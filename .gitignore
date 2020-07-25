@@ -33,3 +33,6 @@
 
 # Others
 .idea/*.xml
+.DS_Store
+examples/.DS_Store
+examples/fraud_detection/.DS_Store
