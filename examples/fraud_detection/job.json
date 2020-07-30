@@ -1,0 +1,34 @@
+{
+  "job_name": "fraud_detection_training",
+  "job_id": "10002",
+  "task_num": "1",
+  "tasks": {
+    "model_training": {
+      "task_id": "1",
+      "algorithm_name": "neural_network",
+      "input_configs": {
+        "data_input": [
+          "path/fraud_detection_training.data",
+          "path/fraud_detection_testing.data"
+        ],
+        "algorithm_config": {
+          "singa_network_arch": {
+            "layer_conf": "xxx"
+          },
+          "learning_rate": "0.1",
+          "epoch_num": "10",
+          "max_iteration": "500",
+          "convergence_threshold": "0.0001",
+          "batch_size": "128",
+          "metric": "accuracy",
+          "with_validation": false,
+          "with_dp": false
+        }
+      },
+      "output_configs": {
+        "trained_model": ["path/neural_network_10002.model"],
+        "evaluation_report": "path/neural_network_10002_eval_report.txt"
+      }
+    }
+  }
+}
