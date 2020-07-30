@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package com.nus.dbsystem.falcon.v0;
+
+// import "common.proto";
+
+// the status of model serving service
+enum ServingStatus {
+    // the service is created but no model bind
+    created = 0;
+    // the service is bind with a model and is in serving
+    online = 1;
+    // the service is bind with a model but is not in serving
+    offline = 2;
+}
+
+// Message for creating a model serving service
+message CreateServingRequest {
+    // the serving service id
+    int32 serving_id = 1;
+    // the serving service name
+    string serving_name = 2;
+    // the model id bind with the serving service
+    int32 model_id = 3;
+    // the party id of the initiator
+    int32 party_id = 4;
+}
+
+// Response of CreateServingRequest
+message CreateServingResponse {
+    int32 serving_id = 1;
+    int32 is_success = 2;
+    string error_msg = 3;
+}
+
+// Message for enabling a serving service
+message EnableServingRequest {
+    int32 serving_id = 1;
+    int32 model_id = 2;
+    int32 party_id = 3;
+}
+
+// Response of EnableServingRequest
+message EnableServingResponse {
+    int32 serving_id = 1;
+    int32 is_success = 2;
+    string error_msg = 3;
+}
+
+// Message for updating a serving model
+message UpdateServingRequest {
+    int32 serving_id = 1;
+    int32 new_model_id = 2;
+    int32 party_id = 3;
+}
+
+// Response of UpdateServingRequest
+message UpdateServingResponse {
+    int32 serving_id = 1;
+    int32 is_success = 2;
+    string error_msg = 3;
+}
+
+// Message for querying serving service
+message QueryServingRequest {
+    repeated int32 serving_id = 1;
+    int32 party_id = 2;
+}
+
+// Existing serving information
+message ServingInfo {
+    int32 serving_id = 1;
+    int32 served_model_id = 2;
+    ServingStatus status = 3;
+}
+
+// Response of QueryServingResponse
+message QueryServingResponse {
+    repeated ServingInfo serving_infos = 1;
+}
+
+// Message for stopping a serving service
+message DisableServingRequest {
+    int32 serving_id = 1;
+    int32 party_id = 2;
+}
+
+// Response of StopServingResponse
+message DisableServingResponse {
+    int32 serving_id = 1;
+    int32 is_success = 2;
+    string error_msg = 3;
+}
+
+// Message for deleting a serving service
+message DeleteServingRequest {
+    int32 serving_id = 1;
+    int32 party_id = 2;
+}
+
+// Response of DeleteServingResponse
+message DeleteServingResponse {
+    int32 serving_id = 1;
+    int32 is_success = 2;
+    string error_msg = 3;
+}

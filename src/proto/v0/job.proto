@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package com.nus.dbsystem.falcon.v0;
+
+// import "common.proto";
+import "google/protobuf/struct.proto";
+
+// Message for forwarding a job to executors
+message ForwardJobRequest {
+    // new job id
+    int32 job_id = 1;
+    // job name
+    string job_name = 2;
+    // task number in the job
+    int32 task_num = 3;
+    // participating party number
+    int32 party_num = 4;
+    // participating party ids
+    repeated int32 party_ids = 5;
+    // setting: 0, vertical fl; 1, horizontal fl
+    int32 fl_setting = 6;
+    // job description with (key, value) format
+    google.protobuf.Value job_desc = 7;
+}
+
+// Response of ForwardJobRequest
+message ForwardJobResponse {
+    // received job id
+    int32 job_id = 1;
+    // whether the job is received and executed
+    int32 is_success = 2;
+    // error msg
+    string error_msg = 3;
+}
+
+// Message for stopping a job
+message StopJobRequest {
+    // job id
+    int32 job_id = 1;
+}
+
+// Response of StopJobRequest
+message StopJobResponse {
+    // job id
+    int32 job_id = 1;
+    // whether job is stopped
+    int32 is_success = 2;
+    // error msg
+    string error_msg = 3;
+}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package com.nus.dbsystem.falcon.v0;
+
+// import "common.proto";
+
+// This message is from the coordinator to executor
+// for publishing a trained model to model serving stage
+message ModelPublishRequest {
+    // trained model id
+    int32 model_id = 1;
+    // initiator party id
+    int32 initiator_party_id = 2;
+}
+
+// This message is for the response of ModelPublish
+message ModelPublishResponse {
+    // trained model id
+    int32 model_id = 1;
+    // initiator party id
+    int32 initiator_party_id = 2;
+    // model publish status
+    int32 is_success = 3;
+    // error msg
+    string error_msg = 4;
+}

@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package com.nus.dbsystem.falcon.v0;
+
+import "google/protobuf/timestamp.proto";
+
+// job or task status
+enum StatusType {
+    // the job or task is initialized but not running
+    initialized = 0;
+    // the job or task is running
+    running = 1;
+    // the job or task is finished
+    succeed = 2;
+    // the job or task is failed
+    failed = 3;
+}
+
+// Message for executors to report heartbeat to the coordinator
+message HeartBeat {
+    // record the google timestamp
+    google.protobuf.Timestamp timestamp = 1;
+}
+
+// Message for reporting status of each task
+message TaskStatus {
+    // task id
+    int32 task_id = 1;
+    // task status
+    StatusType task_status = 2;
+    // task result
+    string task_result = 3;
+    // error msg
+    string error_msg = 4;
+}
+
+// Message for reporting status of a job
+message JobStatus {
+    // job id
+    int32 job_id = 1;
+    // job status
+    StatusType job_status = 2;
+    // job result
+    string job_result = 3;
+    // error msg
+    string error_msg = 4;
+    // each task status
+    repeated TaskStatus tasks = 5;
+}
+
+// Message sent to the coordinator
+message ExecutorStatus {
+    // heartbeat message is required
+    HeartBeat heartbeat = 1;
+    // add JobStatus if any job is executing or just finished
+    repeated JobStatus jobs = 2;
+}
