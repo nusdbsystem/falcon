@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include <google/protobuf/io/coded_stream.h>
-#include "../../../proto/v0/message/model.pb.h"
+#include "../../message/model.pb.h"
 
 void serialize_model_publish_request(int model_id,
     int initiator_party_id,

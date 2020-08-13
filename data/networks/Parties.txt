@@ -1,0 +1,6 @@
+party_0_ip = 127.0.0.1
+party_1_ip = 127.0.0.1
+party_2_ip = 127.0.0.1
+party_0_port = 9000
+party_1_port = 9020
+party_2_port = 9040
