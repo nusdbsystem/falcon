@@ -70,9 +70,10 @@ void protobuf_AssignDesc_job_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ForwardJobRequest, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ForwardJobRequest, _is_default_instance_));
   ForwardJobResponse_descriptor_ = file->message_type(1);
-  static const int ForwardJobResponse_offsets_[3] = {
+  static const int ForwardJobResponse_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ForwardJobResponse, job_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ForwardJobResponse, is_success_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ForwardJobResponse, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ForwardJobResponse, error_msg_),
   };
   ForwardJobResponse_reflection_ =
@@ -102,9 +103,10 @@ void protobuf_AssignDesc_job_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopJobRequest, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopJobRequest, _is_default_instance_));
   StopJobResponse_descriptor_ = file->message_type(3);
-  static const int StopJobResponse_offsets_[3] = {
+  static const int StopJobResponse_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopJobResponse, job_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopJobResponse, is_success_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopJobResponse, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StopJobResponse, error_msg_),
   };
   StopJobResponse_reflection_ =
@@ -169,11 +171,12 @@ void protobuf_AddDesc_job_2eproto() {
     "\002 \001(\t\022\020\n\010task_num\030\003 \001(\005\022\021\n\tparty_num\030\004 \001"
     "(\005\022\021\n\tparty_ids\030\005 \003(\005\022\022\n\nfl_setting\030\006 \001("
     "\005\022(\n\010job_desc\030\007 \001(\0132\026.google.protobuf.Va"
-    "lue\"K\n\022ForwardJobResponse\022\016\n\006job_id\030\001 \001("
-    "\005\022\022\n\nis_success\030\002 \001(\005\022\021\n\terror_msg\030\003 \001(\t"
-    "\" \n\016StopJobRequest\022\016\n\006job_id\030\001 \001(\005\"H\n\017St"
-    "opJobResponse\022\016\n\006job_id\030\001 \001(\005\022\022\n\nis_succ"
-    "ess\030\002 \001(\005\022\021\n\terror_msg\030\003 \001(\tb\006proto3", 436);
+    "lue\"_\n\022ForwardJobResponse\022\016\n\006job_id\030\001 \001("
+    "\005\022\022\n\nis_success\030\002 \001(\005\022\022\n\nerror_code\030\003 \001("
+    "\005\022\021\n\terror_msg\030\004 \001(\t\" \n\016StopJobRequest\022\016"
+    "\n\006job_id\030\001 \001(\005\"\\\n\017StopJobResponse\022\016\n\006job"
+    "_id\030\001 \001(\005\022\022\n\nis_success\030\002 \001(\005\022\022\n\nerror_c"
+    "ode\030\003 \001(\005\022\021\n\terror_msg\030\004 \001(\tb\006proto3", 476);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "job.proto", &protobuf_RegisterTypes);
   ForwardJobRequest::default_instance_ = new ForwardJobRequest();
@@ -887,6 +890,7 @@ void ForwardJobRequest::set_allocated_job_desc(::google::protobuf::Value* job_de
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int ForwardJobResponse::kJobIdFieldNumber;
 const int ForwardJobResponse::kIsSuccessFieldNumber;
+const int ForwardJobResponse::kErrorCodeFieldNumber;
 const int ForwardJobResponse::kErrorMsgFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -914,6 +918,7 @@ void ForwardJobResponse::SharedCtor() {
   _cached_size_ = 0;
   job_id_ = 0;
   is_success_ = 0;
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -972,6 +977,7 @@ void ForwardJobResponse::Clear() {
 } while (0)
 
   ZR_(job_id_, is_success_);
+  error_code_ = 0;
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -1014,13 +1020,28 @@ bool ForwardJobResponse::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_error_msg;
+        if (input->ExpectTag(24)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 3;
+      // optional int32 error_code = 3;
       case 3: {
-        if (tag == 26) {
+        if (tag == 24) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 4;
+      case 4: {
+        if (tag == 34) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -1069,14 +1090,19 @@ void ForwardJobResponse::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->is_success(), output);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->error_code(), output);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.ForwardJobResponse.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->error_msg(), output);
+      4, this->error_msg(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.ForwardJobResponse)
@@ -1095,7 +1121,12 @@ void ForwardJobResponse::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->is_success(), target);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->error_code(), target);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -1103,7 +1134,7 @@ void ForwardJobResponse::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.ForwardJobResponse.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->error_msg(), target);
+        4, this->error_msg(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.ForwardJobResponse)
@@ -1128,7 +1159,14 @@ int ForwardJobResponse::ByteSize() const {
         this->is_success());
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -1169,6 +1207,9 @@ void ForwardJobResponse::MergeFrom(const ForwardJobResponse& from) {
   if (from.is_success() != 0) {
     set_is_success(from.is_success());
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -1201,6 +1242,7 @@ void ForwardJobResponse::Swap(ForwardJobResponse* other) {
 void ForwardJobResponse::InternalSwap(ForwardJobResponse* other) {
   std::swap(job_id_, other->job_id_);
   std::swap(is_success_, other->is_success_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -1245,7 +1287,21 @@ void ForwardJobResponse::clear_is_success() {
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.ForwardJobResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+void ForwardJobResponse::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 ForwardJobResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.ForwardJobResponse.error_code)
+  return error_code_;
+}
+ void ForwardJobResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.ForwardJobResponse.error_code)
+}
+
+// optional string error_msg = 4;
 void ForwardJobResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1534,6 +1590,7 @@ void StopJobRequest::clear_job_id() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int StopJobResponse::kJobIdFieldNumber;
 const int StopJobResponse::kIsSuccessFieldNumber;
+const int StopJobResponse::kErrorCodeFieldNumber;
 const int StopJobResponse::kErrorMsgFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -1561,6 +1618,7 @@ void StopJobResponse::SharedCtor() {
   _cached_size_ = 0;
   job_id_ = 0;
   is_success_ = 0;
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -1619,6 +1677,7 @@ void StopJobResponse::Clear() {
 } while (0)
 
   ZR_(job_id_, is_success_);
+  error_code_ = 0;
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -1661,13 +1720,28 @@ bool StopJobResponse::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_error_msg;
+        if (input->ExpectTag(24)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 3;
+      // optional int32 error_code = 3;
       case 3: {
-        if (tag == 26) {
+        if (tag == 24) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 4;
+      case 4: {
+        if (tag == 34) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -1716,14 +1790,19 @@ void StopJobResponse::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->is_success(), output);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->error_code(), output);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.StopJobResponse.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->error_msg(), output);
+      4, this->error_msg(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.StopJobResponse)
@@ -1742,7 +1821,12 @@ void StopJobResponse::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->is_success(), target);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->error_code(), target);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -1750,7 +1834,7 @@ void StopJobResponse::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.StopJobResponse.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->error_msg(), target);
+        4, this->error_msg(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.StopJobResponse)
@@ -1775,7 +1859,14 @@ int StopJobResponse::ByteSize() const {
         this->is_success());
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -1816,6 +1907,9 @@ void StopJobResponse::MergeFrom(const StopJobResponse& from) {
   if (from.is_success() != 0) {
     set_is_success(from.is_success());
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -1848,6 +1942,7 @@ void StopJobResponse::Swap(StopJobResponse* other) {
 void StopJobResponse::InternalSwap(StopJobResponse* other) {
   std::swap(job_id_, other->job_id_);
   std::swap(is_success_, other->is_success_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -1892,7 +1987,21 @@ void StopJobResponse::clear_is_success() {
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.StopJobResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+void StopJobResponse::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 StopJobResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.StopJobResponse.error_code)
+  return error_code_;
+}
+ void StopJobResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.StopJobResponse.error_code)
+}
+
+// optional string error_msg = 4;
 void StopJobResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

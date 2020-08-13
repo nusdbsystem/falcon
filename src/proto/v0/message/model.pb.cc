@@ -59,10 +59,11 @@ void protobuf_AssignDesc_model_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModelPublishRequest, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModelPublishRequest, _is_default_instance_));
   ModelPublishResponse_descriptor_ = file->message_type(1);
-  static const int ModelPublishResponse_offsets_[4] = {
+  static const int ModelPublishResponse_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModelPublishResponse, model_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModelPublishResponse, initiator_party_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModelPublishResponse, is_success_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModelPublishResponse, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModelPublishResponse, error_msg_),
   };
   ModelPublishResponse_reflection_ =
@@ -114,10 +115,11 @@ void protobuf_AddDesc_model_2eproto() {
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\013model.proto\022\032com.nus.dbsystem.falcon.v"
     "0\"C\n\023ModelPublishRequest\022\020\n\010model_id\030\001 \001"
-    "(\005\022\032\n\022initiator_party_id\030\002 \001(\005\"k\n\024ModelP"
+    "(\005\022\032\n\022initiator_party_id\030\002 \001(\005\"\177\n\024ModelP"
     "ublishResponse\022\020\n\010model_id\030\001 \001(\005\022\032\n\022init"
     "iator_party_id\030\002 \001(\005\022\022\n\nis_success\030\003 \001(\005"
-    "\022\021\n\terror_msg\030\004 \001(\tb\006proto3", 227);
+    "\022\022\n\nerror_code\030\004 \001(\005\022\021\n\terror_msg\030\005 \001(\tb"
+    "\006proto3", 247);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "model.proto", &protobuf_RegisterTypes);
   ModelPublishRequest::default_instance_ = new ModelPublishRequest();
@@ -450,6 +452,7 @@ void ModelPublishRequest::clear_initiator_party_id() {
 const int ModelPublishResponse::kModelIdFieldNumber;
 const int ModelPublishResponse::kInitiatorPartyIdFieldNumber;
 const int ModelPublishResponse::kIsSuccessFieldNumber;
+const int ModelPublishResponse::kErrorCodeFieldNumber;
 const int ModelPublishResponse::kErrorMsgFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -478,6 +481,7 @@ void ModelPublishResponse::SharedCtor() {
   model_id_ = 0;
   initiator_party_id_ = 0;
   is_success_ = 0;
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -535,8 +539,7 @@ void ModelPublishResponse::Clear() {
            ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
 } while (0)
 
-  ZR_(model_id_, initiator_party_id_);
-  is_success_ = 0;
+  ZR_(model_id_, error_code_);
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -594,13 +597,28 @@ bool ModelPublishResponse::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(34)) goto parse_error_msg;
+        if (input->ExpectTag(32)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 4;
+      // optional int32 error_code = 4;
       case 4: {
-        if (tag == 34) {
+        if (tag == 32) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(42)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 5;
+      case 5: {
+        if (tag == 42) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -654,14 +672,19 @@ void ModelPublishResponse::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->is_success(), output);
   }
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->error_code(), output);
+  }
+
+  // optional string error_msg = 5;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.ModelPublishResponse.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      4, this->error_msg(), output);
+      5, this->error_msg(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.ModelPublishResponse)
@@ -685,7 +708,12 @@ void ModelPublishResponse::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->is_success(), target);
   }
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->error_code(), target);
+  }
+
+  // optional string error_msg = 5;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -693,7 +721,7 @@ void ModelPublishResponse::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.ModelPublishResponse.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        4, this->error_msg(), target);
+        5, this->error_msg(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.ModelPublishResponse)
@@ -725,7 +753,14 @@ int ModelPublishResponse::ByteSize() const {
         this->is_success());
   }
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 5;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -769,6 +804,9 @@ void ModelPublishResponse::MergeFrom(const ModelPublishResponse& from) {
   if (from.is_success() != 0) {
     set_is_success(from.is_success());
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -802,6 +840,7 @@ void ModelPublishResponse::InternalSwap(ModelPublishResponse* other) {
   std::swap(model_id_, other->model_id_);
   std::swap(initiator_party_id_, other->initiator_party_id_);
   std::swap(is_success_, other->is_success_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -860,7 +899,21 @@ void ModelPublishResponse::clear_is_success() {
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.ModelPublishResponse.is_success)
 }
 
-// optional string error_msg = 4;
+// optional int32 error_code = 4;
+void ModelPublishResponse::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 ModelPublishResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.ModelPublishResponse.error_code)
+  return error_code_;
+}
+ void ModelPublishResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.ModelPublishResponse.error_code)
+}
+
+// optional string error_msg = 5;
 void ModelPublishResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

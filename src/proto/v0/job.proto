@@ -29,8 +29,10 @@ message ForwardJobResponse {
     int32 job_id = 1;
     // whether the job is received and executed
     int32 is_success = 2;
+    // error code
+    int32 error_code = 3;
     // error msg
-    string error_msg = 3;
+    string error_msg = 4;
 }
 
 // Message for stopping a job
@@ -45,6 +47,8 @@ message StopJobResponse {
     int32 job_id = 1;
     // whether job is stopped
     int32 is_success = 2;
+    // error code
+    int32 error_code = 3;
     // error msg
-    string error_msg = 3;
+    string error_msg = 4;
 }

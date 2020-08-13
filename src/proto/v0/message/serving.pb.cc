@@ -95,9 +95,10 @@ void protobuf_AssignDesc_serving_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CreateServingRequest, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CreateServingRequest, _is_default_instance_));
   CreateServingResponse_descriptor_ = file->message_type(1);
-  static const int CreateServingResponse_offsets_[3] = {
+  static const int CreateServingResponse_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CreateServingResponse, serving_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CreateServingResponse, is_success_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CreateServingResponse, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(CreateServingResponse, error_msg_),
   };
   CreateServingResponse_reflection_ =
@@ -129,9 +130,10 @@ void protobuf_AssignDesc_serving_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnableServingRequest, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnableServingRequest, _is_default_instance_));
   EnableServingResponse_descriptor_ = file->message_type(3);
-  static const int EnableServingResponse_offsets_[3] = {
+  static const int EnableServingResponse_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnableServingResponse, serving_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnableServingResponse, is_success_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnableServingResponse, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EnableServingResponse, error_msg_),
   };
   EnableServingResponse_reflection_ =
@@ -163,9 +165,10 @@ void protobuf_AssignDesc_serving_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UpdateServingRequest, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UpdateServingRequest, _is_default_instance_));
   UpdateServingResponse_descriptor_ = file->message_type(5);
-  static const int UpdateServingResponse_offsets_[3] = {
+  static const int UpdateServingResponse_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UpdateServingResponse, serving_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UpdateServingResponse, is_success_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UpdateServingResponse, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UpdateServingResponse, error_msg_),
   };
   UpdateServingResponse_reflection_ =
@@ -244,9 +247,10 @@ void protobuf_AssignDesc_serving_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DisableServingRequest, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DisableServingRequest, _is_default_instance_));
   DisableServingResponse_descriptor_ = file->message_type(10);
-  static const int DisableServingResponse_offsets_[3] = {
+  static const int DisableServingResponse_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DisableServingResponse, serving_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DisableServingResponse, is_success_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DisableServingResponse, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DisableServingResponse, error_msg_),
   };
   DisableServingResponse_reflection_ =
@@ -277,9 +281,10 @@ void protobuf_AssignDesc_serving_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeleteServingRequest, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeleteServingRequest, _is_default_instance_));
   DeleteServingResponse_descriptor_ = file->message_type(12);
-  static const int DeleteServingResponse_offsets_[3] = {
+  static const int DeleteServingResponse_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeleteServingResponse, serving_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeleteServingResponse, is_success_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeleteServingResponse, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeleteServingResponse, error_msg_),
   };
   DeleteServingResponse_reflection_ =
@@ -377,33 +382,36 @@ void protobuf_AddDesc_serving_2eproto() {
     "\n\rserving.proto\022\032com.nus.dbsystem.falcon"
     ".v0\"d\n\024CreateServingRequest\022\022\n\nserving_i"
     "d\030\001 \001(\005\022\024\n\014serving_name\030\002 \001(\t\022\020\n\010model_i"
-    "d\030\003 \001(\005\022\020\n\010party_id\030\004 \001(\005\"R\n\025CreateServi"
+    "d\030\003 \001(\005\022\020\n\010party_id\030\004 \001(\005\"f\n\025CreateServi"
     "ngResponse\022\022\n\nserving_id\030\001 \001(\005\022\022\n\nis_suc"
-    "cess\030\002 \001(\005\022\021\n\terror_msg\030\003 \001(\t\"N\n\024EnableS"
-    "ervingRequest\022\022\n\nserving_id\030\001 \001(\005\022\020\n\010mod"
-    "el_id\030\002 \001(\005\022\020\n\010party_id\030\003 \001(\005\"R\n\025EnableS"
-    "ervingResponse\022\022\n\nserving_id\030\001 \001(\005\022\022\n\nis"
-    "_success\030\002 \001(\005\022\021\n\terror_msg\030\003 \001(\t\"R\n\024Upd"
+    "cess\030\002 \001(\005\022\022\n\nerror_code\030\003 \001(\005\022\021\n\terror_"
+    "msg\030\004 \001(\t\"N\n\024EnableServingRequest\022\022\n\nser"
+    "ving_id\030\001 \001(\005\022\020\n\010model_id\030\002 \001(\005\022\020\n\010party"
+    "_id\030\003 \001(\005\"f\n\025EnableServingResponse\022\022\n\nse"
+    "rving_id\030\001 \001(\005\022\022\n\nis_success\030\002 \001(\005\022\022\n\ner"
+    "ror_code\030\003 \001(\005\022\021\n\terror_msg\030\004 \001(\t\"R\n\024Upd"
     "ateServingRequest\022\022\n\nserving_id\030\001 \001(\005\022\024\n"
-    "\014new_model_id\030\002 \001(\005\022\020\n\010party_id\030\003 \001(\005\"R\n"
+    "\014new_model_id\030\002 \001(\005\022\020\n\010party_id\030\003 \001(\005\"f\n"
     "\025UpdateServingResponse\022\022\n\nserving_id\030\001 \001"
-    "(\005\022\022\n\nis_success\030\002 \001(\005\022\021\n\terror_msg\030\003 \001("
-    "\t\";\n\023QueryServingRequest\022\022\n\nserving_id\030\001"
-    " \003(\005\022\020\n\010party_id\030\002 \001(\005\"u\n\013ServingInfo\022\022\n"
-    "\nserving_id\030\001 \001(\005\022\027\n\017served_model_id\030\002 \001"
-    "(\005\0229\n\006status\030\003 \001(\0162).com.nus.dbsystem.fa"
-    "lcon.v0.ServingStatus\"V\n\024QueryServingRes"
-    "ponse\022>\n\rserving_infos\030\001 \003(\0132\'.com.nus.d"
-    "bsystem.falcon.v0.ServingInfo\"=\n\025Disable"
-    "ServingRequest\022\022\n\nserving_id\030\001 \001(\005\022\020\n\010pa"
-    "rty_id\030\002 \001(\005\"S\n\026DisableServingResponse\022\022"
-    "\n\nserving_id\030\001 \001(\005\022\022\n\nis_success\030\002 \001(\005\022\021"
-    "\n\terror_msg\030\003 \001(\t\"<\n\024DeleteServingReques"
+    "(\005\022\022\n\nis_success\030\002 \001(\005\022\022\n\nerror_code\030\003 \001"
+    "(\005\022\021\n\terror_msg\030\004 \001(\t\";\n\023QueryServingReq"
+    "uest\022\022\n\nserving_id\030\001 \003(\005\022\020\n\010party_id\030\002 \001"
+    "(\005\"u\n\013ServingInfo\022\022\n\nserving_id\030\001 \001(\005\022\027\n"
+    "\017served_model_id\030\002 \001(\005\0229\n\006status\030\003 \001(\0162)"
+    ".com.nus.dbsystem.falcon.v0.ServingStatu"
+    "s\"V\n\024QueryServingResponse\022>\n\rserving_inf"
+    "os\030\001 \003(\0132\'.com.nus.dbsystem.falcon.v0.Se"
+    "rvingInfo\"=\n\025DisableServingRequest\022\022\n\nse"
+    "rving_id\030\001 \001(\005\022\020\n\010party_id\030\002 \001(\005\"g\n\026Disa"
+    "bleServingResponse\022\022\n\nserving_id\030\001 \001(\005\022\022"
+    "\n\nis_success\030\002 \001(\005\022\022\n\nerror_code\030\003 \001(\005\022\021"
+    "\n\terror_msg\030\004 \001(\t\"<\n\024DeleteServingReques"
     "t\022\022\n\nserving_id\030\001 \001(\005\022\020\n\010party_id\030\002 \001(\005\""
-    "R\n\025DeleteServingResponse\022\022\n\nserving_id\030\001"
-    " \001(\005\022\022\n\nis_success\030\002 \001(\005\022\021\n\terror_msg\030\003 "
-    "\001(\t*5\n\rServingStatus\022\013\n\007created\020\000\022\n\n\006onl"
-    "ine\020\001\022\013\n\007offline\020\002b\006proto3", 1186);
+    "f\n\025DeleteServingResponse\022\022\n\nserving_id\030\001"
+    " \001(\005\022\022\n\nis_success\030\002 \001(\005\022\022\n\nerror_code\030\003"
+    " \001(\005\022\021\n\terror_msg\030\004 \001(\t*5\n\rServingStatus"
+    "\022\013\n\007created\020\000\022\n\n\006online\020\001\022\013\n\007offline\020\002b\006"
+    "proto3", 1286);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serving.proto", &protobuf_RegisterTypes);
   CreateServingRequest::default_instance_ = new CreateServingRequest();
@@ -923,6 +931,7 @@ void CreateServingRequest::clear_party_id() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int CreateServingResponse::kServingIdFieldNumber;
 const int CreateServingResponse::kIsSuccessFieldNumber;
+const int CreateServingResponse::kErrorCodeFieldNumber;
 const int CreateServingResponse::kErrorMsgFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -950,6 +959,7 @@ void CreateServingResponse::SharedCtor() {
   _cached_size_ = 0;
   serving_id_ = 0;
   is_success_ = 0;
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -1008,6 +1018,7 @@ void CreateServingResponse::Clear() {
 } while (0)
 
   ZR_(serving_id_, is_success_);
+  error_code_ = 0;
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -1050,13 +1061,28 @@ bool CreateServingResponse::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_error_msg;
+        if (input->ExpectTag(24)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 3;
+      // optional int32 error_code = 3;
       case 3: {
-        if (tag == 26) {
+        if (tag == 24) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 4;
+      case 4: {
+        if (tag == 34) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -1105,14 +1131,19 @@ void CreateServingResponse::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->is_success(), output);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->error_code(), output);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.CreateServingResponse.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->error_msg(), output);
+      4, this->error_msg(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.CreateServingResponse)
@@ -1131,7 +1162,12 @@ void CreateServingResponse::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->is_success(), target);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->error_code(), target);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -1139,7 +1175,7 @@ void CreateServingResponse::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.CreateServingResponse.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->error_msg(), target);
+        4, this->error_msg(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.CreateServingResponse)
@@ -1164,7 +1200,14 @@ int CreateServingResponse::ByteSize() const {
         this->is_success());
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -1205,6 +1248,9 @@ void CreateServingResponse::MergeFrom(const CreateServingResponse& from) {
   if (from.is_success() != 0) {
     set_is_success(from.is_success());
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -1237,6 +1283,7 @@ void CreateServingResponse::Swap(CreateServingResponse* other) {
 void CreateServingResponse::InternalSwap(CreateServingResponse* other) {
   std::swap(serving_id_, other->serving_id_);
   std::swap(is_success_, other->is_success_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -1281,7 +1328,21 @@ void CreateServingResponse::clear_is_success() {
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.CreateServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+void CreateServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 CreateServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.CreateServingResponse.error_code)
+  return error_code_;
+}
+ void CreateServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.CreateServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 void CreateServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1694,6 +1755,7 @@ void EnableServingRequest::clear_party_id() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int EnableServingResponse::kServingIdFieldNumber;
 const int EnableServingResponse::kIsSuccessFieldNumber;
+const int EnableServingResponse::kErrorCodeFieldNumber;
 const int EnableServingResponse::kErrorMsgFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -1721,6 +1783,7 @@ void EnableServingResponse::SharedCtor() {
   _cached_size_ = 0;
   serving_id_ = 0;
   is_success_ = 0;
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -1779,6 +1842,7 @@ void EnableServingResponse::Clear() {
 } while (0)
 
   ZR_(serving_id_, is_success_);
+  error_code_ = 0;
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -1821,13 +1885,28 @@ bool EnableServingResponse::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_error_msg;
+        if (input->ExpectTag(24)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 3;
+      // optional int32 error_code = 3;
       case 3: {
-        if (tag == 26) {
+        if (tag == 24) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 4;
+      case 4: {
+        if (tag == 34) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -1876,14 +1955,19 @@ void EnableServingResponse::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->is_success(), output);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->error_code(), output);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.EnableServingResponse.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->error_msg(), output);
+      4, this->error_msg(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.EnableServingResponse)
@@ -1902,7 +1986,12 @@ void EnableServingResponse::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->is_success(), target);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->error_code(), target);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -1910,7 +1999,7 @@ void EnableServingResponse::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.EnableServingResponse.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->error_msg(), target);
+        4, this->error_msg(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.EnableServingResponse)
@@ -1935,7 +2024,14 @@ int EnableServingResponse::ByteSize() const {
         this->is_success());
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -1976,6 +2072,9 @@ void EnableServingResponse::MergeFrom(const EnableServingResponse& from) {
   if (from.is_success() != 0) {
     set_is_success(from.is_success());
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -2008,6 +2107,7 @@ void EnableServingResponse::Swap(EnableServingResponse* other) {
 void EnableServingResponse::InternalSwap(EnableServingResponse* other) {
   std::swap(serving_id_, other->serving_id_);
   std::swap(is_success_, other->is_success_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -2052,7 +2152,21 @@ void EnableServingResponse::clear_is_success() {
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.EnableServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+void EnableServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 EnableServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.EnableServingResponse.error_code)
+  return error_code_;
+}
+ void EnableServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.EnableServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 void EnableServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2465,6 +2579,7 @@ void UpdateServingRequest::clear_party_id() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int UpdateServingResponse::kServingIdFieldNumber;
 const int UpdateServingResponse::kIsSuccessFieldNumber;
+const int UpdateServingResponse::kErrorCodeFieldNumber;
 const int UpdateServingResponse::kErrorMsgFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -2492,6 +2607,7 @@ void UpdateServingResponse::SharedCtor() {
   _cached_size_ = 0;
   serving_id_ = 0;
   is_success_ = 0;
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -2550,6 +2666,7 @@ void UpdateServingResponse::Clear() {
 } while (0)
 
   ZR_(serving_id_, is_success_);
+  error_code_ = 0;
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -2592,13 +2709,28 @@ bool UpdateServingResponse::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_error_msg;
+        if (input->ExpectTag(24)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 3;
+      // optional int32 error_code = 3;
       case 3: {
-        if (tag == 26) {
+        if (tag == 24) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 4;
+      case 4: {
+        if (tag == 34) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -2647,14 +2779,19 @@ void UpdateServingResponse::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->is_success(), output);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->error_code(), output);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.UpdateServingResponse.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->error_msg(), output);
+      4, this->error_msg(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.UpdateServingResponse)
@@ -2673,7 +2810,12 @@ void UpdateServingResponse::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->is_success(), target);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->error_code(), target);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -2681,7 +2823,7 @@ void UpdateServingResponse::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.UpdateServingResponse.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->error_msg(), target);
+        4, this->error_msg(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.UpdateServingResponse)
@@ -2706,7 +2848,14 @@ int UpdateServingResponse::ByteSize() const {
         this->is_success());
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -2747,6 +2896,9 @@ void UpdateServingResponse::MergeFrom(const UpdateServingResponse& from) {
   if (from.is_success() != 0) {
     set_is_success(from.is_success());
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -2779,6 +2931,7 @@ void UpdateServingResponse::Swap(UpdateServingResponse* other) {
 void UpdateServingResponse::InternalSwap(UpdateServingResponse* other) {
   std::swap(serving_id_, other->serving_id_);
   std::swap(is_success_, other->is_success_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -2823,7 +2976,21 @@ void UpdateServingResponse::clear_is_success() {
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.UpdateServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+void UpdateServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 UpdateServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.UpdateServingResponse.error_code)
+  return error_code_;
+}
+ void UpdateServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.UpdateServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 void UpdateServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -4136,6 +4303,7 @@ void DisableServingRequest::clear_party_id() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int DisableServingResponse::kServingIdFieldNumber;
 const int DisableServingResponse::kIsSuccessFieldNumber;
+const int DisableServingResponse::kErrorCodeFieldNumber;
 const int DisableServingResponse::kErrorMsgFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -4163,6 +4331,7 @@ void DisableServingResponse::SharedCtor() {
   _cached_size_ = 0;
   serving_id_ = 0;
   is_success_ = 0;
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -4221,6 +4390,7 @@ void DisableServingResponse::Clear() {
 } while (0)
 
   ZR_(serving_id_, is_success_);
+  error_code_ = 0;
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -4263,13 +4433,28 @@ bool DisableServingResponse::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_error_msg;
+        if (input->ExpectTag(24)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 3;
+      // optional int32 error_code = 3;
       case 3: {
-        if (tag == 26) {
+        if (tag == 24) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 4;
+      case 4: {
+        if (tag == 34) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -4318,14 +4503,19 @@ void DisableServingResponse::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->is_success(), output);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->error_code(), output);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.DisableServingResponse.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->error_msg(), output);
+      4, this->error_msg(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.DisableServingResponse)
@@ -4344,7 +4534,12 @@ void DisableServingResponse::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->is_success(), target);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->error_code(), target);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -4352,7 +4547,7 @@ void DisableServingResponse::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.DisableServingResponse.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->error_msg(), target);
+        4, this->error_msg(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.DisableServingResponse)
@@ -4377,7 +4572,14 @@ int DisableServingResponse::ByteSize() const {
         this->is_success());
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -4418,6 +4620,9 @@ void DisableServingResponse::MergeFrom(const DisableServingResponse& from) {
   if (from.is_success() != 0) {
     set_is_success(from.is_success());
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -4450,6 +4655,7 @@ void DisableServingResponse::Swap(DisableServingResponse* other) {
 void DisableServingResponse::InternalSwap(DisableServingResponse* other) {
   std::swap(serving_id_, other->serving_id_);
   std::swap(is_success_, other->is_success_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -4494,7 +4700,21 @@ void DisableServingResponse::clear_is_success() {
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.DisableServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+void DisableServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 DisableServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.DisableServingResponse.error_code)
+  return error_code_;
+}
+ void DisableServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.DisableServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 void DisableServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -4855,6 +5075,7 @@ void DeleteServingRequest::clear_party_id() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int DeleteServingResponse::kServingIdFieldNumber;
 const int DeleteServingResponse::kIsSuccessFieldNumber;
+const int DeleteServingResponse::kErrorCodeFieldNumber;
 const int DeleteServingResponse::kErrorMsgFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -4882,6 +5103,7 @@ void DeleteServingResponse::SharedCtor() {
   _cached_size_ = 0;
   serving_id_ = 0;
   is_success_ = 0;
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -4940,6 +5162,7 @@ void DeleteServingResponse::Clear() {
 } while (0)
 
   ZR_(serving_id_, is_success_);
+  error_code_ = 0;
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -4982,13 +5205,28 @@ bool DeleteServingResponse::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_error_msg;
+        if (input->ExpectTag(24)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 3;
+      // optional int32 error_code = 3;
       case 3: {
-        if (tag == 26) {
+        if (tag == 24) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 4;
+      case 4: {
+        if (tag == 34) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -5037,14 +5275,19 @@ void DeleteServingResponse::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->is_success(), output);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->error_code(), output);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.DeleteServingResponse.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->error_msg(), output);
+      4, this->error_msg(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.DeleteServingResponse)
@@ -5063,7 +5306,12 @@ void DeleteServingResponse::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->is_success(), target);
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->error_code(), target);
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -5071,7 +5319,7 @@ void DeleteServingResponse::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.DeleteServingResponse.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->error_msg(), target);
+        4, this->error_msg(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.DeleteServingResponse)
@@ -5096,7 +5344,14 @@ int DeleteServingResponse::ByteSize() const {
         this->is_success());
   }
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 4;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -5137,6 +5392,9 @@ void DeleteServingResponse::MergeFrom(const DeleteServingResponse& from) {
   if (from.is_success() != 0) {
     set_is_success(from.is_success());
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -5169,6 +5427,7 @@ void DeleteServingResponse::Swap(DeleteServingResponse* other) {
 void DeleteServingResponse::InternalSwap(DeleteServingResponse* other) {
   std::swap(serving_id_, other->serving_id_);
   std::swap(is_success_, other->is_success_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -5213,7 +5472,21 @@ void DeleteServingResponse::clear_is_success() {
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.DeleteServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+void DeleteServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 DeleteServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.DeleteServingResponse.error_code)
+  return error_code_;
+}
+ void DeleteServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.DeleteServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 void DeleteServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

@@ -212,9 +212,15 @@ class ModelPublishResponse : public ::google::protobuf::Message /* @@protoc_inse
   ::google::protobuf::int32 is_success() const;
   void set_is_success(::google::protobuf::int32 value);
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 4;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 5;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 4;
+  static const int kErrorMsgFieldNumber = 5;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -230,8 +236,9 @@ class ModelPublishResponse : public ::google::protobuf::Message /* @@protoc_inse
   bool _is_default_instance_;
   ::google::protobuf::int32 model_id_;
   ::google::protobuf::int32 initiator_party_id_;
-  ::google::protobuf::internal::ArenaStringPtr error_msg_;
   ::google::protobuf::int32 is_success_;
+  ::google::protobuf::int32 error_code_;
+  ::google::protobuf::internal::ArenaStringPtr error_msg_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_model_2eproto();
   friend void protobuf_AssignDesc_model_2eproto();
@@ -322,7 +329,21 @@ inline void ModelPublishResponse::set_is_success(::google::protobuf::int32 value
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.ModelPublishResponse.is_success)
 }
 
-// optional string error_msg = 4;
+// optional int32 error_code = 4;
+inline void ModelPublishResponse::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 ModelPublishResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.ModelPublishResponse.error_code)
+  return error_code_;
+}
+inline void ModelPublishResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.ModelPublishResponse.error_code)
+}
+
+// optional string error_msg = 5;
 inline void ModelPublishResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

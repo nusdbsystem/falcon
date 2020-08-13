@@ -30,8 +30,10 @@ message TaskStatus {
     StatusType task_status = 2;
     // task result
     string task_result = 3;
+    // error code
+    int32 error_code = 4;
     // error msg
-    string error_msg = 4;
+    string error_msg = 5;
 }
 
 // Message for reporting status of a job
@@ -42,10 +44,12 @@ message JobStatus {
     StatusType job_status = 2;
     // job result
     string job_result = 3;
+    // error code
+    int32 error_code = 4;
     // error msg
-    string error_msg = 4;
+    string error_msg = 5;
     // each task status
-    repeated TaskStatus tasks = 5;
+    repeated TaskStatus tasks = 6;
 }
 
 // Message sent to the coordinator

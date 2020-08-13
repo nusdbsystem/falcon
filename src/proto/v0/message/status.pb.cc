@@ -65,10 +65,11 @@ void protobuf_AssignDesc_status_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HeartBeat, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(HeartBeat, _is_default_instance_));
   TaskStatus_descriptor_ = file->message_type(1);
-  static const int TaskStatus_offsets_[4] = {
+  static const int TaskStatus_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TaskStatus, task_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TaskStatus, task_status_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TaskStatus, task_result_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TaskStatus, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TaskStatus, error_msg_),
   };
   TaskStatus_reflection_ =
@@ -83,10 +84,11 @@ void protobuf_AssignDesc_status_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TaskStatus, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TaskStatus, _is_default_instance_));
   JobStatus_descriptor_ = file->message_type(2);
-  static const int JobStatus_offsets_[5] = {
+  static const int JobStatus_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(JobStatus, job_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(JobStatus, job_status_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(JobStatus, job_result_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(JobStatus, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(JobStatus, error_msg_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(JobStatus, tasks_),
   };
@@ -166,20 +168,21 @@ void protobuf_AddDesc_status_2eproto() {
     "\n\014status.proto\022\032com.nus.dbsystem.falcon."
     "v0\032\037google/protobuf/timestamp.proto\":\n\tH"
     "eartBeat\022-\n\ttimestamp\030\001 \001(\0132\032.google.pro"
-    "tobuf.Timestamp\"\202\001\n\nTaskStatus\022\017\n\007task_i"
+    "tobuf.Timestamp\"\226\001\n\nTaskStatus\022\017\n\007task_i"
     "d\030\001 \001(\005\022;\n\013task_status\030\002 \001(\0162&.com.nus.d"
     "bsystem.falcon.v0.StatusType\022\023\n\013task_res"
-    "ult\030\003 \001(\t\022\021\n\terror_msg\030\004 \001(\t\"\265\001\n\tJobStat"
-    "us\022\016\n\006job_id\030\001 \001(\005\022:\n\njob_status\030\002 \001(\0162&"
-    ".com.nus.dbsystem.falcon.v0.StatusType\022\022"
-    "\n\njob_result\030\003 \001(\t\022\021\n\terror_msg\030\004 \001(\t\0225\n"
-    "\005tasks\030\005 \003(\0132&.com.nus.dbsystem.falcon.v"
+    "ult\030\003 \001(\t\022\022\n\nerror_code\030\004 \001(\005\022\021\n\terror_m"
+    "sg\030\005 \001(\t\"\311\001\n\tJobStatus\022\016\n\006job_id\030\001 \001(\005\022:"
+    "\n\njob_status\030\002 \001(\0162&.com.nus.dbsystem.fa"
+    "lcon.v0.StatusType\022\022\n\njob_result\030\003 \001(\t\022\022"
+    "\n\nerror_code\030\004 \001(\005\022\021\n\terror_msg\030\005 \001(\t\0225\n"
+    "\005tasks\030\006 \003(\0132&.com.nus.dbsystem.falcon.v"
     "0.TaskStatus\"\177\n\016ExecutorStatus\0228\n\theartb"
     "eat\030\001 \001(\0132%.com.nus.dbsystem.falcon.v0.H"
     "eartBeat\0223\n\004jobs\030\002 \003(\0132%.com.nus.dbsyste"
     "m.falcon.v0.JobStatus*C\n\nStatusType\022\017\n\013i"
     "nitialized\020\000\022\013\n\007running\020\001\022\013\n\007succeed\020\002\022\n"
-    "\n\006failed\020\003b\006proto3", 658);
+    "\n\006failed\020\003b\006proto3", 698);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "status.proto", &protobuf_RegisterTypes);
   HeartBeat::default_instance_ = new HeartBeat();
@@ -493,6 +496,7 @@ void HeartBeat::set_allocated_timestamp(::google::protobuf::Timestamp* timestamp
 const int TaskStatus::kTaskIdFieldNumber;
 const int TaskStatus::kTaskStatusFieldNumber;
 const int TaskStatus::kTaskResultFieldNumber;
+const int TaskStatus::kErrorCodeFieldNumber;
 const int TaskStatus::kErrorMsgFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -521,6 +525,7 @@ void TaskStatus::SharedCtor() {
   task_id_ = 0;
   task_status_ = 0;
   task_result_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -581,6 +586,7 @@ void TaskStatus::Clear() {
 
   ZR_(task_id_, task_status_);
   task_result_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  error_code_ = 0;
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -641,13 +647,28 @@ bool TaskStatus::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(34)) goto parse_error_msg;
+        if (input->ExpectTag(32)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 4;
+      // optional int32 error_code = 4;
       case 4: {
-        if (tag == 34) {
+        if (tag == 32) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(42)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 5;
+      case 5: {
+        if (tag == 42) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -707,14 +728,19 @@ void TaskStatus::SerializeWithCachedSizes(
       3, this->task_result(), output);
   }
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->error_code(), output);
+  }
+
+  // optional string error_msg = 5;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.TaskStatus.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      4, this->error_msg(), output);
+      5, this->error_msg(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.TaskStatus)
@@ -745,7 +771,12 @@ void TaskStatus::SerializeWithCachedSizes(
         3, this->task_result(), target);
   }
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->error_code(), target);
+  }
+
+  // optional string error_msg = 5;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -753,7 +784,7 @@ void TaskStatus::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.TaskStatus.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        4, this->error_msg(), target);
+        5, this->error_msg(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.TaskStatus)
@@ -784,7 +815,14 @@ int TaskStatus::ByteSize() const {
         this->task_result());
   }
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 5;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -829,6 +867,9 @@ void TaskStatus::MergeFrom(const TaskStatus& from) {
 
     task_result_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.task_result_);
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -862,6 +903,7 @@ void TaskStatus::InternalSwap(TaskStatus* other) {
   std::swap(task_id_, other->task_id_);
   std::swap(task_status_, other->task_status_);
   task_result_.Swap(&other->task_result_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -950,7 +992,21 @@ void TaskStatus::clear_task_result() {
   // @@protoc_insertion_point(field_set_allocated:com.nus.dbsystem.falcon.v0.TaskStatus.task_result)
 }
 
-// optional string error_msg = 4;
+// optional int32 error_code = 4;
+void TaskStatus::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 TaskStatus::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.TaskStatus.error_code)
+  return error_code_;
+}
+ void TaskStatus::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.TaskStatus.error_code)
+}
+
+// optional string error_msg = 5;
 void TaskStatus::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1002,6 +1058,7 @@ void TaskStatus::clear_error_msg() {
 const int JobStatus::kJobIdFieldNumber;
 const int JobStatus::kJobStatusFieldNumber;
 const int JobStatus::kJobResultFieldNumber;
+const int JobStatus::kErrorCodeFieldNumber;
 const int JobStatus::kErrorMsgFieldNumber;
 const int JobStatus::kTasksFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
@@ -1031,6 +1088,7 @@ void JobStatus::SharedCtor() {
   job_id_ = 0;
   job_status_ = 0;
   job_result_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  error_code_ = 0;
   error_msg_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -1091,6 +1149,7 @@ void JobStatus::Clear() {
 
   ZR_(job_id_, job_status_);
   job_result_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  error_code_ = 0;
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 
 #undef ZR_HELPER_
@@ -1152,13 +1211,28 @@ bool JobStatus::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(34)) goto parse_error_msg;
+        if (input->ExpectTag(32)) goto parse_error_code;
         break;
       }
 
-      // optional string error_msg = 4;
+      // optional int32 error_code = 4;
       case 4: {
-        if (tag == 34) {
+        if (tag == 32) {
+         parse_error_code:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &error_code_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(42)) goto parse_error_msg;
+        break;
+      }
+
+      // optional string error_msg = 5;
+      case 5: {
+        if (tag == 42) {
          parse_error_msg:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_error_msg()));
@@ -1169,13 +1243,13 @@ bool JobStatus::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(42)) goto parse_tasks;
+        if (input->ExpectTag(50)) goto parse_tasks;
         break;
       }
 
-      // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 5;
-      case 5: {
-        if (tag == 42) {
+      // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 6;
+      case 6: {
+        if (tag == 50) {
          parse_tasks:
           DO_(input->IncrementRecursionDepth());
          parse_loop_tasks:
@@ -1184,7 +1258,7 @@ bool JobStatus::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(42)) goto parse_loop_tasks;
+        if (input->ExpectTag(50)) goto parse_loop_tasks;
         input->UnsafeDecrementRecursionDepth();
         if (input->ExpectAtEnd()) goto success;
         break;
@@ -1235,20 +1309,25 @@ void JobStatus::SerializeWithCachedSizes(
       3, this->job_result(), output);
   }
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  if (this->error_code() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->error_code(), output);
+  }
+
+  // optional string error_msg = 5;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
       "com.nus.dbsystem.falcon.v0.JobStatus.error_msg");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      4, this->error_msg(), output);
+      5, this->error_msg(), output);
   }
 
-  // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 5;
+  // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 6;
   for (unsigned int i = 0, n = this->tasks_size(); i < n; i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      5, this->tasks(i), output);
+      6, this->tasks(i), output);
   }
 
   // @@protoc_insertion_point(serialize_end:com.nus.dbsystem.falcon.v0.JobStatus)
@@ -1279,7 +1358,12 @@ void JobStatus::SerializeWithCachedSizes(
         3, this->job_result(), target);
   }
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  if (this->error_code() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->error_code(), target);
+  }
+
+  // optional string error_msg = 5;
   if (this->error_msg().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->error_msg().data(), this->error_msg().length(),
@@ -1287,14 +1371,14 @@ void JobStatus::SerializeWithCachedSizes(
       "com.nus.dbsystem.falcon.v0.JobStatus.error_msg");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        4, this->error_msg(), target);
+        5, this->error_msg(), target);
   }
 
-  // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 5;
+  // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 6;
   for (unsigned int i = 0, n = this->tasks_size(); i < n; i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       InternalWriteMessageNoVirtualToArray(
-        5, this->tasks(i), false, target);
+        6, this->tasks(i), false, target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsystem.falcon.v0.JobStatus)
@@ -1325,14 +1409,21 @@ int JobStatus::ByteSize() const {
         this->job_result());
   }
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  if (this->error_code() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->error_code());
+  }
+
+  // optional string error_msg = 5;
   if (this->error_msg().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->error_msg());
   }
 
-  // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 5;
+  // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 6;
   total_size += 1 * this->tasks_size();
   for (int i = 0; i < this->tasks_size(); i++) {
     total_size +=
@@ -1379,6 +1470,9 @@ void JobStatus::MergeFrom(const JobStatus& from) {
 
     job_result_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.job_result_);
   }
+  if (from.error_code() != 0) {
+    set_error_code(from.error_code());
+  }
   if (from.error_msg().size() > 0) {
 
     error_msg_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.error_msg_);
@@ -1412,6 +1506,7 @@ void JobStatus::InternalSwap(JobStatus* other) {
   std::swap(job_id_, other->job_id_);
   std::swap(job_status_, other->job_status_);
   job_result_.Swap(&other->job_result_);
+  std::swap(error_code_, other->error_code_);
   error_msg_.Swap(&other->error_msg_);
   tasks_.UnsafeArenaSwap(&other->tasks_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
@@ -1501,7 +1596,21 @@ void JobStatus::clear_job_result() {
   // @@protoc_insertion_point(field_set_allocated:com.nus.dbsystem.falcon.v0.JobStatus.job_result)
 }
 
-// optional string error_msg = 4;
+// optional int32 error_code = 4;
+void JobStatus::clear_error_code() {
+  error_code_ = 0;
+}
+ ::google::protobuf::int32 JobStatus::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.JobStatus.error_code)
+  return error_code_;
+}
+ void JobStatus::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.JobStatus.error_code)
+}
+
+// optional string error_msg = 5;
 void JobStatus::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1545,7 +1654,7 @@ void JobStatus::clear_error_msg() {
   // @@protoc_insertion_point(field_set_allocated:com.nus.dbsystem.falcon.v0.JobStatus.error_msg)
 }
 
-// repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 5;
+// repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 6;
 int JobStatus::tasks_size() const {
   return tasks_.size();
 }

@@ -259,9 +259,15 @@ class ForwardJobResponse : public ::google::protobuf::Message /* @@protoc_insert
   ::google::protobuf::int32 is_success() const;
   void set_is_success(::google::protobuf::int32 value);
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 3;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 4;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 3;
+  static const int kErrorMsgFieldNumber = 4;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -278,6 +284,7 @@ class ForwardJobResponse : public ::google::protobuf::Message /* @@protoc_insert
   ::google::protobuf::int32 job_id_;
   ::google::protobuf::int32 is_success_;
   ::google::protobuf::internal::ArenaStringPtr error_msg_;
+  ::google::protobuf::int32 error_code_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_job_2eproto();
   friend void protobuf_AssignDesc_job_2eproto();
@@ -442,9 +449,15 @@ class StopJobResponse : public ::google::protobuf::Message /* @@protoc_insertion
   ::google::protobuf::int32 is_success() const;
   void set_is_success(::google::protobuf::int32 value);
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 3;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 4;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 3;
+  static const int kErrorMsgFieldNumber = 4;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -461,6 +474,7 @@ class StopJobResponse : public ::google::protobuf::Message /* @@protoc_insertion
   ::google::protobuf::int32 job_id_;
   ::google::protobuf::int32 is_success_;
   ::google::protobuf::internal::ArenaStringPtr error_msg_;
+  ::google::protobuf::int32 error_code_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_job_2eproto();
   friend void protobuf_AssignDesc_job_2eproto();
@@ -677,7 +691,21 @@ inline void ForwardJobResponse::set_is_success(::google::protobuf::int32 value) 
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.ForwardJobResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+inline void ForwardJobResponse::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 ForwardJobResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.ForwardJobResponse.error_code)
+  return error_code_;
+}
+inline void ForwardJobResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.ForwardJobResponse.error_code)
+}
+
+// optional string error_msg = 4;
 inline void ForwardJobResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -771,7 +799,21 @@ inline void StopJobResponse::set_is_success(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.StopJobResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+inline void StopJobResponse::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 StopJobResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.StopJobResponse.error_code)
+  return error_code_;
+}
+inline void StopJobResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.StopJobResponse.error_code)
+}
+
+// optional string error_msg = 4;
 inline void StopJobResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

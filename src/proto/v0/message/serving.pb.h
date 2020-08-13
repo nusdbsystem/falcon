@@ -259,9 +259,15 @@ class CreateServingResponse : public ::google::protobuf::Message /* @@protoc_ins
   ::google::protobuf::int32 is_success() const;
   void set_is_success(::google::protobuf::int32 value);
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 3;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 4;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 3;
+  static const int kErrorMsgFieldNumber = 4;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -278,6 +284,7 @@ class CreateServingResponse : public ::google::protobuf::Message /* @@protoc_ins
   ::google::protobuf::int32 serving_id_;
   ::google::protobuf::int32 is_success_;
   ::google::protobuf::internal::ArenaStringPtr error_msg_;
+  ::google::protobuf::int32 error_code_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_serving_2eproto();
   friend void protobuf_AssignDesc_serving_2eproto();
@@ -456,9 +463,15 @@ class EnableServingResponse : public ::google::protobuf::Message /* @@protoc_ins
   ::google::protobuf::int32 is_success() const;
   void set_is_success(::google::protobuf::int32 value);
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 3;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 4;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 3;
+  static const int kErrorMsgFieldNumber = 4;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -475,6 +488,7 @@ class EnableServingResponse : public ::google::protobuf::Message /* @@protoc_ins
   ::google::protobuf::int32 serving_id_;
   ::google::protobuf::int32 is_success_;
   ::google::protobuf::internal::ArenaStringPtr error_msg_;
+  ::google::protobuf::int32 error_code_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_serving_2eproto();
   friend void protobuf_AssignDesc_serving_2eproto();
@@ -653,9 +667,15 @@ class UpdateServingResponse : public ::google::protobuf::Message /* @@protoc_ins
   ::google::protobuf::int32 is_success() const;
   void set_is_success(::google::protobuf::int32 value);
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 3;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 4;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 3;
+  static const int kErrorMsgFieldNumber = 4;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -672,6 +692,7 @@ class UpdateServingResponse : public ::google::protobuf::Message /* @@protoc_ins
   ::google::protobuf::int32 serving_id_;
   ::google::protobuf::int32 is_success_;
   ::google::protobuf::internal::ArenaStringPtr error_msg_;
+  ::google::protobuf::int32 error_code_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_serving_2eproto();
   friend void protobuf_AssignDesc_serving_2eproto();
@@ -1123,9 +1144,15 @@ class DisableServingResponse : public ::google::protobuf::Message /* @@protoc_in
   ::google::protobuf::int32 is_success() const;
   void set_is_success(::google::protobuf::int32 value);
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 3;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 4;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 3;
+  static const int kErrorMsgFieldNumber = 4;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -1142,6 +1169,7 @@ class DisableServingResponse : public ::google::protobuf::Message /* @@protoc_in
   ::google::protobuf::int32 serving_id_;
   ::google::protobuf::int32 is_success_;
   ::google::protobuf::internal::ArenaStringPtr error_msg_;
+  ::google::protobuf::int32 error_code_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_serving_2eproto();
   friend void protobuf_AssignDesc_serving_2eproto();
@@ -1313,9 +1341,15 @@ class DeleteServingResponse : public ::google::protobuf::Message /* @@protoc_ins
   ::google::protobuf::int32 is_success() const;
   void set_is_success(::google::protobuf::int32 value);
 
-  // optional string error_msg = 3;
+  // optional int32 error_code = 3;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 3;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 4;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 3;
+  static const int kErrorMsgFieldNumber = 4;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -1332,6 +1366,7 @@ class DeleteServingResponse : public ::google::protobuf::Message /* @@protoc_ins
   ::google::protobuf::int32 serving_id_;
   ::google::protobuf::int32 is_success_;
   ::google::protobuf::internal::ArenaStringPtr error_msg_;
+  ::google::protobuf::int32 error_code_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_serving_2eproto();
   friend void protobuf_AssignDesc_serving_2eproto();
@@ -1466,7 +1501,21 @@ inline void CreateServingResponse::set_is_success(::google::protobuf::int32 valu
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.CreateServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+inline void CreateServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 CreateServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.CreateServingResponse.error_code)
+  return error_code_;
+}
+inline void CreateServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.CreateServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 inline void CreateServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1588,7 +1637,21 @@ inline void EnableServingResponse::set_is_success(::google::protobuf::int32 valu
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.EnableServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+inline void EnableServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 EnableServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.EnableServingResponse.error_code)
+  return error_code_;
+}
+inline void EnableServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.EnableServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 inline void EnableServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1710,7 +1773,21 @@ inline void UpdateServingResponse::set_is_success(::google::protobuf::int32 valu
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.UpdateServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+inline void UpdateServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 UpdateServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.UpdateServingResponse.error_code)
+  return error_code_;
+}
+inline void UpdateServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.UpdateServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 inline void UpdateServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -1946,7 +2023,21 @@ inline void DisableServingResponse::set_is_success(::google::protobuf::int32 val
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.DisableServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+inline void DisableServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 DisableServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.DisableServingResponse.error_code)
+  return error_code_;
+}
+inline void DisableServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.DisableServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 inline void DisableServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -2054,7 +2145,21 @@ inline void DeleteServingResponse::set_is_success(::google::protobuf::int32 valu
   // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.DeleteServingResponse.is_success)
 }
 
-// optional string error_msg = 3;
+// optional int32 error_code = 3;
+inline void DeleteServingResponse::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 DeleteServingResponse::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.DeleteServingResponse.error_code)
+  return error_code_;
+}
+inline void DeleteServingResponse::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.DeleteServingResponse.error_code)
+}
+
+// optional string error_msg = 4;
 inline void DeleteServingResponse::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }

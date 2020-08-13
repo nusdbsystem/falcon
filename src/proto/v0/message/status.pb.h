@@ -240,9 +240,15 @@ class TaskStatus : public ::google::protobuf::Message /* @@protoc_insertion_poin
   ::std::string* release_task_result();
   void set_allocated_task_result(::std::string* task_result);
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 4;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 5;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 4;
+  static const int kErrorMsgFieldNumber = 5;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -260,6 +266,7 @@ class TaskStatus : public ::google::protobuf::Message /* @@protoc_insertion_poin
   int task_status_;
   ::google::protobuf::internal::ArenaStringPtr task_result_;
   ::google::protobuf::internal::ArenaStringPtr error_msg_;
+  ::google::protobuf::int32 error_code_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_status_2eproto();
   friend void protobuf_AssignDesc_status_2eproto();
@@ -353,9 +360,15 @@ class JobStatus : public ::google::protobuf::Message /* @@protoc_insertion_point
   ::std::string* release_job_result();
   void set_allocated_job_result(::std::string* job_result);
 
-  // optional string error_msg = 4;
+  // optional int32 error_code = 4;
+  void clear_error_code();
+  static const int kErrorCodeFieldNumber = 4;
+  ::google::protobuf::int32 error_code() const;
+  void set_error_code(::google::protobuf::int32 value);
+
+  // optional string error_msg = 5;
   void clear_error_msg();
-  static const int kErrorMsgFieldNumber = 4;
+  static const int kErrorMsgFieldNumber = 5;
   const ::std::string& error_msg() const;
   void set_error_msg(const ::std::string& value);
   void set_error_msg(const char* value);
@@ -364,10 +377,10 @@ class JobStatus : public ::google::protobuf::Message /* @@protoc_insertion_point
   ::std::string* release_error_msg();
   void set_allocated_error_msg(::std::string* error_msg);
 
-  // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 5;
+  // repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 6;
   int tasks_size() const;
   void clear_tasks();
-  static const int kTasksFieldNumber = 5;
+  static const int kTasksFieldNumber = 6;
   const ::com::nus::dbsystem::falcon::v0::TaskStatus& tasks(int index) const;
   ::com::nus::dbsystem::falcon::v0::TaskStatus* mutable_tasks(int index);
   ::com::nus::dbsystem::falcon::v0::TaskStatus* add_tasks();
@@ -386,6 +399,7 @@ class JobStatus : public ::google::protobuf::Message /* @@protoc_insertion_point
   ::google::protobuf::internal::ArenaStringPtr job_result_;
   ::google::protobuf::internal::ArenaStringPtr error_msg_;
   ::google::protobuf::RepeatedPtrField< ::com::nus::dbsystem::falcon::v0::TaskStatus > tasks_;
+  ::google::protobuf::int32 error_code_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_status_2eproto();
   friend void protobuf_AssignDesc_status_2eproto();
@@ -619,7 +633,21 @@ inline void TaskStatus::set_allocated_task_result(::std::string* task_result) {
   // @@protoc_insertion_point(field_set_allocated:com.nus.dbsystem.falcon.v0.TaskStatus.task_result)
 }
 
-// optional string error_msg = 4;
+// optional int32 error_code = 4;
+inline void TaskStatus::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 TaskStatus::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.TaskStatus.error_code)
+  return error_code_;
+}
+inline void TaskStatus::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.TaskStatus.error_code)
+}
+
+// optional string error_msg = 5;
 inline void TaskStatus::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -739,7 +767,21 @@ inline void JobStatus::set_allocated_job_result(::std::string* job_result) {
   // @@protoc_insertion_point(field_set_allocated:com.nus.dbsystem.falcon.v0.JobStatus.job_result)
 }
 
-// optional string error_msg = 4;
+// optional int32 error_code = 4;
+inline void JobStatus::clear_error_code() {
+  error_code_ = 0;
+}
+inline ::google::protobuf::int32 JobStatus::error_code() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsystem.falcon.v0.JobStatus.error_code)
+  return error_code_;
+}
+inline void JobStatus::set_error_code(::google::protobuf::int32 value) {
+  
+  error_code_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsystem.falcon.v0.JobStatus.error_code)
+}
+
+// optional string error_msg = 5;
 inline void JobStatus::clear_error_msg() {
   error_msg_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -783,7 +825,7 @@ inline void JobStatus::set_allocated_error_msg(::std::string* error_msg) {
   // @@protoc_insertion_point(field_set_allocated:com.nus.dbsystem.falcon.v0.JobStatus.error_msg)
 }
 
-// repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 5;
+// repeated .com.nus.dbsystem.falcon.v0.TaskStatus tasks = 6;
 inline int JobStatus::tasks_size() const {
   return tasks_.size();
 }
