@@ -40,3 +40,4 @@ examples/fraud_detection/.DS_Store
 build/
 src/executor/build/
 src/executor/cmake-build-debug/
+src/executor/log/

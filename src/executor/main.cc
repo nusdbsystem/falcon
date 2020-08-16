@@ -9,9 +9,12 @@
 #include "network/Comm.hpp"
 #include "party/party.h"
 
+#include <glog/logging.h>
+
 int main(int argc, char *argv[]) {
+  google::InitGoogleLogging(argv[0]);
   int party_id, party_num;
-  std::string network_file;
+  std::string network_file, log_dir;
   if (argv[1] != NULL) {
     party_id = atoi(argv[1]);
   }
@@ -25,6 +28,13 @@ int main(int argc, char *argv[]) {
       network_file = argv[3];
     }
   }
+  if (argc > 4) {
+    if (argv[4] != NULL) {
+      log_dir = argv[4];
+    }
+  }
+  FLAGS_log_dir = log_dir;
+  LOG(INFO) << "Init glog file.";
   Party party(party_id, party_num, network_file);
   return 0;
 }

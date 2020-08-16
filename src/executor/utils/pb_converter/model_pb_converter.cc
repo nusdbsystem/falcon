@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include <google/protobuf/io/coded_stream.h>
+#include <glog/logging.h>
 #include "../../message/model.pb.h"
 
 void serialize_model_publish_request(int model_id,
@@ -26,8 +27,7 @@ void deserialize_model_publish_request(int & model_id,
 {
   com::nus::dbsystem::falcon::v0::ModelPublishRequest pb_request;
   if (!pb_request.ParseFromString(input_message)) {
-    //TODO: replace with logger
-    std::cout << "Deserialize model publish request failed." << std::endl;
+    LOG(INFO) << "Deserialize model publish request failed.";
     return;
   }
 
@@ -61,8 +61,7 @@ void deserialize_model_publish_response(int & model_id,
 {
   com::nus::dbsystem::falcon::v0::ModelPublishResponse pb_response;
   if (!pb_response.ParseFromString(input_message)) {
-    //TODO: replace with logger
-    std::cout << "Deserialize model publish response failed." << std::endl;
+    LOG(INFO) << "Deserialize model publish response failed.";
     return;
   }
 

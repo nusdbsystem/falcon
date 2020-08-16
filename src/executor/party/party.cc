@@ -8,7 +8,10 @@
 #include <string>
 #include <random>
 #include <stack>
+
 #include "../network/ConfigFile.hpp"
+
+#include <glog/logging.h>
 
 Party::Party(){}
 
@@ -45,7 +48,7 @@ Party::Party(int m_party_id, int m_party_num, std::string network_file) {
       // connect to the other party
       channel->join(500,5000);
       //logger(logger_out, "channel established\n");
-      std::cout << "channel established." << std::endl;
+      LOG(INFO) << "channel established.";
 
       // add channel to the other client
       channels.push_back(std::move(channel));
@@ -60,7 +63,7 @@ Party::Party(int m_party_id, int m_party_num, std::string network_file) {
       // connect to the other party
       channel->join(500,5000);
       //logger(logger_out, "channel established\n");
-      std::cout << "channel established." << std::endl;
+      LOG(INFO) << "channel established.";
 
       // add channel to the other client
       channels.push_back(std::move(channel));
