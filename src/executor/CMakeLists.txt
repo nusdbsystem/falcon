@@ -13,7 +13,9 @@ set(SOURCE_FILES main.cc
         utils/pb_converter/model_pb_converter.h
         utils/pb_converter/model_pb_converter.cc
         message/model.pb.h
-        message/model.pb.cc)
+        message/model.pb.cc
+        operator/phe/fixed_point_encoder.h
+        operator/phe/fixed_point_encoder.cc)
 
 set(SPDZ_HOME "/home/wuyuncheng/Documents/projects/Pivot-SPDZ/")
 
