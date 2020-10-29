@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="falcon"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="executor">
+				<Option output="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/libexecutor.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/wuyuncheng/Documents/projects/boost_1_64_0/stage/lib"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/falcon/src/include"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/Pivot-SPDZ"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/Pivot-SPDZ/local/include"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/falcon/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 executor"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="executor/fast">
+				<Option output="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/libexecutor.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/wuyuncheng/Documents/projects/boost_1_64_0/stage/lib"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/falcon/src/include"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/Pivot-SPDZ"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/Pivot-SPDZ/local/include"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/falcon/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 executor/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="falcon">
+				<Option output="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/falcon" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/wuyuncheng/Documents/projects/boost_1_64_0/stage/lib"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/falcon/src/include"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/Pivot-SPDZ"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/Pivot-SPDZ/local/include"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/falcon/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 falcon"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="falcon/fast">
+				<Option output="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/falcon" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/wuyuncheng/Documents/projects/boost_1_64_0/stage/lib"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/falcon/src/include"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/Pivot-SPDZ"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/Pivot-SPDZ/local/include"/>
+					<Add directory="/home/wuyuncheng/Documents/projects/falcon/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 falcon/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/include/falcon/operator/phe/fixed_point_encoder.h">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/include/message/model.pb.cc">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/include/message/model.pb.h">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/main.cc">
+			<Option target="falcon"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/network/Comm.cpp">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/network/Comm.hpp">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/network/ConfigFile.cpp">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/network/ConfigFile.hpp">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/operator/phe/fixed_point_encoder.cc">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/party/party.cc">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/party/party.h">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/utils/pb_converter/model_pb_converter.cc">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/utils/pb_converter/model_pb_converter.h">
+			<Option target="executor"/>
+		</Unit>
+		<Unit filename="/home/wuyuncheng/Documents/projects/falcon/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

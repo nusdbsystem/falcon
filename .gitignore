@@ -41,3 +41,5 @@ build/
 src/executor/build/
 src/executor/cmake-build-debug/
 src/executor/log/
+build/
+log/
