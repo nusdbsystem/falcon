@@ -60,8 +60,3 @@ TEST(PB_Converter, ModelPublishResponse) {
   EXPECT_EQ(2001, deserialized_error_code);
   EXPECT_TRUE(error_msg == deserialized_error_msg);
 }
-
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

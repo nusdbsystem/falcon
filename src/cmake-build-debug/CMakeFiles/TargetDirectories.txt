@@ -1,4 +1,0 @@
-/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/CMakeFiles/executor.dir
-/home/wuyuncheng/Documents/projects/falcon/src/cmake-build-debug/CMakeFiles/falcon.dir

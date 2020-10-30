@@ -20,8 +20,11 @@ include_directories(
         ${SPDZ_HOME}/local/include
         ${PROJECT_SOURCE_DIR}/src)
 
-#set(SOURCE_FILES falcon/test_fixed_point.cc)
-add_executable(falcon_test falcon/test_fixed_point.cc)
+set(TEST_SOURCE_FILES test_main.cc
+        falcon/test_fixed_point.cc
+        falcon/test_pb_converter.cc)
+
+add_executable(falcon_test ${TEST_SOURCE_FILES})
 
 target_link_libraries(falcon_test
         $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so

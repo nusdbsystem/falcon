@@ -25,7 +25,7 @@ set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
 include(FindProtobuf)
 find_package(Protobuf REQUIRED)
 
-include_directories(
+target_include_directories(executor PUBLIC
         $ENV{HOME}/Documents/projects/boost_1_64_0/stage/lib
         ${FALCON_INCLUDE_DIR}
         ${PROTOBUF_INCLUDE_DIR}
@@ -33,17 +33,10 @@ include_directories(
         ${SPDZ_HOME}/local/include
         /home/wuyuncheng/Documents/projects/falcon/include)
 
-#find_package (glog 0.4.0 REQUIRED)
-
-link_directories(/usr/local/lib /usr/ssl/lib ${SPDZ_HOME}/local/lib)
-
-add_executable(falcon main.cc)
-
-target_link_libraries(falcon
+target_link_libraries(executor
         $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
         ${PROTOBUF_LIBRARY}
         ${SPDZ_HOME}/libSPDZ.a
-        executor
         libboost_thread.a
         libboost_system.a
         pthread
@@ -58,3 +51,11 @@ target_link_libraries(falcon
         /usr/local/lib/libglog.so
         /usr/lib/x86_64-linux-gnu/libgmp.so
         /usr/lib/x86_64-linux-gnu/libgmpxx.so)
+
+#find_package (glog 0.4.0 REQUIRED)
+
+link_directories(/usr/local/lib /usr/ssl/lib ${SPDZ_HOME}/local/lib)
+
+add_executable(falcon main.cc)
+
+target_link_libraries(falcon executor)
