@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include <gtest/gtest.h>
-#include "../../src/executor/utils/pb_converter/model_pb_converter.h"
+#include "../../src/utils/pb_converter/model_pb_converter.h"
 
 using namespace std;
 

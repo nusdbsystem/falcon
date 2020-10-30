@@ -76,7 +76,7 @@ class EncodedNumber {
 
   /**
      * make two EncodedNumber exponent the same for computation
-     * on the same level, only reasonable when is on plaintexts
+     * on the same level, only reasonable when two are plaintexts
      * @param new_exponent
      */
   void decrease_exponent(int new_exponent);
@@ -104,6 +104,9 @@ class EncodedNumber {
 
   /**
    * when exponent is large, decode with truncation
+   * NOTE: should be careful that the decoded value maybe inaccurate,
+   * especially when the value is small
+   *
    * @param v
    * @param truncated_exponent
    */
@@ -132,12 +135,19 @@ class EncodedNumber {
   void compute_decode_threshold(mpz_t max_int);
 
   void setter_n(mpz_t s_n);
+
   void setter_value(mpz_t s_value);
+
   void setter_exponent(int s_exponent);
+
   void setter_type(EncodedNumberType s_type);
+
   void getter_n(__mpz_struct *g_n) const;
+
   void getter_value(__mpz_struct *g_value) const;
+
   int getter_exponent() const;
+
   EncodedNumberType  getter_type() const;
 };
 
@@ -151,6 +161,7 @@ long long fixed_pointed_integer_representation(float value, int precision);
 
 /**
  * encode an integer with mpz_t
+ * must ensure that abs(value) <= n / 3
  * @param value
  * @param res
  * @param exponent
@@ -159,6 +170,7 @@ void fixed_pointed_encode(long value, mpz_t res, int & exponent);
 
 /**
  * encode a float with mpz_t
+ * must ensure that abs(value * PHE_FIXED_POINT_BASE ** precision) <= n / 3
  * @param value
  * @param precision
  * @param res

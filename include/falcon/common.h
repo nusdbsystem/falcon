@@ -7,6 +7,7 @@
 
 namespace falcon{
   #define PHE_FIXED_POINT_PRECISION 8
+  #define PHE_MAXIMUM_FIXED_POINT_PRECISION 32
   #define PHE_FIXED_POINT_BASE 2
 }
 

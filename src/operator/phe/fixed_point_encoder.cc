@@ -100,31 +100,17 @@ void EncodedNumber::increase_exponent(int new_exponent)
 
   if (new_exponent == exponent) return;
 
-  // 1. convert to string value
-  char *t = mpz_get_str(NULL, 10, value);
-  std::string s = t;
-
-  // 2. truncate, should preserve the former (s_size - exp_diff) elements
-  unsigned long int exp_diff = new_exponent - exponent;
-  int v_size = s.size() - exp_diff;
-  if (v_size <= 0) {
-    LOG(ERROR) << "Increase exponent error when truncating.";
-    return;
-  }
-
-  char *r = new char[v_size + 1];
-  for (int j = 0; j < v_size; ++j) {
-    r[j] = t[j];
-  }
-  r[v_size] = '\0';  // if miss this line, new_value would be any value unexpected
-
-  // 3. convert back
-  exponent = new_exponent;
-  mpz_t new_value;
+  mpz_t t, new_value;
+  mpz_init(t);
   mpz_init(new_value);
-  mpz_set_str(new_value, r, 10);
+  unsigned long int exp_diff = new_exponent - exponent;
+  mpz_ui_pow_ui(t, PHE_FIXED_POINT_BASE, exp_diff);
+  mpz_cdiv_q(new_value, value, t);
+
+  exponent = new_exponent;
   mpz_set(value, new_value);
 
+  mpz_clear(t);
   mpz_clear(new_value);
 }
 
@@ -201,6 +187,9 @@ EncodedNumberState EncodedNumber::check_encoded_number()
   mpz_init(neg_int);
   mpz_sub(neg_int, n, max_int);
 
+  // gmp_printf("max_int is %Zd\n", max_int);
+  // gmp_printf("neg_int is %Zd\n", neg_int);
+
   EncodedNumberState state;
   if (mpz_cmp(value, n) >= 0) {
     state = Invalid;
@@ -211,6 +200,8 @@ EncodedNumberState EncodedNumber::check_encoded_number()
   } else {
     state = Overflow;
   }
+
+  // printf("state is %d\n", state);
 
   mpz_clear(max_int);
   mpz_clear(neg_int);
@@ -288,8 +279,8 @@ void fixed_pointed_decode(float & value, mpz_t res, int exponent) {
     LOG(ERROR) << "Decode mpz_t for float value failed.";
     return;
   }
-  if (exponent <= 0 - 2 * PHE_FIXED_POINT_PRECISION) {
-    fixed_pointed_decode_truncated(value, res, exponent, 0 - 2 * PHE_FIXED_POINT_PRECISION);
+  if (exponent < 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION) {
+    fixed_pointed_decode_truncated(value, res, exponent, 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
   } else {
     char *t = mpz_get_str(NULL, 10, res);
     long v = ::atol(t);
@@ -308,32 +299,43 @@ void fixed_pointed_decode_truncated(float & value, mpz_t res, int exponent, int 
     LOG(ERROR) << "Decode mpz_t for float value failed.";
     return;
   }
-  int real_exponent = exponent >= truncated_exponent ? exponent : truncated_exponent;
 
-  // convert to string and truncate string before assign to long
-  char *t = mpz_get_str(NULL, 10, res);
-  std::string s(t);
-  // handle the case that the result value is 0
-  if (::atol(t) == 0) {
-    value = 0;
-    return;
+  if (exponent >= truncated_exponent) {
+    char *t = mpz_get_str(NULL, 10, res);
+    long v = ::atol(t);
+
+    if (v == 0) {
+      value = 0;
+    } else {
+      value = (float) (v * pow(PHE_FIXED_POINT_BASE, exponent));
+      // printf("decoded value = %f\n", value);
+    }
+    free(t);
+  } else {
+    // convert res to truncated_exponent
+    unsigned long int exp_diff = truncated_exponent - exponent;
+    // printf("exp_diff = %ld\n", exp_diff);
+    mpz_t tmp, new_value;
+    mpz_init(tmp);
+    mpz_init(new_value);
+    mpz_ui_pow_ui(tmp, PHE_FIXED_POINT_BASE, exp_diff);
+    mpz_cdiv_q(new_value, res, tmp);
+    // gmp_printf("tmp = %Zd\n", tmp);
+    // gmp_printf("new_value = %Zd\n", new_value);
+
+    // decode with new_value
+    char *t_new = mpz_get_str(NULL, 10, new_value);
+    long v_new = ::atol(t_new);
+
+    // printf("v_new = %ld\n", v_new);
+
+    if (v_new == 0) {
+      value = 0;
+    } else {
+      value = (float) (v_new * pow(PHE_FIXED_POINT_BASE, truncated_exponent));
+    }
+    free(t_new);
+    mpz_clear(tmp);
+    mpz_clear(new_value);
   }
-
-  // should preserve the former (s_size - exponent + real_exponent) elements
-  int v_size = s.size() + exponent - real_exponent;
-  if (v_size <= 0) {
-    LOG(ERROR) << "Decode error when truncating to desired exponent.";
-    return;
-  }
-
-  char *r = new char[v_size + 1];
-  for (int j = 0; j < v_size; ++j) {
-    r[j] = t[j];
-  }
-  r[v_size] = '\0';
-  long v = ::atol(r);
-  value = (float) (v * pow(PHE_FIXED_POINT_BASE, real_exponent));
-
-  free(t);
-  delete [] r;
 }
