@@ -15,7 +15,9 @@ set(SOURCE_FILES
         include/message/model.pb.h
         include/message/model.pb.cc
         ../include/falcon/operator/phe/fixed_point_encoder.h
-        operator/phe/fixed_point_encoder.cc)
+        operator/phe/fixed_point_encoder.cc
+        ../include/falcon/operator/phe/djcs_t_aux.h
+        operator/phe/djcs_t_aux.cc)
 
 add_library(executor ${SOURCE_FILES})
 
