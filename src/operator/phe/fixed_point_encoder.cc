@@ -89,6 +89,8 @@ void EncodedNumber::decrease_exponent(int new_exponent)
   mpz_ui_pow_ui(t, PHE_FIXED_POINT_BASE, exp_diff);
   mpz_mul(value, value, t);
   exponent = new_exponent;
+
+  mpz_clear(t);
 }
 
 void EncodedNumber::increase_exponent(int new_exponent)

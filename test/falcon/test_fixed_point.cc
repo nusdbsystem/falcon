@@ -87,6 +87,7 @@ TEST(FixedPoint, IntegerEncodeDecode){
 
   // negative integer
   int negative = -8000;
+  mpz_clear(v_value);
   mpz_init(v_value);
   mpz_set_str(v_value, "-8000", 10);
 
@@ -153,6 +154,7 @@ TEST(FixedPoint, FloatEncodeDecode){
 
   // negative float
   float negative = -0.666666;
+  mpz_clear(v_value);
   mpz_init(v_value);
   mpz_set_str(v_value, "-43690", 10);
 
