@@ -22,7 +22,8 @@ include_directories(
 
 set(TEST_SOURCE_FILES test_main.cc
         falcon/test_fixed_point.cc
-        falcon/test_pb_converter.cc)
+        falcon/test_pb_converter.cc
+        falcon/test_djcs_t_aux.cc)
 
 add_executable(falcon_test ${TEST_SOURCE_FILES})
 

@@ -21,7 +21,7 @@ set(SOURCE_FILES
 
 add_library(executor ${SOURCE_FILES})
 
-set(SPDZ_HOME "/home/wuyuncheng/Documents/projects/Pivot-SPDZ/")
+set(SPDZ_HOME "$ENV{HOME}/Documents/projects/Pivot-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
 
 include(FindProtobuf)
@@ -33,7 +33,7 @@ target_include_directories(executor PUBLIC
         ${PROTOBUF_INCLUDE_DIR}
         ${SPDZ_HOME}
         ${SPDZ_HOME}/local/include
-        /home/wuyuncheng/Documents/projects/falcon/include)
+        $ENV{HOME}/Documents/projects/falcon/include)
 
 target_link_libraries(executor
         $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so

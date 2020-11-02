@@ -35,19 +35,21 @@ void djcs_t_aux_encrypt(djcs_t_public_key* pk,
  */
 void djcs_t_aux_partial_decrypt(djcs_t_public_key* pk,
     djcs_t_auth_server* au,
-    EncodedNumber res,
+    EncodedNumber & res,
     EncodedNumber cipher);
 
 /**
- * combine hcs_shares, should set n and exponent before calling this function
+ * combine partially decrypted EncodedNumbers
  *
  * @param pk: public key
  * @param res: decrypted EncodedNumber
- * @param shares: hcs decrypted shares
+ * @param shares: partially decrypted EncodedNumbers
+ * @param size: size of the shares vector
  */
 void djcs_t_aux_share_combine(djcs_t_public_key* pk,
-    EncodedNumber res,
-    mpz_t* shares);
+    EncodedNumber & res,
+    EncodedNumber* shares,
+    int size);
 
 /**
  * homomorphic addition of two ciphers and return an EncodedNumber

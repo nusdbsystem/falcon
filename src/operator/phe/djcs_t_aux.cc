@@ -39,10 +39,10 @@ void djcs_t_aux_encrypt(djcs_t_public_key* pk,
 
 void djcs_t_aux_partial_decrypt(djcs_t_public_key* pk,
     djcs_t_auth_server* au,
-    EncodedNumber res,
+    EncodedNumber & res,
     EncodedNumber cipher) {
   if (cipher.getter_type() != Ciphertext) {
-    LOG(ERROR) << "The value is not ciphertext and cannot be encrypted.";
+    LOG(ERROR) << "The value is not ciphertext and cannot be decrypted.";
     return;
   }
 
@@ -65,15 +65,31 @@ void djcs_t_aux_partial_decrypt(djcs_t_public_key* pk,
 }
 
 void djcs_t_aux_share_combine(djcs_t_public_key* pk,
-    EncodedNumber res,
-    mpz_t* shares) {
-  mpz_t t;
-  mpz_init(t);
-  djcs_t_share_combine(pk, t, shares);
-  res.setter_value(t);
-  res.setter_type(Plaintext);
+    EncodedNumber & res,
+    EncodedNumber* shares,
+    int size) {
+  mpz_t* shares_value = (mpz_t *) malloc (size * sizeof(mpz_t));
+  for (int i = 0; i < size; i++) {
+    mpz_init(shares_value[i]);
+    shares[i].getter_value(shares_value[i]);
+  }
 
-  mpz_clear(t);
+  mpz_t t1, t2;
+  mpz_init(t1);
+  mpz_init(t2);
+  djcs_t_share_combine(pk, t1, shares_value);
+  shares[0].getter_n(t2);
+  res.setter_value(t1);
+  res.setter_n(t2);
+  res.setter_type(Plaintext);
+  res.setter_exponent(shares[0].getter_exponent());
+
+
+  for (int i = 0; i < size; i++) {
+    mpz_clear(shares_value[i]);
+  }
+  mpz_clear(t1);
+  mpz_clear(t2);
 }
 
 void djcs_t_aux_ee_add(djcs_t_public_key* pk,
