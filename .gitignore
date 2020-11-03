@@ -41,3 +41,4 @@ build/
 src/cmake-build-debug/
 build/
 log/
+cmake-build-debug/

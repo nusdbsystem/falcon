@@ -17,7 +17,9 @@ set(SOURCE_FILES
         ../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
         ../include/falcon/operator/phe/djcs_t_aux.h
-        operator/phe/djcs_t_aux.cc)
+        operator/phe/djcs_t_aux.cc
+        ../include/falcon/operator/mpc/spdz_connector.h
+        operator/mpc/spdz_connector.cc)
 
 add_library(executor ${SOURCE_FILES})
 
