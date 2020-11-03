@@ -33,6 +33,11 @@
 
 # Others
 .idea/*.xml
+.idea/
 .DS_Store
 examples/.DS_Store
 examples/fraud_detection/.DS_Store
+build/
+src/cmake-build-debug/
+build/
+log/
