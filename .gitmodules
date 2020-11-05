@@ -1,0 +1,6 @@
+[submodule "third_party/libhcs"]
+	path = third_party/libhcs
+	url = https://github.com/lemonviv/libhcs.git
+[submodule "third_party/MP-SPDZ"]
+	path = third_party/MP-SPDZ
+	url = https://github.com/lemonviv/MP-SPDZ.git

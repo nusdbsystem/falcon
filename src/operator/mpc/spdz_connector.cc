@@ -114,6 +114,7 @@ void send_private_values(std::vector<gfp> values, std::vector<int> sockets, int 
 
 template <typename T>
 void send_private_inputs(std::vector<T> inputs, std::vector<int> sockets, int n_parties) {
+  // now only support float type
   if (!std::is_same<T, float >::value) {
     LOG(ERROR) << "Private inputs other than float type are not supported, aborting.";
     // cerr << "Private inputs other than int type are not supported, aborting.\n";
