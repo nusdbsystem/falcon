@@ -14,11 +14,11 @@ set(SOURCE_FILES
         utils/pb_converter/model_pb_converter.cc
         include/message/model.pb.h
         include/message/model.pb.cc
-        ../include/falcon/operator/phe/fixed_point_encoder.h
+        ../../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
-        ../include/falcon/operator/phe/djcs_t_aux.h
+        ../../include/falcon/operator/phe/djcs_t_aux.h
         operator/phe/djcs_t_aux.cc
-        ../include/falcon/operator/mpc/spdz_connector.h
+        ../../include/falcon/operator/mpc/spdz_connector.h
         operator/mpc/spdz_connector.cc)
 
 #set(SPDZ_HOME "$ENV{HOME}/Documents/MP-SPDZ/")

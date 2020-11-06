@@ -8,7 +8,7 @@
 
 #include "network/Comm.hpp"
 #include "party/party.h"
-#include "../include/falcon/operator/mpc/spdz_connector.h"
+#include "falcon/operator/mpc/spdz_connector.h"
 
 #include <glog/logging.h>
 
