@@ -9,65 +9,61 @@
 
 #include <glog/logging.h>
 
-std::vector<int> setup_sockets(int n_parties, int my_party_id,
-    std::vector<std::string> host_names, int port_base) {
+
+std::vector<ssl_socket*> setup_sockets(int n_parties,
+    int my_party_id,
+    std::string player_data_path,
+    std::vector<std::string> host_names,
+    int port_base) {
   // setup connections from this party to each spdz party socket
-  std::vector<int> sockets(n_parties);
+  vector<int> plain_sockets(n_parties);
+  std::vector<ssl_socket*> sockets(n_parties);
+  ssl_ctx ctx(player_data_path, "C" + to_string(my_party_id));
+  ssl_service io_service;
+  octetStream specification;
   for (int i = 0; i < n_parties; i++)
   {
-    set_up_client_socket(sockets[i], host_names[i].c_str(), port_base + i);
-    send(sockets[i], (octet*) &my_party_id, sizeof(int));
+    set_up_client_socket(plain_sockets[i], host_names[i].c_str(), port_base + i);
+    send(plain_sockets[i], (octet*) &my_party_id, sizeof(int));
+    sockets[i] = new ssl_socket(io_service, ctx, plain_sockets[i],
+                                "P" + to_string(i), "C" + to_string(my_party_id), true);
+    if (i == 0){
+      // receive gfp prime
+      specification.Receive(sockets[0]);
+    }
+    int finish;
+    if (my_party_id == 2) {
+      finish = 1;
+    } else {
+      finish = 0;
+    }
+    octetStream os;
+    os.store(finish);
+    os.Send(sockets[i]);
     LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
-      " sockets = " << sockets[i] << ", port_num = " << port_base + i << ".";
+                                                          " sockets = " << sockets[i] << ", port_num = " << port_base + i << ".";
   }
   LOG(INFO) << "Finish setup socket connections to spdz engines.";
+
+  int type = specification.get<int>();
+  switch (type)
+  {
+    case 'p':
+    {
+      gfp::init_field(specification.get<bigint>());
+      LOG(INFO) << "Using prime " << gfp::pr();
+      break;
+    }
+    default:
+      LOG(ERROR) << "Type " << type << " not implemented";
+      exit(1);
+  }
+  LOG(INFO) << "Finish initializing gfp field.";
+
   return sockets;
 }
 
-void initialise_fields(string param_data_file)
-{
-  LOG(INFO) << "Param data file is " << param_data_file << ".";
-
-  int lg2;
-  bigint p;
-
-  ifstream inpf(param_data_file.c_str());
-  if (inpf.fail()) {
-    LOG(ERROR) << "Open " << param_data_file << "failed.";
-    //throw file_error(param_data_file.c_str());
-  }
-  inpf >> p;
-  inpf >> lg2;
-
-  inpf.close();
-
-  gfp::init_field(p);
-  //gf2n::init_field(lg2);
-}
-
-template <typename T>
-void send_public_values(std::vector<T> values, std::vector<int> sockets, int n_parties) {
-  octetStream os;
-  int size = values.size();
-  vector<gfp> parameters(size);
-
-  if (std::is_same<T, int>::value) {
-    for (int i = 0; i < size; i++) {
-      parameters[i].assign(values[i]);
-      parameters[i].pack(os);
-    }
-  } else {
-    LOG(ERROR) << "Public values other than int type are not supported, aborting.";
-    // cerr << "Public values other than int type are not supported, aborting.\n";
-    exit(1);
-  }
-
-  for (int i = 0; i < n_parties; i++) {
-    os.Send(sockets[i]);
-  }
-}
-
-void send_private_values(std::vector<gfp> values, std::vector<int> sockets, int n_parties)
+void send_private_values(std::vector<gfp> values, vector<ssl_socket*>& sockets, int n_parties)
 {
   int num_inputs = values.size();
   octetStream os;
@@ -112,30 +108,33 @@ void send_private_values(std::vector<gfp> values, std::vector<int> sockets, int 
     os.Send(sockets[j]);
 }
 
-template <typename T>
-void send_private_inputs(std::vector<T> inputs, std::vector<int> sockets, int n_parties) {
-  // now only support float type
-  if (!std::is_same<T, float >::value) {
-    LOG(ERROR) << "Private inputs other than float type are not supported, aborting.";
-    // cerr << "Private inputs other than int type are not supported, aborting.\n";
-    exit(1);
+std::vector<float> receive_result(vector<ssl_socket*>& sockets, int n_parties, int size)
+{
+  cout << "Receive result from the SPDZ engine" <<endl;
+  std::vector<gfp> output_values(size);
+  octetStream os;
+  for (int i = 0; i < n_parties; i++)
+  {
+    os.reset_write_head();
+    os.Receive(sockets[i]);
+    for (int j = 0; j < size; j++)
+    {
+      gfp value;
+      value.unpack(os);
+      output_values[j] += value;
+    }
   }
 
-  int size = inputs.size();
-  std::vector<int64_t> long_shares(size);
+  std::vector<float> res_shares(size);
 
-  // step 1: convert to int or long according to the fixed precision
-  for (int i = 0; i < size; ++i) {
-    long_shares[i] = static_cast<int64_t>(round(inputs[i] * pow(2, SPDZ_FIXED_POINT_PRECISION)));
-  }
-
-  // step 2: convert to the gfp value and call send_private_inputs
-  // Map inputs into gfp
-  vector<gfp> input_values_gfp(size);
   for (int i = 0; i < size; i++) {
-    input_values_gfp[i].assign(long_shares[i]);
+    gfp val = output_values[i];
+    bigint aa;
+    to_signed_bigint(aa, val);
+    long t = aa.get_si();
+    //cout<< "i = " << i << ", t = " << t <<endl;
+    res_shares[i] = static_cast<float>(t * pow(2, 0 - SPDZ_FIXED_POINT_PRECISION));
   }
 
-  // call sending values
-  send_private_values(input_values_gfp, sockets, n_parties);
+  return res_shares;
 }
