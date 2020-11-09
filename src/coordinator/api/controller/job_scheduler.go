@@ -7,6 +7,7 @@ import (
 	dist "coordinator/distributed"
 	"fmt"
 	"sync"
+	"time"
 )
 
 type DslScheduler struct {
@@ -70,6 +71,7 @@ loop:
 			}
 
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 	fmt.Println("Consumer stopped")
 }
@@ -96,6 +98,7 @@ loop:
 			}
 			ds.Unlock()
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 	fmt.Println("Consumer Monitor stopped")
 
