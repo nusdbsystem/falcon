@@ -6,13 +6,14 @@ import (
 	"coordinator/listener"
 	"flag"
 	"fmt"
+	"runtime"
 )
 
 var svc string
 var httpAddr string
 
 func init() {
-
+	runtime.GOMAXPROCS(4)
 	flag.StringVar(&svc, "svc", "http", "choose which service to run")
 	flag.StringVar(&httpAddr, "addr", "", "addr of master")
 }

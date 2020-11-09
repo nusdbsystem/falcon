@@ -1,7 +1,7 @@
 package test
 
 import (
-	"coordinator/distributed/utils"
+	"coordinator/distributed/taskmanager"
 	"fmt"
 	"testing"
 	"time"
@@ -15,7 +15,7 @@ func TestSubProc(t *testing.T) {
 	args := []string{"preprocessing.py", "-a 1 -b 1"}
 	envs := []string{}
 
-	pm := utils.InitSubProcessManager()
+	pm := taskmanager.InitSubProcessManager()
 
 	//go func(){
 	//	for i:=8;i>0;i--{
