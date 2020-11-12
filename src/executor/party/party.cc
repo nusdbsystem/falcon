@@ -89,6 +89,15 @@ Party::Party(int m_party_id,
   }
 
   host_names = ips;
+
+  /// init phe keys
+  /// if use existing key, read key file
+  /// otherwise, generate keys and broadcast to others
+  if (m_use_existing_key) {
+
+  } else {
+
+  }
 }
 
 Party::~Party() {

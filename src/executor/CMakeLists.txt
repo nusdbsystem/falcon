@@ -10,10 +10,14 @@ set(SOURCE_FILES
         network/ConfigFile.cpp
         ../../include/falcon/party/party.h
         party/party.cc
-        utils/pb_converter/model_pb_converter.h
-        utils/pb_converter/model_pb_converter.cc
+        ../../include/falcon/utils/pb_converter/model_converter.h
+        utils/pb_converter/model_converter.cc
+        ../../include/falcon/utils/pb_converter/phe_keys_converter.h
+        utils/pb_converter/phe_keys_converter.cc
         include/message/model.pb.h
         include/message/model.pb.cc
+        include/message/phe_keys.pb.h
+        include/message/phe_keys.pb.cc
         ../../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
         ../../include/falcon/operator/phe/djcs_t_aux.h
