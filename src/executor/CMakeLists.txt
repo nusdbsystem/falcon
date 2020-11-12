@@ -4,11 +4,11 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
 
 set(SOURCE_FILES
-        network/Comm.hpp
+        ../../include/falcon/network/Comm.hpp
         network/Comm.cpp
-        network/ConfigFile.hpp
+        ../../include/falcon/network/ConfigFile.hpp
         network/ConfigFile.cpp
-        party/party.h
+        ../../include/falcon/party/party.h
         party/party.cc
         utils/pb_converter/model_pb_converter.h
         utils/pb_converter/model_pb_converter.cc
@@ -19,7 +19,9 @@ set(SOURCE_FILES
         ../../include/falcon/operator/phe/djcs_t_aux.h
         operator/phe/djcs_t_aux.cc
         ../../include/falcon/operator/mpc/spdz_connector.h
-        operator/mpc/spdz_connector.cc)
+        operator/mpc/spdz_connector.cc
+        ../../include/falcon/utils/io_util.h
+        utils/io_util.cc)
 
 #set(SPDZ_HOME "$ENV{HOME}/Documents/MP-SPDZ/")
 set(SPDZ_HOME "$ENV{HOME}/Documents/falcon/third_party/MP-SPDZ/")

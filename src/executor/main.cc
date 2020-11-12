@@ -6,8 +6,8 @@
 #include <vector>
 #include <string>
 
-#include "network/Comm.hpp"
-#include "party/party.h"
+#include "falcon/network/Comm.hpp"
+#include "falcon/party/party.h"
 #include "falcon/operator/mpc/spdz_connector.h"
 
 #include <glog/logging.h>
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   }
   FLAGS_log_dir = log_dir;
   LOG(INFO) << "Init glog file.";
-  Party party(party_id, party_num, network_file);
+  //Party party(party_id, party_num, network_file);
 
 //  bigint::init_thread();
 //  std::vector<std::string> hosts;

@@ -96,5 +96,28 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
     EncodedNumber* plains,
     int size);
 
+/**
+ * copy a djcs_t public key from src to dest
+ *
+ * @param src: src public key object
+ * @param dest: dest public key object
+ */
+void djcs_t_public_key_copy(djcs_t_public_key* src, djcs_t_public_key* dest);
+
+/**
+ * copy a djcs_t authenticate server from src to dest
+ *
+ * @param src: src auth server object
+ * @param dest: dest auth server object
+ */
+void djcs_t_auth_server_copy(djcs_t_auth_server* src, djcs_t_auth_server* dest);
+
+/**
+ * copy a hcs_random from src to dest
+ *
+ * @param src: src hcs random object
+ * @param dest: dest hcs random object
+ */
+void djcs_t_hcs_random_copy(hcs_random* src, hcs_random* dest);
 
 #endif //FALCON_SRC_OPERATOR_PHE_DJCS_T_AUX_H_
