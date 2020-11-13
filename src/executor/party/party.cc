@@ -25,7 +25,7 @@ Party::Party(int m_party_id,
              const std::string& m_network_file,
              const std::string& m_data_file,
              bool m_use_existing_key,
-             std::string m_key_file) {
+             const std::string& m_key_file) {
   // copy params
   party_id = m_party_id;
   party_num = m_party_num;
@@ -84,7 +84,7 @@ Party::Party(int m_party_id,
       channels.push_back(std::move(channel));
     } else {
       // self communication
-      shared_ptr<CommParty> channel = NULL;
+      shared_ptr<CommParty> channel = nullptr;
       channels.push_back(std::move(channel));
     }
   }
@@ -104,14 +104,49 @@ Party::Party(int m_party_id,
   }
 }
 
+Party::Party(const Party &party) {
+  // copy public variables
+  party_id = party.party_id;
+  party_num = party.party_num;
+  party_type = party.party_type;
+  fl_setting = party.fl_setting;
+  channels = party.channels;
+  host_names = party.host_names;
+
+  // copy private variables
+  feature_num = party.getter_feature_num();
+  sample_num = party.getter_sample_num();
+  local_data = party.getter_local_data();
+  labels = party.getter_labels();
+
+  // init phe keys and copy from party
+  phe_random = hcs_init_random();
+  phe_pub_key = djcs_t_init_public_key();
+  phe_auth_server = djcs_t_init_auth_server();
+  hcs_random* tmp_random = hcs_init_random();
+  djcs_t_public_key* tmp_pub_key = djcs_t_init_public_key();
+  djcs_t_auth_server* tmp_auth_server = djcs_t_init_auth_server();
+  party.getter_phe_random(tmp_random);
+  party.getter_phe_pub_key(tmp_pub_key);
+  party.getter_phe_auth_server(tmp_auth_server);
+  djcs_t_hcs_random_copy(tmp_random, phe_random);
+  djcs_t_public_key_copy(tmp_pub_key, phe_pub_key);
+  djcs_t_auth_server_copy(tmp_auth_server, phe_auth_server);
+
+  // free tmp phe key objects
+  hcs_free_random(tmp_random);
+  djcs_t_free_public_key(tmp_pub_key);
+  djcs_t_free_auth_server(tmp_auth_server);
+}
+
 void Party::init_with_new_phe_keys(int epsilon, int phe_key_size, int required_party_num) {
   if (party_type == falcon::ACTIVE_PARTY) {
     // generate phe keys
     hcs_random* random = hcs_init_random();
     djcs_t_public_key* pub_key = djcs_t_init_public_key();
     djcs_t_private_key* priv_key = djcs_t_init_private_key();
-    djcs_t_auth_server** auth_server = (djcs_t_auth_server **) malloc (3 * sizeof(djcs_t_auth_server *));
-    mpz_t* si = (mpz_t *) malloc (3 * sizeof(mpz_t));
+    djcs_t_auth_server** auth_server = (djcs_t_auth_server **) malloc (party_num * sizeof(djcs_t_auth_server *));
+    mpz_t* si = (mpz_t *) malloc (party_num * sizeof(mpz_t));
     djcs_t_generate_key_pair(pub_key, priv_key, random, epsilon, phe_key_size, party_num, required_party_num);
     mpz_t* coeff = djcs_t_init_polynomial(priv_key, random);
     for (int i = 0; i < party_num; i++) {
@@ -138,16 +173,16 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size, int required_p
     djcs_t_free_public_key(pub_key);
     djcs_t_free_private_key(priv_key);
     djcs_t_free_polynomial(priv_key, coeff);
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < party_num; i++) {
       mpz_clear(si[i]);
       djcs_t_free_auth_server(auth_server[i]);
     }
     free(si);
     free(auth_server);
   } else {
-    // for passive parties,
-    // receive the phe keys message from the active party
+    // for passive parties, receive the phe keys message from the active party
     // and set its own keys with the received message
+    // TODO: now active party id is 0 by design, could abstract as a variable
     std::string recv_phe_keys_message;
     recv_long_message(0, recv_phe_keys_message);
     deserialize_phe_keys(phe_pub_key, phe_auth_server, recv_phe_keys_message);
@@ -185,5 +220,8 @@ void Party::recv_long_message(int id, std::string &message) {
 
 Party::~Party() {
   io_service.stop();
+  hcs_free_random(phe_random);
+  djcs_t_free_public_key(phe_pub_key);
+  djcs_t_free_auth_server(phe_auth_server);
 }
 

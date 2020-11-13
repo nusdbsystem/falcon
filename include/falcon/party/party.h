@@ -73,7 +73,13 @@ class Party {
       const std::string& m_network_file,
       const std::string& m_data_file,
       bool m_use_existing_key,
-      std::string m_key_file);
+      const std::string& m_key_file);
+
+  /**
+   * copy constructor
+   * @param party
+   */
+  Party(const Party& party);
 
   ~Party();
 

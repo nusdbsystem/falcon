@@ -13,14 +13,21 @@
 /**
  * serialize phe keys proto message
  *
- * @param phe_pub_key: public key struct
- * @param phe_auth_server: authenticated server struct
+ * @param phe_pub_key: public key object
+ * @param phe_auth_server: authenticated server object
  * @param output_message: serialized string
  */
 void serialize_phe_keys(djcs_t_public_key* phe_pub_key,
     djcs_t_auth_server* phe_auth_server,
     std::string& output_message);
 
+/**
+ * deserialize phe keys from proto message
+ *
+ * @param phe_pub_key: public key object
+ * @param phe_auth_server: authenticated server object
+ * @param input_message: serialized string
+ */
 void deserialize_phe_keys(djcs_t_public_key* phe_pub_key,
     djcs_t_auth_server* phe_auth_server,
     std::string input_message);
