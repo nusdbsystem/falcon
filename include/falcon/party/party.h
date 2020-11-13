@@ -77,6 +77,55 @@ class Party {
 
   ~Party();
 
+  /**
+   * when not use existing key file, generate and init with new keys
+   *
+   * @param epsilon: djcs_t cryptosystem level, default 1
+   * @param phe_key_size: djcs_t key size
+   * @param required_party_num: i.e., party num (additive secret sharing)
+   */
+  void init_with_new_phe_keys(int epsilon, int phe_key_size, int required_party_num);
+
+  /**
+   * when use existing key file, deserialize and init phe keys
+   *
+   * @param key_file: file that stores the pb serialized phe keys
+   */
+  void init_with_key_file(const std::string& key_file);
+
+  /**
+   * send message via channel commParty
+   *
+   * @param id: other party id
+   * @param message: sent message
+   */
+  void send_message(int id, std::string message);
+
+  /**
+   * send long message via channel commParty
+   *
+   * @param id: other party id
+   * @param message: sent message
+   */
+  void send_long_message(int id, string message);
+
+  /**
+   * receive message from channel comm_party
+   *
+   * @param id: other party id
+   * @param message: received message
+   * @param buffer: received buffer
+   * @param expected_size: buffer size
+   */
+  void recv_message(int id, std::string message, byte* buffer, int expected_size);
+
+  /**
+   * receive message from channel comm_party
+   *
+   * @param id: other party id
+   * @param message: received message
+   */
+  void recv_long_message(int id, std::string & message);
 
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }
