@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(falcon)
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options")
 
 set(SOURCE_FILES
         ../../include/falcon/network/Comm.hpp
@@ -35,9 +35,10 @@ add_library(executor ${SOURCE_FILES})
 
 include(FindProtobuf)
 find_package(Protobuf REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
 
 target_include_directories(executor PUBLIC
-        $ENV{HOME}/Documents/projects/boost_1_64_0/stage/lib
+        ${Boost_INCLUDE_DIRS}
         ${FALCON_INCLUDE_DIR}
         ${PROTOBUF_INCLUDE_DIR}
         ${SPDZ_HOME}
@@ -47,6 +48,7 @@ target_include_directories(executor PUBLIC
 target_link_libraries(executor
         $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
         ${PROTOBUF_LIBRARY}
+        ${Boost_LIBRARIES}
         ${SPDZ_HOME}/libSPDZ.a
         libboost_thread.a
         libboost_system.a
@@ -68,7 +70,7 @@ target_link_libraries(executor
 link_directories(/usr/local/lib /usr/ssl/lib ${SPDZ_HOME}/local/lib)
 
 include_directories(
-        $ENV{HOME}/Documents/projects/boost_1_64_0/stage/lib
+        ${Boost_INCLUDE_DIRS}
         ${PROJECT_SOURCE_DIR}/include/
         ${PROTOBUF_INCLUDE_DIR}
         ${SPDZ_HOME}
@@ -80,6 +82,7 @@ add_executable(falcon main.cc)
 target_link_libraries(falcon
         $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
         ${PROTOBUF_LIBRARY}
+        ${Boost_LIBRARIES}
         executor
         libboost_thread.a
         libboost_system.a

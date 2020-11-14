@@ -101,6 +101,9 @@ Party::Party(int m_party_id,
   } else {
     // the active party generates new phe keys and send to passive parties
     init_with_new_phe_keys(PHE_EPSILON, PHE_KEY_SIZE, party_num);
+    std::string phe_keys_str;
+    serialize_phe_keys(phe_pub_key, phe_auth_server, phe_keys_str);
+    write_key_to_file(phe_keys_str, m_key_file);
   }
 }
 
