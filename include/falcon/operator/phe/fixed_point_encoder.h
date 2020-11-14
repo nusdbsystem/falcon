@@ -30,10 +30,14 @@ enum EncodedNumberType {Plaintext, Ciphertext};
 // fixed pointed integer representation
 class EncodedNumber {
  private:
-  mpz_t n;                 // max value in public key for encoding
-  mpz_t value;             // the value in mpz_t form
-  int exponent;            // 0 for integer, negative for float
-  EncodedNumberType type;  // the encoded number type
+  // max value in public key for encoding
+  mpz_t n;
+  // the value in mpz_t form
+  mpz_t value;
+  // 0 for integer, negative for float
+  int exponent;
+  // the encoded number type
+  EncodedNumberType type;
 
  public:
   /**
@@ -134,20 +138,28 @@ class EncodedNumber {
    */
   void compute_decode_threshold(mpz_t max_int);
 
+  /** set EncodedNumber max value n */
   void setter_n(mpz_t s_n);
 
+  /** set EncodedNumber value*/
   void setter_value(mpz_t s_value);
 
+  /** set EncodedNumber exponent */
   void setter_exponent(int s_exponent);
 
+  /** set EncodedNumber type */
   void setter_type(EncodedNumberType s_type);
 
+  /** get EncodedNumber max value */
   void getter_n(__mpz_struct *g_n) const;
 
+  /** get EncodedNumber value */
   void getter_value(__mpz_struct *g_value) const;
 
+  /** get EncodedNumber exponent*/
   int getter_exponent() const;
 
+  /** get EncodedNumber type */
   EncodedNumberType  getter_type() const;
 };
 

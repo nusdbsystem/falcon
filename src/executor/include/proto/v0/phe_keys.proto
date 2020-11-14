@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package com.nus.dbsystem.falcon.v0;
+
+// This message denotes the phe public key and
+// private key share (i.e., auth server)
+message PHEKeys {
+    // public key info
+    int32 public_key_s = 1;
+    int32 public_key_w = 2;
+    int32 public_key_l = 3;
+    repeated string public_key_n = 4;
+    string public_key_g = 5;
+    string public_key_delta = 6;
+
+    // private key share
+    int32 auth_server_i = 7;
+    string auth_server_si = 8;
+}

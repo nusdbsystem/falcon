@@ -1,25 +1,31 @@
 cmake_minimum_required(VERSION 3.10)
 project(falcon)
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options")
 
 set(SOURCE_FILES
-        network/Comm.hpp
+        ../../include/falcon/network/Comm.hpp
         network/Comm.cpp
-        network/ConfigFile.hpp
+        ../../include/falcon/network/ConfigFile.hpp
         network/ConfigFile.cpp
-        party/party.h
+        ../../include/falcon/party/party.h
         party/party.cc
-        utils/pb_converter/model_pb_converter.h
-        utils/pb_converter/model_pb_converter.cc
+        ../../include/falcon/utils/pb_converter/model_converter.h
+        utils/pb_converter/model_converter.cc
+        ../../include/falcon/utils/pb_converter/phe_keys_converter.h
+        utils/pb_converter/phe_keys_converter.cc
         include/message/model.pb.h
         include/message/model.pb.cc
-        ../include/falcon/operator/phe/fixed_point_encoder.h
+        include/message/phe_keys.pb.h
+        include/message/phe_keys.pb.cc
+        ../../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
-        ../include/falcon/operator/phe/djcs_t_aux.h
+        ../../include/falcon/operator/phe/djcs_t_aux.h
         operator/phe/djcs_t_aux.cc
-        ../include/falcon/operator/mpc/spdz_connector.h
-        operator/mpc/spdz_connector.cc)
+        ../../include/falcon/operator/mpc/spdz_connector.h
+        operator/mpc/spdz_connector.cc
+        ../../include/falcon/utils/io_util.h
+        utils/io_util.cc)
 
 #set(SPDZ_HOME "$ENV{HOME}/Documents/MP-SPDZ/")
 set(SPDZ_HOME "$ENV{HOME}/Documents/falcon/third_party/MP-SPDZ/")
@@ -29,9 +35,10 @@ add_library(executor ${SOURCE_FILES})
 
 include(FindProtobuf)
 find_package(Protobuf REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
 
 target_include_directories(executor PUBLIC
-        $ENV{HOME}/Documents/projects/boost_1_64_0/stage/lib
+        ${Boost_INCLUDE_DIRS}
         ${FALCON_INCLUDE_DIR}
         ${PROTOBUF_INCLUDE_DIR}
         ${SPDZ_HOME}
@@ -41,6 +48,7 @@ target_include_directories(executor PUBLIC
 target_link_libraries(executor
         $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
         ${PROTOBUF_LIBRARY}
+        ${Boost_LIBRARIES}
         ${SPDZ_HOME}/libSPDZ.a
         libboost_thread.a
         libboost_system.a
@@ -62,7 +70,7 @@ target_link_libraries(executor
 link_directories(/usr/local/lib /usr/ssl/lib ${SPDZ_HOME}/local/lib)
 
 include_directories(
-        $ENV{HOME}/Documents/projects/boost_1_64_0/stage/lib
+        ${Boost_INCLUDE_DIRS}
         ${PROJECT_SOURCE_DIR}/include/
         ${PROTOBUF_INCLUDE_DIR}
         ${SPDZ_HOME}
@@ -74,6 +82,7 @@ add_executable(falcon main.cc)
 target_link_libraries(falcon
         $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
         ${PROTOBUF_LIBRARY}
+        ${Boost_LIBRARIES}
         executor
         libboost_thread.a
         libboost_system.a

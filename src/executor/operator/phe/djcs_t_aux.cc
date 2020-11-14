@@ -244,3 +244,24 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
   free(mpz_ciphers);
   free(mpz_plains);
 }
+
+void djcs_t_public_key_copy(djcs_t_public_key* src, djcs_t_public_key* dest) {
+  dest->s = src->s;
+  dest->l = src->l;
+  dest->w = src->w;
+  mpz_set(dest->g, src->g);
+  mpz_set(dest->delta, src->delta);
+  dest->n = (mpz_t *) malloc(sizeof(mpz_t) * (src->s+1));
+  for (int i = 0; i < dest->s + 1; i++) {
+    mpz_init_set(dest->n[i], src->n[i]);
+  }
+}
+
+void djcs_t_auth_server_copy(djcs_t_auth_server* src, djcs_t_auth_server* dest) {
+  dest->i = src->i;
+  mpz_set(dest->si, src->si);
+}
+
+void djcs_t_hcs_random_copy(hcs_random* src, hcs_random* dest) {
+  gmp_randinit_set(dest->rstate, src->rstate);
+}

@@ -26,7 +26,7 @@
 */
 
 
-#include "Comm.hpp"
+#include "falcon/network/Comm.hpp"
 
 
 /*****************************************/
