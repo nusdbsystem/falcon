@@ -47,15 +47,15 @@ int main(int argc, char *argv[]) {
       return 0;
     }
 
-    std::cout << "vm: " << vm["party-id"].as<int>() << std::endl;
-    std::cout << "vm: " << vm["party-num"].as<int>() << std::endl;
-    std::cout << "vm: " << vm["party-type"].as<int>() << std::endl;
-    std::cout << "vm: " << vm["fl-setting"].as<int>() << std::endl;
-    std::cout << "vm: " << vm["existing-key"].as<int>() << std::endl;
-    std::cout << "vm: " << vm["network-file"].as< std::string >() << std::endl;
-    std::cout << "vm: " << vm["log-file"].as< std::string >() << std::endl;
-    std::cout << "vm: " << vm["data-file"].as< std::string >() << std::endl;
-    std::cout << "vm: " << vm["key-file"].as< std::string >() << std::endl;
+    std::cout << "party-id: " << vm["party-id"].as<int>() << std::endl;
+    std::cout << "party-num: " << vm["party-num"].as<int>() << std::endl;
+    std::cout << "party-type: " << vm["party-type"].as<int>() << std::endl;
+    std::cout << "fl-setting: " << vm["fl-setting"].as<int>() << std::endl;
+    std::cout << "existing-key: " << vm["existing-key"].as<int>() << std::endl;
+    std::cout << "network-file: " << vm["network-file"].as< std::string >() << std::endl;
+    std::cout << "log-file: " << vm["log-file"].as< std::string >() << std::endl;
+    std::cout << "data-file: " << vm["data-file"].as< std::string >() << std::endl;
+    std::cout << "key-file: " << vm["key-file"].as< std::string >() << std::endl;
   }
   catch(std::exception& e)
   {
