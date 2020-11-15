@@ -29,7 +29,7 @@ class Model {
   Model();
 
   /**
-   * constructor
+   * model constructor
    *
    * @param m_training_data
    * @param m_testing_data

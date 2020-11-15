@@ -23,8 +23,10 @@
 #include <google/protobuf/arenastring.h>
 #include <google/protobuf/generated_message_util.h>
 #include <google/protobuf/metadata.h>
+#include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/extension_set.h>
+#include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 
 namespace com {
@@ -38,16 +40,135 @@ void protobuf_AddDesc_common_2eproto();
 void protobuf_AssignDesc_common_2eproto();
 void protobuf_ShutdownFile_common_2eproto();
 
+class IntArray;
 
 // ===================================================================
 
+class IntArray : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.IntArray) */ {
+ public:
+  IntArray();
+  virtual ~IntArray();
 
+  IntArray(const IntArray& from);
+
+  inline IntArray& operator=(const IntArray& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const IntArray& default_instance();
+
+  void Swap(IntArray* other);
+
+  // implements Message ----------------------------------------------
+
+  inline IntArray* New() const { return New(NULL); }
+
+  IntArray* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const IntArray& from);
+  void MergeFrom(const IntArray& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(IntArray* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated int32 int_item = 1;
+  int int_item_size() const;
+  void clear_int_item();
+  static const int kIntItemFieldNumber = 1;
+  ::google::protobuf::int32 int_item(int index) const;
+  void set_int_item(int index, ::google::protobuf::int32 value);
+  void add_int_item(::google::protobuf::int32 value);
+  const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+      int_item() const;
+  ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+      mutable_int_item();
+
+  // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.IntArray)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::int32 > int_item_;
+  mutable int _int_item_cached_byte_size_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_common_2eproto();
+  friend void protobuf_AssignDesc_common_2eproto();
+  friend void protobuf_ShutdownFile_common_2eproto();
+
+  void InitAsDefaultInstance();
+  static IntArray* default_instance_;
+};
 // ===================================================================
 
 
 // ===================================================================
 
 #if !PROTOBUF_INLINE_NOT_IN_HEADERS
+// IntArray
+
+// repeated int32 int_item = 1;
+inline int IntArray::int_item_size() const {
+  return int_item_.size();
+}
+inline void IntArray::clear_int_item() {
+  int_item_.Clear();
+}
+inline ::google::protobuf::int32 IntArray::int_item(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+  return int_item_.Get(index);
+}
+inline void IntArray::set_int_item(int index, ::google::protobuf::int32 value) {
+  int_item_.Set(index, value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+}
+inline void IntArray::add_int_item(::google::protobuf::int32 value) {
+  int_item_.Add(value);
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+IntArray::int_item() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+  return int_item_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+IntArray::mutable_int_item() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+  return &int_item_;
+}
+
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // @@protoc_insertion_point(namespace_scope)

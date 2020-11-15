@@ -81,6 +81,9 @@ class Party {
    */
   Party(const Party& party);
 
+  /**
+   * destructor
+   */
   ~Party();
 
   /**
@@ -132,6 +135,21 @@ class Party {
    * @param message: received message
    */
   void recv_long_message(int id, std::string & message);
+
+  /**
+   * split local data and labels into train-test
+   *
+   * @param split_percentage: percentage of training data
+   * @param training_data: split training dataset
+   * @param testing_data: split testing dataset
+   * @param training_labels: split training labels for active party
+   * @param testing_labels: split testing labels for active party
+   */
+  void split_train_test_data(float split_percentage,
+      std::vector< std::vector<float> >& training_data,
+      std::vector< std::vector<float> >& testing_data,
+      std::vector<float>& training_labels,
+      std::vector<float>& testing_labels);
 
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }

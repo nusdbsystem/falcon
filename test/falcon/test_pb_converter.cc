@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <falcon/utils/pb_converter/model_converter.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
+#include <falcon/utils/pb_converter/common_converter.h>
 
 TEST(PB_Converter, ModelPublishRequest) {
   int model_id = 1;
@@ -110,6 +111,26 @@ TEST(PB_Converter, PHEKeys) {
   }
   free(si);
   free(phe_auth_server);
+}
+
+TEST(PB_Converter, IntArray) {
+  // generate int array
+  std::vector<int> vec;
+  vec.push_back(3);
+  vec.push_back(1);
+  vec.push_back(4);
+  vec.push_back(5);
+  vec.push_back(2);
+  std::string output_message;
+  serialize_int_array(vec, output_message);
+
+  std::vector<int> deserialized_vec;
+  deserialize_int_array(deserialized_vec, output_message);
+
+  // check equality
+  for (int i = 0; i < 5; i++) {
+    EXPECT_EQ(vec[i], deserialized_vec[i]);
+  }
 }
 
 

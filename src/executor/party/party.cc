@@ -7,6 +7,8 @@
 #include <string>
 #include <random>
 #include <stack>
+#include <cstdlib>
+#include <ctime>
 
 #include <glog/logging.h>
 
@@ -15,6 +17,7 @@
 #include <falcon/party/party.h>
 #include <falcon/utils/io_util.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
+#include <falcon/utils/pb_converter/common_converter.h>
 
 Party::Party(){}
 
@@ -219,6 +222,69 @@ void Party::recv_long_message(int id, std::string &message) {
   const byte * uc = &(recv_message[0]);
   string recv_message_str(reinterpret_cast<char const*>(uc), recv_message.size());
   message = recv_message_str;
+}
+
+void Party::split_train_test_data(float split_percentage,
+                          std::vector<std::vector<float> > &training_data,
+                          std::vector<std::vector<float> > &testing_data,
+                          std::vector<float> &training_labels,
+                          std::vector<float> &testing_labels) {
+  LOG(INFO) << "Split local data and labels into training and testing dataset.";
+  int training_data_size = sample_num * split_percentage;
+
+  std::vector<int> data_indexes;
+
+  // if the party is active party, shuffle the data and labels,
+  // and send the shuffled indexes to passive parties for splitting accordingly
+  if (party_type == falcon::ACTIVE_PARTY) {
+    for (int i = 0; i < sample_num; i++) {
+      data_indexes.push_back(i);
+    }
+    std::random_device rd;
+    std::default_random_engine rng(rd());
+    std::shuffle(std::begin(data_indexes), std::end(data_indexes), rng);
+
+    // select the former training data size as training data, and the latter as testing data
+    for (int i = 0; i < sample_num; i++) {
+      if (i < training_data_size) {
+        // add to training dataset and labels
+        training_data.push_back(local_data[data_indexes[i]]);
+        training_labels.push_back(labels[data_indexes[i]]);
+      } else {
+        // add to testing dataset and labels
+        testing_data.push_back(local_data[data_indexes[i]]);
+        testing_labels.push_back(labels[data_indexes[i]]);
+      }
+    }
+
+    // send the data_indexes to passive parties
+    for (int i = 0; i < party_num; i++) {
+      if (i != party_id) {
+        std::string shuffled_indexes_str;
+        serialize_int_array(data_indexes, shuffled_indexes_str);
+        send_long_message(i, shuffled_indexes_str);
+      }
+    }
+  } else {
+    // receive shuffled indexes and split in the same way
+    std::string recv_shuffled_indexes_str;
+    recv_long_message(0, recv_shuffled_indexes_str);
+    deserialize_int_array(data_indexes, recv_shuffled_indexes_str);
+
+    if (data_indexes.size() != sample_num) {
+      LOG(ERROR) << "Received size of shuffled indexes does not equal to sample num.";
+      return;
+    }
+
+    // split local data accordingly
+    for (int i = 0; i < sample_num; i++) {
+      if (i < training_data_size) {
+        training_data.push_back(local_data[data_indexes[i]]);
+      } else {
+        testing_data.push_back(local_data[data_indexes[i]]);
+      }
+    }
+  }
 }
 
 Party::~Party() {

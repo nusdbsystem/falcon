@@ -1,3 +1,9 @@
 syntax = "proto3";
 
 package com.nus.dbsytem.falcon.v0;
+
+// This message is used when initializing the training data
+// and testing data, as well as transmitting batch ids in each training iteration
+message IntArray {
+    repeated int32 int_item = 1;
+}

@@ -14,6 +14,10 @@ set(SOURCE_FILES
         utils/pb_converter/model_converter.cc
         ../../include/falcon/utils/pb_converter/phe_keys_converter.h
         utils/pb_converter/phe_keys_converter.cc
+        ../../include/falcon/utils/pb_converter/common_converter.h
+        utils/pb_converter/common_converter.cc
+        include/message/common.pb.h
+        include/message/common.pb.cc
         include/message/model.pb.h
         include/message/model.pb.cc
         include/message/phe_keys.pb.h

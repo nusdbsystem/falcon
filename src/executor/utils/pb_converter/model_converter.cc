@@ -27,7 +27,7 @@ void deserialize_model_publish_request(int & model_id,
 {
   com::nus::dbsystem::falcon::v0::ModelPublishRequest pb_request;
   if (!pb_request.ParseFromString(input_message)) {
-    LOG(INFO) << "Deserialize model publish request failed.";
+    LOG(ERROR) << "Deserialize model publish request failed.";
     return;
   }
 
@@ -61,7 +61,7 @@ void deserialize_model_publish_response(int & model_id,
 {
   com::nus::dbsystem::falcon::v0::ModelPublishResponse pb_response;
   if (!pb_response.ParseFromString(input_message)) {
-    LOG(INFO) << "Deserialize model publish response failed.";
+    LOG(ERROR) << "Deserialize model publish response failed.";
     return;
   }
 
