@@ -108,7 +108,7 @@ class Party {
    * @param id: other party id
    * @param message: sent message
    */
-  void send_message(int id, std::string message);
+  void send_message(int id, std::string message) const;
 
   /**
    * send long message via channel commParty
@@ -116,7 +116,7 @@ class Party {
    * @param id: other party id
    * @param message: sent message
    */
-  void send_long_message(int id, string message);
+  void send_long_message (int id, string message) const;
 
   /**
    * receive message from channel comm_party
@@ -126,7 +126,7 @@ class Party {
    * @param buffer: received buffer
    * @param expected_size: buffer size
    */
-  void recv_message(int id, std::string message, byte* buffer, int expected_size);
+  void recv_message(int id, std::string message, byte* buffer, int expected_size) const;
 
   /**
    * receive message from channel comm_party
@@ -134,7 +134,7 @@ class Party {
    * @param id: other party id
    * @param message: received message
    */
-  void recv_long_message(int id, std::string & message);
+  void recv_long_message (int id, std::string & message) const;
 
   /**
    * split local data and labels into train-test
@@ -149,7 +149,7 @@ class Party {
       std::vector< std::vector<float> >& training_data,
       std::vector< std::vector<float> >& testing_data,
       std::vector<float>& training_labels,
-      std::vector<float>& testing_labels);
+      std::vector<float>& testing_labels) const;
 
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }

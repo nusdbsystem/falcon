@@ -201,22 +201,22 @@ void Party::init_with_key_file(const std::string& key_file) {
   deserialize_phe_keys(phe_pub_key, phe_auth_server, phe_keys_str);
 }
 
-void Party::send_message(int id, std::string message) {
+void Party::send_message(int id, std::string message) const {
   channels[id]->write((const byte *) message.c_str(), message.size());
 }
 
-void Party::send_long_message(int id, string message) {
+void Party::send_long_message(int id, string message) const {
   channels[id]->writeWithSize(message);
 }
 
-void Party::recv_message(int id, std::string message, byte *buffer, int expected_size) {
+void Party::recv_message(int id, std::string message, byte *buffer, int expected_size) const {
   channels[id]->read(buffer, expected_size);
   // the size of all strings is 2. Parse the message to get the original strings
   auto s = string(reinterpret_cast<char const*>(buffer), expected_size);
   message = s;
 }
 
-void Party::recv_long_message(int id, std::string &message) {
+void Party::recv_long_message(int id, std::string &message) const {
   vector<byte> recv_message;
   channels[id]->readWithSizeIntoVector(recv_message);
   const byte * uc = &(recv_message[0]);
@@ -228,7 +228,7 @@ void Party::split_train_test_data(float split_percentage,
                           std::vector<std::vector<float> > &training_data,
                           std::vector<std::vector<float> > &testing_data,
                           std::vector<float> &training_labels,
-                          std::vector<float> &testing_labels) {
+                          std::vector<float> &testing_labels) const {
   LOG(INFO) << "Split local data and labels into training and testing dataset.";
   int training_data_size = sample_num * split_percentage;
 
