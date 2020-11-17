@@ -97,6 +97,26 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
     int size);
 
 /**
+ * homomorphic matrix multiplication of a cipher vector
+ * and a plain matrix, the result is a cipher vector
+ *
+ * @param pk: public key
+ * @param hr: random variable
+ * @param res: multiplication results with row_size
+ * @param ciphers: cipher vector
+ * @param plains: plain matrix
+ * @param row_size: number of plaintext rows
+ * @param column_size: number of columns, equal to cipher size
+ */
+void djcs_t_aux_matrix_mult(djcs_t_public_key* pk,
+    hcs_random* hr,
+    EncodedNumber* res,
+    EncodedNumber* ciphers,
+    EncodedNumber** plains,
+    int row_size,
+    int column_size);
+
+/**
  * copy a djcs_t public key from src to dest
  *
  * @param src: src public key object

@@ -245,6 +245,37 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
   free(mpz_plains);
 }
 
+void djcs_t_aux_matrix_mult(djcs_t_public_key* pk,
+    hcs_random* hr,
+    EncodedNumber* res,
+    EncodedNumber* ciphers,
+    EncodedNumber** plains,
+    int row_size,
+    int column_size) {
+  if (row_size == 0 || column_size == 0) {
+    LOG(ERROR) << "The size of the vector or matrix is zero.";
+    return;
+  }
+
+  mpz_t t1, t2;
+  mpz_init(t1);
+  mpz_init(t2);
+  ciphers[0].getter_n(t1);
+  plains[0][0].getter_n(t2);
+
+  if (mpz_cmp(t1, t2) != 0) {
+    LOG(ERROR) << "The vector and the matrix are not with the same public key.";
+    return;
+  }
+
+  for (int i = 0; i < row_size; i++) {
+    djcs_t_aux_inner_product(pk, hr, res[i], ciphers, plains[i], column_size);
+  }
+
+  mpz_clear(t1);
+  mpz_clear(t2);
+}
+
 void djcs_t_public_key_copy(djcs_t_public_key* src, djcs_t_public_key* dest) {
   dest->s = src->s;
   dest->l = src->l;
