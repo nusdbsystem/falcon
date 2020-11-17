@@ -151,6 +151,35 @@ class Party {
       std::vector<float>& training_labels,
       std::vector<float>& testing_labels) const;
 
+  /**
+   * parties jointly decrypt a ciphertext vector,
+   * assume that the parties have already have the same src_ciphers.
+   * The request party obtains the decrypted plaintext while
+   * the other parties obtain nothing plaintext.
+   *
+   * @param src_ciphers: ciphertext vector to be decrypted
+   * @param dest_plains: decrypted plaintext vector
+   * @param size: size of the vector
+   * @param req_party_id: party that initiate decryption
+   */
+  void collaborative_decrypt(EncodedNumber* src_ciphers,
+      EncodedNumber* dest_plains,
+      int size, int req_party_id);
+
+  /**
+   * convert ciphertext vector to secret shares securely
+   *
+   * @param src_ciphers: ciphertext vector to be decrypted
+   * @param secret_shares: decrypted and decoded secret shares
+   * @param size: size of the vector
+   * @param req_party_id: party that initiate decryption
+   * @param phe_precision: fixed point precision when encoding
+   */
+  void ciphers_to_secret_shares(EncodedNumber* src_ciphers,
+      std::vector<float> secret_shares,
+      int size, int req_party_id,
+      int phe_precision);
+
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }
 

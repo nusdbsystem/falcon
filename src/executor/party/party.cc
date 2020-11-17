@@ -287,6 +287,151 @@ void Party::split_train_test_data(float split_percentage,
   }
 }
 
+void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
+    EncodedNumber *dest_plains,
+    int size,
+    int req_party_id) {
+  // partially decrypt the ciphertext vector
+  EncodedNumber* partial_decryption = new EncodedNumber[size];
+  for (int i = 0; i < size; i++) {
+    djcs_t_aux_partial_decrypt(phe_pub_key,
+        phe_auth_server, partial_decryption[i], src_ciphers[i]);
+  }
+
+  if (party_id == req_party_id) {
+    // create 2D-array m*n to store the decryption shares,
+    // m = size, n = party_num, such that each row i represents
+    // all the shares for the i-th ciphertext
+    EncodedNumber** decryption_shares = new EncodedNumber*[size];
+    for (int i = 0; i < size; i++) {
+      decryption_shares[i] = new EncodedNumber[party_num];
+    }
+
+    // collect all the decryption shares
+    for (int id = 0; id < party_num; id++) {
+      if (id == party_id) {
+        // copy self partially decrypted shares
+        for (int i = 0; i < size; i++) {
+          decryption_shares[id][i] = partial_decryption[i];
+        }
+      } else {
+        std::string recv_partial_decryption_str;
+        recv_long_message(id, recv_partial_decryption_str);
+        EncodedNumber* recv_partial_decryption = new EncodedNumber[size];
+        deserialize_encoded_number_array(recv_partial_decryption,
+            size, recv_partial_decryption_str);
+        // copy other party's decrypted shares
+        for (int i = 0; i < size; i++) {
+          decryption_shares[id][i] = recv_partial_decryption[i];
+        }
+        delete [] recv_partial_decryption;
+      }
+    }
+
+    // share combine for decryption
+    for (int i = 0; i < size; i++) {
+      djcs_t_aux_share_combine(phe_pub_key, dest_plains[i], decryption_shares[i], size);
+    }
+
+    // free memory
+    for (int i = 0; i < size; i++) {
+      delete [] decryption_shares[i];
+    }
+    delete [] decryption_shares;
+  } else {
+    // send decrypted shares to the req_party_id
+    std::string partial_decryption_str;
+    serialize_encoded_number_array(partial_decryption, size, partial_decryption_str);
+    send_long_message(req_party_id, partial_decryption_str);
+  }
+}
+
+void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
+    std::vector<float> secret_shares,
+    int size,
+    int req_party_id,
+    int phe_precision) {
+  // each party generates a random vector with size values
+  // (the request party will add the summation to the share)
+  EncodedNumber* encrypted_shares = new EncodedNumber[size];
+  for (int i = 0; i < size; i++) {
+    // TODO: check how to replace with spdz random values
+    if (phe_precision != 0) {
+      float s = static_cast<float> (rand() % MAXIMUM_RAND_VALUE);
+      encrypted_shares[i].set_float(phe_pub_key->n[0], s, phe_precision);
+      djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i], encrypted_shares[i]);
+      secret_shares.push_back(0 - s);
+    } else {
+      int s = rand() % MAXIMUM_RAND_VALUE;
+      encrypted_shares[i].set_integer(phe_pub_key->n[0], s);
+      djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i], encrypted_shares[i]);
+      secret_shares.push_back(0 - s);
+    }
+  }
+
+  // request party aggregate the shares and invoke collaborative decryption
+  EncodedNumber* aggregated_shares = new EncodedNumber[size];
+  if (party_id == req_party_id) {
+    for (int i = 0; i < size; i++) {
+      aggregated_shares[i] = encrypted_shares[i];
+    }
+    // recv message and add to aggregated shares
+    for (int id = 0; id < party_num; id++) {
+      if (id != party_id) {
+        std::string recv_encrypted_shares_str;
+        recv_long_message(id, recv_encrypted_shares_str);
+        EncodedNumber* recv_encrypted_shares = new EncodedNumber[size];
+        deserialize_encoded_number_array(recv_encrypted_shares, size, recv_encrypted_shares_str);
+        for (int i = 0; i < size; i++) {
+          djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i], aggregated_shares[i], recv_encrypted_shares[i]);
+        }
+        delete [] recv_encrypted_shares;
+      }
+    }
+    // serialize and send to other parties
+    std::string aggregated_shares_str;
+    serialize_encoded_number_array(aggregated_shares, size, aggregated_shares_str);
+    for (int id = 0; id < party_num; id++) {
+      if (id != party_id) {
+        send_long_message(id, aggregated_shares_str);
+      }
+    }
+  } else {
+    // send encrypted shares to the request party
+    std::string encrypted_shares_str;
+    serialize_encoded_number_array(encrypted_shares, size, encrypted_shares_str);
+    send_long_message(req_party_id, encrypted_shares_str);
+
+    // receive aggregated shares from the request party
+    std::string recv_aggregated_shares_str;
+    recv_long_message(req_party_id, recv_aggregated_shares_str);
+    deserialize_encoded_number_array(aggregated_shares, size, recv_aggregated_shares_str);
+  }
+
+  // collaborative decrypt the aggregated shares
+  EncodedNumber* decrypted_sum = new EncodedNumber[size];
+  collaborative_decrypt(aggregated_shares, decrypted_sum, size, req_party_id);
+
+  // if request party, add the decoded results to the secret shares
+  if (party_id == req_party_id) {
+    for (int i = 0; i < size; i++) {
+      if (phe_precision != 0) {
+        float decoded_sum_i;
+        decrypted_sum[i].decode(decoded_sum_i);
+        secret_shares[i] += decoded_sum_i;
+      } else {
+        long decoded_sum_i;
+        decrypted_sum[i].decode(decoded_sum_i);
+        secret_shares[i] += (float) decoded_sum_i;
+      }
+    }
+  }
+
+  delete [] encrypted_shares;
+  delete [] aggregated_shares;
+  delete [] decrypted_sum;
+}
+
 Party::~Party() {
   io_service.stop();
   hcs_free_random(phe_random);
