@@ -109,6 +109,7 @@ std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
 
 void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
     std::vector<int> batch_indexes,
+    int precision,
     EncodedNumber *batch_phe_aggregation) {
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
@@ -116,8 +117,82 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
   party.getter_phe_pub_key(phe_pub_key);
   party.getter_phe_random(phe_random);
 
-  // TODO: add batch phe aggregation
+  // retrieve batch samples and encode (notice to use cur_batch_size
+  // instead of default batch size to avoid unexpected batch)
+  int cur_batch_size = batch_indexes.size();
+  std::vector< std::vector<float> > batch_samples;
+  for (int i = 0; i < cur_batch_size; i++) {
+    batch_samples.push_back(training_data[batch_indexes[i]]);
+  }
+  EncodedNumber** encoded_batch_samples = new EncodedNumber*[cur_batch_size];
+  for (int i = 0; i < cur_batch_size; i++) {
+    encoded_batch_samples[i] = new EncodedNumber[weight_size];
+  }
+  for (int i = 0; i < cur_batch_size; i++) {
+    for (int j = 0; j < weight_size; j++) {
+      encoded_batch_samples[i][j].set_float(phe_pub_key->n[0],
+          batch_samples[i][j], precision);
+    }
+  }
+
+  // compute local homomorphic aggregation
+  EncodedNumber* local_batch_phe_aggregation = new EncodedNumber[cur_batch_size];
+  djcs_t_aux_matrix_mult(phe_pub_key, phe_random, local_batch_phe_aggregation,
+      local_weights, encoded_batch_samples, cur_batch_size, weight_size);
+
+  // every party sends the local aggregation to the active party
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // copy self local aggregation results
+    for (int i = 0; i < cur_batch_size; i++) {
+      batch_phe_aggregation[i] = local_batch_phe_aggregation[i];
+    }
+
+    // receive serialized string from other parties
+    // deserialize and sum to batch_phe_aggregation
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        EncodedNumber* recv_batch_phe_aggregation = new EncodedNumber[cur_batch_size];
+        std::string recv_local_aggregation_str;
+        party.recv_long_message(id, recv_local_aggregation_str);
+        deserialize_encoded_number_array(recv_batch_phe_aggregation,
+            cur_batch_size, recv_local_aggregation_str);
+        // homomorphic addition of the received aggregations
+        for (int i = 0; i < cur_batch_size; i++) {
+          djcs_t_aux_ee_add(phe_pub_key,batch_phe_aggregation[i],
+              batch_phe_aggregation[i], recv_batch_phe_aggregation[i]);
+        }
+        delete [] recv_batch_phe_aggregation;
+      }
+    }
+
+    // serialize and send the batch_phe_aggregation to other parties
+    std::string global_aggregation_str;
+    serialize_encoded_number_array(batch_phe_aggregation,
+        cur_batch_size, global_aggregation_str);
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        party.send_long_message(id, global_aggregation_str);
+      }
+    }
+  } else {
+    // serialize local batch aggregation and send to active party
+    std::string local_aggregation_str;
+    serialize_encoded_number_array(local_batch_phe_aggregation,
+        cur_batch_size, local_aggregation_str);
+    party.send_long_message(0, local_aggregation_str);
+
+    // receive the global batch aggregation from the active party
+    std::string recv_global_aggregation_str;
+    party.recv_long_message(0, recv_global_aggregation_str);
+    deserialize_encoded_number_array(batch_phe_aggregation,
+        cur_batch_size, recv_global_aggregation_str);
+  }
 
   djcs_t_free_public_key(phe_pub_key);
   hcs_free_random(phe_random);
+  for (int i = 0; i < cur_batch_size; i++) {
+    delete [] encoded_batch_samples[i];
+  }
+  delete [] encoded_batch_samples;
+  delete [] local_batch_phe_aggregation;
 }
