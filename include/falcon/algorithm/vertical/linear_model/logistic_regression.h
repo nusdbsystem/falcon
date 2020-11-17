@@ -111,9 +111,9 @@ class LogisticRegression : public Model {
    * @param batch_indexes: selected batch indexes
    * @param batch_aggregation: returned phe aggregation for the batch
    */
-//  void compute_batch_phe_aggregation(const Party& party,
-//      std::vector<int> batch_indexes,
-//      EncodedNumber* batch_phe_aggregation);
+  void compute_batch_phe_aggregation(const Party& party,
+      std::vector<int> batch_indexes,
+      EncodedNumber* batch_phe_aggregation);
 };
 
 #endif //FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_H_

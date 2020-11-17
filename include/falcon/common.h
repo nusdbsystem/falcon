@@ -12,6 +12,7 @@ namespace falcon{
   #define PHE_EPSILON 1
   #define PHE_KEY_SIZE 1024
   #define SPDZ_FIXED_POINT_PRECISION 16
+  #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};

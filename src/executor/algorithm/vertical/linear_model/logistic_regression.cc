@@ -107,8 +107,17 @@ std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
   return batch_indexes;
 }
 
-//void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
-//    std::vector<int> batch_indexes,
-//    EncodedNumber *batch_phe_aggregation) {
-//
-//}
+void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
+    std::vector<int> batch_indexes,
+    EncodedNumber *batch_phe_aggregation) {
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  hcs_random* phe_random = hcs_init_random();
+  party.getter_phe_pub_key(phe_pub_key);
+  party.getter_phe_random(phe_random);
+
+  // TODO: add batch phe aggregation
+
+  djcs_t_free_public_key(phe_pub_key);
+  hcs_free_random(phe_random);
+}
