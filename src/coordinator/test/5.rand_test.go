@@ -4,7 +4,7 @@ import (
 	"coordinator/distributed/entitiy"
 	crand "crypto/rand"
 	"encoding/base64"
-	"fmt"
+	"log"
 	"testing"
 )
 
@@ -13,11 +13,11 @@ func TestRandomFunc(t *testing.T) {
 	a := entitiy.ShutdownReply{Ntasks: 123}
 
 	res := entitiy.EncodeDoTaskArgsGeneral(&a)
-	fmt.Println(res)
+	log.Println(res)
 
 	rr := entitiy.ShutdownReply{}
 	entitiy.DecodeDoTaskArgsGeneral(res, &rr)
-	fmt.Println(rr.Ntasks)
+	log.Println(rr.Ntasks)
 
 }
 
@@ -29,5 +29,5 @@ func TestRandomFunc2(t *testing.T) {
 		return s[0:n]
 	}
 
-	fmt.Println(a(20))
+	log.Println(a(20))
 }

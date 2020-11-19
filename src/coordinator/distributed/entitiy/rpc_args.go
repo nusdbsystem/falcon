@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"coordinator/config"
 	"encoding/gob"
-	"fmt"
+	"log"
 	"reflect"
 )
 
@@ -77,7 +77,7 @@ func EncodeDoTaskArgsGeneral(args interface{}) []byte {
 
 	switch t := args.(type) {
 	default:
-		fmt.Println(t)
+		log.Println(t)
 	case *ShutdownReply:
 		args = args.(*ShutdownReply)
 	case *DoTaskArgs:
@@ -107,7 +107,7 @@ func DecodeDoTaskArgsGeneral(by []byte, reply interface{}) {
 
 		switch t := reply.(type) {
 		default:
-			fmt.Println(t)
+			log.Println(t)
 		case *ShutdownReply:
 
 			var d ShutdownReply

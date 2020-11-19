@@ -2,12 +2,12 @@ package master
 
 import (
 	"coordinator/config"
-	"fmt"
+	"log"
 	"time"
 )
 
 func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem) (ms *Master) {
-	fmt.Println("Master: address is :", masterAddr)
+	log.Println("Master: address is :", masterAddr)
 	ms = newMaster(Proxy, masterAddr, len(qItem.IPs))
 
 	ms.reset()
@@ -36,7 +36,7 @@ func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem) (
 			// stop other related threads
 
 			ms.Lock()
-			ms.isStop= true
+			ms.isStop = true
 			ms.Unlock()
 
 		})

@@ -3,7 +3,7 @@ package worker
 import (
 	"coordinator/config"
 	"coordinator/distributed/taskmanager"
-	"fmt"
+	"log"
 	"net"
 	"net/rpc"
 	"sync"
@@ -32,24 +32,24 @@ func RunWorker(masterAddress, workerProxy, workerHost, workerPort string, wg *sy
 	listener, err := net.Listen(workerProxy, workerAddress)
 
 	if err != nil {
-		fmt.Println("Worker: runWorker: ", workerAddress, " error: ", err)
+		log.Println("Worker: runWorker: ", workerAddress, " error: ", err)
 	}
 
 	wk.l = listener
-	fmt.Println("Worker: register to masterAddress= ", masterAddress)
+	log.Println("Worker: register to masterAddress= ", masterAddress)
 	wk.register(masterAddress)
 
 	for {
 		conn, err := wk.l.Accept()
 		if err == nil {
-			fmt.Println("Worker: got new conn")
+			log.Println("Worker: got new conn")
 			go rpcs.ServeConn(conn)
 		} else {
-			fmt.Println("Worker: got conn error", err)
+			log.Println("Worker: got conn error", err)
 			break
 		}
 	}
 	//_ = wk.l.Close()
-	fmt.Println("Worker: ", workerAddress, "runWorker exit")
+	log.Println("Worker: ", workerAddress, "runWorker exit")
 	wg.Done()
 }

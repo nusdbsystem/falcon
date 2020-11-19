@@ -5,12 +5,12 @@ import (
 	"coordinator/config"
 	"coordinator/distributed"
 	"encoding/json"
-	"fmt"
+	"log"
 )
 
 func JobSubmit(dsl *config.DSL, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
 
-	fmt.Println("HTTP server: in SubmitJob, put to the JobQueue")
+	log.Println("HTTP server: in SubmitJob, put to the JobQueue")
 
 	// write to db
 	partyIds, err := json.Marshal(dsl.PartyInfos)

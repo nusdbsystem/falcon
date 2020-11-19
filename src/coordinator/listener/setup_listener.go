@@ -5,7 +5,6 @@ import (
 	c "coordinator/client"
 	"coordinator/config"
 	rt "coordinator/listener/router"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -40,7 +39,7 @@ func SetupListener(host, port string, ServerAddress string) {
 
 	c.ListenerAdd(ServerAddress, httpAddr)
 
-	fmt.Println("Starting HTTP server...")
+	log.Println("Starting HTTP server...")
 	err := server.ListenAndServe()
 
 	if err != nil {

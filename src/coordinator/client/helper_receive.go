@@ -2,8 +2,8 @@ package client
 
 import (
 	"bytes"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -18,10 +18,10 @@ func ReceiveFile(r *http.Request, buf bytes.Buffer, key string) (error, string) 
 	defer file.Close()
 
 	name := strings.Split(header.Filename, ".")
-	fmt.Printf("File name %s\n", name[0])
+	log.Printf("File name %s\n", name[0])
 	_, e := io.Copy(&buf, file)
 	if e != nil {
-		fmt.Println("copy error", e)
+		log.Println("copy error", e)
 	}
 	contents := buf.String()
 	return nil, contents
@@ -30,9 +30,9 @@ func ReceiveFile(r *http.Request, buf bytes.Buffer, key string) (error, string) 
 // send by data=
 func ReceiveForm(r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		fmt.Printf("ParseForm() err: %v", err)
+		log.Printf("ParseForm() err: %v", err)
 	}
-	//fmt.Printf( "PostFrom = %v\n", r.PostForm)
+	//log.Printf( "PostFrom = %v\n", r.PostForm)
 
 	//name := r.FormValue("name")
 	//address := r.FormValue("address")

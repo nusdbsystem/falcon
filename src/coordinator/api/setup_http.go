@@ -6,7 +6,6 @@ import (
 	md "coordinator/api/middleware"
 	rt "coordinator/api/router"
 	"coordinator/config"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +15,7 @@ import (
 
 func handlePanic() {
 	err := recover()
-	fmt.Println(err)
+	log.Println(err)
 }
 func SetupHttp(host, port string, nConsumer int) {
 	defer handlePanic()
@@ -45,10 +44,10 @@ func SetupHttp(host, port string, nConsumer int) {
 		Handler: mux,
 	}
 
-	fmt.Println("HTTP: Updating table...")
+	log.Println("HTTP: Updating table...")
 	controller.CreateTables()
 
-	fmt.Println("HTTP: Creating admin user...")
+	log.Println("HTTP: Creating admin user...")
 	controller.CreateUser()
 
 	dslScheduler := controller.Init(host, port, nConsumer)
@@ -59,10 +58,10 @@ func SetupHttp(host, port string, nConsumer int) {
 
 		<-done
 
-		fmt.Println("HTTP: Stopping muti consumers")
+		log.Println("HTTP: Stopping muti consumers")
 
 		dslScheduler.StopMonitor()
-		fmt.Println("HTTP: Monitor Stopped")
+		log.Println("HTTP: Monitor Stopped")
 
 		for i := 0; i < nConsumer; i++ {
 			dslScheduler.StopConsumer()
@@ -71,13 +70,13 @@ func SetupHttp(host, port string, nConsumer int) {
 		//todo, this will shutdown the master thread at the same time
 		// but the worker need to be stopped also??, add later ???
 
-		fmt.Println("HTTP: Consumer Stopped")
+		log.Println("HTTP: Consumer Stopped")
 		if err := server.Shutdown(context.Background()); err != nil {
 			log.Fatal("HTTP: ShutDown the server", err)
 		}
 	}()
 
-	fmt.Println("HTTP: Starting muti consumers...")
+	log.Println("HTTP: Starting muti consumers...")
 
 	// multi-thread consumer
 
@@ -87,7 +86,7 @@ func SetupHttp(host, port string, nConsumer int) {
 	}
 	go dslScheduler.MonitorConsumers()
 
-	fmt.Println("HTTP: Starting HTTP server...")
+	log.Println("HTTP: Starting HTTP server...")
 	err := server.ListenAndServe()
 
 	if err != nil {
