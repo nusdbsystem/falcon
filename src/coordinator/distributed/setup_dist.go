@@ -7,17 +7,18 @@ import (
 	"coordinator/distributed/utils"
 	"coordinator/distributed/worker"
 	"fmt"
+	"log"
 	"sync"
 )
 
 func SetupDist(httpHost, httpPort string, qItem *config.QItem) {
-	fmt.Println("SetupDist: Lunching master")
+	log.Println("SetupDist: Lunching master")
 
 	httpAddr := httpHost + ":" + httpPort
 	port, e := utils.GetFreePort()
 
 	if e != nil {
-		fmt.Println("Get port Error")
+		log.Println("Get port Error")
 		return
 	}
 	masterAddress := httpHost + ":" + fmt.Sprintf("%d", port)
@@ -42,7 +43,7 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem) {
 }
 
 func SetupWorker(httpHost string, masterAddress string) error {
-	fmt.Println("SetupDist: Lunching worker threads")
+	log.Println("SetupDist: Lunching worker threads")
 
 	wg := sync.WaitGroup{}
 
@@ -51,7 +52,7 @@ func SetupWorker(httpHost string, masterAddress string) error {
 	for i := 0; i < 1; i++ {
 		port, e := utils.GetFreePort()
 		if e != nil {
-			fmt.Println("SetupDist: Lunching worker Get port Error")
+			log.Println("SetupDist: Lunching worker Get port Error")
 			return e
 		}
 		wg.Add(1)
@@ -66,9 +67,9 @@ func SetupWorker(httpHost string, masterAddress string) error {
 func KillJob(masterAddr, Proxy string) {
 	ok := utils.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {
-		fmt.Println("Master: KillJob error")
+		log.Println("Master: KillJob error")
 		panic("Master: KillJob error")
 	} else {
-		fmt.Println("Master: KillJob Done")
+		log.Println("Master: KillJob Done")
 	}
 }

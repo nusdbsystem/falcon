@@ -5,26 +5,26 @@ import (
 	"coordinator/config"
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/utils"
-	"fmt"
+	"log"
 	"strings"
 	"sync"
 )
 
 func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *config.QItem) {
-	fmt.Println("Scheduler: Begin to schedule")
+	log.Println("Scheduler: Begin to schedule")
 
 	// checking if the ip of worker match the qItem
 	this.Lock()
 	this.allWorkerReady.Wait()
 	this.Unlock()
 
-	fmt.Println("Scheduler: All worker found")
+	log.Println("Scheduler: All worker found")
 
 	// extract ip from register chan to static slice
 	var workerAddress []string
 
 	for i := 0; i < len(qItem.IPs); i++ {
-		fmt.Println("Scheduler: Reading from registerChan")
+		log.Println("Scheduler: Reading from registerChan")
 		addr := <-registerChan
 		workerAddress = append(workerAddress, addr)
 	}
@@ -37,11 +37,11 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 		argAddr := entitiy.EncodeDoTaskArgs(args)
 		var rep entitiy.DoTaskReply
 
-		fmt.Println("Scheduler: begin to call Worker.DoTask")
+		log.Println("Scheduler: begin to call Worker.DoTask")
 		ok := utils.Call(workerAddr, this.Proxy, "Worker.DoTask", argAddr, &rep)
 
 		if !ok {
-			fmt.Println("Scheduler: Worker.DoTask error")
+			log.Println("Scheduler: Worker.DoTask error")
 			client.JobUpdateResInfo(
 				httpAddr,
 				"call Worker.DoTask error",
@@ -64,7 +64,7 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 			outLen = len(outMsg)
 		}
 
-		fmt.Println("Scheduler: max length is", outLen, errLen)
+		log.Println("Scheduler: max length is", outLen, errLen)
 
 		if rep.Killed == true {
 		} else if rep.Errs[config.PreProcessing] != config.SubProcessNormal {
@@ -121,6 +121,6 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 	}
 
 	wg.Wait()
-	fmt.Println("Scheduler: Finish all task done")
+	log.Println("Scheduler: Finish all task done")
 
 }

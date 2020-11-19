@@ -61,13 +61,13 @@ func (ssh_client *SSH) Connect(mode int) {
 
 	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", ssh_client.Ip, ssh_client.Port), ssh_config)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
 	session, err := client.NewSession()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		_ = client.Close()
 		return
 	}
@@ -79,9 +79,9 @@ func (ssh_client *SSH) Connect(mode int) {
 func (ssh_client *SSH) RunCmd(cmd string) {
 	out, err := ssh_client.session.CombinedOutput(cmd)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-	fmt.Println(string(out))
+	log.Println(string(out))
 }
 
 func (ssh_client *SSH) Close() {

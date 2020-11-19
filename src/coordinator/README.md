@@ -50,4 +50,6 @@
     python coordinator_client.py -url 172.25.121.4:6573 -method query_status -job 60
     ```
 
+## check the log
 
+1. log is at folder .log

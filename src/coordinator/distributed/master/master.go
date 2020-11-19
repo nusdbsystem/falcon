@@ -5,6 +5,7 @@ import (
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/utils"
 	"fmt"
+	"log"
 	"net"
 	"reflect"
 	"sort"
@@ -20,9 +21,9 @@ type Master struct {
 	Address     string
 	doneChannel chan bool
 
-	newCond   			*sync.Cond
-	beginCountDown   	*sync.Cond
-	allWorkerReady		*sync.Cond
+	newCond        *sync.Cond
+	beginCountDown *sync.Cond
+	allWorkerReady *sync.Cond
 
 	workers   []string
 	workerNum int
@@ -30,13 +31,13 @@ type Master struct {
 	l     net.Listener
 	stats []int
 
-	lastSendTime  		int64
-	heartbeatTimeout 	int
+	lastSendTime     int64
+	heartbeatTimeout int
 
-	foundWorker		bool
+	foundWorker bool
 
 	// if the master is stopped
-	isStop 			bool
+	isStop bool
 }
 
 func newMaster(Proxy, masterAddr string, workerNum int) (ms *Master) {
@@ -56,7 +57,7 @@ func newMaster(Proxy, masterAddr string, workerNum int) (ms *Master) {
 }
 
 func (this *Master) Test(args string, reply *string) error {
-	fmt.Println(args)
+	log.Println(args)
 	return nil
 }
 
@@ -65,7 +66,7 @@ func (this *Master) Test(args string, reply *string) error {
 func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 	this.Lock()
 	defer this.Unlock()
-	fmt.Println("Master: Register: worker", args.WorkerAddr)
+	log.Println("Master: Register: worker", args.WorkerAddr)
 
 	if len(this.workers) <= this.workerNum {
 		this.workers = append(this.workers, args.WorkerAddr)
@@ -74,7 +75,7 @@ func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 		this.newCond.Broadcast()
 		this.beginCountDown.Broadcast()
 	} else {
-		fmt.Println("Master: Register Already got enough worker")
+		log.Println("Master: Register Already got enough worker")
 	}
 	return nil
 }
@@ -111,7 +112,7 @@ func (this *Master) forwardRegistrations(ch chan string, qItem *config.QItem) {
 			// if registered ip and job ip not match
 
 			if ok := reflect.DeepEqual(c, d); !ok {
-				fmt.Println("Scheduler: Ip are not match")
+				log.Println("Scheduler: Ip are not match")
 				this.Unlock()
 				return
 			}
@@ -122,14 +123,14 @@ func (this *Master) forwardRegistrations(ch chan string, qItem *config.QItem) {
 			break
 		}
 		if len(this.workers) > indexWorker {
-			fmt.Println("Master: Found one worker")
+			log.Println("Master: Found one worker")
 			// there's a worker that we haven't told schedule() about.
 			w := this.workers[indexWorker]
 			go func() {
 				ch <- w
 			}()
 			indexWorker += 1
-			fmt.Println("Master: worker index is ", indexWorker)
+			log.Println("Master: worker index is ", indexWorker)
 		} else {
 			// wait for Register() to add an entry to workers[]
 			// in response to an RPC from a new worker.
@@ -142,10 +143,10 @@ func (this *Master) forwardRegistrations(ch chan string, qItem *config.QItem) {
 func (this *Master) run(schedule func(), finish func()) {
 
 	schedule()
-	fmt.Println("Master: finish job, begin to close all")
+	log.Println("Master: finish job, begin to close all")
 	finish()
 
-	fmt.Printf("Master %s: job completed\n", this.Address)
+	log.Printf("Master %s: job completed\n", this.Address)
 
 	this.doneChannel <- true
 }
@@ -160,11 +161,11 @@ func (this *Master) killWorkers() []int {
 
 		var reply entitiy.ShutdownReply
 
-		fmt.Println("Master: begin to call Worker.Shutdown")
+		log.Println("Master: begin to call Worker.Shutdown")
 
 		ok := utils.Call(worker, this.Proxy, "Worker.Shutdown", new(struct{}), &reply)
 		if ok == false {
-			fmt.Printf("Master: RPC %s shutdown error\n", worker)
+			log.Printf("Master: RPC %s shutdown error\n", worker)
 		} else {
 			// save the res of each call
 			nStat = append(nStat, reply.Ntasks)
@@ -187,9 +188,9 @@ func (this *Master) CheckWorker() bool {
 
 	this.Lock()
 
-	if len(this.workers) > 0{
+	if len(this.workers) > 0 {
 		this.foundWorker = true
-	}else{
+	} else {
 		this.foundWorker = false
 	}
 
@@ -197,62 +198,56 @@ func (this *Master) CheckWorker() bool {
 	return this.foundWorker
 }
 
+func (this *Master) eventLoop() {
 
-
-func (this *Master) eventLoop(){
-
-	for{
+	for {
 
 		this.Lock()
-		if this.isStop == true{
-			fmt.Printf("Master: isStop=true, server %s quite eventLoop \n", this.Address)
+		if this.isStop == true {
+			log.Printf("Master: isStop=true, server %s quite eventLoop \n", this.Address)
 			this.Unlock()
 			break
 		}
 		this.Unlock()
 
-
-		if !this.CheckWorker(){
+		if !this.CheckWorker() {
 
 			this.Lock()
 			this.beginCountDown.Wait()
 			this.Unlock()
 
-		}else{
-
+		} else {
 
 			this.Lock()
 			elapseTime := time.Now().UnixNano() - this.lastSendTime
 			fmt.Printf("Master: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
 
-			if int(elapseTime/int64(time.Millisecond)) >= this.heartbeatTimeout{
+			if int(elapseTime/int64(time.Millisecond)) >= this.heartbeatTimeout {
 
 				this.Unlock()
 				fmt.Println("Master: Timeout, server begin to send hb to worker")
 				this.broadcastHeartbeat()
 
-			}else{
+			} else {
 				this.Unlock()
 			}
 		}
 
-		time.Sleep(time.Millisecond*config.MasterTimeout/5)
+		time.Sleep(time.Millisecond * config.MasterTimeout / 5)
 	}
 }
 
-
-func (this *Master) broadcastHeartbeat(){
+func (this *Master) broadcastHeartbeat() {
 	// update lastSendTime
 	this.reset()
 	for _, worker := range this.workers {
 
 		ok := utils.Call(worker, this.Proxy, "Worker.ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
-			fmt.Printf("Master: RPC %s send heartbeat error\n", worker)
+			log.Printf("Master: RPC %s send heartbeat error\n", worker)
 		}
 	}
 }
-
 
 func (this *Master) reset() {
 	this.Lock()
