@@ -48,32 +48,32 @@ func (ds *DslScheduler) Consume(consumerId int) {
 
 	}()
 
-loop:
-	for {
-		select {
-		case stop := <-ds.isStop:
-			fmt.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Get from isStop")
-			if stop == true {
-				fmt.Println("Consume: Stop consuming")
-				break loop
+	loop:
+		for {
+			select {
+			case stop := <-ds.isStop:
+				fmt.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Get from isStop")
+				if stop == true {
+					fmt.Println("Consume: Stop consuming")
+					break loop
+				}
+			default:
+
+				//fmt.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the queue...")
+
+				if qItem, ok := entity.JobQueue.Pop(); ok {
+
+					fmt.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
+
+					models.JobUpdateStatus(qItem.JobId, config.JobRunning)
+					// lunching the master
+					dist.SetupDist(ds.httpHost, ds.httpPort, qItem)
+				}
+
 			}
-		default:
-
-			//fmt.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the queue...")
-
-			if qItem, ok := entity.JobQueue.Pop(); ok {
-
-				fmt.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
-
-				models.JobUpdateStatus(qItem.JobId, config.JobRunning)
-				// lunching the master
-				dist.SetupDist(ds.httpHost, ds.httpPort, qItem)
-			}
-
+			time.Sleep(10 * time.Millisecond)
 		}
-		time.Sleep(10 * time.Millisecond)
-	}
-	fmt.Println("Consumer stopped")
+		fmt.Println("Consumer stopped")
 }
 
 func (ds *DslScheduler) StopConsumer() {

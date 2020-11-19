@@ -9,6 +9,10 @@ import (
 func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem) (ms *Master) {
 	fmt.Println("Master: address is :", masterAddr)
 	ms = newMaster(Proxy, masterAddr, len(qItem.IPs))
+
+	ms.reset()
+	go ms.eventLoop()
+
 	ms.startRPCServer()
 
 	// set time out, no worker comes within 1 min, stop master
@@ -21,13 +25,20 @@ func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem) (
 	go ms.run(
 		func() {
 			ch := make(chan string, len(qItem.IPs))
-			go ms.forwardRegistrations(ch)
-			schedule(ch, Proxy, httpAddr, masterAddr, qItem)
+			go ms.forwardRegistrations(ch, qItem)
+			ms.schedule(ch, httpAddr, qItem)
 		},
 		func() {
 			// stop both master and worker after finishing the job
 			ms.stats = ms.killWorkers()
 			ms.stopRPCServer()
+
+			// stop other related threads
+
+			ms.Lock()
+			ms.isStop= true
+			ms.Unlock()
+
 		})
 	return
 }

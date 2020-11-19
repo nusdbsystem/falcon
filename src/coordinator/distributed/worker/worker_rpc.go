@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"coordinator/config"
 	"coordinator/distributed/taskmanager"
 	"fmt"
 	"net"
@@ -15,10 +16,14 @@ func RunWorker(masterAddress, workerProxy, workerHost, workerPort string, wg *sy
 	wk := new(Worker)
 	wk.Proxy = workerProxy
 	wk.name = workerAddress
-
+	wk.SuicideTimeout = config.WorkerTimeout
+	wk.isStop = false
 	// the lock needs to pass to multi funcs, must create a instance
 	wk.pm = taskmanager.InitSubProcessManager()
 	wk.taskFinish = make(chan bool)
+
+	wk.reset()
+	go wk.eventLoop()
 
 	rpcs := rpc.NewServer()
 
@@ -31,7 +36,7 @@ func RunWorker(masterAddress, workerProxy, workerHost, workerPort string, wg *sy
 	}
 
 	wk.l = listener
-	fmt.Println("Worker: register to ", masterAddress)
+	fmt.Println("Worker: register to masterAddress= ", masterAddress)
 	wk.register(masterAddress)
 
 	for {

@@ -1,6 +1,13 @@
 package config
 
 const (
+
+	// master& wokrer heartbeat
+
+	MasterTimeout = 10000 //  send hb every 10 second
+	WorkerTimeout = 20000 //  receive hb within every 20 second
+
+
 	// router path for api
 	Register         = "register"
 	SubmitJob        = "submit"
