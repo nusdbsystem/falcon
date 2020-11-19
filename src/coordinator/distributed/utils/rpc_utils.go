@@ -7,7 +7,7 @@ import (
 
 func Call(srv string, proxy string, rpcname string, args interface{}, reply interface{}) bool {
 
-	fmt.Println("---------------in Calling----------------Address of this call:", proxy, srv, rpcname)
+	fmt.Printf("---------------in Calling----------------Address of this call, proxy: %s, address: %s, methodName: %s \n:", proxy, srv, rpcname)
 	c, derr := rpc.Dial(proxy, srv)
 	if derr != nil {
 		fmt.Println("---------------in Calling----------------Error: Connection error", derr)

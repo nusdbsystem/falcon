@@ -6,51 +6,30 @@ import (
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/utils"
 	"fmt"
-	"reflect"
-	"sort"
 	"strings"
 	"sync"
 )
 
-func schedule(registerChan chan string, Proxy, httpAddr, masterAddr string, qItem *config.QItem) {
+func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *config.QItem) {
 	fmt.Println("Scheduler: Begin to schedule")
 
 	// checking if the ip of worker match the qItem
+	this.Lock()
+	this.allWorkerReady.Wait()
+	this.Unlock()
 
 	fmt.Println("Scheduler: All worker found")
 
 	// extract ip from register chan to static slice
+	var workerAddress []string
 
-	var reIps []string
-	var reAddres []string
-	var qIps = qItem.IPs
-
-	for i := 0; i < len(qIps); i++ {
+	for i := 0; i < len(qItem.IPs); i++ {
+		fmt.Println("Scheduler: Reading from registerChan")
 		addr := <-registerChan
-		ip := strings.Split(addr, ":")[0]
-		reIps = append(reIps, ip)
-		reAddres = append(reAddres, addr)
-	}
-
-	// compare if 2 slice are the same
-	var c = make([]string, len(reIps))
-	var d = make([]string, len(qIps))
-
-	copy(c, reIps)
-	copy(d, qIps)
-
-	sort.Strings(c)
-	sort.Strings(d)
-
-	// if registered ip and job ip match
-
-	if ok := reflect.DeepEqual(c, d); !ok {
-		fmt.Println("Scheduler: Job not match")
-		return
+		workerAddress = append(workerAddress, addr)
 	}
 
 	// execute the task
-
 	wg := sync.WaitGroup{}
 	startTask := func(workerAddr string, args *entitiy.DoTaskArgs) {
 		defer wg.Done()
@@ -59,7 +38,7 @@ func schedule(registerChan chan string, Proxy, httpAddr, masterAddr string, qIte
 		var rep entitiy.DoTaskReply
 
 		fmt.Println("Scheduler: begin to call Worker.DoTask")
-		ok := utils.Call(workerAddr, Proxy, "Worker.DoTask", argAddr, &rep)
+		ok := utils.Call(workerAddr, this.Proxy, "Worker.DoTask", argAddr, &rep)
 
 		if !ok {
 			fmt.Println("Scheduler: Worker.DoTask error")
@@ -126,7 +105,7 @@ func schedule(registerChan chan string, Proxy, httpAddr, masterAddr string, qIte
 		args.PartyPath = qItem.PartyPath[i]
 		args.TaskInfos = qItem.TaskInfos
 
-		for _, workerAddr := range reAddres {
+		for _, workerAddr := range workerAddress {
 			ip := strings.Split(workerAddr, ":")[0]
 
 			// match using ip

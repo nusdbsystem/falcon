@@ -1,11 +1,16 @@
 package master
 
 import (
+	"coordinator/config"
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/utils"
 	"fmt"
 	"net"
+	"reflect"
+	"sort"
+	"strings"
 	"sync"
+	"time"
 )
 
 type Master struct {
@@ -15,21 +20,38 @@ type Master struct {
 	Address     string
 	doneChannel chan bool
 
-	newCond   *sync.Cond
+	newCond   			*sync.Cond
+	beginCountDown   	*sync.Cond
+	allWorkerReady		*sync.Cond
+
 	workers   []string
 	workerNum int
 
 	l     net.Listener
 	stats []int
+
+	lastSendTime  		int64
+	heartbeatTimeout 	int
+
+	foundWorker		bool
+
+	// if the master is stopped
+	isStop 			bool
 }
 
 func newMaster(Proxy, masterAddr string, workerNum int) (ms *Master) {
 	ms = new(Master)
 	ms.Address = masterAddr
 	ms.Proxy = Proxy
+
 	ms.newCond = sync.NewCond(ms)
+	ms.beginCountDown = sync.NewCond(ms)
+	ms.allWorkerReady = sync.NewCond(ms)
+
 	ms.doneChannel = make(chan bool)
 	ms.workerNum = workerNum
+	ms.heartbeatTimeout = config.MasterTimeout
+	ms.isStop = false
 	return
 }
 
@@ -45,11 +67,12 @@ func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 	defer this.Unlock()
 	fmt.Println("Master: Register: worker", args.WorkerAddr)
 
-	if len(this.workers) < this.workerNum {
+	if len(this.workers) <= this.workerNum {
 		this.workers = append(this.workers, args.WorkerAddr)
 
 		// tell forwardRegistrations() that there's a new workers[] entry.
 		this.newCond.Broadcast()
+		this.beginCountDown.Broadcast()
 	} else {
 		fmt.Println("Master: Register Already got enough worker")
 	}
@@ -57,12 +80,44 @@ func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 }
 
 // sends information of worker to ch. which is used by scheduler
-func (this *Master) forwardRegistrations(ch chan string) {
+func (this *Master) forwardRegistrations(ch chan string, qItem *config.QItem) {
 	indexWorker := 0
 	for {
 		this.Lock()
-		if len(this.workers) > this.workerNum {
-			// if got enough worker, break out loop
+		// if current worker number == already checked worker, and also ==  total worker number needed
+		if len(this.workers) == indexWorker && len(this.workers) == this.workerNum {
+			// if got enough worker, break out loop and tell scheduler to schedule
+
+			// verify if ip match
+			var reIps []string
+			var qIps = qItem.IPs
+
+			for i := 0; i < len(qIps); i++ {
+				addr := this.workers[i]
+				ip := strings.Split(addr, ":")[0]
+				reIps = append(reIps, ip)
+			}
+
+			// compare if 2 slice are the same
+			var c = make([]string, len(reIps))
+			var d = make([]string, len(qIps))
+
+			copy(c, reIps)
+			copy(d, qIps)
+
+			sort.Strings(c)
+			sort.Strings(d)
+
+			// if registered ip and job ip not match
+
+			if ok := reflect.DeepEqual(c, d); !ok {
+				fmt.Println("Scheduler: Ip are not match")
+				this.Unlock()
+				return
+			}
+
+			this.allWorkerReady.Broadcast()
+
 			this.Unlock()
 			break
 		}
@@ -126,4 +181,82 @@ func (this *Master) KillJob(_, _ *struct{}) error {
 
 func (this *Master) Wait() {
 	<-this.doneChannel
+}
+
+func (this *Master) CheckWorker() bool {
+
+	this.Lock()
+
+	if len(this.workers) > 0{
+		this.foundWorker = true
+	}else{
+		this.foundWorker = false
+	}
+
+	this.Unlock()
+	return this.foundWorker
+}
+
+
+
+func (this *Master) eventLoop(){
+
+	for{
+
+		this.Lock()
+		if this.isStop == true{
+			fmt.Printf("Master: isStop=true, server %s quite eventLoop \n", this.Address)
+			this.Unlock()
+			break
+		}
+		this.Unlock()
+
+
+		if !this.CheckWorker(){
+
+			this.Lock()
+			this.beginCountDown.Wait()
+			this.Unlock()
+
+		}else{
+
+
+			this.Lock()
+			elapseTime := time.Now().UnixNano() - this.lastSendTime
+			fmt.Printf("Master: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
+
+			if int(elapseTime/int64(time.Millisecond)) >= this.heartbeatTimeout{
+
+				this.Unlock()
+				fmt.Println("Master: Timeout, server begin to send hb to worker")
+				this.broadcastHeartbeat()
+
+			}else{
+				this.Unlock()
+			}
+		}
+
+		time.Sleep(time.Millisecond*config.MasterTimeout/5)
+	}
+}
+
+
+func (this *Master) broadcastHeartbeat(){
+	// update lastSendTime
+	this.reset()
+	for _, worker := range this.workers {
+
+		ok := utils.Call(worker, this.Proxy, "Worker.ResetTime", new(struct{}), new(struct{}))
+		if ok == false {
+			fmt.Printf("Master: RPC %s send heartbeat error\n", worker)
+		}
+	}
+}
+
+
+func (this *Master) reset() {
+	this.Lock()
+	this.lastSendTime = time.Now().UnixNano()
+	this.Unlock()
+
 }

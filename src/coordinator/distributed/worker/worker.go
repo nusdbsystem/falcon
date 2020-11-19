@@ -8,10 +8,14 @@ import (
 	"coordinator/distributed/utils"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 )
 
 type Worker struct {
+
+	sync.Mutex
+
 	Proxy string
 	name  string //  which is the ip+port address of worker
 
@@ -19,6 +23,12 @@ type Worker struct {
 
 	pm         *taskmanager.SubProcessManager
 	taskFinish chan bool
+
+	latestHeardTime	int64
+	SuicideTimeout	int
+
+	// if the master is stopped
+	isStop 			bool
 }
 
 func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
@@ -108,7 +118,7 @@ func (wk *Worker) register(master string) {
 	args := new(entitiy.RegisterArgs)
 	args.WorkerAddr = wk.name
 
-	fmt.Println("Worker: begin to call Master.Register")
+	fmt.Printf("Worker: begin to call Master.Register to register address= %s \n", args.WorkerAddr)
 	ok := utils.Call(master, wk.Proxy, "Master.Register", args, new(struct{}))
 	if ok == false {
 		fmt.Printf("Worker: Register RPC %s, register error\n", master)
@@ -122,6 +132,10 @@ func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
 
 	// there are running subprocess
 	wk.pm.Lock()
+
+	// shutdown other related thread
+	wk.isStop = true
+
 	if wk.pm.NumProc > 0 {
 		wk.pm.Unlock()
 
@@ -142,4 +156,53 @@ func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
 	// this is used to define shut down the worker servers
 
 	return nil
+}
+
+
+func (wk *Worker) eventLoop() {
+	time.Sleep(time.Second*5)
+	for {
+
+		wk.Lock()
+		if wk.isStop == true{
+			fmt.Printf("Worker: isStop=true, server %s quite eventLoop \n", wk.name)
+
+			wk.Unlock()
+			break
+		}
+
+		elapseTime := time.Now().UnixNano() - wk.latestHeardTime
+		if int(elapseTime/int64(time.Millisecond)) >= wk.SuicideTimeout{
+
+			fmt.Printf("Worker: Timeout, server %s begin to suicide \n", wk.name)
+
+			var reply entitiy.ShutdownReply
+			ok := utils.Call(wk.name, wk.Proxy, "Worker.Shutdown", new(struct{}), &reply)
+			if ok == false {
+				fmt.Printf("Worker: RPC %s shutdown error\n", wk.name)
+			}else{
+				fmt.Printf("Worker: worker timeout, RPC %s shutdown successfule\n", wk.name)
+			}
+			// quite event loop no matter ok or not
+			break
+		}
+		wk.Unlock()
+
+		time.Sleep(time.Millisecond*config.WorkerTimeout/5)
+		fmt.Printf("Worker: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
+	}
+}
+
+func (wk *Worker) ResetTime(_ *struct{}, _ *struct{}) error {
+	fmt.Println("Worker: reset the countdown")
+	wk.reset()
+	return nil
+}
+
+
+func (wk *Worker) reset() {
+	wk.Lock()
+	wk.latestHeardTime = time.Now().UnixNano()
+	wk.Unlock()
+
 }
