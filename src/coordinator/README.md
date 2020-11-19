@@ -52,4 +52,4 @@
 
 ## check the log
 
-1. log is at folder .log
+1. log is at folder .logs
