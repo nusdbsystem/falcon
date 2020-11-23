@@ -87,4 +87,4 @@ go build <go-program>.go
 
 ## check the log
 
-1. log is at folder .logs
+1. log is at folder `logs`
