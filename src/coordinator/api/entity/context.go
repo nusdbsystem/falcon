@@ -10,6 +10,6 @@ type Context struct {
 
 func InitContext() *Context {
 	ad := new(Context)
-	ad.Ms = models.InitDefaultMetaStore()
+	ad.Ms = models.InitMetaStore()
 	return ad
 }

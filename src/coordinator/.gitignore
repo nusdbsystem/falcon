@@ -17,3 +17,6 @@ coordinator_server
 
 # logs
 *.log
+
+# sqlite3 db
+falcon.db

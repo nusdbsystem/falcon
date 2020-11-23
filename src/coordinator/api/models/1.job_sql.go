@@ -78,7 +78,7 @@ func (ms *MetaStore) JobUpdateResInfo(jobId uint, jobErrMsg, jobResult, jobExtIn
 ////////////////////////////////////////////////////////////////
 
 func JobUpdateStatus(jobId uint, status uint) {
-	ms := InitDefaultMetaStore()
+	ms := InitMetaStore()
 
 	ms.Connect()
 	ms.Tx = ms.Db.Begin()
