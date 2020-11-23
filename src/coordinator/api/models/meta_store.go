@@ -1,11 +1,14 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
+	"coordinator/config"
+	"fmt"
 	"log"
 
-	//_ "gorm.io/driver/sqlite"
+	"github.com/jinzhu/gorm"
+
 	_ "gorm.io/driver/mysql"
+	_ "gorm.io/driver/sqlite"
 )
 
 type MetaStore struct {
@@ -19,29 +22,30 @@ type MetaStore struct {
 	Tx       *gorm.DB
 }
 
-func InitDefaultMetaStore() *MetaStore {
-	ms := InitMetaStore(
-		"mysql",
-		"localhost",
-		"root",
-		"rootuser",
-		"Test",
-		"?parseTime=true")
-	return ms
-}
-
-func InitMetaStore(engine, host, user, password, database, options string) *MetaStore {
+func InitMetaStore() *MetaStore {
 	ms := new(MetaStore)
-	ms.engine = engine
-	ms.host = host
-	ms.user = user
-	ms.password = password
-	ms.database = database
+	ms.engine = config.MS_ENGINE
+	ms.host = config.MS_HOST
+	ms.user = ""
+	ms.password = ""
+	ms.database = ""
 
 	if ms.engine == "mysql" {
-		ms.url = ms.user + ":" + ms.password + "@tcp(" + ms.host + ":3306)/" + ms.database + options
+		ms.user = config.MS_MYSQL_USER
+		ms.password = config.MS_MYSQL_PWD
+		ms.database = config.MS_MYSQL_DB
+
+		mysql_url := fmt.Sprintf(
+			"%s:%s@tcp(%s:3306)/%s%s",
+			ms.user,
+			ms.password,
+			ms.host,
+			ms.database,
+			config.MS_MYSQL_OPTIONS,
+		)
+		ms.url = mysql_url
 	} else if ms.engine == "sqlite3" {
-		ms.url = "./falcon.db"
+		ms.url = config.MS_SQLITE_DB
 	}
 	return ms
 }
