@@ -58,6 +58,8 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	//write log
+	// TODO: why is this test log file always printed to the log?
+	// is there any abort?
 	log.Printf("Server abort! Cause:%v \n", "test log file")
 
 	// start work in remote machine automatically
@@ -67,14 +69,14 @@ func main() {
 			log.Println("Error: Input Error, Must Provide ip of listener")
 			os.Exit(1)
 		}
-		log.Println("Lunching coordinator_server, the svc", svc)
+		log.Println("Launch coordinator_server, the svc", svc)
 
 		masterAddr := httpAddr + ":" + config.MasterPort
 		listener.SetupListener(listenerAddr, config.ListenerPort, masterAddr)
 	}
 
 	if svc == "coordinator" {
-		log.Println("Lunching coordinator_server, the svc", svc)
+		log.Println("Launch coordinator_server, the svc", svc)
 
 		api.SetupHttp(httpAddr, config.MasterPort, 3)
 	}
