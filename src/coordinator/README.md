@@ -1,9 +1,44 @@
-
-
-
 # Falcon Coordinator
 
+## Dependencies for Development
+
+- Server-side is Go (1.13 and above)
+- Client-side is any http client, such as Python3 `requests`
+- Storage default is file-based sqlite3, you can also connect to MySQL
+
+**Go quick start**:
+To run go code, you need go compiler
+
+download the go compiler at https://golang.org/dl/
+
+after the download, install by following the instruction at https://golang.org/doc/install
+
+Verify that you've installed Go by opening a command prompt and typing the following command:
+```sh
+$ go version
+```
+
+to compile and run a go program
+```sh
+go run <go-program>.go
+```
+
+to compile into a binary
+```sh
+go build <go-program>.go
+```
+
+
 ## Platform setup instruction
+
+0. Naming
+
+   ```
+   svc == service
+   cip == coordinator IP
+   lip == listener IP
+   ```
+
 1. Setup coordinator:
     
     ./coordinator_server -cip <ip address>
