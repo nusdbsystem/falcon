@@ -3,6 +3,7 @@ package taskmanager
 import (
 	"coordinator/config"
 	"errors"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -22,7 +23,7 @@ type SubProcessManager struct {
 	NumProc int
 
 	// if the subprocess is killed
-
+	IsWait  bool
 	// if the subprocess is finished normally
 
 }
@@ -32,6 +33,8 @@ func InitSubProcessManager() *SubProcessManager {
 
 	pm.IsStop = make(chan bool)
 	pm.NumProc = 0
+
+	pm.IsWait = true
 
 	return pm
 
@@ -102,19 +105,40 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		cmd.Stdin = strings.NewReader(stdIn)
 	}
 
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		log.Println(err)
-		return false, err.Error(), "", ""
+	var stderr io.ReadCloser
+	var stdout io.ReadCloser
+	var err error
 
+	if pm.IsWait{
+		stderr, err = cmd.StderrPipe()
+		if err != nil {
+			log.Println(err)
+			return false, err.Error(), "", ""
+
+		}
+
+		stdout, err = cmd.StdoutPipe()
+		if err != nil {
+			log.Println(err)
+			return false, err.Error(), "", ""
+
+		}
+	}else{
+		_, err := cmd.StderrPipe()
+		if err != nil {
+			log.Println(err)
+			return false, err.Error(), "", ""
+
+		}
+
+		_, err = cmd.StdoutPipe()
+		if err != nil {
+			log.Println(err)
+			return false, err.Error(), "", ""
+
+		}
 	}
 
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Println(err)
-		return false, err.Error(), "", ""
-
-	}
 
 	// shutdown the process after 2 hour, if still not finish
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
@@ -143,10 +167,17 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		pm.NumProc += 1
 		pm.Unlock()
 
-		errLog, _ := ioutil.ReadAll(stderr)
-		outLog, _ := ioutil.ReadAll(stdout)
 
-		outErr := cmd.Wait()
+		var errLog []byte
+		var outLog []byte
+		var outErr error
+
+		if pm.IsWait{
+			errLog, _ = ioutil.ReadAll(stderr)
+			outLog, _ = ioutil.ReadAll(stdout)
+			outErr = cmd.Wait()
+		}
+
 
 		var oe string
 		if outErr != nil {

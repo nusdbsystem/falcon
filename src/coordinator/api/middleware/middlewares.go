@@ -56,15 +56,15 @@ func handPanic() Middleware {
 func AddRouter(
 	f func(w http.ResponseWriter, r *http.Request, ctx *entity.Context),
 	Method string,
-	middleWares ...Middleware) http.HandlerFunc {
+	httpAddr ...string) http.HandlerFunc {
 
 	// change f to newF,
 
-	newF := InitContext(f, SysLvPath)
+	newF := InitContext(f, SysLvPath, httpAddr...)
 
 	defaultMiddleWare := []Middleware{handPanic(), methodVerify(Method), timeUsage()}
 
-	defaultMiddleWare = append(defaultMiddleWare, middleWares...)
+	//defaultMiddleWare = append(defaultMiddleWare, middleWares...)
 
 	for _, middleWare := range defaultMiddleWare {
 		newF = middleWare(newF)

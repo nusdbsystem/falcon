@@ -4,15 +4,19 @@ import (
 	c "coordinator/client"
 	"coordinator/config"
 	"coordinator/distributed/master"
+	"coordinator/distributed/prediction"
+	"coordinator/distributed/taskmanager"
 	"coordinator/distributed/utils"
 	"coordinator/distributed/worker"
 	"fmt"
 	"log"
+	"strconv"
 	"sync"
 )
 
-func SetupDist(httpHost, httpPort string, qItem *config.QItem) {
-	log.Println("SetupDist: Launch master")
+func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) {
+	log.Println("SetupDist: Lunching master")
+
 
 	httpAddr := httpHost + ":" + httpPort
 	port, e := utils.GetFreePort()
@@ -22,10 +26,12 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem) {
 		return
 	}
 	masterAddress := httpHost + ":" + fmt.Sprintf("%d", port)
-	ms := master.RunMaster("tcp", masterAddress, httpAddr, qItem)
+	ms := master.RunMaster("tcp", masterAddress, httpAddr, qItem, taskType)
 
-	// update job's master address
-	c.JobUpdateMaster(httpAddr, masterAddress, qItem.JobId)
+	if taskType == config.TrainTaskType{
+		// update job's master address
+		c.JobUpdateMaster(httpAddr, masterAddress, qItem.JobId)
+	}
 
 	for _, ip := range qItem.IPs {
 
@@ -35,7 +41,7 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem) {
 		// maybe check table wit ip, and + port got from table also
 
 		// send a request to http
-		c.SetupWorker(ip+":"+config.ListenerPort, masterAddress)
+		c.SetupWorker(ip+":"+config.ListenerPort, masterAddress, taskType)
 	}
 
 	// wait until job done
@@ -65,11 +71,48 @@ func SetupWorker(httpHost string, masterAddress string) error {
 }
 
 func KillJob(masterAddr, Proxy string) {
-	ok := utils.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
+	ok := c.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {
 		log.Println("Master: KillJob error")
 		panic("Master: KillJob error")
 	} else {
 		log.Println("Master: KillJob Done")
 	}
+}
+
+func SetupPredictionHelper(httpHost string, masterAddress string) error {
+
+	// the masterAddress is the master thread address
+
+	dir:=""
+	stdIn := "input from keyboard"
+	commend := ""
+	args := []string{"/coordinator_server", "-svc predictor -addr 1" + masterAddress}
+	var envs []string
+
+	pm := taskmanager.InitSubProcessManager()
+	pm.IsWait = false
+
+	killed, e, el, ol := pm.ExecuteSubProc(dir, stdIn, commend, args, envs)
+	log.Println(killed, e, el, ol)
+
+	return nil
+}
+
+
+func SetupPrediction(httpHost, masterAddress string) {
+
+	// the masterAddress is the master thread address
+
+	log.Println("SetupDist: Lunching prediction svc")
+
+	port, e := utils.GetFreePort()
+	if e != nil {
+		log.Println("SetupDist: Lunching worker Get port Error")
+	}
+
+	sPort := strconv.Itoa(port)
+
+	prediction.RunPrediction(masterAddress, httpHost, sPort,"tcp")
+
 }

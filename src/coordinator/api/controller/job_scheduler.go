@@ -67,8 +67,8 @@ loop:
 				log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
 
 				models.JobUpdateStatus(qItem.JobId, config.JobRunning)
-				// Launch the master
-				dist.SetupDist(ds.httpHost, ds.httpPort, qItem)
+				// lunching the master
+				go dist.SetupDist(ds.httpHost, ds.httpPort, qItem, config.TrainTaskType)
 			}
 
 		}

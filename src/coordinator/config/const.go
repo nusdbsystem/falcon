@@ -1,6 +1,9 @@
 package config
 
 const (
+	Master = "Master"
+	Worker = "Worker"
+	ModelService = "ModelService"
 
 	// master& wokrer heartbeat
 
@@ -15,6 +18,8 @@ const (
 	UpdateJobResInfo = "update-job-res"
 	UpdateJobStatus  = "update-job-status"
 	QueryJobStatus   = "query-job-status"
+
+	UpdateModelServiceStatus  = "update-prediction-status"
 
 	ListenerAdd    = "listener-add"
 	ListenerDelete = "listener-del"
@@ -39,6 +44,18 @@ const (
 	PreProcessing = "pre_processing"
 	ModelTraining = "model_training"
 
+	TaskType = "task-type"
+
+
+	// model endpoint
+	ModelUpdate  = "model-update"
+	IsTrained = "is_trained"
+	SvcPublishing  = "model-publish"
+	SvcCreate  = "model-create"
+
+	AppName = "app_name"
+	ExtInfo = "ext_info"
+
 	// sys point
 	MasterPort   = "6573"
 	ListenerPort = "6574"
@@ -52,6 +69,8 @@ const (
 	JobFailed     = 3
 	JobKilled     = 4
 
+	TrainTaskType = "train"
+	PredictTaskType = "predict"
 	// MetaStore and Database Configs
 	MS_ENGINE        = "sqlite3" // or mysql
 	MS_HOST          = "localhost"
@@ -60,4 +79,5 @@ const (
 	MS_MYSQL_PWD     = "rootuser"
 	MS_MYSQL_DB      = "Test"
 	MS_MYSQL_OPTIONS = "?parseTime=true"
+
 )

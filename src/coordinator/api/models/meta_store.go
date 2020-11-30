@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 
 	_ "gorm.io/driver/mysql"
-	_ "gorm.io/driver/sqlite"
+
 )
 
 type MetaStore struct {

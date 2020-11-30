@@ -1,12 +1,12 @@
 package master
 
 import (
+	"coordinator/client"
 	"coordinator/config"
+	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
-	"coordinator/distributed/utils"
 	"fmt"
 	"log"
-	"net"
 	"reflect"
 	"sort"
 	"strings"
@@ -15,10 +15,9 @@ import (
 )
 
 type Master struct {
-	sync.Mutex
 
-	Proxy       string
-	Address     string
+	base.RpcBase
+
 	doneChannel chan bool
 
 	newCond        *sync.Cond
@@ -28,7 +27,6 @@ type Master struct {
 	workers   []string
 	workerNum int
 
-	l     net.Listener
 	stats []int
 
 	lastSendTime     int64
@@ -36,15 +34,12 @@ type Master struct {
 
 	foundWorker bool
 
-	// if the master is stopped
-	isStop bool
 }
 
 func newMaster(Proxy, masterAddr string, workerNum int) (ms *Master) {
 	ms = new(Master)
-	ms.Address = masterAddr
-	ms.Proxy = Proxy
-
+	ms.InitRpc(Proxy, masterAddr)
+	ms.Name = config.Master
 	ms.newCond = sync.NewCond(ms)
 	ms.beginCountDown = sync.NewCond(ms)
 	ms.allWorkerReady = sync.NewCond(ms)
@@ -52,7 +47,6 @@ func newMaster(Proxy, masterAddr string, workerNum int) (ms *Master) {
 	ms.doneChannel = make(chan bool)
 	ms.workerNum = workerNum
 	ms.heartbeatTimeout = config.MasterTimeout
-	ms.isStop = false
 	return
 }
 
@@ -163,7 +157,7 @@ func (this *Master) killWorkers() []int {
 
 		log.Println("Master: begin to call Worker.Shutdown")
 
-		ok := utils.Call(worker, this.Proxy, "Worker.Shutdown", new(struct{}), &reply)
+		ok := client.Call(worker, this.Proxy, "Worker.Shutdown", new(struct{}), &reply)
 		if ok == false {
 			log.Printf("Master: RPC %s shutdown error\n", worker)
 		} else {
@@ -203,7 +197,7 @@ func (this *Master) eventLoop() {
 	for {
 
 		this.Lock()
-		if this.isStop == true {
+		if this.IsStop == true {
 			log.Printf("Master: isStop=true, server %s quite eventLoop \n", this.Address)
 			this.Unlock()
 			break
@@ -242,7 +236,7 @@ func (this *Master) broadcastHeartbeat() {
 	this.reset()
 	for _, worker := range this.workers {
 
-		ok := utils.Call(worker, this.Proxy, "Worker.ResetTime", new(struct{}), new(struct{}))
+		ok := client.Call(worker, this.Proxy, "Worker.ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
 			log.Printf("Master: RPC %s send heartbeat error\n", worker)
 		}
@@ -255,3 +249,28 @@ func (this *Master) reset() {
 	this.Unlock()
 
 }
+
+
+
+// stopRPCServer stops the master RPC server.
+// This must be done through an RPC to avoid
+// race conditions between the RPC server thread and the current thread.
+func (this *Master) stopRPCServer() {
+	var reply entitiy.ShutdownReply
+
+	log.Println("Master: begin to call Master.Shutdown")
+	ok := client.Call(this.Address, this.Proxy, "Master.Shutdown", new(struct{}), &reply)
+	if ok == false {
+		log.Printf("Master: Cleanup: RPC %s error\n", this.Address)
+	}
+	log.Println("Master: cleanupRegistration: done")
+}
+
+// Shutdown is an RPC method that shuts down the Master's RPC server.
+// for rpc method, must be public method, only 2 params, second one must be pointer,return err type
+func (this *Master) Shutdown(_, _ *struct{}) error {
+	log.Println("Master: Shutdown: registration server")
+	_ = this.Listener.Close() // causes the Accept to fail, then break out the accetp loop
+	return nil
+}
+

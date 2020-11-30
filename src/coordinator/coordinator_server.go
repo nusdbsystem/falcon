@@ -3,6 +3,7 @@ package main
 import (
 	"coordinator/api"
 	"coordinator/config"
+	"coordinator/distributed"
 	"coordinator/listener"
 	"flag"
 	"log"
@@ -15,22 +16,23 @@ import (
 var svc string
 var httpAddr string
 var listenerAddr string
+var predictorAddr string
+var masterAddr string
 
 func init() {
 	runtime.GOMAXPROCS(4)
 	flag.StringVar(&svc, "svc", "coordinator", "choose which service to run, 'coordinator' or 'listener'")
 	flag.StringVar(&httpAddr, "cip", "", "Ip Address of coordinator")
 	flag.StringVar(&listenerAddr, "lip", "", "Ip Address of listener")
+	flag.StringVar(&predictorAddr, "pip", "", "Ip Address of predictor")
+	flag.StringVar(&masterAddr, "master_addr", "", "Ip Address of master, this is only used for predictor")
 }
 
 func verifyArgs() {
-	if len(httpAddr) == 0 {
-		log.Println("Error: Input Error, Must Provide ip of coordinator")
-		os.Exit(1)
-	}
 
-	if !(strings.Contains(svc, "coordinator") || strings.Contains(svc, "listener")) {
-		log.Println("Error: Input Error, svc is either 'coordinator' or 'listener'")
+
+	if !(strings.Contains(svc, "coordinator") || strings.Contains(svc, "listener") || strings.Contains(svc, "predictor") ) {
+		log.Println("Error: Input Error, svc is either 'coordinator' or 'listener' or 'predictor' ")
 		os.Exit(1)
 	}
 }
@@ -57,27 +59,42 @@ func main() {
 
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
-	//write log
-	// TODO: why is this test log file always printed to the log?
-	// is there any abort?
-	log.Printf("Server abort! Cause:%v \n", "test log file")
 
 	// start work in remote machine automatically
 	if svc == "listener" {
-
+		if len(httpAddr) == 0 {
+			log.Println("Error: Input Error, Must Provide ip of coordinator")
+			os.Exit(1)
+		}
 		if len(listenerAddr) == 0 {
 			log.Println("Error: Input Error, Must Provide ip of listener")
 			os.Exit(1)
 		}
 		log.Println("Launch coordinator_server, the svc", svc)
 
-		masterAddr := httpAddr + ":" + config.MasterPort
-		listener.SetupListener(listenerAddr, config.ListenerPort, masterAddr)
+		ServerAddress := httpAddr + ":" + config.MasterPort
+		listener.SetupListener(listenerAddr, config.ListenerPort, ServerAddress)
 	}
 
 	if svc == "coordinator" {
+		if len(httpAddr) == 0 {
+			log.Println("Error: Input Error, Must Provide ip of coordinator")
+			os.Exit(1)
+		}
 		log.Println("Launch coordinator_server, the svc", svc)
 
 		api.SetupHttp(httpAddr, config.MasterPort, 3)
+	}
+
+	if svc == "predictor" {
+
+		if len(predictorAddr) == 0 || len(masterAddr) ==0 {
+			log.Println("Error: Input Error, Must Provide ip of predictor and masterAddr,", predictorAddr, masterAddr)
+			os.Exit(1)
+		}
+		log.Println("Lunching coordinator_server, the svc", svc)
+
+		distributed.SetupPrediction(predictorAddr, masterAddr)
+
 	}
 }

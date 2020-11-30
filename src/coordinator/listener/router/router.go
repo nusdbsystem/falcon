@@ -14,8 +14,9 @@ func SetupWorker(httpHost string) func(w http.ResponseWriter, r *http.Request) {
 
 		// this is sent from main http server
 		masterAddress := r.FormValue(config.MasterAddr)
+		taskType := r.FormValue(config.TaskType)
 
-		go controller.SetupWorker(httpHost, masterAddress)
+		go controller.SetupWorker(httpHost, masterAddress, taskType)
 
 	}
 }
