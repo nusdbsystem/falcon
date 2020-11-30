@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 
 '''
-python coordinator_client.py -url 172.25.121.4:6573 -method submit -path /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/dsl.json
-python coordinator_client.py -url 172.25.121.4:6573 -method kill -job 60
-python coordinator_client.py -url 172.25.121.4:6573 -method query_status -job 60
+python coordinator_client.py -url 172.25.123.61:6573 -method submit -path /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/dsl.json
+python coordinator_client.py -url 172.25.123.61:6573 -method kill -job 60
+python coordinator_client.py -url 172.25.123.61:6573 -method query_status -job 60
 '''

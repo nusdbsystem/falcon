@@ -5,4 +5,7 @@ type QItem struct {
 	JobId     uint
 	PartyPath []PartyPath
 	TaskInfos Tasks
+
+	ModelPath []string
+	ExecutablePath []string
 }
