@@ -3,6 +3,7 @@ package main
 import (
 	"coordinator/api"
 	"coordinator/config"
+	"coordinator/distributed"
 	"coordinator/listener"
 	"flag"
 	"log"
@@ -14,12 +15,14 @@ import (
 var svc string
 var httpAddr string
 var listenerAddr string
+var predictorAddr string
 
 func init() {
 	runtime.GOMAXPROCS(4)
 	flag.StringVar(&svc, "svc", "coordinator", "choose which service to run, 'coordinator' or 'listener'")
 	flag.StringVar(&httpAddr, "cip", "", "Ip Address of coordinator")
 	flag.StringVar(&listenerAddr, "lip", "", "Ip Address of listener")
+	flag.StringVar(&predictorAddr, "pip", "", "Ip Address of predictor")
 }
 
 func verifyArgs() {
@@ -52,9 +55,6 @@ func main() {
 
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
-	//write log
-	log.Printf("Server abort! Cause:%v \n", "test log file")
-
 	// start work in remote machine automatically
 	if svc == "listener" {
 
@@ -72,5 +72,17 @@ func main() {
 		log.Println("Lunching coordinator_server, the svc", svc)
 
 		api.SetupHttp(httpAddr, config.MasterPort, 3)
+	}
+
+	if svc == "predictor" {
+
+		if len(predictorAddr) == 0 {
+			log.Println("Error: Input Error, Must Provide ip of predictor ")
+			os.Exit(1)
+		}
+		log.Println("Lunching coordinator_server, the svc", svc)
+
+		distributed.SetupPrediction(predictorAddr)
+
 	}
 }

@@ -30,15 +30,28 @@ type PartyPath struct {
 }
 
 type Tasks struct {
-	PreProcessing Task `json:"pre_processing"`
-	ModelTraining Task `json:"model_training"`
+	PreProcessing PreProcessTask `json:"pre_processing"`
+	ModelTraining ModelTrainTask `json:"model_training"`
 }
 
-type Task struct {
+type PreProcessTask struct {
 	AlgorithmName string                 `json:"algorithm_name"`
 	InputConfigs  map[string]interface{} `json:"input_configs"`
 	OutputConfigs map[string]interface{} `json:"output_configs"`
 }
+
+type ModelTrainTask struct {
+	AlgorithmName string                 `json:"algorithm_name"`
+	InputConfigs  map[string]interface{} `json:"input_configs"`
+	OutputConfigs map[string]interface{} `json:"output_configs"`
+}
+
+type ModelOutput struct {
+	TrainedModel 		[]string    `json:"trained_model"`
+	EvaluationReport  	string 		`json:"evaluation_report"`
+}
+
+
 
 func ParseDsl(contents string, jobInfo *DSL) error {
 	// the error here can only check if field type is correct or not.

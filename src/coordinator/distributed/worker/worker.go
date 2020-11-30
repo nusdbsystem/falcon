@@ -1,25 +1,20 @@
 package worker
 
 import (
+	"coordinator/client"
 	"coordinator/config"
 	_ "coordinator/config"
+	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/taskmanager"
-	"coordinator/distributed/utils"
 	"fmt"
 	"log"
-	"net"
-	"sync"
 	"time"
 )
 
 type Worker struct {
-	sync.Mutex
 
-	Proxy string
-	name  string //  which is the ip+port address of worker
-
-	l net.Listener
+	base.RpcBase
 
 	pm         *taskmanager.SubProcessManager
 	taskFinish chan bool
@@ -27,13 +22,11 @@ type Worker struct {
 	latestHeardTime int64
 	SuicideTimeout  int
 
-	// if the master is stopped
-	isStop bool
 }
 
 func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
-	log.Printf("Worker: %s task started \n", wk.name)
+	log.Printf("Worker: %s task started \n", wk.Address)
 
 	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
 
@@ -108,7 +101,7 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 		time.Sleep(time.Second)
 	}
 
-	log.Printf("Worker: %s: task done\n", wk.name)
+	log.Printf("Worker: %s: task done\n", wk.Address)
 
 	return nil
 }
@@ -116,10 +109,10 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 // call the master's register method,
 func (wk *Worker) register(master string) {
 	args := new(entitiy.RegisterArgs)
-	args.WorkerAddr = wk.name
+	args.WorkerAddr = wk.Address
 
 	log.Printf("Worker: begin to call Master.Register to register address= %s \n", args.WorkerAddr)
-	ok := utils.Call(master, wk.Proxy, "Master.Register", args, new(struct{}))
+	ok := client.Call(master, wk.Proxy, "Master.Register", args, new(struct{}))
 	if ok == false {
 		log.Printf("Worker: Register RPC %s, register error\n", master)
 	}
@@ -128,13 +121,13 @@ func (wk *Worker) register(master string) {
 // Shutdown is called by the master when all work has been completed.
 // We should respond with the number of tasks we have processed.
 func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
-	log.Println("Worker: Shutdown", wk.name)
+	log.Println("Worker: Shutdown", wk.Address)
 
 	// there are running subprocess
 	wk.pm.Lock()
 
 	// shutdown other related thread
-	wk.isStop = true
+	wk.IsStop = true
 
 	if wk.pm.NumProc > 0 {
 		wk.pm.Unlock()
@@ -149,7 +142,7 @@ func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
 
 	}
 
-	err := wk.l.Close() // close the connection, cause error, and then ,break the worker
+	err := wk.Listener.Close() // close the connection, cause error, and then ,break the worker
 	if err != nil {
 		log.Println("Worker: worker close error, ", err)
 	}
@@ -163,8 +156,8 @@ func (wk *Worker) eventLoop() {
 	for {
 
 		wk.Lock()
-		if wk.isStop == true {
-			log.Printf("Worker: isStop=true, server %s quite eventLoop \n", wk.name)
+		if wk.IsStop == true {
+			log.Printf("Worker: isStop=true, server %s quite eventLoop \n", wk.Address)
 
 			wk.Unlock()
 			break
@@ -173,14 +166,14 @@ func (wk *Worker) eventLoop() {
 		elapseTime := time.Now().UnixNano() - wk.latestHeardTime
 		if int(elapseTime/int64(time.Millisecond)) >= wk.SuicideTimeout {
 
-			log.Printf("Worker: Timeout, server %s begin to suicide \n", wk.name)
+			log.Printf("Worker: Timeout, server %s begin to suicide \n", wk.Address)
 
 			var reply entitiy.ShutdownReply
-			ok := utils.Call(wk.name, wk.Proxy, "Worker.Shutdown", new(struct{}), &reply)
+			ok := client.Call(wk.Address, wk.Proxy, "Worker.Shutdown", new(struct{}), &reply)
 			if ok == false {
-				log.Printf("Worker: RPC %s shutdown error\n", wk.name)
+				log.Printf("Worker: RPC %s shutdown error\n", wk.Address)
 			} else {
-				log.Printf("Worker: worker timeout, RPC %s shutdown successfule\n", wk.name)
+				log.Printf("Worker: worker timeout, RPC %s shutdown successfule\n", wk.Address)
 			}
 			// quite event loop no matter ok or not
 			break

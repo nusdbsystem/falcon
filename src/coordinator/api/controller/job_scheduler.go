@@ -68,7 +68,7 @@ loop:
 
 				models.JobUpdateStatus(qItem.JobId, config.JobRunning)
 				// lunching the master
-				dist.SetupDist(ds.httpHost, ds.httpPort, qItem)
+				go dist.SetupDist(ds.httpHost, ds.httpPort, qItem, config.TrainTaskType)
 			}
 
 		}

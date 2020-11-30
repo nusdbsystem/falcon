@@ -4,13 +4,12 @@ import (
 	"coordinator/client"
 	"coordinator/config"
 	"coordinator/distributed/entitiy"
-	"coordinator/distributed/utils"
 	"log"
 	"strings"
 	"sync"
 )
 
-func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *config.QItem) {
+func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *config.QItem, taskType string) {
 	log.Println("Scheduler: Begin to schedule")
 
 	// checking if the ip of worker match the qItem
@@ -29,6 +28,16 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 		workerAddress = append(workerAddress, addr)
 	}
 
+	if taskType == config.TrainTaskType{
+		this.scheduleWorker(httpAddr,qItem,workerAddress)
+	}else if taskType == config.PredictTaskType{
+		this.schedulePrediction(httpAddr,qItem,workerAddress)
+	}
+
+}
+
+
+func (this *Master) scheduleWorker(httpAddr string, qItem *config.QItem, workerAddress []string){
 	// execute the task
 	wg := sync.WaitGroup{}
 	startTask := func(workerAddr string, args *entitiy.DoTaskArgs) {
@@ -38,7 +47,7 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 		var rep entitiy.DoTaskReply
 
 		log.Println("Scheduler: begin to call Worker.DoTask")
-		ok := utils.Call(workerAddr, this.Proxy, "Worker.DoTask", argAddr, &rep)
+		ok := client.Call(workerAddr, this.Proxy, "Worker.DoTask", argAddr, &rep)
 
 		if !ok {
 			log.Println("Scheduler: Worker.DoTask error")
@@ -121,6 +130,59 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 	}
 
 	wg.Wait()
-	log.Println("Scheduler: Finish all task done")
 
+	client.ModelUpdate(
+		httpAddr,
+		1,
+		qItem.JobId)
+
+	log.Println("Scheduler: Finish all task done")
+}
+
+
+func (this *Master) schedulePrediction(httpAddr string, qItem *config.QItem, workerAddress []string){
+
+	// execute the task
+	startTask := func(workerAddr string, args *entitiy.DoTaskArgs) {
+
+		argAddr := entitiy.EncodeDoTaskArgs(args)
+		var rep entitiy.DoTaskReply
+
+		log.Println("Scheduler: begin to call Worker.DoTask")
+
+		ok := client.Call(workerAddr, this.Proxy, "Worker.DoTask", argAddr, &rep)
+
+		if !ok {
+			log.Println("Scheduler: Prediction.DoTask error")
+			client.JobUpdateResInfo(
+				httpAddr,
+				"call Prediction.DoTask error",
+				"call Prediction.DoTask error",
+				"call Prediction.DoTask error",
+				qItem.JobId)
+			client.JobUpdateStatus(httpAddr, config.JobFailed, qItem.JobId)
+			return
+		}
+	}
+
+	for i, v := range qItem.IPs {
+		args := new(entitiy.DoTaskArgs)
+		args.IP = v
+		args.PartyPath = qItem.PartyPath[i]
+		args.TaskInfos = qItem.TaskInfos
+
+		for _, workerAddr := range workerAddress {
+			ip := strings.Split(workerAddr, ":")[0]
+
+			// match using ip
+			if ip == v {
+
+				// execute the task
+				go startTask(workerAddr, args)
+
+			}
+		}
+	}
+
+	log.Println("Scheduler: Finish schedule all prediction task ")
 }

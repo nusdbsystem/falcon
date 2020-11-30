@@ -4,14 +4,17 @@ import (
 	c "coordinator/client"
 	"coordinator/config"
 	"coordinator/distributed/master"
+	"coordinator/distributed/prediction"
+	"coordinator/distributed/taskmanager"
 	"coordinator/distributed/utils"
 	"coordinator/distributed/worker"
 	"fmt"
 	"log"
+	"strconv"
 	"sync"
 )
 
-func SetupDist(httpHost, httpPort string, qItem *config.QItem) {
+func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) {
 	log.Println("SetupDist: Lunching master")
 
 	httpAddr := httpHost + ":" + httpPort
@@ -35,7 +38,7 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem) {
 		// maybe check table wit ip, and + port got from table also
 
 		// send a request to http
-		c.SetupWorker(ip+":"+config.ListenerPort, masterAddress)
+		c.SetupWorker(ip+":"+config.ListenerPort, masterAddress, taskType)
 	}
 
 	// wait until job done
@@ -65,11 +68,43 @@ func SetupWorker(httpHost string, masterAddress string) error {
 }
 
 func KillJob(masterAddr, Proxy string) {
-	ok := utils.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
+	ok := c.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {
 		log.Println("Master: KillJob error")
 		panic("Master: KillJob error")
 	} else {
 		log.Println("Master: KillJob Done")
 	}
+}
+
+func SetupPredictionHelper(httpHost string, masterAddress string) error {
+
+	dir:=""
+	stdIn := "input from keyboard"
+	commend := ""
+	args := []string{"/coordinator_server", "-svc predictor -b 1"}
+	var envs []string
+
+	pm := taskmanager.InitSubProcessManager()
+	pm.IsWait = false
+
+	killed, e, el, ol := pm.ExecuteSubProc(dir, stdIn, commend, args, envs)
+	log.Println(killed, e, el, ol)
+
+	return nil
+}
+
+
+func SetupPrediction(httpHost string) {
+	log.Println("SetupDist: Lunching prediction svc")
+
+	port, e := utils.GetFreePort()
+	if e != nil {
+		log.Println("SetupDist: Lunching worker Get port Error")
+	}
+
+	sPort := strconv.Itoa(port)
+
+	prediction.RunPrediction(httpHost, sPort,"tcp")
+
 }

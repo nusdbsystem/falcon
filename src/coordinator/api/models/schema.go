@@ -12,7 +12,10 @@ type JobRecord struct {
 
 	// 0: init, 1: running, 2:successful, 3: failed, 4: killed
 	Status        uint
-	TaskNum       uint
+
+	TaskNum       uint //?
+	FlSetting     uint
+
 	ErrorMsg      string `gorm:"type:varchar(256)"`
 	JobDecs       string `gorm:"type:varchar(4096)"`
 	JobResult     string `gorm:"type:varchar(4096)"`
@@ -27,7 +30,7 @@ type JobRecord struct {
 type TaskRecord struct {
 	ID         uint `gorm:"primary_key;AUTO_INCREMENT"`
 	JobID      uint `gorm:"unique_index"`
-	TaskId     uint
+	//TaskId     uint
 	TaskName   string `gorm:"type:varchar(256)"`
 	PartyIds   string `gorm:"type:varchar(256)"`
 	Status     uint
@@ -41,36 +44,6 @@ type TaskRecord struct {
 	ExtInfo    string `gorm:"type:varchar(4096)"`
 }
 
-type ExecutionRecord struct {
-	ID         uint `gorm:"primary_key;AUTO_INCREMENT"`
-	TapeId     uint
-	TapeName   string `gorm:"type:varchar(256)"`
-	Status     uint
-	ErrorMsg   string `gorm:"type:varchar(4096)"`
-	TapeDecs   string `gorm:"type:varchar(4096)"`
-	IsDelete   uint
-	CreateTime time.Time
-	UpdateTime time.Time
-	DeleteTime time.Time
-	ExtInfo    string `gorm:"type:varchar(4096)"`
-}
-
-type ModelRecord struct {
-	ID          uint `gorm:"primary_key;AUTO_INCREMENT"`
-	ModelId     uint
-	ModelName   string `gorm:"type:varchar(256)"`
-	ModelDecs   string `gorm:"type:varchar(256)"`
-	PartyNumber uint
-	PartyIds    string `gorm:"type:varchar(256)"`
-	ModelData   string `gorm:"type:varchar(4096)"`
-	JobId       uint
-	IsPublished uint
-	IsDelete    uint
-	CreateTime  time.Time
-	UpdateTime  time.Time
-	DeleteTime  time.Time
-	ExtInfo     string `gorm:"type:varchar(4096)"`
-}
 
 type ServiceRecord struct {
 	ID         uint   `gorm:"primary_key;AUTO_INCREMENT"`
@@ -92,4 +65,66 @@ type Listeners struct {
 type TestTable struct {
 	ID   uint   `gorm:"primary_key;AUTO_INCREMENT"`
 	Name string `gorm:"type:varchar(256)"`
+}
+
+//////////////////////////////////////////////////////////////////
+///////////////////// ListenerDatabase  //////////////////////////
+//////////////////////////////////////////////////////////////////
+
+
+type ExecutionRecord struct {
+	ID         uint `gorm:"primary_key;AUTO_INCREMENT"`
+	TapeId     uint
+	TapeName   string `gorm:"type:varchar(256)"`
+	Status     uint
+	ErrorMsg   string `gorm:"type:varchar(4096)"`
+	TapeDecs   string `gorm:"type:varchar(4096)"`
+	IsDelete   uint
+	CreateTime time.Time
+	UpdateTime time.Time
+	DeleteTime time.Time
+	ExtInfo    string `gorm:"type:varchar(4096)"`
+}
+
+type ModelRecord struct {
+	ID          uint `gorm:"primary_key;AUTO_INCREMENT"`
+	//ModelId     uint									//model编号，与job编号相同
+	JobId       uint									//外键job id
+
+	ModelName   string `gorm:"type:varchar(256)"`		//model名称，LR etc.
+	ModelPath   string									//model路径
+	ModelDecs   string `gorm:"type:varchar(256)"`		//model描述，与job名称相同
+
+	//ModelData   string `gorm:"type:varchar(4096)"`	// model参数
+
+	PartyNumber uint									//参与⽅个数
+	PartyIds    string `gorm:"type:varchar(256)"`		//参与⽅ids
+
+	IsTrained	uint
+	IsPublished uint
+	IsDelete    uint
+
+	CreateTime  time.Time
+	UpdateTime  time.Time
+	DeleteTime  time.Time
+	ExtInfo     string `gorm:"type:varchar(4096)"`
+}
+
+
+type ModelServiceInfo struct {
+	ID          		uint `gorm:"primary_key;AUTO_INCREMENT"`
+
+	//ModelServiceId      uint								//model_service编号
+
+	ModelServiceName   	string `gorm:"type:varchar(256)"`   //模型服务描述
+
+	ModelId	 			uint  //外键模型id，标明哪个模型执⾏
+
+	IsPublished   		uint  //是否被发布
+	IsDelete    		uint  //记录是否被删除
+
+	CreateTime  		time.Time
+	UpdateTime  		time.Time
+	DeleteTime  		time.Time
+	ExtInfo     		string `gorm:"type:varchar(4096)"`
 }

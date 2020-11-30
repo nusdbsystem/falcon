@@ -3,13 +3,17 @@ package entity
 import "coordinator/api/models"
 
 type Context struct {
-	Ms *models.MetaStore
-
-	UsrId uint
+	Ms       *models.MetaStore
+	HttpHost string
+	HttpPort string
+	UsrId    uint
 }
 
-func InitContext() *Context {
+func InitContext(httpAddr ...string) *Context {
 	ad := new(Context)
 	ad.Ms = models.InitDefaultMetaStore()
+	ad.HttpHost = httpAddr[0]
+	ad.HttpPort = httpAddr[1]
+
 	return ad
 }

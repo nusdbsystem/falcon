@@ -1,68 +1,52 @@
 package master
 
 import (
-	"coordinator/distributed/entitiy"
-	"coordinator/distributed/utils"
+	"coordinator/config"
 	"log"
-	"net"
 	"net/rpc"
+	"time"
 )
 
-func (this *Master) startRPCServer() {
-	// register master
-	rpcs := rpc.NewServer()
-	rerr := rpcs.Register(this)
-	if rerr != nil {
-		log.Println("Master: start Error, ", rerr)
+func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem) (ms *Master) {
+	log.Println("Master: address is :", masterAddr)
+	ms = newMaster(Proxy, masterAddr, len(qItem.IPs))
+
+	ms.reset()
+	go ms.eventLoop()
+
+	rpcSvc := rpc.NewServer()
+	err := rpcSvc.Register(ms)
+	if err!= nil{
+		log.Printf("%s: start Error \n", "Master")
 		return
 	}
 
-	log.Println("Master: listening on", this.Proxy, this.Address)
+	ms.StartRPCServer(rpcSvc, "Master", false)
 
-	listener, e := net.Listen(this.Proxy, this.Address)
-
-	if e != nil {
-		log.Println("Master: StartRPCServer error")
-	}
-	this.l = listener
-	// accept connection
-	go func() {
-		// define loop label used for break
-		for {
-			conn, err := this.l.Accept()
-			if err == nil {
-				// user thread to process requests
-				go func() {
-					rpcs.ServeConn(conn)
-					_ = conn.Close()
-				}()
-			} else {
-				log.Printf("Master: RegistrationServer: Accept errored, %v \n", err)
-				break
-			}
+	// set time out, no worker comes within 1 min, stop master
+	time.AfterFunc(1*time.Minute, func() {
+		if len(ms.workers) == 0 {
+			ms.stopRPCServer()
 		}
-		log.Printf("Maseter: masterServer: done\n")
-	}()
-}
+	})
 
-// stopRPCServer stops the master RPC server.
-// This must be done through an RPC to avoid
-// race conditions between the RPC server thread and the current thread.
-func (this *Master) stopRPCServer() {
-	var reply entitiy.ShutdownReply
+	go ms.run(
+		func() {
+			ch := make(chan string, len(qItem.IPs))
+			go ms.forwardRegistrations(ch, qItem)
+			ms.schedule(ch, httpAddr, qItem,config.TrainTaskType)
+		},
+		func() {
+			// stop both master and worker after finishing the job
+			ms.stats = ms.killWorkers()
+			ms.stopRPCServer()
 
-	log.Println("Master: begin to call Master.Shutdown")
-	ok := utils.Call(this.Address, this.Proxy, "Master.Shutdown", new(struct{}), &reply)
-	if ok == false {
-		log.Printf("Master: Cleanup: RPC %s error\n", this.Address)
-	}
-	log.Println("Master: cleanupRegistration: done")
-}
+			// stop other related threads
 
-// Shutdown is an RPC method that shuts down the Master's RPC server.
-// for rpc method, must be public method, only 2 params, second one must be pointer,return err type
-func (this *Master) Shutdown(_, _ *struct{}) error {
-	log.Println("Master: Shutdown: registration server")
-	_ = this.l.Close() // causes the Accept to fail, then break out the accetp loop
-	return nil
+			ms.Lock()
+			ms.IsStop = true
+			ms.Unlock()
+
+		})
+	return
 }

@@ -12,19 +12,7 @@ func JobSubmit(dsl *config.DSL, ctx *entity.Context) (uint, string, uint, string
 
 	log.Println("HTTP server: in SubmitJob, put to the JobQueue")
 
-	// write to db
-	partyIds, err := json.Marshal(dsl.PartyInfos)
-	if err != nil {
-		panic("json.Marshal(dsl.PartyIds) error")
-	}
-	ctx.Ms.Tx = ctx.Ms.Db.Begin()
-	errs, u := ctx.Ms.JobSubmit(dsl.JobName, ctx.UsrId, string(partyIds), dsl.JobDecs, dsl.TaskNum, config.JobInit)
-	err2, _ := ctx.Ms.SvcCreate(u.JobId)
-
-	ctx.Ms.Commit([]error{errs, err2})
-
 	// generate item pushed to the queue
-	var qItem config.QItem
 	var iPs []string
 	var taskInfos config.Tasks
 	var partyPath []config.PartyPath
@@ -38,15 +26,35 @@ func JobSubmit(dsl *config.DSL, ctx *entity.Context) (uint, string, uint, string
 		partyPath = append(partyPath, v.PartyPaths)
 	}
 
+	partyIds, err := json.Marshal(dsl.PartyInfos)
+	if err != nil {
+		panic("json.Marshal(dsl.PartyIds) error")
+	}
+
+	ModelName :=  dsl.Tasks.ModelTraining.AlgorithmName
+	ModelDecs := dsl.Tasks.ModelTraining.AlgorithmName
+	PartyNumber := uint(len(dsl.PartyInfos))
+	ExtInfo := dsl.Tasks.ModelTraining.AlgorithmName
+
+	// write to db
+	ctx.Ms.Tx = ctx.Ms.Db.Begin()
+	errs, u := ctx.Ms.JobSubmit(dsl.JobName, ctx.UsrId, string(partyIds), dsl.JobDecs, dsl.TaskNum, config.JobInit)
+	err2, _ := ctx.Ms.SvcCreate(u.JobId)
+
+	err3, _ := ctx.Ms.ModelCreate(u.JobId, ModelName,ModelDecs,PartyNumber, string(partyIds), ExtInfo)
+
+	ctx.Ms.Commit([]error{errs, err2, err3})
+
 	taskInfos = dsl.Tasks
 
+	qItem := new(config.QItem)
 	qItem.IPs = iPs
 	qItem.JobId = u.JobId
 	qItem.PartyPath = partyPath
 	qItem.TaskInfos = taskInfos
 
 	go func() {
-		entity.JobQueue.Push(&qItem)
+		entity.JobQueue.Push(qItem)
 	}()
 
 	return u.JobId, u.JobName, u.UserID, u.PartyIds, u.TaskNum, u.Status

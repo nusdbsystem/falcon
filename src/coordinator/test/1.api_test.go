@@ -4,7 +4,6 @@ import (
 	"coordinator/api/models"
 	"coordinator/config"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"

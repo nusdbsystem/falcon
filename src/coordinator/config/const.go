@@ -40,6 +40,18 @@ const (
 	PreProcessing = "pre_processing"
 	ModelTraining = "model_training"
 
+	TaskType = "task-type"
+
+
+	// model endpoint
+	ModelUpdate  = "model-update"
+	IsTrained = "is_trained"
+	SvcPublishing  = "model-publish"
+	SvcCreate  = "model-create"
+
+	AppName = "app_name"
+	ExtInfo = "ext_info"
+
 	// sys point
 	MasterPort   = "6573"
 	ListenerPort = "6574"
@@ -52,4 +64,7 @@ const (
 	JobSuccessful = 2
 	JobFailed     = 3
 	JobKilled     = 4
+
+	TrainTaskType = "train"
+	PredictTaskType = "train"
 )

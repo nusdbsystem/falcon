@@ -23,8 +23,10 @@ func ListenerDelete(ServerAddress, listenerAddr string) {
 	_ = PostForm(reqUrl, data)
 }
 
-func SetupWorker(ServerAddr string, masterAddress string) {
-	data := url.Values{config.MasterAddr: {masterAddress}}
+func SetupWorker(ServerAddr string, masterAddress string, taskType string) {
+	data := url.Values{
+		config.MasterAddr: {masterAddress},
+		config.TaskType: {taskType}}
 
 	reqUrl := ServerAddr + "/" + config.SetupWorker
 
@@ -65,6 +67,19 @@ func JobUpdateStatus(ServerAddr string, status uint, jobId uint) {
 
 	_ = PostForm(reqUrl, data)
 }
+
+
+func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
+
+	data := url.Values{
+		config.JobId:     {fmt.Sprintf("%d", jobId)},
+		config.IsTrained: {fmt.Sprintf("%d", isTrained)}}
+
+	reqUrl := ServerAddr + "/" + config.ModelUpdate
+
+	_ = PostForm(reqUrl, data)
+}
+
 
 ////////////////////////////////////
 /////////// Get  ////////////

@@ -4,7 +4,7 @@ import "time"
 
 
 
-func (ms *MetaStore) PublishService(
+func (ms *MetaStore) CreateService(
 	AppName string,
 	ModelId uint,
 	ExtInfo string,
@@ -24,6 +24,24 @@ func (ms *MetaStore) PublishService(
 
 
 	err := ms.Db.Create(u).Error
+	return err, u
+
+}
+
+
+func (ms *MetaStore) PublishService(
+	jobId uint,
+	IsPublished uint,
+
+) (error, *ModelRecord) {
+
+	u := &ModelRecord{}
+
+	err := ms.Db.Model(u).
+		Where("job_id = ?", jobId).
+		Update("is_published", IsPublished).
+		Update("update_time", time.Now()).Error
+
 	return err, u
 
 }
