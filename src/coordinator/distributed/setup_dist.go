@@ -26,10 +26,12 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) 
 		return
 	}
 	masterAddress := httpHost + ":" + fmt.Sprintf("%d", port)
-	ms := master.RunMaster("tcp", masterAddress, httpAddr, qItem)
+	ms := master.RunMaster("tcp", masterAddress, httpAddr, qItem, taskType)
 
-	// update job's master address
-	c.JobUpdateMaster(httpAddr, masterAddress, qItem.JobId)
+	if taskType == config.TrainTaskType{
+		// update job's master address
+		c.JobUpdateMaster(httpAddr, masterAddress, qItem.JobId)
+	}
 
 	for _, ip := range qItem.IPs {
 
@@ -80,10 +82,12 @@ func KillJob(masterAddr, Proxy string) {
 
 func SetupPredictionHelper(httpHost string, masterAddress string) error {
 
+	// the masterAddress is the master thread address
+
 	dir:=""
 	stdIn := "input from keyboard"
 	commend := ""
-	args := []string{"/coordinator_server", "-svc predictor -b 1"}
+	args := []string{"/coordinator_server", "-svc predictor -addr 1" + masterAddress}
 	var envs []string
 
 	pm := taskmanager.InitSubProcessManager()
@@ -96,7 +100,10 @@ func SetupPredictionHelper(httpHost string, masterAddress string) error {
 }
 
 
-func SetupPrediction(httpHost string) {
+func SetupPrediction(httpHost, masterAddress string) {
+
+	// the masterAddress is the master thread address
+
 	log.Println("SetupDist: Lunching prediction svc")
 
 	port, e := utils.GetFreePort()
@@ -106,6 +113,6 @@ func SetupPrediction(httpHost string) {
 
 	sPort := strconv.Itoa(port)
 
-	prediction.RunPrediction(httpHost, sPort,"tcp")
+	prediction.RunPrediction(masterAddress, httpHost, sPort,"tcp")
 
 }

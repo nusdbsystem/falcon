@@ -39,7 +39,7 @@ type Master struct {
 func newMaster(Proxy, masterAddr string, workerNum int) (ms *Master) {
 	ms = new(Master)
 	ms.InitRpc(Proxy, masterAddr)
-
+	ms.Name = config.Master
 	ms.newCond = sync.NewCond(ms)
 	ms.beginCountDown = sync.NewCond(ms)
 	ms.allWorkerReady = sync.NewCond(ms)

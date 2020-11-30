@@ -16,7 +16,7 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 
 	e1, u1 := ctx.Ms.ModelGetByID(jobId)
 
-	e2, u := ctx.Ms.CreateService(appName, u1.ID, extInfo)
+	e2, u := ctx.Ms.CreateService(appName, u1.ID, jobId, extInfo)
 
 	e3, u2 := ctx.Ms.JobGetByJobID(jobId)
 
@@ -24,32 +24,23 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 
 
 	var pInfo []config.PartyInfo
-
-	err := json.Unmarshal([]byte(u2.PartyIds), &pInfo)
-	if err != nil {
-		panic("json.Unmarshal(PartyIds) error")
-	}
-
-
-	var iPs []string
-
-	var partyPath []config.PartyPath
 	var taskInfos config.Tasks
 
-	for _, v := range pInfo {
-
-		// list of ip
-		iPs = append(iPs, v.IP)
-
-		// list of ip
-		partyPath = append(partyPath, v.PartyPaths)
+	err := json.Unmarshal([]byte(u2.PartyIds), &pInfo)
+	err2 := json.Unmarshal([]byte(u2.TaskInfos), &taskInfos)
+	if err != nil || err2!=nil {
+		panic("json.Unmarshal(PartyIds or TaskInfos) error")
 	}
+
+	iPs ,partyPath, modelPath, executablePath := config.ParsePartyInfo(pInfo, taskInfos)
 
 	qItem := new(config.QItem)
 	qItem.IPs = iPs
 	qItem.JobId = jobId
 	qItem.PartyPath = partyPath
 	qItem.TaskInfos = taskInfos
+	qItem.ModelPath = modelPath
+	qItem.ExecutablePath = executablePath
 
 	go dist.SetupDist(ctx.HttpHost, ctx.HttpPort, qItem, config.PredictTaskType)
 
@@ -86,4 +77,12 @@ func PublishService(jobId uint, isPublish uint, ctx *entity.Context) {
 
 
 func LaunchService(dsl *config.DSL, ctx *entity.Context) {
+}
+
+
+func ModelServiceUpdateStatus(jobId uint, status uint, ctx *entity.Context){
+	ctx.Ms.Tx = ctx.Ms.Db.Begin()
+	e, _ := ctx.Ms.ModelServiceUpdateStatus(jobId, status)
+	ctx.Ms.Commit(e)
+
 }

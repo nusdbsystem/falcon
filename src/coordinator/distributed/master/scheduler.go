@@ -29,15 +29,18 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 	}
 
 	if taskType == config.TrainTaskType{
-		this.scheduleWorker(httpAddr,qItem,workerAddress)
-	}else if taskType == config.PredictTaskType{
-		this.schedulePrediction(httpAddr,qItem,workerAddress)
-	}
+		this.scheduleWorker(httpAddr,config.Worker,qItem,workerAddress)
 
+		// stop worker after finishing the job
+		this.stats = this.killWorkers()
+
+	}else if taskType == config.PredictTaskType{
+		this.schedulePrediction(httpAddr,config.ModelService,qItem,workerAddress)
+	}
 }
 
 
-func (this *Master) scheduleWorker(httpAddr string, qItem *config.QItem, workerAddress []string){
+func (this *Master) scheduleWorker(httpAddr, svcName string, qItem *config.QItem, workerAddress []string){
 	// execute the task
 	wg := sync.WaitGroup{}
 	startTask := func(workerAddr string, args *entitiy.DoTaskArgs) {
@@ -46,11 +49,14 @@ func (this *Master) scheduleWorker(httpAddr string, qItem *config.QItem, workerA
 		argAddr := entitiy.EncodeDoTaskArgs(args)
 		var rep entitiy.DoTaskReply
 
-		log.Println("Scheduler: begin to call Worker.DoTask")
-		ok := client.Call(workerAddr, this.Proxy, "Worker.DoTask", argAddr, &rep)
+		// todo, now master call worker.Dotask, worker start to train, until training is done, so how long it will wait? before timeout
+
+		log.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
+		ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
 
 		if !ok {
-			log.Println("Scheduler: Worker.DoTask error")
+			log.Printf("Scheduler: %s.DoTask error\n", svcName)
+
 			client.JobUpdateResInfo(
 				httpAddr,
 				"call Worker.DoTask error",
@@ -129,6 +135,7 @@ func (this *Master) scheduleWorker(httpAddr string, qItem *config.QItem, workerA
 		}
 	}
 
+	// wait until all task is done
 	wg.Wait()
 
 	client.ModelUpdate(
@@ -140,7 +147,7 @@ func (this *Master) scheduleWorker(httpAddr string, qItem *config.QItem, workerA
 }
 
 
-func (this *Master) schedulePrediction(httpAddr string, qItem *config.QItem, workerAddress []string){
+func (this *Master) schedulePrediction(httpAddr, svcName string, qItem *config.QItem, workerAddress []string){
 
 	// execute the task
 	startTask := func(workerAddr string, args *entitiy.DoTaskArgs) {
@@ -148,20 +155,17 @@ func (this *Master) schedulePrediction(httpAddr string, qItem *config.QItem, wor
 		argAddr := entitiy.EncodeDoTaskArgs(args)
 		var rep entitiy.DoTaskReply
 
-		log.Println("Scheduler: begin to call Worker.DoTask")
+		log.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
 
-		ok := client.Call(workerAddr, this.Proxy, "Worker.DoTask", argAddr, &rep)
+		ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
 
 		if !ok {
-			log.Println("Scheduler: Prediction.DoTask error")
-			client.JobUpdateResInfo(
-				httpAddr,
-				"call Prediction.DoTask error",
-				"call Prediction.DoTask error",
-				"call Prediction.DoTask error",
-				qItem.JobId)
-			client.JobUpdateStatus(httpAddr, config.JobFailed, qItem.JobId)
+			log.Printf("Scheduler: %s.CreateService error\n", svcName)
+
+			client.ModelServiceUpdateStatus(httpAddr, config.JobFailed, qItem.JobId)
 			return
+		}else{
+			client.ModelServiceUpdateStatus(httpAddr, config.JobRunning, qItem.JobId)
 		}
 	}
 

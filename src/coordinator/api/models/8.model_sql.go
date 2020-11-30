@@ -8,6 +8,8 @@ func (ms *MetaStore) ModelCreate(
 	ModelName string,
 	ModelDecs string,
 	PartyNumber uint,
+	modelPaths string,
+	executablePaths string,
 	PartyIds string,
 	ExtInfo string,
 
@@ -20,6 +22,9 @@ func (ms *MetaStore) ModelCreate(
 
 		PartyNumber:    PartyNumber,
 		PartyIds:    	PartyIds,
+
+		ModelPaths:		 modelPaths,
+		ExecutablePaths: executablePaths,
 
 		IsTrained:			 0,
 		IsPublished:		 0,

@@ -81,6 +81,17 @@ func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 }
 
 
+func ModelServiceUpdateStatus(ServerAddr string, jobId, status uint) {
+
+	data := url.Values{
+		config.JobId:     {fmt.Sprintf("%d", jobId)},
+		config.JobStatus: {fmt.Sprintf("%d", status)}}
+
+	reqUrl := ServerAddr + "/" + config.UpdateModelServiceStatus
+
+	_ = PostForm(reqUrl, data)
+}
+
 ////////////////////////////////////
 /////////// Get  ////////////
 ////////////////////////////////////

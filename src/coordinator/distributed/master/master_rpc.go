@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem) (ms *Master) {
+func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem, taskType string) (ms *Master) {
 	log.Println("Master: address is :", masterAddr)
 	ms = newMaster(Proxy, masterAddr, len(qItem.IPs))
 
@@ -21,7 +21,8 @@ func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem) (
 		return
 	}
 
-	ms.StartRPCServer(rpcSvc, "Master", false)
+	// launch a rpc server thread to process the requests.
+	ms.StartRPCServer(rpcSvc, false)
 
 	// set time out, no worker comes within 1 min, stop master
 	time.AfterFunc(1*time.Minute, func() {
@@ -30,23 +31,24 @@ func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem) (
 		}
 	})
 
-	go ms.run(
-		func() {
-			ch := make(chan string, len(qItem.IPs))
-			go ms.forwardRegistrations(ch, qItem)
-			ms.schedule(ch, httpAddr, qItem,config.TrainTaskType)
-		},
-		func() {
-			// stop both master and worker after finishing the job
-			ms.stats = ms.killWorkers()
-			ms.stopRPCServer()
 
-			// stop other related threads
+	scheduler:= func() {
+		ch := make(chan string, len(qItem.IPs))
+		go ms.forwardRegistrations(ch, qItem)
+		ms.schedule(ch, httpAddr, qItem, taskType)
+	}
 
-			ms.Lock()
-			ms.IsStop = true
-			ms.Unlock()
+	clean := func() {
+		// stop both master after finishing the job
+		ms.stopRPCServer()
+		// stop other related threads
+		ms.Lock()
+		ms.IsStop = true
+		ms.Unlock()
+	}
 
-		})
+	// launch a thread to process the do the scheduling.
+	go ms.run(scheduler,clean)
+
 	return
 }

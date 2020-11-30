@@ -43,7 +43,7 @@ type PreProcessTask struct {
 type ModelTrainTask struct {
 	AlgorithmName string                 `json:"algorithm_name"`
 	InputConfigs  map[string]interface{} `json:"input_configs"`
-	OutputConfigs map[string]interface{} `json:"output_configs"`
+	OutputConfigs ModelOutput `json:"output_configs"`
 }
 
 type ModelOutput struct {
@@ -83,4 +83,29 @@ func dslVerify(jobInfo *DSL) error {
 	}
 
 	return nil
+}
+
+func ParsePartyInfo(pInfo []PartyInfo, taskInfos Tasks) ([]string, []PartyPath, []string, []string){
+	var iPs []string
+
+	var partyPath []PartyPath
+
+	var modelPath []string
+	var executablePath  []string
+
+	for _, v := range pInfo {
+
+		// list of ip
+		iPs = append(iPs, v.IP)
+
+		// list of ip
+		partyPath = append(partyPath, v.PartyPaths)
+
+		// todo, should we use list to store model path in dsl ? ?:?
+		modelPath = append(modelPath, v.PartyPaths.Model + taskInfos.ModelTraining.OutputConfigs.TrainedModel[0])
+		executablePath = append(executablePath, )
+	}
+
+	return iPs ,partyPath, modelPath, executablePath
+
 }

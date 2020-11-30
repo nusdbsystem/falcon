@@ -9,12 +9,12 @@ import (
 )
 
 func RunWorker(masterAddress, workerProxy, workerHost, workerPort string, wg *sync.WaitGroup) {
-	ServiceName := "Worker"
+
 	workerAddress := workerHost + ":" + workerPort
 
 	wk := new(Worker)
 	wk.InitRpc(workerProxy, workerAddress)
-
+	wk.Name = config.Worker
 	wk.SuicideTimeout = config.WorkerTimeout
 
 	// the lock needs to pass to multi funcs, must create a instance
@@ -28,14 +28,14 @@ func RunWorker(masterAddress, workerProxy, workerHost, workerPort string, wg *sy
 	rpcSvc := rpc.NewServer()
 	err := rpcSvc.Register(wk)
 	if err!= nil{
-		log.Printf("%s: start Error \n", ServiceName)
+		log.Printf("%s: start Error \n", wk.Name)
 		return
 	}
 
 	log.Println("Worker: register to masterAddress= ", masterAddress)
 	wk.register(masterAddress)
 
-	wk.StartRPCServer(rpcSvc, ServiceName, true)
+	wk.StartRPCServer(rpcSvc, true)
 	wg.Done()
 
 	log.Println("Worker: ", workerAddress, "runWorker exit")

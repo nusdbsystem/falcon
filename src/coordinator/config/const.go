@@ -1,6 +1,9 @@
 package config
 
 const (
+	Master = "Master"
+	Worker = "Worker"
+	ModelService = "ModelService"
 
 	// master& wokrer heartbeat
 
@@ -15,6 +18,8 @@ const (
 	UpdateJobResInfo = "update-job-res"
 	UpdateJobStatus  = "update-job-status"
 	QueryJobStatus   = "query-job-status"
+
+	UpdateModelServiceStatus  = "update-prediction-status"
 
 	ListenerAdd    = "listener-add"
 	ListenerDelete = "listener-del"
@@ -65,7 +70,7 @@ const (
 	JobKilled     = 4
 
 	TrainTaskType = "train"
-	PredictTaskType = "train"
+	PredictTaskType = "predict"
 	// MetaStore and Database Configs
 	MS_ENGINE        = "sqlite3" // or mysql
 	MS_HOST          = "localhost"

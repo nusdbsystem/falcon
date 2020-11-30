@@ -45,6 +45,8 @@ func SetupHttp(host, port string, nConsumer int) {
 	mux.HandleFunc("/"+config.ModelUpdate, md.AddRouter(rt.ModelUpdate, http.MethodPost))
 	mux.HandleFunc("/"+config.SvcPublishing, md.AddRouter(rt.PublishService, http.MethodPost))
 	mux.HandleFunc("/"+config.SvcCreate, md.AddRouter(rt.CreateService, http.MethodPost, host, port))
+	mux.HandleFunc("/"+config.UpdateModelServiceStatus, md.AddRouter(rt.ModelServiceUpdateStatus, http.MethodPost))
+
 
 	server := &http.Server{
 		Addr:    httpAddr,

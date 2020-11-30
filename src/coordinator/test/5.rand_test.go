@@ -43,9 +43,8 @@ func unjsonSlice(){
 
 
 func TestRandomFunc2(t *testing.T) {
-
-	unjsonSlice()
-
+	svcName := "asdf"
+	fmt.Println(svcName+".DoTask")
 
 
 }

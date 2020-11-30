@@ -69,3 +69,22 @@ func LaunchService(w http.ResponseWriter, r *http.Request, ctx *entity.Context) 
 
 }
 
+
+
+func ModelServiceUpdateStatus(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
+	client.ReceiveForm(r)
+	JobId := r.FormValue(config.JobId)
+	JobStatus := r.FormValue(config.JobStatus)
+
+	jobId, e := strconv.Atoi(JobId)
+	if e != nil {
+		panic(e)
+	}
+	jobStatus, e2 := strconv.Atoi(JobStatus)
+	if e2 != nil {
+		panic(e2)
+	}
+
+	controller.ModelServiceUpdateStatus(uint(jobId), uint(jobStatus), ctx)
+
+}
