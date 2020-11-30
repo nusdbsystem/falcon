@@ -12,7 +12,11 @@ type Context struct {
 func InitContext(httpAddr ...string) *Context {
 	ad := new(Context)
 	ad.Ms = models.InitMetaStore()
-	ad.HttpHost = httpAddr[0]
-	ad.HttpPort = httpAddr[1]
+
+	if len(httpAddr)==2{
+		ad.HttpHost = httpAddr[0]
+		ad.HttpPort = httpAddr[1]
+	}
+
 	return ad
 }

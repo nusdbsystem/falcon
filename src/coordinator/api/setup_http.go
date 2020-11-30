@@ -6,7 +6,7 @@ import (
 	md "coordinator/api/middleware"
 	rt "coordinator/api/router"
 	"coordinator/config"
-	"log"
+	"coordinator/logger"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,7 +16,7 @@ import (
 func handlePanic() {
 	err := recover()
 	if err != nil {
-		log.Println(err)
+		logger.Do.Println(err)
 	}
 }
 func SetupHttp(host, port string, nConsumer int) {
@@ -53,10 +53,10 @@ func SetupHttp(host, port string, nConsumer int) {
 		Handler: mux,
 	}
 
-	log.Println("HTTP: Updating table...")
+	logger.Do.Println("HTTP: Updating table...")
 	controller.CreateTables()
 
-	log.Println("HTTP: Creating admin user...")
+	logger.Do.Println("HTTP: Creating admin user...")
 	controller.CreateUser()
 
 	dslScheduler := controller.Init(host, port, nConsumer)
@@ -67,10 +67,10 @@ func SetupHttp(host, port string, nConsumer int) {
 
 		<-done
 
-		log.Println("HTTP: Stop multi consumers")
+		logger.Do.Println("HTTP: Stop multi consumers")
 
 		dslScheduler.StopMonitor()
-		log.Println("HTTP: Monitor Stopped")
+		logger.Do.Println("HTTP: Monitor Stopped")
 
 		for i := 0; i < nConsumer; i++ {
 			dslScheduler.StopConsumer()
@@ -79,13 +79,13 @@ func SetupHttp(host, port string, nConsumer int) {
 		//todo, this will shutdown the master thread at the same time
 		// but the worker need to be stopped also??, add later ???
 
-		log.Println("HTTP: Consumer Stopped")
+		logger.Do.Println("HTTP: Consumer Stopped")
 		if err := server.Shutdown(context.Background()); err != nil {
-			log.Fatal("HTTP: ShutDown the server", err)
+			logger.Do.Fatal("HTTP: ShutDown the server", err)
 		}
 	}()
 
-	log.Println("HTTP: Starting multi consumers...")
+	logger.Do.Println("HTTP: Starting multi consumers...")
 
 	// multi-thread consumer
 
@@ -95,14 +95,14 @@ func SetupHttp(host, port string, nConsumer int) {
 	}
 	go dslScheduler.MonitorConsumers()
 
-	log.Println("HTTP: Starting HTTP server...")
+	logger.Do.Println("HTTP: Starting HTTP server...")
 	err := server.ListenAndServe()
 
 	if err != nil {
 		if err == http.ErrServerClosed {
-			log.Print("HTTP: Server closed under request", err)
+			logger.Do.Print("HTTP: Server closed under request", err)
 		} else {
-			log.Fatal("HTTP: Server closed unexpected", err)
+			logger.Do.Fatal("HTTP: Server closed unexpected", err)
 		}
 	}
 

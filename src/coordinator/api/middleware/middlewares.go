@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"coordinator/api/entity"
-	"log"
+	"coordinator/logger"
 	"net/http"
 	"time"
 )
@@ -18,9 +18,9 @@ func timeUsage() Middleware {
 		return func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			defer func() {
-				log.Println("HTTP: Time of process func:", r.URL.Path, "is:", time.Since(start))
+				logger.Do.Println("HTTP: Time of process func:", r.URL.Path, "is:", time.Since(start))
 			}()
-			//log.Println("HTTP: Checking time")
+			//logger.Do.Println("HTTP: Checking time")
 			f(w, r)
 		}
 	}
@@ -35,7 +35,7 @@ func methodVerify(method string) Middleware {
 				http.Error(w, "HTTP: Method not correct", http.StatusBadRequest)
 				return
 			}
-			//log.Println("HTTP: Checking method")
+			//logger.Do.Println("HTTP: Checking method")
 			f(w, r)
 		}
 	}
@@ -46,7 +46,7 @@ func handPanic() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 
 		return func(w http.ResponseWriter, r *http.Request) {
-			defer handlePanic(w)
+			defer handlePanic(w, r)
 			f(w, r)
 		}
 	}

@@ -2,13 +2,13 @@ package master
 
 import (
 	"coordinator/config"
-	"log"
+	"coordinator/logger"
 	"net/rpc"
 	"time"
 )
 
 func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem, taskType string) (ms *Master) {
-	log.Println("Master: address is :", masterAddr)
+	logger.Do.Println("Master: address is :", masterAddr)
 	ms = newMaster(Proxy, masterAddr, len(qItem.IPs))
 
 	ms.reset()
@@ -17,7 +17,7 @@ func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem, t
 	rpcSvc := rpc.NewServer()
 	err := rpcSvc.Register(ms)
 	if err!= nil{
-		log.Printf("%s: start Error \n", "Master")
+		logger.Do.Printf("%s: start Error \n", "Master")
 		return
 	}
 

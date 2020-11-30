@@ -4,13 +4,13 @@ import (
 	"coordinator/api/entity"
 	"coordinator/config"
 	"coordinator/distributed"
+	"coordinator/logger"
 	"encoding/json"
-	"log"
 )
 
 func JobSubmit(dsl *config.DSL, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
 
-	log.Println("HTTP server: in SubmitJob, put to the JobQueue")
+	logger.Do.Println("HTTP server: in SubmitJob, put to the JobQueue")
 
 	// generate item pushed to the queue
 

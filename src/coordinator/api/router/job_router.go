@@ -6,8 +6,8 @@ import (
 	"coordinator/api/entity"
 	"coordinator/client"
 	"coordinator/config"
+	"coordinator/logger"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -40,7 +40,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	err, contents := client.ReceiveFile(r, buf, config.DslFile)
 	if err != nil {
-		log.Println(err)
+		logger.Do.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

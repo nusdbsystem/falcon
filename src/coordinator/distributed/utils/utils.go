@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"log"
+	"coordinator/logger"
 	"net"
 )
 
@@ -16,7 +16,7 @@ func GetFreePort() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer log.Println(l.Close())
+	defer logger.Do.Println(l.Close())
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
 
@@ -34,7 +34,7 @@ func GetFreePorts(count int) ([]int, error) {
 			return nil, err
 		}
 		ports = append(ports, l.Addr().(*net.TCPAddr).Port)
-		log.Println(l.Close())
+		logger.Do.Println(l.Close())
 	}
 	return ports, nil
 }

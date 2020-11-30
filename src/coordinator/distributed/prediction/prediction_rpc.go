@@ -3,7 +3,7 @@ package prediction
 import (
 	"coordinator/config"
 	"coordinator/distributed/taskmanager"
-	"log"
+	"coordinator/logger"
 	"net/rpc"
 )
 
@@ -18,11 +18,11 @@ func RunPrediction(masterAddress, predHost, predPort, Proxy string){
 	rpcSvc := rpc.NewServer()
 	err := rpcSvc.Register(msvc)
 	if err!= nil{
-		log.Printf("%s: start Error \n", msvc.Name)
+		logger.Do.Printf("%s: start Error \n", msvc.Name)
 		return
 	}
 
-	log.Printf("%s: register to masterAddress=%s \n", msvc.Name, predAddress)
+	logger.Do.Printf("%s: register to masterAddress=%s \n", msvc.Name, predAddress)
 
 	msvc.register(masterAddress)
 

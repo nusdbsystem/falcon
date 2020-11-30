@@ -2,10 +2,10 @@ package taskmanager
 
 import (
 	"coordinator/config"
+	"coordinator/logger"
 	"errors"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -51,18 +51,18 @@ loop:
 
 				err := syscall.Kill(pid, syscall.SIGQUIT)
 				if err != nil {
-					log.Println(err)
-					//log.Fatal(err)
+					logger.Do.Println(err)
+					//logger.Do.Fatal(err)
 				}
-				log.Println("SubProcessManager: Manually Killed PID=cmd.Process.Pid", pid)
+				logger.Do.Println("SubProcessManager: Manually Killed PID=cmd.Process.Pid", pid)
 				killed = true
 
 				<-isFinish
-				log.Println("SubProcessManager: Put true to isKilled")
+				logger.Do.Println("SubProcessManager: Put true to isKilled")
 				isKilled <- killed
-				log.Println("SubProcessManager: Put true to isKilled done")
+				logger.Do.Println("SubProcessManager: Put true to isKilled done")
 
-				log.Println("SubProcessManager: break the loop, quite KillSubProc thread")
+				logger.Do.Println("SubProcessManager: break the loop, quite KillSubProc thread")
 				break loop
 			}
 		case finish := <-isFinish:
@@ -83,12 +83,12 @@ func (pm *SubProcessManager) ExecuteSubProc(
 ) (bool, string, string, string) {
 
 	defer func() {
-		log.Println("SubProcessManager: Getting lock")
+		logger.Do.Println("SubProcessManager: Getting lock")
 		pm.Lock()
 		pm.NumProc -= 1
-		log.Println("SubProcessManager: Unlock")
+		logger.Do.Println("SubProcessManager: Unlock")
 		pm.Unlock()
-		log.Println("SubProcessManager: Unlock done")
+		logger.Do.Println("SubProcessManager: Unlock done")
 	}()
 
 	cmd := exec.Command(commend, args...)
@@ -112,28 +112,28 @@ func (pm *SubProcessManager) ExecuteSubProc(
 	if pm.IsWait{
 		stderr, err = cmd.StderrPipe()
 		if err != nil {
-			log.Println(err)
+			logger.Do.Println(err)
 			return false, err.Error(), "", ""
 
 		}
 
 		stdout, err = cmd.StdoutPipe()
 		if err != nil {
-			log.Println(err)
+			logger.Do.Println(err)
 			return false, err.Error(), "", ""
 
 		}
 	}else{
 		_, err := cmd.StderrPipe()
 		if err != nil {
-			log.Println(err)
+			logger.Do.Println(err)
 			return false, err.Error(), "", ""
 
 		}
 
 		_, err = cmd.StdoutPipe()
 		if err != nil {
-			log.Println(err)
+			logger.Do.Println(err)
 			return false, err.Error(), "", ""
 
 		}
@@ -144,14 +144,14 @@ func (pm *SubProcessManager) ExecuteSubProc(
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	time.AfterFunc(2*time.Hour, func() {
 		err := syscall.Kill(cmd.Process.Pid, syscall.SIGQUIT)
-		log.Println("SubProcessManager: Timeout, Killed PID=cmd.Process.Pid")
+		logger.Do.Println("SubProcessManager: Timeout, Killed PID=cmd.Process.Pid")
 		if err != nil {
-			log.Fatal(err)
+			logger.Do.Fatal(err)
 		}
 	})
 
 	if err := cmd.Start(); err != nil {
-		log.Println(err)
+		logger.Do.Println(err)
 		return false, err.Error(), "", ""
 	}
 
@@ -159,7 +159,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 	isFinish := make(chan bool, 1)
 	// if start successfully
 	if cmd.Process != nil {
-		log.Println("SubProcessManager: Open subProcess, PID=", cmd.Process.Pid)
+		logger.Do.Println("SubProcessManager: Open subProcess, PID=", cmd.Process.Pid)
 
 		go pm.KillSubProc(cmd.Process.Pid, isKilled, isFinish)
 		// if there is a running KillSubProc, nTasks add 1
@@ -189,10 +189,10 @@ func (pm *SubProcessManager) ExecuteSubProc(
 
 			select {
 			case killed := <-isKilled:
-				log.Println("SubProcessManager: Job Done, return")
+				logger.Do.Println("SubProcessManager: Job Done, return")
 				return killed, oe, string(errLog), string(outLog)
 			case isFinish <- true:
-				log.Println("SubProcessManager: Write to isFinish")
+				logger.Do.Println("SubProcessManager: Write to isFinish")
 			default:
 			}
 		}

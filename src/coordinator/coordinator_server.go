@@ -5,8 +5,8 @@ import (
 	"coordinator/config"
 	"coordinator/distributed"
 	"coordinator/listener"
+	"coordinator/logger"
 	"flag"
-	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -22,17 +22,17 @@ var masterAddr string
 func init() {
 	runtime.GOMAXPROCS(4)
 	flag.StringVar(&svc, "svc", "coordinator", "choose which service to run, 'coordinator' or 'listener'")
-	flag.StringVar(&httpAddr, "cip", "", "Ip Address of coordinator")
-	flag.StringVar(&listenerAddr, "lip", "", "Ip Address of listener")
-	flag.StringVar(&predictorAddr, "pip", "", "Ip Address of predictor")
-	flag.StringVar(&masterAddr, "master_addr", "", "Ip Address of master, this is only used for predictor")
+	flag.StringVar(&httpAddr, "cip", "localhost", "Ip Address of coordinator")
+	flag.StringVar(&listenerAddr, "lip", "localhost", "Ip Address of listener")
+	flag.StringVar(&predictorAddr, "pip", "localhost", "Ip Address of predictor")
+	flag.StringVar(&masterAddr, "master_addr", "localhost", "Ip Address of master, this is only used for predictor")
 }
 
 func verifyArgs() {
 
 
 	if !(strings.Contains(svc, "coordinator") || strings.Contains(svc, "listener") || strings.Contains(svc, "predictor") ) {
-		log.Println("Error: Input Error, svc is either 'coordinator' or 'listener' or 'predictor' ")
+		logger.Do.Println("Error: Input Error, svc is either 'coordinator' or 'listener' or 'predictor' ")
 		os.Exit(1)
 	}
 }
@@ -41,36 +41,28 @@ func main() {
 	flag.Parse()
 	verifyArgs()
 
-	_ = os.Mkdir("logs", os.ModePerm)
+	_ = os.Mkdir(".logs", os.ModePerm)
 	// Use layout string for time format.
 	const layout = "2006-01-02T15:04:05"
 	// Place now in the string.
 	rawTime := time.Now()
-	logFileName := "logs/" + svc + rawTime.Format(layout) + ".log"
 
-	logFile, logErr := os.OpenFile(logFileName, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+	logFileName := ".logs/" + svc + rawTime.Format(layout) + ".log"
 
-	if logErr != nil {
-		log.Println("Fail to find", logFile, "cServer start Failed")
-		os.Exit(1)
-	}
-
-	log.SetOutput(logFile)
-
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-
+	logger.Do, logger.F = logger.GetLogger(logFileName)
+	defer logger.F.Close()
 
 	// start work in remote machine automatically
 	if svc == "listener" {
 		if len(httpAddr) == 0 {
-			log.Println("Error: Input Error, Must Provide ip of coordinator")
+			logger.Do.Println("Error: Input Error, Must Provide ip of coordinator")
 			os.Exit(1)
 		}
 		if len(listenerAddr) == 0 {
-			log.Println("Error: Input Error, Must Provide ip of listener")
+			logger.Do.Println("Error: Input Error, Must Provide ip of listener")
 			os.Exit(1)
 		}
-		log.Println("Launch coordinator_server, the svc", svc)
+		logger.Do.Println("Launch coordinator_server, the svc", svc)
 
 		ServerAddress := httpAddr + ":" + config.MasterPort
 		listener.SetupListener(listenerAddr, config.ListenerPort, ServerAddress)
@@ -78,10 +70,10 @@ func main() {
 
 	if svc == "coordinator" {
 		if len(httpAddr) == 0 {
-			log.Println("Error: Input Error, Must Provide ip of coordinator")
+			logger.Do.Println("Error: Input Error, Must Provide ip of coordinator")
 			os.Exit(1)
 		}
-		log.Println("Launch coordinator_server, the svc", svc)
+		logger.Do.Println("Launch coordinator_server, the svc", svc)
 
 		api.SetupHttp(httpAddr, config.MasterPort, 3)
 	}
@@ -89,10 +81,10 @@ func main() {
 	if svc == "predictor" {
 
 		if len(predictorAddr) == 0 || len(masterAddr) ==0 {
-			log.Println("Error: Input Error, Must Provide ip of predictor and masterAddr,", predictorAddr, masterAddr)
+			logger.Do.Println("Error: Input Error, Must Provide ip of predictor and masterAddr,", predictorAddr, masterAddr)
 			os.Exit(1)
 		}
-		log.Println("Lunching coordinator_server, the svc", svc)
+		logger.Do.Println("Lunching coordinator_server, the svc", svc)
 
 		distributed.SetupPrediction(predictorAddr, masterAddr)
 

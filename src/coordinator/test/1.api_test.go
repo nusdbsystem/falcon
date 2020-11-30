@@ -3,9 +3,9 @@ package test
 import (
 	"coordinator/api/models"
 	"coordinator/config"
+	"coordinator/logger"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 )
@@ -19,7 +19,7 @@ func TestSql(t *testing.T) {
 	ms.Commit(e)
 	ms.DisConnect()
 
-	log.Println(u)
+	logger.Do.Println(u)
 
 }
 
@@ -34,14 +34,14 @@ func TestJson(t *testing.T) {
 	var bird Bird
 
 	_ = json.Unmarshal([]byte(birdJson), &bird)
-	log.Printf(
+	logger.Do.Printf(
 		"Species: %s, Description: %s",
 		bird.Species, bird.Description)
 }
 
 func TestParseJson(t *testing.T) {
 	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/coordinator/data/dsl.json")
-	log.Println(err)
+	logger.Do.Println(err)
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
@@ -49,9 +49,9 @@ func TestParseJson(t *testing.T) {
 	var dsl config.DSL
 
 	e2 := json.Unmarshal(byteValue, &dsl)
-	log.Println(e2)
+	logger.Do.Println(e2)
 
 	b, err := json.Marshal(dsl.PartyInfos)
-	log.Println(string(b), err)
+	logger.Do.Println(string(b), err)
 
 }

@@ -71,6 +71,7 @@ const (
 
 	TrainTaskType = "train"
 	PredictTaskType = "predict"
+
 	// MetaStore and Database Configs
 	MS_ENGINE        = "sqlite3" // or mysql
 	MS_HOST          = "localhost"

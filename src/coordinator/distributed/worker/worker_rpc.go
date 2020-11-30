@@ -3,7 +3,7 @@ package worker
 import (
 	"coordinator/config"
 	"coordinator/distributed/taskmanager"
-	"log"
+	"coordinator/logger"
 	"net/rpc"
 	"sync"
 )
@@ -28,15 +28,15 @@ func RunWorker(masterAddress, workerProxy, workerHost, workerPort string, wg *sy
 	rpcSvc := rpc.NewServer()
 	err := rpcSvc.Register(wk)
 	if err!= nil{
-		log.Printf("%s: start Error \n", wk.Name)
+		logger.Do.Printf("%s: start Error \n", wk.Name)
 		return
 	}
 
-	log.Println("Worker: register to masterAddress= ", masterAddress)
+	logger.Do.Println("Worker: register to masterAddress= ", masterAddress)
 	wk.register(masterAddress)
 
 	wk.StartRPCServer(rpcSvc, true)
 	wg.Done()
 
-	log.Println("Worker: ", workerAddress, "runWorker exit")
+	logger.Do.Println("Worker: ", workerAddress, "runWorker exit")
 }
