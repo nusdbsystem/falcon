@@ -4,26 +4,26 @@ import (
 	"coordinator/client"
 	"coordinator/config"
 	"coordinator/distributed/entitiy"
-	"log"
+	"coordinator/logger"
 	"strings"
 	"sync"
 )
 
 func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *config.QItem, taskType string) {
-	log.Println("Scheduler: Begin to schedule")
+	logger.Do.Println("Scheduler: Begin to schedule")
 
 	// checking if the ip of worker match the qItem
 	this.Lock()
 	this.allWorkerReady.Wait()
 	this.Unlock()
 
-	log.Println("Scheduler: All worker found")
+	logger.Do.Println("Scheduler: All worker found")
 
 	// extract ip from register chan to static slice
 	var workerAddress []string
 
 	for i := 0; i < len(qItem.IPs); i++ {
-		log.Println("Scheduler: Reading from registerChan")
+		logger.Do.Println("Scheduler: Reading from registerChan")
 		addr := <-registerChan
 		workerAddress = append(workerAddress, addr)
 	}
@@ -51,11 +51,11 @@ func (this *Master) scheduleWorker(httpAddr, svcName string, qItem *config.QItem
 
 		// todo, now master call worker.Dotask, worker start to train, until training is done, so how long it will wait? before timeout
 
-		log.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
+		logger.Do.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
 		ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
 
 		if !ok {
-			log.Printf("Scheduler: %s.DoTask error\n", svcName)
+			logger.Do.Printf("Scheduler: %s.DoTask error\n", svcName)
 
 			client.JobUpdateResInfo(
 				httpAddr,
@@ -79,7 +79,7 @@ func (this *Master) scheduleWorker(httpAddr, svcName string, qItem *config.QItem
 			outLen = len(outMsg)
 		}
 
-		log.Println("Scheduler: max length is", outLen, errLen)
+		logger.Do.Println("Scheduler: max length is", outLen, errLen)
 
 		if rep.Killed == true {
 		} else if rep.Errs[config.PreProcessing] != config.SubProcessNormal {
@@ -143,7 +143,7 @@ func (this *Master) scheduleWorker(httpAddr, svcName string, qItem *config.QItem
 		1,
 		qItem.JobId)
 
-	log.Println("Scheduler: Finish all task done")
+	logger.Do.Println("Scheduler: Finish all task done")
 }
 
 
@@ -155,12 +155,12 @@ func (this *Master) schedulePrediction(httpAddr, svcName string, qItem *config.Q
 		argAddr := entitiy.EncodeDoTaskArgs(args)
 		var rep entitiy.DoTaskReply
 
-		log.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
+		logger.Do.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
 
 		ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
 
 		if !ok {
-			log.Printf("Scheduler: %s.CreateService error\n", svcName)
+			logger.Do.Printf("Scheduler: %s.CreateService error\n", svcName)
 
 			client.ModelServiceUpdateStatus(httpAddr, config.JobFailed, qItem.JobId)
 			return
@@ -188,5 +188,5 @@ func (this *Master) schedulePrediction(httpAddr, svcName string, qItem *config.Q
 		}
 	}
 
-	log.Println("Scheduler: Finish schedule all prediction task ")
+	logger.Do.Println("Scheduler: Finish schedule all prediction task ")
 }

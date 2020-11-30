@@ -5,8 +5,8 @@ import (
 	"coordinator/api/models"
 	"coordinator/config"
 	dist "coordinator/distributed"
+	"coordinator/logger"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 )
@@ -42,7 +42,7 @@ func Init(httpHost, httpPort string, nConsumer int) *DslScheduler {
 func (ds *DslScheduler) Consume(consumerId int) {
 	defer func() {
 		err := recover()
-		log.Println("Consume: Error of this thread, ", consumerId, err)
+		logger.Do.Println("Consume: Error of this thread, ", consumerId, err)
 		ds.Lock()
 		ds.curConsumers -= 1
 		ds.Unlock()
@@ -53,18 +53,18 @@ loop:
 	for {
 		select {
 		case stop := <-ds.isStop:
-			log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Get from isStop")
+			logger.Do.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Get from isStop")
 			if stop == true {
-				log.Println("Consume: Stop consuming")
+				logger.Do.Println("Consume: Stop consuming")
 				break loop
 			}
 		default:
 
-			//log.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the queue...")
+			//logger.Do.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the queue...")
 
 			if qItem, ok := entity.JobQueue.Pop(); ok {
 
-				log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
+				logger.Do.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
 
 				models.JobUpdateStatus(qItem.JobId, config.JobRunning)
 				// lunching the master
@@ -74,7 +74,7 @@ loop:
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	log.Println("Consumer stopped")
+	logger.Do.Println("Consumer stopped")
 }
 
 func (ds *DslScheduler) StopConsumer() {
@@ -88,7 +88,7 @@ loop:
 		select {
 		case stop := <-ds.isStopMonitor:
 			if stop == true {
-				log.Println("Consume: Stopping monitor")
+				logger.Do.Println("Consume: Stopping monitor")
 				break loop
 			}
 		default:
@@ -101,7 +101,7 @@ loop:
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	log.Println("Consumer Monitor stopped")
+	logger.Do.Println("Consumer Monitor stopped")
 
 }
 

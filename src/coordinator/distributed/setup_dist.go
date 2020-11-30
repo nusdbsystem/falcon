@@ -8,21 +8,21 @@ import (
 	"coordinator/distributed/taskmanager"
 	"coordinator/distributed/utils"
 	"coordinator/distributed/worker"
+	"coordinator/logger"
 	"fmt"
-	"log"
 	"strconv"
 	"sync"
 )
 
 func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) {
-	log.Println("SetupDist: Lunching master")
+	logger.Do.Println("SetupDist: Lunching master")
 
 
 	httpAddr := httpHost + ":" + httpPort
 	port, e := utils.GetFreePort()
 
 	if e != nil {
-		log.Println("Get port Error")
+		logger.Do.Println("Get port Error")
 		return
 	}
 	masterAddress := httpHost + ":" + fmt.Sprintf("%d", port)
@@ -49,7 +49,7 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) 
 }
 
 func SetupWorker(httpHost string, masterAddress string) error {
-	log.Println("SetupDist: Launch worker threads")
+	logger.Do.Println("SetupDist: Launch worker threads")
 
 	wg := sync.WaitGroup{}
 
@@ -58,7 +58,7 @@ func SetupWorker(httpHost string, masterAddress string) error {
 	for i := 0; i < 1; i++ {
 		port, e := utils.GetFreePort()
 		if e != nil {
-			log.Println("SetupDist: Launch worker Get port Error")
+			logger.Do.Println("SetupDist: Launch worker Get port Error")
 			return e
 		}
 		wg.Add(1)
@@ -73,10 +73,10 @@ func SetupWorker(httpHost string, masterAddress string) error {
 func KillJob(masterAddr, Proxy string) {
 	ok := c.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {
-		log.Println("Master: KillJob error")
+		logger.Do.Println("Master: KillJob error")
 		panic("Master: KillJob error")
 	} else {
-		log.Println("Master: KillJob Done")
+		logger.Do.Println("Master: KillJob Done")
 	}
 }
 
@@ -94,7 +94,7 @@ func SetupPredictionHelper(httpHost string, masterAddress string) error {
 	pm.IsWait = false
 
 	killed, e, el, ol := pm.ExecuteSubProc(dir, stdIn, commend, args, envs)
-	log.Println(killed, e, el, ol)
+	logger.Do.Println(killed, e, el, ol)
 
 	return nil
 }
@@ -104,11 +104,11 @@ func SetupPrediction(httpHost, masterAddress string) {
 
 	// the masterAddress is the master thread address
 
-	log.Println("SetupDist: Lunching prediction svc")
+	logger.Do.Println("SetupDist: Lunching prediction svc")
 
 	port, e := utils.GetFreePort()
 	if e != nil {
-		log.Println("SetupDist: Lunching worker Get port Error")
+		logger.Do.Println("SetupDist: Lunching worker Get port Error")
 	}
 
 	sPort := strconv.Itoa(port)

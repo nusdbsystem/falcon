@@ -2,6 +2,7 @@ package test
 
 import (
 	"coordinator/distributed/entitiy"
+	"coordinator/logger"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,11 +14,11 @@ func TestRandomFunc(t *testing.T) {
 	a := entitiy.ShutdownReply{Ntasks: 123}
 
 	res := entitiy.EncodeDoTaskArgsGeneral(&a)
-	log.Println(res)
+	logger.Do.Println(res)
 
 	rr := entitiy.ShutdownReply{}
 	entitiy.DecodeDoTaskArgsGeneral(res, &rr)
-	log.Println(rr.Ntasks)
+	logger.Do.Println(rr.Ntasks)
 
 }
 

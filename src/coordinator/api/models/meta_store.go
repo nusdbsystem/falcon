@@ -2,12 +2,12 @@ package models
 
 import (
 	"coordinator/config"
+	"coordinator/logger"
 	"fmt"
-	"log"
-
 	"github.com/jinzhu/gorm"
 
 	_ "gorm.io/driver/mysql"
+	_ "gorm.io/driver/sqlite"
 
 )
 
@@ -54,7 +54,7 @@ func InitMetaStore() *MetaStore {
 func (ms *MetaStore) Connect() {
 	db, err := gorm.Open(ms.engine, ms.url)
 	if err != nil {
-		log.Println(err)
+		logger.Do.Println(err)
 		return
 	}
 	ms.Db = db
@@ -65,7 +65,7 @@ func (ms *MetaStore) DisConnect() {
 
 	e := ms.Db.Close()
 	if e != nil {
-		log.Println("closeDb error")
+		logger.Do.Println("closeDb error")
 	}
 }
 
@@ -133,7 +133,7 @@ func (ms *MetaStore) Commit(el interface{}) {
 		res, _ := el.([]error)
 		for _, ev := range res {
 			if ev != nil {
-				log.Println("Sql error", ev)
+				logger.Do.Println("Sql error", ev)
 				ms.Tx.Rollback()
 				panic(ev)
 			}
@@ -142,7 +142,7 @@ func (ms *MetaStore) Commit(el interface{}) {
 	case error:
 		res, _ := el.(error)
 		if res != nil {
-			log.Println("Sql error", res)
+			logger.Do.Println("Sql error", res)
 			ms.Tx.Rollback()
 			panic(res)
 		}

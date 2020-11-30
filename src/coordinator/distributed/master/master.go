@@ -5,8 +5,8 @@ import (
 	"coordinator/config"
 	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
+	"coordinator/logger"
 	"fmt"
-	"log"
 	"reflect"
 	"sort"
 	"strings"
@@ -51,7 +51,7 @@ func newMaster(Proxy, masterAddr string, workerNum int) (ms *Master) {
 }
 
 func (this *Master) Test(args string, reply *string) error {
-	log.Println(args)
+	logger.Do.Println(args)
 	return nil
 }
 
@@ -60,7 +60,7 @@ func (this *Master) Test(args string, reply *string) error {
 func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 	this.Lock()
 	defer this.Unlock()
-	log.Println("Master: Register: worker", args.WorkerAddr)
+	logger.Do.Println("Master: Register: worker", args.WorkerAddr)
 
 	if len(this.workers) <= this.workerNum {
 		this.workers = append(this.workers, args.WorkerAddr)
@@ -69,7 +69,7 @@ func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 		this.newCond.Broadcast()
 		this.beginCountDown.Broadcast()
 	} else {
-		log.Println("Master: Register Already got enough worker")
+		logger.Do.Println("Master: Register Already got enough worker")
 	}
 	return nil
 }
@@ -106,7 +106,7 @@ func (this *Master) forwardRegistrations(ch chan string, qItem *config.QItem) {
 			// if registered ip and job ip not match
 
 			if ok := reflect.DeepEqual(c, d); !ok {
-				log.Println("Scheduler: Ip are not match")
+				logger.Do.Println("Scheduler: Ip are not match")
 				this.Unlock()
 				return
 			}
@@ -117,14 +117,14 @@ func (this *Master) forwardRegistrations(ch chan string, qItem *config.QItem) {
 			break
 		}
 		if len(this.workers) > indexWorker {
-			log.Println("Master: Found one worker")
+			logger.Do.Println("Master: Found one worker")
 			// there's a worker that we haven't told schedule() about.
 			w := this.workers[indexWorker]
 			go func() {
 				ch <- w
 			}()
 			indexWorker += 1
-			log.Println("Master: worker index is ", indexWorker)
+			logger.Do.Println("Master: worker index is ", indexWorker)
 		} else {
 			// wait for Register() to add an entry to workers[]
 			// in response to an RPC from a new worker.
@@ -137,10 +137,10 @@ func (this *Master) forwardRegistrations(ch chan string, qItem *config.QItem) {
 func (this *Master) run(schedule func(), finish func()) {
 
 	schedule()
-	log.Println("Master: finish job, begin to close all")
+	logger.Do.Println("Master: finish job, begin to close all")
 	finish()
 
-	log.Printf("Master %s: job completed\n", this.Address)
+	logger.Do.Printf("Master %s: job completed\n", this.Address)
 
 	this.doneChannel <- true
 }
@@ -155,11 +155,11 @@ func (this *Master) killWorkers() []int {
 
 		var reply entitiy.ShutdownReply
 
-		log.Println("Master: begin to call Worker.Shutdown")
+		logger.Do.Println("Master: begin to call Worker.Shutdown")
 
 		ok := client.Call(worker, this.Proxy, "Worker.Shutdown", new(struct{}), &reply)
 		if ok == false {
-			log.Printf("Master: RPC %s shutdown error\n", worker)
+			logger.Do.Printf("Master: RPC %s shutdown error\n", worker)
 		} else {
 			// save the res of each call
 			nStat = append(nStat, reply.Ntasks)
@@ -198,7 +198,7 @@ func (this *Master) eventLoop() {
 
 		this.Lock()
 		if this.IsStop == true {
-			log.Printf("Master: isStop=true, server %s quite eventLoop \n", this.Address)
+			logger.Do.Printf("Master: isStop=true, server %s quite eventLoop \n", this.Address)
 			this.Unlock()
 			break
 		}
@@ -238,7 +238,7 @@ func (this *Master) broadcastHeartbeat() {
 
 		ok := client.Call(worker, this.Proxy, "Worker.ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
-			log.Printf("Master: RPC %s send heartbeat error\n", worker)
+			logger.Do.Printf("Master: RPC %s send heartbeat error\n", worker)
 		}
 	}
 }
@@ -258,18 +258,18 @@ func (this *Master) reset() {
 func (this *Master) stopRPCServer() {
 	var reply entitiy.ShutdownReply
 
-	log.Println("Master: begin to call Master.Shutdown")
+	logger.Do.Println("Master: begin to call Master.Shutdown")
 	ok := client.Call(this.Address, this.Proxy, "Master.Shutdown", new(struct{}), &reply)
 	if ok == false {
-		log.Printf("Master: Cleanup: RPC %s error\n", this.Address)
+		logger.Do.Printf("Master: Cleanup: RPC %s error\n", this.Address)
 	}
-	log.Println("Master: cleanupRegistration: done")
+	logger.Do.Println("Master: cleanupRegistration: done")
 }
 
 // Shutdown is an RPC method that shuts down the Master's RPC server.
 // for rpc method, must be public method, only 2 params, second one must be pointer,return err type
 func (this *Master) Shutdown(_, _ *struct{}) error {
-	log.Println("Master: Shutdown: registration server")
+	logger.Do.Println("Master: Shutdown: registration server")
 	_ = this.Listener.Close() // causes the Accept to fail, then break out the accetp loop
 	return nil
 }

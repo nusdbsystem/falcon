@@ -1,10 +1,10 @@
 package worker
 
 import (
+	"coordinator/logger"
 	"fmt"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
-	"log"
 	"net"
 	"time"
 )
@@ -45,7 +45,7 @@ func (ssh_client *SSH) Connect(mode int) {
 	} else if mode == CERT_PUBLIC_KEY_FILE {
 		auth = []ssh.AuthMethod{ssh_client.readPublicKeyFile(ssh_client.Cert)}
 	} else {
-		log.Println("does not support mode: ", mode)
+		logger.Do.Println("does not support mode: ", mode)
 		return
 	}
 
@@ -61,13 +61,13 @@ func (ssh_client *SSH) Connect(mode int) {
 
 	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", ssh_client.Ip, ssh_client.Port), ssh_config)
 	if err != nil {
-		log.Println(err)
+		logger.Do.Println(err)
 		return
 	}
 
 	session, err := client.NewSession()
 	if err != nil {
-		log.Println(err)
+		logger.Do.Println(err)
 		_ = client.Close()
 		return
 	}
@@ -79,9 +79,9 @@ func (ssh_client *SSH) Connect(mode int) {
 func (ssh_client *SSH) RunCmd(cmd string) {
 	out, err := ssh_client.session.CombinedOutput(cmd)
 	if err != nil {
-		log.Println(err)
+		logger.Do.Println(err)
 	}
-	log.Println(string(out))
+	logger.Do.Println(string(out))
 }
 
 func (ssh_client *SSH) Close() {

@@ -2,9 +2,9 @@ package client
 
 import (
 	"bytes"
+	"coordinator/logger"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -26,7 +26,7 @@ func Get(addr string) error {
 		panic(err)
 	}
 
-	log.Println(string(body))
+	logger.Do.Println(string(body))
 	return nil
 }
 
@@ -40,11 +40,11 @@ func PostForm(addr string, data map[string][]string) error {
 					"occupation": {"gardener"}}
 
 	*/
-	log.Printf("%q", addr)
+	logger.Do.Printf("%q", addr)
 	addr = "http://" + strings.TrimSpace(addr)
 	resp, err := http.PostForm(addr, data)
 	if err != nil {
-		log.Println("PostForm Error happens,", err)
+		logger.Do.Println("PostForm Error happens,", err)
 		//panic(err)
 		return err
 	}
@@ -52,7 +52,7 @@ func PostForm(addr string, data map[string][]string) error {
 
 	_ = json.NewDecoder(resp.Body).Decode(&res)
 
-	log.Println("PostForm, res: ", res)
+	logger.Do.Println("PostForm, res: ", res)
 
 	return nil
 }
@@ -78,8 +78,8 @@ func PostJson(addr string, js string) {
 	}
 	defer resp.Body.Close()
 
-	log.Println("response Status:", resp.Status)
-	log.Println("response Headers:", resp.Header)
+	logger.Do.Println("response Status:", resp.Status)
+	logger.Do.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	log.Println("response Body:", string(body))
+	logger.Do.Println("response Body:", string(body))
 }

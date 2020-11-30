@@ -1,7 +1,7 @@
 package base
 
 import (
-	"log"
+	"coordinator/logger"
 	"net"
 	"net/rpc"
 	"sync"
@@ -29,11 +29,11 @@ func (rb *RpcBase) InitRpc(Proxy, Address string) {
 func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 
 
-	log.Printf("%s: listening on %s, %s \n", rb.Name, rb.Proxy, rb.Address)
+	logger.Do.Printf("%s: listening on %s, %s \n", rb.Name, rb.Proxy, rb.Address)
 	listener, e := net.Listen(rb.Proxy, rb.Address)
 
 	if e != nil {
-		log.Printf("%s: StartRPCServer error", rb.Name)
+		logger.Do.Printf("%s: StartRPCServer error", rb.Name)
 	}
 
 	rb.Listener = listener
@@ -45,7 +45,7 @@ func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 			for {
 				conn, err := rb.Listener.Accept()
 				if err == nil {
-					log.Printf("%s: got new conn", rb.Name)
+					logger.Do.Printf("%s: got new conn", rb.Name)
 					// user thread to process requests
 					go func() {
 						rpcSvc.ServeConn(conn)
@@ -53,11 +53,11 @@ func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 					}()
 				} else {
 
-					log.Printf("%s: RegistrationServer: Accept errored, %v \n",rb.Name, err)
+					logger.Do.Printf("%s: RegistrationServer: Accept errored, %v \n",rb.Name, err)
 					break
 				}
 			}
-			log.Printf("%s: masterServer: done\n", rb.Name)
+			logger.Do.Printf("%s: masterServer: done\n", rb.Name)
 		}()
 
 	}else{
@@ -66,14 +66,14 @@ func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 			// create a connection
 			conn, err := rb.Listener.Accept()
 			if err == nil {
-				log.Println("Worker: got new conn")
+				logger.Do.Println("Worker: got new conn")
 				go func() {
 					rpcSvc.ServeConn(conn)
 					// close a connection
 					_ = conn.Close()
 				}()
 			} else {
-				log.Println("Worker: got conn error", err)
+				logger.Do.Println("Worker: got conn error", err)
 				break
 			}
 		}

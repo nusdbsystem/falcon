@@ -6,7 +6,7 @@ import (
 	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/taskmanager"
-	"log"
+	"coordinator/logger"
 )
 
 type ModelService struct{
@@ -29,7 +29,7 @@ func (msvc *ModelService) DoTask(arg []byte, _ *struct{}) error {
 func (msvc *ModelService) CreateService(dta *entitiy.DoTaskArgs) {
 	// todo build sub process to run prediction job
 
-	log.Println("ModelService: CreateService")
+	logger.Do.Println("ModelService: CreateService")
 	dir := "PartyPath.DataInput"
 	stdIn := ""
 	command := "/Users/nailixing/.virtualenvs/test_pip/bin/python"
@@ -40,7 +40,7 @@ func (msvc *ModelService) CreateService(dta *entitiy.DoTaskArgs) {
 
 	killed, e, el, ol := msvc.pm.ExecuteSubProc(dir, stdIn, command, args, envs)
 
-	log.Println("Worker:task 1 pre processing done", killed, e, el, ol)
+	logger.Do.Println("Worker:task 1 pre processing done", killed, e, el, ol)
 
 	if e != config.SubProcessNormal {
 		// return res is used to control the rpc call status, always return nil, but
@@ -79,9 +79,9 @@ func (msvc *ModelService) register(master string) {
 	args := new(entitiy.RegisterArgs)
 	args.WorkerAddr = msvc.Address
 
-	log.Printf("ModelService Worker: begin to call Master.Register to register address= %s \n", args.WorkerAddr)
+	logger.Do.Printf("ModelService Worker: begin to call Master.Register to register address= %s \n", args.WorkerAddr)
 	ok := client.Call(master, msvc.Proxy, "Master.Register", args, new(struct{}))
 	if ok == false {
-		log.Printf("ModelService Worker: Register RPC %s, register error\n", master)
+		logger.Do.Printf("ModelService Worker: Register RPC %s, register error\n", master)
 	}
 }

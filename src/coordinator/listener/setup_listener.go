@@ -5,7 +5,7 @@ import (
 	c "coordinator/client"
 	"coordinator/config"
 	rt "coordinator/listener/router"
-	"log"
+	"coordinator/logger"
 	"net/http"
 	"os"
 )
@@ -31,7 +31,7 @@ func SetupListener(host, port string, ServerAddress string) {
 
 		<-done
 		if err := server.Shutdown(context.Background()); err != nil {
-			log.Fatal("ShutDown the server", err)
+			logger.Do.Fatal("ShutDown the server", err)
 		}
 
 		c.ListenerDelete(ServerAddress, httpAddr)
@@ -39,14 +39,14 @@ func SetupListener(host, port string, ServerAddress string) {
 
 	c.ListenerAdd(ServerAddress, httpAddr)
 
-	log.Println("Starting HTTP server...")
+	logger.Do.Println("Starting HTTP server...")
 	err := server.ListenAndServe()
 
 	if err != nil {
 		if err == http.ErrServerClosed {
-			log.Print("Server closed under request", err)
+			logger.Do.Print("Server closed under request", err)
 		} else {
-			log.Fatal("Server closed unexpected", err)
+			logger.Do.Fatal("Server closed unexpected", err)
 		}
 	}
 }

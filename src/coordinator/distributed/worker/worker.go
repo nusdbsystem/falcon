@@ -7,8 +7,8 @@ import (
 	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/taskmanager"
+	"coordinator/logger"
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -26,7 +26,7 @@ type Worker struct {
 
 func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
-	log.Printf("Worker: %s task started \n", wk.Address)
+	logger.Do.Printf("Worker: %s task started \n", wk.Address)
 
 	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
 
@@ -36,7 +36,7 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
 	// execute task 1: data processing
 
-	log.Println("Worker:task 1 pre processing start")
+	logger.Do.Println("Worker:task 1 pre processing start")
 	dir := dta.PartyPath.DataInput
 	stdIn := ""
 	command := "/Users/nailixing/.virtualenvs/test_pip/bin/python"
@@ -55,7 +55,7 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 	rep.Errs[config.PreProcessing] = e
 	rep.ErrLogs[config.PreProcessing] = el
 	rep.OutLogs[config.PreProcessing] = ol
-	log.Println("Worker:task 1 pre processing done", killed, e, el, ol)
+	logger.Do.Println("Worker:task 1 pre processing done", killed, e, el, ol)
 
 	if e != config.SubProcessNormal {
 		// return res is used to control the rpc call status, always return nil, but
@@ -63,14 +63,14 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 		return nil
 	}
 
-	//log.Println("----------------------------------------")
-	//log.Printf("Errors is %s\n", el)
-	//log.Println("----------------------------------------")
-	//log.Printf("Output is %s\n", ol)
-	//log.Println("----------------------------------------")
+	//logger.Do.Println("----------------------------------------")
+	//logger.Do.Printf("Errors is %s\n", el)
+	//logger.Do.Println("----------------------------------------")
+	//logger.Do.Printf("Output is %s\n", ol)
+	//logger.Do.Println("----------------------------------------")
 
 	// execute task 2: train
-	log.Println("Worker:task model training start")
+	logger.Do.Println("Worker:task model training start")
 	dir = dta.PartyPath.Model
 	stdIn = ""
 	command = "/Users/nailixing/.virtualenvs/test_pip/bin/python"
@@ -89,19 +89,19 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 	rep.ErrLogs[config.ModelTraining] = el
 	rep.OutLogs[config.ModelTraining] = ol
 
-	log.Println("Worker:task 2 train worker done", killed)
+	logger.Do.Println("Worker:task 2 train worker done", killed)
 
 	if e != config.SubProcessNormal {
 		return nil
 	}
 
 	for i := 10; i > 0; i-- {
-		log.Println("Worker: Counting down before job done... ", i)
+		logger.Do.Println("Worker: Counting down before job done... ", i)
 
 		time.Sleep(time.Second)
 	}
 
-	log.Printf("Worker: %s: task done\n", wk.Address)
+	logger.Do.Printf("Worker: %s: task done\n", wk.Address)
 
 	return nil
 }
@@ -111,17 +111,17 @@ func (wk *Worker) register(master string) {
 	args := new(entitiy.RegisterArgs)
 	args.WorkerAddr = wk.Address
 
-	log.Printf("Worker: begin to call Master.Register to register address= %s \n", args.WorkerAddr)
+	logger.Do.Printf("Worker: begin to call Master.Register to register address= %s \n", args.WorkerAddr)
 	ok := client.Call(master, wk.Proxy, "Master.Register", args, new(struct{}))
 	if ok == false {
-		log.Printf("Worker: Register RPC %s, register error\n", master)
+		logger.Do.Printf("Worker: Register RPC %s, register error\n", master)
 	}
 }
 
 // Shutdown is called by the master when all work has been completed.
 // We should respond with the number of tasks we have processed.
 func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
-	log.Println("Worker: Shutdown", wk.Address)
+	logger.Do.Println("Worker: Shutdown", wk.Address)
 
 	// there are running subprocess
 	wk.pm.Lock()
@@ -134,9 +134,9 @@ func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
 
 		wk.pm.IsStop <- true
 
-		log.Println("Worker: Waiting to finish DoTask...", wk.pm.NumProc)
+		logger.Do.Println("Worker: Waiting to finish DoTask...", wk.pm.NumProc)
 		<-wk.taskFinish
-		log.Println("Worker: DoTask returned, Close the listener...")
+		logger.Do.Println("Worker: DoTask returned, Close the listener...")
 	} else {
 		wk.pm.Unlock()
 
@@ -144,7 +144,7 @@ func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
 
 	err := wk.Listener.Close() // close the connection, cause error, and then ,break the worker
 	if err != nil {
-		log.Println("Worker: worker close error, ", err)
+		logger.Do.Println("Worker: worker close error, ", err)
 	}
 	// this is used to define shut down the worker servers
 
@@ -157,7 +157,7 @@ func (wk *Worker) eventLoop() {
 
 		wk.Lock()
 		if wk.IsStop == true {
-			log.Printf("Worker: isStop=true, server %s quite eventLoop \n", wk.Address)
+			logger.Do.Printf("Worker: isStop=true, server %s quite eventLoop \n", wk.Address)
 
 			wk.Unlock()
 			break
@@ -166,14 +166,14 @@ func (wk *Worker) eventLoop() {
 		elapseTime := time.Now().UnixNano() - wk.latestHeardTime
 		if int(elapseTime/int64(time.Millisecond)) >= wk.SuicideTimeout {
 
-			log.Printf("Worker: Timeout, server %s begin to suicide \n", wk.Address)
+			logger.Do.Printf("Worker: Timeout, server %s begin to suicide \n", wk.Address)
 
 			var reply entitiy.ShutdownReply
 			ok := client.Call(wk.Address, wk.Proxy, "Worker.Shutdown", new(struct{}), &reply)
 			if ok == false {
-				log.Printf("Worker: RPC %s shutdown error\n", wk.Address)
+				logger.Do.Printf("Worker: RPC %s shutdown error\n", wk.Address)
 			} else {
-				log.Printf("Worker: worker timeout, RPC %s shutdown successfule\n", wk.Address)
+				logger.Do.Printf("Worker: worker timeout, RPC %s shutdown successfule\n", wk.Address)
 			}
 			// quite event loop no matter ok or not
 			break
