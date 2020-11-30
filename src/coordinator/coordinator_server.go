@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 )
 
 var svc string
@@ -41,8 +42,12 @@ func main() {
 	flag.Parse()
 	verifyArgs()
 
-	_ = os.Mkdir(".logs", os.ModePerm)
-	logFileName := ".logs/" + svc + ".log"
+	_ = os.Mkdir("logs", os.ModePerm)
+	// Use layout string for time format.
+	const layout = "2006-01-02T15:04:05"
+	// Place now in the string.
+	rawTime := time.Now()
+	logFileName := "logs/" + svc + rawTime.Format(layout) + ".log"
 
 	logFile, logErr := os.OpenFile(logFileName, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
 
@@ -55,6 +60,7 @@ func main() {
 
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
+
 	// start work in remote machine automatically
 	if svc == "listener" {
 
@@ -62,14 +68,14 @@ func main() {
 			log.Println("Error: Input Error, Must Provide ip of listener")
 			os.Exit(1)
 		}
-		log.Println("Lunching coordinator_server, the svc", svc)
+		log.Println("Launch coordinator_server, the svc", svc)
 
 		masterAddr := httpAddr + ":" + config.MasterPort
 		listener.SetupListener(listenerAddr, config.ListenerPort, masterAddr)
 	}
 
 	if svc == "coordinator" {
-		log.Println("Lunching coordinator_server, the svc", svc)
+		log.Println("Launch coordinator_server, the svc", svc)
 
 		api.SetupHttp(httpAddr, config.MasterPort, 3)
 	}

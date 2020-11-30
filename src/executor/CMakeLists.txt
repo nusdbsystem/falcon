@@ -1,0 +1,100 @@
+cmake_minimum_required(VERSION 3.10)
+project(falcon)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options")
+
+set(SOURCE_FILES
+        ../../include/falcon/network/Comm.hpp
+        network/Comm.cpp
+        ../../include/falcon/network/ConfigFile.hpp
+        network/ConfigFile.cpp
+        ../../include/falcon/party/party.h
+        party/party.cc
+        ../../include/falcon/utils/pb_converter/model_converter.h
+        utils/pb_converter/model_converter.cc
+        ../../include/falcon/utils/pb_converter/phe_keys_converter.h
+        utils/pb_converter/phe_keys_converter.cc
+        include/message/model.pb.h
+        include/message/model.pb.cc
+        include/message/phe_keys.pb.h
+        include/message/phe_keys.pb.cc
+        ../../include/falcon/operator/phe/fixed_point_encoder.h
+        operator/phe/fixed_point_encoder.cc
+        ../../include/falcon/operator/phe/djcs_t_aux.h
+        operator/phe/djcs_t_aux.cc
+        ../../include/falcon/operator/mpc/spdz_connector.h
+        operator/mpc/spdz_connector.cc
+        ../../include/falcon/utils/io_util.h
+        utils/io_util.cc)
+
+#set(SPDZ_HOME "$ENV{HOME}/Documents/MP-SPDZ/")
+set(SPDZ_HOME "$ENV{HOME}/Documents/falcon/third_party/MP-SPDZ/")
+set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
+
+add_library(executor ${SOURCE_FILES})
+
+include(FindProtobuf)
+find_package(Protobuf REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
+
+target_include_directories(executor PUBLIC
+        ${Boost_INCLUDE_DIRS}
+        ${FALCON_INCLUDE_DIR}
+        ${PROTOBUF_INCLUDE_DIR}
+        ${SPDZ_HOME}
+        ${SPDZ_HOME}/local/include
+        $ENV{HOME}/Documents/falcon/include)
+
+target_link_libraries(executor
+        $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
+        ${PROTOBUF_LIBRARY}
+        ${Boost_LIBRARIES}
+        ${SPDZ_HOME}/libSPDZ.a
+        libboost_thread.a
+        libboost_system.a
+        pthread
+        crypto
+        cryptopp
+        gtest
+        gflags
+        ssl
+        mpirxx
+        mpir
+        sodium
+        /usr/local/lib/libglog.so
+        /usr/lib/x86_64-linux-gnu/libgmp.so
+        /usr/lib/x86_64-linux-gnu/libgmpxx.so)
+
+#find_package (glog 0.4.0 REQUIRED)
+
+link_directories(/usr/local/lib /usr/ssl/lib ${SPDZ_HOME}/local/lib)
+
+include_directories(
+        ${Boost_INCLUDE_DIRS}
+        ${PROJECT_SOURCE_DIR}/include/
+        ${PROTOBUF_INCLUDE_DIR}
+        ${SPDZ_HOME}
+        ${SPDZ_HOME}/local/include
+        ${PROJECT_SOURCE_DIR}/src)
+
+add_executable(falcon main.cc)
+
+target_link_libraries(falcon
+        $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
+        ${PROTOBUF_LIBRARY}
+        ${Boost_LIBRARIES}
+        executor
+        libboost_thread.a
+        libboost_system.a
+        pthread
+        crypto
+        cryptopp
+        gtest
+        gflags
+        ssl
+        mpirxx
+        mpir
+        sodium
+        /usr/local/lib/libglog.so
+        /usr/lib/x86_64-linux-gnu/libgmp.so
+        /usr/lib/x86_64-linux-gnu/libgmpxx.so)

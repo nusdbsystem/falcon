@@ -11,9 +11,8 @@ type Context struct {
 
 func InitContext(httpAddr ...string) *Context {
 	ad := new(Context)
-	ad.Ms = models.InitDefaultMetaStore()
+	ad.Ms = models.InitMetaStore()
 	ad.HttpHost = httpAddr[0]
 	ad.HttpPort = httpAddr[1]
-
 	return ad
 }

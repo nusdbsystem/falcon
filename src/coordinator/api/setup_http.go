@@ -15,7 +15,9 @@ import (
 
 func handlePanic() {
 	err := recover()
-	log.Println(err)
+	if err != nil {
+		log.Println(err)
+	}
 }
 func SetupHttp(host, port string, nConsumer int) {
 	defer handlePanic()
@@ -63,7 +65,7 @@ func SetupHttp(host, port string, nConsumer int) {
 
 		<-done
 
-		log.Println("HTTP: Stopping muti consumers")
+		log.Println("HTTP: Stop multi consumers")
 
 		dslScheduler.StopMonitor()
 		log.Println("HTTP: Monitor Stopped")
@@ -81,7 +83,7 @@ func SetupHttp(host, port string, nConsumer int) {
 		}
 	}()
 
-	log.Println("HTTP: Starting muti consumers...")
+	log.Println("HTTP: Starting multi consumers...")
 
 	// multi-thread consumer
 

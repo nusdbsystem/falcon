@@ -1,4 +1,5 @@
 import argparse
+import requests
 
 
 def submit_job(url, path):
@@ -45,7 +46,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     print(args.url, args.path, args.path)
-    import requests
 
     if args.method == "submit":
         submit_job(args.url, args.path)

@@ -5,6 +5,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
 include_directories(${FALCON_INCLUDE_DIR};${PROJECT_BINARY_DIR})
 
-add_subdirectory(src)
+add_subdirectory(src/executor)
 enable_testing ()
 add_subdirectory(test)

@@ -12,13 +12,7 @@ import (
 
 func TestSql(t *testing.T) {
 
-	ms := models.InitMetaStore(
-		"mysql",
-		"localhost",
-		"root",
-		"rootuser",
-		"Test",
-		"?parseTime=true")
+	ms := models.InitMetaStore()
 
 	ms.Connect()
 	e, u := ms.JobGetByJobID(1)

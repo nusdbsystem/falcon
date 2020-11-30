@@ -7,7 +7,7 @@ import (
 
 func CreateTables() {
 
-	ms := models.InitDefaultMetaStore()
+	ms := models.InitMetaStore()
 
 	ms.Connect()
 	ms.Tx = ms.Db.Begin()

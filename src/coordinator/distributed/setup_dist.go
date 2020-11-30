@@ -17,6 +17,7 @@ import (
 func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) {
 	log.Println("SetupDist: Lunching master")
 
+
 	httpAddr := httpHost + ":" + httpPort
 	port, e := utils.GetFreePort()
 
@@ -32,7 +33,7 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) 
 
 	for _, ip := range qItem.IPs {
 
-		// lunching the worker
+		// Launch the worker
 
 		// todo currently worker port is fixed, not a good design, change to dynamic later
 		// maybe check table wit ip, and + port got from table also
@@ -46,7 +47,7 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) 
 }
 
 func SetupWorker(httpHost string, masterAddress string) error {
-	log.Println("SetupDist: Lunching worker threads")
+	log.Println("SetupDist: Launch worker threads")
 
 	wg := sync.WaitGroup{}
 
@@ -55,7 +56,7 @@ func SetupWorker(httpHost string, masterAddress string) error {
 	for i := 0; i < 1; i++ {
 		port, e := utils.GetFreePort()
 		if e != nil {
-			log.Println("SetupDist: Lunching worker Get port Error")
+			log.Println("SetupDist: Launch worker Get port Error")
 			return e
 		}
 		wg.Add(1)

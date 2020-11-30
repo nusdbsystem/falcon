@@ -1,67 +1,39 @@
 //
-// Created by wuyuncheng on 13/8/20.
+// Created by wuyuncheng on 14/11/20.
 //
 
-#include <string>
-#include <iostream>
-
-#include <gtest/gtest.h>
-#include <falcon/utils/pb_converter/model_converter.h>
+#include <falcon/utils/io_util.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 
-TEST(PB_Converter, ModelPublishRequest) {
-  int model_id = 1;
-  int initiator_party_id = 1001;
-  std::string output_message;
-  serialize_model_publish_request(model_id,
-      initiator_party_id,
-      output_message);
+#include <vector>
 
-  int deserialized_model_id;
-  int deserialized_initiator_party_id;
-  deserialize_model_publish_request(deserialized_model_id,
-      deserialized_initiator_party_id,
-      output_message);
+#include <gtest/gtest.h>
 
-  EXPECT_EQ(1, deserialized_model_id);
-  EXPECT_EQ(1001, deserialized_initiator_party_id);
+TEST(IO_Util, ReadWriteData) {
+  // create dummy data
+  std::vector< std::vector<float> > write_data;
+  for (int i = 0; i < 2; i++) {
+    std::vector<float> row;
+    for (int j = 0; j < 3; j++) {
+      row.push_back(i*100 + j*10 + 0.5);
+    }
+    write_data.push_back(row);
+  }
+  // write data to file
+  std::string file_name = "test_data.txt";
+  write_dataset_to_file(write_data, file_name);
+
+  // read data and compare
+  std::vector< std::vector<float> > read_data = read_dataset(file_name);
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 3; j++) {
+      EXPECT_EQ(write_data[i][j], read_data[i][j]);
+    }
+  }
 }
 
-TEST(PB_Converter, ModelPublishResponse) {
-  int model_id = 1;
-  int initiator_party_id = 1001;
-  int is_success = 0;
-  int error_code = 2001;
-  std::string error_msg = "Model id does not exist.";
-  std::string output_message;
-  serialize_model_publish_response(model_id,
-      initiator_party_id,
-      is_success,
-      error_code,
-      error_msg,
-      output_message);
-
-  int deserialized_model_id;
-  int deserialized_initiator_party_id;
-  int deserialized_is_success;
-  int deserialized_error_code;
-  std::string deserialized_error_msg;
-  deserialize_model_publish_response(deserialized_model_id,
-      deserialized_initiator_party_id,
-      deserialized_is_success,
-      deserialized_error_code,
-      deserialized_error_msg,
-      output_message);
-
-  EXPECT_EQ(1, deserialized_model_id);
-  EXPECT_EQ(1001, deserialized_initiator_party_id);
-  EXPECT_EQ(0, deserialized_is_success);
-  EXPECT_EQ(2001, deserialized_error_code);
-  EXPECT_TRUE(error_msg == deserialized_error_msg);
-}
-
-TEST(PB_Converter, PHEKeys) {
-  // generate phe keys
+TEST(IO_Util, ReadWriteKeys) {
+// generate phe keys
   hcs_random* phe_random = hcs_init_random();
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   djcs_t_private_key* phe_priv_key = djcs_t_init_private_key();
@@ -78,11 +50,16 @@ TEST(PB_Converter, PHEKeys) {
 
   // test serialization and deserialization
   for(int i = 0; i < 3; i++) {
-    std::string output_message;
-    serialize_phe_keys(phe_pub_key, phe_auth_server[i], output_message);
+    std::string write_message;
+    serialize_phe_keys(phe_pub_key, phe_auth_server[i], write_message);
+
+    std::string key_file_name = "test_key_file" + std::to_string(i) + ".pem";
+    write_key_to_file(write_message, key_file_name);
+
+    std::string read_message = read_key_file(key_file_name);
     djcs_t_public_key* deserialized_phe_pub_key = djcs_t_init_public_key();
     djcs_t_auth_server* deserialized_phe_auth_server = djcs_t_init_auth_server();
-    deserialize_phe_keys(deserialized_phe_pub_key, deserialized_phe_auth_server, output_message);
+    deserialize_phe_keys(deserialized_phe_pub_key, deserialized_phe_auth_server, read_message);
 
     EXPECT_EQ(phe_pub_key->s, deserialized_phe_pub_key->s);
     EXPECT_EQ(phe_pub_key->l, deserialized_phe_pub_key->l);
@@ -111,6 +88,3 @@ TEST(PB_Converter, PHEKeys) {
   free(si);
   free(phe_auth_server);
 }
-
-
-
