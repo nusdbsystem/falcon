@@ -1,0 +1,90 @@
+Table JobRecord {
+  id int [primary key]
+  JobId int
+  AppId int
+  JobName varchar
+  UserID int
+  PartyIds varchar
+  Status int
+
+  TaskNum int
+  FlSetting int
+  ErrorMsg varchar
+
+  JobDecs varchar
+  JobResult varchar
+  IsDelete int
+
+  CreateTime timestamp
+  UpdateTime timestamp
+  DeleteTime timestamp
+  ExtInfo varchar
+  MasterAddress varchar
+
+}
+
+
+Table ServiceRecord {
+  id int [primary key]
+  JobId int
+  MasterAddress varchar
+  WorkerAddr varchar
+
+}
+
+
+Table ModelRecord {
+  ID int [primary key]
+  JobId int
+
+  ModelName varchar
+  ModelPath varchar
+  ModelDecs varchar
+
+  PartyNumber int
+  PartyIds varchar
+
+  ExecutablePath varchar
+
+  IsTrained int
+  IsPublished int
+  IsDelete int
+
+
+  CreateTime timestamp
+  UpdateTime timestamp
+  DeleteTime timestamp
+  ExtInfo varchar
+}
+
+
+
+Table ModelServiceInfo {
+  ID int [primary key]
+
+
+  ModelServiceName varchar
+
+  Status int
+  ModelId int
+  JobId int
+  PartyNumber int
+  PartyIds varchar
+
+  IsPublished int
+  IsDelete int
+
+  CreateTime timestamp
+  UpdateTime timestamp
+  DeleteTime timestamp
+  ExtInfo varchar
+}
+
+
+// Creating references
+// You can also define relaionship separately
+// > many-to-one; < one-to-many; - one-to-one
+Ref: JobRecord.JobId - ServiceRecord.JobId
+Ref: JobRecord.JobId - ModelRecord.JobId
+Ref: JobRecord.JobId - ModelServiceInfo.JobId
+
