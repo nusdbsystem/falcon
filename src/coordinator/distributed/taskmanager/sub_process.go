@@ -4,6 +4,7 @@ import (
 	"coordinator/config"
 	"coordinator/logger"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -128,7 +129,6 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		if err != nil {
 			logger.Do.Println(err)
 			return false, err.Error(), "", ""
-
 		}
 
 		_, err = cmd.StdoutPipe()
@@ -201,4 +201,103 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		return false, errors.New("SubProcessManager: cmd.Process is Nil, start error").Error(), "", ""
 	}
 
+}
+
+
+
+
+func (pm *SubProcessManager) ExecuteSubProc2(
+	dir, stdIn, commend string,
+	args []string,
+	envs []string,
+) (bool, string, string, string) {
+
+	defer func() {
+		logger.Do.Println("SubProcessManager: Getting lock")
+		pm.Lock()
+		pm.NumProc -= 1
+		logger.Do.Println("SubProcessManager: Unlock")
+		pm.Unlock()
+		logger.Do.Println("SubProcessManager: Unlock done")
+	}()
+
+	cmd := exec.Command(commend, args...)
+
+	if len(dir) > 0 {
+		cmd.Dir = dir
+	}
+
+	if len(envs) > 0 {
+		cmd.Env = append(os.Environ(), envs...)
+	}
+
+	if len(stdIn) > 0 {
+		cmd.Stdin = strings.NewReader(stdIn)
+	}
+
+	// shutdown the process after 2 hour, if still not finish
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
+	time.AfterFunc(2*time.Hour, func() {
+		err := syscall.Kill(cmd.Process.Pid, syscall.SIGQUIT)
+		logger.Do.Println("SubProcessManager: Timeout, Killed PID=cmd.Process.Pid")
+		if err != nil {
+			logger.Do.Fatal(err)
+		}
+	})
+
+	var out outstream
+	cmd.Stdout = out
+
+	if err := cmd.Start(); err != nil {
+		logger.Do.Println(err)
+		return false, err.Error(), "", ""
+	}
+
+	isKilled := make(chan bool, 1)
+	isFinish := make(chan bool, 1)
+	// if start successfully
+	if cmd.Process != nil {
+		logger.Do.Println("SubProcessManager: Open subProcess, PID=", cmd.Process.Pid)
+
+		go pm.KillSubProc(cmd.Process.Pid, isKilled, isFinish)
+		// if there is a running KillSubProc, nTasks add 1
+		pm.Lock()
+		pm.NumProc += 1
+		pm.Unlock()
+
+		var outErr error
+
+		//阻塞直到该命令执行完成，该命令必须是被Start方法开始执行的
+		outErr = cmd.Wait()
+
+		var oe string
+		if outErr != nil {
+			oe = outErr.Error()
+		} else {
+			oe = config.SubProcessNormal
+		}
+		for {
+
+			select {
+			case killed := <-isKilled:
+				logger.Do.Println("SubProcessManager: Job Done, return")
+				return killed, oe, "", ""
+			case isFinish <- true:
+				logger.Do.Println("SubProcessManager: Write to isFinish")
+			default:
+			}
+		}
+
+	} else {
+		return false, errors.New("SubProcessManager: cmd.Process is Nil, start error").Error(), "", ""
+	}
+}
+
+
+type outstream struct{}
+
+func (out outstream) Write(p []byte) (int, error) {
+	fmt.Println(string(p))
+	return len(p), nil
 }

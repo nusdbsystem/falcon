@@ -11,7 +11,7 @@ import (
 )
 
 func SetupListener(host, port string, ServerAddress string) {
-
+	// host: listenerAddr
 	// ServerAddress: the address for main http server
 	// host port:  for listener,
 

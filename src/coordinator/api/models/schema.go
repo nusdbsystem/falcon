@@ -97,7 +97,7 @@ type ModelRecord struct {
 	JobId       uint									//外键job id
 
 	ModelName   string `gorm:"type:varchar(256)"`		//model名称，LR etc.
-	ModelPaths   string									////参与⽅model路径
+	ModelPaths   string	`gorm:"type:varchar(4096)"`		////参与⽅model路径
 	ModelDecs   string `gorm:"type:varchar(256)"`		//model描述，与job名称相同
 
 	//ModelData   string `gorm:"type:varchar(4096)"`	// model参数

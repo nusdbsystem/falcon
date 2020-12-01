@@ -1,5 +1,18 @@
 package config
 
+import "os"
+
+/**
+ * @Author
+ * @Description This file is only used inside the project,
+				for any config required to modify according to env,
+				use user_config.sh or bash_env.sh
+ * @Date 4:42 下午 1/12/20
+ * @Param
+ * @return
+ **/
+
+
 const (
 	Master = "Master"
 	Worker = "Worker"
@@ -56,10 +69,6 @@ const (
 	AppName = "app_name"
 	ExtInfo = "ext_info"
 
-	// sys point
-	MasterPort   = "6573"
-	ListenerPort = "6574"
-
 	Proxy = "tcp"
 
 	// job status
@@ -72,13 +81,37 @@ const (
 	TrainTaskType = "train"
 	PredictTaskType = "predict"
 
+	DevEnv = "dev"
+	ProdEnv = "prod"
+
+	CoordinatorYaml = "./deploy/yamlfiles/"
+	ListenerYaml = "./deploy/yamlfiles/"
+
+	TrainYaml = "./deploy/yamlfiles/"
+	PredictorYaml = "./deploy/yamlfiles/"
+
+)
+
+var (
+	//////////////////////////////////////////////////////////////////////////
+	// This is user defined variables, define them in user_config.sh first, //
+	// and then, add to here												//
+	//////////////////////////////////////////////////////////////////////////
+
 	// MetaStore and Database Configs
-	MS_ENGINE        = "sqlite3" // or mysql
-	MS_HOST          = "localhost"
-	MS_SQLITE_DB     = "./falcon.db"
-	MS_MYSQL_USER    = "root"
-	MS_MYSQL_PWD     = "rootuser"
-	MS_MYSQL_DB      = "Test"
-	MS_MYSQL_OPTIONS = "?parseTime=true"
+	MsEngine       = os.Getenv("MS_ENGINE")
+	MsSqliteDb     = os.Getenv("MS_SQLITE_DB")
+	MsHost         = os.Getenv("MS_HOST")
+	MsMysqlUser    = os.Getenv("MS_MYSQL_USER")
+	MsMysqlPwd     = os.Getenv("MS_MYSQL_PWD")
+	MsMysqlDb      = os.Getenv("MS_MYSQL_DB")
+	MsMysqlOptions = os.Getenv("MS_MYSQL_OPTIONS")
+
+	// sys port
+	MasterPort   = os.Getenv("MasterPort")
+	ListenerPort = os.Getenv("ListenerPort")
+
+	// envs
+	Env = os.Getenv("Env")
 
 )

@@ -5,7 +5,6 @@ import (
 	"coordinator/logger"
 	"encoding/json"
 	"fmt"
-	"log"
 	"testing"
 )
 
