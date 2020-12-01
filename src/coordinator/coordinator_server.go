@@ -16,7 +16,8 @@ import (
 var svc string
 var httpAddr string
 var listenerAddr string
-var predictorAddr string
+
+var workerAddr string
 var masterAddr string
 
 func init() {
@@ -24,7 +25,9 @@ func init() {
 	flag.StringVar(&svc, "svc", "coordinator", "choose which service to run, 'coordinator' or 'listener'")
 	flag.StringVar(&httpAddr, "cip", "localhost", "Ip Address of coordinator")
 	flag.StringVar(&listenerAddr, "lip", "localhost", "Ip Address of listener")
-	flag.StringVar(&predictorAddr, "pip", "localhost", "Ip Address of predictor")
+
+	// worker ip ,master addr
+	flag.StringVar(&workerAddr, "wip", "localhost", "Ip Address of WorkerAddr")
 	flag.StringVar(&masterAddr, "master_addr", "localhost", "Ip Address of master, this is only used for predictor")
 }
 
@@ -78,15 +81,27 @@ func main() {
 		api.SetupHttp(httpAddr, config.MasterPort, 3)
 	}
 
-	if svc == "predictor" {
+	if svc == config.TrainTaskType {
 
-		if len(predictorAddr) == 0 || len(masterAddr) ==0 {
-			logger.Do.Println("Error: Input Error, Must Provide ip of predictor and masterAddr,", predictorAddr, masterAddr)
+		if len(workerAddr) == 0 || len(masterAddr) ==0 {
+			logger.Do.Println("Error: Input Error, Must Provide ip of predictor and masterAddr,", workerAddr, masterAddr)
 			os.Exit(1)
 		}
 		logger.Do.Println("Lunching coordinator_server, the svc", svc)
 
-		distributed.SetupPrediction(predictorAddr, masterAddr)
+		distributed.SetupTrain(workerAddr, masterAddr)
+	}
+
+
+	if svc == config.PredictTaskType {
+
+		if len(workerAddr) == 0 || len(masterAddr) ==0 {
+			logger.Do.Println("Error: Input Error, Must Provide ip of trainWorkerAddr and masterAddr,", workerAddr, masterAddr)
+			os.Exit(1)
+		}
+		logger.Do.Println("Lunching coordinator_server, the svc", svc)
+
+		distributed.SetupPrediction(workerAddr, masterAddr)
 
 	}
 }

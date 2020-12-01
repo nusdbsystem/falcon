@@ -5,10 +5,9 @@ import (
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"net/rpc"
-	"sync"
 )
 
-func RunWorker(masterAddress, workerProxy, workerHost, workerPort string, wg *sync.WaitGroup) {
+func RunWorker(masterAddress, workerProxy, workerHost, workerPort string) {
 
 	workerAddress := workerHost + ":" + workerPort
 
@@ -36,7 +35,6 @@ func RunWorker(masterAddress, workerProxy, workerHost, workerPort string, wg *sy
 	wk.register(masterAddress)
 
 	wk.StartRPCServer(rpcSvc, true)
-	wg.Done()
 
 	logger.Do.Println("Worker: ", workerAddress, "runWorker exit")
 }

@@ -24,16 +24,16 @@ type MetaStore struct {
 
 func InitMetaStore() *MetaStore {
 	ms := new(MetaStore)
-	ms.engine = config.MS_ENGINE
-	ms.host = config.MS_HOST
+	ms.engine = config.MsEngine
+	ms.host = config.MsHost
 	ms.user = ""
 	ms.password = ""
 	ms.database = ""
 
 	if ms.engine == "mysql" {
-		ms.user = config.MS_MYSQL_USER
-		ms.password = config.MS_MYSQL_PWD
-		ms.database = config.MS_MYSQL_DB
+		ms.user = config.MsMysqlUser
+		ms.password = config.MsMysqlPwd
+		ms.database = config.MsMysqlDb
 
 		mysql_url := fmt.Sprintf(
 			"%s:%s@tcp(%s:3306)/%s%s",
@@ -41,11 +41,11 @@ func InitMetaStore() *MetaStore {
 			ms.password,
 			ms.host,
 			ms.database,
-			config.MS_MYSQL_OPTIONS,
+			config.MsMysqlOptions,
 		)
 		ms.url = mysql_url
 	} else if ms.engine == "sqlite3" {
-		ms.url = config.MS_SQLITE_DB
+		ms.url = config.MsSqliteDb
 	}
 	return ms
 }

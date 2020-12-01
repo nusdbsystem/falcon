@@ -9,6 +9,8 @@ import (
 	"sync"
 )
 
+type taskHandler func(workerAddr,httpAddr,svcName string, args *entitiy.DoTaskArgs, JobId uint, wg *sync.WaitGroup)
+
 func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *config.QItem, taskType string) {
 	logger.Do.Println("Scheduler: Begin to schedule")
 
@@ -28,92 +30,43 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 		workerAddress = append(workerAddress, addr)
 	}
 
+
 	if taskType == config.TrainTaskType{
-		this.scheduleWorker(httpAddr,config.Worker,qItem,workerAddress)
+
+		taskFunc := this.trainTaskHandler
+
+		this.schedulerHelper(taskFunc, httpAddr, config.Worker,qItem,workerAddress)
+
+		client.ModelUpdate(
+			httpAddr,
+			1,
+			qItem.JobId)
 
 		// stop worker after finishing the job
 		this.stats = this.killWorkers()
 
 	}else if taskType == config.PredictTaskType{
-		this.schedulePrediction(httpAddr,config.ModelService,qItem,workerAddress)
+
+		taskFunc := this.predictTaskHandler
+
+		this.schedulerHelper(taskFunc, httpAddr,config.ModelService,qItem,workerAddress)
+
 	}
 }
 
 
-func (this *Master) scheduleWorker(httpAddr, svcName string, qItem *config.QItem, workerAddress []string){
-	// execute the task
+func (this *Master) schedulerHelper(
+
+	taskHandler taskHandler,
+
+	httpAddr string,
+	svcName string,
+	qItem *config.QItem,
+	workerAddress []string){
+
 	wg := sync.WaitGroup{}
-	startTask := func(workerAddr string, args *entitiy.DoTaskArgs) {
-		defer wg.Done()
 
-		argAddr := entitiy.EncodeDoTaskArgs(args)
-		var rep entitiy.DoTaskReply
-
-		// todo, now master call worker.Dotask, worker start to train, until training is done, so how long it will wait? before timeout
-
-		logger.Do.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
-		ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
-
-		if !ok {
-			logger.Do.Printf("Scheduler: %s.DoTask error\n", svcName)
-
-			client.JobUpdateResInfo(
-				httpAddr,
-				"call Worker.DoTask error",
-				"call Worker.DoTask error",
-				"call Worker.DoTask error",
-				qItem.JobId)
-			client.JobUpdateStatus(httpAddr, config.JobFailed, qItem.JobId)
-			return
-		}
-
-		errLen := 4096
-		outLen := 4096
-		errMsg := rep.ErrLogs[config.PreProcessing] + config.ModelTraining + rep.ErrLogs[config.ModelTraining]
-		outMsg := rep.OutLogs[config.PreProcessing] + config.ModelTraining + rep.OutLogs[config.ModelTraining]
-		if len(errMsg) < errLen {
-			errLen = len(errMsg)
-		}
-
-		if len(outMsg) < outLen {
-			outLen = len(outMsg)
-		}
-
-		logger.Do.Println("Scheduler: max length is", outLen, errLen)
-
-		if rep.Killed == true {
-		} else if rep.Errs[config.PreProcessing] != config.SubProcessNormal {
-			// if pre-processing failed
-			client.JobUpdateResInfo(
-				httpAddr,
-				rep.ErrLogs[config.PreProcessing],
-				rep.OutLogs[config.PreProcessing],
-				"PreProcessing Failed",
-				qItem.JobId)
-			client.JobUpdateStatus(httpAddr, config.JobFailed, qItem.JobId)
-
-			// if pre-processing pass, but train failed
-		} else if rep.Errs[config.ModelTraining] != config.SubProcessNormal {
-			client.JobUpdateResInfo(
-				httpAddr,
-				errMsg[:errLen],
-				outMsg[:outLen],
-				"PreProcessing Passed, ModelTraining Failed",
-				qItem.JobId)
-			client.JobUpdateStatus(httpAddr, config.JobFailed, qItem.JobId)
-
-			// if both train and process pass
-		} else {
-			client.JobUpdateResInfo(
-				httpAddr,
-				errMsg[:errLen],
-				outMsg[:outLen],
-				"PreProcessing Passed, ModelTraining Passed",
-				qItem.JobId)
-			client.JobUpdateStatus(httpAddr, config.JobSuccessful, qItem.JobId)
-		}
-	}
-
+	// execute the task
 	for i, v := range qItem.IPs {
 		args := new(entitiy.DoTaskArgs)
 		args.IP = v
@@ -129,64 +82,118 @@ func (this *Master) scheduleWorker(httpAddr, svcName string, qItem *config.QItem
 				wg.Add(1)
 
 				// execute the task
-				go startTask(workerAddr, args)
+				go taskHandler(workerAddr,httpAddr,svcName,args,qItem.JobId,&wg)
 
 			}
 		}
 	}
-
-	// wait until all task is done
+	// wait all job has been finished successfully
 	wg.Wait()
 
-	client.ModelUpdate(
-		httpAddr,
-		1,
-		qItem.JobId)
-
-	logger.Do.Println("Scheduler: Finish all task done")
+	logger.Do.Println("Scheduler: Finish schedule all prediction task ")
 }
 
 
-func (this *Master) schedulePrediction(httpAddr, svcName string, qItem *config.QItem, workerAddress []string){
+func (this *Master) trainTaskHandler(
+	workerAddr,
+	httpAddr,svcName string,
+	args *entitiy.DoTaskArgs,
+	JobId uint,
+	wg *sync.WaitGroup){
 
-	// execute the task
-	startTask := func(workerAddr string, args *entitiy.DoTaskArgs) {
+	defer wg.Done()
 
-		argAddr := entitiy.EncodeDoTaskArgs(args)
-		var rep entitiy.DoTaskReply
+	argAddr := entitiy.EncodeDoTaskArgs(args)
+	var rep entitiy.DoTaskReply
 
-		logger.Do.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
+	// todo, now master call worker.Dotask, worker start to train, until training is done, so how long it will wait? before timeout
 
-		ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
+	logger.Do.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
+	ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
 
-		if !ok {
-			logger.Do.Printf("Scheduler: %s.CreateService error\n", svcName)
+	if !ok {
+		logger.Do.Printf("Scheduler: %s.DoTask error\n", svcName)
 
-			client.ModelServiceUpdateStatus(httpAddr, config.JobFailed, qItem.JobId)
-			return
-		}else{
-			client.ModelServiceUpdateStatus(httpAddr, config.JobRunning, qItem.JobId)
-		}
+		client.JobUpdateResInfo(
+			httpAddr,
+			"call Worker.DoTask error",
+			"call Worker.DoTask error",
+			"call Worker.DoTask error",
+			JobId)
+		client.JobUpdateStatus(httpAddr, config.JobFailed, JobId)
+		return
 	}
 
-	for i, v := range qItem.IPs {
-		args := new(entitiy.DoTaskArgs)
-		args.IP = v
-		args.PartyPath = qItem.PartyPath[i]
-		args.TaskInfos = qItem.TaskInfos
-
-		for _, workerAddr := range workerAddress {
-			ip := strings.Split(workerAddr, ":")[0]
-
-			// match using ip
-			if ip == v {
-
-				// execute the task
-				go startTask(workerAddr, args)
-
-			}
-		}
+	errLen := 4096
+	outLen := 4096
+	errMsg := rep.ErrLogs[config.PreProcessing] + config.ModelTraining + rep.ErrLogs[config.ModelTraining]
+	outMsg := rep.OutLogs[config.PreProcessing] + config.ModelTraining + rep.OutLogs[config.ModelTraining]
+	if len(errMsg) < errLen {
+		errLen = len(errMsg)
 	}
 
-	logger.Do.Println("Scheduler: Finish schedule all prediction task ")
+	if len(outMsg) < outLen {
+		outLen = len(outMsg)
+	}
+
+	logger.Do.Println("Scheduler: max length is", outLen, errLen)
+
+	if rep.Killed == true {
+	} else if rep.Errs[config.PreProcessing] != config.SubProcessNormal {
+		// if pre-processing failed
+		client.JobUpdateResInfo(
+			httpAddr,
+			rep.ErrLogs[config.PreProcessing],
+			rep.OutLogs[config.PreProcessing],
+			"PreProcessing Failed",
+			JobId)
+		client.JobUpdateStatus(httpAddr, config.JobFailed, JobId)
+
+		// if pre-processing pass, but train failed
+	} else if rep.Errs[config.ModelTraining] != config.SubProcessNormal {
+		client.JobUpdateResInfo(
+			httpAddr,
+			errMsg[:errLen],
+			outMsg[:outLen],
+			"PreProcessing Passed, ModelTraining Failed",
+			JobId)
+		client.JobUpdateStatus(httpAddr, config.JobFailed, JobId)
+
+		// if both train and process pass
+	} else {
+		client.JobUpdateResInfo(
+			httpAddr,
+			errMsg[:errLen],
+			outMsg[:outLen],
+			"PreProcessing Passed, ModelTraining Passed",
+			JobId)
+		client.JobUpdateStatus(httpAddr, config.JobSuccessful, JobId)
+	}
+}
+
+
+func (this *Master) predictTaskHandler(
+	workerAddr,
+	httpAddr,svcName string,
+	args *entitiy.DoTaskArgs,
+	JobId uint,
+	wg *sync.WaitGroup){
+
+	defer wg.Done()
+
+	argAddr := entitiy.EncodeDoTaskArgs(args)
+	var rep entitiy.DoTaskReply
+
+	logger.Do.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
+
+	ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
+
+	if !ok {
+		logger.Do.Printf("Scheduler: %s.CreateService error\n", svcName)
+
+		client.ModelServiceUpdateStatus(httpAddr, config.JobFailed, JobId)
+		return
+	}else{
+		client.ModelServiceUpdateStatus(httpAddr, config.JobRunning, JobId)
+	}
 }

@@ -10,8 +10,6 @@ import (
 	"coordinator/distributed/worker"
 	"coordinator/logger"
 	"fmt"
-	"strconv"
-	"sync"
 )
 
 func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) {
@@ -48,27 +46,6 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) 
 	ms.Wait()
 }
 
-func SetupWorker(httpHost string, masterAddress string) error {
-	logger.Do.Println("SetupDist: Launch worker threads")
-
-	wg := sync.WaitGroup{}
-
-	// each listener only have 1 worker thread
-
-	for i := 0; i < 1; i++ {
-		port, e := utils.GetFreePort()
-		if e != nil {
-			logger.Do.Println("SetupDist: Launch worker Get port Error")
-			return e
-		}
-		wg.Add(1)
-
-		// worker address share the same host with listener server
-		go worker.RunWorker(masterAddress, "tcp", httpHost, fmt.Sprintf("%d", port), &wg)
-	}
-	wg.Wait()
-	return nil
-}
 
 func KillJob(masterAddr, Proxy string) {
 	ok := c.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
@@ -80,28 +57,76 @@ func KillJob(masterAddr, Proxy string) {
 	}
 }
 
-func SetupPredictionHelper(httpHost string, masterAddress string) error {
+func SetupWorkerHelper(httpHost string, masterAddress, taskType string)  {
 
-	// the masterAddress is the master thread address
+	/**
+	 * @Author
+	 * @Description
+	 * @Date 2:14 下午 1/12/20
+	 * @Param
+	 	httpHost： 		IP of the listener address
+		masterAddress： IP of the master address
+		masterAddress： train or predictor
+	 **/
 
-	dir:=""
-	stdIn := "input from keyboard"
-	commend := ""
-	args := []string{"/coordinator_server", "-svc predictor -addr 1" + masterAddress}
-	var envs []string
+	if config.Env == config.DevEnv{
 
-	pm := taskmanager.InitSubProcessManager()
-	pm.IsWait = false
+		if taskType == config.TrainTaskType{
 
-	killed, e, el, ol := pm.ExecuteSubProc(dir, stdIn, commend, args, envs)
-	logger.Do.Println(killed, e, el, ol)
+			SetupTrain(httpHost, masterAddress)
 
-	return nil
+		}else if taskType == config.PredictTaskType{
+
+			SetupPrediction(httpHost, masterAddress)
+		}
+
+	}else if config.Env == config.ProdEnv{
+
+		var filename string
+
+		if taskType == config.TrainTaskType{
+			filename = config.TrainYaml
+
+		}else if taskType == config.PredictTaskType{
+			filename = config.PredictorYaml
+		}
+
+		km := taskmanager.InitK8sManager(false,  "")
+		km.CreateResources(filename)
+
+	}
 }
 
 
-func SetupPrediction(httpHost, masterAddress string) {
+func SetupTrain(httpHost string, masterAddress string)  {
+	/**
+	 * @Author
+	 * @Description : run train rpc server in a thread, used to test only
+	 * @Date 2:26 下午 1/12/20
+	 * @Param
+	 * @return
+	 **/
+	logger.Do.Println("SetupDist: Launch worker threads")
 
+	port, e := utils.GetFreePort()
+	if e != nil {
+		logger.Do.Println("SetupDist: Launch worker Get port Error")
+		panic(e)
+	}
+
+	// worker address share the same host with listener server
+	worker.RunWorker(masterAddress, "tcp", httpHost, fmt.Sprintf("%d", port))
+
+}
+
+func SetupPrediction(httpHost, masterAddress string)  {
+	/**
+	 * @Author
+	 * @Description : run prediction rpc server in a thread, used to test only
+	 * @Date 2:26 下午 1/12/20
+	 * @Param
+	 * @return
+	 **/
 	// the masterAddress is the master thread address
 
 	logger.Do.Println("SetupDist: Lunching prediction svc")
@@ -109,10 +134,39 @@ func SetupPrediction(httpHost, masterAddress string) {
 	port, e := utils.GetFreePort()
 	if e != nil {
 		logger.Do.Println("SetupDist: Lunching worker Get port Error")
+		panic(e)
 	}
-
-	sPort := strconv.Itoa(port)
-
-	prediction.RunPrediction(masterAddress, httpHost, sPort,"tcp")
+	// worker address share the same host with listener server
+	prediction.RunPrediction(masterAddress, httpHost, fmt.Sprintf("%d", port),"tcp")
 
 }
+
+
+//pm := taskmanager.InitSubProcessManager()
+//dir:=""
+//stdIn := ""
+//var envs []string
+//
+//var args []string
+//
+//commend := "./coordinator_server"
+//
+//if taskType == config.TrainTaskType{
+//	args = []string{
+//		fmt.Sprintf("-svc %s -wip %s -master_addr %s",
+//		config.TrainTaskType,
+//		httpHost,
+//		masterAddress)}
+//
+//}else if taskType == config.PredictTaskType{
+//	args = []string{
+//		fmt.Sprintf("-svc %s -wip %s -master_addr %s",
+//			config.PredictTaskType,
+//			httpHost,
+//			masterAddress)}
+//	pm.IsWait = false
+//
+//}
+//
+//killed, e, el, ol := pm.ExecuteSubProc(dir, stdIn, commend, args, envs)
+//logger.Do.Println(killed, e, el, ol)
