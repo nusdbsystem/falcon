@@ -12,11 +12,11 @@ func JobSubmit(dsl *config.DSL, ctx *entity.Context) (uint, string, uint, string
 
 	logger.Do.Println("HTTP server: in SubmitJob, put to the JobQueue")
 
-	// generate item pushed to the queue
+	// generate.sh item pushed to the queue
 
 	iPs ,partyPath, modelPath, executablePath := config.ParsePartyInfo(dsl.PartyInfos, dsl.Tasks)
 
-	// generate strings used to write to db
+	// generate.sh strings used to write to db
 	partyIds, err := json.Marshal(dsl.PartyInfos)
 	taskInfos, err := json.Marshal(dsl.Tasks)
 	modelPaths, e2 := json.Marshal(modelPath)

@@ -6,7 +6,7 @@ import "os"
  * @Author
  * @Description This file is only used inside the project,
 				for any config required to modify according to env,
-				use user_config.sh or bash_env.sh
+				use coordinator.properties or bash_env.sh
  * @Date 4:42 下午 1/12/20
  * @Param
  * @return
@@ -84,17 +84,17 @@ const (
 	DevEnv = "dev"
 	ProdEnv = "prod"
 
-	CoordinatorYaml = "./deploy/yamlfiles/"
-	ListenerYaml = "./deploy/yamlfiles/"
+	CoordinatorYaml = "./deploy/template/"
+	ListenerYaml = "./deploy/template/"
 
-	TrainYaml = "./deploy/yamlfiles/"
-	PredictorYaml = "./deploy/yamlfiles/"
+	TrainYaml = "./deploy/template/"
+	PredictorYaml = "./deploy/template/"
 
 )
 
 var (
 	//////////////////////////////////////////////////////////////////////////
-	// This is user defined variables, define them in user_config.sh first, //
+	// This is user defined variables, define them in coordinator.properties first, //
 	// and then, add to here												//
 	//////////////////////////////////////////////////////////////////////////
 
