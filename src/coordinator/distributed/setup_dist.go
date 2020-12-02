@@ -69,6 +69,7 @@ func SetupWorkerHelper(httpHost string, masterAddress, taskType string)  {
 		masterAddress： train or predictor
 	 **/
 
+	// in dev, use thread
 	if config.Env == config.DevEnv{
 
 		if taskType == config.TrainTaskType{
@@ -80,6 +81,7 @@ func SetupWorkerHelper(httpHost string, masterAddress, taskType string)  {
 			SetupPrediction(httpHost, masterAddress)
 		}
 
+		// in prod, use k8s to run train/predict server as a isolate process
 	}else if config.Env == config.ProdEnv{
 
 		var filename string
@@ -91,7 +93,7 @@ func SetupWorkerHelper(httpHost string, masterAddress, taskType string)  {
 			filename = config.PredictorYaml
 		}
 
-		km := taskmanager.InitK8sManager(false,  "")
+		km := taskmanager.InitK8sManager(true,  "")
 		km.CreateResources(filename)
 
 	}
