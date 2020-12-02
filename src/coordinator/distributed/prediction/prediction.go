@@ -27,7 +27,7 @@ func (msvc *ModelService) DoTask(arg []byte, _ *struct{}) error {
 
 
 func (msvc *ModelService) CreateService(dta *entitiy.DoTaskArgs) {
-	// todo build sub process to run prediction job
+	// todo build.sh sub process to run prediction job
 
 	logger.Do.Println("ModelService: CreateService")
 	dir := "PartyPath.DataInput"

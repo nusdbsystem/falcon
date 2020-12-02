@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 /**
  * @Author
@@ -99,19 +102,29 @@ var (
 	//////////////////////////////////////////////////////////////////////////
 
 	// MetaStore and Database Configs
-	MsEngine       = os.Getenv("MS_ENGINE")
-	MsSqliteDb     = os.Getenv("MS_SQLITE_DB")
-	MsHost         = os.Getenv("MS_HOST")
-	MsMysqlUser    = os.Getenv("MS_MYSQL_USER")
-	MsMysqlPwd     = os.Getenv("MS_MYSQL_PWD")
-	MsMysqlDb      = os.Getenv("MS_MYSQL_DB")
-	MsMysqlOptions = os.Getenv("MS_MYSQL_OPTIONS")
+	MsEngine       = getEnv("MS_ENGINE", "sqlite3")
+	MsSqliteDb     = getEnv("MS_SQLITE_DB", "falcon")
+	MsHost         = getEnv("MS_HOST","localhost")
+	MsMysqlUser    = getEnv("MS_MYSQL_USER", "falcon")
+	MsMysqlPwd     = getEnv("MS_MYSQL_PWD", "falcon")
+	MsMysqlDb      = getEnv("MS_MYSQL_DB", "falcon")
+	MsMysqlOptions = getEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
 
 	// sys port
-	MasterPort   = os.Getenv("MasterPort")
-	ListenerPort = os.Getenv("ListenerPort")
+	MasterPort   = getEnv("MasterPort", "6573")
+	ListenerPort = getEnv("ListenerPort", "6574")
 
 	// envs
-	Env = os.Getenv("Env")
-
+	Env = getEnv("Env",DevEnv)
 )
+
+// getEnv get key environment variable if exist otherwise return defalutValue
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, set to default, key: %s, default: %s >>>>>>>>>>>>>\n",key, defaultValue)
+		return defaultValue
+	}
+	fmt.Printf("<<<<<<<<<<<<<<<< Read envs,key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
+	return value
+}
