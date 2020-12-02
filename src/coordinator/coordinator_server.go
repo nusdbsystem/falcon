@@ -33,8 +33,7 @@ func init() {
 
 func verifyArgs() {
 
-
-	if !(strings.Contains(svc, "coordinator") || strings.Contains(svc, "listener") || strings.Contains(svc, "predictor") ) {
+	if !(strings.Contains(svc, "coordinator") || strings.Contains(svc, "listener") || strings.Contains(svc, "predictor")) {
 		logger.Do.Println("Error: Input Error, svc is either 'coordinator' or 'listener' or 'predictor' ")
 		os.Exit(1)
 	}
@@ -83,7 +82,7 @@ func main() {
 
 	if svc == config.TrainTaskType {
 
-		if len(workerAddr) == 0 || len(masterAddr) ==0 {
+		if len(workerAddr) == 0 || len(masterAddr) == 0 {
 			logger.Do.Println("Error: Input Error, Must Provide ip of predictor and masterAddr,", workerAddr, masterAddr)
 			os.Exit(1)
 		}
@@ -92,10 +91,9 @@ func main() {
 		distributed.SetupTrain(workerAddr, masterAddr)
 	}
 
-
 	if svc == config.PredictTaskType {
 
-		if len(workerAddr) == 0 || len(masterAddr) ==0 {
+		if len(workerAddr) == 0 || len(masterAddr) == 0 {
 			logger.Do.Println("Error: Input Error, Must Provide ip of trainWorkerAddr and masterAddr,", workerAddr, masterAddr)
 			os.Exit(1)
 		}
