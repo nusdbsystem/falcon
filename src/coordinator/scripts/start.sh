@@ -34,10 +34,6 @@ start_db()
 {
   title "Starting falcon DB..."
 
-  LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_db.log
-
-  (kubectl create configmap mysql-initdb-config --from-file=./deploy/property \
-  &> $LOG_FILE_PATH) || exit 1
 
   bash ./scripts/create_mysql.sh $DATA_BASE_PATH || exit 1
 

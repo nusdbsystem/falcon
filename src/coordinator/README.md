@@ -2,7 +2,8 @@
 
 ## Dependencies for Development
 
-- Server-side is Go (1.13 and above)
+- Server-side is Go (1.14 and above)
+- k8s (V1.6)
 - Client-side is any http client, such as Python3 `requests`
 - Storage default is file-based sqlite3, you can also connect to MySQL
 
