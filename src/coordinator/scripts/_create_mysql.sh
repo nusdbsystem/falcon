@@ -4,8 +4,17 @@ export DATA_BASE_PATH=$1
 
 # load variables from properties
 . ./deploy/property/db.properties
+. ./deploy/property/svc.properties
 . coordinator.properties
 
+LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_db.log
+{
+  (kubectl create configmap mysql-initdb-config --from-file=./deploy/property &> $LOG_FILE_PATH)
+    echo "-------------------------- finish creating config map for db --------------------------------"
+
+} || {
+echo "--------------------------  creating config map error, check the log, --------------------------------"
+}
 
 # create new yaml according template
 MYSQL_YAML=./deploy/template/mysql.yaml
@@ -22,9 +31,10 @@ sed -i '' -e "s/MYSQL_IMAGE/$MYSQL_IMAGE/g" $MYSQL_YAML || exit 1
 sed -i '' -e "s/PV_DB_STORAGE_PATH/$PV_PATH/g" $MYSQL_YAML || exit 1
 
 # apply the job
-#kubectl apply -f $MYSQL_YAML || exit 1
+echo "--------------------------  creating mysql service --------------------------------"
+kubectl apply -f $MYSQL_YAML &> $LOG_FILE_PATH|| exit 1
 
 # delete config
-#rm -f $MYSQL_YAML
+rm -f $MYSQL_YAML
 
 
