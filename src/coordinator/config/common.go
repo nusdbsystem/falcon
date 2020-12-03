@@ -111,8 +111,8 @@ var (
 	MsMysqlOptions = getEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
 
 	// sys port
-	MasterPort   = getEnv("MasterPort", "6573")
-	ListenerPort = getEnv("ListenerPort", "6574")
+	MasterPort   = getEnv("MASTER_TARGET_PORT", "31201")
+	ListenerPort = getEnv("LISTENER_TARGET_PORT", "31301")
 
 	// envs
 	Env = getEnv("Env",DevEnv)

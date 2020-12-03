@@ -5,6 +5,8 @@ metadata:
 spec:
   ports:
     - port: MYSQL_CLUSTER_PORT  #这里port集群内部clusterIp 对应的端口
+      targetPort: MYSQL_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
+      nodePort: MYSQL_NODE_PORT  #这里是物理机的端口
   selector:
     app: mysql
   clusterIP: None # None使服务DNS名称直接解析为Pod的IP地址。当您仅在service后面只有一个Pod，并且不打算增加Pod的数量时，这是最佳选择
@@ -25,7 +27,7 @@ spec:
         app: mysql
     spec:
       containers:
-        - image: mysql:5.6
+        - image: MYSQL_IMAGE
           name: mysql
           env:
             - name: MYSQL_ROOT_PASSWORD
@@ -64,11 +66,11 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mysql-pv-claim
+  name: mysql-pv-claim  #Claims use the same conventions as volumes when requesting storage with specific access modes.
 spec:
   storageClassName: manual
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 20Gi
+        storage: 10Gi

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: STORAGE_NAME-pv
+  labels:
+    type: local
+spec:
+  storageClassName: STORAGE_NAME
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: DATA_BASE_PATH
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: STORAGE_NAME-pvc
+spec:
+  storageClassName: STORAGE_NAME
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: falcon-master-pv
+  labels:
+    type: local
+spec:
+  storageClassName: falcon-master
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_runtime_resources
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: falcon-master-pvc
+spec:
+  storageClassName: falcon-master
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
