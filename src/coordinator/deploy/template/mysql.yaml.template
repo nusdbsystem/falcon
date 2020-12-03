@@ -3,13 +3,14 @@ kind: Service
 metadata:
   name: mysql
 spec:
+  type: NodePort
   ports:
     - port: MYSQL_CLUSTER_PORT  #这里port集群内部clusterIp 对应的端口
       targetPort: MYSQL_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
       nodePort: MYSQL_NODE_PORT  #这里是物理机的端口
   selector:
     app: mysql
-  clusterIP: None # None使服务DNS名称直接解析为Pod的IP地址。当您仅在service后面只有一个Pod，并且不打算增加Pod的数量时，这是最佳选择
+  # clusterIP: None # None使服务DNS名称直接解析为Pod的IP地址。当您仅在service后面只有一个Pod，并且不打算增加Pod的数量时，这是最佳选择
 ---
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment

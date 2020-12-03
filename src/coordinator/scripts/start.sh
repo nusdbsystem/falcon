@@ -34,11 +34,6 @@ start_db()
 {
   title "Starting falcon DB..."
 
-  LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_db.log
-
-  (kubectl create configmap mysql-initdb-config --from-file=./deploy/property \
-  &> $LOG_FILE_PATH) || exit 1
-
   bash ./scripts/_create_mysql.sh $DATA_BASE_PATH || exit 1
 
   title "Starting falcon DB Done, Db are mounted at folder $DATA_BASE_PATH"
@@ -55,8 +50,11 @@ start_coordinator()
 
 }
 
-
-
+create_folders()
+{
+      title "Creating folders"
+      mkdir $DATA_BASE_PATH/logs
+}
 
 title "Guidence"
 help
@@ -73,14 +71,15 @@ kubectl create clusterrolebinding add-on-cluster-admin \
 if [ ! -n "$1" ] ;then
       # start all services
      start_db || exit 1
+     start_coordinator || exit 1
 elif [[ $1 = "db" ]];then
      title "Launch Model: Start db"
      start_db || exit 1
 
-elif [[ $1 = "admin" ]];then
-     title "Launch Model: Start admin"
-     start_admin || exit 1
+elif [[ $1 = "coord" ]];then
+     title "Launch Model: Start coordinator"
+     start_coordinator || exit 1
 else
-    title "Unsupport arguments, please see the help doc"
+    title "Un-support arguments, please see the help doc"
 fi
 
