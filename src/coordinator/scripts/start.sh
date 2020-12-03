@@ -34,8 +34,12 @@ start_db()
 {
   title "Starting falcon DB..."
 
+  LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_db.log
 
-  bash ./scripts/create_mysql.sh $DATA_BASE_PATH || exit 1
+  (kubectl create configmap mysql-initdb-config --from-file=./deploy/property \
+  &> $LOG_FILE_PATH) || exit 1
+
+  bash ./scripts/_create_mysql.sh $DATA_BASE_PATH || exit 1
 
   title "Starting falcon DB Done, Db are mounted at folder $DATA_BASE_PATH"
 
@@ -43,7 +47,12 @@ start_db()
 
 start_coordinator()
 {
-  echo "sdf"
+  title "Starting falcon coord..."
+
+  bash ./scripts/_create_coordconfig.sh $DATA_BASE_PATH || exit 1
+
+  title "falcon coord started"
+
 }
 
 
