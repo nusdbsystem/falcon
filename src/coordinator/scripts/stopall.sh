@@ -9,3 +9,4 @@ kubectl delete pvc $MASTER_STORAGE-pvc
 kubectl delete pv $MASTER_STORAGE-pv
 kubectl delete pvc $LISTENER_STORAGE-pvc
 kubectl delete pv $LISTENER_STORAGE-pv
+kubectl delete configmap redis-config

@@ -2,19 +2,20 @@ package controller
 
 import (
 	"coordinator/api/entity"
-	"coordinator/config"
+	"coordinator/cache"
+	"coordinator/common"
 	"coordinator/distributed"
 	"coordinator/logger"
 	"encoding/json"
 )
 
-func JobSubmit(dsl *config.DSL, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
+func JobSubmit(dsl *common.DSL, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
 
 	logger.Do.Println("HTTP server: in SubmitJob, put to the JobQueue")
 
 	// generate.sh item pushed to the queue
 
-	iPs ,partyPath, modelPath, executablePath := config.ParsePartyInfo(dsl.PartyInfos, dsl.Tasks)
+	iPs ,partyPath, modelPath, executablePath := common.ParsePartyInfo(dsl.PartyInfos, dsl.Tasks)
 
 	// generate.sh strings used to write to db
 	partyIds, err := json.Marshal(dsl.PartyInfos)
@@ -32,7 +33,7 @@ func JobSubmit(dsl *config.DSL, ctx *entity.Context) (uint, string, uint, string
 
 	// write to db
 	ctx.Ms.Tx = ctx.Ms.Db.Begin()
-	errs, u := ctx.Ms.JobSubmit(dsl.JobName, ctx.UsrId, string(partyIds), string(taskInfos), dsl.JobDecs, dsl.TaskNum, config.JobInit)
+	errs, u := ctx.Ms.JobSubmit(dsl.JobName, ctx.UsrId, string(partyIds), string(taskInfos), dsl.JobDecs, dsl.TaskNum, common.JobInit)
 	err2, _ := ctx.Ms.SvcCreate(u.JobId)
 
 	err3, _ := ctx.Ms.ModelCreate(
@@ -48,7 +49,7 @@ func JobSubmit(dsl *config.DSL, ctx *entity.Context) (uint, string, uint, string
 	ctx.Ms.Commit([]error{errs, err2, err3})
 
 
-	qItem := new(config.QItem)
+	qItem := new(cache.QItem)
 	qItem.IPs = iPs
 	qItem.JobId = u.JobId
 	qItem.PartyPath = partyPath
@@ -69,10 +70,10 @@ func JobKill(jobId uint, ctx *entity.Context) {
 	e, u := ctx.Ms.JobGetByJobID(jobId)
 	ctx.Ms.Commit(e)
 
-	distributed.KillJob(u.MasterAddress, config.Proxy)
+	distributed.KillJob(u.MasterAddress, common.Proxy)
 
 	ctx.Ms.Tx = ctx.Ms.Db.Begin()
-	e2, _ := ctx.Ms.JobUpdateStatus(jobId, config.JobKilled)
+	e2, _ := ctx.Ms.JobUpdateStatus(jobId, common.JobKilled)
 	ctx.Ms.Commit(e2)
 }
 

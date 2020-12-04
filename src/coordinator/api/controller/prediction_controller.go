@@ -2,7 +2,8 @@ package controller
 
 import (
 	"coordinator/api/entity"
-	"coordinator/config"
+	"coordinator/cache"
+	"coordinator/common"
 	dist "coordinator/distributed"
 	"encoding/json"
 )
@@ -23,8 +24,8 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 	ctx.Ms.Commit([]error{e1, e2, e3})
 
 
-	var pInfo []config.PartyInfo
-	var taskInfos config.Tasks
+	var pInfo []common.PartyInfo
+	var taskInfos common.Tasks
 
 	err := json.Unmarshal([]byte(u2.PartyIds), &pInfo)
 	err2 := json.Unmarshal([]byte(u2.TaskInfos), &taskInfos)
@@ -32,9 +33,9 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 		panic("json.Unmarshal(PartyIds or TaskInfos) error")
 	}
 
-	iPs ,partyPath, modelPath, executablePath := config.ParsePartyInfo(pInfo, taskInfos)
+	iPs ,partyPath, modelPath, executablePath := common.ParsePartyInfo(pInfo, taskInfos)
 
-	qItem := new(config.QItem)
+	qItem := new(cache.QItem)
 	qItem.IPs = iPs
 	qItem.JobId = jobId
 	qItem.PartyPath = partyPath
@@ -42,28 +43,28 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 	qItem.ModelPath = modelPath
 	qItem.ExecutablePath = executablePath
 
-	go dist.SetupDist(ctx.HttpHost, ctx.HttpPort, qItem, config.PredictTaskType)
+	go dist.SetupDist(ctx.HttpHost, ctx.HttpPort, qItem, common.PredictTaskType)
 
 	return u.ID, u.ModelServiceName
 }
 
 
-func UpdateService(dsl *config.DSL, ctx *entity.Context) {
+func UpdateService(dsl *common.DSL, ctx *entity.Context) {
 
 }
 
 
-func QueryService(dsl *config.DSL, ctx *entity.Context) {
+func QueryService(dsl *common.DSL, ctx *entity.Context) {
 
 }
 
 
-func StopService(dsl *config.DSL, ctx *entity.Context) {
+func StopService(dsl *common.DSL, ctx *entity.Context) {
 
 }
 
 
-func DeleteService(dsl *config.DSL, ctx *entity.Context) {
+func DeleteService(dsl *common.DSL, ctx *entity.Context) {
 
 }
 
@@ -76,7 +77,7 @@ func PublishService(jobId uint, isPublish uint, ctx *entity.Context) {
 }
 
 
-func LaunchService(dsl *config.DSL, ctx *entity.Context) {
+func LaunchService(dsl *common.DSL, ctx *entity.Context) {
 }
 
 

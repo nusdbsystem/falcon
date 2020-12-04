@@ -1,7 +1,7 @@
 package models
 
 import (
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/logger"
 	"fmt"
 	"github.com/jinzhu/gorm"
@@ -24,16 +24,16 @@ type MetaStore struct {
 
 func InitMetaStore() *MetaStore {
 	ms := new(MetaStore)
-	ms.engine = config.MsEngine
-	ms.host = config.MsHost
+	ms.engine = common.MsEngine
+	ms.host = common.MsHost
 	ms.user = ""
 	ms.password = ""
 	ms.database = ""
 
 	if ms.engine == "mysql" {
-		ms.user = config.MsMysqlUser
-		ms.password = config.MsMysqlPwd
-		ms.database = config.MsMysqlDb
+		ms.user = common.MsMysqlUser
+		ms.password = common.MsMysqlPwd
+		ms.database = common.MsMysqlDb
 
 		mysql_url := fmt.Sprintf(
 			"%s:%s@tcp(%s:3306)/%s%s",
@@ -41,11 +41,11 @@ func InitMetaStore() *MetaStore {
 			ms.password,
 			ms.host,
 			ms.database,
-			config.MsMysqlOptions,
+			common.MsMysqlOptions,
 		)
 		ms.url = mysql_url
 	} else if ms.engine == "sqlite3" {
-		ms.url = config.MsSqliteDb
+		ms.url = common.MsSqliteDb
 	}
 	return ms
 }

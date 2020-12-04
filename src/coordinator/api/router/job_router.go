@@ -5,7 +5,7 @@ import (
 	"coordinator/api/controller"
 	"coordinator/api/entity"
 	"coordinator/client"
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/logger"
 	"encoding/json"
 	"net/http"
@@ -38,7 +38,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	var buf bytes.Buffer
 
-	err, contents := client.ReceiveFile(r, buf, config.DslFile)
+	err, contents := client.ReceiveFile(r, buf, common.DslFile)
 	if err != nil {
 		logger.Do.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -46,9 +46,9 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	}
 
 	// parse it
-	var dsl config.DSL
+	var dsl common.DSL
 
-	e := config.ParseDsl(contents, &dsl)
+	e := common.ParseDsl(contents, &dsl)
 
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusBadRequest)
@@ -85,7 +85,7 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	client.ReceiveForm(r)
 
-	JobId := r.FormValue(config.JobId)
+	JobId := r.FormValue(common.JobId)
 	jobId, e := strconv.Atoi(JobId)
 	if e != nil {
 		panic(e)
@@ -94,7 +94,7 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	jr := JobStatusRes{
 		JobId:  uint(jobId),
-		Status: config.JobKilled,
+		Status: common.JobKilled,
 	}
 
 	js, err := json.Marshal(jr)
@@ -111,8 +111,8 @@ func JobUpdateMaster(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 	client.ReceiveForm(r)
 
-	JobId := r.FormValue(config.JobId)
-	MasterAddr := r.FormValue(config.MasterAddr)
+	JobId := r.FormValue(common.JobId)
+	MasterAddr := r.FormValue(common.MasterAddr)
 
 	jobId, e := strconv.Atoi(JobId)
 	if e != nil {
@@ -125,8 +125,8 @@ func JobUpdateMaster(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 func JobUpdateStatus(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	client.ReceiveForm(r)
-	JobId := r.FormValue(config.JobId)
-	JobStatus := r.FormValue(config.JobStatus)
+	JobId := r.FormValue(common.JobId)
+	JobStatus := r.FormValue(common.JobStatus)
 
 	jobId, e := strconv.Atoi(JobId)
 	if e != nil {
@@ -142,10 +142,10 @@ func JobUpdateStatus(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 func JobUpdateResInfo(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	client.ReceiveForm(r)
-	JobId := r.FormValue(config.JobId)
-	JobErrMsg := r.FormValue(config.JobErrMsg)
-	JobResult := r.FormValue(config.JobResult)
-	JobExtInfo := r.FormValue(config.JobExtInfo)
+	JobId := r.FormValue(common.JobId)
+	JobErrMsg := r.FormValue(common.JobErrMsg)
+	JobResult := r.FormValue(common.JobResult)
+	JobExtInfo := r.FormValue(common.JobExtInfo)
 
 	jobId, e := strconv.Atoi(JobId)
 	if e != nil {

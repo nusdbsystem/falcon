@@ -1,17 +1,17 @@
-package entity
+package cache
 
 import (
-	"coordinator/config"
 	"sync"
 )
+
 
 type Queue struct {
 	sync.Mutex
 
-	queue []*config.QItem
+	queue []*QItem
 }
 
-func (q *Queue) Push(item *config.QItem) {
+func (q *Queue) Push(item *QItem) {
 
 	q.Lock()
 
@@ -21,7 +21,7 @@ func (q *Queue) Push(item *config.QItem) {
 
 }
 
-func (q *Queue) Pop() (*config.QItem, bool) {
+func (q *Queue) Pop() (*QItem, bool) {
 	q.Lock()
 	defer q.Unlock()
 
@@ -35,14 +35,14 @@ func (q *Queue) Pop() (*config.QItem, bool) {
 
 	} else {
 
-		return &config.QItem{}, false
+		return &QItem{}, false
 
 	}
 }
 
 func (q *Queue) Clear() {
 	q.Lock()
-	q.queue = []*config.QItem{}
+	q.queue = []*QItem{}
 	q.Unlock()
 }
 

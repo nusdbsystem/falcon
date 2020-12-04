@@ -1,13 +1,13 @@
 package master
 
 import (
-	"coordinator/config"
+	"coordinator/cache"
 	"coordinator/logger"
 	"net/rpc"
 	"time"
 )
 
-func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *config.QItem, taskType string) (ms *Master) {
+func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *cache.QItem, taskType string) (ms *Master) {
 	logger.Do.Println("Master: address is :", masterAddr)
 	ms = newMaster(Proxy, masterAddr, len(qItem.IPs))
 

@@ -1,34 +1,34 @@
 package client
 
 import (
-	"coordinator/config"
+	"coordinator/common"
 	"fmt"
 	"net/url"
 )
 
 func ListenerAdd(ServerAddress, listenerAddr string) {
-	data := url.Values{config.ListenerAddr: {listenerAddr}}
+	data := url.Values{common.ListenerAddr: {listenerAddr}}
 
-	reqUrl := ServerAddress + "/" + config.ListenerAdd
+	reqUrl := ServerAddress + "/" + common.ListenerAdd
 
 	_ = PostForm(reqUrl, data)
 
 }
 
 func ListenerDelete(ServerAddress, listenerAddr string) {
-	data := url.Values{config.ListenerAddr: {listenerAddr}}
+	data := url.Values{common.ListenerAddr: {listenerAddr}}
 
-	reqUrl := ServerAddress + "/" + config.ListenerDelete
+	reqUrl := ServerAddress + "/" + common.ListenerDelete
 
 	_ = PostForm(reqUrl, data)
 }
 
 func SetupWorker(ServerAddr string, masterAddress string, taskType string) {
 	data := url.Values{
-		config.MasterAddr: {masterAddress},
-		config.TaskType: {taskType}}
+		common.MasterAddr: {masterAddress},
+		common.TaskType:   {taskType}}
 
-	reqUrl := ServerAddr + "/" + config.SetupWorker
+	reqUrl := ServerAddr + "/" + common.SetupWorker
 
 	_ = PostForm(reqUrl, data)
 }
@@ -36,23 +36,23 @@ func SetupWorker(ServerAddr string, masterAddress string, taskType string) {
 func JobUpdateMaster(ServerAddr string, masterAddress string, jobId uint) {
 
 	data := url.Values{
-		config.MasterAddr: {masterAddress},
-		config.JobId:      {fmt.Sprintf("%d", jobId)}}
+		common.MasterAddr: {masterAddress},
+		common.JobId:      {fmt.Sprintf("%d", jobId)}}
 
-	reqUrl := ServerAddr + "/" + config.UpdateJobMaster
+	reqUrl := ServerAddr + "/" + common.UpdateJobMaster
 
 	_ = PostForm(reqUrl, data)
 }
 
 func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jobId uint) {
 	data := url.Values{
-		config.JobId:      {fmt.Sprintf("%d", jobId)},
-		config.JobErrMsg:  {errorMsg},
-		config.JobResult:  {jobResult},
-		config.JobExtInfo: {extInfo},
+		common.JobId:      {fmt.Sprintf("%d", jobId)},
+		common.JobErrMsg:  {errorMsg},
+		common.JobResult:  {jobResult},
+		common.JobExtInfo: {extInfo},
 	}
 
-	reqUrl := ServerAddr + "/" + config.UpdateJobResInfo
+	reqUrl := ServerAddr + "/" + common.UpdateJobResInfo
 
 	_ = PostForm(reqUrl, data)
 }
@@ -60,10 +60,10 @@ func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jo
 func JobUpdateStatus(ServerAddr string, status uint, jobId uint) {
 
 	data := url.Values{
-		config.JobId:     {fmt.Sprintf("%d", jobId)},
-		config.JobStatus: {fmt.Sprintf("%d", status)}}
+		common.JobId:     {fmt.Sprintf("%d", jobId)},
+		common.JobStatus: {fmt.Sprintf("%d", status)}}
 
-	reqUrl := ServerAddr + "/" + config.UpdateJobStatus
+	reqUrl := ServerAddr + "/" + common.UpdateJobStatus
 
 	_ = PostForm(reqUrl, data)
 }
@@ -72,10 +72,10 @@ func JobUpdateStatus(ServerAddr string, status uint, jobId uint) {
 func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 
 	data := url.Values{
-		config.JobId:     {fmt.Sprintf("%d", jobId)},
-		config.IsTrained: {fmt.Sprintf("%d", isTrained)}}
+		common.JobId:     {fmt.Sprintf("%d", jobId)},
+		common.IsTrained: {fmt.Sprintf("%d", isTrained)}}
 
-	reqUrl := ServerAddr + "/" + config.ModelUpdate
+	reqUrl := ServerAddr + "/" + common.ModelUpdate
 
 	_ = PostForm(reqUrl, data)
 }
@@ -84,10 +84,10 @@ func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 func ModelServiceUpdateStatus(ServerAddr string, jobId, status uint) {
 
 	data := url.Values{
-		config.JobId:     {fmt.Sprintf("%d", jobId)},
-		config.JobStatus: {fmt.Sprintf("%d", status)}}
+		common.JobId:     {fmt.Sprintf("%d", jobId)},
+		common.JobStatus: {fmt.Sprintf("%d", status)}}
 
-	reqUrl := ServerAddr + "/" + config.UpdateModelServiceStatus
+	reqUrl := ServerAddr + "/" + common.UpdateModelServiceStatus
 
 	_ = PostForm(reqUrl, data)
 }
@@ -98,9 +98,9 @@ func ModelServiceUpdateStatus(ServerAddr string, jobId, status uint) {
 func JobGetStatus(ServerAddr string, jobId uint) uint {
 
 	data := url.Values{
-		config.JobId: {fmt.Sprintf("%d", jobId)}}
+		common.JobId: {fmt.Sprintf("%d", jobId)}}
 
-	reqUrl := ServerAddr + "/" + config.UpdateJobStatus
+	reqUrl := ServerAddr + "/" + common.UpdateJobStatus
 
 	_ = PostForm(reqUrl, data)
 	return 1

@@ -3,7 +3,7 @@ package listener
 import (
 	"context"
 	c "coordinator/client"
-	"coordinator/config"
+	"coordinator/common"
 	rt "coordinator/listener/router"
 	"coordinator/logger"
 	"net/http"
@@ -18,7 +18,7 @@ func SetupListener(host, port string, ServerAddress string) {
 	httpAddr := host + ":" + port
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/"+config.SetupWorker, rt.SetupWorker(host))
+	mux.HandleFunc("/"+common.SetupWorker, rt.SetupWorker(host))
 
 	server := &http.Server{
 		Addr:    httpAddr,

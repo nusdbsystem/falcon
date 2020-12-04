@@ -1,7 +1,7 @@
 package models
 
 import (
-	"coordinator/config"
+	"coordinator/common"
 	"time"
 )
 
@@ -16,16 +16,16 @@ func (ms *MetaStore) CreateService(
 ) (error, *ModelServiceInfo) {
 
 	u := &ModelServiceInfo{
-		ModelServiceName:    AppName,
-		Status:				 config.JobInit,
-		JobId:				 JobId,
-		ModelId:     		 ModelId,
-		IsPublished:		 1,
-		IsDelete:    		 0,
-		CreateTime: 		 time.Now(),
-		UpdateTime: 		 time.Now(),
-		DeleteTime:  		 time.Now(),
-		ExtInfo:    		 ExtInfo,
+		ModelServiceName: AppName,
+		Status:           common.JobInit,
+		JobId:            JobId,
+		ModelId:          ModelId,
+		IsPublished:      1,
+		IsDelete:         0,
+		CreateTime:       time.Now(),
+		UpdateTime:       time.Now(),
+		DeleteTime:       time.Now(),
+		ExtInfo:          ExtInfo,
 	}
 
 	err := ms.Db.Create(u).Error

@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    name: redis
+spec:
+  type: NodePort
+  ports:
+    - port: REDIS_CLUSTER_PORT
+      targetPort: REDIS_TARGET_PORT
+      nodePort: REDIS_NODE_PORT
+  selector:
+    name: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: REDIS_IMAGE
+          command:
+              - redis-server
+              - "/redis-master/redis.conf"
+          env:
+            - name: MASTER
+              value: "true"
+          ports:
+            - containerPort: REDIS_TARGET_PORT
+          resources:
+            limits:
+              cpu: "0.1"
+          volumeMounts:
+            - mountPath: /redis-master-data
+              name: data
+            - mountPath: /redis-master
+              name: config
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: redis-config
+            items:
+            - key: redis-config
+              path: redis.conf
+
+
+

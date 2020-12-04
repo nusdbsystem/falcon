@@ -37,7 +37,7 @@ spec:
               name: coordinator
           volumeMounts:
             - name: coord-storage
-              mountPath: /.falcon_runtime_resources
+              mountPath: .falcon_runtime_resources
       volumes:
         - name: coord-storage
           persistentVolumeClaim:

@@ -2,7 +2,7 @@ package prediction
 
 import (
 	"coordinator/client"
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/taskmanager"
@@ -42,7 +42,7 @@ func (msvc *ModelService) CreateService(dta *entitiy.DoTaskArgs) {
 
 	logger.Do.Println("Worker:task 1 pre processing done", killed, e, el, ol)
 
-	if e != config.SubProcessNormal {
+	if e != common.SubProcessNormal {
 		// return res is used to control the rpc call status, always return nil, but
 		// keep error at rep.Errs
 		return

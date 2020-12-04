@@ -1,7 +1,7 @@
 package worker
 
 import (
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"net/rpc"
@@ -13,8 +13,8 @@ func RunWorker(masterAddress, workerProxy, workerHost, workerPort string) {
 
 	wk := new(Worker)
 	wk.InitRpc(workerProxy, workerAddress)
-	wk.Name = config.Worker
-	wk.SuicideTimeout = config.WorkerTimeout
+	wk.Name = common.Worker
+	wk.SuicideTimeout = common.WorkerTimeout
 
 	// the lock needs to pass to multi funcs, must create a instance
 	wk.pm = taskmanager.InitSubProcessManager()

@@ -5,7 +5,7 @@ import (
 	"coordinator/api/controller"
 	md "coordinator/api/middleware"
 	rt "coordinator/api/router"
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/logger"
 	"net/http"
 	"os"
@@ -21,35 +21,34 @@ func handlePanic() {
 }
 func SetupHttp(host, port string, nConsumer int) {
 	defer handlePanic()
-	httpAddr := host + ":" + port
 	mux := http.NewServeMux()
 
-	md.SysLvPath = []string{config.Register, config.ListenerAdd}
+	md.SysLvPath = []string{common.Register, common.ListenerAdd}
 
 	//job post
-	mux.HandleFunc("/"+config.SubmitJob, md.AddRouter(rt.JobSubmit, http.MethodPost))
-	mux.HandleFunc("/"+config.StopJob, md.AddRouter(rt.JobKill, http.MethodPost))
-	mux.HandleFunc("/"+config.UpdateJobMaster, md.AddRouter(rt.JobUpdateMaster, http.MethodPost))
-	mux.HandleFunc("/"+config.UpdateJobStatus, md.AddRouter(rt.JobUpdateStatus, http.MethodPost))
-	mux.HandleFunc("/"+config.UpdateJobResInfo, md.AddRouter(rt.JobUpdateResInfo, http.MethodPost))
+	mux.HandleFunc("/"+common.SubmitJob, md.AddRouter(rt.JobSubmit, http.MethodPost))
+	mux.HandleFunc("/"+common.StopJob, md.AddRouter(rt.JobKill, http.MethodPost))
+	mux.HandleFunc("/"+common.UpdateJobMaster, md.AddRouter(rt.JobUpdateMaster, http.MethodPost))
+	mux.HandleFunc("/"+common.UpdateJobStatus, md.AddRouter(rt.JobUpdateStatus, http.MethodPost))
+	mux.HandleFunc("/"+common.UpdateJobResInfo, md.AddRouter(rt.JobUpdateResInfo, http.MethodPost))
 
 	//job post
-	mux.HandleFunc("/"+config.QueryJobStatus, md.AddRouter(rt.JobStatusQuery, http.MethodGet))
+	mux.HandleFunc("/"+common.QueryJobStatus, md.AddRouter(rt.JobStatusQuery, http.MethodGet))
 
 	//listener
-	mux.HandleFunc("/"+config.Register, md.AddRouter(rt.UserRegister, http.MethodPost))
-	mux.HandleFunc("/"+config.ListenerAdd, md.AddRouter(rt.ListenerAdd, http.MethodPost))
-	mux.HandleFunc("/"+config.ListenerDelete, md.AddRouter(rt.ListenerDelete, http.MethodPost))
+	mux.HandleFunc("/"+common.Register, md.AddRouter(rt.UserRegister, http.MethodPost))
+	mux.HandleFunc("/"+common.ListenerAdd, md.AddRouter(rt.ListenerAdd, http.MethodPost))
+	mux.HandleFunc("/"+common.ListenerDelete, md.AddRouter(rt.ListenerDelete, http.MethodPost))
 
 	// model serving
-	mux.HandleFunc("/"+config.ModelUpdate, md.AddRouter(rt.ModelUpdate, http.MethodPost))
-	mux.HandleFunc("/"+config.SvcPublishing, md.AddRouter(rt.PublishService, http.MethodPost))
-	mux.HandleFunc("/"+config.SvcCreate, md.AddRouter(rt.CreateService, http.MethodPost, host, port))
-	mux.HandleFunc("/"+config.UpdateModelServiceStatus, md.AddRouter(rt.ModelServiceUpdateStatus, http.MethodPost))
+	mux.HandleFunc("/"+common.ModelUpdate, md.AddRouter(rt.ModelUpdate, http.MethodPost))
+	mux.HandleFunc("/"+common.SvcPublishing, md.AddRouter(rt.PublishService, http.MethodPost))
+	mux.HandleFunc("/"+common.SvcCreate, md.AddRouter(rt.CreateService, http.MethodPost, host, port))
+	mux.HandleFunc("/"+common.UpdateModelServiceStatus, md.AddRouter(rt.ModelServiceUpdateStatus, http.MethodPost))
 
 
 	server := &http.Server{
-		Addr:    httpAddr,
+		Addr:    "0.0.0.0",
 		Handler: mux,
 	}
 
