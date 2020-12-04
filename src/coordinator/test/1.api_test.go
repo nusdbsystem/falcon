@@ -2,7 +2,7 @@ package test
 
 import (
 	"coordinator/api/models"
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/logger"
 	"encoding/json"
 	"io/ioutil"
@@ -46,7 +46,7 @@ func TestParseJson(t *testing.T) {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
 	// we initialize our Users array
-	var dsl config.DSL
+	var dsl common.DSL
 
 	e2 := json.Unmarshal(byteValue, &dsl)
 	logger.Do.Println(e2)

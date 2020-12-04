@@ -1,7 +1,7 @@
 package prediction
 
 import (
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"net/rpc"
@@ -12,7 +12,7 @@ func RunPrediction(masterAddress, predHost, predPort, Proxy string){
 
 	msvc := new(ModelService)
 	msvc.InitRpc(Proxy, predAddress)
-	msvc.Name = config.ModelService
+	msvc.Name = common.ModelService
 	msvc.pm = taskmanager.InitSubProcessManager()
 
 	rpcSvc := rpc.NewServer()

@@ -1,10 +1,12 @@
-package config
+package cache
+
+import "coordinator/common"
 
 type QItem struct {
 	IPs       []string
 	JobId     uint
-	PartyPath []PartyPath
-	TaskInfos Tasks
+	PartyPath []common.PartyPath
+	TaskInfos common.Tasks
 
 	ModelPath []string
 	ExecutablePath []string

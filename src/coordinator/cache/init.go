@@ -1,3 +1,3 @@
-package entity
+package cache
 
 var JobQueue = Queue{}

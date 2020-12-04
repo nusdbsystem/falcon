@@ -2,18 +2,18 @@ package entitiy
 
 import (
 	"bytes"
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/logger"
 	"encoding/gob"
 	"reflect"
 )
 
 type DoTaskArgs struct {
-	IP        string
-	PartyPath config.PartyPath
-	TaskInfos config.Tasks
-	ModelPath  []string
-	ExecutablePath  []string
+	IP             string
+	PartyPath      common.PartyPath
+	TaskInfos      common.Tasks
+	ModelPath      []string
+	ExecutablePath []string
 }
 
 // RegisterArgs is the argument passed when a worker registers with the master.

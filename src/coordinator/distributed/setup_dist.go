@@ -1,8 +1,9 @@
 package distributed
 
 import (
+	"coordinator/cache"
 	c "coordinator/client"
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/distributed/master"
 	"coordinator/distributed/prediction"
 	"coordinator/distributed/taskmanager"
@@ -12,21 +13,14 @@ import (
 	"fmt"
 )
 
-func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) {
-	logger.Do.Println("SetupDist: Lunching master")
+func SetupDist(httpHost, httpPort string, qItem *cache.QItem, taskType string) {
 
 
 	httpAddr := httpHost + ":" + httpPort
-	port, e := utils.GetFreePort()
 
-	if e != nil {
-		logger.Do.Println("Get port Error")
-		return
-	}
-	masterAddress := httpHost + ":" + fmt.Sprintf("%d", port)
-	ms := master.RunMaster("tcp", masterAddress, httpAddr, qItem, taskType)
+	ms, masterAddress := SetupMaster(httpHost,httpAddr,qItem, taskType)
 
-	if taskType == config.TrainTaskType{
+	if taskType == common.TrainTaskType{
 		// update job's master address
 		c.JobUpdateMaster(httpAddr, masterAddress, qItem.JobId)
 	}
@@ -39,7 +33,7 @@ func SetupDist(httpHost, httpPort string, qItem *config.QItem, taskType string) 
 		// maybe check table wit ip, and + port got from table also
 
 		// send a request to http
-		c.SetupWorker(ip+":"+config.ListenerPort, masterAddress, taskType)
+		c.SetupWorker(ip+":"+common.ListenerPort, masterAddress, taskType)
 	}
 
 	// wait until job done
@@ -70,33 +64,72 @@ func SetupWorkerHelper(httpHost string, masterAddress, taskType string)  {
 	 **/
 
 	// in dev, use thread
-	if config.Env == config.DevEnv{
+	if common.Env == common.DevEnv{
 
-		if taskType == config.TrainTaskType{
+		if taskType == common.TrainTaskType{
 
 			SetupTrain(httpHost, masterAddress)
 
-		}else if taskType == config.PredictTaskType{
+		}else if taskType == common.PredictTaskType{
 
 			SetupPrediction(httpHost, masterAddress)
 		}
 
 		// in prod, use k8s to run train/predict server as a isolate process
-	}else if config.Env == config.ProdEnv{
+	}else if common.Env == common.ProdEnv{
 
 		var filename string
 
-		if taskType == config.TrainTaskType{
-			filename = config.TrainYaml
+		if taskType == common.TrainTaskType{
+			filename = common.TrainYaml
 
-		}else if taskType == config.PredictTaskType{
-			filename = config.PredictorYaml
+		}else if taskType == common.PredictTaskType{
+			filename = common.PredictorYaml
 		}
 
 		km := taskmanager.InitK8sManager(true,  "")
 		km.CreateResources(filename)
 
 	}
+}
+
+func SetupMasterHelper(httpHost, httpAddr string, qItem *cache.QItem, taskType string)  {
+	if common.Env == common.DevEnv{
+
+		SetupMaster(httpHost,httpAddr,qItem, taskType)
+
+		// in prod, use k8s to run train/predict server as a isolate process
+	}else if common.Env == common.ProdEnv{
+
+		filename := common.PredictorYaml
+
+		km := taskmanager.InitK8sManager(true,  "")
+		km.CreateResources(filename)
+}
+
+
+
+}
+func SetupMaster(httpHost,httpAddr string, qItem *cache.QItem, taskType string) (*master.Master,string) {
+	/**
+	 * @Author
+	 * @Description : run train rpc server in a thread, used to test only
+	 * @Date 2:26 下午 1/12/20
+	 * @Param
+	 * @return
+	 **/
+	logger.Do.Println("SetupDist: Lunching master")
+
+	port, e := utils.GetFreePort()
+	if e != nil {
+		logger.Do.Println("SetupDist: Launch master Get port Error")
+		panic(e)
+	}
+	masterAddress := httpHost + ":" + fmt.Sprintf("%d", port)
+	ms := master.RunMaster("tcp", masterAddress, httpAddr, qItem, taskType)
+
+	return ms, masterAddress
+
 }
 
 
@@ -153,17 +186,17 @@ func SetupPrediction(httpHost, masterAddress string)  {
 //
 //commend := "./coordinator_server"
 //
-//if taskType == config.TrainTaskType{
+//if taskType == common.TrainTaskType{
 //	args = []string{
 //		fmt.Sprintf("-svc %s -wip %s -master_addr %s",
-//		config.TrainTaskType,
+//		common.TrainTaskType,
 //		httpHost,
 //		masterAddress)}
 //
-//}else if taskType == config.PredictTaskType{
+//}else if taskType == common.PredictTaskType{
 //	args = []string{
 //		fmt.Sprintf("-svc %s -wip %s -master_addr %s",
-//			config.PredictTaskType,
+//			common.PredictTaskType,
 //			httpHost,
 //			masterAddress)}
 //	pm.IsWait = false

@@ -3,7 +3,7 @@ package controller
 import (
 	"coordinator/api/entity"
 	"coordinator/api/models"
-	"coordinator/config"
+	"coordinator/common"
 	dist "coordinator/distributed"
 	"coordinator/logger"
 	"fmt"
@@ -66,9 +66,9 @@ loop:
 
 				logger.Do.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
 
-				models.JobUpdateStatus(qItem.JobId, config.JobRunning)
+				models.JobUpdateStatus(qItem.JobId, common.JobRunning)
 				// lunching the master
-				go dist.SetupDist(ds.httpHost, ds.httpPort, qItem, config.TrainTaskType)
+				go dist.SetupDist(ds.httpHost, ds.httpPort, qItem, common.TrainTaskType)
 			}
 
 		}

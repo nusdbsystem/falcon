@@ -1,8 +1,9 @@
 package master
 
 import (
+	"coordinator/cache"
 	"coordinator/client"
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
 	"coordinator/logger"
@@ -39,14 +40,14 @@ type Master struct {
 func newMaster(Proxy, masterAddr string, workerNum int) (ms *Master) {
 	ms = new(Master)
 	ms.InitRpc(Proxy, masterAddr)
-	ms.Name = config.Master
+	ms.Name = common.Master
 	ms.newCond = sync.NewCond(ms)
 	ms.beginCountDown = sync.NewCond(ms)
 	ms.allWorkerReady = sync.NewCond(ms)
 
 	ms.doneChannel = make(chan bool)
 	ms.workerNum = workerNum
-	ms.heartbeatTimeout = config.MasterTimeout
+	ms.heartbeatTimeout = common.MasterTimeout
 	return
 }
 
@@ -75,7 +76,7 @@ func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 }
 
 // sends information of worker to ch. which is used by scheduler
-func (this *Master) forwardRegistrations(ch chan string, qItem *config.QItem) {
+func (this *Master) forwardRegistrations(ch chan string, qItem *cache.QItem) {
 	indexWorker := 0
 	for {
 		this.Lock()
@@ -227,7 +228,7 @@ func (this *Master) eventLoop() {
 			}
 		}
 
-		time.Sleep(time.Millisecond * config.MasterTimeout / 5)
+		time.Sleep(time.Millisecond * common.MasterTimeout / 5)
 	}
 }
 

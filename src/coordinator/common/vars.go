@@ -1,4 +1,4 @@
-package config
+package common
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 /**
  * @Author
  * @Description This file is only used inside the project,
-				for any config required to modify according to env,
+				for any common required to modify according to env,
 				use coordinator.properties or bash_env.sh
  * @Date 4:42 下午 1/12/20
  * @Param
@@ -81,6 +81,7 @@ const (
 	JobFailed     = 3
 	JobKilled     = 4
 
+	MasterTaskType = "master"
 	TrainTaskType = "train"
 	PredictTaskType = "predict"
 
@@ -102,24 +103,24 @@ var (
 	//////////////////////////////////////////////////////////////////////////
 
 	// MetaStore and Database Configs
-	MsEngine       = getEnv("MS_ENGINE", "sqlite3")
-	MsSqliteDb     = getEnv("MS_SQLITE_DB", "falcon")
-	MsHost         = getEnv("MS_HOST","localhost")
-	MsMysqlUser    = getEnv("MS_MYSQL_USER", "falcon")
-	MsMysqlPwd     = getEnv("MS_MYSQL_PWD", "falcon")
-	MsMysqlDb      = getEnv("MS_MYSQL_DB", "falcon")
-	MsMysqlOptions = getEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
+	MsEngine       = GetEnv("MS_ENGINE", "sqlite3")
+	MsSqliteDb     = GetEnv("MS_SQLITE_DB", "falcon")
+	MsHost         = GetEnv("MS_HOST","localhost")
+	MsMysqlUser    = GetEnv("MS_MYSQL_USER", "falcon")
+	MsMysqlPwd     = GetEnv("MS_MYSQL_PWD", "falcon")
+	MsMysqlDb      = GetEnv("MS_MYSQL_DB", "falcon")
+	MsMysqlOptions = GetEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
 
 	// sys port
-	MasterPort   = getEnv("MASTER_TARGET_PORT", "31201")
-	ListenerPort = getEnv("LISTENER_TARGET_PORT", "31301")
+	MasterPort   = GetEnv("MASTER_TARGET_PORT", "31201")
+	ListenerPort = GetEnv("LISTENER_TARGET_PORT", "31301")
 
 	// envs
-	Env = getEnv("Env",DevEnv)
+	Env = GetEnv("Env",DevEnv)
 )
 
-// getEnv get key environment variable if exist otherwise return defalutValue
-func getEnv(key, defaultValue string) string {
+// GetEnv get key environment variable if exist otherwise return defalutValue
+func GetEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
 		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, set to default, key: %s, default: %s >>>>>>>>>>>>>\n",key, defaultValue)

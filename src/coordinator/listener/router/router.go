@@ -2,7 +2,7 @@ package router
 
 import (
 	"coordinator/client"
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/listener/controller"
 	"net/http"
 )
@@ -13,8 +13,8 @@ func SetupWorker(httpHost string) func(w http.ResponseWriter, r *http.Request) {
 		client.ReceiveForm(r)
 
 		// this is sent from main http server
-		masterAddress := r.FormValue(config.MasterAddr)
-		taskType := r.FormValue(config.TaskType)
+		masterAddress := r.FormValue(common.MasterAddr)
+		taskType := r.FormValue(common.TaskType)
 
 		go controller.SetupWorker(httpHost, masterAddress, taskType)
 

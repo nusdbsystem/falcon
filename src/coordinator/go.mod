@@ -8,6 +8,6 @@ require (
 	golang.org/x/sys v0.0.0-20201024232916-9f70ab9862d5 // indirect
 	gorm.io/driver/mysql v1.0.3
 	gorm.io/driver/sqlite v1.1.4
-	k8s.io/apimachinery v0.0.0-20191028221656-72ed19daf4bb
-	k8s.io/client-go v0.0.0-20191114101535-6c5935290e33
+	k8s.io/apimachinery v0.19.0
+	k8s.io/client-go v0.19.0
 )

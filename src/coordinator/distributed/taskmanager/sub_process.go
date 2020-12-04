@@ -1,7 +1,7 @@
 package taskmanager
 
 import (
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/logger"
 	"errors"
 	"fmt"
@@ -183,7 +183,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		if outErr != nil {
 			oe = outErr.Error()
 		} else {
-			oe = config.SubProcessNormal
+			oe = common.SubProcessNormal
 		}
 		for {
 
@@ -275,7 +275,7 @@ func (pm *SubProcessManager) ExecuteSubProc2(
 		if outErr != nil {
 			oe = outErr.Error()
 		} else {
-			oe = config.SubProcessNormal
+			oe = common.SubProcessNormal
 		}
 		for {
 

@@ -1,8 +1,9 @@
 package master
 
 import (
+	"coordinator/cache"
 	"coordinator/client"
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/distributed/entitiy"
 	"coordinator/logger"
 	"strings"
@@ -11,7 +12,7 @@ import (
 
 type taskHandler func(workerAddr,httpAddr,svcName string, args *entitiy.DoTaskArgs, JobId uint, wg *sync.WaitGroup)
 
-func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *config.QItem, taskType string) {
+func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *cache.QItem, taskType string) {
 	logger.Do.Println("Scheduler: Begin to schedule")
 
 	// checking if the ip of worker match the qItem
@@ -31,11 +32,11 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 	}
 
 
-	if taskType == config.TrainTaskType{
+	if taskType == common.TrainTaskType{
 
 		taskFunc := this.trainTaskHandler
 
-		this.schedulerHelper(taskFunc, httpAddr, config.Worker,qItem,workerAddress)
+		this.schedulerHelper(taskFunc, httpAddr, common.Worker,qItem,workerAddress)
 
 		client.ModelUpdate(
 			httpAddr,
@@ -45,11 +46,11 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 		// stop worker after finishing the job
 		this.stats = this.killWorkers()
 
-	}else if taskType == config.PredictTaskType{
+	}else if taskType == common.PredictTaskType{
 
 		taskFunc := this.predictTaskHandler
 
-		this.schedulerHelper(taskFunc, httpAddr,config.ModelService,qItem,workerAddress)
+		this.schedulerHelper(taskFunc, httpAddr, common.ModelService,qItem,workerAddress)
 
 	}
 }
@@ -61,7 +62,7 @@ func (this *Master) schedulerHelper(
 
 	httpAddr string,
 	svcName string,
-	qItem *config.QItem,
+	qItem *cache.QItem,
 	workerAddress []string){
 
 	wg := sync.WaitGroup{}
@@ -120,14 +121,14 @@ func (this *Master) trainTaskHandler(
 			"call Worker.DoTask error",
 			"call Worker.DoTask error",
 			JobId)
-		client.JobUpdateStatus(httpAddr, config.JobFailed, JobId)
+		client.JobUpdateStatus(httpAddr, common.JobFailed, JobId)
 		return
 	}
 
 	errLen := 4096
 	outLen := 4096
-	errMsg := rep.ErrLogs[config.PreProcessing] + config.ModelTraining + rep.ErrLogs[config.ModelTraining]
-	outMsg := rep.OutLogs[config.PreProcessing] + config.ModelTraining + rep.OutLogs[config.ModelTraining]
+	errMsg := rep.ErrLogs[common.PreProcessing] + common.ModelTraining + rep.ErrLogs[common.ModelTraining]
+	outMsg := rep.OutLogs[common.PreProcessing] + common.ModelTraining + rep.OutLogs[common.ModelTraining]
 	if len(errMsg) < errLen {
 		errLen = len(errMsg)
 	}
@@ -139,25 +140,25 @@ func (this *Master) trainTaskHandler(
 	logger.Do.Println("Scheduler: max length is", outLen, errLen)
 
 	if rep.Killed == true {
-	} else if rep.Errs[config.PreProcessing] != config.SubProcessNormal {
+	} else if rep.Errs[common.PreProcessing] != common.SubProcessNormal {
 		// if pre-processing failed
 		client.JobUpdateResInfo(
 			httpAddr,
-			rep.ErrLogs[config.PreProcessing],
-			rep.OutLogs[config.PreProcessing],
+			rep.ErrLogs[common.PreProcessing],
+			rep.OutLogs[common.PreProcessing],
 			"PreProcessing Failed",
 			JobId)
-		client.JobUpdateStatus(httpAddr, config.JobFailed, JobId)
+		client.JobUpdateStatus(httpAddr, common.JobFailed, JobId)
 
 		// if pre-processing pass, but train failed
-	} else if rep.Errs[config.ModelTraining] != config.SubProcessNormal {
+	} else if rep.Errs[common.ModelTraining] != common.SubProcessNormal {
 		client.JobUpdateResInfo(
 			httpAddr,
 			errMsg[:errLen],
 			outMsg[:outLen],
 			"PreProcessing Passed, ModelTraining Failed",
 			JobId)
-		client.JobUpdateStatus(httpAddr, config.JobFailed, JobId)
+		client.JobUpdateStatus(httpAddr, common.JobFailed, JobId)
 
 		// if both train and process pass
 	} else {
@@ -167,7 +168,7 @@ func (this *Master) trainTaskHandler(
 			outMsg[:outLen],
 			"PreProcessing Passed, ModelTraining Passed",
 			JobId)
-		client.JobUpdateStatus(httpAddr, config.JobSuccessful, JobId)
+		client.JobUpdateStatus(httpAddr, common.JobSuccessful, JobId)
 	}
 }
 
@@ -191,9 +192,9 @@ func (this *Master) predictTaskHandler(
 	if !ok {
 		logger.Do.Printf("Scheduler: %s.CreateService error\n", svcName)
 
-		client.ModelServiceUpdateStatus(httpAddr, config.JobFailed, JobId)
+		client.ModelServiceUpdateStatus(httpAddr, common.JobFailed, JobId)
 		return
 	}else{
-		client.ModelServiceUpdateStatus(httpAddr, config.JobRunning, JobId)
+		client.ModelServiceUpdateStatus(httpAddr, common.JobRunning, JobId)
 	}
 }

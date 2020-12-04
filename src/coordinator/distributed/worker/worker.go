@@ -2,8 +2,8 @@ package worker
 
 import (
 	"coordinator/client"
-	"coordinator/config"
-	_ "coordinator/config"
+	"coordinator/common"
+	_ "coordinator/common"
 	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/taskmanager"
@@ -52,12 +52,12 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 		return nil
 	}
 
-	rep.Errs[config.PreProcessing] = e
-	rep.ErrLogs[config.PreProcessing] = el
-	rep.OutLogs[config.PreProcessing] = ol
+	rep.Errs[common.PreProcessing] = e
+	rep.ErrLogs[common.PreProcessing] = el
+	rep.OutLogs[common.PreProcessing] = ol
 	logger.Do.Println("Worker:task 1 pre processing done", killed, e, el, ol)
 
-	if e != config.SubProcessNormal {
+	if e != common.SubProcessNormal {
 		// return res is used to control the rpc call status, always return nil, but
 		// keep error at rep.Errs
 		return nil
@@ -85,13 +85,13 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 		return nil
 	}
 
-	rep.Errs[config.ModelTraining] = e
-	rep.ErrLogs[config.ModelTraining] = el
-	rep.OutLogs[config.ModelTraining] = ol
+	rep.Errs[common.ModelTraining] = e
+	rep.ErrLogs[common.ModelTraining] = el
+	rep.OutLogs[common.ModelTraining] = ol
 
 	logger.Do.Println("Worker:task 2 train worker done", killed)
 
-	if e != config.SubProcessNormal {
+	if e != common.SubProcessNormal {
 		return nil
 	}
 
@@ -180,7 +180,7 @@ func (wk *Worker) eventLoop() {
 		}
 		wk.Unlock()
 
-		time.Sleep(time.Millisecond * config.WorkerTimeout / 5)
+		time.Sleep(time.Millisecond * common.WorkerTimeout / 5)
 		fmt.Printf("Worker: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
 	}
 }

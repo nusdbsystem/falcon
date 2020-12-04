@@ -1,7 +1,7 @@
 package test
 
 import (
-	"coordinator/config"
+	"coordinator/common"
 	"coordinator/listener"
 	"testing"
 )
@@ -9,7 +9,7 @@ import (
 func TestWorker(t *testing.T) {
 
 	localIp := "172.25.122.185"
-	masterAddr := localIp + ":" + config.MasterPort
+	masterAddr := localIp + ":" + common.MasterPort
 
-	listener.SetupListener(localIp, config.ListenerPort, masterAddr)
+	listener.SetupListener(localIp, common.ListenerPort, masterAddr)
 }

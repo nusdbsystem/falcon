@@ -4,7 +4,7 @@ import (
 	"coordinator/api/controller"
 	"coordinator/api/entity"
 	"coordinator/client"
-	"coordinator/config"
+	"coordinator/common"
 	"net/http"
 	"strconv"
 )
@@ -14,7 +14,7 @@ import (
 func PublishService(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	client.ReceiveForm(r)
-	JobId := r.FormValue(config.JobId)
+	JobId := r.FormValue(common.JobId)
 
 	jobId, e := strconv.Atoi(JobId)
 	if e != nil {
@@ -30,9 +30,9 @@ func PublishService(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 func CreateService(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	client.ReceiveForm(r)
-	JobId := r.FormValue(config.JobId)
-	appName := r.FormValue(config.AppName)
-	extInfo := r.FormValue(config.ExtInfo)
+	JobId := r.FormValue(common.JobId)
+	appName := r.FormValue(common.AppName)
+	extInfo := r.FormValue(common.ExtInfo)
 
 	jobId, e := strconv.Atoi(JobId)
 	if e != nil {
@@ -73,8 +73,8 @@ func LaunchService(w http.ResponseWriter, r *http.Request, ctx *entity.Context) 
 
 func ModelServiceUpdateStatus(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	client.ReceiveForm(r)
-	JobId := r.FormValue(config.JobId)
-	JobStatus := r.FormValue(config.JobStatus)
+	JobId := r.FormValue(common.JobId)
+	JobStatus := r.FormValue(common.JobStatus)
 
 	jobId, e := strconv.Atoi(JobId)
 	if e != nil {
