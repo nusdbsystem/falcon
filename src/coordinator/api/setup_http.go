@@ -48,7 +48,7 @@ func SetupHttp(nConsumer int) {
 
 
 	server := &http.Server{
-		Addr:    "0.0.0.0",
+		Addr:    "0.0.0.0:" + common.MasterPort,
 		Handler: mux,
 	}
 

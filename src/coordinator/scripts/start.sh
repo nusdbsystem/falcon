@@ -65,12 +65,14 @@ start_coordinator()
 create_folders()
 {
       title "Creating folders"
+      mkdir $DATA_BASE_PATH
       mkdir $DATA_BASE_PATH/logs
+
 }
 
 title "Guidence"
 help
-#create_folders
+create_folders
 
 title "Creating the cluster role binding"
 # ensure python api in pod has auth to control kubernetes

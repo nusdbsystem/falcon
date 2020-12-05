@@ -13,9 +13,9 @@ LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_redis.log
 (kubectl create configmap redis-config --from-file=./deploy/property/redis-config &> $LOG_FILE_PATH)
 # error: from-env-file cannot be combined with from-file or from-literal
 (kubectl create configmap redis-envs --from-env-file=./deploy/property/db.properties &> $LOG_FILE_PATH)
-echo "-------------------------- finish creating config map for db --------------------------------"
+  echo "-------------------------- finish creating config map for redis --------------------------------"
 }||{
-  echo "--------------------------  creating config map error, check the log, --------------------------------"
+  echo "-------------------------- creating config map error, check the log, --------------------------------"
 }
 
 # create new yaml according template
@@ -31,7 +31,7 @@ sed -i '' -e "s/REDIS_NODE_PORT/$REDIS_NODE_PORT/g" $REDIS_YAML || exit 1
 sed -i '' -e "s/REDIS_IMAGE/$REDIS_IMAGE/g" $REDIS_YAML || exit 1
 
 # apply the job
-echo "--------------------------  creating mysql service --------------------------------"
+echo "--------------------------  creating cache service --------------------------------"
 kubectl apply -f $REDIS_YAML &> $LOG_FILE_PATH|| exit 1
 
 # delete common

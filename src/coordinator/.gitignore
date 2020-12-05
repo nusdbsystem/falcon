@@ -20,3 +20,4 @@ coordinator_server
 
 # sqlite3 db
 falcon.db
+.falcon_runtime_resources/*

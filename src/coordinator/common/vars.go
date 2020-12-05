@@ -87,9 +87,6 @@ const (
 	DevEnv = "dev"
 	ProdEnv = "prod"
 
-	CoordinatorYaml = "./deploy/template/"
-	ListenerYaml = "./deploy/template/"
-
 	WorkerYamlCreatePath = "./scripts/_create_worker.sh"
 	MasterYamlCreatePath = "./scripts/_create_master.sh"
 
@@ -150,10 +147,10 @@ var (
 func GetEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, set to default, key: %s, default: %s >>>>>>>>>>>>>\n",key, defaultValue)
+		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, Set to default, key: %s, default: %s >>>>>>>>>>>>>\n",key, defaultValue)
 		return defaultValue
 	}
-	fmt.Printf("<<<<<<<<<<<<<<<< Read envs,key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
+	fmt.Printf("<<<<<<<<<<<<<<<< Read envs, user defined, key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
 	return value
 }
 

@@ -18,8 +18,8 @@ func init() {
 
 	// prority: env >  user provided > default value
 	runtime.GOMAXPROCS(4)
-	verifyArgs()
 	initLogger()
+	verifyArgs()
 
 }
 
