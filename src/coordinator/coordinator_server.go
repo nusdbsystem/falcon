@@ -5,6 +5,8 @@ import (
 	"coordinator/cache"
 	"coordinator/common"
 	"coordinator/distributed"
+	"coordinator/distributed/prediction"
+	"coordinator/distributed/worker"
 	"coordinator/listener"
 	"coordinator/logger"
 	"os"
@@ -23,7 +25,7 @@ func init() {
 
 func verifyArgs() {
 
-	if len(common.ServiceNameGlobal) == 0 && len(common.ExecutorTypeGlobal) == 0{
+	if len(common.ServiceNameGlobal) == 0 && len(common.ExecutorTypeGlobal) == 0 && common.ISMASTER=="false"{
 		logger.Do.Println("Error: Input Error, ServiceNameGlobal is either 'coord' or 'listener' ")
 		os.Exit(1)
 	}
@@ -42,22 +44,23 @@ func verifyArgs() {
 		}
 	}
 
-	if common.ExecutorTypeGlobal == common.MasterExecutor{
+	// this will be executed only in production, in dev, the common.ExecutorTypeGlobal==""
+	if common.ISMASTER == "true"{
 
-		if common.MasterAddrGlobal=="" || common.CoordAddrGlobal=="" {
+		if common.MasterURLGlobal=="" || common.CoordAddrGlobal==""|| common.ListenAddrGlobal==""{
 			logger.Do.Println("Error: Input Error, either MasterAddrGlobal or CoordAddrGlobal not provided")
 			os.Exit(1)
 		}
 
 	}else if common.ExecutorTypeGlobal == common.TrainExecutor{
-		if common.WorkerAddrGlobal=="" || common.MasterAddrGlobal=="" || common.TaskTypeGlobal==""  {
+		if common.MasterURLGlobal=="" || common.WorkerURLGlobal=="" {
 			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
 			os.Exit(1)
 		}
 
 
 	}else if common.ExecutorTypeGlobal == common.PredictExecutor{
-		if common.WorkerAddrGlobal=="" || common.MasterAddrGlobal=="" || common.TaskTypeGlobal==""  {
+		if common.MasterURLGlobal=="" || common.WorkerURLGlobal==""{
 			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
 			os.Exit(1)
 		}
@@ -96,8 +99,7 @@ func main() {
 
 		logger.Do.Println("Launch coordinator_server, the common.ServiceNameGlobal", common.ServiceNameGlobal)
 
-		ServerAddress := common.CoordAddrGlobal + ":" + common.MasterPort
-		listener.SetupListener(common.ListenAddrGlobal, common.ListenerPort, ServerAddress)
+		listener.SetupListener()
 	}
 
 
@@ -108,34 +110,36 @@ func main() {
 
 	//those 2 is only called internally
 
-	if common.ExecutorTypeGlobal == common.MasterExecutor {
+	if common.ISMASTER == "true" {
 
 		logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
 		// this should be the service name, defined at runtime,
-		masterIp := common.MasterAddrGlobal
+		masterUrl := common.MasterURLGlobal
 
-		// todo. get from redis
+		qItem := cache.Deserialize(cache.RedisClient.Get(common.MasterQItem))
 
-		qItem := &cache.QItem{}
+		taskType := common.ExecutorTypeGlobal
 
-		taskType := common.TaskTypeGlobal
+		distributed.SetupMaster(masterUrl, qItem, taskType)
 
-		distributed.SetupMaster(masterIp, qItem, taskType)
-	}
+	}else{
 
-	if common.ExecutorTypeGlobal == common.TrainExecutor {
+		if common.ExecutorTypeGlobal == common.TrainExecutor {
 
-		logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
+			logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
-		distributed.SetupTrain(common.WorkerAddrGlobal, common.MasterAddrGlobal)
-	}
+			worker.RunWorker(common.WorkerURLGlobal, common.MasterURLGlobal)
+		}
 
-	if common.ExecutorTypeGlobal == common.PredictExecutor {
+		if common.ExecutorTypeGlobal == common.PredictExecutor {
 
-		logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
+			logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
-		distributed.SetupPrediction(common.WorkerAddrGlobal, common.MasterAddrGlobal)
+			prediction.RunPrediction(common.WorkerURLGlobal, common.MasterURLGlobal)
+
+		}
+
 
 	}
 }

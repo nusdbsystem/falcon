@@ -11,22 +11,65 @@ import (
 	"coordinator/distributed/worker"
 	"coordinator/logger"
 	"fmt"
+	"math/rand"
+	"strings"
+	"time"
 )
 
-func SetupDist(qItem *cache.QItem, taskType string) {
+func initSvcName() string{
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	res := fmt.Sprintf("%d", r.Int())
+	return res
+}
 
-	var masterIp string
+func SetupDist(qItem *cache.QItem, taskType string) {
+	/**
+	 * @Author
+	 * @Description run master, and then, master will call lister to run worker
+	 * @Date 2:36 下午 5/12/20
+	 * @Param
+	 * @return
+	 **/
+
+	port, e := utils.GetFreePort4K8s()
+	if e != nil {
+		logger.Do.Println("SetupDist: Launch master Get port Error")
+		panic(e)
+	}
+
+	masterIp := common.CoordAddrGlobal
+	masterPort := fmt.Sprintf("%d", port)
+	masterAddress := masterIp + ":" + masterPort
+
 	if common.Env == common.DevEnv{
-		masterIp = common.CoordAddrGlobal
+
 		// use a thread
-		// in dev model, the master ip is the same as coordinator ip
-		SetupMaster(masterIp, qItem, taskType)
+		SetupMaster(masterAddress, qItem, taskType)
 
 	}else if common.Env == common.ProdEnv{
+
 		// in prod, use k8s to run train/predict server as a isolate process
-		filename := common.MasterYaml
+		itemKey := initSvcName()
+		serviceName := "master-" + itemKey
+
+		// put to the queue, assign key to env
+
+		cache.RedisClient.Set(itemKey, cache.Serialize(qItem))
 
 		km := taskmanager.InitK8sManager(true,  "")
+
+		command := []string{
+			common.MasterYamlCreatePath,
+			serviceName,
+			masterPort,
+			itemKey,
+			taskType,
+		}
+
+		km.UpdateYaml(strings.Join(command, " "))
+
+		filename := common.YamlBasePath + serviceName + ".yaml"
+
 		km.CreateResources(filename)
 	}
 	logger.Do.Println("SetupDist: setup master done")
@@ -43,11 +86,11 @@ func KillJob(masterAddr, Proxy string) {
 	}
 }
 
-func SetupWorkerHelper(httpHost string, masterAddress, taskType string)  {
+func SetupWorkerHelper(masterAddress, taskType string)  {
 
 	/**
 	 * @Author
-	 * @Description
+	 * @Description: this func is only called by listener
 	 * @Date 2:14 下午 1/12/20
 	 * @Param
 	 	httpHost： 		IP of the listener address
@@ -55,31 +98,53 @@ func SetupWorkerHelper(httpHost string, masterAddress, taskType string)  {
 		masterAddress： train or predictor
 	 **/
 
+	port, e := utils.GetFreePort4K8s()
+	if e != nil {
+		logger.Do.Println("SetupDist: Launch worker Get port Error")
+		panic(e)
+	}
+	workerPort := fmt.Sprintf("%d", port)
+
+	workerAddress := common.ListenAddrGlobal + workerPort
+
 	// in dev, use thread
 	if common.Env == common.DevEnv{
 
-		if taskType == common.TrainTaskType{
+		if taskType == common.TrainExecutor{
 
-			SetupTrain(httpHost, masterAddress)
+			worker.RunWorker(masterAddress, workerAddress)
 
-		}else if taskType == common.PredictTaskType{
+		}else if taskType == common.PredictExecutor{
 
-			SetupPrediction(httpHost, masterAddress)
+			prediction.RunPrediction(masterAddress, workerAddress)
 		}
 
 		// in prod, use k8s to run train/predict server as a isolate process
 	}else if common.Env == common.ProdEnv{
+		itemKey := initSvcName()
 
-		var filename string
+		var serviceName string
 
-		if taskType == common.TrainTaskType{
-			filename = common.TrainYaml
+		if taskType == common.TrainExecutor{
+			serviceName = "train-" + itemKey
 
-		}else if taskType == common.PredictTaskType{
-			filename = common.PredictorYaml
+		}else if taskType == common.PredictExecutor{
+			serviceName = "predict-" + itemKey
 		}
 
 		km := taskmanager.InitK8sManager(true,  "")
+		command := []string{
+			common.WorkerYamlCreatePath,
+			serviceName,
+			workerPort,
+			masterAddress,
+			taskType,
+		}
+
+		km.UpdateYaml(strings.Join(command, " "))
+
+		filename := common.YamlBasePath + serviceName + ".yaml"
+
 		km.CreateResources(filename)
 
 	}
@@ -88,7 +153,8 @@ func SetupWorkerHelper(httpHost string, masterAddress, taskType string)  {
 
 }
 
-func SetupMaster(masterIp string, qItem *cache.QItem, taskType string) string {
+
+func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) string {
 	/**
 	 * @Author
 	 * @Description : run train rpc server in a thread, used to test only
@@ -98,21 +164,13 @@ func SetupMaster(masterIp string, qItem *cache.QItem, taskType string) string {
 	 **/
 	logger.Do.Println("SetupDist: Lunching master")
 
-	port, e := utils.GetFreePort4K8s()
-	if e != nil {
-		logger.Do.Println("SetupDist: Launch master Get port Error")
-		panic(e)
-	}
-	masterPort := fmt.Sprintf("%d", port)
-	masterAddress := masterIp + ":" + masterPort
-
 	master.RunMaster(masterAddress, qItem, taskType)
 
 
 	// update job's master address
-	if taskType == common.TrainTaskType{
+	if taskType == common.TrainExecutor{
 
-		c.JobUpdateMaster(common.CoordAddrPortGlobal, masterAddress, qItem.JobId)
+		c.JobUpdateMaster(common.CoordURLGlobal, masterAddress, qItem.JobId)
 	}
 
 	// master will call lister's endpoint to launch worker, to train or predict
@@ -131,76 +189,3 @@ func SetupMaster(masterIp string, qItem *cache.QItem, taskType string) string {
 	return masterAddress
 }
 
-
-func SetupTrain(httpHost string, masterAddress string)  {
-	/**
-	 * @Author
-	 * @Description : run train rpc server in a thread, used to test only
-	 * @Date 2:26 下午 1/12/20
-	 * @Param
-	 * @return
-	 **/
-	logger.Do.Println("SetupDist: Launch worker threads")
-
-	port, e := utils.GetFreePort()
-	if e != nil {
-		logger.Do.Println("SetupDist: Launch worker Get port Error")
-		panic(e)
-	}
-
-	// worker address share the same host with listener server
-	worker.RunWorker(masterAddress, httpHost, fmt.Sprintf("%d", port))
-
-}
-
-func SetupPrediction(httpHost, masterAddress string)  {
-	/**
-	 * @Author
-	 * @Description : run prediction rpc server in a thread, used to test only
-	 * @Date 2:26 下午 1/12/20
-	 * @Param
-	 * @return
-	 **/
-	// the masterAddress is the master thread address
-
-	logger.Do.Println("SetupDist: Lunching prediction svc")
-
-	port, e := utils.GetFreePort()
-	if e != nil {
-		logger.Do.Println("SetupDist: Lunching worker Get port Error")
-		panic(e)
-	}
-	// worker address share the same host with listener server
-	prediction.RunPrediction(masterAddress, httpHost, fmt.Sprintf("%d", port),"tcp")
-
-}
-
-
-//pm := taskmanager.InitSubProcessManager()
-//dir:=""
-//stdIn := ""
-//var envs []string
-//
-//var args []string
-//
-//commend := "./coordinator_server"
-//
-//if taskType == common.TrainTaskType{
-//	args = []string{
-//		fmt.Sprintf("-svc %s -wip %s -master_addr %s",
-//		common.TrainTaskType,
-//		httpHost,
-//		masterAddress)}
-//
-//}else if taskType == common.PredictTaskType{
-//	args = []string{
-//		fmt.Sprintf("-svc %s -wip %s -master_addr %s",
-//			common.PredictTaskType,
-//			httpHost,
-//			masterAddress)}
-//	pm.IsWait = false
-//
-//}
-//
-//killed, e, el, ol := pm.ExecuteSubProc(dir, stdIn, commend, args, envs)
-//logger.Do.Println(killed, e, el, ol)

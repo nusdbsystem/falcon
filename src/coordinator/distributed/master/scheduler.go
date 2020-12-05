@@ -32,21 +32,21 @@ func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskT
 	}
 
 
-	if taskType == common.TrainTaskType{
+	if taskType == common.TrainExecutor{
 
 		taskFunc := this.trainTaskHandler
 
 		this.schedulerHelper(taskFunc, common.Worker,qItem,workerAddress)
 
 		client.ModelUpdate(
-			common.CoordAddrPortGlobal,
+			common.CoordURLGlobal,
 			1,
 			qItem.JobId)
 
 		// stop worker after finishing the job
 		this.stats = this.killWorkers()
 
-	}else if taskType == common.PredictTaskType{
+	}else if taskType == common.PredictExecutor{
 
 		taskFunc := this.predictTaskHandler
 
@@ -115,12 +115,12 @@ func (this *Master) trainTaskHandler(
 		logger.Do.Printf("Scheduler: %s.DoTask error\n", svcName)
 
 		client.JobUpdateResInfo(
-			common.CoordAddrPortGlobal,
+			common.CoordURLGlobal,
 			"call Worker.DoTask error",
 			"call Worker.DoTask error",
 			"call Worker.DoTask error",
 			JobId)
-		client.JobUpdateStatus(common.CoordAddrPortGlobal, common.JobFailed, JobId)
+		client.JobUpdateStatus(common.CoordURLGlobal, common.JobFailed, JobId)
 		return
 	}
 
@@ -142,32 +142,32 @@ func (this *Master) trainTaskHandler(
 	} else if rep.Errs[common.PreProcessing] != common.SubProcessNormal {
 		// if pre-processing failed
 		client.JobUpdateResInfo(
-			common.CoordAddrPortGlobal,
+			common.CoordURLGlobal,
 			rep.ErrLogs[common.PreProcessing],
 			rep.OutLogs[common.PreProcessing],
 			"PreProcessing Failed",
 			JobId)
-		client.JobUpdateStatus(common.CoordAddrPortGlobal, common.JobFailed, JobId)
+		client.JobUpdateStatus(common.CoordURLGlobal, common.JobFailed, JobId)
 
 		// if pre-processing pass, but train failed
 	} else if rep.Errs[common.ModelTraining] != common.SubProcessNormal {
 		client.JobUpdateResInfo(
-			common.CoordAddrPortGlobal,
+			common.CoordURLGlobal,
 			errMsg[:errLen],
 			outMsg[:outLen],
 			"PreProcessing Passed, ModelTraining Failed",
 			JobId)
-		client.JobUpdateStatus(common.CoordAddrPortGlobal, common.JobFailed, JobId)
+		client.JobUpdateStatus(common.CoordURLGlobal, common.JobFailed, JobId)
 
 		// if both train and process pass
 	} else {
 		client.JobUpdateResInfo(
-			common.CoordAddrPortGlobal,
+			common.CoordURLGlobal,
 			errMsg[:errLen],
 			outMsg[:outLen],
 			"PreProcessing Passed, ModelTraining Passed",
 			JobId)
-		client.JobUpdateStatus(common.CoordAddrPortGlobal, common.JobSuccessful, JobId)
+		client.JobUpdateStatus(common.CoordURLGlobal, common.JobSuccessful, JobId)
 	}
 }
 
@@ -191,9 +191,9 @@ func (this *Master) predictTaskHandler(
 	if !ok {
 		logger.Do.Printf("Scheduler: %s.CreateService error\n", svcName)
 
-		client.ModelServiceUpdateStatus(common.CoordAddrPortGlobal, common.JobFailed, JobId)
+		client.ModelServiceUpdateStatus(common.CoordURLGlobal, common.JobFailed, JobId)
 		return
 	}else{
-		client.ModelServiceUpdateStatus(common.CoordAddrPortGlobal, common.JobRunning, JobId)
+		client.ModelServiceUpdateStatus(common.CoordURLGlobal, common.JobRunning, JobId)
 	}
 }

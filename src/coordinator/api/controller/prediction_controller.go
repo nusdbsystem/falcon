@@ -10,7 +10,6 @@ import (
 
 
 
-
 func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (uint,string){
 
 	ctx.Ms.Tx = ctx.Ms.Db.Begin()
@@ -43,7 +42,7 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 	qItem.ModelPath = modelPath
 	qItem.ExecutablePath = executablePath
 
-	go dist.SetupDist(ctx.HttpHost, ctx.HttpPort, qItem, common.PredictTaskType)
+	go dist.SetupDist(qItem, common.PredictExecutor)
 
 	return u.ID, u.ModelServiceName
 }

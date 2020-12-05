@@ -58,7 +58,7 @@ func JobSubmit(dsl *common.DSL, ctx *entity.Context) (uint, string, uint, string
 	qItem.ExecutablePath = executablePath
 
 	go func() {
-		entity.JobQueue.Push(qItem)
+		cache.JobQueue.Push(qItem)
 	}()
 
 	return u.JobId, u.JobName, u.UserID, u.PartyIds, u.TaskNum, u.Status

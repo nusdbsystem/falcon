@@ -10,18 +10,17 @@ import (
 	"os"
 )
 
-func SetupListener(host, port string, ServerAddress string) {
+func SetupListener() {
 	// host: listenerAddr
 	// ServerAddress: the address for main http server
 	// host port:  for listener,
 
-	httpAddr := host + ":" + port
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/"+common.SetupWorker, rt.SetupWorker(host))
+	mux.HandleFunc("/"+common.SetupWorker, rt.SetupWorker())
 
 	server := &http.Server{
-		Addr:    httpAddr,
+		Addr:    "0.0.0.0",
 		Handler: mux,
 	}
 	// report address to flow htp server
@@ -34,10 +33,10 @@ func SetupListener(host, port string, ServerAddress string) {
 			logger.Do.Fatal("ShutDown the server", err)
 		}
 
-		c.ListenerDelete(ServerAddress, httpAddr)
+		c.ListenerDelete(common.CoordURLGlobal, common.ListenURLGlobal)
 	}()
 
-	c.ListenerAdd(ServerAddress, httpAddr)
+	c.ListenerAdd(common.CoordURLGlobal, common.ListenURLGlobal)
 
 	logger.Do.Println("Starting HTTP server...")
 	err := server.ListenAndServe()

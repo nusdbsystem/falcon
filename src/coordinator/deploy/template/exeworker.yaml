@@ -29,8 +29,10 @@ spec:
         - image: FALCON_WORKER_IMAGE
           name: WORKER_NAME
           env:
-            - name: taskType
-              value: TASK_TYPE
+            - name: WORKER_URL
+              value: MASTER_ADDR
+            - name: EXECUTOR
+              value: EXECUTOR_TYPE
           ports:
             - containerPort: WORKER_TARGET_PORT  #这里containerPort是容器内部的port
               name: WORKER_NAME
