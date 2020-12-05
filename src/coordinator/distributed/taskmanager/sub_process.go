@@ -301,3 +301,16 @@ func (out outstream) Write(p []byte) (int, error) {
 	fmt.Println(string(p))
 	return len(p), nil
 }
+
+
+func ExecuteBash(command string) error{
+	// 返回一个 cmd 对象
+	cmd := exec.Command("/bin/bash", "-c", command)
+
+	// 收返回值[]byte, error
+	b,er:= cmd.Output()
+
+	logger.Do.Println(string(b))
+
+	return er
+}

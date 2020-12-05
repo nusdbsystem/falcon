@@ -4,8 +4,8 @@ import (
 	dist "coordinator/distributed"
 )
 
-func SetupWorker(httpHost, masterAddress, taskType string) {
+func SetupWorker(masterAddress, taskType string) {
 
-	dist.SetupWorkerHelper(httpHost, masterAddress, taskType)
+	dist.SetupWorkerHelper(masterAddress, taskType)
 
 }

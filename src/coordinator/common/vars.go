@@ -81,7 +81,6 @@ const (
 	JobFailed     = 3
 	JobKilled     = 4
 
-	MasterExecutor = "master"
 	TrainExecutor = "train"
 	PredictExecutor = "predict"
 
@@ -91,9 +90,10 @@ const (
 	CoordinatorYaml = "./deploy/template/"
 	ListenerYaml = "./deploy/template/"
 
-	TrainYaml = "./deploy/template/"
-	PredictorYaml = "./deploy/template/"
-	MasterYaml = "./deploy/template/"
+	WorkerYamlCreatePath = "./scripts/_create_worker.sh"
+	MasterYamlCreatePath = "./scripts/_create_master.sh"
+
+	YamlBasePath = "./deploy/template/"
 
 )
 
@@ -112,6 +112,16 @@ var (
 	MsMysqlDb      = GetEnv("MS_MYSQL_DB", "falcon")
 	MsMysqlOptions = GetEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
 
+	// find the cluster port, call internally
+	MsMysqlPort    = GetEnv("MYSQL_CLUSTER_PORT", "3306")
+
+	// redis
+	RedisHost      = GetEnv("REDIS_HOST","localhost")
+	RedisPwd       = GetEnv("REDIS_PWD", "falcon")
+
+	// find the cluster port, call internally
+	RedisPort       = GetEnv("REDIS_CLUSTER_PORT", "6379")
+
 	// sys port
 	MasterPort   = GetEnv("MASTER_TARGET_PORT", "31201")
 	ListenerPort = GetEnv("LISTENER_TARGET_PORT", "31301")
@@ -119,20 +129,21 @@ var (
 	// envs
 	Env = GetEnv("Env",DevEnv)
 
-	// those are init
+	// those are init by user
 	ServiceNameGlobal = GetEnv("SERVICE_NAME", "")
 	CoordAddrGlobal = GetEnv("COORDINATOR_IP", "")
 	ListenAddrGlobal = GetEnv("LISTENER_IP", "")
 
+	// those are init by coordinator
 	ExecutorTypeGlobal = GetEnv("EXECUTOR", "")
-	TaskTypeGlobal = GetEnv("TASK", "")
-
-	WorkerAddrGlobal = GetEnv("WORKER_IP", "")
-	MasterAddrGlobal = GetEnv("MASTER_IP", "")
+	WorkerURLGlobal = GetEnv("WORKER_URL", "")
+	MasterURLGlobal = GetEnv("MASTER_URL", "")
 
 	CoordURLGlobal = CoordAddrGlobal + ":" + MasterPort
 	ListenURLGlobal = ListenAddrGlobal + ":" + ListenerPort
 
+	MasterQItem = GetEnv("QItem", "")
+	ISMASTER = GetEnv("ISMASTER", "false")
 )
 
 // GetEnv get key environment variable if exist otherwise return defalutValue

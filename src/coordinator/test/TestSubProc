@@ -19,3 +19,5 @@
 2020/12/04 21:41:44 utils.go:39: <nil>
 2020/12/04 21:41:44 utils.go:39: <nil>
 2020/12/04 21:41:44 utils.go:39: <nil>
+2020/12/05 14:48:52 k8s.go:35: stat /Users/nailixing/.kube/common: no such file or directory
+2020/12/05 14:49:23 k8s.go:92: K8sManager: Creating resources, Name: my-nginx, Kind: Deployment 

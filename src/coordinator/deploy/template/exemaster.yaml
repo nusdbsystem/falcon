@@ -28,9 +28,16 @@ spec:
       containers:
         - image: FALCON_MASTER_IMAGE
           name: MASTER_NAME
+          envFrom:
+            - configMapRef:
+                name: redis-envs
           env:
-            - name: qitem
+            - name: QItem
               value: ITEMKEY
+            - name: EXECUTOR
+              value: EXECUTOR_TYPE
+            - name: ISMASTER
+              value: true
           ports:
             - containerPort: MASTER_TARGET_PORT  #这里containerPort是容器内部的port
               name: MASTER_NAME

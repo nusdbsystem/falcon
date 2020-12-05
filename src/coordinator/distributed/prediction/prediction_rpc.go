@@ -7,11 +7,10 @@ import (
 	"net/rpc"
 )
 
-func RunPrediction(masterAddress, predHost, predPort, Proxy string){
-	predAddress := predHost + ":" + predPort
+func RunPrediction(masterAddress, predAddress string){
 
 	msvc := new(ModelService)
-	msvc.InitRpc(Proxy, predAddress)
+	msvc.InitRpc(predAddress)
 	msvc.Name = common.ModelService
 	msvc.pm = taskmanager.InitSubProcessManager()
 

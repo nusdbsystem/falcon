@@ -124,3 +124,12 @@ func (km *K8sManager) CreateResources(filename string) {
 		logger.Do.Fatal("K8sManager: eof ", err)
 	}
 }
+
+func (km *K8sManager) UpdateYaml(command string){
+	e := ExecuteBash(command)
+	if e!=nil{
+		panic("K8sManager: MasterError " +e.Error())
+	}
+}
+
+

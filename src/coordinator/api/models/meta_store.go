@@ -36,10 +36,11 @@ func InitMetaStore() *MetaStore {
 		ms.database = common.MsMysqlDb
 
 		mysql_url := fmt.Sprintf(
-			"%s:%s@tcp(%s:3306)/%s%s",
+			"%s:%s@tcp(%s:%s)/%s%s",
 			ms.user,
 			ms.password,
 			ms.host,
+			common.MsMysqlPort,
 			ms.database,
 			common.MsMysqlOptions,
 		)

@@ -7,9 +7,7 @@ import (
 	"net/rpc"
 )
 
-func RunWorker(masterAddress, workerHost, workerPort string) {
-
-	workerAddress := workerHost + ":" + workerPort
+func RunWorker(masterAddress, workerAddress string) {
 
 	wk := new(Worker)
 	wk.InitRpc(workerAddress)

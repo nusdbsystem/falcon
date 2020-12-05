@@ -62,8 +62,9 @@ loop:
 				logger.Do.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
 
 				models.JobUpdateStatus(qItem.JobId, common.JobRunning)
+
 				// lunching the master
-				go dist.SetupDist(qItem, common.TrainTaskType)
+				go dist.SetupDist(qItem, common.TrainExecutor)
 			}
 
 		}

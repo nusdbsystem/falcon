@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func SetupWorker(httpHost string) func(w http.ResponseWriter, r *http.Request) {
+func SetupWorker() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		client.ReceiveForm(r)
@@ -16,7 +16,7 @@ func SetupWorker(httpHost string) func(w http.ResponseWriter, r *http.Request) {
 		masterAddress := r.FormValue(common.MasterAddr)
 		taskType := r.FormValue(common.TaskType)
 
-		go controller.SetupWorker(httpHost, masterAddress, taskType)
+		go controller.SetupWorker(masterAddress, taskType)
 
 	}
 }
