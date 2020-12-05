@@ -4,6 +4,7 @@ import (
 	"coordinator/logger"
 	"net"
 	"net/rpc"
+	"strings"
 	"sync"
 )
 
@@ -12,15 +13,20 @@ type RpcBase struct {
 	Name 		string
 	Proxy 		string
 	Address  	string //  which is the ip+port address of worker
+	Port  	string //  which is the port address of worker
 	Listener 	net.Listener
 
 	// if the master is stopped
 	IsStop 		bool
 }
 
-func (rb *RpcBase) InitRpc(Proxy, Address string) {
-	rb.Proxy = Proxy
-	rb.Address = Address
+func (rb *RpcBase) InitRpc(masterAddr string) {
+	rb.Proxy = "tcp"
+	rb.Address = masterAddr
+
+	h := strings.Split(masterAddr, ":")
+
+	rb.Port = h[1]
 	rb.IsStop = false
 }
 
@@ -29,8 +35,8 @@ func (rb *RpcBase) InitRpc(Proxy, Address string) {
 func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 
 
-	logger.Do.Printf("%s: listening on %s, %s \n", rb.Name, rb.Proxy, rb.Address)
-	listener, e := net.Listen(rb.Proxy, rb.Address)
+	logger.Do.Printf("%s: listening on %s, %s \n", rb.Name, rb.Proxy, "0.0.0.0:"+rb.Port)
+	listener, e := net.Listen(rb.Proxy, "0.0.0.0:"+rb.Port)
 
 	if e != nil {
 		logger.Do.Printf("%s: StartRPCServer error", rb.Name)

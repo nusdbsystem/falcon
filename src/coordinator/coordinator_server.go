@@ -2,60 +2,67 @@ package main
 
 import (
 	"coordinator/api"
+	"coordinator/cache"
 	"coordinator/common"
 	"coordinator/distributed"
 	"coordinator/listener"
 	"coordinator/logger"
-	"flag"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 )
 
-var svc string
-var httpAddr string
-var listenerAddr string
-
-var taskType string
-var workerAddr string
-var masterAddr string
-
 func init() {
-	runtime.GOMAXPROCS(4)
-	flag.StringVar(&svc, "svc", "coordinator", "choose which service to run, 'coordinator' or 'listener'")
-	flag.StringVar(&httpAddr, "cip", "localhost", "Ip Address of coordinator")
-	flag.StringVar(&listenerAddr, "lip", "localhost", "Ip Address of listener")
 
-	// worker ip ,master addr
-	flag.StringVar(&taskType, "taskType", "", "master, train, predict")
-	flag.StringVar(&workerAddr, "workerAddr", "", "Ip Address of WorkerAddr")
-	flag.StringVar(&masterAddr, "masterAddr", "", "Ip Address of master, this is only used for predictor")
+	// prority: env >  user provided > default value
+	runtime.GOMAXPROCS(4)
+	verifyArgs()
+	initLogger()
+
 }
 
 func verifyArgs() {
 
-	if !(
-			strings.Contains(svc, "coord") ||
-			strings.Contains(svc, "listener")){
-		logger.Do.Println("Error: Input Error, svc is either 'coordinator' or 'listener' or 'predictor' ")
+	if len(common.ServiceNameGlobal) == 0 && len(common.ExecutorTypeGlobal) == 0{
+		logger.Do.Println("Error: Input Error, ServiceNameGlobal is either 'coord' or 'listener' ")
 		os.Exit(1)
 	}
-}
 
-func checkEnv(){
-	/**
-	 * @Author
-	 * @Description , if there is env, use env (in prod), otherwise use parameters provided, (in dev), pick the env first be default
-	 * @Date 8:36 下午 3/12/20
-	 * @Param
-	 * @return
-	 **/
-	svc = common.GetEnv("SERVICE_NAME", svc)
-	httpAddr = common.GetEnv("COORDINATOR_IP", httpAddr)
-	listenerAddr = common.GetEnv("LISTENER_IP", listenerAddr)
-}
+	if common.ServiceNameGlobal == "coord"{
+		if common.CoordAddrGlobal==""{
+			logger.Do.Println("Error: Input Error, common.CoordAddrGlobal not provided")
+			os.Exit(1)
+		}
 
+
+	}else if common.ServiceNameGlobal == "listener"{
+		if common.CoordAddrGlobal=="" || common.ListenAddrGlobal=="" {
+			logger.Do.Println("Error: Input Error, either CoordAddrGlobal or ListenAddrGlobal not provided")
+			os.Exit(1)
+		}
+	}
+
+	if common.ExecutorTypeGlobal == common.MasterExecutor{
+
+		if common.MasterAddrGlobal=="" || common.CoordAddrGlobal=="" {
+			logger.Do.Println("Error: Input Error, either MasterAddrGlobal or CoordAddrGlobal not provided")
+			os.Exit(1)
+		}
+
+	}else if common.ExecutorTypeGlobal == common.TrainExecutor{
+		if common.WorkerAddrGlobal=="" || common.MasterAddrGlobal=="" || common.TaskTypeGlobal==""  {
+			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
+			os.Exit(1)
+		}
+
+
+	}else if common.ExecutorTypeGlobal == common.PredictExecutor{
+		if common.WorkerAddrGlobal=="" || common.MasterAddrGlobal=="" || common.TaskTypeGlobal==""  {
+			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
+			os.Exit(1)
+		}
+	}
+}
 
 func initLogger(){
 	// this path is fixed, used to creating folder inside container
@@ -66,70 +73,69 @@ func initLogger(){
 	// Place now in the string.
 	rawTime := time.Now()
 
-	logFileName := fixedPath + svc + rawTime.Format(layout) + ".log"
+	logFileName := fixedPath + common.ServiceNameGlobal + rawTime.Format(layout) + ".log"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }
 
 
 func main() {
-	flag.Parse()
-	verifyArgs()
-	initLogger()
-	checkEnv()
 
 	defer func(){
 		_=logger.F.Close()
 	}()
 
+	if common.ServiceNameGlobal == "coord" {
+		logger.Do.Println("Launch coordinator_server, the common.ServiceNameGlobal", common.ServiceNameGlobal)
+
+		api.SetupHttp(3)
+	}
+
 	// start work in remote machine automatically
-	if svc == "listener" {
-		if len(httpAddr) == 0 {
-			logger.Do.Println("Error: Input Error, Must Provide ip of coordinator")
-			os.Exit(1)
-		}
-		logger.Do.Println("Launch coordinator_server, the svc", svc)
+	if common.ServiceNameGlobal == "listener" {
 
-		ServerAddress := httpAddr + ":" + common.MasterPort
-		listener.SetupListener(listenerAddr, common.ListenerPort, ServerAddress)
+		logger.Do.Println("Launch coordinator_server, the common.ServiceNameGlobal", common.ServiceNameGlobal)
+
+		ServerAddress := common.CoordAddrGlobal + ":" + common.MasterPort
+		listener.SetupListener(common.ListenAddrGlobal, common.ListenerPort, ServerAddress)
 	}
 
-	if svc == "coordinator" {
-		logger.Do.Println("Launch coordinator_server, the svc", svc)
 
-		api.SetupHttp(httpAddr, common.MasterPort, 3)
-	}
-
+	//////////////////////////////////////////////////////////////////////////
+	//						 start tasks, called internally 				//
+	// 																	    //
+	//////////////////////////////////////////////////////////////////////////
 
 	//those 2 is only called internally
 
-	if taskType == common.MasterTaskType {
+	if common.ExecutorTypeGlobal == common.MasterExecutor {
 
-		logger.Do.Println("Lunching coordinator_server, the taskType", taskType)
+		logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
-		distributed.SetupMaster(workerAddr, masterAddr)
+		// this should be the service name, defined at runtime,
+		masterIp := common.MasterAddrGlobal
+
+		// todo. get from redis
+
+		qItem := &cache.QItem{}
+
+		taskType := common.TaskTypeGlobal
+
+		distributed.SetupMaster(masterIp, qItem, taskType)
 	}
 
-	if taskType == common.TrainTaskType {
+	if common.ExecutorTypeGlobal == common.TrainExecutor {
 
-		if len(workerAddr) == 0 || len(masterAddr) == 0 {
-			logger.Do.Println("Error: Input Error, Must Provide ip of predictor and masterAddr,", workerAddr, masterAddr)
-			os.Exit(1)
-		}
-		logger.Do.Println("Lunching coordinator_server, the taskType", taskType)
+		logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
-		distributed.SetupTrain(workerAddr, masterAddr)
+		distributed.SetupTrain(common.WorkerAddrGlobal, common.MasterAddrGlobal)
 	}
 
-	if taskType == common.PredictTaskType {
+	if common.ExecutorTypeGlobal == common.PredictExecutor {
 
-		if len(workerAddr) == 0 || len(masterAddr) == 0 {
-			logger.Do.Println("Error: Input Error, Must Provide ip of trainWorkerAddr and masterAddr,", workerAddr, masterAddr)
-			os.Exit(1)
-		}
-		logger.Do.Println("Lunching coordinator_server, the taskType", taskType)
+		logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
-		distributed.SetupPrediction(workerAddr, masterAddr)
+		distributed.SetupPrediction(common.WorkerAddrGlobal, common.MasterAddrGlobal)
 
 	}
 }

@@ -7,9 +7,16 @@ import (
 	"time"
 )
 
-func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *cache.QItem, taskType string) (ms *Master) {
-	logger.Do.Println("Master: address is :", masterAddr)
-	ms = newMaster(Proxy, masterAddr, len(qItem.IPs))
+func RunMaster(masterAddr string, qItem *cache.QItem, taskType string) (ms *Master) {
+	/**
+	 * @Author
+	 * @Description
+	 * @Date 5:09 下午 4/12/20
+	 * @Param  launch 2 thread, one is rpc server, another is scheduler, once got party info, assign work
+	 * @return
+	 **/
+	logger.Do.Println("Master: addr is :", masterAddr)
+	ms = newMaster(masterAddr, len(qItem.IPs))
 
 	ms.reset()
 	go ms.eventLoop()
@@ -21,6 +28,7 @@ func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *cache.QItem, ta
 		return
 	}
 
+	// thread 1
 	// launch a rpc server thread to process the requests.
 	ms.StartRPCServer(rpcSvc, false)
 
@@ -35,7 +43,7 @@ func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *cache.QItem, ta
 	scheduler:= func() {
 		ch := make(chan string, len(qItem.IPs))
 		go ms.forwardRegistrations(ch, qItem)
-		ms.schedule(ch, httpAddr, qItem, taskType)
+		ms.schedule(ch, qItem, taskType)
 	}
 
 	clean := func() {
@@ -47,6 +55,7 @@ func RunMaster(Proxy string, masterAddr, httpAddr string, qItem *cache.QItem, ta
 		ms.Unlock()
 	}
 
+	// thread 2
 	// launch a thread to process the do the scheduling.
 	go ms.run(scheduler,clean)
 

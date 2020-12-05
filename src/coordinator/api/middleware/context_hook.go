@@ -7,12 +7,11 @@ import (
 
 // middle ware used to verify the methods
 func InitContext(f func(w http.ResponseWriter, r *http.Request, c *entity.Context),
-	SysLvPath []string,
-	httpAddr ...string) http.HandlerFunc {
+	SysLvPath []string) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		context := entity.InitContext(httpAddr...)
+		context := entity.InitContext()
 
 		// connect to db
 		context.Ms.Connect()

@@ -44,7 +44,7 @@ const (
 	SetupWorker = "setup-worker" // RFC 5789
 
 	// shared key of map
-	ListenerAddr = "listenerAddr"
+	ListenerAddr = "listenerAddress"
 	MasterAddr   = "masterAddress"
 
 	JobId      = "job_id"
@@ -81,9 +81,9 @@ const (
 	JobFailed     = 3
 	JobKilled     = 4
 
-	MasterTaskType = "master"
-	TrainTaskType = "train"
-	PredictTaskType = "predict"
+	MasterExecutor = "master"
+	TrainExecutor = "train"
+	PredictExecutor = "predict"
 
 	DevEnv = "dev"
 	ProdEnv = "prod"
@@ -93,6 +93,7 @@ const (
 
 	TrainYaml = "./deploy/template/"
 	PredictorYaml = "./deploy/template/"
+	MasterYaml = "./deploy/template/"
 
 )
 
@@ -117,6 +118,21 @@ var (
 
 	// envs
 	Env = GetEnv("Env",DevEnv)
+
+	// those are init
+	ServiceNameGlobal = GetEnv("SERVICE_NAME", "")
+	CoordAddrGlobal = GetEnv("COORDINATOR_IP", "")
+	ListenAddrGlobal = GetEnv("LISTENER_IP", "")
+
+	ExecutorTypeGlobal = GetEnv("EXECUTOR", "")
+	TaskTypeGlobal = GetEnv("TASK", "")
+
+	WorkerAddrGlobal = GetEnv("WORKER_IP", "")
+	MasterAddrGlobal = GetEnv("MASTER_IP", "")
+
+	CoordURLGlobal = CoordAddrGlobal + ":" + MasterPort
+	ListenURLGlobal = ListenAddrGlobal + ":" + ListenerPort
+
 )
 
 // GetEnv get key environment variable if exist otherwise return defalutValue
@@ -129,3 +145,4 @@ func GetEnv(key, defaultValue string) string {
 	fmt.Printf("<<<<<<<<<<<<<<<< Read envs,key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
 	return value
 }
+

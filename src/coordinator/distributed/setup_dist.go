@@ -13,31 +13,23 @@ import (
 	"fmt"
 )
 
-func SetupDist(httpHost, httpPort string, qItem *cache.QItem, taskType string) {
+func SetupDist(qItem *cache.QItem, taskType string) {
 
+	var masterIp string
+	if common.Env == common.DevEnv{
+		masterIp = common.CoordAddrGlobal
+		// use a thread
+		// in dev model, the master ip is the same as coordinator ip
+		SetupMaster(masterIp, qItem, taskType)
 
-	httpAddr := httpHost + ":" + httpPort
+	}else if common.Env == common.ProdEnv{
+		// in prod, use k8s to run train/predict server as a isolate process
+		filename := common.MasterYaml
 
-	ms, masterAddress := SetupMaster(httpHost,httpAddr,qItem, taskType)
-
-	if taskType == common.TrainTaskType{
-		// update job's master address
-		c.JobUpdateMaster(httpAddr, masterAddress, qItem.JobId)
+		km := taskmanager.InitK8sManager(true,  "")
+		km.CreateResources(filename)
 	}
-
-	for _, ip := range qItem.IPs {
-
-		// Launch the worker
-
-		// todo currently worker port is fixed, not a good design, change to dynamic later
-		// maybe check table wit ip, and + port got from table also
-
-		// send a request to http
-		c.SetupWorker(ip+":"+common.ListenerPort, masterAddress, taskType)
-	}
-
-	// wait until job done
-	ms.Wait()
+	logger.Do.Println("SetupDist: setup master done")
 }
 
 
@@ -91,26 +83,12 @@ func SetupWorkerHelper(httpHost string, masterAddress, taskType string)  {
 		km.CreateResources(filename)
 
 	}
-}
 
-func SetupMasterHelper(httpHost, httpAddr string, qItem *cache.QItem, taskType string)  {
-	if common.Env == common.DevEnv{
-
-		SetupMaster(httpHost,httpAddr,qItem, taskType)
-
-		// in prod, use k8s to run train/predict server as a isolate process
-	}else if common.Env == common.ProdEnv{
-
-		filename := common.PredictorYaml
-
-		km := taskmanager.InitK8sManager(true,  "")
-		km.CreateResources(filename)
-}
-
-
+	logger.Do.Println("SetupDist: worker is running")
 
 }
-func SetupMaster(httpHost,httpAddr string, qItem *cache.QItem, taskType string) (*master.Master,string) {
+
+func SetupMaster(masterIp string, qItem *cache.QItem, taskType string) string {
 	/**
 	 * @Author
 	 * @Description : run train rpc server in a thread, used to test only
@@ -120,16 +98,37 @@ func SetupMaster(httpHost,httpAddr string, qItem *cache.QItem, taskType string) 
 	 **/
 	logger.Do.Println("SetupDist: Lunching master")
 
-	port, e := utils.GetFreePort()
+	port, e := utils.GetFreePort4K8s()
 	if e != nil {
 		logger.Do.Println("SetupDist: Launch master Get port Error")
 		panic(e)
 	}
-	masterAddress := httpHost + ":" + fmt.Sprintf("%d", port)
-	ms := master.RunMaster("tcp", masterAddress, httpAddr, qItem, taskType)
+	masterPort := fmt.Sprintf("%d", port)
+	masterAddress := masterIp + ":" + masterPort
 
-	return ms, masterAddress
+	master.RunMaster(masterAddress, qItem, taskType)
 
+
+	// update job's master address
+	if taskType == common.TrainTaskType{
+
+		c.JobUpdateMaster(common.CoordAddrPortGlobal, masterAddress, qItem.JobId)
+	}
+
+	// master will call lister's endpoint to launch worker, to train or predict
+	for _, ip := range qItem.IPs {
+
+		// Launch the worker
+		// todo currently worker port is fixed, not a good design, change to dynamic later
+		// maybe check table wit ip, and + port got from table also
+
+		// send a request to http
+		c.SetupWorker(ip+":"+common.ListenerPort, masterAddress, taskType)
+	}
+
+	logger.Do.Println("SetupDist: master is running at ", masterAddress)
+
+	return masterAddress
 }
 
 
@@ -150,7 +149,7 @@ func SetupTrain(httpHost string, masterAddress string)  {
 	}
 
 	// worker address share the same host with listener server
-	worker.RunWorker(masterAddress, "tcp", httpHost, fmt.Sprintf("%d", port))
+	worker.RunWorker(masterAddress, httpHost, fmt.Sprintf("%d", port))
 
 }
 

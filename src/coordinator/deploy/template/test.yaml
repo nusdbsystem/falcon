@@ -1,40 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app: nginx
-  name: nginx
-  namespace: default
+  name: my-nginx
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: nginx
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+      run: my-nginx
+  replicas: 2
   template:
     metadata:
       labels:
-        app: nginx
+        run: my-nginx
     spec:
       containers:
-        - image: nginx
-          name: nginx
+        - name: my-nginx
+          image: nginx
+          ports:
+            - containerPort: 80
 ---
+# This specification will create a Service which targets TCP port 80 on any Pod with the run: my-nginx label, and expose it on an abstracted Service port
 apiVersion: v1
 kind: Service
 metadata:
+  name: my-nginx
   labels:
-    app: demo
-  name: demo
-  namespace: default
+    run: my-nginx
 spec:
   ports:
-    - name: web
-      port: 80
+    - port: 80
+      protocol: TCP
   selector:
-    app: demo
-  type: ClusterIP
+    run: my-nginx

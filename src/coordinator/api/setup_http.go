@@ -19,7 +19,7 @@ func handlePanic() {
 		logger.Do.Println(err)
 	}
 }
-func SetupHttp(host, port string, nConsumer int) {
+func SetupHttp(nConsumer int) {
 	defer handlePanic()
 	mux := http.NewServeMux()
 
@@ -43,7 +43,7 @@ func SetupHttp(host, port string, nConsumer int) {
 	// model serving
 	mux.HandleFunc("/"+common.ModelUpdate, md.AddRouter(rt.ModelUpdate, http.MethodPost))
 	mux.HandleFunc("/"+common.SvcPublishing, md.AddRouter(rt.PublishService, http.MethodPost))
-	mux.HandleFunc("/"+common.SvcCreate, md.AddRouter(rt.CreateService, http.MethodPost, host, port))
+	mux.HandleFunc("/"+common.SvcCreate, md.AddRouter(rt.CreateService, http.MethodPost))
 	mux.HandleFunc("/"+common.UpdateModelServiceStatus, md.AddRouter(rt.ModelServiceUpdateStatus, http.MethodPost))
 
 
@@ -58,7 +58,7 @@ func SetupHttp(host, port string, nConsumer int) {
 	logger.Do.Println("HTTP: Creating admin user...")
 	controller.CreateUser()
 
-	dslScheduler := controller.Init(host, port, nConsumer)
+	dslScheduler := controller.Init(nConsumer)
 
 	done := make(chan os.Signal)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)

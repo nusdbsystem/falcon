@@ -11,7 +11,7 @@ spec:
       targetPort: REDIS_TARGET_PORT
       nodePort: REDIS_NODE_PORT
   selector:
-    name: redis
+    app: redis
 ---
 apiVersion: apps/v1
 kind: Deployment

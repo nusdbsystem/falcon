@@ -2,6 +2,7 @@ package taskmanager
 
 import (
 	"bytes"
+	"context"
 	"coordinator/logger"
 	"io"
 	"io/ioutil"
@@ -114,7 +115,7 @@ func (km *K8sManager) CreateResources(filename string) {
 			dri = dd.Resource(mapping.Resource)
 		}
 
-		if _, err := dri.Create(unstructuredObj, metav1.CreateOptions{}); err != nil {
+		if _, err := dri.Create(context.Background(), unstructuredObj, metav1.CreateOptions{}); err != nil {
 			//logger.Do.Fatal(err)
 			logger.Do.Println("K8sManager:",err)
 		}
