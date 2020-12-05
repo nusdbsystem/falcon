@@ -18,13 +18,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: coordinator
+      app: coord
   strategy:
     type: Recreate # Use strategy: type: Recreate in the Deployment configuration YAML file. This instructs Kubernetes to not use rolling updates. Rolling updates will not work, as you cannot have more than one Pod running at a time. The Recreate strategy will stop the first pod before creating a new one with the updated configuration.
   template:
     metadata:
       labels:
-        app: coordinator
+        app: coord
     spec:
       containers:
         - image: FALCON_COORDINATOR_IMAGE

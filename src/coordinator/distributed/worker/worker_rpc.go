@@ -7,12 +7,12 @@ import (
 	"net/rpc"
 )
 
-func RunWorker(masterAddress, workerProxy, workerHost, workerPort string) {
+func RunWorker(masterAddress, workerHost, workerPort string) {
 
 	workerAddress := workerHost + ":" + workerPort
 
 	wk := new(Worker)
-	wk.InitRpc(workerProxy, workerAddress)
+	wk.InitRpc(workerAddress)
 	wk.Name = common.Worker
 	wk.SuicideTimeout = common.WorkerTimeout
 

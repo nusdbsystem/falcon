@@ -1,6 +1,9 @@
 package entity
 
-import "coordinator/api/models"
+import (
+	"coordinator/api/models"
+	"coordinator/common"
+)
 
 type Context struct {
 	Ms       *models.MetaStore
@@ -9,14 +12,12 @@ type Context struct {
 	UsrId    uint
 }
 
-func InitContext(httpAddr ...string) *Context {
+func InitContext() *Context {
 	ad := new(Context)
 	ad.Ms = models.InitMetaStore()
 
-	if len(httpAddr)==2{
-		ad.HttpHost = httpAddr[0]
-		ad.HttpPort = httpAddr[1]
-	}
+	ad.HttpHost = common.CoordAddrGlobal
+	ad.HttpPort = common.MasterPort
 
 	return ad
 }

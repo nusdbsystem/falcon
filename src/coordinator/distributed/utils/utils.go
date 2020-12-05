@@ -2,6 +2,8 @@ package utils
 
 import (
 	"coordinator/logger"
+	"fmt"
+	"math/rand"
 	"net"
 )
 
@@ -37,4 +39,31 @@ func GetFreePorts(count int) ([]int, error) {
 		logger.Do.Println(l.Close())
 	}
 	return ports, nil
+}
+
+
+// get one port
+func GetFreePort4K8s() (int, error) {
+	min := 30000
+	max := 32767
+	p := rand.Intn(max - min) + min
+
+	var addr *net.TCPAddr
+	var l *net.TCPListener
+	var err error
+
+	for {
+		addr, err = net.ResolveTCPAddr("tcp", "localhost:"+fmt.Sprintf("%d",p))
+		if err != nil {
+			return 0, err
+		}
+
+		l, err = net.ListenTCP("tcp",addr)
+		if err != nil {
+			p++
+		}else{
+			logger.Do.Println(l.Close())
+			return p, nil
+		}
+	}
 }

@@ -10,9 +10,9 @@ import (
 	"sync"
 )
 
-type taskHandler func(workerAddr,httpAddr,svcName string, args *entitiy.DoTaskArgs, JobId uint, wg *sync.WaitGroup)
+type taskHandler func(workerAddr,svcName string, args *entitiy.DoTaskArgs, JobId uint, wg *sync.WaitGroup)
 
-func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *cache.QItem, taskType string) {
+func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskType string) {
 	logger.Do.Println("Scheduler: Begin to schedule")
 
 	// checking if the ip of worker match the qItem
@@ -36,10 +36,10 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 
 		taskFunc := this.trainTaskHandler
 
-		this.schedulerHelper(taskFunc, httpAddr, common.Worker,qItem,workerAddress)
+		this.schedulerHelper(taskFunc, common.Worker,qItem,workerAddress)
 
 		client.ModelUpdate(
-			httpAddr,
+			common.CoordAddrPortGlobal,
 			1,
 			qItem.JobId)
 
@@ -50,7 +50,7 @@ func (this *Master) schedule(registerChan chan string, httpAddr string, qItem *c
 
 		taskFunc := this.predictTaskHandler
 
-		this.schedulerHelper(taskFunc, httpAddr, common.ModelService,qItem,workerAddress)
+		this.schedulerHelper(taskFunc, common.ModelService,qItem,workerAddress)
 
 	}
 }
@@ -60,7 +60,6 @@ func (this *Master) schedulerHelper(
 
 	taskHandler taskHandler,
 
-	httpAddr string,
 	svcName string,
 	qItem *cache.QItem,
 	workerAddress []string){
@@ -83,7 +82,7 @@ func (this *Master) schedulerHelper(
 				wg.Add(1)
 
 				// execute the task
-				go taskHandler(workerAddr,httpAddr,svcName,args,qItem.JobId,&wg)
+				go taskHandler(workerAddr,svcName,args,qItem.JobId,&wg)
 
 			}
 		}
@@ -97,7 +96,7 @@ func (this *Master) schedulerHelper(
 
 func (this *Master) trainTaskHandler(
 	workerAddr,
-	httpAddr,svcName string,
+	svcName string,
 	args *entitiy.DoTaskArgs,
 	JobId uint,
 	wg *sync.WaitGroup){
@@ -116,12 +115,12 @@ func (this *Master) trainTaskHandler(
 		logger.Do.Printf("Scheduler: %s.DoTask error\n", svcName)
 
 		client.JobUpdateResInfo(
-			httpAddr,
+			common.CoordAddrPortGlobal,
 			"call Worker.DoTask error",
 			"call Worker.DoTask error",
 			"call Worker.DoTask error",
 			JobId)
-		client.JobUpdateStatus(httpAddr, common.JobFailed, JobId)
+		client.JobUpdateStatus(common.CoordAddrPortGlobal, common.JobFailed, JobId)
 		return
 	}
 
@@ -143,39 +142,39 @@ func (this *Master) trainTaskHandler(
 	} else if rep.Errs[common.PreProcessing] != common.SubProcessNormal {
 		// if pre-processing failed
 		client.JobUpdateResInfo(
-			httpAddr,
+			common.CoordAddrPortGlobal,
 			rep.ErrLogs[common.PreProcessing],
 			rep.OutLogs[common.PreProcessing],
 			"PreProcessing Failed",
 			JobId)
-		client.JobUpdateStatus(httpAddr, common.JobFailed, JobId)
+		client.JobUpdateStatus(common.CoordAddrPortGlobal, common.JobFailed, JobId)
 
 		// if pre-processing pass, but train failed
 	} else if rep.Errs[common.ModelTraining] != common.SubProcessNormal {
 		client.JobUpdateResInfo(
-			httpAddr,
+			common.CoordAddrPortGlobal,
 			errMsg[:errLen],
 			outMsg[:outLen],
 			"PreProcessing Passed, ModelTraining Failed",
 			JobId)
-		client.JobUpdateStatus(httpAddr, common.JobFailed, JobId)
+		client.JobUpdateStatus(common.CoordAddrPortGlobal, common.JobFailed, JobId)
 
 		// if both train and process pass
 	} else {
 		client.JobUpdateResInfo(
-			httpAddr,
+			common.CoordAddrPortGlobal,
 			errMsg[:errLen],
 			outMsg[:outLen],
 			"PreProcessing Passed, ModelTraining Passed",
 			JobId)
-		client.JobUpdateStatus(httpAddr, common.JobSuccessful, JobId)
+		client.JobUpdateStatus(common.CoordAddrPortGlobal, common.JobSuccessful, JobId)
 	}
 }
 
 
 func (this *Master) predictTaskHandler(
 	workerAddr,
-	httpAddr,svcName string,
+	svcName string,
 	args *entitiy.DoTaskArgs,
 	JobId uint,
 	wg *sync.WaitGroup){
@@ -192,9 +191,9 @@ func (this *Master) predictTaskHandler(
 	if !ok {
 		logger.Do.Printf("Scheduler: %s.CreateService error\n", svcName)
 
-		client.ModelServiceUpdateStatus(httpAddr, common.JobFailed, JobId)
+		client.ModelServiceUpdateStatus(common.CoordAddrPortGlobal, common.JobFailed, JobId)
 		return
 	}else{
-		client.ModelServiceUpdateStatus(httpAddr, common.JobRunning, JobId)
+		client.ModelServiceUpdateStatus(common.CoordAddrPortGlobal, common.JobRunning, JobId)
 	}
 }

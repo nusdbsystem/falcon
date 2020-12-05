@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"coordinator/api/entity"
 	"coordinator/api/models"
+	"coordinator/cache"
 	"coordinator/common"
 	dist "coordinator/distributed"
 	"coordinator/logger"
@@ -16,21 +16,16 @@ type DslScheduler struct {
 
 	isStop        chan bool
 	isStopMonitor chan bool
-	httpHost      string
-	httpPort      string
 	nConsumer     int
 	curConsumers  int
 }
 
-func Init(httpHost, httpPort string, nConsumer int) *DslScheduler {
+func Init(nConsumer int) *DslScheduler {
 	// n worker
 	ds := new(DslScheduler)
 
 	ds.isStop = make(chan bool, nConsumer)
 	ds.isStopMonitor = make(chan bool, 1)
-
-	ds.httpHost = httpHost
-	ds.httpPort = httpPort
 
 	ds.nConsumer = nConsumer
 	// 0 consumers are running at beginning
@@ -62,13 +57,13 @@ loop:
 
 			//logger.Do.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the queue...")
 
-			if qItem, ok := entity.JobQueue.Pop(); ok {
+			if qItem, ok := cache.JobQueue.Pop(); ok {
 
 				logger.Do.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
 
 				models.JobUpdateStatus(qItem.JobId, common.JobRunning)
 				// lunching the master
-				go dist.SetupDist(ds.httpHost, ds.httpPort, qItem, common.TrainTaskType)
+				go dist.SetupDist(qItem, common.TrainTaskType)
 			}
 
 		}
