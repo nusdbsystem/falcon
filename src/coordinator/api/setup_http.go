@@ -46,17 +46,22 @@ func SetupHttp(nConsumer int) {
 	mux.HandleFunc("/"+common.SvcCreate, md.AddRouter(rt.CreateService, http.MethodPost))
 	mux.HandleFunc("/"+common.UpdateModelServiceStatus, md.AddRouter(rt.ModelServiceUpdateStatus, http.MethodPost))
 
+	// resource
+
+	mux.HandleFunc("/"+common.AssignPort, md.AddRouter(rt.AssignPort, http.MethodGet))
 
 	server := &http.Server{
-		Addr:    "0.0.0.0",
+		Addr:    "0.0.0.0:" + common.MasterPort,
 		Handler: mux,
 	}
 
 	logger.Do.Println("HTTP: Updating table...")
 	controller.CreateTables()
+	controller.CreateSysPorts()
 
 	logger.Do.Println("HTTP: Creating admin user...")
 	controller.CreateUser()
+
 
 	dslScheduler := controller.Init(nConsumer)
 

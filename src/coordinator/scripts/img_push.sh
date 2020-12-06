@@ -1,6 +1,6 @@
 
 
-. ./deploy/property/img.properties
+. ./deploy/property/svc.properties
 
 
 docker push $FALCON_COORDINATOR_IMAGE

@@ -32,7 +32,7 @@ awk -F= '!a[$1]++' ./deploy/property/db.properties ./deploy/property/svc.propert
 # create common map, 当多次使用 --from-env-file 来从多个数据源创建 ConfigMap 时，仅仅最后一个 env 文件有效。
 LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_coord.log
 {
-  (kubectl create configmap coord-config --from-env-file=$COMBINE_FILE &> $LOG_FILE_PATH)
+  (kubectl create configmap coord-config --from-env-file=$COMBINE_PROPERTIES &> $LOG_FILE_PATH)
   echo "-------------------------- finish creating config map for coordinator --------------------------------"
 } || {
 echo "--------------------------  creating config map error, check the log, --------------------------------"

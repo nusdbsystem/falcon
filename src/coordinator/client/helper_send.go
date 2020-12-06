@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func Get(addr string) error {
-	addr = strings.TrimSpace(addr)
+func Get(addr string) string {
+	addr = "http://" + strings.TrimSpace(addr)
 	resp, err := http.Get(addr)
 
 	if err != nil {
@@ -27,7 +27,7 @@ func Get(addr string) error {
 	}
 
 	logger.Do.Println(string(body))
-	return nil
+	return string(body)
 }
 
 func PostForm(addr string, data map[string][]string) error {

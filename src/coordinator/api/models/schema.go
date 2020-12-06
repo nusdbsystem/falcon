@@ -57,6 +57,15 @@ type ServiceRecord struct {
 	WorkerAddr string `gorm:"type:varchar(256)"`
 }
 
+
+type PortRecord struct {
+	ID         uint   `gorm:"primary_key;AUTO_INCREMENT"`
+	NodeId	   uint
+	Port       uint   `gorm:"unique_index"`
+	IsDelete   uint
+}
+
+
 type User struct {
 	UserID uint   `gorm:"primary_key;AUTO_INCREMENT"`
 	Name   string `gorm:"type:varchar(256)"`

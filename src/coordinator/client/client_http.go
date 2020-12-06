@@ -105,3 +105,13 @@ func JobGetStatus(ServerAddr string, jobId uint) uint {
 	_ = PostForm(reqUrl, data)
 	return 1
 }
+
+
+func GetFreePort(ServerAddr string) string{
+
+	reqUrl := ServerAddr + "/" + common.AssignPort
+
+	port := Get(reqUrl)
+
+	return port
+}
