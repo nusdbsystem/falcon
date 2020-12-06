@@ -20,7 +20,7 @@ func SetupListener() {
 	mux.HandleFunc("/"+common.SetupWorker, rt.SetupWorker())
 
 	server := &http.Server{
-		Addr:    "0.0.0.0",
+		Addr:    "0.0.0.0:" + common.ListenerPort,
 		Handler: mux,
 	}
 	// report address to flow htp server

@@ -35,26 +35,30 @@ go build <go-program>.go
 0. Naming
 
    ```
-   svc == service
-   cip == coordinator IP
-   lip == listener IP
+   SERVICE_NAME == coord or listener
+   COORDINATOR_IP == coordinator IP
+   LISTENER_IP == listener IP
    ```
 
 1. Setup coordinator:
     
-    ./coordinator_server -cip <ip address>
+    Update coordinator.properties, 
+    change SERVICE_NAME to be 'coord' , 
+    change COORDINATOR_IP and LISTENER_IP, 
+    finally run script with following
     
     ```
-    ./coordinator_server -cip 172.25.121.4
+    bash scripts/dev_start.sh
     ```
-
 
 2. Setup listener:
     
-    ./coordinator_server -svc listenser -cip <ip address of coordinator> -lip <ip address of listener>
-    
+    Update coordinator.properties, 
+    change SERVICE_NAME to be 'listener', 
+    change COORDINATOR_IP and LISTENER_IP, 
+    finally run script with following
     ```
-    ./coordinator_server -svc listenser -cip 172.25.121.4 -lip 172.25.121.4
+    bash scripts/dev_start.sh
     ```
    
 ## Use the platform

@@ -7,7 +7,6 @@ import (
 	"coordinator/distributed/master"
 	"coordinator/distributed/prediction"
 	"coordinator/distributed/taskmanager"
-	"coordinator/distributed/utils"
 	"coordinator/distributed/worker"
 	"coordinator/logger"
 	"fmt"
@@ -31,14 +30,10 @@ func SetupDist(qItem *cache.QItem, taskType string) {
 	 * @return
 	 **/
 
-	port, e := utils.GetFreePort4K8s()
-	if e != nil {
-		logger.Do.Println("SetupDist: Launch master Get port Error")
-		panic(e)
-	}
+	masterPort := c.GetFreePort(common.CoordURLGlobal)
+	logger.Do.Println("SetupDist: Launch master Get port ", masterPort)
 
 	masterIp := common.CoordAddrGlobal
-	masterPort := fmt.Sprintf("%d", port)
 	masterAddress := masterIp + ":" + masterPort
 
 	if common.Env == common.DevEnv{
@@ -98,14 +93,9 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 		masterAddress： train or predictor
 	 **/
 
-	port, e := utils.GetFreePort4K8s()
-	if e != nil {
-		logger.Do.Println("SetupDist: Launch worker Get port Error")
-		panic(e)
-	}
-	workerPort := fmt.Sprintf("%d", port)
+	workerPort := c.GetFreePort(common.CoordURLGlobal)
 
-	workerAddress := common.ListenAddrGlobal + workerPort
+	workerAddress := common.ListenAddrGlobal + ":" + workerPort
 
 	// in dev, use thread
 	if common.Env == common.DevEnv{
@@ -177,7 +167,6 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 	for _, ip := range qItem.IPs {
 
 		// Launch the worker
-		// todo currently worker port is fixed, not a good design, change to dynamic later
 		// maybe check table wit ip, and + port got from table also
 
 		// send a request to http

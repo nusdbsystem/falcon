@@ -37,6 +37,8 @@ const (
 
 	UpdateModelServiceStatus  = "update-prediction-status"
 
+	AssignPort  = "port-assign"
+
 	ListenerAdd    = "listener-add"
 	ListenerDelete = "listener-del"
 
@@ -119,16 +121,19 @@ var (
 	// find the cluster port, call internally
 	RedisPort       = GetEnv("REDIS_CLUSTER_PORT", "6379")
 
+	MsMysqlNodePort    = GetEnv("MYSQL_NODE_PORT", "30001")
+	RedisNodePort    = GetEnv("REDIS_NODE_PORT", "30003")
+
 	// sys port
-	MasterPort   = GetEnv("MASTER_TARGET_PORT", "31201")
-	ListenerPort = GetEnv("LISTENER_TARGET_PORT", "31301")
+	MasterPort   = GetEnv("MASTER_TARGET_PORT", "30004")
+	ListenerPort = GetEnv("LISTENER_TARGET_PORT", "30005")
 
 	// envs
 	Env = GetEnv("Env",DevEnv)
 
 	// those are init by user
-	ServiceNameGlobal = GetEnv("SERVICE_NAME", "")
-	CoordAddrGlobal = GetEnv("COORDINATOR_IP", "")
+	ServiceNameGlobal = GetEnv("SERVICE_NAME", "coord")
+	CoordAddrGlobal = GetEnv("COORDINATOR_IP", "127.0.0.1")
 	ListenAddrGlobal = GetEnv("LISTENER_IP", "")
 
 	// those are init by coordinator
@@ -141,6 +146,8 @@ var (
 
 	MasterQItem = GetEnv("QItem", "")
 	ISMASTER = GetEnv("ISMASTER", "false")
+
+	DATA_BASE_PATH = GetEnv("DATA_BASE_PATH", "./")
 )
 
 // GetEnv get key environment variable if exist otherwise return defalutValue
@@ -150,7 +157,7 @@ func GetEnv(key, defaultValue string) string {
 		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, Set to default, key: %s, default: %s >>>>>>>>>>>>>\n",key, defaultValue)
 		return defaultValue
 	}
-	fmt.Printf("<<<<<<<<<<<<<<<< Read envs, user defined, key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
+	fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
 	return value
 }
 

@@ -20,11 +20,11 @@ type RpcBase struct {
 	IsStop 		bool
 }
 
-func (rb *RpcBase) InitRpc(masterAddr string) {
+func (rb *RpcBase) InitRpc(Address string) {
 	rb.Proxy = "tcp"
-	rb.Address = masterAddr
+	rb.Address = Address
 
-	h := strings.Split(masterAddr, ":")
+	h := strings.Split(Address, ":")
 
 	rb.Port = h[1]
 	rb.IsStop = false
@@ -39,7 +39,8 @@ func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 	listener, e := net.Listen(rb.Proxy, "0.0.0.0:"+rb.Port)
 
 	if e != nil {
-		logger.Do.Printf("%s: StartRPCServer error", rb.Name)
+		logger.Do.Printf("%s: StartRPCServer error, %s\n", rb.Name, e)
+		panic(e)
 	}
 
 	rb.Listener = listener

@@ -125,6 +125,13 @@ func (ms *MetaStore) DefineTables() {
 	} else {
 		ms.Db.CreateTable(&TestTable{})
 	}
+
+	if ms.Db.HasTable(&PortRecord{}) {
+		ms.Db.AutoMigrate(&PortRecord{})
+	} else {
+		ms.Db.CreateTable(&PortRecord{})
+	}
+
 }
 
 func (ms *MetaStore) Commit(el interface{}) {
