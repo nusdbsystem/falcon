@@ -1,45 +1,45 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: coordinator
+  name: falcon-listener
 spec:
   type: NodePort # by default, it's cluster Ip, if use nodePort, need to provide type here
   ports:
-    - port: MASTER_PORT  #这里port集群内部clusterIp 对应的端口
-      targetPort: MASTER_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
-      nodePort: MASTER_NODE_PORT  #这里是物理机的端口
+    - port: LISTENER_PORT  #这里port集群内部clusterIp 对应的端口
+      targetPort: LISTENER_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
+      nodePort: LISTENER_NODE_PORT  #这里是物理机的端口
   selector:
-    app: coordinator
+    app: listener
 ---
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: coordinator
+  name: falcon-listener
 spec:
   selector:
     matchLabels:
-      app: coordinator
+      app: listener
   strategy:
     type: Recreate # Use strategy: type: Recreate in the Deployment configuration YAML file. This instructs Kubernetes to not use rolling updates. Rolling updates will not work, as you cannot have more than one Pod running at a time. The Recreate strategy will stop the first pod before creating a new one with the updated configuration.
   template:
     metadata:
       labels:
-        app: coordinator
+        app: listener
     spec:
       containers:
         - image: FALCON_COORDINATOR_IMAGE
-          name: coordinator
+          name: listener
           envFrom:
           - configMapRef:
-              name: coord-config
+              name: listener-config
           ports:
-            - containerPort: MASTER_TARGET_PORT  #这里containerPort是容器内部的port
-              name: coordinator
+            - containerPort: LISTENER_TARGET_PORT  #这里containerPort是容器内部的port
+              name: listener
           volumeMounts:
-            - name: coord-storage
+            - name: falcon-listener
               mountPath: /.falcon_runtime_resources
       volumes:
-        - name: coord-storage
-          persistentVolumeClaim:
-            claimName: STORAGE_NAME-pvc
+        - name: falcon-listener
+          hostPath:
+            path: HOST_PATH
 

@@ -1,10 +1,11 @@
 #!/bin/bash
 
 export DATA_BASE_PATH=$1
+env=$2
 
 # load variables from properties
 . ./deploy/property/db.properties
-. coordinator.properties
+. userdefined.properties
 . ./deploy/property/svc.properties
 
 BASE_PATH=$(echo "$DATA_BASE_PATH" | sed 's_/_\\/_g')
@@ -26,8 +27,11 @@ echo "-------------------------- finish creating coordinator storage -----------
 
 # create multi properties files
 COMBINE_PROPERTIES=temp_combine.properties
-awk -F= '!a[$1]++' ./deploy/property/db.properties ./deploy/property/svc.properties  ./coordinator.properties >  $COMBINE_PROPERTIES
+awk -F= '!a[$1]++' ./deploy/property/db.properties ./deploy/property/svc.properties  ./userdefined.properties >  $COMBINE_PROPERTIES
 
+# if using this scripts, assume running in production
+echo 'Env='$env >> $COMBINE_PROPERTIES
+echo 'SERVICE_NAME=coord' >> $COMBINE_PROPERTIES
 
 # create common map, 当多次使用 --from-env-file 来从多个数据源创建 ConfigMap 时，仅仅最后一个 env 文件有效。
 LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_coord.log

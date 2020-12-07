@@ -69,14 +69,14 @@ func verifyArgs() {
 
 func initLogger(){
 	// this path is fixed, used to creating folder inside container
-	fixedPath:=common.DATA_BASE_PATH
+	fixedPath:="./"
 	_ = os.Mkdir(fixedPath, os.ModePerm)
 	// Use layout string for time format.
 	const layout = "2006-01-02T15:04:05"
 	// Place now in the string.
 	rawTime := time.Now()
 
-	logFileName := fixedPath +"/"+ common.ServiceNameGlobal + rawTime.Format(layout) + "logs"
+	logFileName := fixedPath + common.ServiceNameGlobal + rawTime.Format(layout) + "logs"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }

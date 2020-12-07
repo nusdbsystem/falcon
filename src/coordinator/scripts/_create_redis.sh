@@ -5,7 +5,7 @@ export DATA_BASE_PATH=$1
 # load variables from properties
 . ./deploy/property/db.properties
 . ./deploy/property/svc.properties
-. coordinator.properties
+. userdefined.properties
 
 LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_redis.log
 
