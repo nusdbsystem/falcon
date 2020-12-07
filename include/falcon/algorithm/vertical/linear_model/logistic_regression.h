@@ -20,6 +20,8 @@ class LogisticRegression : public Model {
   int max_iteration;
   // tolerance of convergence
   float converge_threshold;
+  // whether use regularization or not
+  bool with_regularization;
   // regularization parameter
   float alpha;
   // learning rate for parameter updating
@@ -51,6 +53,7 @@ class LogisticRegression : public Model {
    * @param m_batch_size: mini-batch size
    * @param m_max_iteration: maximum number of iteration
    * @param m_converge_threshold: tolerance of convergence
+   * @param m_with_regularization: use regularization or not
    * @param m_alpha: regularization parameter
    * @param m_learning_rate: learning rate
    * @param m_decay: decay rate
@@ -69,6 +72,7 @@ class LogisticRegression : public Model {
   LogisticRegression(int m_batch_size,
       int m_max_iteration,
       float m_converge_threshold,
+      bool m_with_regularization,
       float m_alpha,
       float m_learning_rate,
       float m_decay,
@@ -116,6 +120,29 @@ class LogisticRegression : public Model {
       std::vector<int> batch_indexes,
       int precision,
       EncodedNumber *batch_phe_aggregation);
+
+  /**
+   * after receiving batch loss shares and truncated weight shares
+   * from spdz parties, update the encrypted local weights
+   *
+   * @param party: initialized party object
+   * @param batch_loss_shares: secret shares of batch losses
+   * @param truncated_weight_shares: truncated global weights if with regularization
+   * @param batch_indexes: selected batch indexes
+   * @param precision: precision for the batch samples and shares
+   */
+  void update_encrypted_weights(Party party,
+      std::vector<float> batch_loss_shares,
+      std::vector<float> truncated_weight_shares,
+      std::vector<int> batch_indexes,
+      int precision);
+
+  /**
+   * train a logistic regression model
+   *
+   * @param party: initialized party object
+   */
+  void train(Party party);
 };
 
 #endif //FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_H_

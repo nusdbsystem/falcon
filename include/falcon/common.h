@@ -12,6 +12,8 @@ namespace falcon{
   #define PHE_EPSILON 1
   #define PHE_KEY_SIZE 1024
   #define SPDZ_FIXED_POINT_PRECISION 16
+  #define SPDZ_PORT_BASE 14000
+  #define SPDZ_PLAYER_PATH "/home/wuyuncheng/Documents/falcon/third_party/MP-SPDZ/Player-Data/"
   #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024
   #define MAXIMUM_RAND_VALUE 32767
 

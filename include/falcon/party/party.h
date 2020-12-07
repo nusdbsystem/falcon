@@ -176,6 +176,20 @@ class Party {
    * @param phe_precision: fixed point precision when encoding
    */
   void ciphers_to_secret_shares(EncodedNumber* src_ciphers,
+      std::vector<float>& secret_shares,
+      int size, int req_party_id,
+      int phe_precision);
+
+  /**
+   * convert secret shares back to ciphertext vector
+   *
+   * @param dest_ciphers: ciphertext vector to be recovered
+   * @param secret_shares: secret shares received from spdz parties
+   * @param size: size of the vector
+   * @param req_party_id: party that initiate conversion
+   * @param phe_precision: ciphertext vector precision, need careful design
+   */
+  void secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
       std::vector<float> secret_shares,
       int size, int req_party_id,
       int phe_precision);

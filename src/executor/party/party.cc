@@ -347,7 +347,7 @@ void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
 }
 
 void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
-    std::vector<float> secret_shares,
+    std::vector<float>& secret_shares,
     int size,
     int req_party_id,
     int phe_precision) {
@@ -430,6 +430,62 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
   delete [] encrypted_shares;
   delete [] aggregated_shares;
   delete [] decrypted_sum;
+}
+
+void Party::secret_shares_to_ciphers(EncodedNumber *dest_ciphers,
+    std::vector<float> secret_shares,
+    int size,
+    int req_party_id,
+    int phe_precision) {
+  // encode and encrypt the secret shares
+  // and send to req_party, who aggregates
+  // and send back to the other parties
+  EncodedNumber* encrypted_shares = new EncodedNumber[size];
+  for (int i = 0; i < size; i++) {
+    encrypted_shares[i].set_float(phe_pub_key->n[0], secret_shares[i], phe_precision);
+    djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i], encrypted_shares[i]);
+  }
+
+  if (party_id == req_party_id) {
+    // copy local encrypted_shares to dest_ciphers
+    for (int i = 0; i < size; i++) {
+      dest_ciphers[i] = encrypted_shares[i];
+    }
+    // receive from other parties and aggregate encrypted shares
+    for (int id = 0; id < party_num; id++) {
+      if (id != party_id) {
+        std::string recv_encrypted_shares_str;
+        recv_long_message(id, recv_encrypted_shares_str);
+        EncodedNumber* recv_encrypted_shares = new EncodedNumber[size];
+        deserialize_encoded_number_array(recv_encrypted_shares, size, recv_encrypted_shares_str);
+        // homomorphic aggregation
+        for (int i = 0; i < size; i++) {
+          djcs_t_aux_ee_add(phe_pub_key, dest_ciphers[i], dest_ciphers[i], recv_encrypted_shares[i]);
+        }
+        delete [] recv_encrypted_shares;
+      }
+    }
+    // serialize dest_ciphers and broadcast
+    std::string dest_ciphers_str;
+    serialize_encoded_number_array(dest_ciphers, size, dest_ciphers_str);
+    for (int id = 0; id < party_num; id++) {
+      if (id != party_id) {
+        send_long_message(id, dest_ciphers_str);
+      }
+    }
+  } else {
+    // serialize and send to req_party
+    std::string encrypted_shares_str;
+    serialize_encoded_number_array(encrypted_shares, size, encrypted_shares_str);
+    send_long_message(req_party_id, encrypted_shares_str);
+
+    // receive and set dest_ciphers
+    std::string recv_dest_ciphers_str;
+    recv_long_message(req_party_id, recv_dest_ciphers_str);
+    deserialize_encoded_number_array(dest_ciphers, size, recv_dest_ciphers_str);
+  }
+
+  delete [] encrypted_shares;
 }
 
 Party::~Party() {

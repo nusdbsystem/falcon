@@ -9,12 +9,15 @@
 #include <random>
 
 #include <glog/logging.h>
+#include <Networking/ssl_sockets.h>
+#include <falcon/operator/mpc/spdz_connector.h>
 
 LogisticRegression::LogisticRegression() {}
 
 LogisticRegression::LogisticRegression(int m_batch_size,
     int m_max_iteration,
     float m_converge_threshold,
+    bool m_with_regularization,
     float m_alpha,
     float m_learning_rate,
     float m_decay,
@@ -37,6 +40,7 @@ LogisticRegression::LogisticRegression(int m_batch_size,
   batch_size = m_batch_size;
   max_iteration = m_max_iteration;
   converge_threshold = m_converge_threshold;
+  with_regularization = m_with_regularization;
   alpha = m_alpha;
   learning_rate = m_learning_rate;
   decay = m_decay;
@@ -195,4 +199,168 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
   }
   delete [] encoded_batch_samples;
   delete [] local_batch_phe_aggregation;
+}
+
+void LogisticRegression::update_encrypted_weights(Party party,
+    std::vector<float> batch_loss_shares,
+    std::vector<float> truncated_weight_shares,
+    std::vector<int> batch_indexes,
+    int precision) {
+  // retrieve phe pub key and phe random
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
+  hcs_random *phe_random = hcs_init_random();
+  party.getter_phe_pub_key(phe_pub_key);
+  party.getter_phe_random(phe_random);
+
+  // convert batch loss shares back to encrypted losses
+  int cur_batch_size = batch_indexes.size();
+  EncodedNumber *encrypted_batch_losses = new EncodedNumber[cur_batch_size];
+  party.secret_shares_to_ciphers(encrypted_batch_losses,
+                                 batch_loss_shares,
+                                 cur_batch_size,
+                                 0,
+                                 precision);
+
+  std::vector<std::vector<float> > batch_samples;
+  for (int i = 0; i < cur_batch_size; i++) {
+    batch_samples.push_back(training_data[batch_indexes[i]]);
+  }
+  EncodedNumber **encoded_batch_samples = new EncodedNumber *[cur_batch_size];
+  for (int i = 0; i < cur_batch_size; i++) {
+    encoded_batch_samples[i] = new EncodedNumber[weight_size];
+  }
+
+  // update formula: [w_j]=[w_j]-lr*(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}} + reg?
+  // lr*(1/|B|) is the same for all sample values, thus can be initialized
+  float lr_batch = learning_rate / cur_batch_size;
+  for (int i = 0; i < cur_batch_size; i++) {
+    for (int j = 0; j < weight_size; j++) {
+      encoded_batch_samples[i][j].set_float(phe_pub_key->n[0],
+          0 - lr_batch * batch_samples[i][j], precision);
+    }
+  }
+
+  // if not with_regularization, no need to convert truncated weights;
+  // otherwise, need to convert truncated weights to ciphers for the update
+  if (!with_regularization) {
+    // update each local weight j
+    for (int j = 0; j < weight_size; j++) {
+      EncodedNumber inner_product;
+      EncodedNumber* batch_feature_j = new EncodedNumber[cur_batch_size];
+      for (int i = 0; i < cur_batch_size; i++) {
+        batch_feature_j[i] = encoded_batch_samples[i][j];
+      }
+      djcs_t_aux_inner_product(phe_pub_key,
+          phe_random,
+          inner_product,
+          encrypted_batch_losses,
+          batch_feature_j,
+          cur_batch_size);
+      // need to make sure that the exponents of inner_product and local weights are same
+      djcs_t_aux_ee_add(phe_pub_key, local_weights[j], local_weights[j], inner_product);
+      delete [] batch_feature_j;
+    }
+  } else {
+    //TODO: handle the update formula when using regularization, currently only l2
+  }
+
+  djcs_t_free_public_key(phe_pub_key);
+  hcs_free_random(phe_random);
+  delete[] encrypted_batch_losses;
+  for (int i = 0; i < cur_batch_size; i++) {
+    delete[] encoded_batch_samples[i];
+  }
+  delete[] encoded_batch_samples;
+}
+
+void LogisticRegression::train(Party party) {
+  LOG(INFO) << "************* Training Start *************";
+  const clock_t training_start_time = clock();
+
+  /// The training stage consists of the following steps
+  /// 1. init encrypted local weights
+  /// 2. iterative computation
+  ///     2.1 randomly select a batch of indexes for current iteration
+  ///     2.2 homomorphic aggregation on the batch samples
+  ///     2.3 convert the batch ciphertexts to secret shares
+  ///     2.4 connect to spdz parties for mpc computations
+  ///     2.5 receive secret shared results from spdz party and aggregate
+  ///     2.6 update encrypted local weights carefully
+  /// 3. decrypt weights ciphertext
+
+  // step 1: init encrypted local weights (here use 2*prec for consistence in the following)
+  int encrypted_weights_precision = 2 * PHE_FIXED_POINT_PRECISION;
+  int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
+  init_encrypted_weights(party, encrypted_weights_precision);
+
+  // record training data ids in data_indexes for iteratively batch selection
+  std::vector<int> data_indexes;
+  for (int i = 0; i < training_data.size(); i++) {
+    data_indexes.push_back(i);
+  }
+
+  // step 2: iteratively computation
+  for (int iter = 0; iter < max_iteration; iter++) {
+    LOG(INFO) << "-------- Iteration " << iter << " --------";
+    const clock_t iter_start_time = clock();
+
+    // step 2.1: randomly select a batch of samples
+    std::vector<int> batch_indexes = select_batch_idx(party, data_indexes);
+    int cur_batch_size = batch_indexes.size();
+
+    // step 2.2: homomorphic batch aggregation (the precision should be 3 * prec now)
+    EncodedNumber* encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
+    compute_batch_phe_aggregation(party,
+        batch_indexes,
+        plaintext_samples_precision,
+        encrypted_batch_aggregation);
+
+    // step 2.3: convert the encrypted batch aggregation into secret shares
+    int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
+    std::vector<float> batch_aggregation_shares;
+    party.ciphers_to_secret_shares(encrypted_batch_aggregation,
+        batch_aggregation_shares,
+        cur_batch_size,
+        0,
+        encrypted_batch_aggregation_precision);
+
+    // step 2.4: connect to spdz parties for mpc computation
+    std::string mpc_player_path = SPDZ_PLAYER_PATH;
+    int mpc_port_base = SPDZ_PORT_BASE;
+    std::vector<ssl_socket*> mpc_sockets = setup_sockets(party.party_num,
+        party.party_id,
+        mpc_player_path,
+        party.host_names,
+        mpc_port_base);
+    send_private_inputs(batch_aggregation_shares,mpc_sockets, party.party_num);
+
+    // step 2.5: receive mpc computation results and aggregate
+    std::vector<float> batch_loss_shares = receive_result(mpc_sockets, party.party_num, cur_batch_size);
+
+    // step 2.6: update encrypted local weights
+    // TODO: currently does not support with_regularization
+    std::vector<float> truncated_weights_shares;
+    // need to make sure that update_precision * 2 = encrypted_weights_precision
+    int update_precision = PHE_FIXED_POINT_PRECISION;
+    update_encrypted_weights(party,
+        batch_loss_shares,
+        truncated_weights_shares,
+        batch_indexes,
+        update_precision);
+
+    // free memory and close mpc_sockets
+    for (int i = 0; i < party.party_num; i++) {
+      delete mpc_sockets[i];
+    }
+    delete [] encrypted_batch_aggregation;
+
+    const clock_t iter_finish_time = clock();
+    float iter_consumed_time = float(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+    LOG(INFO) << "-------- The " << iter << "-th iteration consumed time = " << iter_consumed_time << " --------";
+  }
+
+  const clock_t training_finish_time = clock();
+  float training_consumed_time = float(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  LOG(INFO) << "Training time = " << training_consumed_time;
+  LOG(INFO) << "************* Training Finished *************";
 }
