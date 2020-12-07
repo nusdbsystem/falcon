@@ -29,6 +29,7 @@ spec:
       containers:
         - name: redis
           image: REDIS_IMAGE
+          imagePullPolicy: IfNotPresent
           command:
               - redis-server
               - "/redis-master/redis.conf"

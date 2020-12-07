@@ -5,9 +5,9 @@ metadata:
 spec:
   type: NodePort # by default, it's cluster Ip, if use nodePort, need to provide type here
   ports:
-    - port: MASTER_PORT  #这里port集群内部clusterIp 对应的端口
-      targetPort: MASTER_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
-      nodePort: MASTER_NODE_PORT  #这里是物理机的端口
+    - port: COORD_PORT  #这里port集群内部clusterIp 对应的端口
+      targetPort: COORD_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
+      nodePort: COORD_NODE_PORT  #这里是物理机的端口
   selector:
     app: coord
 ---
@@ -29,15 +29,16 @@ spec:
       containers:
         - image: FALCON_COORDINATOR_IMAGE
           name: coordinator
+          imagePullPolicy: IfNotPresent
           envFrom:
-          - configMapRef:
+          - configMapRef: # must specify one of: `configMapRef` or `secretRef`
               name: coord-config
           ports:
-            - containerPort: MASTER_TARGET_PORT  #这里containerPort是容器内部的port
+            - containerPort: COORD_TARGET_PORT  #这里containerPort是容器内部的port
               name: coordinator
           volumeMounts:
             - name: coord-storage
-              mountPath: .falcon_runtime_resources
+              mountPath: ./logs
       volumes:
         - name: coord-storage
           persistentVolumeClaim:

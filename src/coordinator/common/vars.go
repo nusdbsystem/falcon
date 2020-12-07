@@ -89,8 +89,8 @@ const (
 	DevEnv = "dev"
 	ProdEnv = "prod"
 
-	WorkerYamlCreatePath = "./scripts/_create_worker.sh"
-	MasterYamlCreatePath = "./scripts/_create_master.sh"
+	WorkerYamlCreatePath = "./scripts/_create_runtime_worker.sh"
+	MasterYamlCreatePath = "./scripts/_create_runtime_master.sh"
 
 	YamlBasePath = "./deploy/template/"
 
@@ -124,16 +124,16 @@ var (
 	MsMysqlNodePort    = GetEnv("MYSQL_NODE_PORT", "30001")
 	RedisNodePort    = GetEnv("REDIS_NODE_PORT", "30003")
 
-	// sys port
-	MasterPort   = GetEnv("MASTER_TARGET_PORT", "30004")
+	// sys port, here COORD_TARGET_PORT must equal to
+	CoordPort   = GetEnv("COORD_TARGET_PORT", "30004")
 	ListenerPort = GetEnv("LISTENER_TARGET_PORT", "30005")
 
 	// envs
 	Env = GetEnv("Env",DevEnv)
 
 	// those are init by user
-	ServiceNameGlobal = GetEnv("SERVICE_NAME", "coord")
-	CoordAddrGlobal = GetEnv("COORDINATOR_IP", "127.0.0.1")
+	ServiceNameGlobal = GetEnv("SERVICE_NAME", "")
+	CoordAddrGlobal = GetEnv("COORDINATOR_IP", "")
 	ListenAddrGlobal = GetEnv("LISTENER_IP", "")
 
 	// those are init by coordinator
@@ -141,8 +141,16 @@ var (
 	WorkerURLGlobal = GetEnv("WORKER_URL", "")
 	MasterURLGlobal = GetEnv("MASTER_URL", "")
 
-	CoordURLGlobal = CoordAddrGlobal + ":" + MasterPort
+	// this is ip + port
+	CoordURLGlobal = CoordAddrGlobal + ":" + CoordPort
 	ListenURLGlobal = ListenAddrGlobal + ":" + ListenerPort
+
+	// enable other service access master with clusterIp+clusterPort, from inside the cluster
+	CoordSvcName = GetEnv("CoordSvcName", "")
+
+	// for coord, node port is the same as cluster port, so all use coorport
+	// this is service name + port
+	CoordSvcURLGlobal = getCoordUrl()
 
 	MasterQItem = GetEnv("QItem", "")
 	ISMASTER = GetEnv("ISMASTER", "false")
@@ -159,5 +167,20 @@ func GetEnv(key, defaultValue string) string {
 	}
 	fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
 	return value
+}
+
+
+func getCoordUrl() string{
+	if Env==ProdEnv || CoordSvcName!=""{
+		// using service name+ port to connect to coord
+		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordSvcURLGlobal, value: %s >>>>>>>>>>>>>\n", CoordSvcName + ":" + CoordPort)
+		return CoordSvcName + ":" + CoordPort
+	}
+	if Env==DevEnv || CoordSvcName==""{
+		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordSvcURLGlobal, value: %s >>>>>>>>>>>>>\n", CoordURLGlobal)
+		// using  ip+ port to connect to coord
+		return CoordURLGlobal
+	}
+	panic("No CoordSvcURLGlobal assigned, master may not connect to coordinator")
 }
 

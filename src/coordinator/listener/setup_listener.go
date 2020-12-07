@@ -14,7 +14,7 @@ func SetupListener() {
 	// host: listenerAddr
 	// ServerAddress: the address for main http server
 	// host port:  for listener,
-
+	defer logger.HandleErrors()
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/"+common.SetupWorker, rt.SetupWorker())

@@ -29,6 +29,7 @@ spec:
       containers:
         - image: FALCON_COORDINATOR_IMAGE
           name: listener
+          imagePullPolicy: IfNotPresent
           envFrom:
           - configMapRef:
               name: listener-config
@@ -37,9 +38,9 @@ spec:
               name: listener
           volumeMounts:
             - name: falcon-listener
-              mountPath: /.falcon_runtime_resources
+              mountPath: ./logs
       volumes:
         - name: falcon-listener
           hostPath:
-            path: HOST_PATH
+            path: HOST_PATH/run_time_logs
 

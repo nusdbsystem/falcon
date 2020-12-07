@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: master-8566096890363814070
+spec:
+  ports:
+    - port: 30006  #这里port集群内部clusterIp 对应的端口
+    - targetPort: 30006  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
+    - nodePort: 30006  #这里是物理机的端口
+  selector:
+    app: master-8566096890363814070
+---
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: master-8566096890363814070
+spec:
+  selector:
+    matchLabels:
+      app: master-8566096890363814070
+  strategy:
+    type: Recreate # Use strategy: type: Recreate in the Deployment configuration YAML file. This instructs Kubernetes to not use rolling updates. Rolling updates will not work, as you cannot have more than one Pod running at a time. The Recreate strategy will stop the first pod before creating a new one with the updated configuration.
+  template:
+    metadata:
+      labels:
+        app: master-8566096890363814070
+    spec:
+      containers:
+        - image: nailidocker/falcon_coord:latest
+          name: master-8566096890363814070
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: redis-envs
+          env:
+            - name: QItem
+              value: 8566096890363814070
+            - name: EXECUTOR
+              value: train
+            - name: ISMASTER
+              value: true
+          ports:
+            - containerPort: 30006  #这里containerPort是容器内部的port
+              name: master-8566096890363814070
+

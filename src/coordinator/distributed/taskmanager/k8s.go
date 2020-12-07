@@ -89,7 +89,7 @@ func (km *K8sManager) CreateResources(filename string) {
 
 		unstructuredObj := &unstructured.Unstructured{Object: unstructuredMap}
 
-		logger.Do.Printf("K8sManager: Creating resources, Name: %s, Kind: %s \n",
+		logger.Do.Printf("K8sManager: Creating resources, Name: %s, Kind: %s ...\n",
 			unstructuredObj.GetName(),
 			unstructuredObj.GetKind() )
 
@@ -117,7 +117,7 @@ func (km *K8sManager) CreateResources(filename string) {
 
 		if _, err := dri.Create(context.Background(), unstructuredObj, metav1.CreateOptions{}); err != nil {
 			//logger.Do.Fatal(err)
-			logger.Do.Println("K8sManager:",err)
+			logger.Do.Println("K8sManager: Creating resource Error",err)
 		}
 	}
 	if err != io.EOF {

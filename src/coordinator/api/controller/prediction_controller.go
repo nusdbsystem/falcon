@@ -5,6 +5,7 @@ import (
 	"coordinator/cache"
 	"coordinator/common"
 	dist "coordinator/distributed"
+	"coordinator/logger"
 	"encoding/json"
 )
 
@@ -42,7 +43,10 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 	qItem.ModelPath = modelPath
 	qItem.ExecutablePath = executablePath
 
-	go dist.SetupDist(qItem, common.PredictExecutor)
+	go func(){
+		defer logger.HandleErrors()
+		dist.SetupDist(qItem, common.PredictExecutor)
+	}()
 
 	return u.ID, u.ModelServiceName
 }

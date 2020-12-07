@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. userdefined.properties
+. config_listener.properties
 
 # load env variables
 if [ $DATA_BASE_PATH ];then
@@ -43,6 +43,9 @@ create_folders()
 {
       title "Creating folders"
       mkdir $DATA_BASE_PATH
+      mkdir $DATA_BASE_PATH/logs
+      mkdir $DATA_BASE_PATH/run_time_logs
+
 }
 
 title "Guidence"

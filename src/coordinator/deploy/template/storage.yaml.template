@@ -11,7 +11,7 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: DATA_BASE_PATH
+    path: RUNTIMELOG_PATH
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

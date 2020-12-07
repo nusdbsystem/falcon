@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: MASTER_NAME
 spec:
+  type: NodePort
   ports:
     - port: MASTER_CLUSTER_PORT  #这里port集群内部clusterIp 对应的端口
-    - targetPort: MASTER_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
-    - nodePort: MASTER_NODE_PORT  #这里是物理机的端口
+      targetPort: MASTER_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
+      nodePort: MASTER_NODE_PORT  #这里是物理机的端口
   selector:
     app: MASTER_NAME
 ---
@@ -28,16 +29,21 @@ spec:
       containers:
         - image: FALCON_MASTER_IMAGE
           name: MASTER_NAME
+          imagePullPolicy: IfNotPresent
           envFrom:
-            - configMapRef:
-                name: redis-envs
+          - configMapRef: # must specify one of: `configMapRef` or `secretRef`
+              name: redis-envs
           env:
             - name: QItem
-              value: ITEMKEY
+              value: "ITEMKEY"  # must have ""
             - name: EXECUTOR
-              value: EXECUTOR_TYPE
+              value: "EXECUTOR_TYPE"
             - name: ISMASTER
-              value: true
+              value: "true"
+            - name: CoordSvcName
+              value: "COORD_SVC_NAME"
+            - name: MASTER_URL
+              value: "MASTER_URL_PLACEHOLDER"
           ports:
             - containerPort: MASTER_TARGET_PORT  #这里containerPort是容器内部的port
               name: MASTER_NAME

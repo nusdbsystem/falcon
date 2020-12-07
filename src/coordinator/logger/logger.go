@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"runtime"
 )
 
 var Do *log.Logger
@@ -30,3 +31,16 @@ func GetLogger(fileName string) (*log.Logger,*os.File) {
 
 }
 
+
+func HandleErrors(){
+	// cache global unexpected error
+	Do.Println("HandlerErrors: Catching error ...")
+	err := recover()
+	if err != nil{
+		var buf [4096]byte
+		n := runtime.Stack(buf[:], false)
+		Do.Println(err)
+		Do.Printf("==> %s\n", string(buf[:n]))
+		//os.Exit(1)
+	}
+}
