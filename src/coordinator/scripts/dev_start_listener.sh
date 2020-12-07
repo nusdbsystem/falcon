@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. userdefined.properties
+. config_listener.properties
 export Env=dev
 export SERVICE_NAME=listener
 export COORDINATOR_IP=$COORDINATOR_IP

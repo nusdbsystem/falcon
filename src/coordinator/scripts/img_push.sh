@@ -4,4 +4,4 @@
 
 
 docker push $FALCON_COORDINATOR_IMAGE
-#docker push $FALCON_WORKER_IMAGE
+docker push $FALCON_MASTER_IMAGE

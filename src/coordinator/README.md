@@ -30,37 +30,70 @@ go build <go-program>.go
 ```
 
 
-## Platform setup instruction
+## Platform setup DEV instruction
 
-0. Naming
-
+0. Build Golang executable file
+   
+   If in Linux:
    ```
-   SERVICE_NAME == coord or listener
-   COORDINATOR_IP == coordinator IP
-   LISTENER_IP == listener IP
+   make build_linux
    ```
+   
+   If in MAC:
+      ```
+      make build_mac
+      ```
+   
+   If in windows:
+      ```
+      make build_windows
+      ```
 
 1. Setup coordinator:
     
-    Update coordinator.properties, 
-    change SERVICE_NAME to be 'coord' , 
-    change COORDINATOR_IP and LISTENER_IP, 
+    Update config_coord.properties
+    choose the MS_ENGINE, DATA_BASE_PATH, COORDINATOR_IP
     finally run script with following
     
     ```
-    bash scripts/dev_start.sh
+    bash scripts/dev_start_coord.sh
     ```
 
 2. Setup listener:
     
-    Update coordinator.properties, 
-    change SERVICE_NAME to be 'listener', 
-    change COORDINATOR_IP and LISTENER_IP, 
+    Update config_listener.properties
+    choose the LISTENER_IP, COORDINATOR_IP, LISTENER_NODE_PORT
     finally run script with following
     ```
-    bash scripts/dev_start.sh
+    bash scripts/dev_start_listener.sh
     ```
    
+## Platform setup production instruction
+
+0. docker image is upload, if u wanna build yourself, try with:
+
+   ```
+   bash scripts/img_build.sh
+   ```
+
+1. Setup coordinator:
+    Update config_coord.properties
+    choose the MS_ENGINE, DATA_BASE_PATH, COORDINATOR_IP
+    finally run script with following
+    
+    ```
+    bash scripts/start_coord.sh
+    ```
+
+2. Setup listener:
+    Update config_listener.properties
+    choose the LISTENER_IP, COORDINATOR_IP, LISTENER_NODE_PORT
+    finally run script with following
+
+    ```
+    bash scripts/start_listener.sh
+    ```
+      
 ## Use the platform
 
 1. define your dsl.json, similar to the example provided in ./data/dsl.json
@@ -92,4 +125,6 @@ go build <go-program>.go
 
 ## check the log
 
-1. log is at folder `logs`
+1.  log is at folder `$DATA_BASE_PATH/run_time_logs/` , 
+    platform setup log is at `$DATA_BASE_PATH/logs/` ,
+    db is at     `$DATA_BASE_PATH/database/` 

@@ -30,6 +30,7 @@ spec:
       containers:
         - image: MYSQL_IMAGE
           name: mysql
+          imagePullPolicy: IfNotPresent
           env:
             - name: MYSQL_ROOT_PASSWORD
               value: root
@@ -56,7 +57,7 @@ metadata:
   labels:
     type: local
 spec:
-  storageClassName: manual
+  storageClassName: falcon-mysql
   capacity:
     storage: 20Gi
   accessModes:
@@ -69,7 +70,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: mysql-pv-claim  #Claims use the same conventions as volumes when requesting storage with specific access modes.
 spec:
-  storageClassName: manual
+  storageClassName: falcon-mysql
   accessModes:
     - ReadWriteOnce
   resources:

@@ -44,7 +44,7 @@ func CreateSysPorts() {
 
 	}
 
-	masterPort, _:= strconv.Atoi(common.MasterPort)
+	masterPort, _:= strconv.Atoi(common.CoordPort)
 	if !ms.CheckPort(uint(masterPort)){
 		e3, _ = ms.AddPort(uint(masterPort))
 

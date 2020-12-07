@@ -13,14 +13,9 @@ import (
 	"syscall"
 )
 
-func handlePanic() {
-	err := recover()
-	if err != nil {
-		logger.Do.Println(err)
-	}
-}
+
 func SetupHttp(nConsumer int) {
-	defer handlePanic()
+	defer logger.HandleErrors()
 	mux := http.NewServeMux()
 
 	md.SysLvPath = []string{common.Register, common.ListenerAdd}
@@ -51,7 +46,7 @@ func SetupHttp(nConsumer int) {
 	mux.HandleFunc("/"+common.AssignPort, md.AddRouter(rt.AssignPort, http.MethodGet))
 
 	server := &http.Server{
-		Addr:    "0.0.0.0:" + common.MasterPort,
+		Addr:    "0.0.0.0:" + common.CoordPort,
 		Handler: mux,
 	}
 

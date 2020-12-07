@@ -1,5 +1,6 @@
 . ./deploy/property/svc.properties
-. userdefined.properties
+. config_coord.properties
+. config_listener.properties
 
 
 # load env variables
@@ -14,8 +15,8 @@ kubectl delete all --all
 kubectl delete deployment,svc mysql
 kubectl delete pvc mysql-pv-claim
 kubectl delete pv mysql-pv-volume
-kubectl delete pvc $MASTER_STORAGE-pvc
-kubectl delete pv $MASTER_STORAGE-pv
+kubectl delete pvc $COORD_STORAGE-pvc
+kubectl delete pv $COORD_STORAGE-pv
 kubectl delete pvc $LISTENER_STORAGE-pvc
 kubectl delete pv $LISTENER_STORAGE-pv
 
@@ -23,6 +24,10 @@ kubectl delete configmap mysql-initdb-config
 kubectl delete configmap coord-config
 kubectl delete configmap redis-config
 kubectl delete configmap redis-envs
+kubectl delete configmap listener-config
 
 rm -rf $DATA_BASE_PATH/database
-#rm -rf $DATA_BASE_PATH/logs
+rm -rf $DATA_BASE_PATH/run_time_logs/*
+rm -rf $DATA_BASE_PATH/logs/*
+
+bash scripts/status.sh user

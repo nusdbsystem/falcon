@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. userdefined.properties
+. config_coord.properties
 
 
 # load env variables
@@ -69,6 +69,7 @@ create_folders()
       title "Creating folders"
       mkdir $DATA_BASE_PATH
       mkdir $DATA_BASE_PATH/logs
+      mkdir $DATA_BASE_PATH/run_time_logs
 
 }
 

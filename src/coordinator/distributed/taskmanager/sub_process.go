@@ -305,12 +305,47 @@ func (out outstream) Write(p []byte) (int, error) {
 
 func ExecuteBash(command string) error{
 	// 返回一个 cmd 对象
-	cmd := exec.Command("/bin/bash", "-c", command)
+	logger.Do.Println("SubProcessManager: execute bash,", command)
 
-	// 收返回值[]byte, error
-	b,er:= cmd.Output()
+	cmd := exec.Command("bash", "-c", command)
 
-	logger.Do.Println(string(b))
+	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
 
-	return er
+	if err := cmd.Start(); err != nil {
+		logger.Do.Println("ExecuteBash: Start error ",err)
+		return err
+	}
+	errLog, _ := ioutil.ReadAll(stderr)
+	outLog, _ := ioutil.ReadAll(stdout)
+
+	logger.Do.Println("ExecuteBash: ErrorLog is ",string(errLog))
+	logger.Do.Println("ExecuteBash: OutPut is ",string(outLog))
+	outErr := cmd.Wait()
+	return outErr
+
+}
+
+func ExecuteOthers(command string) error{
+	// 返回一个 cmd 对象
+
+	logger.Do.Println("SubProcessManager: execute bash,", command)
+
+	cmd := exec.Command(command)
+
+	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
+
+	if err := cmd.Start(); err != nil {
+		logger.Do.Println("ExecuteBash: Start error ",err)
+		return err
+	}
+	errLog, _ := ioutil.ReadAll(stderr)
+	outLog, _ := ioutil.ReadAll(stdout)
+
+	logger.Do.Println("ExecuteBash: ErrorLog is ",string(errLog))
+	logger.Do.Println("ExecuteBash: OutPut is ",string(outLog))
+	outErr := cmd.Wait()
+
+	return outErr
 }

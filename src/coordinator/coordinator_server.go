@@ -47,7 +47,7 @@ func verifyArgs() {
 	// this will be executed only in production, in dev, the common.ExecutorTypeGlobal==""
 	if common.ISMASTER == "true"{
 
-		if common.MasterURLGlobal=="" || common.CoordAddrGlobal==""|| common.ListenAddrGlobal==""{
+		if common.CoordSvcName==""{
 			logger.Do.Println("Error: Input Error, either MasterAddrGlobal or CoordAddrGlobal not provided")
 			os.Exit(1)
 		}
@@ -69,14 +69,14 @@ func verifyArgs() {
 
 func initLogger(){
 	// this path is fixed, used to creating folder inside container
-	fixedPath:="./"
+	fixedPath:="/logs"
 	_ = os.Mkdir(fixedPath, os.ModePerm)
 	// Use layout string for time format.
 	const layout = "2006-01-02T15:04:05"
 	// Place now in the string.
 	rawTime := time.Now()
 
-	logFileName := fixedPath + common.ServiceNameGlobal + rawTime.Format(layout) + "logs"
+	logFileName := fixedPath + "/" + common.ServiceNameGlobal + rawTime.Format(layout) + "logs"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }
@@ -84,12 +84,7 @@ func initLogger(){
 
 func main() {
 
-	defer func(){
-		// cache global unexpected error
-		err := recover()
-		logger.Do.Printf("HTTP: Unexpected Error: %s \n", err)
-		os.Exit(1)
-	}()
+	defer logger.HandleErrors()
 
 	defer func(){
 		_=logger.F.Close()
@@ -136,14 +131,14 @@ func main() {
 
 			logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
-			worker.RunWorker(common.WorkerURLGlobal, common.MasterURLGlobal)
+			worker.RunWorker(common.MasterURLGlobal, common.WorkerURLGlobal)
 		}
 
 		if common.ExecutorTypeGlobal == common.PredictExecutor {
 
 			logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
-			prediction.RunPrediction(common.WorkerURLGlobal, common.MasterURLGlobal)
+			prediction.RunPrediction(common.MasterURLGlobal, common.WorkerURLGlobal)
 
 		}
 

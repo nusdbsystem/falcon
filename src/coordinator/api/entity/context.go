@@ -17,7 +17,7 @@ func InitContext() *Context {
 	ad.Ms = models.InitMetaStore()
 
 	ad.HttpHost = common.CoordAddrGlobal
-	ad.HttpPort = common.MasterPort
+	ad.HttpPort = common.CoordPort
 
 	return ad
 }

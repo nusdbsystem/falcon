@@ -28,11 +28,12 @@ spec:
       containers:
         - image: FALCON_WORKER_IMAGE
           name: WORKER_NAME
+          imagePullPolicy: IfNotPresent
           env:
-            - name: WORKER_URL
-              value: MASTER_ADDR
+            - name: MASTER_URL
+              value: "MASTER_ADDR"
             - name: EXECUTOR
-              value: EXECUTOR_TYPE
+              value: "EXECUTOR_TYPE"
           ports:
             - containerPort: WORKER_TARGET_PORT  #这里containerPort是容器内部的port
               name: WORKER_NAME

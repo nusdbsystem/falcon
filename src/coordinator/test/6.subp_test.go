@@ -3,6 +3,7 @@ package test
 import (
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
+	"fmt"
 	"testing"
 	"time"
 )
@@ -37,4 +38,16 @@ func TestSubProc(t *testing.T) {
 	//logger.Do.Println(killed, e, el, ol)
 
 	time.Sleep(time.Second * 3)
+}
+
+func TestSubProcessShell(t *testing.T){
+	logger.Do, logger.F = logger.GetLogger("./TestSubProc")
+
+	commend := "./scripts/_create_runtime_master.sh master-6369386254669931332 30006 6369386254669931332 train"
+	err := taskmanager.ExecuteBash(commend)
+	fmt.Println(err)
+
+	_=taskmanager.ExecuteBash("ls")
+	_=taskmanager.ExecuteBash("pwd")
+
 }

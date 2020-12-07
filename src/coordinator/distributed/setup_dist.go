@@ -30,26 +30,32 @@ func SetupDist(qItem *cache.QItem, taskType string) {
 	 * @return
 	 **/
 
-	masterPort := c.GetFreePort(common.CoordURLGlobal)
-	logger.Do.Println("SetupDist: Launch master Get port ", masterPort)
+	masterPort := c.GetFreePort(common.CoordSvcURLGlobal)
+	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
 	masterIp := common.CoordAddrGlobal
 	masterAddress := masterIp + ":" + masterPort
 
 	if common.Env == common.DevEnv{
+		logger.Do.Println("SetupDist: Launch master DevEnv")
 
 		// use a thread
 		SetupMaster(masterAddress, qItem, taskType)
 
 	}else if common.Env == common.ProdEnv{
+		logger.Do.Println("SetupDist: Launch master ProdEnv")
 
 		// in prod, use k8s to run train/predict server as a isolate process
-		itemKey := initSvcName()
+		itemKey := "jid"+fmt.Sprintf("%d", qItem.JobId)
+
 		serviceName := "master-" + itemKey
 
 		// put to the queue, assign key to env
+		logger.Do.Println("SetupDist: Writing item to redis")
 
 		cache.RedisClient.Set(itemKey, cache.Serialize(qItem))
+
+		logger.Do.Printf("SetupDist: Get key, %s InitK8sManager\n", itemKey)
 
 		km := taskmanager.InitK8sManager(true,  "")
 
@@ -59,11 +65,18 @@ func SetupDist(qItem *cache.QItem, taskType string) {
 			masterPort,
 			itemKey,
 			taskType,
+			masterAddress,
 		}
 
+		//_=taskmanager.ExecuteOthers("ls")
+		//_=taskmanager.ExecuteOthers("pwd")
 		km.UpdateYaml(strings.Join(command, " "))
 
+		logger.Do.Println("SetupDist: Creating yaml done")
+
 		filename := common.YamlBasePath + serviceName + ".yaml"
+
+		logger.Do.Println("SetupDist: Creating Resources based on file, ", filename)
 
 		km.CreateResources(filename)
 	}
@@ -154,13 +167,13 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 	 **/
 	logger.Do.Println("SetupDist: Lunching master")
 
-	master.RunMaster(masterAddress, qItem, taskType)
+	ms := master.RunMaster(masterAddress, qItem, taskType)
 
 
 	// update job's master address
 	if taskType == common.TrainExecutor{
 
-		c.JobUpdateMaster(common.CoordURLGlobal, masterAddress, qItem.JobId)
+		c.JobUpdateMaster(common.CoordSvcURLGlobal, masterAddress, qItem.JobId)
 	}
 
 	// master will call lister's endpoint to launch worker, to train or predict
@@ -173,7 +186,9 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 		c.SetupWorker(ip+":"+common.ListenerPort, masterAddress, taskType)
 	}
 
-	logger.Do.Println("SetupDist: master is running at ", masterAddress)
+	logger.Do.Printf("SetupDist: master is running at %s ... waiting\n", masterAddress)
+
+	ms.Wait()
 
 	return masterAddress
 }
