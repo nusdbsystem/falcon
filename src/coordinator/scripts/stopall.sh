@@ -1,5 +1,5 @@
 . ./deploy/property/svc.properties
-. coordinator.properties
+. userdefined.properties
 
 
 # load env variables

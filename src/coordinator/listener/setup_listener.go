@@ -43,9 +43,9 @@ func SetupListener() {
 
 	if err != nil {
 		if err == http.ErrServerClosed {
-			logger.Do.Print("Server closed under request", err)
+			logger.Do.Print("Server closed under request ", err)
 		} else {
-			logger.Do.Fatal("Server closed unexpected", err)
+			logger.Do.Fatal("Server closed unexpected ", err)
 		}
 	}
 }

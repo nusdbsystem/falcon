@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. coordinator.properties
+. userdefined.properties
 
 
 # load env variables
@@ -10,6 +10,8 @@ else
 	export DATA_BASE_PATH=$PWD
 fi
 
+# if using this scripts, assume running in production
+env=prod
 
 title()
 {
@@ -56,7 +58,7 @@ start_coordinator()
 {
   title "Starting falcon coord..."
 
-  bash ./scripts/_create_coordconfig.sh $DATA_BASE_PATH || exit 1
+  bash ./scripts/_create_coord.sh $DATA_BASE_PATH $env|| exit 1
 
   title "falcon coord started"
 

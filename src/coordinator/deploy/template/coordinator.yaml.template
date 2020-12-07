@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: coordinator
+  name: falcon-coordinator
 spec:
   type: NodePort # by default, it's cluster Ip, if use nodePort, need to provide type here
   ports:
@@ -14,7 +14,7 @@ spec:
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: coordinator
+  name: falcon-coordinator
 spec:
   selector:
     matchLabels:

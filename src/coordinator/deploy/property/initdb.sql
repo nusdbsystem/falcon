@@ -1,4 +1,5 @@
-CREATE USER 'falcon'@'localhost' IDENTIFIED BY 'falcon';
-SET GLOBAL max_connections = 500;
+CREATE USER 'falcon'@'%' IDENTIFIED BY 'falcon';
+GRANT ALL PRIVILEGES ON *.* to 'falcon'@'%' identified by 'falcon';
+FLUSH PRIVILEGES;
 CREATE DATABASE falcon;
-GRANT ALL PRIVILEGES ON falcon.* TO 'falcon'@'localhost';
+SET GLOBAL max_connections = 500;

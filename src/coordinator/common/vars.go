@@ -9,7 +9,7 @@ import (
  * @Author
  * @Description This file is only used inside the project,
 				for any common required to modify according to env,
-				use coordinator.properties or bash_env.sh
+				use userdefined.properties or bash_env.sh
  * @Date 4:42 下午 1/12/20
  * @Param
  * @return
@@ -98,7 +98,7 @@ const (
 
 var (
 	//////////////////////////////////////////////////////////////////////////
-	// This is user defined variables, define them in coordinator.properties first, //
+	// This is user defined variables, define them in userdefined.properties first, //
 	// and then, add to here												//
 	//////////////////////////////////////////////////////////////////////////
 
@@ -112,14 +112,14 @@ var (
 	MsMysqlOptions = GetEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
 
 	// find the cluster port, call internally
-	MsMysqlPort    = GetEnv("MYSQL_CLUSTER_PORT", "3306")
+	MsMysqlPort    = GetEnv("MYSQL_CLUSTER_PORT", "30000")
 
 	// redis
 	RedisHost      = GetEnv("REDIS_HOST","localhost")
 	RedisPwd       = GetEnv("REDIS_PWD", "falcon")
 
 	// find the cluster port, call internally
-	RedisPort       = GetEnv("REDIS_CLUSTER_PORT", "6379")
+	RedisPort       = GetEnv("REDIS_CLUSTER_PORT", "30002")
 
 	MsMysqlNodePort    = GetEnv("MYSQL_NODE_PORT", "30001")
 	RedisNodePort    = GetEnv("REDIS_NODE_PORT", "30003")
@@ -147,7 +147,7 @@ var (
 	MasterQItem = GetEnv("QItem", "")
 	ISMASTER = GetEnv("ISMASTER", "false")
 
-	DATA_BASE_PATH = GetEnv("DATA_BASE_PATH", "./")
+	//DATA_BASE_PATH = GetEnv("DATA_BASE_PATH", "./")
 )
 
 // GetEnv get key environment variable if exist otherwise return defalutValue
