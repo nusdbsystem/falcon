@@ -7,6 +7,8 @@
 
 #include <ctime>
 #include <random>
+#include <thread>
+#include <future>
 
 #include <glog/logging.h>
 #include <Networking/ssl_sockets.h>
@@ -334,29 +336,21 @@ void LogisticRegression::train(Party party) {
 
     std::cout << "step 2.3 success" << std::endl;
 
-    // step 2.4: connect to spdz parties for mpc computation
-    std::string mpc_player_path = SPDZ_PLAYER_PATH;
-    int mpc_port_base = SPDZ_PORT_BASE;
-    std::vector<ssl_socket*> mpc_sockets(party.party_num);
-//    std::vector<ssl_socket*> mpc_sockets = setup_sockets(party.party_num,
-//        party.party_id,
-//        mpc_player_path,
-//        party.host_names,
-//        mpc_port_base);
-    setup_sockets(party.party_num,
+    std::promise<std::vector<float>> promise_values;
+    std::future<std::vector<float>> future_values = promise_values.get_future();
+    std::thread spdz_thread(spdz_logistic_function_computation,
+        party.party_num,
         party.party_id,
-        mpc_player_path,
+        SPDZ_PORT_BASE,
+        SPDZ_PLAYER_PATH,
         party.host_names,
-        mpc_port_base,
-        mpc_sockets);
-    send_private_inputs(batch_aggregation_shares,mpc_sockets, party.party_num);
+        batch_aggregation_shares,
+        cur_batch_size,
+        &promise_values);
+    std::vector<float> batch_loss_shares = future_values.get();
+    spdz_thread.join();
 
     std::cout << "step 2.4 success" << std::endl;
-
-    // step 2.5: receive mpc computation results and aggregate
-    std::vector<float> batch_loss_shares = receive_result(mpc_sockets, party.party_num, cur_batch_size);
-
-    std::cout << "step 2.5 success" << std::endl;
 
     // step 2.6: update encrypted local weights
     // TODO: currently does not support with_regularization
@@ -369,12 +363,8 @@ void LogisticRegression::train(Party party) {
         batch_indexes,
         update_precision);
 
-    std::cout << "step 2.6 success" << std::endl;
+    std::cout << "step 2.5 success" << std::endl;
 
-    // free memory and close mpc_sockets
-    for (int i = 0; i < party.party_num; i++) {
-      delete mpc_sockets[i];
-    }
     delete [] encrypted_batch_aggregation;
 
     const clock_t iter_finish_time = clock();
@@ -388,6 +378,31 @@ void LogisticRegression::train(Party party) {
   LOG(INFO) << "Training time = " << training_consumed_time;
   LOG(INFO) << "************* Training Finished *************";
   google::FlushLogFiles(google::INFO);
+}
+
+void spdz_logistic_function_computation(int party_num,
+    int party_id,
+    int mpc_port_base,
+    std::string mpc_player_path,
+    std::vector<std::string> party_host_names,
+    std::vector<float> batch_aggregation_shares,
+    int cur_batch_size,
+    std::promise<std::vector<float>> *batch_loss_shares) {
+  std::vector<ssl_socket*> mpc_sockets(party_num);
+  setup_sockets(party_num,
+                party_id,
+                std::move(mpc_player_path),
+                std::move(party_host_names),
+                mpc_port_base,
+                mpc_sockets);
+  send_private_inputs(batch_aggregation_shares,mpc_sockets, party_num);
+  std::vector<float> return_values = receive_result(mpc_sockets, party_num, cur_batch_size);
+  batch_loss_shares->set_value(return_values);
+
+  // free memory and close mpc_sockets
+  for (int i = 0; i < party_num; i++) {
+    delete mpc_sockets[i];
+  }
 }
 
 void train_logistic_regression(Party party, std::string params) {

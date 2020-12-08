@@ -11,6 +11,8 @@
 
 #include <vector>
 #include <string>
+#include <thread>
+#include <future>
 
 class LogisticRegression : public Model {
  public:
@@ -144,6 +146,27 @@ class LogisticRegression : public Model {
    */
   void train(Party party);
 };
+
+/**
+ * spdz computation with thread
+ *
+ * @param party_num: number of parties
+ * @param party_id: current party id
+ * @param mpc_port_base: port base of the spdz parties
+ * @param mpc_player_path: player data path of the spdz parties
+ * @param party_host_names: spdz parties host names (ips)
+ * @param batch_aggregation_shares: the batch shares
+ * @param cur_batch_size: size of current batch
+ * @param batch_loss_shares: promise structure of the loss shares
+ */
+void spdz_logistic_function_computation(int party_num,
+    int party_id,
+    int mpc_port_base,
+    std::string mpc_player_path,
+    std::vector<std::string> party_host_names,
+    std::vector<float> batch_aggregation_shares,
+    int cur_batch_size,
+    std::promise<std::vector<float>> *batch_loss_shares);
 
 void train_logistic_regression(Party party, std::string params);
 
