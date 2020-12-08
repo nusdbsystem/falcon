@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  containers:
+    - name: my-nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+---
+# This specification will create a Service which targets TCP port 80 on any Pod with the run: my-nginx label, and expose it on an abstracted Service port
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+  selector:
+    run: my-nginx

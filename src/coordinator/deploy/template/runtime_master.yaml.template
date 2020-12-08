@@ -11,40 +11,41 @@ spec:
   selector:
     app: MASTER_NAME
 ---
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
   name: MASTER_NAME
+  labels:
+    app: MASTER_NAME
 spec:
-  selector:
-    matchLabels:
-      app: MASTER_NAME
-  strategy:
-    type: Recreate # Use strategy: type: Recreate in the Deployment configuration YAML file. This instructs Kubernetes to not use rolling updates. Rolling updates will not work, as you cannot have more than one Pod running at a time. The Recreate strategy will stop the first pod before creating a new one with the updated configuration.
-  template:
-    metadata:
-      labels:
-        app: MASTER_NAME
-    spec:
-      containers:
-        - image: FALCON_MASTER_IMAGE
+  restartPolicy: Never
+  containers:
+    - image: FALCON_MASTER_IMAGE
+      name: MASTER_NAME
+      imagePullPolicy: IfNotPresent
+      envFrom:
+      - configMapRef: # must specify one of: `configMapRef` or `secretRef`
+          name: redis-envs
+      env:
+        - name: QItem
+          value: "ITEMKEY"  # must have ""
+        - name: EXECUTOR
+          value: "EXECUTOR_TYPE"
+        - name: ISMASTER
+          value: "true"
+        - name: CoordSvcName
+          value: "COORD_SVC_NAME"
+        - name: MASTER_URL
+          value: "MASTER_URL_PLACEHOLDER"
+      ports:
+        - containerPort: MASTER_TARGET_PORT  #这里containerPort是容器内部的port
           name: MASTER_NAME
-          imagePullPolicy: IfNotPresent
-          envFrom:
-          - configMapRef: # must specify one of: `configMapRef` or `secretRef`
-              name: redis-envs
-          env:
-            - name: QItem
-              value: "ITEMKEY"  # must have ""
-            - name: EXECUTOR
-              value: "EXECUTOR_TYPE"
-            - name: ISMASTER
-              value: "true"
-            - name: CoordSvcName
-              value: "COORD_SVC_NAME"
-            - name: MASTER_URL
-              value: "MASTER_URL_PLACEHOLDER"
-          ports:
-            - containerPort: MASTER_TARGET_PORT  #这里containerPort是容器内部的port
-              name: MASTER_NAME
+      volumeMounts:
+        - name: coord-storage
+          mountPath: ./logs
+  volumes:
+    - name: coord-storage
+      persistentVolumeClaim:
+        claimName: STORAGE_NAME-pvc
+
 

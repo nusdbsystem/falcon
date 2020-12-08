@@ -39,7 +39,7 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 	logger.Do.Println("Worker:task 1 pre processing start")
 	dir := dta.PartyPath.DataInput
 	stdIn := ""
-	command := "/Users/nailixing/.virtualenvs/test_pip/bin/python"
+	command := "python3"
 	args := []string{dta.TaskInfos.PreProcessing.AlgorithmName, "-a=1", "-b=2"}
 	envs := []string{}
 
@@ -73,7 +73,7 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 	logger.Do.Println("Worker:task model training start")
 	dir = dta.PartyPath.Model
 	stdIn = ""
-	command = "/Users/nailixing/.virtualenvs/test_pip/bin/python"
+	command = "python3"
 	args = []string{dta.TaskInfos.ModelTraining.AlgorithmName}
 	envs = []string{}
 

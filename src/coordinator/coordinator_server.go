@@ -76,7 +76,18 @@ func initLogger(){
 	// Place now in the string.
 	rawTime := time.Now()
 
-	logFileName := fixedPath + "/" + common.ServiceNameGlobal + rawTime.Format(layout) + "logs"
+	var logFileName string
+
+	if common.ServiceNameGlobal!=""{
+		logFileName = fixedPath + "/" + common.ServiceNameGlobal + rawTime.Format(layout) + "logs"
+	}else{
+		if common.ISMASTER=="true"{
+			logFileName = fixedPath + "/" + "Master_"+common.ExecutorTypeGlobal + rawTime.Format(layout) + "logs"
+		}else{
+			logFileName = fixedPath + "/" + "Worker_"+common.ExecutorTypeGlobal + rawTime.Format(layout) + "logs"
+		}
+	}
+
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }

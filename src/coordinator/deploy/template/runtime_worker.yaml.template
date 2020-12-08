@@ -3,38 +3,40 @@ kind: Service
 metadata:
   name: WORKER_NAME
 spec:
+  type: NodePort
   ports:
     - port: WORKER_CLUSTER_PORT  #这里port集群内部clusterIp 对应的端口
-    - targetPort: WORKER_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
-    - nodePort: WORKER_NODE_PORT  #这里是物理机的端口
+      targetPort: WORKER_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
+      nodePort: WORKER_NODE_PORT  #这里是物理机的端口
   selector:
     app: WORKER_NAME
 ---
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
   name: WORKER_NAME
+  labels:
+    app: WORKER_NAME
 spec:
-  selector:
-    matchLabels:
-      app: WORKER_NAME
-  strategy:
-    type: Recreate # Use strategy: type: Recreate in the Deployment configuration YAML file. This instructs Kubernetes to not use rolling updates. Rolling updates will not work, as you cannot have more than one Pod running at a time. The Recreate strategy will stop the first pod before creating a new one with the updated configuration.
-  template:
-    metadata:
-      labels:
-        app: WORKER_NAME
-    spec:
-      containers:
-        - image: FALCON_WORKER_IMAGE
-          name: WORKER_NAME
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: MASTER_URL
-              value: "MASTER_ADDR"
-            - name: EXECUTOR
-              value: "EXECUTOR_TYPE"
-          ports:
-            - containerPort: WORKER_TARGET_PORT  #这里containerPort是容器内部的port
-              name: WORKER_NAME
-
+  restartPolicy: Never
+  containers:
+    - image: FALCON_WORKER_IMAGE
+      name: WORKER_NAME
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: MASTER_URL
+          value: "MASTER_ADDR"
+        - name: EXECUTOR
+          value: "EXECUTOR_TYPE"
+        - name: WORKER_URL
+          value: "WORKER_URL_PLACEHOLDER"
+      ports:
+        - containerPort: WORKER_TARGET_PORT  #这里containerPort是容器内部的port
+          name: "port-WORKER_TARGET_PORT"  # .ports[0].name: Invalid value: "train-8490548680670953438": must be no more than 15 characters
+      volumeMounts:
+        - name: falcon-listener
+          mountPath: ./logs
+  volumes:
+    - name: falcon-listener
+      hostPath:
+        path: HOST_PATH/run_time_logs

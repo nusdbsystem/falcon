@@ -32,4 +32,5 @@ sed -i -e "s/FALCON_MASTER_IMAGE/$IMAGE/g" $MASTER_YAML || exit 1
 sed -i -e "s/ITEMKEY/$ITEMKEY/g" $MASTER_YAML || exit 1
 sed -i -e "s/COORD_SVC_NAME/$CoordSvcName/g" $MASTER_YAML || exit 1
 sed -i -e "s/MASTER_URL_PLACEHOLDER/$MASTER_URL_PLACEHOLDER/g" $MASTER_YAML || exit 1
+sed -i -e "s/STORAGE_NAME/$COORD_STORAGE/g" $MASTER_YAML || exit 1
 

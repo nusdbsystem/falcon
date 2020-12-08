@@ -121,7 +121,10 @@ func (this *Master) trainTaskHandler(
 			"call Worker.DoTask error",
 			JobId)
 		client.JobUpdateStatus(common.CoordSvcURLGlobal, common.JobFailed, JobId)
-		panic("error")
+
+		// todo define return or panic, how to handle panic if one panic, and others normal?
+
+		panic("trainTaskHandler error")
 	}
 
 	errLen := 4096

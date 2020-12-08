@@ -105,6 +105,7 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 		masterAddress： IP of the master address
 		masterAddress： train or predictor
 	 **/
+	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddress, taskType)
 
 	workerPort := c.GetFreePort(common.CoordURLGlobal)
 
@@ -114,11 +115,11 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 	if common.Env == common.DevEnv{
 
 		if taskType == common.TrainExecutor{
-
+			logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainExecutor")
 			worker.RunWorker(masterAddress, workerAddress)
 
 		}else if taskType == common.PredictExecutor{
-
+			logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictExecutor")
 			prediction.RunPrediction(masterAddress, workerAddress)
 		}
 
@@ -130,9 +131,10 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 
 		if taskType == common.TrainExecutor{
 			serviceName = "train-" + itemKey
-
+			logger.Do.Println("SetupWorkerHelper: Current in Prod, TrainExecutor, svcName", serviceName)
 		}else if taskType == common.PredictExecutor{
 			serviceName = "predict-" + itemKey
+			logger.Do.Println("SetupWorkerHelper: Current in Prod, PredictExecutor, svcName", serviceName)
 		}
 
 		km := taskmanager.InitK8sManager(true,  "")
@@ -142,11 +144,16 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 			workerPort,
 			masterAddress,
 			taskType,
+			workerAddress,
 		}
 
+		_=taskmanager.ExecuteOthers("ls")
+		_=taskmanager.ExecuteOthers("pwd")
 		km.UpdateYaml(strings.Join(command, " "))
 
 		filename := common.YamlBasePath + serviceName + ".yaml"
+
+		logger.Do.Println("SetupDist: Creating yaml done", filename)
 
 		km.CreateResources(filename)
 
@@ -191,5 +198,10 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 	ms.Wait()
 
 	return masterAddress
+}
+
+func CleanWorker(){
+
+	// todo delete the svc created for training, master will call this method after ms.Wait()
 }
 
