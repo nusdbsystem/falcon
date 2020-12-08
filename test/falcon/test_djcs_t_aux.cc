@@ -136,6 +136,56 @@ TEST(PHE, ThresholdPaillierScheme) {
   //printf("inner_product = %f\n", inner_product);
   //printf("decrypted_decoded_inner_product = %f\n", decrypted_decoded_inner_product);
 
+  //////////////////////////////////////////////
+  /// Test homomorphic matrix multiplication ///
+  //////////////////////////////////////////////
+  float d1[5] = {0.1, -0.2, 0.3, -0.4, 0.5};
+  float d2[3][5] = {
+      {0.9, 0.8, -0.7, 0.6, 0.5},
+      {-0.8, 0.7, -0.6, 0.5, -0.4},
+      {0.7, -0.6, 0.5, -0.4, 0.3}
+  };
+
+  EncodedNumber* number_d1 = new EncodedNumber[5];
+  EncodedNumber** number_d2 = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    number_d2[i] = new EncodedNumber[5];
+  }
+  for (int i = 0; i < 5; i++) {
+    number_d1[i].set_float(pk->n[0], d1[i], 16);
+  }
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 5; j++) {
+      number_d2[i][j].set_float(pk->n[0], d2[i][j], 16);
+    }
+  }
+
+  EncodedNumber* encrypted_number_d1 = new EncodedNumber[5];
+  for (int i = 0; i < 5; i++) {
+    djcs_t_aux_encrypt(pk, hr, encrypted_number_d1[i], number_d1[i]);
+  }
+
+  EncodedNumber* encrypted_mat_result = new EncodedNumber[3];
+  EncodedNumber* decrypted_mat_result = new EncodedNumber[3];
+  djcs_t_aux_matrix_mult(pk, hr, encrypted_mat_result, encrypted_number_d1, number_d2, 3, 5);
+
+  for (int j = 0; j < 3; j++) {
+    EncodedNumber* partially_decryption_mat_res_j = new EncodedNumber[client_num];
+    for (int i = 0; i < client_num; i++) {
+      djcs_t_aux_partial_decrypt(pk, au[i], partially_decryption_mat_res_j[i], encrypted_mat_result[j]);
+    }
+    djcs_t_aux_share_combine(pk, decrypted_mat_result[j], partially_decryption_mat_res_j, client_num);
+
+    float decrypted_decoded_mat_res_j;
+    decrypted_mat_result[j].decode(decrypted_decoded_mat_res_j);
+    float mat_mult_j = 0.0;
+    for (int i = 0; i < 5; i++) {
+      mat_mult_j = mat_mult_j + d1[i] * d2[j][i];
+    }
+    EXPECT_NEAR(mat_mult_j, decrypted_decoded_mat_res_j, 1e-3);
+    delete [] partially_decryption_mat_res_j;
+  }
+
   // free memory
   delete [] partially_decryption;
   delete [] partially_sum_decryption;
@@ -144,6 +194,14 @@ TEST(PHE, ThresholdPaillierScheme) {
   delete [] number_c1;
   delete [] number_c2;
   delete [] encrypted_number_c1;
+  delete [] number_d1;
+  delete [] encrypted_number_d1;
+  delete [] encrypted_mat_result;
+  delete [] decrypted_mat_result;
+  for (int i = 0; i < 3; i++) {
+    delete [] number_d2[i];
+  }
+  delete [] number_d2;
 
   hcs_free_random(hr);
   djcs_t_free_public_key(pk);

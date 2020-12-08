@@ -25,6 +25,15 @@ namespace v0 {
 
 namespace {
 
+const ::google::protobuf::Descriptor* IntArray_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  IntArray_reflection_ = NULL;
+const ::google::protobuf::Descriptor* FixedPointEncodedNumber_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  FixedPointEncodedNumber_reflection_ = NULL;
+const ::google::protobuf::Descriptor* EncodedNumberArray_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  EncodedNumberArray_reflection_ = NULL;
 
 }  // namespace
 
@@ -36,6 +45,54 @@ void protobuf_AssignDesc_common_2eproto() {
     ::google::protobuf::DescriptorPool::generated_pool()->FindFileByName(
       "common.proto");
   GOOGLE_CHECK(file != NULL);
+  IntArray_descriptor_ = file->message_type(0);
+  static const int IntArray_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IntArray, int_item_),
+  };
+  IntArray_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      IntArray_descriptor_,
+      IntArray::default_instance_,
+      IntArray_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(IntArray),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IntArray, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IntArray, _is_default_instance_));
+  FixedPointEncodedNumber_descriptor_ = file->message_type(1);
+  static const int FixedPointEncodedNumber_offsets_[4] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FixedPointEncodedNumber, n_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FixedPointEncodedNumber, value_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FixedPointEncodedNumber, exponent_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FixedPointEncodedNumber, type_),
+  };
+  FixedPointEncodedNumber_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      FixedPointEncodedNumber_descriptor_,
+      FixedPointEncodedNumber::default_instance_,
+      FixedPointEncodedNumber_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(FixedPointEncodedNumber),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FixedPointEncodedNumber, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FixedPointEncodedNumber, _is_default_instance_));
+  EncodedNumberArray_descriptor_ = file->message_type(2);
+  static const int EncodedNumberArray_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EncodedNumberArray, encoded_number_),
+  };
+  EncodedNumberArray_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      EncodedNumberArray_descriptor_,
+      EncodedNumberArray::default_instance_,
+      EncodedNumberArray_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(EncodedNumberArray),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EncodedNumberArray, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(EncodedNumberArray, _is_default_instance_));
 }
 
 namespace {
@@ -49,11 +106,23 @@ inline void protobuf_AssignDescriptorsOnce() {
 void protobuf_RegisterTypes(const ::std::string&) GOOGLE_ATTRIBUTE_COLD;
 void protobuf_RegisterTypes(const ::std::string&) {
   protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      IntArray_descriptor_, &IntArray::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      FixedPointEncodedNumber_descriptor_, &FixedPointEncodedNumber::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      EncodedNumberArray_descriptor_, &EncodedNumberArray::default_instance());
 }
 
 }  // namespace
 
 void protobuf_ShutdownFile_common_2eproto() {
+  delete IntArray::default_instance_;
+  delete IntArray_reflection_;
+  delete FixedPointEncodedNumber::default_instance_;
+  delete FixedPointEncodedNumber_reflection_;
+  delete EncodedNumberArray::default_instance_;
+  delete EncodedNumberArray_reflection_;
 }
 
 void protobuf_AddDesc_common_2eproto() GOOGLE_ATTRIBUTE_COLD;
@@ -65,9 +134,20 @@ void protobuf_AddDesc_common_2eproto() {
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\014common.proto\022\031com.nus.dbsytem.falcon.v"
-    "0b\006proto3", 49);
+    "0\"\034\n\010IntArray\022\020\n\010int_item\030\001 \003(\005\"S\n\027Fixed"
+    "PointEncodedNumber\022\t\n\001n\030\001 \001(\t\022\r\n\005value\030\002"
+    " \001(\t\022\020\n\010exponent\030\003 \001(\005\022\014\n\004type\030\004 \001(\005\"`\n\022"
+    "EncodedNumberArray\022J\n\016encoded_number\030\001 \003"
+    "(\01322.com.nus.dbsytem.falcon.v0.FixedPoin"
+    "tEncodedNumberb\006proto3", 262);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "common.proto", &protobuf_RegisterTypes);
+  IntArray::default_instance_ = new IntArray();
+  FixedPointEncodedNumber::default_instance_ = new FixedPointEncodedNumber();
+  EncodedNumberArray::default_instance_ = new EncodedNumberArray();
+  IntArray::default_instance_->InitAsDefaultInstance();
+  FixedPointEncodedNumber::default_instance_->InitAsDefaultInstance();
+  EncodedNumberArray::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_common_2eproto);
 }
 
@@ -77,6 +157,1048 @@ struct StaticDescriptorInitializer_common_2eproto {
     protobuf_AddDesc_common_2eproto();
   }
 } static_descriptor_initializer_common_2eproto_;
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int IntArray::kIntItemFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+IntArray::IntArray()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:com.nus.dbsytem.falcon.v0.IntArray)
+}
+
+void IntArray::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+IntArray::IntArray(const IntArray& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.IntArray)
+}
+
+void IntArray::SharedCtor() {
+    _is_default_instance_ = false;
+  _cached_size_ = 0;
+}
+
+IntArray::~IntArray() {
+  // @@protoc_insertion_point(destructor:com.nus.dbsytem.falcon.v0.IntArray)
+  SharedDtor();
+}
+
+void IntArray::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void IntArray::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* IntArray::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return IntArray_descriptor_;
+}
+
+const IntArray& IntArray::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_common_2eproto();
+  return *default_instance_;
+}
+
+IntArray* IntArray::default_instance_ = NULL;
+
+IntArray* IntArray::New(::google::protobuf::Arena* arena) const {
+  IntArray* n = new IntArray;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void IntArray::Clear() {
+// @@protoc_insertion_point(message_clear_start:com.nus.dbsytem.falcon.v0.IntArray)
+  int_item_.Clear();
+}
+
+bool IntArray::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:com.nus.dbsytem.falcon.v0.IntArray)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // repeated int32 int_item = 1;
+      case 1: {
+        if (tag == 10) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, this->mutable_int_item())));
+        } else if (tag == 8) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitiveNoInline<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 1, 10, input, this->mutable_int_item())));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:com.nus.dbsytem.falcon.v0.IntArray)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:com.nus.dbsytem.falcon.v0.IntArray)
+  return false;
+#undef DO_
+}
+
+void IntArray::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:com.nus.dbsytem.falcon.v0.IntArray)
+  // repeated int32 int_item = 1;
+  if (this->int_item_size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteTag(1, ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED, output);
+    output->WriteVarint32(_int_item_cached_byte_size_);
+  }
+  for (int i = 0; i < this->int_item_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32NoTag(
+      this->int_item(i), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:com.nus.dbsytem.falcon.v0.IntArray)
+}
+
+::google::protobuf::uint8* IntArray::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:com.nus.dbsytem.falcon.v0.IntArray)
+  // repeated int32 int_item = 1;
+  if (this->int_item_size() > 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteTagToArray(
+      1,
+      ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED,
+      target);
+    target = ::google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(
+      _int_item_cached_byte_size_, target);
+  }
+  for (int i = 0; i < this->int_item_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteInt32NoTagToArray(this->int_item(i), target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsytem.falcon.v0.IntArray)
+  return target;
+}
+
+int IntArray::ByteSize() const {
+// @@protoc_insertion_point(message_byte_size_start:com.nus.dbsytem.falcon.v0.IntArray)
+  int total_size = 0;
+
+  // repeated int32 int_item = 1;
+  {
+    int data_size = 0;
+    for (int i = 0; i < this->int_item_size(); i++) {
+      data_size += ::google::protobuf::internal::WireFormatLite::
+        Int32Size(this->int_item(i));
+    }
+    if (data_size > 0) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(data_size);
+    }
+    GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+    _int_item_cached_byte_size_ = data_size;
+    GOOGLE_SAFE_CONCURRENT_WRITES_END();
+    total_size += data_size;
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void IntArray::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:com.nus.dbsytem.falcon.v0.IntArray)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  const IntArray* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const IntArray>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:com.nus.dbsytem.falcon.v0.IntArray)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:com.nus.dbsytem.falcon.v0.IntArray)
+    MergeFrom(*source);
+  }
+}
+
+void IntArray::MergeFrom(const IntArray& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:com.nus.dbsytem.falcon.v0.IntArray)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  int_item_.MergeFrom(from.int_item_);
+}
+
+void IntArray::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:com.nus.dbsytem.falcon.v0.IntArray)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void IntArray::CopyFrom(const IntArray& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:com.nus.dbsytem.falcon.v0.IntArray)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool IntArray::IsInitialized() const {
+
+  return true;
+}
+
+void IntArray::Swap(IntArray* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void IntArray::InternalSwap(IntArray* other) {
+  int_item_.UnsafeArenaSwap(&other->int_item_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata IntArray::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = IntArray_descriptor_;
+  metadata.reflection = IntArray_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// IntArray
+
+// repeated int32 int_item = 1;
+int IntArray::int_item_size() const {
+  return int_item_.size();
+}
+void IntArray::clear_int_item() {
+  int_item_.Clear();
+}
+ ::google::protobuf::int32 IntArray::int_item(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+  return int_item_.Get(index);
+}
+ void IntArray::set_int_item(int index, ::google::protobuf::int32 value) {
+  int_item_.Set(index, value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+}
+ void IntArray::add_int_item(::google::protobuf::int32 value) {
+  int_item_.Add(value);
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+}
+ const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+IntArray::int_item() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+  return int_item_;
+}
+ ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+IntArray::mutable_int_item() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+  return &int_item_;
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int FixedPointEncodedNumber::kNFieldNumber;
+const int FixedPointEncodedNumber::kValueFieldNumber;
+const int FixedPointEncodedNumber::kExponentFieldNumber;
+const int FixedPointEncodedNumber::kTypeFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+FixedPointEncodedNumber::FixedPointEncodedNumber()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+}
+
+void FixedPointEncodedNumber::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+FixedPointEncodedNumber::FixedPointEncodedNumber(const FixedPointEncodedNumber& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+}
+
+void FixedPointEncodedNumber::SharedCtor() {
+    _is_default_instance_ = false;
+  ::google::protobuf::internal::GetEmptyString();
+  _cached_size_ = 0;
+  n_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  value_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  exponent_ = 0;
+  type_ = 0;
+}
+
+FixedPointEncodedNumber::~FixedPointEncodedNumber() {
+  // @@protoc_insertion_point(destructor:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  SharedDtor();
+}
+
+void FixedPointEncodedNumber::SharedDtor() {
+  n_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  value_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (this != default_instance_) {
+  }
+}
+
+void FixedPointEncodedNumber::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* FixedPointEncodedNumber::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return FixedPointEncodedNumber_descriptor_;
+}
+
+const FixedPointEncodedNumber& FixedPointEncodedNumber::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_common_2eproto();
+  return *default_instance_;
+}
+
+FixedPointEncodedNumber* FixedPointEncodedNumber::default_instance_ = NULL;
+
+FixedPointEncodedNumber* FixedPointEncodedNumber::New(::google::protobuf::Arena* arena) const {
+  FixedPointEncodedNumber* n = new FixedPointEncodedNumber;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void FixedPointEncodedNumber::Clear() {
+// @@protoc_insertion_point(message_clear_start:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+#if defined(__clang__)
+#define ZR_HELPER_(f) \
+  _Pragma("clang diagnostic push") \
+  _Pragma("clang diagnostic ignored \"-Winvalid-offsetof\"") \
+  __builtin_offsetof(FixedPointEncodedNumber, f) \
+  _Pragma("clang diagnostic pop")
+#else
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<FixedPointEncodedNumber*>(16)->f)
+#endif
+
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
+
+  ZR_(exponent_, type_);
+  n_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  value_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+
+#undef ZR_HELPER_
+#undef ZR_
+
+}
+
+bool FixedPointEncodedNumber::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string n = 1;
+      case 1: {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_n()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->n().data(), this->n().length(),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n"));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_value;
+        break;
+      }
+
+      // optional string value = 2;
+      case 2: {
+        if (tag == 18) {
+         parse_value:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_value()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->value().data(), this->value().length(),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value"));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(24)) goto parse_exponent;
+        break;
+      }
+
+      // optional int32 exponent = 3;
+      case 3: {
+        if (tag == 24) {
+         parse_exponent:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &exponent_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(32)) goto parse_type;
+        break;
+      }
+
+      // optional int32 type = 4;
+      case 4: {
+        if (tag == 32) {
+         parse_type:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &type_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  return false;
+#undef DO_
+}
+
+void FixedPointEncodedNumber::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  // optional string n = 1;
+  if (this->n().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->n().data(), this->n().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      1, this->n(), output);
+  }
+
+  // optional string value = 2;
+  if (this->value().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->value().data(), this->value().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      2, this->value(), output);
+  }
+
+  // optional int32 exponent = 3;
+  if (this->exponent() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->exponent(), output);
+  }
+
+  // optional int32 type = 4;
+  if (this->type() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->type(), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+}
+
+::google::protobuf::uint8* FixedPointEncodedNumber::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  // optional string n = 1;
+  if (this->n().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->n().data(), this->n().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->n(), target);
+  }
+
+  // optional string value = 2;
+  if (this->value().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->value().data(), this->value().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->value(), target);
+  }
+
+  // optional int32 exponent = 3;
+  if (this->exponent() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->exponent(), target);
+  }
+
+  // optional int32 type = 4;
+  if (this->type() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->type(), target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  return target;
+}
+
+int FixedPointEncodedNumber::ByteSize() const {
+// @@protoc_insertion_point(message_byte_size_start:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  int total_size = 0;
+
+  // optional string n = 1;
+  if (this->n().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->n());
+  }
+
+  // optional string value = 2;
+  if (this->value().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->value());
+  }
+
+  // optional int32 exponent = 3;
+  if (this->exponent() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->exponent());
+  }
+
+  // optional int32 type = 4;
+  if (this->type() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->type());
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void FixedPointEncodedNumber::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  const FixedPointEncodedNumber* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const FixedPointEncodedNumber>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+    MergeFrom(*source);
+  }
+}
+
+void FixedPointEncodedNumber::MergeFrom(const FixedPointEncodedNumber& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  if (from.n().size() > 0) {
+
+    n_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.n_);
+  }
+  if (from.value().size() > 0) {
+
+    value_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.value_);
+  }
+  if (from.exponent() != 0) {
+    set_exponent(from.exponent());
+  }
+  if (from.type() != 0) {
+    set_type(from.type());
+  }
+}
+
+void FixedPointEncodedNumber::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void FixedPointEncodedNumber::CopyFrom(const FixedPointEncodedNumber& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool FixedPointEncodedNumber::IsInitialized() const {
+
+  return true;
+}
+
+void FixedPointEncodedNumber::Swap(FixedPointEncodedNumber* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void FixedPointEncodedNumber::InternalSwap(FixedPointEncodedNumber* other) {
+  n_.Swap(&other->n_);
+  value_.Swap(&other->value_);
+  std::swap(exponent_, other->exponent_);
+  std::swap(type_, other->type_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata FixedPointEncodedNumber::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = FixedPointEncodedNumber_descriptor_;
+  metadata.reflection = FixedPointEncodedNumber_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// FixedPointEncodedNumber
+
+// optional string n = 1;
+void FixedPointEncodedNumber::clear_n() {
+  n_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ const ::std::string& FixedPointEncodedNumber::n() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+  return n_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void FixedPointEncodedNumber::set_n(const ::std::string& value) {
+  
+  n_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+}
+ void FixedPointEncodedNumber::set_n(const char* value) {
+  
+  n_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+}
+ void FixedPointEncodedNumber::set_n(const char* value, size_t size) {
+  
+  n_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+}
+ ::std::string* FixedPointEncodedNumber::mutable_n() {
+  
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+  return n_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* FixedPointEncodedNumber::release_n() {
+  // @@protoc_insertion_point(field_release:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+  
+  return n_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void FixedPointEncodedNumber::set_allocated_n(::std::string* n) {
+  if (n != NULL) {
+    
+  } else {
+    
+  }
+  n_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), n);
+  // @@protoc_insertion_point(field_set_allocated:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+}
+
+// optional string value = 2;
+void FixedPointEncodedNumber::clear_value() {
+  value_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ const ::std::string& FixedPointEncodedNumber::value() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+  return value_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void FixedPointEncodedNumber::set_value(const ::std::string& value) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+}
+ void FixedPointEncodedNumber::set_value(const char* value) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+}
+ void FixedPointEncodedNumber::set_value(const char* value, size_t size) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+}
+ ::std::string* FixedPointEncodedNumber::mutable_value() {
+  
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+  return value_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* FixedPointEncodedNumber::release_value() {
+  // @@protoc_insertion_point(field_release:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+  
+  return value_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void FixedPointEncodedNumber::set_allocated_value(::std::string* value) {
+  if (value != NULL) {
+    
+  } else {
+    
+  }
+  value_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set_allocated:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+}
+
+// optional int32 exponent = 3;
+void FixedPointEncodedNumber::clear_exponent() {
+  exponent_ = 0;
+}
+ ::google::protobuf::int32 FixedPointEncodedNumber::exponent() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.exponent)
+  return exponent_;
+}
+ void FixedPointEncodedNumber::set_exponent(::google::protobuf::int32 value) {
+  
+  exponent_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.exponent)
+}
+
+// optional int32 type = 4;
+void FixedPointEncodedNumber::clear_type() {
+  type_ = 0;
+}
+ ::google::protobuf::int32 FixedPointEncodedNumber::type() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.type)
+  return type_;
+}
+ void FixedPointEncodedNumber::set_type(::google::protobuf::int32 value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.type)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int EncodedNumberArray::kEncodedNumberFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+EncodedNumberArray::EncodedNumberArray()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+}
+
+void EncodedNumberArray::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+EncodedNumberArray::EncodedNumberArray(const EncodedNumberArray& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+}
+
+void EncodedNumberArray::SharedCtor() {
+    _is_default_instance_ = false;
+  _cached_size_ = 0;
+}
+
+EncodedNumberArray::~EncodedNumberArray() {
+  // @@protoc_insertion_point(destructor:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  SharedDtor();
+}
+
+void EncodedNumberArray::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void EncodedNumberArray::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* EncodedNumberArray::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return EncodedNumberArray_descriptor_;
+}
+
+const EncodedNumberArray& EncodedNumberArray::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_common_2eproto();
+  return *default_instance_;
+}
+
+EncodedNumberArray* EncodedNumberArray::default_instance_ = NULL;
+
+EncodedNumberArray* EncodedNumberArray::New(::google::protobuf::Arena* arena) const {
+  EncodedNumberArray* n = new EncodedNumberArray;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void EncodedNumberArray::Clear() {
+// @@protoc_insertion_point(message_clear_start:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  encoded_number_.Clear();
+}
+
+bool EncodedNumberArray::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // repeated .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber encoded_number = 1;
+      case 1: {
+        if (tag == 10) {
+          DO_(input->IncrementRecursionDepth());
+         parse_loop_encoded_number:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtualNoRecursionDepth(
+                input, add_encoded_number()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(10)) goto parse_loop_encoded_number;
+        input->UnsafeDecrementRecursionDepth();
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  return false;
+#undef DO_
+}
+
+void EncodedNumberArray::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  // repeated .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber encoded_number = 1;
+  for (unsigned int i = 0, n = this->encoded_number_size(); i < n; i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->encoded_number(i), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+}
+
+::google::protobuf::uint8* EncodedNumberArray::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  // repeated .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber encoded_number = 1;
+  for (unsigned int i = 0, n = this->encoded_number_size(); i < n; i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      InternalWriteMessageNoVirtualToArray(
+        1, this->encoded_number(i), false, target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  return target;
+}
+
+int EncodedNumberArray::ByteSize() const {
+// @@protoc_insertion_point(message_byte_size_start:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  int total_size = 0;
+
+  // repeated .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber encoded_number = 1;
+  total_size += 1 * this->encoded_number_size();
+  for (int i = 0; i < this->encoded_number_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->encoded_number(i));
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void EncodedNumberArray::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  const EncodedNumberArray* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const EncodedNumberArray>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+    MergeFrom(*source);
+  }
+}
+
+void EncodedNumberArray::MergeFrom(const EncodedNumberArray& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  encoded_number_.MergeFrom(from.encoded_number_);
+}
+
+void EncodedNumberArray::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void EncodedNumberArray::CopyFrom(const EncodedNumberArray& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool EncodedNumberArray::IsInitialized() const {
+
+  return true;
+}
+
+void EncodedNumberArray::Swap(EncodedNumberArray* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void EncodedNumberArray::InternalSwap(EncodedNumberArray* other) {
+  encoded_number_.UnsafeArenaSwap(&other->encoded_number_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata EncodedNumberArray::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = EncodedNumberArray_descriptor_;
+  metadata.reflection = EncodedNumberArray_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// EncodedNumberArray
+
+// repeated .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber encoded_number = 1;
+int EncodedNumberArray::encoded_number_size() const {
+  return encoded_number_.size();
+}
+void EncodedNumberArray::clear_encoded_number() {
+  encoded_number_.Clear();
+}
+const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& EncodedNumberArray::encoded_number(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return encoded_number_.Get(index);
+}
+::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* EncodedNumberArray::mutable_encoded_number(int index) {
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return encoded_number_.Mutable(index);
+}
+::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* EncodedNumberArray::add_encoded_number() {
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return encoded_number_.Add();
+}
+::google::protobuf::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber >*
+EncodedNumberArray::mutable_encoded_number() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return &encoded_number_;
+}
+const ::google::protobuf::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber >&
+EncodedNumberArray::encoded_number() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return encoded_number_;
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // @@protoc_insertion_point(namespace_scope)
 

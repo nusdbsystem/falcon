@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(falcon)
 set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options")
 
 set(SOURCE_FILES
@@ -14,6 +15,10 @@ set(SOURCE_FILES
         utils/pb_converter/model_converter.cc
         ../../include/falcon/utils/pb_converter/phe_keys_converter.h
         utils/pb_converter/phe_keys_converter.cc
+        ../../include/falcon/utils/pb_converter/common_converter.h
+        utils/pb_converter/common_converter.cc
+        include/message/common.pb.h
+        include/message/common.pb.cc
         include/message/model.pb.h
         include/message/model.pb.cc
         include/message/phe_keys.pb.h
@@ -25,7 +30,11 @@ set(SOURCE_FILES
         ../../include/falcon/operator/mpc/spdz_connector.h
         operator/mpc/spdz_connector.cc
         ../../include/falcon/utils/io_util.h
-        utils/io_util.cc)
+        utils/io_util.cc
+        ../../include/falcon/algorithm/vertical/linear_model/logistic_regression.h
+        algorithm/vertical/linear_model/logistic_regression.cc
+        ../../include/falcon/algorithm/model.h
+        algorithm/model.cc)
 
 #set(SPDZ_HOME "$ENV{HOME}/Documents/MP-SPDZ/")
 set(SPDZ_HOME "$ENV{HOME}/Documents/falcon/third_party/MP-SPDZ/")

@@ -1,3 +1,25 @@
 syntax = "proto3";
 
 package com.nus.dbsytem.falcon.v0;
+
+// This message is used when initializing the training data
+// and testing data, as well as transmitting batch ids in each training iteration
+message IntArray {
+    repeated int32 int_item = 1;
+}
+
+// This message is used to serialize an EncodedNumber value
+message FixedPointEncodedNumber{
+    // maximum value
+    string n = 1;
+    // encoded value
+    string value = 2;
+    // fixed point precision
+    int32 exponent = 3;
+    // value type
+    int32 type = 4;
+}
+
+message EncodedNumberArray {
+    repeated FixedPointEncodedNumber encoded_number = 1;
+}

@@ -43,6 +43,23 @@ std::vector<ssl_socket*> setup_sockets(int n_parties,
     int port_base);
 
 /**
+ * setup sockets to communicate with spdz parties
+ *
+ * @param n_parties: number of parties for spdz computations
+ * @param my_party_id: current party id
+ * @param player_data_path: ssl related key path
+ * @param host_names: ip addresses of the spdz parties
+ * @param port_base: port for the spdz program
+ * @param returned socket vector
+ */
+void setup_sockets(int n_parties,
+    int my_party_id,
+    std::string player_data_path,
+    std::vector<std::string> host_names,
+    int port_base,
+    std::vector<ssl_socket*>& sockets);
+
+/**
  * send public values to spdz parties (i.e., cint or cfloat)
  * currently only int vector is supported
  *

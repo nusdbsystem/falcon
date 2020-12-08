@@ -81,6 +81,9 @@ class Party {
    */
   Party(const Party& party);
 
+  /**
+   * destructor
+   */
   ~Party();
 
   /**
@@ -105,7 +108,7 @@ class Party {
    * @param id: other party id
    * @param message: sent message
    */
-  void send_message(int id, std::string message);
+  void send_message(int id, std::string message) const;
 
   /**
    * send long message via channel commParty
@@ -113,7 +116,7 @@ class Party {
    * @param id: other party id
    * @param message: sent message
    */
-  void send_long_message(int id, string message);
+  void send_long_message (int id, string message) const;
 
   /**
    * receive message from channel comm_party
@@ -123,7 +126,7 @@ class Party {
    * @param buffer: received buffer
    * @param expected_size: buffer size
    */
-  void recv_message(int id, std::string message, byte* buffer, int expected_size);
+  void recv_message(int id, std::string message, byte* buffer, int expected_size) const;
 
   /**
    * receive message from channel comm_party
@@ -131,7 +134,65 @@ class Party {
    * @param id: other party id
    * @param message: received message
    */
-  void recv_long_message(int id, std::string & message);
+  void recv_long_message (int id, std::string & message) const;
+
+  /**
+   * split local data and labels into train-test
+   *
+   * @param split_percentage: percentage of training data
+   * @param training_data: split training dataset
+   * @param testing_data: split testing dataset
+   * @param training_labels: split training labels for active party
+   * @param testing_labels: split testing labels for active party
+   */
+  void split_train_test_data(float split_percentage,
+      std::vector< std::vector<float> >& training_data,
+      std::vector< std::vector<float> >& testing_data,
+      std::vector<float>& training_labels,
+      std::vector<float>& testing_labels) const;
+
+  /**
+   * parties jointly decrypt a ciphertext vector,
+   * assume that the parties have already have the same src_ciphers.
+   * The request party obtains the decrypted plaintext while
+   * the other parties obtain nothing plaintext.
+   *
+   * @param src_ciphers: ciphertext vector to be decrypted
+   * @param dest_plains: decrypted plaintext vector
+   * @param size: size of the vector
+   * @param req_party_id: party that initiate decryption
+   */
+  void collaborative_decrypt(EncodedNumber* src_ciphers,
+      EncodedNumber* dest_plains,
+      int size, int req_party_id);
+
+  /**
+   * convert ciphertext vector to secret shares securely
+   *
+   * @param src_ciphers: ciphertext vector to be decrypted
+   * @param secret_shares: decrypted and decoded secret shares
+   * @param size: size of the vector
+   * @param req_party_id: party that initiate decryption
+   * @param phe_precision: fixed point precision when encoding
+   */
+  void ciphers_to_secret_shares(EncodedNumber* src_ciphers,
+      std::vector<float>& secret_shares,
+      int size, int req_party_id,
+      int phe_precision);
+
+  /**
+   * convert secret shares back to ciphertext vector
+   *
+   * @param dest_ciphers: ciphertext vector to be recovered
+   * @param secret_shares: secret shares received from spdz parties
+   * @param size: size of the vector
+   * @param req_party_id: party that initiate conversion
+   * @param phe_precision: ciphertext vector precision, need careful design
+   */
+  void secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
+      std::vector<float> secret_shares,
+      int size, int req_party_id,
+      int phe_precision);
 
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }

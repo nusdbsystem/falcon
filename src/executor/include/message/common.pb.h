@@ -23,8 +23,10 @@
 #include <google/protobuf/arenastring.h>
 #include <google/protobuf/generated_message_util.h>
 #include <google/protobuf/metadata.h>
+#include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/extension_set.h>
+#include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 
 namespace com {
@@ -38,17 +40,497 @@ void protobuf_AddDesc_common_2eproto();
 void protobuf_AssignDesc_common_2eproto();
 void protobuf_ShutdownFile_common_2eproto();
 
+class EncodedNumberArray;
+class FixedPointEncodedNumber;
+class IntArray;
 
 // ===================================================================
 
+class IntArray : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.IntArray) */ {
+ public:
+  IntArray();
+  virtual ~IntArray();
 
+  IntArray(const IntArray& from);
+
+  inline IntArray& operator=(const IntArray& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const IntArray& default_instance();
+
+  void Swap(IntArray* other);
+
+  // implements Message ----------------------------------------------
+
+  inline IntArray* New() const { return New(NULL); }
+
+  IntArray* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const IntArray& from);
+  void MergeFrom(const IntArray& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(IntArray* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated int32 int_item = 1;
+  int int_item_size() const;
+  void clear_int_item();
+  static const int kIntItemFieldNumber = 1;
+  ::google::protobuf::int32 int_item(int index) const;
+  void set_int_item(int index, ::google::protobuf::int32 value);
+  void add_int_item(::google::protobuf::int32 value);
+  const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+      int_item() const;
+  ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+      mutable_int_item();
+
+  // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.IntArray)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::int32 > int_item_;
+  mutable int _int_item_cached_byte_size_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_common_2eproto();
+  friend void protobuf_AssignDesc_common_2eproto();
+  friend void protobuf_ShutdownFile_common_2eproto();
+
+  void InitAsDefaultInstance();
+  static IntArray* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class FixedPointEncodedNumber : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber) */ {
+ public:
+  FixedPointEncodedNumber();
+  virtual ~FixedPointEncodedNumber();
+
+  FixedPointEncodedNumber(const FixedPointEncodedNumber& from);
+
+  inline FixedPointEncodedNumber& operator=(const FixedPointEncodedNumber& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const FixedPointEncodedNumber& default_instance();
+
+  void Swap(FixedPointEncodedNumber* other);
+
+  // implements Message ----------------------------------------------
+
+  inline FixedPointEncodedNumber* New() const { return New(NULL); }
+
+  FixedPointEncodedNumber* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const FixedPointEncodedNumber& from);
+  void MergeFrom(const FixedPointEncodedNumber& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(FixedPointEncodedNumber* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string n = 1;
+  void clear_n();
+  static const int kNFieldNumber = 1;
+  const ::std::string& n() const;
+  void set_n(const ::std::string& value);
+  void set_n(const char* value);
+  void set_n(const char* value, size_t size);
+  ::std::string* mutable_n();
+  ::std::string* release_n();
+  void set_allocated_n(::std::string* n);
+
+  // optional string value = 2;
+  void clear_value();
+  static const int kValueFieldNumber = 2;
+  const ::std::string& value() const;
+  void set_value(const ::std::string& value);
+  void set_value(const char* value);
+  void set_value(const char* value, size_t size);
+  ::std::string* mutable_value();
+  ::std::string* release_value();
+  void set_allocated_value(::std::string* value);
+
+  // optional int32 exponent = 3;
+  void clear_exponent();
+  static const int kExponentFieldNumber = 3;
+  ::google::protobuf::int32 exponent() const;
+  void set_exponent(::google::protobuf::int32 value);
+
+  // optional int32 type = 4;
+  void clear_type();
+  static const int kTypeFieldNumber = 4;
+  ::google::protobuf::int32 type() const;
+  void set_type(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::internal::ArenaStringPtr n_;
+  ::google::protobuf::internal::ArenaStringPtr value_;
+  ::google::protobuf::int32 exponent_;
+  ::google::protobuf::int32 type_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_common_2eproto();
+  friend void protobuf_AssignDesc_common_2eproto();
+  friend void protobuf_ShutdownFile_common_2eproto();
+
+  void InitAsDefaultInstance();
+  static FixedPointEncodedNumber* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class EncodedNumberArray : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.EncodedNumberArray) */ {
+ public:
+  EncodedNumberArray();
+  virtual ~EncodedNumberArray();
+
+  EncodedNumberArray(const EncodedNumberArray& from);
+
+  inline EncodedNumberArray& operator=(const EncodedNumberArray& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const EncodedNumberArray& default_instance();
+
+  void Swap(EncodedNumberArray* other);
+
+  // implements Message ----------------------------------------------
+
+  inline EncodedNumberArray* New() const { return New(NULL); }
+
+  EncodedNumberArray* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const EncodedNumberArray& from);
+  void MergeFrom(const EncodedNumberArray& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(EncodedNumberArray* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber encoded_number = 1;
+  int encoded_number_size() const;
+  void clear_encoded_number();
+  static const int kEncodedNumberFieldNumber = 1;
+  const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& encoded_number(int index) const;
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* mutable_encoded_number(int index);
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* add_encoded_number();
+  ::google::protobuf::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber >*
+      mutable_encoded_number();
+  const ::google::protobuf::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber >&
+      encoded_number() const;
+
+  // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.EncodedNumberArray)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber > encoded_number_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_common_2eproto();
+  friend void protobuf_AssignDesc_common_2eproto();
+  friend void protobuf_ShutdownFile_common_2eproto();
+
+  void InitAsDefaultInstance();
+  static EncodedNumberArray* default_instance_;
+};
 // ===================================================================
 
 
 // ===================================================================
 
 #if !PROTOBUF_INLINE_NOT_IN_HEADERS
+// IntArray
+
+// repeated int32 int_item = 1;
+inline int IntArray::int_item_size() const {
+  return int_item_.size();
+}
+inline void IntArray::clear_int_item() {
+  int_item_.Clear();
+}
+inline ::google::protobuf::int32 IntArray::int_item(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+  return int_item_.Get(index);
+}
+inline void IntArray::set_int_item(int index, ::google::protobuf::int32 value) {
+  int_item_.Set(index, value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+}
+inline void IntArray::add_int_item(::google::protobuf::int32 value) {
+  int_item_.Add(value);
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::int32 >&
+IntArray::int_item() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+  return int_item_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::int32 >*
+IntArray::mutable_int_item() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.IntArray.int_item)
+  return &int_item_;
+}
+
+// -------------------------------------------------------------------
+
+// FixedPointEncodedNumber
+
+// optional string n = 1;
+inline void FixedPointEncodedNumber::clear_n() {
+  n_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& FixedPointEncodedNumber::n() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+  return n_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void FixedPointEncodedNumber::set_n(const ::std::string& value) {
+  
+  n_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+}
+inline void FixedPointEncodedNumber::set_n(const char* value) {
+  
+  n_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+}
+inline void FixedPointEncodedNumber::set_n(const char* value, size_t size) {
+  
+  n_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+}
+inline ::std::string* FixedPointEncodedNumber::mutable_n() {
+  
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+  return n_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* FixedPointEncodedNumber::release_n() {
+  // @@protoc_insertion_point(field_release:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+  
+  return n_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void FixedPointEncodedNumber::set_allocated_n(::std::string* n) {
+  if (n != NULL) {
+    
+  } else {
+    
+  }
+  n_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), n);
+  // @@protoc_insertion_point(field_set_allocated:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.n)
+}
+
+// optional string value = 2;
+inline void FixedPointEncodedNumber::clear_value() {
+  value_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& FixedPointEncodedNumber::value() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+  return value_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void FixedPointEncodedNumber::set_value(const ::std::string& value) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+}
+inline void FixedPointEncodedNumber::set_value(const char* value) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+}
+inline void FixedPointEncodedNumber::set_value(const char* value, size_t size) {
+  
+  value_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+}
+inline ::std::string* FixedPointEncodedNumber::mutable_value() {
+  
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+  return value_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* FixedPointEncodedNumber::release_value() {
+  // @@protoc_insertion_point(field_release:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+  
+  return value_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void FixedPointEncodedNumber::set_allocated_value(::std::string* value) {
+  if (value != NULL) {
+    
+  } else {
+    
+  }
+  value_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set_allocated:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.value)
+}
+
+// optional int32 exponent = 3;
+inline void FixedPointEncodedNumber::clear_exponent() {
+  exponent_ = 0;
+}
+inline ::google::protobuf::int32 FixedPointEncodedNumber::exponent() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.exponent)
+  return exponent_;
+}
+inline void FixedPointEncodedNumber::set_exponent(::google::protobuf::int32 value) {
+  
+  exponent_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.exponent)
+}
+
+// optional int32 type = 4;
+inline void FixedPointEncodedNumber::clear_type() {
+  type_ = 0;
+}
+inline ::google::protobuf::int32 FixedPointEncodedNumber::type() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.type)
+  return type_;
+}
+inline void FixedPointEncodedNumber::set_type(::google::protobuf::int32 value) {
+  
+  type_ = value;
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber.type)
+}
+
+// -------------------------------------------------------------------
+
+// EncodedNumberArray
+
+// repeated .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber encoded_number = 1;
+inline int EncodedNumberArray::encoded_number_size() const {
+  return encoded_number_.size();
+}
+inline void EncodedNumberArray::clear_encoded_number() {
+  encoded_number_.Clear();
+}
+inline const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& EncodedNumberArray::encoded_number(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return encoded_number_.Get(index);
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* EncodedNumberArray::mutable_encoded_number(int index) {
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return encoded_number_.Mutable(index);
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* EncodedNumberArray::add_encoded_number() {
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return encoded_number_.Add();
+}
+inline ::google::protobuf::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber >*
+EncodedNumberArray::mutable_encoded_number() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return &encoded_number_;
+}
+inline const ::google::protobuf::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber >&
+EncodedNumberArray::encoded_number() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.EncodedNumberArray.encoded_number)
+  return encoded_number_;
+}
+
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 
 // @@protoc_insertion_point(namespace_scope)
 

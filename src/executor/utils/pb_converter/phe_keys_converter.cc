@@ -46,7 +46,7 @@ void deserialize_phe_keys(djcs_t_public_key* phe_pub_key,
     std::string input_message) {
   com::nus::dbsystem::falcon::v0::PHEKeys deserialized_phe_keys;
   if (!deserialized_phe_keys.ParseFromString(input_message)) {
-    LOG(INFO) << "Deserialize phe keys message failed.";
+    LOG(ERROR) << "Deserialize phe keys message failed.";
     return;
   }
   // set public key

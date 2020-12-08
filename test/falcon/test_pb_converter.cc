@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <falcon/utils/pb_converter/model_converter.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
+#include <falcon/utils/pb_converter/common_converter.h>
 
 TEST(PB_Converter, ModelPublishRequest) {
   int model_id = 1;
@@ -110,6 +111,107 @@ TEST(PB_Converter, PHEKeys) {
   }
   free(si);
   free(phe_auth_server);
+}
+
+TEST(PB_Converter, IntArray) {
+  // generate int array
+  std::vector<int> vec;
+  vec.push_back(3);
+  vec.push_back(1);
+  vec.push_back(4);
+  vec.push_back(5);
+  vec.push_back(2);
+  std::string output_message;
+  serialize_int_array(vec, output_message);
+
+  std::vector<int> deserialized_vec;
+  deserialize_int_array(deserialized_vec, output_message);
+
+  // check equality
+  for (int i = 0; i < 5; i++) {
+    EXPECT_EQ(vec[i], deserialized_vec[i]);
+  }
+}
+
+TEST(PB_Converter, FixedPointEncodedNumber) {
+  mpz_t v_n;
+  mpz_t v_value;
+  mpz_init(v_n);
+  mpz_init(v_value);
+  mpz_set_str(v_n, "100000000000000", 10);
+  mpz_set_str(v_value, "100", 10);
+  int v_exponent = -8;
+  EncodedNumberType v_type = Ciphertext;
+
+  EncodedNumber number;
+  number.setter_n(v_n);
+  number.setter_value(v_value);
+  number.setter_exponent(v_exponent);
+  number.setter_type(v_type);
+
+  std::string output_message;
+  serialize_encoded_number(number, output_message);
+  EncodedNumber deserialized_number;
+  deserialize_encoded_number(deserialized_number, output_message);
+
+  mpz_t deserialized_n, deserialized_value;
+  mpz_init(deserialized_n);
+  mpz_init(deserialized_value);
+  deserialized_number.getter_n(deserialized_n);
+  deserialized_number.getter_value(deserialized_value);
+  int n_cmp = mpz_cmp(v_n, deserialized_n);
+  int value_cmp = mpz_cmp(v_value, deserialized_value);
+
+  EXPECT_EQ(0, n_cmp);
+  EXPECT_EQ(0, value_cmp);
+  EXPECT_EQ(v_exponent, deserialized_number.getter_exponent());
+  EXPECT_EQ(v_type, deserialized_number.getter_type());
+
+  mpz_clear(v_n);
+  mpz_clear(v_value);
+  mpz_clear(deserialized_n);
+  mpz_clear(deserialized_value);
+}
+
+TEST(PB_Converter, EncodedNumberArray) {
+  EncodedNumber* encoded_number_array = new EncodedNumber[3];
+  mpz_t v_n;
+  mpz_t v_value;
+  mpz_init(v_n);
+  mpz_init(v_value);
+  mpz_set_str(v_n, "100000000000000", 10);
+  mpz_set_str(v_value, "100", 10);
+  int v_exponent = -8;
+  EncodedNumberType v_type = Ciphertext;
+  for (int i = 0; i < 3; i++) {
+    encoded_number_array[i].setter_n(v_n);
+    encoded_number_array[i].setter_value(v_value);
+    encoded_number_array[i].setter_exponent(v_exponent);
+    encoded_number_array[i].setter_type(v_type);
+  }
+
+  std::string out_message;
+  serialize_encoded_number_array(encoded_number_array, 3, out_message);
+  EncodedNumber* deserialized_number_array = new EncodedNumber[3];
+  deserialize_encoded_number_array(deserialized_number_array, 3, out_message);
+
+  for (int i = 0; i < 3; i++) {
+    mpz_t deserialized_n, deserialized_value;
+    mpz_init(deserialized_n);
+    mpz_init(deserialized_value);
+    deserialized_number_array[i].getter_n(deserialized_n);
+    deserialized_number_array[i].getter_value(deserialized_value);
+    int n_cmp = mpz_cmp(v_n, deserialized_n);
+    int value_cmp = mpz_cmp(v_value, deserialized_value);
+    EXPECT_EQ(0, n_cmp);
+    EXPECT_EQ(0, value_cmp);
+    EXPECT_EQ(v_exponent, deserialized_number_array[i].getter_exponent());
+    EXPECT_EQ(v_type, deserialized_number_array[i].getter_type());
+    mpz_clear(deserialized_n);
+    mpz_clear(deserialized_value);
+  }
+  mpz_clear(v_n);
+  mpz_clear(v_value);
 }
 
 
