@@ -10,16 +10,19 @@
 #include "falcon/network/Comm.hpp"
 #include "falcon/party/party.h"
 #include "falcon/operator/mpc/spdz_connector.h"
+#include "falcon/algorithm/vertical/linear_model/logistic_regression.h"
 
 #include <glog/logging.h>
 
 using namespace boost;
 
+falcon::AlgorithmName parse_algorithm_name(const std::string& name);
+
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
 
   int party_id, party_num, party_type, fl_setting, use_existing_key;
-  std::string network_file, log_file, data_file, key_file;
+  std::string network_file, log_file, data_file, key_file, algorithm_name;
 
   try {
     namespace po = boost::program_options;
@@ -35,7 +38,8 @@ int main(int argc, char *argv[]) {
         ("log-file", po::value<std::string>(&log_file), "file name of log destination")
         ("data-file", po::value<std::string>(&data_file), "file name of dataset")
         ("existing-key", po::value<int>(&use_existing_key), "whether use existing phe keys")
-        ("key-file", po::value<std::string>(&key_file), "file name of phe keys");
+        ("key-file", po::value<std::string>(&key_file), "file name of phe keys")
+        ("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run");
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
@@ -56,6 +60,7 @@ int main(int argc, char *argv[]) {
     std::cout << "log-file: " << vm["log-file"].as< std::string >() << std::endl;
     std::cout << "data-file: " << vm["data-file"].as< std::string >() << std::endl;
     std::cout << "key-file: " << vm["key-file"].as< std::string >() << std::endl;
+    std::cout << "algorithm-name: " << vm["algorithm-name"].as< std::string >() << std::endl;
   }
   catch(std::exception& e)
   {
@@ -75,6 +80,7 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "log_file: " << log_file;
   LOG(INFO) << "data_file: " << data_file;
   LOG(INFO) << "key_file: " << key_file;
+  LOG(INFO) << "algorithm_name: " << algorithm_name;
 
   Party party(party_id, party_num,
       static_cast<falcon::PartyType>(party_type),
@@ -84,43 +90,29 @@ int main(int argc, char *argv[]) {
       use_existing_key,
       key_file);
 
-//  bigint::init_thread();
-//  std::vector<std::string> hosts;
-//  hosts.push_back("localhost");
-//  hosts.push_back("localhost");
-//  hosts.push_back("localhost");
-//  std::string path = "/home/wuyuncheng/Documents/falcon/third_party/MP-SPDZ/Player-Data/";
-//  std::vector<ssl_socket*> sockets = setup_sockets(party_num, party_id,
-//      path, hosts, 14000);
-//  // Map inputs into gfp
-//  int size = 10;
-//  vector<float> shares(size);
-//  for (int i = 0; i < size; i++) {
-//    shares[i] = party_id * 0.1 + i * (-0.1) + 0.0;
-//    cout << "shares[" << i << "] = " << shares[i] << endl;
-//  }
-//
-//  cout << "Finish prepare secret shares " << endl;
-//
-//  // Run the computation
-//  send_private_inputs<float>(shares,sockets, party_num);
-//
-//  // Get the result back (client_id of winning client)
-//  vector<float> result = receive_result(sockets, party_num, size);
-//
-//  cout << "result = ";
-//  for (int i = 0; i < size; i++) {
-//    cout << result[i] << ",";
-//  }
-//  cout << endl;
-//
-//  for (int i = 0; i < party_num; i++)
-//  {
-//    cout << "delete socket " << i << endl;
-//    delete sockets[i];
-//  }
-//
-//  cout << "delete finished" << endl;
+  LOG(INFO) << "Parse algorithm name and run the program";
+  std::cout << "Parse algorithm name and run the program" << std::endl;
+
+  falcon::AlgorithmName name = parse_algorithm_name(algorithm_name);
+  std::string algorithm_params;
+  switch(name) {
+    case falcon::LR:
+      train_logistic_regression(party, algorithm_params);
+      break;
+    case falcon::DT:
+      LOG(INFO) << "Decision Tree algorithm is not supported now.";
+      break;
+    default:
+      train_logistic_regression(party, algorithm_params);
+      break;
+  }
+
+  std::cout << "Finish algorithm " << std::endl;
 
   return 0;
+}
+
+falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
+  if ("logistic_regression" == name) return falcon::LR;
+  if ("decision_tree" == name) return falcon::DT;
 }

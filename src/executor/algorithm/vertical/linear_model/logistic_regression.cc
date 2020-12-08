@@ -201,7 +201,7 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
   delete [] local_batch_phe_aggregation;
 }
 
-void LogisticRegression::update_encrypted_weights(Party party,
+void LogisticRegression::update_encrypted_weights(Party& party,
     std::vector<float> batch_loss_shares,
     std::vector<float> truncated_weight_shares,
     std::vector<int> batch_indexes,
@@ -288,7 +288,7 @@ void LogisticRegression::train(Party party) {
   ///     2.6 update encrypted local weights carefully
   /// 3. decrypt weights ciphertext
 
-  // step 1: init encrypted local weights (here use 2*prec for consistence in the following)
+  // step 1: init encrypted local weights (here use 2 * precision for consistence in the following)
   int encrypted_weights_precision = 2 * PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
   init_encrypted_weights(party, encrypted_weights_precision);
@@ -299,14 +299,20 @@ void LogisticRegression::train(Party party) {
     data_indexes.push_back(i);
   }
 
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+
   // step 2: iteratively computation
   for (int iter = 0; iter < max_iteration; iter++) {
     LOG(INFO) << "-------- Iteration " << iter << " --------";
+    std::cout << "-------- Iteration " << iter << " --------" << std::endl;
     const clock_t iter_start_time = clock();
 
     // step 2.1: randomly select a batch of samples
     std::vector<int> batch_indexes = select_batch_idx(party, data_indexes);
     int cur_batch_size = batch_indexes.size();
+
+    std::cout << "step 2.1 success" << std::endl;
 
     // step 2.2: homomorphic batch aggregation (the precision should be 3 * prec now)
     EncodedNumber* encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
@@ -314,6 +320,8 @@ void LogisticRegression::train(Party party) {
         batch_indexes,
         plaintext_samples_precision,
         encrypted_batch_aggregation);
+
+    std::cout << "step 2.2 success" << std::endl;
 
     // step 2.3: convert the encrypted batch aggregation into secret shares
     int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
@@ -324,18 +332,31 @@ void LogisticRegression::train(Party party) {
         0,
         encrypted_batch_aggregation_precision);
 
+    std::cout << "step 2.3 success" << std::endl;
+
     // step 2.4: connect to spdz parties for mpc computation
     std::string mpc_player_path = SPDZ_PLAYER_PATH;
     int mpc_port_base = SPDZ_PORT_BASE;
-    std::vector<ssl_socket*> mpc_sockets = setup_sockets(party.party_num,
+    std::vector<ssl_socket*> mpc_sockets(party.party_num);
+//    std::vector<ssl_socket*> mpc_sockets = setup_sockets(party.party_num,
+//        party.party_id,
+//        mpc_player_path,
+//        party.host_names,
+//        mpc_port_base);
+    setup_sockets(party.party_num,
         party.party_id,
         mpc_player_path,
         party.host_names,
-        mpc_port_base);
+        mpc_port_base,
+        mpc_sockets);
     send_private_inputs(batch_aggregation_shares,mpc_sockets, party.party_num);
+
+    std::cout << "step 2.4 success" << std::endl;
 
     // step 2.5: receive mpc computation results and aggregate
     std::vector<float> batch_loss_shares = receive_result(mpc_sockets, party.party_num, cur_batch_size);
+
+    std::cout << "step 2.5 success" << std::endl;
 
     // step 2.6: update encrypted local weights
     // TODO: currently does not support with_regularization
@@ -348,6 +369,8 @@ void LogisticRegression::train(Party party) {
         batch_indexes,
         update_precision);
 
+    std::cout << "step 2.6 success" << std::endl;
+
     // free memory and close mpc_sockets
     for (int i = 0; i < party.party_num; i++) {
       delete mpc_sockets[i];
@@ -357,10 +380,73 @@ void LogisticRegression::train(Party party) {
     const clock_t iter_finish_time = clock();
     float iter_consumed_time = float(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
     LOG(INFO) << "-------- The " << iter << "-th iteration consumed time = " << iter_consumed_time << " --------";
+    std::cout << "-------- The " << iter << "-th iteration consumed time = " << iter_consumed_time << " --------" << std::endl;
   }
 
   const clock_t training_finish_time = clock();
   float training_consumed_time = float(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
   LOG(INFO) << "Training time = " << training_consumed_time;
   LOG(INFO) << "************* Training Finished *************";
+  google::FlushLogFiles(google::INFO);
+}
+
+void train_logistic_regression(Party party, std::string params) {
+
+  LOG(INFO) << "Run the example logistic regression train";
+  std::cout << "Run the example logistic regression train" << std::endl;
+
+  // TODO: Parse the params and match with the LogisticRegression parameters
+  // currently for testing
+  int batch_size = 32;
+  int max_iteration = 2;
+  float converge_threshold = 1e-3;
+  bool with_regularization = false;
+  float alpha = 0.1;
+  float learning_rate = 0.05;
+  float decay = 1.0;
+  std::string penalty = "l2";
+  std::string optimizer = "sgd";
+  std::string multi_class = "ovr";
+  std::string metric = "acc";
+  int weight_size = party.getter_feature_num();
+  float training_accuracy = 0.0;
+  float testing_accuracy = 0.0;
+
+  std::vector< std::vector<float> > training_data;
+  std::vector< std::vector<float> > testing_data;
+  std::vector<float> training_labels;
+  std::vector<float> testing_labels;
+  float split_percentage = 0.8;
+  party.split_train_test_data(split_percentage,
+      training_data,
+      testing_data,
+      training_labels,
+      testing_labels);
+
+  LOG(INFO) << "Init logistic regression model";
+  std::cout << "Init logistic regression model" << std::endl;
+
+  LogisticRegression model(batch_size,
+      max_iteration,
+      converge_threshold,
+      with_regularization,
+      alpha,
+      learning_rate,
+      decay,
+      weight_size,
+      penalty,
+      optimizer,
+      multi_class,
+      metric,
+      training_data,
+      testing_data,
+      training_labels,
+      testing_labels,
+      training_accuracy,
+      testing_accuracy);
+
+  LOG(INFO) << "Init model success";
+  std::cout << "Init model success" << std::endl;
+
+  model.train(party);
 }

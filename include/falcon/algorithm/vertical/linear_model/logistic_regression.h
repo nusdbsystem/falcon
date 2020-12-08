@@ -131,7 +131,7 @@ class LogisticRegression : public Model {
    * @param batch_indexes: selected batch indexes
    * @param precision: precision for the batch samples and shares
    */
-  void update_encrypted_weights(Party party,
+  void update_encrypted_weights(Party& party,
       std::vector<float> batch_loss_shares,
       std::vector<float> truncated_weight_shares,
       std::vector<int> batch_indexes,
@@ -144,5 +144,7 @@ class LogisticRegression : public Model {
    */
   void train(Party party);
 };
+
+void train_logistic_regression(Party party, std::string params);
 
 #endif //FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_H_

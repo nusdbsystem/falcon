@@ -62,6 +62,8 @@ Party::Party(int m_party_id,
     ips[i] = config_file.Value("", ip_string);
   }
 
+  LOG(INFO) << "Establish network communications with other parties";
+
   // establish communication connections
   SocketPartyData me, other;
   for (int  i = 0;  i < party_num; ++ i) {
@@ -93,6 +95,8 @@ Party::Party(int m_party_id,
   }
 
   host_names = ips;
+
+  LOG(INFO) << "Init threshold partially homomorphic encryption keys";
 
   // init phe keys: if use existing key, read key file
   // otherwise, generate keys and broadcast to others
@@ -312,7 +316,7 @@ void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
       if (id == party_id) {
         // copy self partially decrypted shares
         for (int i = 0; i < size; i++) {
-          decryption_shares[id][i] = partial_decryption[i];
+          decryption_shares[i][id] = partial_decryption[i];
         }
       } else {
         std::string recv_partial_decryption_str;
@@ -322,7 +326,7 @@ void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
             size, recv_partial_decryption_str);
         // copy other party's decrypted shares
         for (int i = 0; i < size; i++) {
-          decryption_shares[id][i] = recv_partial_decryption[i];
+          decryption_shares[i][id] = recv_partial_decryption[i];
         }
         delete [] recv_partial_decryption;
       }
@@ -330,7 +334,7 @@ void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
 
     // share combine for decryption
     for (int i = 0; i < size; i++) {
-      djcs_t_aux_share_combine(phe_pub_key, dest_plains[i], decryption_shares[i], size);
+      djcs_t_aux_share_combine(phe_pub_key, dest_plains[i], decryption_shares[i], party_num);
     }
 
     // free memory
@@ -407,11 +411,9 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
     recv_long_message(req_party_id, recv_aggregated_shares_str);
     deserialize_encoded_number_array(aggregated_shares, size, recv_aggregated_shares_str);
   }
-
   // collaborative decrypt the aggregated shares
   EncodedNumber* decrypted_sum = new EncodedNumber[size];
   collaborative_decrypt(aggregated_shares, decrypted_sum, size, req_party_id);
-
   // if request party, add the decoded results to the secret shares
   if (party_id == req_party_id) {
     for (int i = 0; i < size; i++) {
