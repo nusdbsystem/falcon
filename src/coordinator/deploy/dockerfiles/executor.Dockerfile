@@ -17,12 +17,15 @@ RUN apt-get -y install curl bzip2 \
 
 ENV PATH /usr/local/envs/falconenv/bin:$PATH
 RUN pip install --upgrade pip
-ENV PYTHONUNBUFFERED 1
 
 # remove the cahce, == "python -u"
 ENV PYTHONUNBUFFERED 1
 
 COPY bin/coordinator_server ./coordinator_server
+
+COPY testggg.go ./testggg.go
+COPY falcon_ml/preprocessing.py ./preprocessing.py
+
 ADD deploy ./deploy
 ADD scripts ./scripts
 RUN chmod -R 777 ./deploy && chmod -R 777 ./scripts

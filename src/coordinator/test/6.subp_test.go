@@ -14,8 +14,8 @@ func TestSubProc(t *testing.T) {
 	//dir := "/Users/nailixing/GOProj/src/coordinator/falcon_ml"
 	dir:=""
 	stdIn := "input from keyboard"
-	commend := "docker"
-	args := []string{"image ls"}
+	commend := "python"
+	args := []string{"/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml/preprocessing.py"}
 	envs := []string{}
 
 	pm := taskmanager.InitSubProcessManager()
@@ -28,7 +28,7 @@ func TestSubProc(t *testing.T) {
 	//	pm.IsStop <-true
 	//}()
 
-	killed, e, el, ol := pm.ExecuteSubProc2(dir, stdIn, commend, args, envs)
+	killed, e, el, ol := pm.ExecuteSubProc(dir, stdIn, commend, args, envs)
 	logger.Do.Println(killed, e, el, ol)
 
 	//logger.Do.Println("Worker:task model training start")

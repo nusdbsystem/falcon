@@ -1,8 +1,9 @@
 package models
 
-func (ms *MetaStore) ListenerAdd(ListenerAddr string) (error, *Listeners) {
+func (ms *MetaStore) ListenerAdd(ListenerAddr, Port string) (error, *Listeners) {
 	u := &Listeners{
 		ListenerAddr: ListenerAddr,
+		Port: Port,
 	}
 
 	err := ms.Db.Create(u).Error
@@ -11,7 +12,15 @@ func (ms *MetaStore) ListenerAdd(ListenerAddr string) (error, *Listeners) {
 
 func (ms *MetaStore) ListenerDelete(ListenerAddr string) error {
 
-	e := ms.Db.Where("listener_add = ?", ListenerAddr).Delete(Listeners{}).Error
+	e := ms.Db.Where("listener_addr = ?", ListenerAddr).Delete(Listeners{}).Error
 
 	return e
+}
+
+
+func (ms *MetaStore) ListenerGet(ListenerAddr string) (error, *Listeners) {
+
+	u := &Listeners{}
+	err := ms.Db.Where("listener_addr = ?", ListenerAddr).First(u).Error
+	return err, u
 }

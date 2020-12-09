@@ -25,11 +25,15 @@ spec:
       imagePullPolicy: IfNotPresent
       env:
         - name: MASTER_URL
-          value: "MASTER_ADDR"
-        - name: EXECUTOR
-          value: "EXECUTOR_TYPE"
+          value: "MASTER_URL_PLACEHOLDER"
+        - name: SERVICE_NAME
+          value: "SERVICE_NAME_PLACEHOLDER"
+        - name: EXECUTOR_TYPE
+          value: "EXECUTOR_TYPE_PLACEHOLDER"
         - name: WORKER_URL
           value: "WORKER_URL_PLACEHOLDER"
+        - name: Env
+          value: "Env_PLACEHOLDER"
       ports:
         - containerPort: WORKER_TARGET_PORT  #这里containerPort是容器内部的port
           name: "port-WORKER_TARGET_PORT"  # .ports[0].name: Invalid value: "train-8490548680670953438": must be no more than 15 characters

@@ -14,7 +14,7 @@ func GetLogger(fileName string) (*log.Logger,*os.File) {
 
 	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
-		log.Println("Fail to find", fileName, "cServer start Failed")
+		log.Println("Fail to find", fileName, "GetLogger start Failed")
 		os.Exit(1)
 	}
 

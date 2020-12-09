@@ -15,8 +15,6 @@ import (
  * @return
  **/
 
-var RedisClient = initRedisClient()
-
 
 type RedisSession struct {
 	
@@ -24,7 +22,7 @@ type RedisSession struct {
 		 ctx    context.Context
 }
 
-func initRedisClient() *RedisSession {
+func InitRedisClient() *RedisSession {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     common.RedisHost + ":" + common.RedisPort,
 		Password: common.RedisPwd, // no password set

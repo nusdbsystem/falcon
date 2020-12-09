@@ -53,7 +53,7 @@ func SetupDist(qItem *cache.QItem, taskType string) {
 		// put to the queue, assign key to env
 		logger.Do.Println("SetupDist: Writing item to redis")
 
-		cache.RedisClient.Set(itemKey, cache.Serialize(qItem))
+		cache.InitRedisClient().Set(itemKey, cache.Serialize(qItem))
 
 		logger.Do.Printf("SetupDist: Get key, %s InitK8sManager\n", itemKey)
 
@@ -66,6 +66,9 @@ func SetupDist(qItem *cache.QItem, taskType string) {
 			itemKey,
 			taskType,
 			masterAddress,
+			common.MasterExecutor,
+			common.CoordSvcName,
+			common.Env,
 		}
 
 		//_=taskmanager.ExecuteOthers("ls")
@@ -107,7 +110,7 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 	 **/
 	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddress, taskType)
 
-	workerPort := c.GetFreePort(common.CoordURLGlobal)
+	workerPort := c.GetFreePort(common.CoordSvcURLGlobal)
 
 	workerAddress := common.ListenAddrGlobal + ":" + workerPort
 
@@ -145,6 +148,8 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 			masterAddress,
 			taskType,
 			workerAddress,
+			taskType,
+			common.Env,
 		}
 
 		_=taskmanager.ExecuteOthers("ls")
@@ -184,13 +189,19 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 	}
 
 	// master will call lister's endpoint to launch worker, to train or predict
+	logger.Do.Println("SetupDist: master begin to call listeners:...")
 	for _, ip := range qItem.IPs {
 
 		// Launch the worker
 		// maybe check table wit ip, and + port got from table also
 
 		// send a request to http
-		c.SetupWorker(ip+":"+common.ListenerPort, masterAddress, taskType)
+		logger.Do.Printf("SetupDist: current listener's ip: %s ...\n", ip)
+		lisPort := c.GetExistPort(common.CoordSvcURLGlobal, ip)
+
+		logger.Do.Printf("SetupDist: master is calling listener: %s ...\n", ip+":" + lisPort)
+
+		c.SetupWorker(ip+":" + lisPort, masterAddress, taskType)
 	}
 
 	logger.Do.Printf("SetupDist: master is running at %s ... waiting\n", masterAddress)

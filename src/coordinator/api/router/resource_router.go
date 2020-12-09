@@ -3,8 +3,11 @@ package router
 import (
 	"coordinator/api/controller"
 	"coordinator/api/entity"
+	"coordinator/client"
+	"coordinator/common"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 func AssignPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
@@ -17,3 +20,13 @@ func AssignPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 }
 
+func AddPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
+	client.ReceiveForm(r)
+
+	port := r.FormValue(common.AddPort)
+
+	Port, _:= strconv.Atoi(port)
+
+	controller.AddPort(uint(Port),ctx)
+
+}

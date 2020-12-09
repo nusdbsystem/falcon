@@ -27,16 +27,20 @@ spec:
       - configMapRef: # must specify one of: `configMapRef` or `secretRef`
           name: redis-envs
       env:
-        - name: QItem
-          value: "ITEMKEY"  # must have ""
-        - name: EXECUTOR
-          value: "EXECUTOR_TYPE"
-        - name: ISMASTER
-          value: "true"
-        - name: CoordSvcName
-          value: "COORD_SVC_NAME"
+        - name: ITEM_KEY
+          value: "ITEM_KEY_PLACEHOLDER"  # must have ""
+        - name: EXECUTOR_TYPE
+          value: "EXECUTOR_TYPE_PLACEHOLDER"
+        - name: SERVICE_NAME
+          value: "SERVICE_NAME_PLACEHOLDER"
+        - name: COORD_SVC_NAME
+          value: "COORD_SVC_NAME_PLACEHOLDER"
         - name: MASTER_URL
           value: "MASTER_URL_PLACEHOLDER"
+        - name: COORD_TARGET_PORT
+          value: "COORD_TARGET_PORT_PLACEHOLDER"
+        - name: Env
+          value: "Env_PLACEHOLDER"
       ports:
         - containerPort: MASTER_TARGET_PORT  #这里containerPort是容器内部的port
           name: MASTER_NAME

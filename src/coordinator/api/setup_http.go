@@ -34,6 +34,7 @@ func SetupHttp(nConsumer int) {
 	mux.HandleFunc("/"+common.Register, md.AddRouter(rt.UserRegister, http.MethodPost))
 	mux.HandleFunc("/"+common.ListenerAdd, md.AddRouter(rt.ListenerAdd, http.MethodPost))
 	mux.HandleFunc("/"+common.ListenerDelete, md.AddRouter(rt.ListenerDelete, http.MethodPost))
+	mux.HandleFunc("/"+common.GetListenerPort, md.AddRouter(rt.GetListenerPort, http.MethodGet))
 
 	// model serving
 	mux.HandleFunc("/"+common.ModelUpdate, md.AddRouter(rt.ModelUpdate, http.MethodPost))
@@ -44,6 +45,7 @@ func SetupHttp(nConsumer int) {
 	// resource
 
 	mux.HandleFunc("/"+common.AssignPort, md.AddRouter(rt.AssignPort, http.MethodGet))
+	mux.HandleFunc("/"+common.AddPort, md.AddRouter(rt.AddPort, http.MethodPost))
 
 	server := &http.Server{
 		Addr:    "0.0.0.0:" + common.CoordPort,

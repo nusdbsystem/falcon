@@ -1,6 +1,7 @@
 package common
 
 import (
+	"coordinator/logger"
 	"fmt"
 	"os"
 )
@@ -38,6 +39,8 @@ const (
 	UpdateModelServiceStatus  = "update-prediction-status"
 
 	AssignPort  = "port-assign"
+	AddPort  = "portadd"
+	GetListenerPort  = "port-get"
 
 	ListenerAdd    = "listener-add"
 	ListenerDelete = "listener-del"
@@ -48,6 +51,7 @@ const (
 	// shared key of map
 	ListenerAddr = "listenerAddress"
 	MasterAddr   = "masterAddress"
+	ListenerPortKey = "listenerPort"
 
 	JobId      = "job_id"
 	JobErrMsg  = "error_msg"
@@ -83,6 +87,7 @@ const (
 	JobFailed     = 3
 	JobKilled     = 4
 
+	MasterExecutor = "master"
 	TrainExecutor = "train"
 	PredictExecutor = "predict"
 
@@ -103,63 +108,86 @@ var (
 	//////////////////////////////////////////////////////////////////////////
 
 	// MetaStore and Database Configs
-	MsEngine       = GetEnv("MS_ENGINE", "sqlite3")
-	MsSqliteDb     = GetEnv("MS_SQLITE_DB", "falcon")
-	MsHost         = GetEnv("MS_HOST","localhost")
-	MsMysqlUser    = GetEnv("MS_MYSQL_USER", "falcon")
-	MsMysqlPwd     = GetEnv("MS_MYSQL_PWD", "falcon")
-	MsMysqlDb      = GetEnv("MS_MYSQL_DB", "falcon")
-	MsMysqlOptions = GetEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
+	MsEngine       = ""
+	MsSqliteDb     = ""
+	MsHost         = ""
+	MsMysqlUser    = ""
+	MsMysqlPwd     = ""
+	MsMysqlDb      = ""
+	MsMysqlOptions = ""
 
 	// find the cluster port, call internally
-	MsMysqlPort    = GetEnv("MYSQL_CLUSTER_PORT", "30000")
+	MsMysqlPort    = ""
 
 	// redis
-	RedisHost      = GetEnv("REDIS_HOST","localhost")
-	RedisPwd       = GetEnv("REDIS_PWD", "falcon")
+	RedisHost      = ""
+	RedisPwd       = ""
 
 	// find the cluster port, call internally
-	RedisPort       = GetEnv("REDIS_CLUSTER_PORT", "30002")
+	RedisPort       = ""
 
-	MsMysqlNodePort    = GetEnv("MYSQL_NODE_PORT", "30001")
-	RedisNodePort    = GetEnv("REDIS_NODE_PORT", "30003")
+	MsMysqlNodePort = ""
+	RedisNodePort    = ""
 
 	// sys port, here COORD_TARGET_PORT must equal to
-	CoordPort   = GetEnv("COORD_TARGET_PORT", "30004")
-	ListenerPort = GetEnv("LISTENER_TARGET_PORT", "30005")
+	CoordPort   = ""
+	ListenerPort = ""
 
 	// envs
-	Env = GetEnv("Env",DevEnv)
+	Env = getEnv("Env", DevEnv)
 
 	// those are init by user
-	ServiceNameGlobal = GetEnv("SERVICE_NAME", "")
-	CoordAddrGlobal = GetEnv("COORDINATOR_IP", "")
-	ListenAddrGlobal = GetEnv("LISTENER_IP", "")
+	ServiceNameGlobal = getEnv("SERVICE_NAME", "coord")
+	CoordAddrGlobal = ""
+	ListenAddrGlobal = ""
 
 	// those are init by coordinator
-	ExecutorTypeGlobal = GetEnv("EXECUTOR", "")
-	WorkerURLGlobal = GetEnv("WORKER_URL", "")
-	MasterURLGlobal = GetEnv("MASTER_URL", "")
+	ExecutorTypeGlobal = ""
+	WorkerURLGlobal = ""
+	MasterURLGlobal = ""
 
 	// this is ip + port
-	CoordURLGlobal = CoordAddrGlobal + ":" + CoordPort
-	ListenURLGlobal = ListenAddrGlobal + ":" + ListenerPort
+	ListenURLGlobal = ""
 
 	// enable other service access master with clusterIp+clusterPort, from inside the cluster
-	CoordSvcName = GetEnv("CoordSvcName", "")
+	CoordSvcName = ""
 
 	// for coord, node port is the same as cluster port, so all use coorport
 	// this is service name + port
-	CoordSvcURLGlobal = getCoordUrl()
+	CoordSvcURLGlobal = ""
 
-	MasterQItem = GetEnv("QItem", "")
-	ISMASTER = GetEnv("ISMASTER", "false")
+	MasterQItem = ""
 
 	//DATA_BASE_PATH = GetEnv("DATA_BASE_PATH", "./")
 )
 
 // GetEnv get key environment variable if exist otherwise return defalutValue
 func GetEnv(key, defaultValue string) string {
+	/**
+	 * @Author
+	 * @Description init the runtime env,
+	 * @Date 1:33 下午 9/12/20
+	 * @Param
+	 * @return
+	 **/
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, Set to default, key: %s, default: %s >>>>>>>>>>>>>\n",key, defaultValue)
+		return defaultValue
+	}
+	logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
+	return value
+}
+
+
+func getEnv(key, defaultValue string) string {
+	/**
+	 * @Author
+	 * @Description init the base env, for env and serviceName
+	 * @Date 1:32 下午 9/12/20
+	 * @Param
+	 * @return
+	 **/
 	value := os.Getenv(key)
 	if len(value) == 0 {
 		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, Set to default, key: %s, default: %s >>>>>>>>>>>>>\n",key, defaultValue)
@@ -167,20 +195,5 @@ func GetEnv(key, defaultValue string) string {
 	}
 	fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
 	return value
-}
-
-
-func getCoordUrl() string{
-	if Env==ProdEnv || CoordSvcName!=""{
-		// using service name+ port to connect to coord
-		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordSvcURLGlobal, value: %s >>>>>>>>>>>>>\n", CoordSvcName + ":" + CoordPort)
-		return CoordSvcName + ":" + CoordPort
-	}
-	if Env==DevEnv || CoordSvcName==""{
-		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordSvcURLGlobal, value: %s >>>>>>>>>>>>>\n", CoordURLGlobal)
-		// using  ip+ port to connect to coord
-		return CoordURLGlobal
-	}
-	panic("No CoordSvcURLGlobal assigned, master may not connect to coordinator")
 }
 

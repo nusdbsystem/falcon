@@ -4,10 +4,14 @@ import (
 	"coordinator/common"
 	"fmt"
 	"net/url"
+	"strings"
 )
 
-func ListenerAdd(ServerAddress, listenerAddr string) {
-	data := url.Values{common.ListenerAddr: {listenerAddr}}
+func ListenerAdd(ServerAddress, listenerAddr, listenerPort string) {
+	data := url.Values{
+		common.ListenerAddr: {listenerAddr},
+		common.ListenerPortKey: {listenerPort},
+		}
 
 	reqUrl := ServerAddress + "/" + common.ListenerAdd
 
@@ -110,8 +114,43 @@ func JobGetStatus(ServerAddr string, jobId uint) uint {
 func GetFreePort(ServerAddr string) string{
 
 	reqUrl := ServerAddr + "/" + common.AssignPort
-
+	reqUrl = "http://" + strings.TrimSpace(reqUrl)
 	port := Get(reqUrl)
 
 	return port
+}
+
+func GetExistPort(ServerAddr, ListenerIp string) string{
+	params := url.Values{}
+	params.Set(common.ListenerAddr, ListenerIp)
+
+	rawUrl := "http://" + strings.TrimSpace(ServerAddr) + "/" + common.GetListenerPort
+
+	reqURL, err := url.ParseRequestURI(rawUrl)
+	if err != nil {
+		fmt.Printf("url.ParseRequestURI()函数执行错误,错误为:%v\n", err)
+		return err.Error()
+	}
+
+	//3.整合请求URL和参数
+	//Encode方法将请求参数编码为url编码格式("bar=baz&foo=quux")，编码时会以键进行排序。
+	reqURL.RawQuery = params.Encode()
+
+	//4.发送HTTP请求
+	//说明: reqURL.String() String将URL重构为一个合法URL字符串。
+
+	port := Get(reqURL.String())
+
+	return port
+}
+
+
+func AddPort(ServerAddress, port string) {
+
+	data := url.Values{common.AddPort: {port}}
+
+	reqUrl := ServerAddress + "/" + common.AddPort
+
+	_ = PostForm(reqUrl, data)
+
 }

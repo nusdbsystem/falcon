@@ -18,6 +18,9 @@ func SetupListener() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/"+common.SetupWorker, rt.SetupWorker())
+	logger.Do.Println("SetupListener: registering listenerPort to coord", common.ListenerPort)
+
+	c.AddPort(common.CoordSvcURLGlobal, common.ListenerPort)
 
 	server := &http.Server{
 		Addr:    "0.0.0.0:" + common.ListenerPort,
@@ -33,10 +36,10 @@ func SetupListener() {
 			logger.Do.Fatal("ShutDown the server", err)
 		}
 
-		c.ListenerDelete(common.CoordURLGlobal, common.ListenURLGlobal)
+		c.ListenerDelete(common.CoordSvcURLGlobal, common.ListenAddrGlobal)
 	}()
 
-	c.ListenerAdd(common.CoordURLGlobal, common.ListenURLGlobal)
+	c.ListenerAdd(common.CoordSvcURLGlobal, common.ListenAddrGlobal, common.ListenerPort)
 
 	logger.Do.Println("Starting HTTP server...")
 	err := server.ListenAndServe()

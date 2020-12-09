@@ -38,6 +38,7 @@ sed -i -e "s/LISTENER_TARGET_PORT/$LISTENER_TARGET_PORT/g" $LISTENER_YAML || exi
 sed -i -e "s/LISTENER_NODE_PORT/$LISTENER_NODE_PORT/g" $LISTENER_YAML || exit 1
 sed -i -e "s/FALCON_COORDINATOR_IMAGE/$IMAGE/g" $LISTENER_YAML || exit 1
 sed -i -e "s/HOST_PATH/$BASE_PATH/g" $LISTENER_YAML || exit 1
+sed -i -e "s/PARTY_NUMBER/$PARTY_NUMBER/g" $LISTENER_YAML || exit 1
 
 # apply the job
 kubectl apply -f $LISTENER_YAML || exit 1

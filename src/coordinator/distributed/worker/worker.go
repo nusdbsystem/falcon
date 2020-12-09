@@ -40,7 +40,8 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 	dir := dta.PartyPath.DataInput
 	stdIn := ""
 	command := "python3"
-	args := []string{dta.TaskInfos.PreProcessing.AlgorithmName, "-a=1", "-b=2"}
+	//args := []string{dta.TaskInfos.PreProcessing.AlgorithmName, "-a=1", "-b=2"}
+	args := []string{"./preprocessing.py", "-a=1", "-b=2"}
 	envs := []string{}
 
 	// 2 thread will ready from isStop channel, only one is running at the any time
@@ -74,7 +75,7 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 	dir = dta.PartyPath.Model
 	stdIn = ""
 	command = "python3"
-	args = []string{dta.TaskInfos.ModelTraining.AlgorithmName}
+	//args = []string{dta.TaskInfos.ModelTraining.AlgorithmName}
 	envs = []string{}
 
 	killed, e, el, ol = wk.pm.ExecuteSubProc(dir, stdIn, command, args, envs)

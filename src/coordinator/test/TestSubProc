@@ -1,0 +1,2 @@
+2020/12/09 22:12:35 setup_dist.go:180: SetupDist: Lunching master
+2020/12/09 22:12:42 master_rpc.go:18: Master: addr is : 127.0.0.1
