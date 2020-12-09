@@ -151,10 +151,10 @@ class EncodedNumber {
   void setter_type(EncodedNumberType s_type);
 
   /** get EncodedNumber max value */
-  void getter_n(__mpz_struct *g_n) const;
+  void getter_n(mpz_t g_n) const;
 
   /** get EncodedNumber value */
-  void getter_value(__mpz_struct *g_value) const;
+  void getter_value(mpz_t g_value) const;
 
   /** get EncodedNumber exponent*/
   int getter_exponent() const;

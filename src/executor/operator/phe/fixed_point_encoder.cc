@@ -239,11 +239,11 @@ int EncodedNumber::getter_exponent() const {
   return exponent;
 }
 
-void EncodedNumber::getter_n(__mpz_struct *g_n) const {
+void EncodedNumber::getter_n(mpz_t g_n) const {
   mpz_set(g_n, n);
 }
 
-void EncodedNumber::getter_value(__mpz_struct *g_value) const {
+void EncodedNumber::getter_value(mpz_t g_value) const {
   mpz_set(g_value, value);
 }
 

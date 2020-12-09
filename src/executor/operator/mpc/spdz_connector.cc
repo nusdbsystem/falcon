@@ -80,7 +80,6 @@ void setup_sockets(int n_parties,
                                                           " sockets = " << sockets[i] << ", port_num = " << port_base + i << ".";
   }
   LOG(INFO) << "Finish setup socket connections to spdz engines.";
-
   int type = specification.get<int>();
   switch (type)
   {
@@ -95,8 +94,6 @@ void setup_sockets(int n_parties,
       exit(1);
   }
   LOG(INFO) << "Finish initializing gfp field.";
-
-  //return sockets;
 }
 
 void send_private_values(std::vector<gfp> values, vector<ssl_socket*>& sockets, int n_parties)

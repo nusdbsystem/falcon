@@ -268,11 +268,11 @@ void LogisticRegression::update_encrypted_weights(Party& party,
 
   djcs_t_free_public_key(phe_pub_key);
   hcs_free_random(phe_random);
-  delete[] encrypted_batch_losses;
+  delete [] encrypted_batch_losses;
   for (int i = 0; i < cur_batch_size; i++) {
-    delete[] encoded_batch_samples[i];
+    delete [] encoded_batch_samples[i];
   }
-  delete[] encoded_batch_samples;
+  delete [] encoded_batch_samples;
 }
 
 void LogisticRegression::train(Party party) {
@@ -389,12 +389,48 @@ void spdz_logistic_function_computation(int party_num,
     int cur_batch_size,
     std::promise<std::vector<float>> *batch_loss_shares) {
   std::vector<ssl_socket*> mpc_sockets(party_num);
-  setup_sockets(party_num,
-                party_id,
-                std::move(mpc_player_path),
-                std::move(party_host_names),
-                mpc_port_base,
-                mpc_sockets);
+  //  setup_sockets(party_num,
+  //                party_id,
+  //                std::move(mpc_player_path),
+  //                std::move(party_host_names),
+  //                mpc_port_base,
+  //                mpc_sockets);
+
+  // Here put the whole setup socket code together, as using a function call
+  // would result in a problem when deleting the created sockets
+  // setup connections from this party to each spdz party socket
+  vector<int> plain_sockets(party_num);
+  ssl_ctx ctx(mpc_player_path, "C" + to_string(party_id));
+  ssl_service io_service;
+  octetStream specification;
+  for (int i = 0; i < party_num; i++)
+  {
+    set_up_client_socket(plain_sockets[i], party_host_names[i].c_str(), mpc_port_base + i);
+    send(plain_sockets[i], (octet*) &party_id, sizeof(int));
+    mpc_sockets[i] = new ssl_socket(io_service, ctx, plain_sockets[i],
+                                "P" + to_string(i), "C" + to_string(party_id), true);
+    if (i == 0){
+      // receive gfp prime
+      specification.Receive(mpc_sockets[0]);
+    }
+    LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
+                                                          " sockets = " << mpc_sockets[i] << ", port_num = " << mpc_port_base + i << ".";
+  }
+  LOG(INFO) << "Finish setup socket connections to spdz engines.";
+  int type = specification.get<int>();
+  switch (type)
+  {
+    case 'p':
+    {
+      gfp::init_field(specification.get<bigint>());
+      LOG(INFO) << "Using prime " << gfp::pr();
+      break;
+    }
+    default:
+      LOG(ERROR) << "Type " << type << " not implemented";
+      exit(1);
+  }
+  LOG(INFO) << "Finish initializing gfp field.";
   send_private_inputs(batch_aggregation_shares,mpc_sockets, party_num);
   std::vector<float> return_values = receive_result(mpc_sockets, party_num, cur_batch_size);
   batch_loss_shares->set_value(return_values);
@@ -402,6 +438,7 @@ void spdz_logistic_function_computation(int party_num,
   // free memory and close mpc_sockets
   for (int i = 0; i < party_num; i++) {
     delete mpc_sockets[i];
+    mpc_sockets[i] = nullptr;
   }
 }
 
@@ -413,7 +450,7 @@ void train_logistic_regression(Party party, std::string params) {
   // TODO: Parse the params and match with the LogisticRegression parameters
   // currently for testing
   int batch_size = 32;
-  int max_iteration = 2;
+  int max_iteration = 1;
   float converge_threshold = 1e-3;
   bool with_regularization = false;
   float alpha = 0.1;

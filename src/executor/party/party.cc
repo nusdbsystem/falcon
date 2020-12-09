@@ -348,6 +348,8 @@ void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
     serialize_encoded_number_array(partial_decryption, size, partial_decryption_str);
     send_long_message(req_party_id, partial_decryption_str);
   }
+
+  delete [] partial_decryption;
 }
 
 void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
@@ -378,6 +380,7 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
   if (party_id == req_party_id) {
     for (int i = 0; i < size; i++) {
       aggregated_shares[i] = encrypted_shares[i];
+      djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i], aggregated_shares[i], src_ciphers[i]);
     }
     // recv message and add to aggregated shares
     for (int id = 0; id < party_num; id++) {
@@ -491,7 +494,12 @@ void Party::secret_shares_to_ciphers(EncodedNumber *dest_ciphers,
 }
 
 Party::~Party() {
+  // if does not reset channels[i] to nullptr,
+  // there will be a heap-use-after-free crash
   io_service.stop();
+  for (int i = 0; i < party_num; i++) {
+    channels[i] = nullptr;
+  }
   hcs_free_random(phe_random);
   djcs_t_free_public_key(phe_pub_key);
   djcs_t_free_auth_server(phe_auth_server);
