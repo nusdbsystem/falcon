@@ -18,10 +18,7 @@ func TestSubProc(t *testing.T) {
 	fmt.Println(out, err)
 
 
-	dir:=""
-	stdIn := "input from keyboard"
-	commend := "python3"
-	args := []string{"/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml/preprocessing.py"}
+	cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
 	var envs []string
 
 	pm := taskmanager.InitSubProcessManager()
@@ -34,7 +31,7 @@ func TestSubProc(t *testing.T) {
 	//	pm.IsStop <-true
 	//}()
 
-	killed, e, el, ol := pm.ExecuteSubProc(dir, stdIn, commend, args, envs)
+	killed, e, el, ol := pm.ExecuteSubProc(cmd, envs)
 	logger.Do.Println(killed, e, el, ol)
 
 	//logger.Do.Println("Worker:task model training start")

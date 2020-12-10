@@ -10,6 +10,9 @@ import (
 )
 
 func Get(addr string) string {
+
+	logger.Do.Println("send get requests to ", addr)
+
 	resp, err := http.Get(addr)
 
 	if err != nil {
@@ -26,7 +29,12 @@ func Get(addr string) string {
 		panic(err)
 	}
 
-	logger.Do.Println(string(body))
+	if resp.StatusCode > 200 && resp.StatusCode <= 299{
+		logger.Do.Println("Get request Error ", resp.StatusCode, string(body))
+		panic(err)
+	}
+
+	logger.Do.Println("Get response is ",string(body))
 	return string(body)
 }
 

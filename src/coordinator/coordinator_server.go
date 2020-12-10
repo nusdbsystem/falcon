@@ -86,6 +86,7 @@ func InitEnvs(svcName string){
 		common.CoordAddrGlobal = common.GetEnv("COORDINATOR_IP", "")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
 		common.ListenAddrGlobal = common.GetEnv("LISTENER_IP", "")
+		common.ListenBasePath = common.GetEnv("DATA_BASE_PATH", "")
 
 		// listener communicate coord with ip+port
 		common.CoordSvcURLGlobal = getCoordUrl(common.CoordAddrGlobal + ":" + common.CoordPort)
