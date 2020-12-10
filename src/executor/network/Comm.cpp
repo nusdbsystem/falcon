@@ -121,12 +121,14 @@ size_t CommPartyTCPSynced::write(const byte* data, int size, int peer, int proto
 }
 
 CommPartyTCPSynced::~CommPartyTCPSynced() {
-	if (role != 1) 
-		acceptor_.close();
-	if (role != 1)
-		serverSocket.close();
-	if (role != 0)
-		clientSocket.close();
-
+	if (role != 1) {
+      acceptor_.close();
+    }
+	if (role != 1) {
+      serverSocket.close();
+    }
+	if (role != 0){
+      clientSocket.close();
+    }
 }
 

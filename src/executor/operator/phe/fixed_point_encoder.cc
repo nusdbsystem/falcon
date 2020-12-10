@@ -39,8 +39,9 @@ EncodedNumber::EncodedNumber(const EncodedNumber &number)
 }
 
 EncodedNumber& EncodedNumber::operator=(const EncodedNumber &number) {
-  mpz_init(n);
-  mpz_init(value);
+  //need to make sure the number has been initialized beforehand
+  //mpz_init(n);
+  //mpz_init(value);
 
   mpz_t n_helper, value_helper;
   mpz_init(n_helper);
@@ -239,11 +240,11 @@ int EncodedNumber::getter_exponent() const {
   return exponent;
 }
 
-void EncodedNumber::getter_n(__mpz_struct *g_n) const {
+void EncodedNumber::getter_n(mpz_t g_n) const {
   mpz_set(g_n, n);
 }
 
-void EncodedNumber::getter_value(__mpz_struct *g_value) const {
+void EncodedNumber::getter_value(mpz_t g_value) const {
   mpz_set(g_value, value);
 }
 

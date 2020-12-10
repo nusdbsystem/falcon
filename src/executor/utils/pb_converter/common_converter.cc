@@ -16,7 +16,7 @@ void serialize_int_array(std::vector<int> vec, std::string& output_message) {
   int_array.SerializeToString(&output_message);
 }
 
-void deserialize_int_array(std::vector<int>& vec, std::string input_message) {
+void deserialize_int_array(std::vector<int>& vec, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::IntArray deserialized_int_array;
   if (!deserialized_int_array.ParseFromString(input_message)) {
     LOG(ERROR) << "Deserialize int array message failed.";
@@ -99,7 +99,7 @@ void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::
   encoded_number_array.SerializeToString(&output_message);
 }
 
-void deserialize_encoded_number_array(EncodedNumber* number_array, int size, std::string input_message) {
+void deserialize_encoded_number_array(EncodedNumber* number_array, int size, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::EncodedNumberArray deserialized_encoded_number_array;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_message.c_str(), input_message.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);

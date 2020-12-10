@@ -23,7 +23,7 @@ void serialize_int_array(std::vector<int> vec, std::string& output_message);
  * @param vec: deserialized int vector
  * @param input_message: serialized string
  */
-void deserialize_int_array(std::vector<int>& vec, std::string input_message);
+void deserialize_int_array(std::vector<int>& vec, const std::string& input_message);
 
 /**
  * serialize encoded number
@@ -57,6 +57,6 @@ void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::
  * @param size: size of array (need to specify before deserialization)
  * @param input_message: serialized string
  */
-void deserialize_encoded_number_array(EncodedNumber* number_array, int size, std::string input_message);
+void deserialize_encoded_number_array(EncodedNumber* number_array, int size, const std::string& input_message);
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_COMMON_CONVERTER_H_

@@ -88,6 +88,7 @@ void djcs_t_aux_share_combine(djcs_t_public_key* pk,
   for (int i = 0; i < size; i++) {
     mpz_clear(shares_value[i]);
   }
+  free(shares_value);
   mpz_clear(t1);
   mpz_clear(t2);
 }
