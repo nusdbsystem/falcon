@@ -39,8 +39,9 @@ EncodedNumber::EncodedNumber(const EncodedNumber &number)
 }
 
 EncodedNumber& EncodedNumber::operator=(const EncodedNumber &number) {
-  mpz_init(n);
-  mpz_init(value);
+  //need to make sure the number has been initialized beforehand
+  //mpz_init(n);
+  //mpz_init(value);
 
   mpz_t n_helper, value_helper;
   mpz_init(n_helper);
