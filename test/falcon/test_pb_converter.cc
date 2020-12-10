@@ -9,6 +9,7 @@
 #include <falcon/utils/pb_converter/model_converter.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/lr_params_converter.h>
 
 TEST(PB_Converter, ModelPublishRequest) {
   int model_id = 1;
@@ -212,6 +213,39 @@ TEST(PB_Converter, EncodedNumberArray) {
   }
   mpz_clear(v_n);
   mpz_clear(v_value);
+}
+
+TEST(PB_Converter, LogisticRegressionParams) {
+  LogisticRegressionParams lr_params;
+  lr_params.batch_size = 32;
+  lr_params.max_iteration = 100;
+  lr_params.converge_threshold = 1e-3;
+  lr_params.with_regularization = false;
+  lr_params.alpha = 0.5;
+  lr_params.learning_rate = 0.1;
+  lr_params.decay = 0.8;
+  lr_params.penalty = "l2";
+  lr_params.optimizer = "sgd";
+  lr_params.multi_class = "ovr";
+  lr_params.metric = "acc";
+  lr_params.dp_budget = 0;
+  std::string output_message;
+  serialize_lr_params(lr_params, output_message);
+
+  LogisticRegressionParams deserialized_lr_params;
+  deserialize_lr_params(deserialized_lr_params, output_message);
+  EXPECT_EQ(lr_params.batch_size, deserialized_lr_params.batch_size);
+  EXPECT_EQ(lr_params.max_iteration, deserialized_lr_params.max_iteration);
+  EXPECT_EQ(lr_params.converge_threshold, deserialized_lr_params.converge_threshold);
+  EXPECT_EQ(lr_params.with_regularization, deserialized_lr_params.with_regularization);
+  EXPECT_EQ(lr_params.alpha, deserialized_lr_params.alpha);
+  EXPECT_EQ(lr_params.learning_rate, deserialized_lr_params.learning_rate);
+  EXPECT_EQ(lr_params.decay, deserialized_lr_params.decay);
+  EXPECT_EQ(lr_params.dp_budget, deserialized_lr_params.dp_budget);
+  EXPECT_TRUE(lr_params.penalty == deserialized_lr_params.penalty);
+  EXPECT_TRUE(lr_params.optimizer == deserialized_lr_params.optimizer);
+  EXPECT_TRUE(lr_params.multi_class == deserialized_lr_params.multi_class);
+  EXPECT_TRUE(lr_params.metric == deserialized_lr_params.metric);
 }
 
 

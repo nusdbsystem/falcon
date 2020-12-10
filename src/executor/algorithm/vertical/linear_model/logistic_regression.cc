@@ -450,7 +450,7 @@ void train_logistic_regression(Party party, std::string params) {
   // TODO: Parse the params and match with the LogisticRegression parameters
   // currently for testing
   int batch_size = 32;
-  int max_iteration = 1;
+  int max_iteration = 5;
   float converge_threshold = 1e-3;
   bool with_regularization = false;
   float alpha = 0.1;
