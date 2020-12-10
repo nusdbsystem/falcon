@@ -28,10 +28,12 @@ func ListenerDelete(ServerAddress, listenerAddr string) {
 	_ = PostForm(reqUrl, data)
 }
 
-func SetupWorker(ServerAddr string, masterAddress string, taskType string) {
+func SetupWorker(ServerAddr string, masterAddress string, taskType string, jobId string) {
 	data := url.Values{
 		common.MasterAddr: {masterAddress},
-		common.TaskType:   {taskType}}
+		common.TaskType:   {taskType},
+		common.JobId:   {jobId},
+	}
 
 	reqUrl := ServerAddr + "/" + common.SetupWorker
 

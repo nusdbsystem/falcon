@@ -1,7 +1,6 @@
 #!/bin/bash
 
 . ./deploy/property/svc.properties
-. config_listener.properties
 
 WORKER_NAME=$1
 WORKER_TARGET_PORT=$2
@@ -10,6 +9,7 @@ EXECUTOR_TYPE_PLACEHOLDER=$4
 WORKER_URL_PLACEHOLDER=$5
 SERVICE_NAME_PLACEHOLDER=$6
 Env_PLACEHOLDER=$7
+DATA_BASE_PATH=$8
 
 echo "$WORKER_URL_PLACEHOLDER"
 

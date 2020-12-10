@@ -16,10 +16,11 @@ func SetupWorker() func(w http.ResponseWriter, r *http.Request) {
 		// this is sent from main http server
 		masterAddress := r.FormValue(common.MasterAddr)
 		taskType := r.FormValue(common.TaskType)
+		jobId := r.FormValue(common.JobId)
 
 		go func(){
 			defer logger.HandleErrors()
-			controller.SetupWorker(masterAddress, taskType)
+			controller.SetupWorker(masterAddress, taskType, jobId)
 		}()
 
 	}

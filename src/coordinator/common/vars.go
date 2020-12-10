@@ -140,7 +140,7 @@ var (
 	ServiceNameGlobal = getEnv("SERVICE_NAME", "coord")
 	CoordAddrGlobal = ""
 	ListenAddrGlobal = ""
-
+	ListenBasePath = ""
 	// those are init by coordinator
 	ExecutorTypeGlobal = ""
 	WorkerURLGlobal = ""

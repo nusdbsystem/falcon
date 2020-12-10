@@ -4,7 +4,7 @@
 
 
 kubectl delete all --all
-kubectl delete deployment,svc mysql
+kubectl delete deploymenbat,svc mysql
 kubectl delete pvc mysql-pv-claim
 kubectl delete pv mysql-pv-volume
 kubectl delete pvc $COORD_STORAGE-pvc
@@ -26,7 +26,8 @@ rm -rf $DATA_BASE_PATH/run_time_logs/*
 rm -rf $DATA_BASE_PATH/logs/*
 
 . config_listener.properties
-rm -rf $DATA_BASE_PATH/run_time_logs/*
-rm -rf $DATA_BASE_PATH/logs/*
+
+rm -rf /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_listener_1/*
+rm -rf /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_listener_2/*
 
 bash scripts/status.sh user

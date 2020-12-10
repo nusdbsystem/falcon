@@ -283,7 +283,7 @@ func (out outstream) Write(p []byte) (int, error) {
 
 func ExecuteBash(command string) error{
 	// 返回一个 cmd 对象
-	logger.Do.Println("SubProcessManager: execute bash,", command)
+	logger.Do.Println("SubProcessManager: execute bash ::", command)
 
 	cmd := exec.Command("bash", "-c", command)
 

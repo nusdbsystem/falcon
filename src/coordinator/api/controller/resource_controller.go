@@ -2,6 +2,8 @@ package controller
 
 import (
 	"coordinator/api/entity"
+	"coordinator/api/models"
+	"coordinator/logger"
 )
 
 
@@ -13,14 +15,24 @@ func AssignPort(ctx *entity.Context) uint {
 
 	maxPort := findMax(ports)
 
-	newPort := maxPort + 1
+	var err error
+	var u *models.PortRecord
+	i:=1
+	for {
+		err, u = ctx.Ms.AddPort(maxPort + uint(i))
+		if err != nil{
+			logger.Do.Println("AssignPort, error ", err)
+			logger.Do.Println("AssignPort: retry...")
+			i++
+		}else{
+			logger.Do.Println("AssignPort: AssignSuccessful port is ", u.Port)
+			break
+		}
+	}
 
-	e2, _ := ctx.Ms.AddPort(newPort)
+	ctx.Ms.Commit([]error{e, err})
 
-	ctx.Ms.Commit([]error{e, e2})
-
-	return newPort
-
+	return u.Port
 }
 
 func AddPort(newPort uint, ctx *entity.Context) uint {

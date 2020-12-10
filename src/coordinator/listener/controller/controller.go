@@ -4,9 +4,9 @@ import (
 	dist "coordinator/distributed"
 )
 
-func SetupWorker(masterAddress, taskType string) {
+func SetupWorker(masterAddress, taskType, jobId string) {
 
-	dist.SetupWorkerHelper(masterAddress, taskType)
+	dist.SetupWorkerHelper(masterAddress, taskType, jobId)
 
 }
 

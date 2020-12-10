@@ -34,7 +34,9 @@ func RunMaster(masterAddr string, qItem *cache.QItem, taskType string) (ms *Mast
 
 	// set time out, no worker comes within 1 min, stop master
 	time.AfterFunc(1*time.Minute, func() {
-		if len(ms.workers) == 0 {
+		if len(ms.workers) <ms.workerNum {
+			logger.Do.Println("Master: Wait for 1 Min, No enough worker come, stop")
+
 			ms.stopRPCServer()
 		}
 	})

@@ -97,7 +97,7 @@ func KillJob(masterAddr, Proxy string) {
 	}
 }
 
-func SetupWorkerHelper(masterAddress, taskType string)  {
+func SetupWorkerHelper(masterAddress, taskType, jobId string)  {
 
 	/**
 	 * @Author
@@ -128,15 +128,18 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 
 		// in prod, use k8s to run train/predict server as a isolate process
 	}else if common.Env == common.ProdEnv{
-		itemKey := initSvcName()
 
 		var serviceName string
 
 		if taskType == common.TrainExecutor{
-			serviceName = "worker-train-" + common.ListenerId + "-" + itemKey
+
+			serviceName = "worker-jid" + jobId + "-train-" + common.ListenerId
+
 			logger.Do.Println("SetupWorkerHelper: Current in Prod, TrainExecutor, svcName", serviceName)
 		}else if taskType == common.PredictExecutor{
-			serviceName = "worker-predict-" + common.ListenerId + "-" + itemKey
+
+			serviceName = "worker-jid" + jobId + "-predict-" + common.ListenerId
+
 			logger.Do.Println("SetupWorkerHelper: Current in Prod, PredictExecutor, svcName", serviceName)
 		}
 
@@ -150,6 +153,7 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 			workerAddress,
 			taskType,
 			common.Env,
+			common.ListenBasePath,
 		}
 
 		_=taskmanager.ExecuteOthers("ls")
@@ -203,7 +207,7 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 
 		// todo, manage listener port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, taskType), such that user dont need
 		//  to provide port in dsl
-		c.SetupWorker(ip, masterAddress, taskType)
+		c.SetupWorker(ip, masterAddress, taskType, fmt.Sprintf("%d", qItem.JobId))
 	}
 
 	logger.Do.Printf("SetupDist: master is running at %s ... waiting\n", masterAddress)
