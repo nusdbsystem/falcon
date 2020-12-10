@@ -74,6 +74,7 @@ type User struct {
 type Listeners struct {
 	ID           uint   `gorm:"primary_key;AUTO_INCREMENT"`
 	ListenerAddr string `gorm:"type:varchar(256)"`
+	Port string `gorm:"type:varchar(256)"`
 }
 
 type TestTable struct {

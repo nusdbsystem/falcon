@@ -53,7 +53,7 @@ func SetupDist(qItem *cache.QItem, taskType string) {
 		// put to the queue, assign key to env
 		logger.Do.Println("SetupDist: Writing item to redis")
 
-		cache.RedisClient.Set(itemKey, cache.Serialize(qItem))
+		cache.InitRedisClient().Set(itemKey, cache.Serialize(qItem))
 
 		logger.Do.Printf("SetupDist: Get key, %s InitK8sManager\n", itemKey)
 
@@ -66,6 +66,9 @@ func SetupDist(qItem *cache.QItem, taskType string) {
 			itemKey,
 			taskType,
 			masterAddress,
+			common.MasterExecutor,
+			common.CoordSvcName,
+			common.Env,
 		}
 
 		//_=taskmanager.ExecuteOthers("ls")
@@ -105,8 +108,9 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 		masterAddress： IP of the master address
 		masterAddress： train or predictor
 	 **/
+	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddress, taskType)
 
-	workerPort := c.GetFreePort(common.CoordURLGlobal)
+	workerPort := c.GetFreePort(common.CoordSvcURLGlobal)
 
 	workerAddress := common.ListenAddrGlobal + ":" + workerPort
 
@@ -114,11 +118,11 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 	if common.Env == common.DevEnv{
 
 		if taskType == common.TrainExecutor{
-
+			logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainExecutor")
 			worker.RunWorker(masterAddress, workerAddress)
 
 		}else if taskType == common.PredictExecutor{
-
+			logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictExecutor")
 			prediction.RunPrediction(masterAddress, workerAddress)
 		}
 
@@ -129,10 +133,11 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 		var serviceName string
 
 		if taskType == common.TrainExecutor{
-			serviceName = "train-" + itemKey
-
+			serviceName = "worker-train-" + common.ListenerId + "-" + itemKey
+			logger.Do.Println("SetupWorkerHelper: Current in Prod, TrainExecutor, svcName", serviceName)
 		}else if taskType == common.PredictExecutor{
-			serviceName = "predict-" + itemKey
+			serviceName = "worker-predict-" + common.ListenerId + "-" + itemKey
+			logger.Do.Println("SetupWorkerHelper: Current in Prod, PredictExecutor, svcName", serviceName)
 		}
 
 		km := taskmanager.InitK8sManager(true,  "")
@@ -142,11 +147,18 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 			workerPort,
 			masterAddress,
 			taskType,
+			workerAddress,
+			taskType,
+			common.Env,
 		}
 
+		_=taskmanager.ExecuteOthers("ls")
+		_=taskmanager.ExecuteOthers("pwd")
 		km.UpdateYaml(strings.Join(command, " "))
 
 		filename := common.YamlBasePath + serviceName + ".yaml"
+
+		logger.Do.Println("SetupDist: Creating yaml done", filename)
 
 		km.CreateResources(filename)
 
@@ -177,19 +189,34 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 	}
 
 	// master will call lister's endpoint to launch worker, to train or predict
+	logger.Do.Println("SetupDist: master begin to call listeners:...")
 	for _, ip := range qItem.IPs {
 
 		// Launch the worker
 		// maybe check table wit ip, and + port got from table also
 
 		// send a request to http
-		c.SetupWorker(ip+":"+common.ListenerPort, masterAddress, taskType)
+		logger.Do.Printf("SetupDist: current listener's ip: %s ...\n", ip)
+		//lisPort := c.GetExistPort(common.CoordSvcURLGlobal, ip)
+
+		logger.Do.Printf("SetupDist: master is calling listener: %s ...\n", ip)
+
+		// todo, manage listener port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, taskType), such that user dont need
+		//  to provide port in dsl
+		c.SetupWorker(ip, masterAddress, taskType)
 	}
 
 	logger.Do.Printf("SetupDist: master is running at %s ... waiting\n", masterAddress)
 
 	ms.Wait()
 
+	logger.Do.Println("SetupDist: master finish all jobs")
+
 	return masterAddress
+}
+
+func CleanWorker(){
+
+	// todo delete the svc created for training, master will call this method after ms.Wait()
 }
 

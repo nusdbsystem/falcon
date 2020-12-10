@@ -1,4 +1,4 @@
-
+#!/bin/bash
 title()
 {
     title="| $1 |"

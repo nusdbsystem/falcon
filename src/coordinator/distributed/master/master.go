@@ -86,7 +86,13 @@ func (this *Master) forwardRegistrations(ch chan string, qItem *cache.QItem) {
 
 			// verify if ip match
 			var reIps []string
+			var qIpsMatch []string
 			var qIps = qItem.IPs
+
+			for i := 0; i < len(qIps); i++ {
+				ip := strings.Split(qIps[i], ":")[0]
+				qIpsMatch = append(qIpsMatch, ip)
+			}
 
 			for i := 0; i < len(qIps); i++ {
 				addr := this.workers[i]
@@ -96,10 +102,10 @@ func (this *Master) forwardRegistrations(ch chan string, qItem *cache.QItem) {
 
 			// compare if 2 slice are the same
 			var c = make([]string, len(reIps))
-			var d = make([]string, len(qIps))
+			var d = make([]string, len(qIpsMatch))
 
 			copy(c, reIps)
-			copy(d, qIps)
+			copy(d, qIpsMatch)
 
 			sort.Strings(c)
 			sort.Strings(d)

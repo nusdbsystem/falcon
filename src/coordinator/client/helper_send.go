@@ -10,10 +10,10 @@ import (
 )
 
 func Get(addr string) string {
-	addr = "http://" + strings.TrimSpace(addr)
 	resp, err := http.Get(addr)
 
 	if err != nil {
+		logger.Do.Println(err)
 		panic(err)
 	}
 
@@ -22,7 +22,7 @@ func Get(addr string) string {
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-
+		logger.Do.Println(err)
 		panic(err)
 	}
 

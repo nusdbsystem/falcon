@@ -3,12 +3,22 @@
   "job_name": "credit_card_training",
   "job_decs": "this is the job_decs",
   "job_fl_type": "horizontal",
-  "party_nums": 1,
+  "party_nums": 2,
   "party_info": [
 
     {
       "id": 0,
-      "ip": "127.0.0.1",
+      "ip": "192.168.65.3:30005",
+      "path": {
+        "data_input": "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml",
+        "data_output": "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml",
+        "model": "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml",
+        "report": "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml",
+        "executable_path": "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml"}
+    },
+    {
+      "id": 1,
+      "ip": "192.168.65.3:30006",
       "path": {
         "data_input": "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml",
         "data_output": "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml",
@@ -16,7 +26,6 @@
         "report": "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml",
         "executable_path": "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml"}
     }
-
   ],
   "task_num": 2,
   "tasks": {

@@ -8,6 +8,7 @@ import (
 	"coordinator/logger"
 	"net/http"
 	"os"
+	"time"
 )
 
 func SetupListener() {
@@ -18,6 +19,7 @@ func SetupListener() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/"+common.SetupWorker, rt.SetupWorker())
+	logger.Do.Println("SetupListener: registering listenerPort to coord", common.ListenerPort)
 
 	server := &http.Server{
 		Addr:    "0.0.0.0:" + common.ListenerPort,
@@ -33,10 +35,43 @@ func SetupListener() {
 			logger.Do.Fatal("ShutDown the server", err)
 		}
 
-		c.ListenerDelete(common.CoordURLGlobal, common.ListenURLGlobal)
+		c.ListenerDelete(common.CoordSvcURLGlobal, common.ListenAddrGlobal)
 	}()
 
-	c.ListenerAdd(common.CoordURLGlobal, common.ListenURLGlobal)
+	NTimes := 20
+	for {
+		if NTimes<0{
+			panic("\"SetupListener: connecting to coord Db...retry\"")
+		}
+		err := c.AddPort(common.CoordSvcURLGlobal, common.ListenerPort)
+		if err != nil{
+			logger.Do.Println(err)
+			logger.Do.Printf("SetupListener: connecting to coord %s ...retry \n", common.CoordSvcURLGlobal)
+			time.Sleep(time.Second*5)
+			NTimes--
+		}else{
+			break
+		}
+	}
+
+	NTimes = 20
+	for {
+		if NTimes<0{
+			panic("\"SetupListener: connecting to coord Db...retry\"")
+		}
+		err := c.ListenerAdd(common.CoordSvcURLGlobal, common.ListenAddrGlobal, common.ListenerPort)
+
+		if err != nil{
+			logger.Do.Println(err)
+			logger.Do.Printf("SetupListener: ListenerAdd %s ...retry \n", common.ListenAddrGlobal)
+			time.Sleep(time.Second*5)
+			NTimes--
+		}else{
+			break
+		}
+	}
+
+
 
 	logger.Do.Println("Starting HTTP server...")
 	err := server.ListenAndServe()

@@ -8,6 +8,7 @@ import (
 	"coordinator/logger"
 	"strings"
 	"sync"
+	"time"
 )
 
 type taskHandler func(workerAddr,svcName string, args *entitiy.DoTaskArgs, JobId uint, wg *sync.WaitGroup)
@@ -26,7 +27,7 @@ func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskT
 	var workerAddress []string
 
 	for i := 0; i < len(qItem.IPs); i++ {
-		logger.Do.Println("Scheduler: Reading from registerChan")
+		logger.Do.Printf("Scheduler: Reading worker %s from registerChan\n", qItem.IPs[i])
 		addr := <-registerChan
 		workerAddress = append(workerAddress, addr)
 	}
@@ -36,7 +37,7 @@ func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskT
 
 		taskFunc := this.trainTaskHandler
 
-		this.schedulerHelper(taskFunc, common.Worker,qItem,workerAddress)
+		this.schedulerHelper(taskFunc, common.Worker, qItem, workerAddress)
 
 		client.ModelUpdate(
 			common.CoordSvcURLGlobal,
@@ -68,8 +69,10 @@ func (this *Master) schedulerHelper(
 
 	// execute the task
 	for i, v := range qItem.IPs {
+		vip := strings.Split(v, ":")[0]
+
 		args := new(entitiy.DoTaskArgs)
-		args.IP = v
+		args.IP = vip
 		args.PartyPath = qItem.PartyPath[i]
 		args.TaskInfos = qItem.TaskInfos
 
@@ -77,7 +80,7 @@ func (this *Master) schedulerHelper(
 			ip := strings.Split(workerAddr, ":")[0]
 
 			// match using ip
-			if ip == v {
+			if ip == vip {
 
 				wg.Add(1)
 
@@ -112,7 +115,7 @@ func (this *Master) trainTaskHandler(
 	ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
 
 	if !ok {
-		logger.Do.Printf("Scheduler: %s.DoTask error\n", svcName)
+		logger.Do.Printf("Scheduler: Master calling %s, DoTask error\n", workerAddr)
 
 		client.JobUpdateResInfo(
 			common.CoordSvcURLGlobal,
@@ -121,7 +124,11 @@ func (this *Master) trainTaskHandler(
 			"call Worker.DoTask error",
 			JobId)
 		client.JobUpdateStatus(common.CoordSvcURLGlobal, common.JobFailed, JobId)
-		panic("error")
+
+		// todo define return or panic, how to handle panic if one panic, and others normal?
+
+		time.Sleep(time.Minute*30)
+		panic("trainTaskHandler error")
 	}
 
 	errLen := 4096

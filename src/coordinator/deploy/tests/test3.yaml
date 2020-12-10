@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: train-8490548680670953438
+spec:
+  type: NodePort
+  ports:
+    - port: 30007  #这里port集群内部clusterIp 对应的端口
+      targetPort: 30007  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
+      nodePort: 30007  #这里是物理机的端口
+  selector:
+    app: train-8490548680670953438
+---
+apiVersion: v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Pod
+metadata:
+  name: train-8490548680670953438
+  labels:
+    app: train-8490548680670953438
+spec:
+    restartPolicy: Never
+    containers:
+      - image: nailidocker/falcon_coord:latest
+        name: train-8490548680670953438
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: MASTER_URL
+            value: "192.168.65.3:30006"
+          - name: EXECUTOR
+            value: "train"
+          - name: WORKER_URL
+            value: "WORKER_URL_PLACEHOLDER"
+        ports:
+          - containerPort: 30007  #这里containerPort是容器内部的port
+            name:
+        volumeMounts:
+          - name: falcon-listener
+            mountPath: ./logs
+    volumes:
+      - name: falcon-listener
+        hostPath:
+          path: /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_listener//run_time_logs

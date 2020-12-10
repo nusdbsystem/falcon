@@ -23,6 +23,18 @@ func AssignPort(ctx *entity.Context) uint {
 
 }
 
+func AddPort(newPort uint, ctx *entity.Context) uint {
+
+	ctx.Ms.Tx = ctx.Ms.Db.Begin()
+
+	e2, _ := ctx.Ms.AddPort(newPort)
+
+	ctx.Ms.Commit([]error{e2})
+
+	return newPort
+
+}
+
 
 func findMax(l []uint) uint {
 	var res uint
@@ -36,4 +48,17 @@ func findMax(l []uint) uint {
 		}
 	}
 	return res
+}
+
+
+func GetListenerPort(ListenerAddr string, ctx *entity.Context) string {
+
+	ctx.Ms.Tx = ctx.Ms.Db.Begin()
+
+	e, u := ctx.Ms.ListenerGet(ListenerAddr)
+
+	ctx.Ms.Commit([]error{e})
+
+	return u.Port
+
 }

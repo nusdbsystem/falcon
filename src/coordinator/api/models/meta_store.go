@@ -5,6 +5,7 @@ import (
 	"coordinator/logger"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"time"
 
 	_ "gorm.io/driver/mysql"
 	_ "gorm.io/driver/sqlite"
@@ -53,12 +54,27 @@ func InitMetaStore() *MetaStore {
 
 // connect to db, and begin the transaction
 func (ms *MetaStore) Connect() {
-	db, err := gorm.Open(ms.engine, ms.url)
-	if err != nil {
-		logger.Do.Println(err)
-		return
+
+	var db *gorm.DB
+	var err error
+	NTimes := 20
+
+	for {
+		if NTimes<0{
+			break
+		}
+		db, err = gorm.Open(ms.engine, ms.url)
+		if err != nil {
+			logger.Do.Println(err)
+			logger.Do.Println("MetaStore: connecting Db...retry")
+			time.Sleep(time.Second*5)
+			NTimes--
+		}else{
+			ms.Db = db
+			return
+		}
 	}
-	ms.Db = db
+	return
 }
 
 // disconnect , should call after ms.Commit

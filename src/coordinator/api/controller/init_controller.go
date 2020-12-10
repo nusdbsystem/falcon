@@ -21,6 +21,22 @@ func CreateTables() {
 
 }
 
+func CreateSpecificSysPorts(port string) {
+
+	ms := models.InitMetaStore()
+
+	ms.Connect()
+	ms.Tx = ms.Db.Begin()
+	var e1 error
+	portInt, _:= strconv.Atoi(port)
+	if !ms.CheckPort(uint(portInt)){
+		e1, _ = ms.AddPort(uint(portInt))
+	}
+	ms.Commit(e1)
+	ms.DisConnect()
+
+}
+
 func CreateSysPorts() {
 
 	ms := models.InitMetaStore()
@@ -31,7 +47,6 @@ func CreateSysPorts() {
 	var e1 error
 	var e2 error
 	var e3 error
-	var e4 error
 
 	mysqlPort, _:= strconv.Atoi(common.MsMysqlNodePort)
 	if !ms.CheckPort(uint(mysqlPort)){
@@ -44,25 +59,20 @@ func CreateSysPorts() {
 
 	}
 
-	masterPort, _:= strconv.Atoi(common.CoordPort)
-	if !ms.CheckPort(uint(masterPort)){
-		e3, _ = ms.AddPort(uint(masterPort))
+	coordPort, _:= strconv.Atoi(common.CoordPort)
+	if !ms.CheckPort(uint(coordPort)){
+		e3, _ = ms.AddPort(uint(coordPort))
 
 	}
 
-	listenerPort, _:= strconv.Atoi(common.ListenerPort)
-	if !ms.CheckPort(uint(listenerPort)){
-		e4, _ = ms.AddPort(uint(listenerPort))
-	}
-
-	ms.Commit([]error{e1,e2,e3,e4})
+	ms.Commit([]error{e1,e2,e3})
 	ms.DisConnect()
 
 }
 
-func ListenerAdd(ctx *entity.Context, listenerAddr string) {
+func ListenerAdd(ctx *entity.Context, listenerAddr,Port string) {
 
-	_, _ = ctx.Ms.ListenerAdd(listenerAddr)
+	_, _ = ctx.Ms.ListenerAdd(listenerAddr, Port)
 
 }
 

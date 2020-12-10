@@ -1,14 +1,6 @@
+#!/bin/bash
+
 . ./deploy/property/svc.properties
-. config_coord.properties
-. config_listener.properties
-
-
-# load env variables
-if [ $DATA_BASE_PATH ];then
-	echo "DATA_BASE_PATH is exist, and echo to = $DATA_BASE_PATH"
-else
-	export DATA_BASE_PATH=$PWD
-fi
 
 
 kubectl delete all --all
@@ -25,8 +17,15 @@ kubectl delete configmap coord-config
 kubectl delete configmap redis-config
 kubectl delete configmap redis-envs
 kubectl delete configmap listener-config
+kubectl delete configmap listener-config-1
+kubectl delete configmap listener-config-2
 
+. config_coord.properties
 rm -rf $DATA_BASE_PATH/database
+rm -rf $DATA_BASE_PATH/run_time_logs/*
+rm -rf $DATA_BASE_PATH/logs/*
+
+. config_listener.properties
 rm -rf $DATA_BASE_PATH/run_time_logs/*
 rm -rf $DATA_BASE_PATH/logs/*
 

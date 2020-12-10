@@ -86,6 +86,7 @@ go build <go-program>.go
     ```
 
 2. Setup listener:
+    After coordinator running successfully, begin to run listener
     Update config_listener.properties
     choose the LISTENER_IP, COORDINATOR_IP, LISTENER_NODE_PORT
     finally run script with following
