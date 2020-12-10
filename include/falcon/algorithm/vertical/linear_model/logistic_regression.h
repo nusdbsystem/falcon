@@ -14,6 +14,33 @@
 #include <thread>
 #include <future>
 
+struct LogisticRegressionParams {
+  // size of mini-batch in each iteration
+  int batch_size;
+  // maximum number of iterations for training
+  int max_iteration;
+  // tolerance of convergence
+  float converge_threshold;
+  // whether use regularization or not
+  bool with_regularization;
+  // regularization parameter
+  float alpha;
+  // learning rate for parameter updating
+  float learning_rate;
+  // decay rate for learning rate, following lr = lr0 / (1 + decay*t), t is #iteration
+  float decay;
+  // penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
+  std::string penalty;
+  // optimization method, default 'sgd', currently support 'sgd'
+  std::string optimizer;
+  // strategy for handling multi-class classification, default 'ovr', currently support 'ovr'
+  std::string multi_class;
+  // evaluation metric for training and testing, 'acc', 'auc', or 'ks', currently support 'acc'
+  std::string metric;
+  // differential privacy (DP) budget, 0 denotes not use DP
+  float dp_budget;
+};
+
 class LogisticRegression : public Model {
  public:
   // size of mini-batch in each iteration

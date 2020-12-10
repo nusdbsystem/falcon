@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package com.nus.dbsytem.falcon.v0;
+
+// This message denotes the logistic regression parameters
+message LogisticRegressionParams {
+    // batch size in each iteration
+    int32 batch_size = 1;
+    // maximum number of iterations for training
+    int32 max_iteration = 2;
+    // tolerance of convergence
+    float converge_threshold = 3;
+    // whether use regularization or not
+    int32 with_regularization = 4;
+    // regularization parameter
+    float alpha = 5;
+    // learning rate for parameter updating
+    float learning_rate = 6;
+    // decay rate for learning rate, following lr = lr0 / (1 + decay*t), t is #iteration
+    float decay = 7;
+    // penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
+    string penalty = 8;
+    // optimization method, default 'sgd', currently support 'sgd'
+    string optimizer = 9;
+    // strategy for handling multi-class classification, default 'ovr', currently support 'ovr'
+    string multi_class = 10;
+    // evaluation metric for training and testing, 'acc', 'auc', or 'ks', currently support 'acc'
+    string metric = 11;
+    // differential privacy budget
+    float differential_privacy_budget = 12;
+}
+
+

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(falcon)
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options")
 
 set(SOURCE_FILES
         ../../include/falcon/network/Comm.hpp
@@ -17,12 +17,16 @@ set(SOURCE_FILES
         utils/pb_converter/phe_keys_converter.cc
         ../../include/falcon/utils/pb_converter/common_converter.h
         utils/pb_converter/common_converter.cc
+        ../../include/falcon/utils/pb_converter/lr_params_converter.h
+        utils/pb_converter/lr_params_converter.cc
         include/message/common.pb.h
         include/message/common.pb.cc
         include/message/model.pb.h
         include/message/model.pb.cc
         include/message/phe_keys.pb.h
         include/message/phe_keys.pb.cc
+        include/message/lr_params.pb.h
+        include/message/lr_params.pb.cc
         ../../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
         ../../include/falcon/operator/phe/djcs_t_aux.h
