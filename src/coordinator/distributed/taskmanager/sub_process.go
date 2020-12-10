@@ -5,7 +5,6 @@ import (
 	"coordinator/logger"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -24,7 +23,6 @@ type SubProcessManager struct {
 	NumProc int
 
 	// if the subprocess is killed
-	IsWait  bool
 	// if the subprocess is finished normally
 
 }
@@ -34,8 +32,6 @@ func InitSubProcessManager() *SubProcessManager {
 
 	pm.IsStop = make(chan bool)
 	pm.NumProc = 0
-
-	pm.IsWait = true
 
 	return pm
 
@@ -78,11 +74,31 @@ loop:
 }
 
 func (pm *SubProcessManager) ExecuteSubProc(
-	dir, stdIn, commend string,
-	args []string,
+	cmd *exec.Cmd,
 	envs []string,
-) (bool, string, string, string) {
 
+) (bool, string, string, string) {
+/**
+ * @Author
+ * @Description
+ * @Date 11:54 上午 10/12/20
+ * @Param
+	// Env specifies the environment of the process.
+      // Each entry is of the form "key=value".
+      // If Env is nil, the new process uses the current process's
+      // environment.
+      // If Env contains duplicate environment keys, only the last
+      // value in the slice for each duplicate key is used.
+      // As a special case on Windows, SYSTEMROOT is always added if
+      // missing and not explicitly set to the empty string.
+
+	Dir specifies the working directory of the command.
+  	    If Dir is the empty string, Run runs the command in the
+  	    calling process's current directory.
+
+
+ * @return
+ **/
 	defer func() {
 		logger.Do.Println("SubProcessManager: Getting lock")
 		pm.Lock()
@@ -92,53 +108,22 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		logger.Do.Println("SubProcessManager: Unlock done")
 	}()
 
-	cmd := exec.Command(commend, args...)
-
-	if len(dir) > 0 {
-		cmd.Dir = dir
-	}
-
 	if len(envs) > 0 {
 		cmd.Env = append(os.Environ(), envs...)
 	}
 
-	if len(stdIn) > 0 {
-		cmd.Stdin = strings.NewReader(stdIn)
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		logger.Do.Println(err)
+		return false, err.Error(), "", ""
+
 	}
 
-	var stderr io.ReadCloser
-	var stdout io.ReadCloser
-	var err error
-
-	if pm.IsWait{
-		stderr, err = cmd.StderrPipe()
-		if err != nil {
-			logger.Do.Println(err)
-			return false, err.Error(), "", ""
-
-		}
-
-		stdout, err = cmd.StdoutPipe()
-		if err != nil {
-			logger.Do.Println(err)
-			return false, err.Error(), "", ""
-
-		}
-	}else{
-		_, err := cmd.StderrPipe()
-		if err != nil {
-			logger.Do.Println(err)
-			return false, err.Error(), "", ""
-		}
-
-		_, err = cmd.StdoutPipe()
-		if err != nil {
-			logger.Do.Println(err)
-			return false, err.Error(), "", ""
-
-		}
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		logger.Do.Println(err)
+		return false, err.Error(), "", ""
 	}
-
 
 	// shutdown the process after 2 hour, if still not finish
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
@@ -167,16 +152,9 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		pm.NumProc += 1
 		pm.Unlock()
 
-
-		var errLog []byte
-		var outLog []byte
-		var outErr error
-
-		if pm.IsWait{
-			errLog, _ = ioutil.ReadAll(stderr)
-			outLog, _ = ioutil.ReadAll(stdout)
-			outErr = cmd.Wait()
-		}
+		errLog, _ := ioutil.ReadAll(stderr)
+		outLog, _ := ioutil.ReadAll(stdout)
+		outErr := cmd.Wait()
 
 
 		var oe string
@@ -206,7 +184,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 
 
 
-func (pm *SubProcessManager) ExecuteSubProc2(
+func (pm *SubProcessManager) ExecuteSubProcStream(
 	dir, stdIn, commend string,
 	args []string,
 	envs []string,

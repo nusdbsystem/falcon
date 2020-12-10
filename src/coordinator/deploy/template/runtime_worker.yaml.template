@@ -39,7 +39,7 @@ spec:
           name: "port-WORKER_TARGET_PORT"  # .ports[0].name: Invalid value: "train-8490548680670953438": must be no more than 15 characters
       volumeMounts:
         - name: falcon-listener
-          mountPath: ./logs
+          mountPath: go/logs
   volumes:
     - name: falcon-listener
       hostPath:

@@ -4,6 +4,7 @@ import (
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"fmt"
+	"os/exec"
 	"testing"
 	"time"
 )
@@ -12,11 +13,16 @@ func TestSubProc(t *testing.T) {
 	logger.Do, logger.F = logger.GetLogger("./TestSubProc")
 
 	//dir := "/Users/nailixing/GOProj/src/coordinator/falcon_ml"
+
+	out, err := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2").Output()
+	fmt.Println(out, err)
+
+
 	dir:=""
 	stdIn := "input from keyboard"
-	commend := "python"
+	commend := "python3"
 	args := []string{"/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml/preprocessing.py"}
-	envs := []string{}
+	var envs []string
 
 	pm := taskmanager.InitSubProcessManager()
 

@@ -57,7 +57,7 @@ func (ms *MetaStore) Connect() {
 
 	var db *gorm.DB
 	var err error
-	NTimes := 10
+	NTimes := 20
 
 	for {
 		if NTimes<0{
@@ -67,7 +67,7 @@ func (ms *MetaStore) Connect() {
 		if err != nil {
 			logger.Do.Println(err)
 			logger.Do.Println("MetaStore: connecting Db...retry")
-			time.Sleep(time.Second*3)
+			time.Sleep(time.Second*5)
 			NTimes--
 		}else{
 			ms.Db = db

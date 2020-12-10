@@ -23,7 +23,7 @@ ENV PYTHONUNBUFFERED 1
 
 COPY bin/coordinator_server ./coordinator_server
 
-COPY testggg.go ./testggg.go
+COPY test/testggg.go ./testggg.go
 COPY falcon_ml/preprocessing.py ./preprocessing.py
 
 ADD deploy ./deploy

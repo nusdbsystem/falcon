@@ -132,7 +132,7 @@ var (
 	// sys port, here COORD_TARGET_PORT must equal to
 	CoordPort   = ""
 	ListenerPort = ""
-
+	ListenerId = ""
 	// envs
 	Env = getEnv("Env", DevEnv)
 

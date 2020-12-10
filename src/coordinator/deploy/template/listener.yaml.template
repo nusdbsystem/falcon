@@ -6,7 +6,7 @@ spec:
   type: NodePort # by default, it's cluster Ip, if use nodePort, need to provide type here
   ports:
     - port: LISTENER_PORT  #这里port集群内部clusterIp 对应的端口
-      targetPort: LISTENER_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
+      targetPort: LISTENER_NODE_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
       nodePort: LISTENER_NODE_PORT  #这里是物理机的端口
   selector:
     app: falcon-listener-PARTY_NUMBER
@@ -32,9 +32,9 @@ spec:
           imagePullPolicy: IfNotPresent
           envFrom:
           - configMapRef:
-              name: listener-config
+              name: listener-config-PARTY_NUMBER
           ports:
-            - containerPort: LISTENER_TARGET_PORT  #这里containerPort是容器内部的port
+            - containerPort: LISTENER_NODE_PORT  #这里containerPort是容器的port， 代码中用的是nodePort 的环境变量，所以这里也得是nodePort，
               name: listener
           volumeMounts:
             - name: falcon-listener

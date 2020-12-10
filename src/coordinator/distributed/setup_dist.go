@@ -133,10 +133,10 @@ func SetupWorkerHelper(masterAddress, taskType string)  {
 		var serviceName string
 
 		if taskType == common.TrainExecutor{
-			serviceName = "train-" + itemKey
+			serviceName = "worker-train-" + common.ListenerId + "-" + itemKey
 			logger.Do.Println("SetupWorkerHelper: Current in Prod, TrainExecutor, svcName", serviceName)
 		}else if taskType == common.PredictExecutor{
-			serviceName = "predict-" + itemKey
+			serviceName = "worker-predict-" + common.ListenerId + "-" + itemKey
 			logger.Do.Println("SetupWorkerHelper: Current in Prod, PredictExecutor, svcName", serviceName)
 		}
 
@@ -197,16 +197,20 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 
 		// send a request to http
 		logger.Do.Printf("SetupDist: current listener's ip: %s ...\n", ip)
-		lisPort := c.GetExistPort(common.CoordSvcURLGlobal, ip)
+		//lisPort := c.GetExistPort(common.CoordSvcURLGlobal, ip)
 
-		logger.Do.Printf("SetupDist: master is calling listener: %s ...\n", ip+":" + lisPort)
+		logger.Do.Printf("SetupDist: master is calling listener: %s ...\n", ip)
 
-		c.SetupWorker(ip+":" + lisPort, masterAddress, taskType)
+		// todo, manage listener port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, taskType), such that user dont need
+		//  to provide port in dsl
+		c.SetupWorker(ip, masterAddress, taskType)
 	}
 
 	logger.Do.Printf("SetupDist: master is running at %s ... waiting\n", masterAddress)
 
 	ms.Wait()
+
+	logger.Do.Println("SetupDist: master finish all jobs")
 
 	return masterAddress
 }

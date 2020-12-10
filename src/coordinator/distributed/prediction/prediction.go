@@ -7,6 +7,7 @@ import (
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
+	"os/exec"
 )
 
 type ModelService struct{
@@ -30,15 +31,14 @@ func (msvc *ModelService) CreateService(dta *entitiy.DoTaskArgs) {
 	// todo gobuild.sh sub process to run prediction job
 
 	logger.Do.Println("ModelService: CreateService")
-	dir := "PartyPath.DataInput"
-	stdIn := ""
-	command := "/Users/nailixing/.virtualenvs/test_pip/bin/python"
-	args := []string{dta.ExecutablePath[0], "-a=1", "-b=2"}
-	envs := []string{}
+
+	cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
+
+	var envs []string
 
 	// 2 thread will ready from isStop channel, only one is running at the any time
 
-	killed, e, el, ol := msvc.pm.ExecuteSubProc(dir, stdIn, command, args, envs)
+	killed, e, el, ol := msvc.pm.ExecuteSubProc(cmd, envs)
 
 	logger.Do.Println("Worker:task 1 pre processing done", killed, e, el, ol)
 

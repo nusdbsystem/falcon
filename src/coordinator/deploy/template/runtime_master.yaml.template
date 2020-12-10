@@ -46,7 +46,7 @@ spec:
           name: MASTER_NAME
       volumeMounts:
         - name: coord-storage
-          mountPath: ./logs
+          mountPath: go/logs
   volumes:
     - name: coord-storage
       persistentVolumeClaim:

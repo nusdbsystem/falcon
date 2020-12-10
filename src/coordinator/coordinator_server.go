@@ -93,6 +93,8 @@ func InitEnvs(svcName string){
 		// run listener requires to get a new listener port
 		common.ListenerPort = common.GetEnv("LISTENER_NODE_PORT", "")
 
+		common.ListenerId = common.GetEnv("PARTY_NUMBER", "")
+
 		// listener needs will send this to coord
 		common.ListenURLGlobal = common.ListenAddrGlobal + ":" + common.ListenerPort
 

@@ -17,6 +17,8 @@ kubectl delete configmap coord-config
 kubectl delete configmap redis-config
 kubectl delete configmap redis-envs
 kubectl delete configmap listener-config
+kubectl delete configmap listener-config-1
+kubectl delete configmap listener-config-2
 
 . config_coord.properties
 rm -rf $DATA_BASE_PATH/database

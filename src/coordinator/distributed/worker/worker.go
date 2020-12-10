@@ -10,6 +10,7 @@ import (
 	"coordinator/logger"
 	"fmt"
 	"time"
+	"os/exec"
 )
 
 type Worker struct {
@@ -28,7 +29,7 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
 	logger.Do.Printf("Worker: %s task started \n", wk.Address)
 
-	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
+	//var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
 
 	rep.Errs = make(map[string]string)
 	rep.ErrLogs = make(map[string]string)
@@ -37,16 +38,17 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 	// execute task 1: data processing
 
 	logger.Do.Println("Worker:task 1 pre processing start")
-	dir := dta.PartyPath.DataInput
-	stdIn := ""
-	command := "python3"
-	//args := []string{dta.TaskInfos.PreProcessing.AlgorithmName, "-a=1", "-b=2"}
-	args := []string{"./preprocessing.py", "-a=1", "-b=2"}
-	envs := []string{}
+	out, err := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2").Output()
+	fmt.Println(string(out), err)
 
+	//dir := dta.PartyPath.DataInput
+	var envs []string
+	cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
+
+	//time.Sleep(time.Minute*20)
 	// 2 thread will ready from isStop channel, only one is running at the any time
 
-	killed, e, el, ol := wk.pm.ExecuteSubProc(dir, stdIn, command, args, envs)
+	killed, e, el, ol := wk.pm.ExecuteSubProc(cmd, envs)
 	rep.Killed = killed
 	if killed {
 		wk.taskFinish <- true
@@ -72,13 +74,13 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
 	// execute task 2: train
 	logger.Do.Println("Worker:task model training start")
-	dir = dta.PartyPath.Model
-	stdIn = ""
-	command = "python3"
-	//args = []string{dta.TaskInfos.ModelTraining.AlgorithmName}
-	envs = []string{}
+	//dir = "dta.PartyPath.Model"
+	//stdIn = ""
+	//envs = []string{}
 
-	killed, e, el, ol = wk.pm.ExecuteSubProc(dir, stdIn, command, args, envs)
+	cmd2 := exec.Command("python3", "./preprocessing.py", "-a=1", "-b=2")
+
+	killed, e, el, ol = wk.pm.ExecuteSubProc(cmd2, envs)
 
 	rep.Killed = killed
 	if killed {

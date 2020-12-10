@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ListenerAdd(ServerAddress, listenerAddr, listenerPort string) {
+func ListenerAdd(ServerAddress, listenerAddr, listenerPort string) error {
 	data := url.Values{
 		common.ListenerAddr: {listenerAddr},
 		common.ListenerPortKey: {listenerPort},
@@ -15,7 +15,8 @@ func ListenerAdd(ServerAddress, listenerAddr, listenerPort string) {
 
 	reqUrl := ServerAddress + "/" + common.ListenerAdd
 
-	_ = PostForm(reqUrl, data)
+	e := PostForm(reqUrl, data)
+	return e
 
 }
 
@@ -145,12 +146,12 @@ func GetExistPort(ServerAddr, ListenerIp string) string{
 }
 
 
-func AddPort(ServerAddress, port string) {
+func AddPort(ServerAddress, port string) error{
 
 	data := url.Values{common.AddPort: {port}}
 
 	reqUrl := ServerAddress + "/" + common.AddPort
 
-	_ = PostForm(reqUrl, data)
-
+	e := PostForm(reqUrl, data)
+	return e
 }
