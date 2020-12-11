@@ -524,7 +524,7 @@ void train_logistic_regression(Party party, std::string params_str) {
   // currently for testing
   LogisticRegressionParams params;
   params.batch_size = 32;
-  params.max_iteration = 2;
+  params.max_iteration = 100;
   params.converge_threshold = 1e-3;
   params.with_regularization = false;
   params.alpha = 0.1;
