@@ -17,10 +17,13 @@ func SetupWorker() func(w http.ResponseWriter, r *http.Request) {
 		masterAddress := r.FormValue(common.MasterAddr)
 		taskType := r.FormValue(common.TaskType)
 		jobId := r.FormValue(common.JobId)
+		dataPath := r.FormValue(common.TrainDataPath)
+		modelPath := r.FormValue(common.ModelPath)
+		dataOutput := r.FormValue(common.TrainDataOutput)
 
 		go func(){
 			defer logger.HandleErrors()
-			controller.SetupWorker(masterAddress, taskType, jobId)
+			controller.SetupWorker(masterAddress, taskType, jobId, dataPath,modelPath, dataOutput)
 		}()
 
 	}

@@ -24,7 +24,7 @@ ENV PYTHONUNBUFFERED 1
 COPY bin/coordinator_server ./coordinator_server
 
 COPY test/testggg.go ./testggg.go
-COPY falcon_ml/preprocessing.py ./preprocessing.py
+COPY falcon_ml/readwrite.py ./readwrite.py
 
 ADD deploy ./deploy
 ADD scripts ./scripts

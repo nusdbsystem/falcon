@@ -8,7 +8,6 @@ import (
 	"coordinator/logger"
 	"net/http"
 	"os"
-	"time"
 )
 
 func SetupListener() {
@@ -38,43 +37,24 @@ func SetupListener() {
 		c.ListenerDelete(common.CoordSvcURLGlobal, common.ListenAddrGlobal)
 	}()
 
-	NTimes := 20
-	for {
-		if NTimes<0{
-			panic("\"SetupListener: connecting to coord Db...retry\"")
-		}
-		err := c.AddPort(common.CoordSvcURLGlobal, common.ListenerPort)
-		if err != nil{
-			logger.Do.Println(err)
-			logger.Do.Printf("SetupListener: connecting to coord %s ...retry \n", common.CoordSvcURLGlobal)
-			time.Sleep(time.Second*5)
-			NTimes--
-		}else{
-			break
-		}
+	logger.Do.Printf("SetupListener: connecting to coord  %s to AddPort\n", common.CoordSvcURLGlobal)
+
+	err := c.AddPort(common.CoordSvcURLGlobal, common.ListenerPort)
+
+	if err!=nil{
+		panic("SetupListener: Server closed under request, "+err.Error())
 	}
 
-	NTimes = 20
-	for {
-		if NTimes<0{
-			panic("\"SetupListener: connecting to coord Db...retry\"")
-		}
-		err := c.ListenerAdd(common.CoordSvcURLGlobal, common.ListenAddrGlobal, common.ListenerPort)
+	logger.Do.Printf("SetupListener: ListenerAdd %s ...retry \n", common.ListenAddrGlobal)
 
-		if err != nil{
-			logger.Do.Println(err)
-			logger.Do.Printf("SetupListener: ListenerAdd %s ...retry \n", common.ListenAddrGlobal)
-			time.Sleep(time.Second*5)
-			NTimes--
-		}else{
-			break
-		}
+	err = c.ListenerAdd(common.CoordSvcURLGlobal, common.ListenAddrGlobal, common.ListenerPort)
+
+	if err!=nil{
+		panic("SetupListener: ListenerAdd error, "+err.Error())
 	}
-
-
 
 	logger.Do.Println("Starting HTTP server...")
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 
 	if err != nil {
 		if err == http.ErrServerClosed {

@@ -9,8 +9,8 @@ import (
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"fmt"
-	"time"
 	"os/exec"
+	"time"
 )
 
 type Worker struct {
@@ -29,7 +29,46 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
 	logger.Do.Printf("Worker: %s task started \n", wk.Address)
 
-	//var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
+	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
+
+	var dataIn4Paths []string
+	var dataOut4Paths []string
+	var dataKey string
+	//var dataAlgoCfig map[string]interface{}
+
+	var modelInput []string
+	var model4Paths []string
+	var modelReport string
+	var modelKey string
+	//var modelAlgoCfig map[string]interface{}
+
+
+	for _, v := range dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Data{
+
+		dataIn4Paths = append(dataIn4Paths, common.TaskDataPath + v )
+	}
+
+	for _, v := range dta.TaskInfos.PreProcessing.OutputConfigs.DataOutput{
+
+		dataOut4Paths = append(dataOut4Paths, common.TaskDataOutput + v )
+	}
+
+	for _, v := range dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Data{
+
+		modelInput = append(modelInput, common.TaskDataOutput + v )
+	}
+
+	for _, v := range dta.TaskInfos.ModelTraining.OutputConfigs.TrainedModel{
+
+		model4Paths = append(model4Paths, common.TaskModelPath + v )
+	}
+
+	modelReport = dta.TaskInfos.ModelTraining.OutputConfigs.EvaluationReport
+
+	dataKey = dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Key
+	modelKey = dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Key
+
+	fmt.Println(dataKey, modelKey, modelReport)
 
 	rep.Errs = make(map[string]string)
 	rep.ErrLogs = make(map[string]string)
@@ -38,12 +77,11 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 	// execute task 1: data processing
 
 	logger.Do.Println("Worker:task 1 pre processing start")
-	out, err := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2").Output()
-	fmt.Println(string(out), err)
 
-	//dir := dta.PartyPath.DataInput
 	var envs []string
-	cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
+	cmd := exec.Command(
+		"python3",
+		"/go/readwrite.py", "-i="+dataIn4Paths[0], "-o="+dataOut4Paths[0], "-model="+model4Paths[0])
 
 	//time.Sleep(time.Minute*20)
 	// 2 thread will ready from isStop channel, only one is running at the any time
@@ -74,11 +112,10 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
 	// execute task 2: train
 	logger.Do.Println("Worker:task model training start")
-	//dir = "dta.PartyPath.Model"
-	//stdIn = ""
-	//envs = []string{}
 
-	cmd2 := exec.Command("python3", "./preprocessing.py", "-a=1", "-b=2")
+	cmd2 := exec.Command(
+		"python3",
+		"/go/readwrite.py", "-i="+dataIn4Paths[0], "-o="+dataOut4Paths[0], "-model="+model4Paths[0])
 
 	killed, e, el, ol = wk.pm.ExecuteSubProc(cmd2, envs)
 

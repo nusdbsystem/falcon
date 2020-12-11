@@ -27,8 +27,9 @@ func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskT
 	var workerAddress []string
 
 	for i := 0; i < len(qItem.IPs); i++ {
-		logger.Do.Printf("Scheduler: Reading worker %s from registerChan\n", qItem.IPs[i])
 		addr := <-registerChan
+		logger.Do.Printf("Scheduler: Reading worker %s from registerChan\n", addr)
+		logger.Do.Printf("Scheduler: Reading corresponding listenerUrl %s from registerChan\n", qItem.IPs[i])
 		workerAddress = append(workerAddress, addr)
 	}
 
@@ -111,7 +112,7 @@ func (this *Master) trainTaskHandler(
 
 	// todo, now master call worker.Dotask, worker start to train, until training is done, so how long it will wait? before timeout
 
-	logger.Do.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
+	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", svcName, workerAddr)
 	ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
 
 	if !ok {
@@ -129,6 +130,8 @@ func (this *Master) trainTaskHandler(
 
 		time.Sleep(time.Minute*30)
 		panic("trainTaskHandler error")
+	}else{
+		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", svcName, workerAddr)
 	}
 
 	errLen := 4096

@@ -9,11 +9,19 @@ EXECUTOR_TYPE_PLACEHOLDER=$4
 WORKER_URL_PLACEHOLDER=$5
 SERVICE_NAME_PLACEHOLDER=$6
 Env_PLACEHOLDER=$7
-DATA_BASE_PATH=$8
+DATA_BASE_PATH=$8 # used to store logs
+
+HOST_DATA_PATH=$9 # used to store train data
+HOST_MODEL_PATH=${10}
+HOST_DATA_OUTPUT=${11}
 
 echo "$WORKER_URL_PLACEHOLDER"
 
 BASE_PATH=$(echo "$DATA_BASE_PATH" | sed 's_/_\\/_g')
+
+DATA_INPUT_PATH=$(echo "$HOST_DATA_PATH" | sed 's_/_\\/_g')
+MODEL_PATH=$(echo "$HOST_MODEL_PATH" | sed 's_/_\\/_g')
+DATA_OUTPUT_PATH=$(echo "$HOST_DATA_OUTPUT" | sed 's_/_\\/_g')
 
 IMAGE=$(echo "$FALCON_WORKER_IMAGE" | sed 's_/_\\/_g')
 # create new yaml according template
@@ -33,3 +41,6 @@ sed -i -e "s/EXECUTOR_TYPE_PLACEHOLDER/$EXECUTOR_TYPE_PLACEHOLDER/g" $WORKER_YAM
 sed -i -e "s/WORKER_URL_PLACEHOLDER/$WORKER_URL_PLACEHOLDER/g" $WORKER_YAML || exit 1
 sed -i -e "s/HOST_PATH/$BASE_PATH/g" $WORKER_YAML || exit 1
 sed -i -e "s/Env_PLACEHOLDER/$Env_PLACEHOLDER/g" $WORKER_YAML || exit 1
+sed -i -e "s/HOST_DATA_PATH/$DATA_INPUT_PATH/g" $WORKER_YAML || exit 1
+sed -i -e "s/HOST_MODEL_PATH/$MODEL_PATH/g" $WORKER_YAML || exit 1
+sed -i -e "s/HOST_DATA_OUTPUT/$DATA_OUTPUT_PATH/g" $WORKER_YAML || exit 1

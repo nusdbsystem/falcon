@@ -11,7 +11,7 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: RUNTIMELOG_PATH
+    path: RUNTIMELOG_PATH # change to nfs or others in real production
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

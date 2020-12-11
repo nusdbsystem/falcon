@@ -11,9 +11,6 @@ type QItem struct {
 	JobId     uint
 	PartyPath []common.PartyPath
 	TaskInfos common.Tasks
-
-	ModelPath []string
-	ExecutablePath []string
 }
 
 func argTypeRegister() {

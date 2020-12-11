@@ -45,7 +45,7 @@ spec:
           value: "MASTER_NAME"
       ports:
         - containerPort: MASTER_TARGET_PORT  #这里containerPort是容器内部的port
-          name: MASTER_NAME
+          name: "port-MASTER_TARGET_PORT"
       volumeMounts:
         - name: coord-storage
           mountPath: go/logs

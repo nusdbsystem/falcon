@@ -33,15 +33,13 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 		panic("json.Unmarshal(PartyIds or TaskInfos) error")
 	}
 
-	iPs ,partyPath, modelPath, executablePath := common.ParsePartyInfo(pInfo, taskInfos)
+	iPs ,partyPath := common.ParsePartyInfo(pInfo)
 
 	qItem := new(cache.QItem)
 	qItem.IPs = iPs
 	qItem.JobId = jobId
 	qItem.PartyPath = partyPath
 	qItem.TaskInfos = taskInfos
-	qItem.ModelPath = modelPath
-	qItem.ExecutablePath = executablePath
 
 	go func(){
 		defer logger.HandleErrors()
