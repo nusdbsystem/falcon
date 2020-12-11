@@ -151,11 +151,6 @@ func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
 	}
 	// this is used to define shut down the worker servers
 
-	if common.Env==common.ProdEnv{
-		km := taskmanager.InitK8sManager(true,  "")
-		km.DeleteService(common.ExecutorCurrentName)
-	}
-
 	return nil
 }
 
