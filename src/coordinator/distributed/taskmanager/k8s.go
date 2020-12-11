@@ -121,7 +121,7 @@ func (km *K8sManager) CreateResources(filename string) {
 		}
 	}
 	if err != io.EOF {
-		logger.Do.Fatal("K8sManager: eof ", err)
+		logger.Do.Println("K8sManager: eof ", err)
 	}
 }
 
@@ -133,3 +133,15 @@ func (km *K8sManager) UpdateYaml(command string){
 }
 
 
+func (km *K8sManager) DeleteService(svcName string){
+	logger.Do.Printf("K8sManager: deleting svc %s...\n", svcName)
+
+	client, _ := kubernetes.NewForConfig(km.k8sConfig)
+
+	err := client.CoreV1().Services("default").Delete(context.TODO(), svcName, metav1.DeleteOptions{})
+
+	if err != nil {
+		logger.Do.Printf("K8sManager: delete svc %s error %s \n", svcName, err)
+
+	}
+}

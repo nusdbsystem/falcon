@@ -34,6 +34,8 @@ spec:
           value: "WORKER_URL_PLACEHOLDER"
         - name: Env
           value: "Env_PLACEHOLDER"
+        - name: EXECUTOR_NAME
+          value: "WORKER_NAME"
       ports:
         - containerPort: WORKER_TARGET_PORT  #这里containerPort是容器内部的port
           name: "port-WORKER_TARGET_PORT"  # .ports[0].name: Invalid value: "train-8490548680670953438": must be no more than 15 characters

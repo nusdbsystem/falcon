@@ -120,6 +120,8 @@ func InitEnvs(svcName string){
 
 		common.CoordSvcName = common.GetEnv("COORD_SVC_NAME", "")
 
+		common.ExecutorCurrentName = common.GetEnv("EXECUTOR_NAME", "")
+
 		// master communicate coord with ip+port in dev, with name+port in prod
 		if common.Env==common.DevEnv{
 
@@ -146,7 +148,7 @@ func InitEnvs(svcName string){
 		common.ExecutorTypeGlobal = common.GetEnv("EXECUTOR_TYPE", "")
 		common.WorkerURLGlobal = common.GetEnv("WORKER_URL", "")
 		common.MasterURLGlobal = common.GetEnv("MASTER_URL", "")
-
+		common.ExecutorCurrentName = common.GetEnv("EXECUTOR_NAME", "")
 		if common.MasterURLGlobal=="" || common.WorkerURLGlobal=="" {
 			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
 			os.Exit(1)
@@ -158,7 +160,7 @@ func InitEnvs(svcName string){
 		common.ExecutorTypeGlobal = common.GetEnv("EXECUTOR_TYPE", "")
 		common.WorkerURLGlobal = common.GetEnv("WORKER_URL", "")
 		common.MasterURLGlobal = common.GetEnv("MASTER_URL", "")
-
+		common.ExecutorCurrentName = common.GetEnv("EXECUTOR_NAME", "")
 		if common.MasterURLGlobal=="" || common.WorkerURLGlobal=="" {
 			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
 			os.Exit(1)

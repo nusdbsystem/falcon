@@ -6,6 +6,7 @@ import (
 	"coordinator/common"
 	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
+	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"fmt"
 	"reflect"
@@ -183,6 +184,12 @@ func (this *Master) KillJob(_, _ *struct{}) error {
 
 func (this *Master) Wait() {
 	<-this.doneChannel
+
+	if common.Env==common.ProdEnv{
+		km := taskmanager.InitK8sManager(true,  "")
+		km.DeleteService(common.ExecutorCurrentName)
+	}
+
 }
 
 func (this *Master) CheckWorker() bool {
