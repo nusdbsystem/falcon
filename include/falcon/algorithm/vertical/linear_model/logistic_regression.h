@@ -124,11 +124,13 @@ class LogisticRegression : public Model {
    *
    * @param party: initialized party object
    * @param batch_indexes: selected batch indexes
+   * @param type: denote training_data (0) or testing_data (1)
    * @param precision: the fixed point precision of encoded plaintext samples
    * @param batch_aggregation: returned phe aggregation for the batch
    */
   void compute_batch_phe_aggregation(const Party& party,
       std::vector<int> batch_indexes,
+      int type,
       int precision,
       EncodedNumber *batch_phe_aggregation);
 
@@ -154,6 +156,15 @@ class LogisticRegression : public Model {
    * @param party: initialized party object
    */
   void train(Party party);
+
+  /**
+   * test a logistic regression model
+   *
+   * @param party: initialized party object
+   * @param type: 0 for training data and 1 for testing data
+   * @param accuracy: returned model accuracy, default metric "acc"
+   */
+  void test(Party party, int type, float& accuracy);
 };
 
 /**

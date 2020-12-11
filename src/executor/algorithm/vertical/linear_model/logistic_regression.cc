@@ -106,6 +106,7 @@ std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
 
 void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
     std::vector<int> batch_indexes,
+    int type,
     int precision,
     EncodedNumber *batch_phe_aggregation) {
   // retrieve phe pub key and phe random
@@ -276,9 +277,8 @@ void LogisticRegression::train(Party party) {
   ///     2.1 randomly select a batch of indexes for current iteration
   ///     2.2 homomorphic aggregation on the batch samples
   ///     2.3 convert the batch ciphertexts to secret shares
-  ///     2.4 connect to spdz parties for mpc computations
-  ///     2.5 receive secret shared results from spdz party and aggregate
-  ///     2.6 update encrypted local weights carefully
+  ///     2.4 connect to spdz parties for mpc computations and receive results
+  ///     2.5 update encrypted local weights carefully
   /// 3. decrypt weights ciphertext
 
   // step 1: init encrypted local weights (here use 2 * precision for consistence in the following)
@@ -305,16 +305,13 @@ void LogisticRegression::train(Party party) {
     std::vector<int> batch_indexes = select_batch_idx(party, data_indexes);
     int cur_batch_size = batch_indexes.size();
 
-    std::cout << "step 2.1 success" << std::endl;
-
     // step 2.2: homomorphic batch aggregation (the precision should be 3 * prec now)
     EncodedNumber* encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
     compute_batch_phe_aggregation(party,
         batch_indexes,
+        0,
         plaintext_samples_precision,
         encrypted_batch_aggregation);
-
-    std::cout << "step 2.2 success" << std::endl;
 
     // step 2.3: convert the encrypted batch aggregation into secret shares
     int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
@@ -325,8 +322,7 @@ void LogisticRegression::train(Party party) {
         0,
         encrypted_batch_aggregation_precision);
 
-    std::cout << "step 2.3 success" << std::endl;
-
+    // step 2.4: communicate with spdz parties and receive results
     std::promise<std::vector<float>> promise_values;
     std::future<std::vector<float>> future_values = promise_values.get_future();
     std::thread spdz_thread(spdz_logistic_function_computation,
@@ -341,9 +337,7 @@ void LogisticRegression::train(Party party) {
     std::vector<float> batch_loss_shares = future_values.get();
     spdz_thread.join();
 
-    std::cout << "step 2.4 success" << std::endl;
-
-    // step 2.6: update encrypted local weights
+    // step 2.5: update encrypted local weights
     // TODO: currently does not support with_regularization
     std::vector<float> truncated_weights_shares;
     // need to make sure that update_precision * 2 = encrypted_weights_precision
@@ -353,8 +347,6 @@ void LogisticRegression::train(Party party) {
         truncated_weights_shares,
         batch_indexes,
         update_precision);
-
-    std::cout << "step 2.5 success" << std::endl;
 
     delete [] encrypted_batch_aggregation;
 
@@ -368,6 +360,96 @@ void LogisticRegression::train(Party party) {
   float training_consumed_time = float(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
   LOG(INFO) << "Training time = " << training_consumed_time;
   LOG(INFO) << "************* Training Finished *************";
+  google::FlushLogFiles(google::INFO);
+}
+
+void LogisticRegression::test(Party party, int type, float &accuracy) {
+  std::string s = (type == 0 ? "training dataset" : "testing dataset");
+  LOG(INFO) << "************* Testing on " << s << " Start *************";
+  const clock_t testing_start_time = clock();
+
+  /// the testing workflow is as follows:
+  ///     step 1: init test data
+  ///     step 2: every party computes partial phe summation and sends to active party
+  ///     step 3: active party aggregates and call collaborative decryption
+  ///     step 4: active party computes the logistic function and compare the accuracy
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  // step 1: init test data
+  int dataset_size = (type == 0) ? training_data.size() : testing_data.size();
+  std::vector< std::vector<float> > cur_test_dataset = (type == 0) ? training_data : testing_data;
+//  EncodedNumber** cur_test_dataset = new EncodedNumber*[dataset_size];
+//  for (int i = 0; i < dataset_size; i++) {
+//    cur_test_dataset[i] = new EncodedNumber[weight_size];
+//  }
+//  for (int i = 0; i < dataset_size; i++) {
+//    for (int j = 0; j < weight_size; j++) {
+//      if (type == 0) {
+//        // original training dataset
+//        cur_test_dataset[i][j].set_float(phe_pub_key->n[0],
+//            training_data[i][j],
+//            PHE_FIXED_POINT_PRECISION);
+//      } else {
+//        // original testing dataset
+//        cur_test_dataset[i][j].set_float(phe_pub_key->n[0],
+//            testing_data[i][j],
+//            PHE_FIXED_POINT_PRECISION);
+//      }
+//    }
+//  }
+
+  // step 2: every party computes partial phe summation and sends to active party
+  std::vector<int> indexes;
+  for (int i = 0; i < dataset_size; i++) {
+    indexes.push_back(i);
+  }
+  // homomorphic aggregation (the precision should be 3 * prec now)
+  int plaintext_precision = PHE_FIXED_POINT_PRECISION;
+  EncodedNumber* encrypted_aggregation = new EncodedNumber[dataset_size];
+  compute_batch_phe_aggregation(party,
+      indexes,
+      type,
+      plaintext_precision,
+      encrypted_aggregation);
+
+  // step 3: active party aggregates and call collaborative decryption
+  EncodedNumber* decrypted_aggregation = new EncodedNumber[dataset_size];
+  party.collaborative_decrypt(encrypted_aggregation,
+      decrypted_aggregation,
+      dataset_size,
+      0);
+
+  // step 4: active party computes the logistic function and compare the accuracy
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    int correct_num = 0;
+    //std::vector<float> decoded_aggregation;
+    for (int i = 0; i < dataset_size; i++) {
+      float t;
+      decrypted_aggregation[i].decode(t);
+      t = 1.0 / (1 + exp(0 - t));
+      int prediction = t >= 0.5 ? 1 : 0;
+      if (type == 0) {
+        if (prediction == training_labels[i]) correct_num += 1;
+      } else {
+        if (prediction == testing_labels[i]) correct_num += 1;
+      }
+    }
+    float accuracy = (float) correct_num / dataset_size;
+    LOG(INFO) << "The testing accuracy on " << s << " is: " << accuracy;
+  }
+
+  // free memory
+  djcs_t_free_public_key(phe_pub_key);
+  delete [] encrypted_aggregation;
+  delete [] decrypted_aggregation;
+
+  const clock_t testing_finish_time = clock();
+  float testing_consumed_time = float(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
+  LOG(INFO) << "Testing time = " << testing_consumed_time;
+  LOG(INFO) << "************* Testing on " << s << " Finished *************";
   google::FlushLogFiles(google::INFO);
 }
 
@@ -442,7 +524,7 @@ void train_logistic_regression(Party party, std::string params_str) {
   // currently for testing
   LogisticRegressionParams params;
   params.batch_size = 32;
-  params.max_iteration = 5;
+  params.max_iteration = 2;
   params.converge_threshold = 1e-3;
   params.with_regularization = false;
   params.alpha = 0.1;
@@ -484,4 +566,5 @@ void train_logistic_regression(Party party, std::string params_str) {
   std::cout << "Init model success" << std::endl;
 
   model.train(party);
+  model.test(party, 1, testing_accuracy);
 }
