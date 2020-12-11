@@ -16,18 +16,8 @@
 
 LogisticRegression::LogisticRegression() {}
 
-LogisticRegression::LogisticRegression(int m_batch_size,
-    int m_max_iteration,
-    float m_converge_threshold,
-    bool m_with_regularization,
-    float m_alpha,
-    float m_learning_rate,
-    float m_decay,
+LogisticRegression::LogisticRegression(LogisticRegressionParams lr_params,
     int m_weight_size,
-    std::string m_penalty,
-    std::string m_optimizer,
-    std::string m_multi_class,
-    std::string m_metric,
     std::vector<std::vector<float> > m_training_data,
     std::vector<std::vector<float> > m_testing_data,
     std::vector<float> m_training_labels,
@@ -39,18 +29,19 @@ LogisticRegression::LogisticRegression(int m_batch_size,
         std::move(m_testing_labels),
         m_training_accuracy,
         m_testing_accuracy) {
-  batch_size = m_batch_size;
-  max_iteration = m_max_iteration;
-  converge_threshold = m_converge_threshold;
-  with_regularization = m_with_regularization;
-  alpha = m_alpha;
-  learning_rate = m_learning_rate;
-  decay = m_decay;
+  batch_size = lr_params.batch_size;
+  max_iteration = lr_params.max_iteration;
+  converge_threshold = lr_params.converge_threshold;
+  with_regularization = lr_params.with_regularization;
+  alpha = lr_params.alpha;
+  learning_rate = lr_params.alpha;
+  decay = lr_params.decay;
   weight_size = m_weight_size;
-  penalty = std::move(m_penalty);
-  optimizer = std::move(m_optimizer);
-  multi_class = std::move(m_multi_class);
-  metric = std::move(m_metric);
+  penalty = std::move(lr_params.penalty);
+  optimizer = std::move(lr_params.optimizer);
+  multi_class = std::move(lr_params.multi_class);
+  metric = std::move(lr_params.metric);
+  dp_budget = lr_params.dp_budget;
   local_weights = new EncodedNumber[weight_size];
 }
 
@@ -442,24 +433,26 @@ void spdz_logistic_function_computation(int party_num,
   }
 }
 
-void train_logistic_regression(Party party, std::string params) {
+void train_logistic_regression(Party party, std::string params_str) {
 
   LOG(INFO) << "Run the example logistic regression train";
   std::cout << "Run the example logistic regression train" << std::endl;
 
   // TODO: Parse the params and match with the LogisticRegression parameters
   // currently for testing
-  int batch_size = 32;
-  int max_iteration = 5;
-  float converge_threshold = 1e-3;
-  bool with_regularization = false;
-  float alpha = 0.1;
-  float learning_rate = 0.05;
-  float decay = 1.0;
-  std::string penalty = "l2";
-  std::string optimizer = "sgd";
-  std::string multi_class = "ovr";
-  std::string metric = "acc";
+  LogisticRegressionParams params;
+  params.batch_size = 32;
+  params.max_iteration = 5;
+  params.converge_threshold = 1e-3;
+  params.with_regularization = false;
+  params.alpha = 0.1;
+  params.learning_rate = 0.05;
+  params.decay = 1.0;
+  params.penalty = "l2";
+  params.optimizer = "sgd";
+  params.multi_class = "ovr";
+  params.metric = "acc";
+  params.dp_budget = 0.1;
   int weight_size = party.getter_feature_num();
   float training_accuracy = 0.0;
   float testing_accuracy = 0.0;
@@ -478,18 +471,8 @@ void train_logistic_regression(Party party, std::string params) {
   LOG(INFO) << "Init logistic regression model";
   std::cout << "Init logistic regression model" << std::endl;
 
-  LogisticRegression model(batch_size,
-      max_iteration,
-      converge_threshold,
-      with_regularization,
-      alpha,
-      learning_rate,
-      decay,
+  LogisticRegression model(params,
       weight_size,
-      penalty,
-      optimizer,
-      multi_class,
-      metric,
       training_data,
       testing_data,
       training_labels,

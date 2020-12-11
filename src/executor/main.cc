@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
 
   int party_id, party_num, party_type, fl_setting, use_existing_key;
-  std::string network_file, log_file, data_file, key_file, algorithm_name;
+  std::string network_file, log_file, data_file, key_file, algorithm_name, algorithm_params;
 
   try {
     namespace po = boost::program_options;
@@ -39,7 +39,8 @@ int main(int argc, char *argv[]) {
         ("data-file", po::value<std::string>(&data_file), "file name of dataset")
         ("existing-key", po::value<int>(&use_existing_key), "whether use existing phe keys")
         ("key-file", po::value<std::string>(&key_file), "file name of phe keys")
-        ("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run");
+        ("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run")
+        ("algorithm-params", po::value<std::string>(&algorithm_params), "parameters for the algorithm");
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
@@ -61,6 +62,7 @@ int main(int argc, char *argv[]) {
     std::cout << "data-file: " << vm["data-file"].as< std::string >() << std::endl;
     std::cout << "key-file: " << vm["key-file"].as< std::string >() << std::endl;
     std::cout << "algorithm-name: " << vm["algorithm-name"].as< std::string >() << std::endl;
+    std::cout << "algorithm-params: " << vm["algorithm-params"].as< std::string >() << std::endl;
   }
   catch(std::exception& e)
   {
@@ -81,6 +83,7 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "data_file: " << data_file;
   LOG(INFO) << "key_file: " << key_file;
   LOG(INFO) << "algorithm_name: " << algorithm_name;
+  LOG(INFO) << "algorithm_params: " << algorithm_params;
 
   Party party(party_id, party_num,
       static_cast<falcon::PartyType>(party_type),
@@ -94,7 +97,6 @@ int main(int argc, char *argv[]) {
   std::cout << "Parse algorithm name and run the program" << std::endl;
 
   falcon::AlgorithmName name = parse_algorithm_name(algorithm_name);
-  std::string algorithm_params;
   switch(name) {
     case falcon::LR:
       train_logistic_regression(party, algorithm_params);
