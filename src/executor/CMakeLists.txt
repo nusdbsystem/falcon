@@ -19,6 +19,8 @@ set(SOURCE_FILES
         utils/pb_converter/common_converter.cc
         ../../include/falcon/utils/pb_converter/lr_params_converter.h
         utils/pb_converter/lr_params_converter.cc
+        ../../include/falcon/utils/metric/accuracy.h
+        utils/metric/accuracy.cc
         include/message/common.pb.h
         include/message/common.pb.cc
         include/message/model.pb.h

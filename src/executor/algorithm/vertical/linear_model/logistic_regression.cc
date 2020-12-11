@@ -13,6 +13,7 @@
 #include <glog/logging.h>
 #include <Networking/ssl_sockets.h>
 #include <falcon/operator/mpc/spdz_connector.h>
+#include <falcon/utils/metric/accuracy.h>
 
 LogisticRegression::LogisticRegression() {}
 
@@ -281,6 +282,11 @@ void LogisticRegression::train(Party party) {
   ///     2.5 update encrypted local weights carefully
   /// 3. decrypt weights ciphertext
 
+  if (optimizer != "sgd") {
+    LOG(ERROR) << "The " << optimizer << " optimizer does not supported";
+    return;
+  }
+
   // step 1: init encrypted local weights (here use 2 * precision for consistence in the following)
   int encrypted_weights_precision = 2 * PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
@@ -381,25 +387,6 @@ void LogisticRegression::test(Party party, int type, float &accuracy) {
   // step 1: init test data
   int dataset_size = (type == 0) ? training_data.size() : testing_data.size();
   std::vector< std::vector<float> > cur_test_dataset = (type == 0) ? training_data : testing_data;
-//  EncodedNumber** cur_test_dataset = new EncodedNumber*[dataset_size];
-//  for (int i = 0; i < dataset_size; i++) {
-//    cur_test_dataset[i] = new EncodedNumber[weight_size];
-//  }
-//  for (int i = 0; i < dataset_size; i++) {
-//    for (int j = 0; j < weight_size; j++) {
-//      if (type == 0) {
-//        // original training dataset
-//        cur_test_dataset[i][j].set_float(phe_pub_key->n[0],
-//            training_data[i][j],
-//            PHE_FIXED_POINT_PRECISION);
-//      } else {
-//        // original testing dataset
-//        cur_test_dataset[i][j].set_float(phe_pub_key->n[0],
-//            testing_data[i][j],
-//            PHE_FIXED_POINT_PRECISION);
-//      }
-//    }
-//  }
 
   // step 2: every party computes partial phe summation and sends to active party
   std::vector<int> indexes;
@@ -424,21 +411,25 @@ void LogisticRegression::test(Party party, int type, float &accuracy) {
 
   // step 4: active party computes the logistic function and compare the accuracy
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    int correct_num = 0;
-    //std::vector<float> decoded_aggregation;
-    for (int i = 0; i < dataset_size; i++) {
-      float t;
-      decrypted_aggregation[i].decode(t);
-      t = 1.0 / (1 + exp(0 - t));
-      int prediction = t >= 0.5 ? 1 : 0;
-      if (type == 0) {
-        if (prediction == training_labels[i]) correct_num += 1;
-      } else {
-        if (prediction == testing_labels[i]) correct_num += 1;
+    if (metric == "acc") {
+      std::vector<float> vec;
+      for (int i = 0; i < dataset_size; i++) {
+        float t;
+        decrypted_aggregation[i].decode(t);
+        t = 1.0 / (1 + exp(0 - t));
+        t = t >= 0.5 ? 1 : 0;
+        vec.push_back(t);
       }
+      if (type == 0) {
+        accuracy = accuracy_computation(vec, training_labels);
+      } else {
+        accuracy = accuracy_computation(vec, testing_labels);
+      }
+      LOG(INFO) << "The testing accuracy on " << s << " is: " << accuracy;
+    } else {
+      LOG(ERROR) << "The " << metric << " metric is not supported";
+      return;
     }
-    float accuracy = (float) correct_num / dataset_size;
-    LOG(INFO) << "The testing accuracy on " << s << " is: " << accuracy;
   }
 
   // free memory
@@ -566,5 +557,6 @@ void train_logistic_regression(Party party, std::string params_str) {
   std::cout << "Init model success" << std::endl;
 
   model.train(party);
+  model.test(party, 0, training_accuracy);
   model.test(party, 1, testing_accuracy);
 }
