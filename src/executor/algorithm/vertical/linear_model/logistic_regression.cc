@@ -13,21 +13,12 @@
 #include <glog/logging.h>
 #include <Networking/ssl_sockets.h>
 #include <falcon/operator/mpc/spdz_connector.h>
+#include <falcon/utils/metric/accuracy.h>
 
 LogisticRegression::LogisticRegression() {}
 
-LogisticRegression::LogisticRegression(int m_batch_size,
-    int m_max_iteration,
-    float m_converge_threshold,
-    bool m_with_regularization,
-    float m_alpha,
-    float m_learning_rate,
-    float m_decay,
+LogisticRegression::LogisticRegression(LogisticRegressionParams lr_params,
     int m_weight_size,
-    std::string m_penalty,
-    std::string m_optimizer,
-    std::string m_multi_class,
-    std::string m_metric,
     std::vector<std::vector<float> > m_training_data,
     std::vector<std::vector<float> > m_testing_data,
     std::vector<float> m_training_labels,
@@ -39,18 +30,19 @@ LogisticRegression::LogisticRegression(int m_batch_size,
         std::move(m_testing_labels),
         m_training_accuracy,
         m_testing_accuracy) {
-  batch_size = m_batch_size;
-  max_iteration = m_max_iteration;
-  converge_threshold = m_converge_threshold;
-  with_regularization = m_with_regularization;
-  alpha = m_alpha;
-  learning_rate = m_learning_rate;
-  decay = m_decay;
+  batch_size = lr_params.batch_size;
+  max_iteration = lr_params.max_iteration;
+  converge_threshold = lr_params.converge_threshold;
+  with_regularization = lr_params.with_regularization;
+  alpha = lr_params.alpha;
+  learning_rate = lr_params.alpha;
+  decay = lr_params.decay;
   weight_size = m_weight_size;
-  penalty = std::move(m_penalty);
-  optimizer = std::move(m_optimizer);
-  multi_class = std::move(m_multi_class);
-  metric = std::move(m_metric);
+  penalty = std::move(lr_params.penalty);
+  optimizer = std::move(lr_params.optimizer);
+  multi_class = std::move(lr_params.multi_class);
+  metric = std::move(lr_params.metric);
+  dp_budget = lr_params.dp_budget;
   local_weights = new EncodedNumber[weight_size];
 }
 
@@ -115,6 +107,7 @@ std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
 
 void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
     std::vector<int> batch_indexes,
+    int type,
     int precision,
     EncodedNumber *batch_phe_aggregation) {
   // retrieve phe pub key and phe random
@@ -285,10 +278,14 @@ void LogisticRegression::train(Party party) {
   ///     2.1 randomly select a batch of indexes for current iteration
   ///     2.2 homomorphic aggregation on the batch samples
   ///     2.3 convert the batch ciphertexts to secret shares
-  ///     2.4 connect to spdz parties for mpc computations
-  ///     2.5 receive secret shared results from spdz party and aggregate
-  ///     2.6 update encrypted local weights carefully
+  ///     2.4 connect to spdz parties for mpc computations and receive results
+  ///     2.5 update encrypted local weights carefully
   /// 3. decrypt weights ciphertext
+
+  if (optimizer != "sgd") {
+    LOG(ERROR) << "The " << optimizer << " optimizer does not supported";
+    return;
+  }
 
   // step 1: init encrypted local weights (here use 2 * precision for consistence in the following)
   int encrypted_weights_precision = 2 * PHE_FIXED_POINT_PRECISION;
@@ -314,16 +311,13 @@ void LogisticRegression::train(Party party) {
     std::vector<int> batch_indexes = select_batch_idx(party, data_indexes);
     int cur_batch_size = batch_indexes.size();
 
-    std::cout << "step 2.1 success" << std::endl;
-
     // step 2.2: homomorphic batch aggregation (the precision should be 3 * prec now)
     EncodedNumber* encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
     compute_batch_phe_aggregation(party,
         batch_indexes,
+        0,
         plaintext_samples_precision,
         encrypted_batch_aggregation);
-
-    std::cout << "step 2.2 success" << std::endl;
 
     // step 2.3: convert the encrypted batch aggregation into secret shares
     int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
@@ -334,8 +328,7 @@ void LogisticRegression::train(Party party) {
         0,
         encrypted_batch_aggregation_precision);
 
-    std::cout << "step 2.3 success" << std::endl;
-
+    // step 2.4: communicate with spdz parties and receive results
     std::promise<std::vector<float>> promise_values;
     std::future<std::vector<float>> future_values = promise_values.get_future();
     std::thread spdz_thread(spdz_logistic_function_computation,
@@ -350,9 +343,7 @@ void LogisticRegression::train(Party party) {
     std::vector<float> batch_loss_shares = future_values.get();
     spdz_thread.join();
 
-    std::cout << "step 2.4 success" << std::endl;
-
-    // step 2.6: update encrypted local weights
+    // step 2.5: update encrypted local weights
     // TODO: currently does not support with_regularization
     std::vector<float> truncated_weights_shares;
     // need to make sure that update_precision * 2 = encrypted_weights_precision
@@ -362,8 +353,6 @@ void LogisticRegression::train(Party party) {
         truncated_weights_shares,
         batch_indexes,
         update_precision);
-
-    std::cout << "step 2.5 success" << std::endl;
 
     delete [] encrypted_batch_aggregation;
 
@@ -377,6 +366,81 @@ void LogisticRegression::train(Party party) {
   float training_consumed_time = float(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
   LOG(INFO) << "Training time = " << training_consumed_time;
   LOG(INFO) << "************* Training Finished *************";
+  google::FlushLogFiles(google::INFO);
+}
+
+void LogisticRegression::test(Party party, int type, float &accuracy) {
+  std::string s = (type == 0 ? "training dataset" : "testing dataset");
+  LOG(INFO) << "************* Testing on " << s << " Start *************";
+  const clock_t testing_start_time = clock();
+
+  /// the testing workflow is as follows:
+  ///     step 1: init test data
+  ///     step 2: every party computes partial phe summation and sends to active party
+  ///     step 3: active party aggregates and call collaborative decryption
+  ///     step 4: active party computes the logistic function and compare the accuracy
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  // step 1: init test data
+  int dataset_size = (type == 0) ? training_data.size() : testing_data.size();
+  std::vector< std::vector<float> > cur_test_dataset = (type == 0) ? training_data : testing_data;
+
+  // step 2: every party computes partial phe summation and sends to active party
+  std::vector<int> indexes;
+  for (int i = 0; i < dataset_size; i++) {
+    indexes.push_back(i);
+  }
+  // homomorphic aggregation (the precision should be 3 * prec now)
+  int plaintext_precision = PHE_FIXED_POINT_PRECISION;
+  EncodedNumber* encrypted_aggregation = new EncodedNumber[dataset_size];
+  compute_batch_phe_aggregation(party,
+      indexes,
+      type,
+      plaintext_precision,
+      encrypted_aggregation);
+
+  // step 3: active party aggregates and call collaborative decryption
+  EncodedNumber* decrypted_aggregation = new EncodedNumber[dataset_size];
+  party.collaborative_decrypt(encrypted_aggregation,
+      decrypted_aggregation,
+      dataset_size,
+      0);
+
+  // step 4: active party computes the logistic function and compare the accuracy
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    if (metric == "acc") {
+      std::vector<float> vec;
+      for (int i = 0; i < dataset_size; i++) {
+        float t;
+        decrypted_aggregation[i].decode(t);
+        t = 1.0 / (1 + exp(0 - t));
+        t = t >= 0.5 ? 1 : 0;
+        vec.push_back(t);
+      }
+      if (type == 0) {
+        accuracy = accuracy_computation(vec, training_labels);
+      } else {
+        accuracy = accuracy_computation(vec, testing_labels);
+      }
+      LOG(INFO) << "The testing accuracy on " << s << " is: " << accuracy;
+    } else {
+      LOG(ERROR) << "The " << metric << " metric is not supported";
+      return;
+    }
+  }
+
+  // free memory
+  djcs_t_free_public_key(phe_pub_key);
+  delete [] encrypted_aggregation;
+  delete [] decrypted_aggregation;
+
+  const clock_t testing_finish_time = clock();
+  float testing_consumed_time = float(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
+  LOG(INFO) << "Testing time = " << testing_consumed_time;
+  LOG(INFO) << "************* Testing on " << s << " Finished *************";
   google::FlushLogFiles(google::INFO);
 }
 
@@ -442,24 +506,26 @@ void spdz_logistic_function_computation(int party_num,
   }
 }
 
-void train_logistic_regression(Party party, std::string params) {
+void train_logistic_regression(Party party, std::string params_str) {
 
   LOG(INFO) << "Run the example logistic regression train";
   std::cout << "Run the example logistic regression train" << std::endl;
 
   // TODO: Parse the params and match with the LogisticRegression parameters
   // currently for testing
-  int batch_size = 32;
-  int max_iteration = 5;
-  float converge_threshold = 1e-3;
-  bool with_regularization = false;
-  float alpha = 0.1;
-  float learning_rate = 0.05;
-  float decay = 1.0;
-  std::string penalty = "l2";
-  std::string optimizer = "sgd";
-  std::string multi_class = "ovr";
-  std::string metric = "acc";
+  LogisticRegressionParams params;
+  params.batch_size = 32;
+  params.max_iteration = 100;
+  params.converge_threshold = 1e-3;
+  params.with_regularization = false;
+  params.alpha = 0.1;
+  params.learning_rate = 0.05;
+  params.decay = 1.0;
+  params.penalty = "l2";
+  params.optimizer = "sgd";
+  params.multi_class = "ovr";
+  params.metric = "acc";
+  params.dp_budget = 0.1;
   int weight_size = party.getter_feature_num();
   float training_accuracy = 0.0;
   float testing_accuracy = 0.0;
@@ -478,18 +544,8 @@ void train_logistic_regression(Party party, std::string params) {
   LOG(INFO) << "Init logistic regression model";
   std::cout << "Init logistic regression model" << std::endl;
 
-  LogisticRegression model(batch_size,
-      max_iteration,
-      converge_threshold,
-      with_regularization,
-      alpha,
-      learning_rate,
-      decay,
+  LogisticRegression model(params,
       weight_size,
-      penalty,
-      optimizer,
-      multi_class,
-      metric,
       training_data,
       testing_data,
       training_labels,
@@ -501,4 +557,6 @@ void train_logistic_regression(Party party, std::string params) {
   std::cout << "Init model success" << std::endl;
 
   model.train(party);
+  model.test(party, 0, training_accuracy);
+  model.test(party, 1, testing_accuracy);
 }

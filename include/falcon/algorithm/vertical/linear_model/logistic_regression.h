@@ -65,6 +65,8 @@ class LogisticRegression : public Model {
   std::string multi_class;
   // evaluation metric for training and testing, 'acc', 'auc', or 'ks', currently support 'acc'
   std::string metric;
+  // differential privacy budget
+  float dp_budget;
 
  private:
   // number of weights in the model
@@ -79,18 +81,8 @@ class LogisticRegression : public Model {
   /**
    * logistic regression constructor
    *
-   * @param m_batch_size: mini-batch size
-   * @param m_max_iteration: maximum number of iteration
-   * @param m_converge_threshold: tolerance of convergence
-   * @param m_with_regularization: use regularization or not
-   * @param m_alpha: regularization parameter
-   * @param m_learning_rate: learning rate
-   * @param m_decay: decay rate
+   * @param lr_params: logistic regression param structure
    * @param m_weight_size: number of weights
-   * @param m_penalty: penalty method
-   * @param m_optimizer: optimization method
-   * @param m_multi_class: strategy
-   * @param m_metric: evaluation metric
    * @param m_training_data: training data
    * @param m_testing_data: testing data
    * @param m_training_labels: training labels
@@ -98,18 +90,8 @@ class LogisticRegression : public Model {
    * @param m_training_accuracy: training accuracy
    * @param m_testing_accuracy: testing accuracy
    */
-  LogisticRegression(int m_batch_size,
-      int m_max_iteration,
-      float m_converge_threshold,
-      bool m_with_regularization,
-      float m_alpha,
-      float m_learning_rate,
-      float m_decay,
+  LogisticRegression(LogisticRegressionParams lr_params,
       int m_weight_size,
-      std::string m_penalty,
-      std::string m_optimizer,
-      std::string m_multi_class,
-      std::string m_metric,
       std::vector< std::vector<float> > m_training_data,
       std::vector< std::vector<float> > m_testing_data,
       std::vector<float> m_training_labels,
@@ -142,11 +124,13 @@ class LogisticRegression : public Model {
    *
    * @param party: initialized party object
    * @param batch_indexes: selected batch indexes
+   * @param type: denote training_data (0) or testing_data (1)
    * @param precision: the fixed point precision of encoded plaintext samples
    * @param batch_aggregation: returned phe aggregation for the batch
    */
   void compute_batch_phe_aggregation(const Party& party,
       std::vector<int> batch_indexes,
+      int type,
       int precision,
       EncodedNumber *batch_phe_aggregation);
 
@@ -172,6 +156,15 @@ class LogisticRegression : public Model {
    * @param party: initialized party object
    */
   void train(Party party);
+
+  /**
+   * test a logistic regression model
+   *
+   * @param party: initialized party object
+   * @param type: 0 for training data and 1 for testing data
+   * @param accuracy: returned model accuracy, default metric "acc"
+   */
+  void test(Party party, int type, float& accuracy);
 };
 
 /**
