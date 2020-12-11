@@ -22,7 +22,9 @@ RUN pip install --upgrade pip
 ENV PYTHONUNBUFFERED 1
 
 COPY bin/coordinator_server ./coordinator_server
+RUN mkdir /go/trainDataOutput && mkdir /go/trainModels && mkdir /go/trainData
 
+# those 2 files are used to test only
 COPY test/testggg.go ./testggg.go
 COPY falcon_ml/readwrite.py ./readwrite.py
 

@@ -69,6 +69,7 @@ func (this *Master) schedulerHelper(
 	wg := sync.WaitGroup{}
 
 	// execute the task
+	logger.Do.Println("Scheduler: qitem.ips are ", qItem.IPs)
 	for i, v := range qItem.IPs {
 		vip := strings.Split(v, ":")[0]
 
@@ -77,17 +78,26 @@ func (this *Master) schedulerHelper(
 		args.PartyPath = qItem.PartyPath[i]
 		args.TaskInfos = qItem.TaskInfos
 
-		for _, workerAddr := range workerAddress {
-			ip := strings.Split(workerAddr, ":")[0]
+		MaxSearchNumber := 100
+		for len(workerAddress) > 0{
+
+			if MaxSearchNumber <=0{
+				panic("Max search Number reaches, Ip not Match Error ")
+			}
+
+			item := workerAddress[0]
+			ip := strings.Split(item, ":")[0]
+			workerAddress = workerAddress[1:]
 
 			// match using ip
 			if ip == vip {
-
 				wg.Add(1)
-
 				// execute the task
-				go taskHandler(workerAddr,svcName,args,qItem.JobId,&wg)
-
+				go taskHandler(item,svcName,args,qItem.JobId,&wg)
+				break
+			}else{
+				workerAddress = append(workerAddress, item)
+				MaxSearchNumber--
 			}
 		}
 	}

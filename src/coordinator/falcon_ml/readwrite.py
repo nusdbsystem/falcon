@@ -13,17 +13,20 @@ if __name__ == '__main__':
 
     print("Args is : ", args.i, args.o, args.model)
 
-    with open(args.i, "r") as f:
-        res = f.read()
-        print(res)
+    try:
+        with open(args.i, "r") as f:
+            res = f.read()
+            print(res)
 
-    with open(args.o, "w") as f:
-        f.write("finish data process!")
+        with open(args.o, "w") as f:
+            f.write("finish data process!")
 
-    with open(args.model, "w") as f:
-        f.write("finish model trained!")
+        with open(args.model, "w") as f:
+            f.write("finish model trained!")
+    except Exception as e:
+        print(e)
 
-    for i in range(5):
+    for i in range(6):
         print("Python PreProcessing Counting down", i)
         time.sleep(2)
 

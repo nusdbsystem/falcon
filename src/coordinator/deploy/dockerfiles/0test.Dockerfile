@@ -26,6 +26,8 @@ COPY bin/coordinator_server ./coordinator_server
 COPY test/testggg.go ./testggg.go
 COPY falcon_ml/preprocessing.py ./preprocessing.py
 
+RUN mkdir /go/trainDataOutput && mkdir /go/trainModels && mkdir /go/trainData
+
 ADD deploy ./deploy
 ADD scripts ./scripts
 RUN chmod -R 777 ./deploy && chmod -R 777 ./scripts

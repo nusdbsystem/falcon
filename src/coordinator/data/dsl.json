@@ -26,7 +26,7 @@
   "task_num": 2,
   "tasks": {
     "pre_processing": {
-      "algorithm_name": "preprocessing.py",
+      "algorithm_name": "preprocessing",
       "input_configs": {
         "data_input": {
           "data": ["file"],
@@ -42,7 +42,7 @@
       }
     },
     "model_training": {
-      "algorithm_name": "plot_out_of_core_classification.py",
+      "algorithm_name": "plot_out_of_core_classification",
       "input_configs": {
         "data_input": {
           "data": ["outfile"],
