@@ -34,5 +34,12 @@ func RunWorker(masterAddress, workerAddress string) {
 
 	wk.StartRPCServer(rpcSvc, true)
 
+	// once  worker is killed, clear the resources.
+	if common.Env==common.ProdEnv{
+		km := taskmanager.InitK8sManager(true,  "")
+		km.DeleteService(common.ExecutorCurrentName)
+	}
+
 	logger.Do.Println("Worker: ", workerAddress, "runWorker exit")
+
 }

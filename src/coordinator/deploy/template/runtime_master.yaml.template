@@ -41,6 +41,8 @@ spec:
           value: "COORD_TARGET_PORT_PLACEHOLDER"
         - name: Env
           value: "Env_PLACEHOLDER"
+        - name: EXECUTOR_NAME
+          value: "MASTER_NAME"
       ports:
         - containerPort: MASTER_TARGET_PORT  #这里containerPort是容器内部的port
           name: MASTER_NAME

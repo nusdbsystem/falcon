@@ -48,7 +48,7 @@ func SetupDist(qItem *cache.QItem, taskType string) {
 		// in prod, use k8s to run train/predict server as a isolate process
 		itemKey := "jid"+fmt.Sprintf("%d", qItem.JobId)
 
-		serviceName := "master-" + itemKey
+		serviceName := "master-" + itemKey + "-" + taskType
 
 		// put to the queue, assign key to env
 		logger.Do.Println("SetupDist: Writing item to redis")

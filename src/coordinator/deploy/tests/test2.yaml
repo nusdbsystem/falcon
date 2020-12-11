@@ -6,10 +6,14 @@ metadata:
     run: my-nginx
 spec:
   containers:
-    - name: my-nginx
+    - name: my-nginx1
       image: nginx
       ports:
         - containerPort: 80
+    - name: webapp
+      image: training/webapp
+      ports:
+        - containerPort: 5000
 ---
 # This specification will create a Service which targets TCP port 80 on any Pod with the run: my-nginx label, and expose it on an abstracted Service port
 apiVersion: v1
@@ -20,7 +24,11 @@ metadata:
     run: my-nginx
 spec:
   ports:
-    - port: 80
+    - name: ngx
+      port: 80
+      protocol: TCP
+    - name: wap
+      port: 5000
       protocol: TCP
   selector:
     run: my-nginx

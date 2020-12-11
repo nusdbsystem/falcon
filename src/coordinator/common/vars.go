@@ -146,6 +146,7 @@ var (
 	WorkerURLGlobal = ""
 	MasterURLGlobal = ""
 
+	ExecutorCurrentName = ""
 	// this is ip + port
 	ListenURLGlobal = ""
 
