@@ -45,22 +45,22 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
 	for _, v := range dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Data{
 
-		dataIn4Paths = append(dataIn4Paths, common.TaskDataPath + v )
+		dataIn4Paths = append(dataIn4Paths, common.TaskDataPath +"/" +v )
 	}
 
 	for _, v := range dta.TaskInfos.PreProcessing.OutputConfigs.DataOutput{
 
-		dataOut4Paths = append(dataOut4Paths, common.TaskDataOutput + v )
+		dataOut4Paths = append(dataOut4Paths, common.TaskDataOutput +"/"+ v )
 	}
 
 	for _, v := range dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Data{
 
-		modelInput = append(modelInput, common.TaskDataOutput + v )
+		modelInput = append(modelInput, common.TaskDataOutput +"/"+ v )
 	}
 
 	for _, v := range dta.TaskInfos.ModelTraining.OutputConfigs.TrainedModel{
 
-		model4Paths = append(model4Paths, common.TaskModelPath + v )
+		model4Paths = append(model4Paths, common.TaskModelPath +"/"+ v )
 	}
 
 	modelReport = dta.TaskInfos.ModelTraining.OutputConfigs.EvaluationReport
