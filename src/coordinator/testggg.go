@@ -14,6 +14,27 @@ import (
 )
 
 
+/*
+("party-id", po::value<int>(&party_id), "current party id")
+("party-num", po::value<int>(&party_num), "total party num")
+("party-type", po::value<int>(&party_type), "type of this party, active or passive")
+("fl-setting", po::value<int>(&fl_setting), "federated learning setting, horizontal or vertical")
+
+("existing-key", po::value<int>(&use_existing_key), "whether use existing phe keys")
+("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run")
+("algorithm-params", po::value<std::string>(&algorithm_params), "parameters for the algorithm");
+
+
+("network-file", po::value<std::string>(&network_file), "file name of network configurations")
+("log-file", po::value<std::string>(&log_file), "file name of log destination")
+("data-input-file", po::value<std::string>(&data_file), "file name of dataset")
+("data-output-file", po::value<std::string>(&data_file), "file name of dataset")
+("model-save-file", po::value<std::string>(&data_file), "file name of dataset")
+("key-file", po::value<std::string>(&key_file), "file name of phe keys")
+("model-report-file", po::value<std::string>(&key_file), "file name of phe keys")
+
+
+ */
 
 
 type SubProcessManager struct {

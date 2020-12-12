@@ -148,6 +148,7 @@ func InitEnvs(svcName string){
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
 		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
 		common.TaskDataOutput = common.GetEnv("TASK_DATA_OUTPUT", "")
+		common.TaskRuntimeLogs = common.GetEnv("RUN_TIME_LOGS", "")
 
 		common.ExecutorTypeGlobal = common.GetEnv("EXECUTOR_TYPE", "")
 		common.WorkerURLGlobal = common.GetEnv("WORKER_URL", "")
@@ -163,6 +164,8 @@ func InitEnvs(svcName string){
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
 		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
 		common.TaskDataOutput = common.GetEnv("TASK_DATA_OUTPUT", "")
+		common.TaskRuntimeLogs = common.GetEnv("RUN_TIME_LOGS", "")
+
 		// this will be executed only in production, in dev, the common.ExecutorTypeGlobal==""
 
 		common.ExecutorTypeGlobal = common.GetEnv("EXECUTOR_TYPE", "")

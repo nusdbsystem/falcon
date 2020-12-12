@@ -1,10 +1,13 @@
 package test
 
 import (
+	"coordinator/common"
 	"coordinator/distributed/entitiy"
 	"coordinator/logger"
 	"encoding/json"
 	"fmt"
+	"google.golang.org/protobuf/proto"
+	"log"
 	"testing"
 )
 
@@ -43,8 +46,33 @@ func unjsonSlice(){
 
 
 func TestRandomFunc2(t *testing.T) {
-	svcName := "asdf"
-	fmt.Println(svcName+".DoTask")
 
+
+	p := common.NetworkConfig{
+		Ip:    []string{"1","123","123","3"},
+		Port:  []*common.Port{},
+	}
+
+	p1 := &common.Port{Port: []int32{1,2,34,5}}
+	p2 := &common.Port{Port: []int32{1,2,34,5}}
+	p3 := &common.Port{Port: []int32{1,2,34,5}}
+
+	p.Port = append(p.Port, p1)
+	p.Port = append(p.Port, p2)
+	p.Port = append(p.Port, p3)
+
+	out, err := proto.Marshal(&p)
+	if err != nil {
+		log.Fatalln("Failed to encode address book:", err)
+	}
+	fmt.Println(string(out))
+
+	px := &common.NetworkConfig{}
+	if err := proto.Unmarshal(out, px); err != nil {
+		log.Fatalln("Failed to parse address book:", err)
+	}
+
+
+	fmt.Println(px)
 
 }

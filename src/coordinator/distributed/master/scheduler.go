@@ -3,9 +3,12 @@ package master
 import (
 	"coordinator/cache"
 	"coordinator/client"
+	c "coordinator/client"
 	"coordinator/common"
 	"coordinator/distributed/entitiy"
 	"coordinator/logger"
+	"google.golang.org/protobuf/proto"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -70,13 +73,20 @@ func (this *Master) schedulerHelper(
 
 	// execute the task
 	logger.Do.Println("Scheduler: qitem.ips are ", qItem.IPs)
+	netCfg := this.generateNetworkConfig(qItem.IPs)
+
 	for i, v := range qItem.IPs {
 		vip := strings.Split(v, ":")[0]
 
 		args := new(entitiy.DoTaskArgs)
 		args.IP = vip
-		args.PartyPath = qItem.PartyPath[i]
-		args.TaskInfos = qItem.TaskInfos
+		args.AssignID = qItem.PartyInfos[i].ID
+		args.PartyNums = qItem.PartyNums
+		args.JobFlType = qItem.JobFlType
+		args.PartyInfo = qItem.PartyInfos[i]
+		args.ExistingKey = qItem.ExistingKey
+		args.TaskInfos = qItem.Tasks
+		args.NetWorkFile = netCfg
 
 		MaxSearchNumber := 100
 		for len(workerAddress) > 0{
@@ -216,4 +226,42 @@ func (this *Master) predictTaskHandler(
 	}else{
 		client.ModelServiceUpdateStatus(common.CoordSvcURLGlobal, common.JobRunning, JobId)
 	}
+}
+
+
+func (this *Master) generateNetworkConfig(urls []string) string {
+
+	partyNums := len(urls)
+	var ips []string
+	for _, v := range urls {
+		ips = append(ips, strings.Split(v, ":")[0])
+	}
+
+	cfg := common.NetworkConfig{
+		Ip:    ips,
+		Port:  []*common.Port{},
+	}
+
+	// for each ip address
+	for i:=0; i<partyNums; i++{
+		var ports []int32
+		//generate n ports
+		for i:=0; i<partyNums; i++{
+			port := c.GetFreePort(common.CoordSvcURLGlobal)
+			pint, _ := strconv.Atoi(port)
+			ports = append(ports, int32(pint))
+		}
+		p := &common.Port{Port: ports}
+		cfg.Port = append(cfg.Port, p)
+	}
+
+	out, err := proto.Marshal(&cfg)
+	if err != nil {
+		logger.Do.Println("Scheduler: Generate NetworkCfg failed ", err)
+		panic(err)
+	}
+	logger.Do.Println("Scheduler: Generate NetworkCfg successfully")
+
+	return string(out)
+
 }

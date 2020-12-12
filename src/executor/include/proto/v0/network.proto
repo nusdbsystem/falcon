@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package com.nus.dbsytem.falcon.v0;
+option go_package = "common";
+
+import "google/protobuf/struct.proto";
+
+message NetworkConfig {
+
+  repeated string ip = 1;
+  repeated Port port = 2;
+
+}
+
+message Port {
+  repeated  int32 port = 1;
+}
+

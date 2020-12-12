@@ -143,3 +143,11 @@ processing Counting down 4
 2020/12/11 17:52:37 1.api_test.go:55: null <nil>
 2020/12/11 17:53:21 1.api_test.go:44: <nil>
 2020/12/11 17:53:25 1.api_test.go:52: <nil>
+2020/12/12 14:15:25 1.api_test.go:44: <nil>
+2020/12/12 14:15:38 1.api_test.go:52: json: cannot unmarshal number into Go struct field DSL.existing_key of type string
+2020/12/12 14:17:27 1.api_test.go:44: <nil>
+2020/12/12 14:17:28 1.api_test.go:52: <nil>
+2020/12/12 15:06:15 1.api_test.go:44: <nil>
+2020/12/12 15:06:19 1.api_test.go:52: <nil>
+2020/12/12 15:06:43 1.api_test.go:44: <nil>
+2020/12/12 15:06:47 1.api_test.go:52: <nil>

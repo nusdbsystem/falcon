@@ -7,10 +7,14 @@ import (
 )
 
 type QItem struct {
-	IPs       []string
-	JobId     uint
-	PartyPath []common.PartyPath
-	TaskInfos common.Tasks
+	IPs       		[]string
+	JobId     		uint
+	JobName    		string
+	JobFlType  		string
+	ExistingKey  	uint
+	PartyNums  		uint
+	PartyInfos 		[]common.PartyInfo
+	Tasks      		common.Tasks
 }
 
 func argTypeRegister() {

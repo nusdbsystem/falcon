@@ -3,12 +3,14 @@
   "job_name": "credit_card_training",
   "job_decs": "this is the job_decs",
   "job_fl_type": "horizontal",
-  "party_nums": 1,
+  "existing_key": 0,
+  "party_nums": 2,
   "party_info": [
 
     {
       "id": 0,
       "ip": "192.168.65.3:30005",
+      "party_type": 0,
       "path": {
         "data_input": "/Users/nailixing/Test/falcon_demon_12_11/p1/data/",
         "data_output": "/Users/nailixing/Test/falcon_demon_12_11/p1/dout/",
@@ -17,6 +19,7 @@
     {
       "id": 1,
       "ip": "192.168.65.3:30006",
+      "party_type": 1,
       "path": {
         "data_input": "/Users/nailixing/Test/falcon_demon_12_11/p2/data/",
         "data_output": "/Users/nailixing/Test/falcon_demon_12_11/p2/dout/",
@@ -29,7 +32,7 @@
       "algorithm_name": "preprocessing",
       "input_configs": {
         "data_input": {
-          "data": ["file"],
+          "data": "file",
           "key": "key"
         },
         "algorithm_config": {
@@ -38,14 +41,14 @@
         }
       },
       "output_configs": {
-        "data_output": ["outfile"]
+        "data_output": "outfile"
       }
     },
     "model_training": {
       "algorithm_name": "plot_out_of_core_classification",
       "input_configs": {
         "data_input": {
-          "data": ["outfile"],
+          "data": "outfile",
           "key": "key"
         },
         "algorithm_config": {
@@ -59,7 +62,7 @@
         }
       },
       "output_configs": {
-        "trained_model": ["model"],
+        "trained_model": "model",
         "evaluation_report": "model.txt"
       }
     }

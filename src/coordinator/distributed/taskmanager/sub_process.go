@@ -73,11 +73,11 @@ loop:
 	}
 }
 
-func (pm *SubProcessManager) ExecuteSubProc(
+func (pm *SubProcessManager) CreateResources(
 	cmd *exec.Cmd,
 	envs []string,
 
-) (bool, string, string, string) {
+) (bool, string, string) {
 /**
  * @Author
  * @Description
@@ -115,14 +115,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		logger.Do.Println(err)
-		return false, err.Error(), "", ""
-
-	}
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		logger.Do.Println(err)
-		return false, err.Error(), "", ""
+		return false, err.Error(), ""
 	}
 
 	// shutdown the process after 2 hour, if still not finish
@@ -137,7 +130,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 
 	if err := cmd.Start(); err != nil {
 		logger.Do.Println(err)
-		return false, err.Error(), "", ""
+		return false, err.Error(), ""
 	}
 
 	isKilled := make(chan bool, 1)
@@ -153,9 +146,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		pm.Unlock()
 
 		errLog, _ := ioutil.ReadAll(stderr)
-		outLog, _ := ioutil.ReadAll(stdout)
 		outErr := cmd.Wait()
-
 
 		var oe string
 		if outErr != nil {
@@ -168,7 +159,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 			select {
 			case killed := <-isKilled:
 				logger.Do.Println("SubProcessManager: Job Done, return")
-				return killed, oe, string(errLog), string(outLog)
+				return killed, oe, string(errLog)
 			case isFinish <- true:
 				logger.Do.Println("SubProcessManager: Write to isFinish")
 			default:
@@ -176,7 +167,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		}
 
 	} else {
-		return false, errors.New("SubProcessManager: cmd.Process is Nil, start error").Error(), "", ""
+		return false, errors.New("SubProcessManager: cmd.Process is Nil, start error").Error(), ""
 	}
 
 }
