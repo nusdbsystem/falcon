@@ -5,6 +5,7 @@ metadata:
   labels:
     run: my-nginx
 spec:
+  shareProcessNamespace: true
   containers:
     - name: my-nginx1
       image: nginx

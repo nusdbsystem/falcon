@@ -113,6 +113,7 @@ func SetupWorkerHelper(masterAddress, taskType, jobId, dataPath, modelPath, data
 	workerPort := c.GetFreePort(common.CoordSvcURLGlobal)
 
 	workerAddress := common.ListenAddrGlobal + ":" + workerPort
+	var serviceName string
 
 	// in dev, use thread
 	if common.Env == common.DevEnv{
@@ -122,18 +123,24 @@ func SetupWorkerHelper(masterAddress, taskType, jobId, dataPath, modelPath, data
 		common.TaskModelPath = modelPath
 
 		if taskType == common.TrainExecutor{
+
+			serviceName = "worker-jid" + jobId + "-train-" + common.ListenerId
+			common.TaskRuntimeLogs = common.ListenBasePath+"/"+"run_time_logs/"+serviceName
+
 			logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainExecutor")
 			worker.RunWorker(masterAddress, workerAddress)
 
 		}else if taskType == common.PredictExecutor{
+
+			serviceName = "worker-jid" + jobId + "-predict-" + common.ListenerId
+			common.TaskRuntimeLogs = common.ListenBasePath+"/"+"run_time_logs/"+serviceName
+
 			logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictExecutor")
 			prediction.RunPrediction(masterAddress, workerAddress)
 		}
 
 		// in prod, use k8s to run train/predict server as a isolate process
 	}else if common.Env == common.ProdEnv{
-
-		var serviceName string
 
 		if taskType == common.TrainExecutor{
 
@@ -215,9 +222,9 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 		// todo, manage listener port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, taskType), such that user dont need
 		//  to provide port in dsl
 
-		dataPath := qItem.PartyPath[index].DataInput
-		dataOutput := qItem.PartyPath[index].DataOutput
-		modelPath := qItem.PartyPath[index].ModelPath
+		dataPath := qItem.PartyInfos[index].PartyPaths.DataInput
+		dataOutput := qItem.PartyInfos[index].PartyPaths.DataOutput
+		modelPath := qItem.PartyInfos[index].PartyPaths.ModelPath
 
 		c.SetupWorker(ip, masterAddress, taskType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
 	}

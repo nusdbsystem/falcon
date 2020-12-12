@@ -31,8 +31,8 @@ func TestSubProc(t *testing.T) {
 	//	pm.IsStop <-true
 	//}()
 
-	killed, e, el, ol := pm.ExecuteSubProc(cmd, envs)
-	logger.Do.Println(killed, e, el, ol)
+	killed, el, e:= pm.CreateResources(cmd, envs)
+	logger.Do.Println(killed, e, el)
 
 	//logger.Do.Println("Worker:task model training start")
 	//args = []string{"plot_out_of_core_classification.py", "-a 1 -b 1"}

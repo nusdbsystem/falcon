@@ -42,6 +42,8 @@ spec:
           value: "/go/trainModels"   # by default, read data from this dir
         - name: TASK_DATA_OUTPUT
           value: "/go/ProcessedData"   # by default, read data from this dir
+        - name: RUN_TIME_LOGS
+          value: "HOST_PATH/run_time_logs/WORKER_NAME"   # by default, read data from this dir
       ports:
         - containerPort: WORKER_TARGET_PORT  #这里containerPort是容器内部的port
           name: "port-WORKER_TARGET_PORT"  # .ports[0].name: Invalid value: "train-8490548680670953438": must be no more than 15 characters

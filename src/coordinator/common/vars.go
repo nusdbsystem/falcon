@@ -101,6 +101,10 @@ const (
 
 	YamlBasePath = "./deploy/template/"
 
+
+	MpcExe = "./semi-party.x"
+	FalconTrainExe = "./falcon"
+
 )
 
 var (
@@ -164,6 +168,7 @@ var (
 	TaskDataPath = ""
 	TaskDataOutput = ""
 	TaskModelPath = ""
+	TaskRuntimeLogs = ""
 )
 
 // GetEnv get key environment variable if exist otherwise return defalutValue

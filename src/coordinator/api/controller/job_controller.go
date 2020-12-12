@@ -15,7 +15,7 @@ func JobSubmit(dsl *common.DSL, ctx *entity.Context) (uint, string, uint, string
 
 	// generate.sh item pushed to the queue
 
-	iPs ,partyPath := common.ParsePartyInfo(dsl.PartyInfos)
+	iPs := common.ParseIps(dsl.PartyInfos)
 
 	// generate.sh strings used to write to db
 	partyIds, err := json.Marshal(dsl.PartyInfos)
@@ -48,8 +48,12 @@ func JobSubmit(dsl *common.DSL, ctx *entity.Context) (uint, string, uint, string
 	qItem := new(cache.QItem)
 	qItem.IPs = iPs
 	qItem.JobId = u.JobId
-	qItem.PartyPath = partyPath
-	qItem.TaskInfos = dsl.Tasks
+	qItem.JobName = dsl.JobName
+	qItem.JobFlType = dsl.JobFlType
+	qItem.ExistingKey = dsl.ExistingKey
+	qItem.PartyNums = dsl.PartyNums
+	qItem.PartyInfos = dsl.PartyInfos
+	qItem.Tasks = dsl.Tasks
 
 	go func() {
 		cache.JobQueue.Push(qItem)

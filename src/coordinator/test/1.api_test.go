@@ -40,7 +40,7 @@ func TestJson(t *testing.T) {
 }
 
 func TestParseJson(t *testing.T) {
-	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/dsl.json")
+	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/dsltest.json")
 	logger.Do.Println(err)
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)

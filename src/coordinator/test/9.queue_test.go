@@ -20,7 +20,5 @@ func TestQueue(t *testing.T) {
 
 	fmt.Println(res2.IPs)
 	fmt.Println(res2.JobId)
-	fmt.Println(res2.PartyPath)
-	fmt.Println(res2.TaskInfos)
 
 }

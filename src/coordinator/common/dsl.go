@@ -5,20 +5,23 @@ import (
 	"errors"
 )
 
+// protoc -I=/Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/ --go_out=/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/common /Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/job.proto
 type DSL struct {
-	JobName    string      `json:"job_name"`
-	JobDecs    string      `json:"job_decs"`
-	JobFlType  string      `json:"job_fl_type"`
-	PartyNums  uint        `json:"party_nums,uint"`
-	TaskNum    uint        `json:"task_num,uint"`
-	PartyInfos []PartyInfo `json:"party_info"`
-	Tasks      Tasks       `json:"tasks"`
+	JobName    		string      				`json:"job_name"`
+	JobDecs   	 	string      				`json:"job_decs"`
+	JobFlType  		string      				`json:"job_fl_type"`
+	ExistingKey  	uint      					`json:"existing_key"`
+	PartyNums  		uint        				`json:"party_nums,uint"`
+	TaskNum    		uint        				`json:"task_num,uint"`
+	PartyInfos 		[]PartyInfo 				`json:"party_info"`
+	Tasks      		Tasks      `json:"tasks"`
 }
 
 type PartyInfo struct {
-	ID         uint      `json:"id"`
-	IP         string    `json:"ip"`
-	PartyPaths PartyPath `json:"path"`
+	ID         		uint      `json:"id"`
+	IP         		string    `json:"ip"`
+	PartyType       uint      `json:"party_type"`
+	PartyPaths 		PartyPath `json:"path"`
 }
 
 type PartyPath struct {
@@ -45,12 +48,12 @@ type ModelTrainTask struct {
 }
 
 type ModelOutput struct {
-	TrainedModel 		[]string    `json:"trained_model"`
+	TrainedModel 		string    `json:"trained_model"`
 	EvaluationReport  	string 		`json:"evaluation_report"`
 }
 
 type PreProOutput struct {
-	DataOutput 		[]string    	`json:"data_output"`
+	DataOutput 		string    	`json:"data_output"`
 }
 
 type InputConfig struct {
@@ -60,7 +63,7 @@ type InputConfig struct {
 
 type DataInput struct{
 
-	Data  []string  `json:"data"`
+	Data  string  `json:"data"`
 	Key   string    `json:"key"`
 }
 
@@ -97,20 +100,13 @@ func dslVerify(jobInfo *DSL) error {
 	return nil
 }
 
-func ParsePartyInfo(pInfo []PartyInfo) ([]string, []PartyPath){
+func ParseIps(pInfo []PartyInfo) ([]string){
 	var iPs []string
-
-	var partyPath []PartyPath
 
 	for _, v := range pInfo {
 
 		// list of ip
 		iPs = append(iPs, v.IP)
-
-		// list of ip
-		partyPath = append(partyPath, v.PartyPaths)
-
-		// todo, should we use list to store model path in dsl ? ?:?
 	}
-	return iPs ,partyPath
+	return iPs
 }

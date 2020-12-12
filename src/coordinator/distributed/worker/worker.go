@@ -9,7 +9,6 @@ import (
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"fmt"
-	"os/exec"
 	"time"
 )
 
@@ -27,97 +26,118 @@ type Worker struct {
 
 func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
+	/**
+	 * @Author
+	 * @Description
+	 * @Date 2:52 下午 12/12/20
+	 * @Param
+		requires:
+
+			("party-id", po::value<int>(&party_id), "current party id")
+			("party-num", po::value<int>(&party_num), "total party num")
+			("party-type", po::value<int>(&party_type), "type of this party, active or passive")
+			("fl-setting", po::value<int>(&fl_setting), "federated learning setting, horizontal or vertical")
+
+			("network-file", po::value<std::string>(&network_file), "file name of network configurations")
+			("log-file", po::value<std::string>(&log_file), "file name of log destination")
+			("data-input-file", po::value<std::string>(&data_file), "file name of dataset")
+			("data-output-file", po::value<std::string>(&data_file), "file name of dataset")
+			("model-save-file", po::value<std::string>(&data_file), "file name of dataset")
+			("key-file", po::value<std::string>(&key_file), "file name of phe keys")
+
+			("existing-key", po::value<int>(&use_existing_key), "whether use existing phe keys")
+			("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run")
+			("algorithm-params", po::value<std::string>(&algorithm_params), "parameters for the algorithm");
+
+	 * @return
+	 **/
+
 	logger.Do.Printf("Worker: %s task started \n", wk.Address)
 
 	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
 
-	var dataIn4Paths []string
-	var dataOut4Paths []string
-	var dataKey string
-	//var dataAlgoCfig map[string]interface{}
+	partyId := dta.AssignID
+	partyNum := dta.PartyNums
+	partyType := dta.PartyInfo.PartyType
+	flSetting := dta.JobFlType
+	existingKey := dta.ExistingKey
 
-	var modelInput []string
-	var model4Paths []string
-	var modelReport string
-	var modelKey string
-	//var modelAlgoCfig map[string]interface{}
+	dataInputFile := common.TaskDataPath +"/" + dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Data
+	dataOutFile := common.TaskDataOutput  +"/" + dta.TaskInfos.PreProcessing.OutputConfigs.DataOutput
+	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Data
+	modelFile := common.TaskModelPath +"/"+ dta.TaskInfos.ModelTraining.OutputConfigs.TrainedModel
 
+	modelReportFile := dta.TaskInfos.ModelTraining.OutputConfigs.EvaluationReport
 
-	for _, v := range dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Data{
+	//var dataAlgorCfg map[string]interface{}
+	//var modelAlgorCfg map[string]interface{}
 
-		dataIn4Paths = append(dataIn4Paths, common.TaskDataPath +"/" +v )
-	}
-
-	for _, v := range dta.TaskInfos.PreProcessing.OutputConfigs.DataOutput{
-
-		dataOut4Paths = append(dataOut4Paths, common.TaskDataOutput +"/"+ v )
-	}
-
-	for _, v := range dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Data{
-
-		modelInput = append(modelInput, common.TaskDataOutput +"/"+ v )
-	}
-
-	for _, v := range dta.TaskInfos.ModelTraining.OutputConfigs.TrainedModel{
-
-		model4Paths = append(model4Paths, common.TaskModelPath +"/"+ v )
-	}
-
-	modelReport = dta.TaskInfos.ModelTraining.OutputConfigs.EvaluationReport
-
-	dataKey = dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Key
-	modelKey = dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Key
-
-	fmt.Println(dataKey, modelKey, modelReport)
+	time.Sleep(time.Second*1)
+	var KeyFile string
 
 	rep.Errs = make(map[string]string)
-	rep.ErrLogs = make(map[string]string)
 	rep.OutLogs = make(map[string]string)
-
-	// execute task 1: data processing
 
 	logger.Do.Println("Worker:task 1 pre processing start")
 
-	var envs []string
-	cmd := exec.Command(
-		"python3",
-		"/go/readwrite.py", "-i="+dataIn4Paths[0], "-o="+dataOut4Paths[0], "-model="+model4Paths[0])
+	doTrain := taskmanager.DoMlTask(
+	 	wk.pm,
+	 	fmt.Sprintf("%d", partyId),
+	 	fmt.Sprintf("%d", partyNum),
+	 	fmt.Sprintf("%d", partyType),
+	 	flSetting,
+	 	fmt.Sprintf("%d", existingKey),
+		dta.NetWorkFile,
+	 	)
 
-	//time.Sleep(time.Minute*20)
-	// 2 thread will ready from isStop channel, only one is running at the any time
+	var isOk string
+	var killed bool
+	var res map[string]string
+	var logFile string
 
-	killed, e, el, ol := wk.pm.ExecuteSubProc(cmd, envs)
-	rep.Killed = killed
-	if killed {
-		wk.taskFinish <- true
-		return nil
-	}
-
-	rep.Errs[common.PreProcessing] = e
-	rep.ErrLogs[common.PreProcessing] = el
-	rep.OutLogs[common.PreProcessing] = ol
-	logger.Do.Println("Worker:task 1 pre processing done", killed, e, el, ol)
-
-	if e != common.SubProcessNormal {
+	logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfos.PreProcessing.AlgorithmName
+	KeyFile = dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Key
+	isOk, killed, res = doTrain(
+		dta.TaskInfos.PreProcessing.AlgorithmName,
+		"algParams",
+		KeyFile,
+		logFile,
+		dataInputFile,
+		dataOutFile,
+		"", "",
+		)
+	rep.ErrLogs = res
+	if isOk != common.SubProcessNormal {
 		// return res is used to control the rpc call status, always return nil, but
 		// keep error at rep.Errs
 		return nil
 	}
 
-	//logger.Do.Println("----------------------------------------")
-	//logger.Do.Printf("Errors is %s\n", el)
-	//logger.Do.Println("----------------------------------------")
-	//logger.Do.Printf("Output is %s\n", ol)
-	//logger.Do.Println("----------------------------------------")
+	rep.Killed = killed
+	if killed {
+		wk.taskFinish <- true
+		return nil
+	}
+	logger.Do.Println("Worker:task 1 pre processing done", killed, isOk)
 
 	// execute task 2: train
 	logger.Do.Println("Worker:task model training start")
-
-	cmd2 := exec.Command(
-		"python3",
-		"/go/readwrite.py", "-i="+dataIn4Paths[0], "-o="+dataOut4Paths[0], "-model="+model4Paths[0])
-
-	killed, e, el, ol = wk.pm.ExecuteSubProc(cmd2, envs)
+	logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfos.ModelTraining.AlgorithmName
+	KeyFile = dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Key
+	isOk, killed, res = doTrain(
+		dta.TaskInfos.ModelTraining.AlgorithmName,
+		"algParams",
+		KeyFile,
+		logFile,
+		"",
+		modelInputFile,
+		modelFile,
+		modelReportFile,
+	)
+	rep.ErrLogs = res
+	if isOk != common.SubProcessNormal {
+		return nil
+	}
 
 	rep.Killed = killed
 	if killed {
@@ -125,15 +145,9 @@ func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 		return nil
 	}
 
-	rep.Errs[common.ModelTraining] = e
-	rep.ErrLogs[common.ModelTraining] = el
-	rep.OutLogs[common.ModelTraining] = ol
+	logger.Do.Println("Worker:task model training", killed, isOk)
 
-	logger.Do.Println("Worker:task 2 train worker done", killed)
-
-	if e != common.SubProcessNormal {
-		return nil
-	}
+	// 2 thread will ready from isStop channel, only one is running at the any time
 
 	for i := 10; i > 0; i-- {
 		logger.Do.Println("Worker: Counting down before job done... ", i)

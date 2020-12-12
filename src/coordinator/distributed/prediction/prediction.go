@@ -38,9 +38,9 @@ func (msvc *ModelService) CreateService(dta *entitiy.DoTaskArgs) {
 
 	// 2 thread will ready from isStop channel, only one is running at the any time
 
-	killed, e, el, ol := msvc.pm.ExecuteSubProc(cmd, envs)
+	killed, el,e := msvc.pm.CreateResources(cmd, envs)
 
-	logger.Do.Println("Worker:task 1 pre processing done", killed, e, el, ol)
+	logger.Do.Println("Worker:task 1 pre processing done", killed, el)
 
 	if e != common.SubProcessNormal {
 		// return res is used to control the rpc call status, always return nil, but

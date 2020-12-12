@@ -9,10 +9,14 @@ import (
 )
 
 type DoTaskArgs struct {
-	IP             string
-	AssignID	   int
-	PartyPath      common.PartyPath
-	TaskInfos      common.Tasks
+	IP              string
+	AssignID	    uint
+	PartyNums  		uint
+	JobFlType  		string
+	PartyInfo       common.PartyInfo
+	ExistingKey  	uint
+	TaskInfos       common.Tasks
+	NetWorkFile		string
 }
 
 // RegisterArgs is the argument passed when a worker registers with the master.
