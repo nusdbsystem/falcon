@@ -27,8 +27,9 @@ func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskT
 	var workerAddress []string
 
 	for i := 0; i < len(qItem.IPs); i++ {
-		logger.Do.Printf("Scheduler: Reading worker %s from registerChan\n", qItem.IPs[i])
 		addr := <-registerChan
+		logger.Do.Printf("Scheduler: Reading worker %s from registerChan\n", addr)
+		logger.Do.Printf("Scheduler: Reading corresponding listenerUrl %s from registerChan\n", qItem.IPs[i])
 		workerAddress = append(workerAddress, addr)
 	}
 
@@ -68,6 +69,7 @@ func (this *Master) schedulerHelper(
 	wg := sync.WaitGroup{}
 
 	// execute the task
+	logger.Do.Println("Scheduler: qitem.ips are ", qItem.IPs)
 	for i, v := range qItem.IPs {
 		vip := strings.Split(v, ":")[0]
 
@@ -76,17 +78,26 @@ func (this *Master) schedulerHelper(
 		args.PartyPath = qItem.PartyPath[i]
 		args.TaskInfos = qItem.TaskInfos
 
-		for _, workerAddr := range workerAddress {
-			ip := strings.Split(workerAddr, ":")[0]
+		MaxSearchNumber := 100
+		for len(workerAddress) > 0{
+
+			if MaxSearchNumber <=0{
+				panic("Max search Number reaches, Ip not Match Error ")
+			}
+
+			item := workerAddress[0]
+			ip := strings.Split(item, ":")[0]
+			workerAddress = workerAddress[1:]
 
 			// match using ip
 			if ip == vip {
-
 				wg.Add(1)
-
 				// execute the task
-				go taskHandler(workerAddr,svcName,args,qItem.JobId,&wg)
-
+				go taskHandler(item,svcName,args,qItem.JobId,&wg)
+				break
+			}else{
+				workerAddress = append(workerAddress, item)
+				MaxSearchNumber--
 			}
 		}
 	}
@@ -111,7 +122,7 @@ func (this *Master) trainTaskHandler(
 
 	// todo, now master call worker.Dotask, worker start to train, until training is done, so how long it will wait? before timeout
 
-	logger.Do.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
+	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", svcName, workerAddr)
 	ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
 
 	if !ok {
@@ -129,6 +140,8 @@ func (this *Master) trainTaskHandler(
 
 		time.Sleep(time.Minute*30)
 		panic("trainTaskHandler error")
+	}else{
+		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", svcName, workerAddr)
 	}
 
 	errLen := 4096

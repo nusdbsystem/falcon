@@ -145,6 +145,10 @@ func InitEnvs(svcName string){
 	}else if svcName==common.TrainExecutor{
 		// this will be executed only in production, in dev, the common.ExecutorTypeGlobal==""
 
+		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
+		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
+		common.TaskDataOutput = common.GetEnv("TASK_DATA_OUTPUT", "")
+
 		common.ExecutorTypeGlobal = common.GetEnv("EXECUTOR_TYPE", "")
 		common.WorkerURLGlobal = common.GetEnv("WORKER_URL", "")
 		common.MasterURLGlobal = common.GetEnv("MASTER_URL", "")
@@ -155,6 +159,10 @@ func InitEnvs(svcName string){
 		}
 
 	}else if svcName==common.PredictExecutor{
+
+		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
+		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
+		common.TaskDataOutput = common.GetEnv("TASK_DATA_OUTPUT", "")
 		// this will be executed only in production, in dev, the common.ExecutorTypeGlobal==""
 
 		common.ExecutorTypeGlobal = common.GetEnv("EXECUTOR_TYPE", "")

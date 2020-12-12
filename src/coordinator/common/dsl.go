@@ -24,9 +24,7 @@ type PartyInfo struct {
 type PartyPath struct {
 	DataInput      string `json:"data_input"`
 	DataOutput     string `json:"data_output"`
-	Model          string `json:"model"`
-	Report         string `json:"report"`
-	ExecutablePath string `json:"executable_path"`
+	ModelPath      string `json:"model_path"`
 }
 
 type Tasks struct {
@@ -35,14 +33,14 @@ type Tasks struct {
 }
 
 type PreProcessTask struct {
-	AlgorithmName string                 `json:"algorithm_name"`
-	InputConfigs  map[string]interface{} `json:"input_configs"`
-	OutputConfigs map[string]interface{} `json:"output_configs"`
+	AlgorithmName string             `json:"algorithm_name"`
+	InputConfigs  InputConfig 		`json:"input_configs"`
+	OutputConfigs PreProOutput 		`json:"output_configs"`
 }
 
 type ModelTrainTask struct {
-	AlgorithmName string                 `json:"algorithm_name"`
-	InputConfigs  map[string]interface{} `json:"input_configs"`
+	AlgorithmName string      `json:"algorithm_name"`
+	InputConfigs  InputConfig `json:"input_configs"`
 	OutputConfigs ModelOutput `json:"output_configs"`
 }
 
@@ -51,6 +49,20 @@ type ModelOutput struct {
 	EvaluationReport  	string 		`json:"evaluation_report"`
 }
 
+type PreProOutput struct {
+	DataOutput 		[]string    	`json:"data_output"`
+}
+
+type InputConfig struct {
+	DataInput 			DataInput    			`json:"data_input"`
+	AlgorithmConfig  	map[string]interface{} 	`json:"algorithm_config"`
+}
+
+type DataInput struct{
+
+	Data  []string  `json:"data"`
+	Key   string    `json:"key"`
+}
 
 
 func ParseDsl(contents string, jobInfo *DSL) error {
@@ -78,20 +90,17 @@ func dslVerify(jobInfo *DSL) error {
 	for _, v := range jobInfo.PartyInfos {
 
 		if len(v.IP) == 0 {
-			return errors.New("ip must be provide")
+			return errors.New("ip must be provided")
 		}
 	}
 
 	return nil
 }
 
-func ParsePartyInfo(pInfo []PartyInfo, taskInfos Tasks) ([]string, []PartyPath, []string, []string){
+func ParsePartyInfo(pInfo []PartyInfo) ([]string, []PartyPath){
 	var iPs []string
 
 	var partyPath []PartyPath
-
-	var modelPath []string
-	var executablePath  []string
 
 	for _, v := range pInfo {
 
@@ -102,10 +111,6 @@ func ParsePartyInfo(pInfo []PartyInfo, taskInfos Tasks) ([]string, []PartyPath, 
 		partyPath = append(partyPath, v.PartyPaths)
 
 		// todo, should we use list to store model path in dsl ? ?:?
-		modelPath = append(modelPath, v.PartyPaths.Model + taskInfos.ModelTraining.OutputConfigs.TrainedModel[0])
-		executablePath = append(executablePath, )
 	}
-
-	return iPs ,partyPath, modelPath, executablePath
-
+	return iPs ,partyPath
 }

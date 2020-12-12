@@ -97,7 +97,7 @@ func KillJob(masterAddr, Proxy string) {
 	}
 }
 
-func SetupWorkerHelper(masterAddress, taskType, jobId string)  {
+func SetupWorkerHelper(masterAddress, taskType, jobId, dataPath, modelPath, dataOutput string)  {
 
 	/**
 	 * @Author
@@ -116,6 +116,10 @@ func SetupWorkerHelper(masterAddress, taskType, jobId string)  {
 
 	// in dev, use thread
 	if common.Env == common.DevEnv{
+
+		common.TaskDataPath = dataPath
+		common.TaskDataOutput = dataOutput
+		common.TaskModelPath = modelPath
 
 		if taskType == common.TrainExecutor{
 			logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainExecutor")
@@ -146,14 +150,17 @@ func SetupWorkerHelper(masterAddress, taskType, jobId string)  {
 		km := taskmanager.InitK8sManager(true,  "")
 		command := []string{
 			common.WorkerYamlCreatePath,
-			serviceName,
-			workerPort,
-			masterAddress,
-			taskType,
-			workerAddress,
-			taskType,
-			common.Env,
-			common.ListenBasePath,
+			serviceName, 	// 1. worker service name
+			workerPort,  	// 2. worker service port
+			masterAddress,  // 3. master url
+			taskType,		// 4. train or predict job
+			workerAddress, 	// 5. worker url
+			taskType,   	// 6. serviceName train or predict
+			common.Env,  	// 7. env or prod
+			common.ListenBasePath,  // 8. folder to store logs, the same as listener folder currently,
+			dataPath, 		// 9. folder to read train data
+			modelPath, 		// 10. folder to store models
+			dataOutput, 	// 11. folder to store processed data
 		}
 
 		_=taskmanager.ExecuteOthers("ls")
@@ -194,7 +201,7 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 
 	// master will call lister's endpoint to launch worker, to train or predict
 	logger.Do.Println("SetupDist: master begin to call listeners:...")
-	for _, ip := range qItem.IPs {
+	for index, ip := range qItem.IPs {
 
 		// Launch the worker
 		// maybe check table wit ip, and + port got from table also
@@ -207,7 +214,12 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 
 		// todo, manage listener port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, taskType), such that user dont need
 		//  to provide port in dsl
-		c.SetupWorker(ip, masterAddress, taskType, fmt.Sprintf("%d", qItem.JobId))
+
+		dataPath := qItem.PartyPath[index].DataInput
+		dataOutput := qItem.PartyPath[index].DataOutput
+		modelPath := qItem.PartyPath[index].ModelPath
+
+		c.SetupWorker(ip, masterAddress, taskType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
 	}
 
 	logger.Do.Printf("SetupDist: master is running at %s ... waiting\n", masterAddress)

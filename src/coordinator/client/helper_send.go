@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func Get(addr string) string {
@@ -48,14 +49,31 @@ func PostForm(addr string, data map[string][]string) error {
 					"occupation": {"gardener"}}
 
 	*/
-	logger.Do.Printf("%q", addr)
 	addr = "http://" + strings.TrimSpace(addr)
-	resp, err := http.PostForm(addr, data)
-	if err != nil {
-		logger.Do.Println("PostForm Error happens,", err)
-		//panic(err)
-		return err
+
+	logger.Do.Printf("Sending post request to address: %q", addr)
+
+	NTimes := 20
+
+	var err error
+	var resp *http.Response
+
+	for {
+		if NTimes<0{
+			return err
+		}
+
+		resp, err = http.PostForm(addr, data)
+
+		if err != nil{
+			logger.Do.Println("Post Requests Error happens retry ..... ,", err)
+			time.Sleep(time.Second*4)
+			NTimes--
+		}else{
+			break
+		}
 	}
+
 	var res map[string]interface{}
 
 	_ = json.NewDecoder(resp.Body).Decode(&res)

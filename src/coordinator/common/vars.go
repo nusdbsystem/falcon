@@ -68,7 +68,9 @@ const (
 
 	TaskType = "task-type"
 
-
+	TrainDataPath  = "train-data-path"
+	TrainDataOutput  = "train-data-output"
+	ModelPath = "model-path"
 	// model endpoint
 	ModelUpdate  = "model-update"
 	IsTrained = "is_trained"
@@ -159,7 +161,9 @@ var (
 
 	MasterQItem = ""
 
-	//DATA_BASE_PATH = GetEnv("DATA_BASE_PATH", "./")
+	TaskDataPath = ""
+	TaskDataOutput = ""
+	TaskModelPath = ""
 )
 
 // GetEnv get key environment variable if exist otherwise return defalutValue

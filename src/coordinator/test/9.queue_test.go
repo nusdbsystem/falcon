@@ -22,7 +22,5 @@ func TestQueue(t *testing.T) {
 	fmt.Println(res2.JobId)
 	fmt.Println(res2.PartyPath)
 	fmt.Println(res2.TaskInfos)
-	fmt.Println(res2.ModelPath)
-	fmt.Println(res2.ExecutablePath)
 
 }

@@ -36,13 +36,34 @@ spec:
           value: "Env_PLACEHOLDER"
         - name: EXECUTOR_NAME
           value: "WORKER_NAME"
+        - name: TASK_DATA_PATH
+          value: "/go/trainData"     # by default, read data from this dir
+        - name: TASK_MODEL_PATH
+          value: "/go/trainModels"   # by default, read data from this dir
+        - name: TASK_DATA_OUTPUT
+          value: "/go/ProcessedData"   # by default, read data from this dir
       ports:
         - containerPort: WORKER_TARGET_PORT  #这里containerPort是容器内部的port
           name: "port-WORKER_TARGET_PORT"  # .ports[0].name: Invalid value: "train-8490548680670953438": must be no more than 15 characters
       volumeMounts:
         - name: falcon-listener
-          mountPath: go/logs
+          mountPath: /go/logs
+        - name: falcon-train-data
+          mountPath: /go/trainData
+        - name: falcon-train-model
+          mountPath: /go/trainModels
+        - name: falcon-processed-data
+          mountPath: /go/trainDataOutput  # spec.containers[0].volumeMounts[3].mountPath: Invalid value: /go/trainModels: must be unique
   volumes:
     - name: falcon-listener
       hostPath:
         path: HOST_PATH/run_time_logs/WORKER_NAME
+    - name: falcon-train-data
+      hostPath:
+        path: HOST_DATA_PATH
+    - name: falcon-train-model
+      hostPath:
+        path: HOST_MODEL_PATH
+    - name: falcon-processed-data
+      hostPath:
+        path: HOST_DATA_OUTPUT

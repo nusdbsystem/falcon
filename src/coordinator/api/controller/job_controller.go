@@ -15,14 +15,12 @@ func JobSubmit(dsl *common.DSL, ctx *entity.Context) (uint, string, uint, string
 
 	// generate.sh item pushed to the queue
 
-	iPs ,partyPath, modelPath, executablePath := common.ParsePartyInfo(dsl.PartyInfos, dsl.Tasks)
+	iPs ,partyPath := common.ParsePartyInfo(dsl.PartyInfos)
 
 	// generate.sh strings used to write to db
 	partyIds, err := json.Marshal(dsl.PartyInfos)
 	taskInfos, err := json.Marshal(dsl.Tasks)
-	modelPaths, e2 := json.Marshal(modelPath)
-	executablePaths, e3 := json.Marshal(executablePath)
-	if err != nil || e2!=nil || e3 !=nil {
+	if err != nil {
 		panic("json.Marshal(dsl.PartyIds) error")
 	}
 
@@ -42,8 +40,6 @@ func JobSubmit(dsl *common.DSL, ctx *entity.Context) (uint, string, uint, string
 		ModelDecs,
 		PartyNumber,
 		string(partyIds),
-		string(modelPaths),
-		string(executablePaths),
 		ExtInfo)
 
 	ctx.Ms.Commit([]error{errs, err2, err3})
@@ -54,8 +50,6 @@ func JobSubmit(dsl *common.DSL, ctx *entity.Context) (uint, string, uint, string
 	qItem.JobId = u.JobId
 	qItem.PartyPath = partyPath
 	qItem.TaskInfos = dsl.Tasks
-	qItem.ModelPath = modelPath
-	qItem.ExecutablePath = executablePath
 
 	go func() {
 		cache.JobQueue.Push(qItem)

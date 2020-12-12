@@ -4,16 +4,15 @@ import time
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-a', '--a', required=False, type=str, help="runtime conf path")
-    parser.add_argument('-b', '--b', required=False, type=str, help="runtime conf path")
+    parser.add_argument('-a', '--a')
+    parser.add_argument('-b', '--b')
+    parser.add_argument('-c', '--c')
     args = parser.parse_args()
-    print("Args is : ", args.a, args.b)
+    print("Args is : ", args.a, args.b, args.c)
 
-    try :
-        time.sleep(4)
+    try:
         for i in range(5):
-            print("processing Counting down", i)
-            time.sleep(1)
-
+            print("Python PreProcessing Counting down", i)
+            time.sleep(2)
     except:
-        print("error happens")
+        print("Error Happens")

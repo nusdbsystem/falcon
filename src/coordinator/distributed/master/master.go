@@ -64,6 +64,11 @@ func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 	defer this.Unlock()
 	logger.Do.Println("Master: Register: worker", args.WorkerAddr)
 
+	if contains(args.WorkerAddr, this.workers){
+		logger.Do.Printf("Master: the worker %s already registered, skip \n", args.WorkerAddr)
+		return nil
+	}
+
 	if len(this.workers) <= this.workerNum {
 		this.workers = append(this.workers, args.WorkerAddr)
 
@@ -288,3 +293,13 @@ func (this *Master) Shutdown(_, _ *struct{}) error {
 	return nil
 }
 
+
+
+func contains(str string, l []string) bool {
+	for _, ls :=  range l{
+		if ls == str{
+			return true
+		}
+	}
+	return false
+}
