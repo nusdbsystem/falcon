@@ -72,7 +72,6 @@ func TestRandomFunc2(t *testing.T) {
 		log.Fatalln("Failed to parse address book:", err)
 	}
 
-
 	fmt.Println(px)
 
 }
