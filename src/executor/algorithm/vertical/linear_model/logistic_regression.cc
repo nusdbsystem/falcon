@@ -4,6 +4,7 @@
 
 #include <falcon/algorithm/vertical/linear_model/logistic_regression.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/lr_params_converter.h>
 
 #include <ctime>
 #include <random>
@@ -511,21 +512,21 @@ void train_logistic_regression(Party party, std::string params_str) {
   LOG(INFO) << "Run the example logistic regression train";
   std::cout << "Run the example logistic regression train" << std::endl;
 
-  // TODO: Parse the params and match with the LogisticRegression parameters
-  // currently for testing
   LogisticRegressionParams params;
-  params.batch_size = 32;
-  params.max_iteration = 100;
-  params.converge_threshold = 1e-3;
-  params.with_regularization = false;
-  params.alpha = 0.1;
-  params.learning_rate = 0.05;
-  params.decay = 1.0;
-  params.penalty = "l2";
-  params.optimizer = "sgd";
-  params.multi_class = "ovr";
-  params.metric = "acc";
-  params.dp_budget = 0.1;
+//  // currently for testing
+//  params.batch_size = 32;
+//  params.max_iteration = 100;
+//  params.converge_threshold = 1e-3;
+//  params.with_regularization = false;
+//  params.alpha = 0.1;
+//  params.learning_rate = 0.05;
+//  params.decay = 1.0;
+//  params.penalty = "l2";
+//  params.optimizer = "sgd";
+//  params.multi_class = "ovr";
+//  params.metric = "acc";
+//  params.dp_budget = 0.1;
+  deserialize_lr_params(params, params_str);
   int weight_size = party.getter_feature_num();
   float training_accuracy = 0.0;
   float testing_accuracy = 0.0;

@@ -18,6 +18,7 @@
 #include <falcon/utils/io_util.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/network_converter.h>
 
 Party::Party(){}
 
@@ -49,52 +50,91 @@ Party::Party(int m_party_id,
     feature_num = feature_num - 1;
   }
 
-  // read network config file
-  ConfigFile config_file(m_network_file);
-  std::string port_string, ip_string;
-  std::vector<int> ports(party_num);
-  std::vector<std::string> ips(party_num);
-  for (int i = 0; i < party_num; i++) {
-    port_string = "party_" + to_string(i) + "_port";
-    ip_string = "party_" + to_string(i) + "_ip";
-    //get parties ips and ports
-    ports[i] = stoi(config_file.Value("", port_string));
-    ips[i] = config_file.Value("", ip_string);
-  }
+  if (NETWORK_CONFIG_PROTO == 0) {
+    // read network config file
+    ConfigFile config_file(m_network_file);
+    std::string port_string, ip_string;
+    std::vector<int> ports(party_num);
+    std::vector<std::string> ips(party_num);
+    for (int i = 0; i < party_num; i++) {
+      port_string = "party_" + to_string(i) + "_port";
+      ip_string = "party_" + to_string(i) + "_ip";
+      //get parties ips and ports
+      ports[i] = stoi(config_file.Value("", port_string));
+      ips[i] = config_file.Value("", ip_string);
+    }
 
-  LOG(INFO) << "Establish network communications with other parties";
+    LOG(INFO) << "Establish network communications with other parties";
 
-  // establish communication connections
-  SocketPartyData me, other;
-  for (int  i = 0;  i < party_num; ++ i) {
-    if (i < party_id) {
-      // this party will be the receiver in the protocol
-      me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), ports[party_id] + i);
-      other = SocketPartyData(boost_ip::address::from_string(ips[i]), ports[i] + party_id - 1);
-      shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+    // establish communication connections
+    SocketPartyData me, other;
+    for (int  i = 0;  i < party_num; ++ i) {
+      if (i < party_id) {
+        // this party will be the receiver in the protocol
+        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), ports[party_id] + i);
+        other = SocketPartyData(boost_ip::address::from_string(ips[i]), ports[i] + party_id - 1);
+        shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
-      // connect to the other party and add channel
-      channel->join(500,5000);
-      LOG(INFO) << "Communication channel established with party " << i << ", port is " << ports[party_id] + i << ".";
-      channels.push_back(std::move(channel));
-    } else if (i > party_id) {
-      // this party will be the sender in the protocol
-      me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), ports[party_id] + i - 1);
-      other = SocketPartyData(boost_ip::address::from_string(ips[i]), ports[i] + party_id);
-      shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+        // connect to the other party and add channel
+        channel->join(500,5000);
+        LOG(INFO) << "Communication channel established with party " << i << ", port is " << ports[party_id] + i << ".";
+        channels.push_back(std::move(channel));
+      } else if (i > party_id) {
+        // this party will be the sender in the protocol
+        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), ports[party_id] + i - 1);
+        other = SocketPartyData(boost_ip::address::from_string(ips[i]), ports[i] + party_id);
+        shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
 
-      // connect to the other party and add channel
-      channel->join(500,5000);
-      LOG(INFO) << "Communication channel established with party " << i << ", port is " << ports[party_id] + i << ".";
-      channels.push_back(std::move(channel));
-    } else {
-      // self communication
-      shared_ptr<CommParty> channel = nullptr;
-      channels.push_back(std::move(channel));
+        // connect to the other party and add channel
+        channel->join(500,5000);
+        LOG(INFO) << "Communication channel established with party " << i << ", port is " << ports[party_id] + i << ".";
+        channels.push_back(std::move(channel));
+      } else {
+        // self communication
+        shared_ptr<CommParty> channel = nullptr;
+        channels.push_back(std::move(channel));
+      }
+    }
+
+    host_names = ips;
+  } else {
+    // read network config proto from coordinator
+    std::vector<std::string> ips;
+    std::vector< std::vector<int> > port_arrays;
+    deserialize_network_configs(ips, port_arrays, m_network_file);
+
+    LOG(INFO) << "Establish network communications with other parties";
+
+    // establish communication connections
+    SocketPartyData me, other;
+    for (int  i = 0;  i < party_num; ++ i) {
+     if (i < party_id) {
+       // this party will be the receiver in the protocol
+       me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), port_arrays[party_id][i]);
+       other = SocketPartyData(boost_ip::address::from_string(ips[i]), port_arrays[i][party_id]);
+       shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+       // connect to the other party and add channel
+       channel->join(500,5000);
+       LOG(INFO) << "Communication channel established with party " << i << ", port is " << port_arrays[party_id][i] << ".";
+       channels.push_back(std::move(channel));
+      } else if (i > party_id){
+       // this party will be the sender in the protocol
+       me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), port_arrays[party_id][i]);
+       other = SocketPartyData(boost_ip::address::from_string(ips[i]), port_arrays[i][party_id]);
+       shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+       // connect to the other party and add channel
+       channel->join(500,5000);
+       LOG(INFO) << "Communication channel established with party " << i << ", port is " << port_arrays[party_id][i] << ".";
+       channels.push_back(std::move(channel));
+      } else {
+       // self communication
+       shared_ptr<CommParty> channel = nullptr;
+       channels.push_back(std::move(channel));
+     }
     }
   }
-
-  host_names = ips;
 
   LOG(INFO) << "Init threshold partially homomorphic encryption keys";
 

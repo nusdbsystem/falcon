@@ -17,6 +17,7 @@ namespace falcon{
   #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024
   #define MAXIMUM_RAND_VALUE 32767
   #define ROUNDED_PRECISION 1e-3
+  #define NETWORK_CONFIG_PROTO 1
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};
