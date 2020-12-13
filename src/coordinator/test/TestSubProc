@@ -151,3 +151,13 @@ processing Counting down 4
 2020/12/12 15:06:19 1.api_test.go:52: <nil>
 2020/12/12 15:06:43 1.api_test.go:44: <nil>
 2020/12/12 15:06:47 1.api_test.go:52: <nil>
+2020/12/12 22:32:35 1.api_test.go:44: <nil>
+2020/12/12 22:32:35 1.api_test.go:52: <nil>
+2020/12/12 22:34:51 1.api_test.go:45: <nil>
+2020/12/12 22:34:51 1.api_test.go:53: <nil>
+2020/12/12 22:35:02 1.api_test.go:56: [{"id":0,"ip":"192.168.65.3:30005","party_type":0,"path":{"data_input":"/Users/nailixing/Test/falcon_demon_12_11/p1/data/","data_output":"/Users/nailixing/Test/falcon_demon_12_11/p1/dout/","model_path":"/Users/nailixing/Test/falcon_demon_12_11/p1/model/"}},{"id":1,"ip":"192.168.65.3:30006","party_type":1,"path":{"data_input":"/Users/nailixing/Test/falcon_demon_12_11/p2/data/","data_output":"/Users/nailixing/Test/falcon_demon_12_11/p2/dout/","model_path":"/Users/nailixing/Test/falcon_demon_12_11/p2/model/"}}] <nil>
+2020/12/12 22:42:15 1.api_test.go:45: <nil>
+2020/12/12 22:42:15 1.api_test.go:53: <nil>
+2020/12/13 01:25:22 1.api_test.go:45: <nil>
+2020/12/13 01:25:22 1.api_test.go:53: <nil>
+2020/12/13 01:25:24 1.api_test.go:56: [{"id":0,"ip":"192.168.65.3:30005","party_type":0,"path":{"data_input":"/Users/nailixing/Test/falcon_demon_12_11/p1/data/","data_output":"/Users/nailixing/Test/falcon_demon_12_11/p1/dout/","model_path":"/Users/nailixing/Test/falcon_demon_12_11/p1/model/"}},{"id":1,"ip":"192.168.65.3:30006","party_type":1,"path":{"data_input":"/Users/nailixing/Test/falcon_demon_12_11/p2/data/","data_output":"/Users/nailixing/Test/falcon_demon_12_11/p2/dout/","model_path":"/Users/nailixing/Test/falcon_demon_12_11/p2/model/"}}] <nil>

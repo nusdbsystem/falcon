@@ -5,6 +5,7 @@ import (
 	"coordinator/common"
 	"coordinator/logger"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -40,7 +41,7 @@ func TestJson(t *testing.T) {
 }
 
 func TestParseJson(t *testing.T) {
-	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/dsltest.json")
+	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/dsl.json")
 	logger.Do.Println(err)
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -53,5 +54,10 @@ func TestParseJson(t *testing.T) {
 
 	b, err := json.Marshal(dsl.PartyInfos)
 	logger.Do.Println(string(b), err)
+
+	jb, _ := json.Marshal(dsl.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	res := common.LogisticRegression{}
+	_=json.Unmarshal(jb,&res)
+	fmt.Println(res)
 
 }

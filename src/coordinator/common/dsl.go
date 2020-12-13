@@ -3,6 +3,8 @@ package common
 import (
 	"encoding/json"
 	"errors"
+	"google.golang.org/protobuf/proto"
+	"log"
 )
 
 // protoc -I=/Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/ --go_out=/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/common /Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/job.proto
@@ -14,7 +16,7 @@ type DSL struct {
 	PartyNums  		uint        				`json:"party_nums,uint"`
 	TaskNum    		uint        				`json:"task_num,uint"`
 	PartyInfos 		[]PartyInfo 				`json:"party_info"`
-	Tasks      		Tasks      `json:"tasks"`
+	Tasks      		Tasks      					`json:"tasks"`
 }
 
 type PartyInfo struct {
@@ -36,7 +38,7 @@ type Tasks struct {
 }
 
 type PreProcessTask struct {
-	AlgorithmName string             `json:"algorithm_name"`
+	AlgorithmName string            `json:"algorithm_name"`
 	InputConfigs  InputConfig 		`json:"input_configs"`
 	OutputConfigs PreProOutput 		`json:"output_configs"`
 }
@@ -57,8 +59,9 @@ type PreProOutput struct {
 }
 
 type InputConfig struct {
-	DataInput 			DataInput    			`json:"data_input"`
-	AlgorithmConfig  	map[string]interface{} 	`json:"algorithm_config"`
+	DataInput 					DataInput    			`json:"data_input"`
+	AlgorithmConfig  			map[string]interface{} 	`json:"algorithm_config"`
+	SerializedAlgorithmConfig	string
 }
 
 type DataInput struct{
@@ -75,6 +78,19 @@ func ParseDsl(contents string, jobInfo *DSL) error {
 	if e != nil {
 		panic("Parse error")
 	}
+
+	// if there is PreProcessing, serialize it
+	if jobInfo.Tasks.PreProcessing.AlgorithmName!=""{
+		jobInfo.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig=
+			GeneratePreProcessParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	}
+	// if there is ModelTraining, serialize it
+	if jobInfo.Tasks.ModelTraining.AlgorithmName!=""{
+
+		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	}
+
 	ep := dslVerify(jobInfo)
 	if ep != nil {
 		return errors.New("parse verify error")
@@ -109,4 +125,48 @@ func ParseIps(pInfo []PartyInfo) ([]string){
 		iPs = append(iPs, v.IP)
 	}
 	return iPs
+}
+
+func GenerateLrParams(cfg map[string]interface{}) string {
+
+	jb, err := json.Marshal(cfg)
+	if err!=nil{
+		panic("GenerateLrParams error in doing Marshal")
+	}
+
+	res := LogisticRegression{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateLrParams error in doing Unmarshal")
+	}
+
+	lrp := LogisticRegressionParams{
+		BatchSize:res.BatchSize,
+		MaxIteration:res.MaxIteration,
+		ConvergeThreshold:res.ConvergeThreshold,
+		WithRegularization:res.WithRegularization,
+		Alpha:res.Alpha,
+		LearningRate:res.LearningRate,
+		Decay:res.Decay,
+		Penalty:res.Penalty,
+		Optimizer:res.Optimizer,
+		MultiClass:res.MultiClass,
+		Metric:res.Metric,
+		DifferentialPrivacyBudget:res.DifferentialPrivacyBudget,
+	}
+
+	out, err := proto.Marshal(&lrp)
+	if err != nil {
+
+		// todo, should we exit from here directly ????? error handler management?
+		log.Fatalln("Failed to encode GenerateLrParams:", err)
+	}
+
+	return string(out)
+}
+
+
+func GeneratePreProcessParams(cfg map[string]interface{}) string {
+	return ""
 }
