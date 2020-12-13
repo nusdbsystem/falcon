@@ -161,3 +161,5 @@ processing Counting down 4
 2020/12/13 01:25:22 1.api_test.go:45: <nil>
 2020/12/13 01:25:22 1.api_test.go:53: <nil>
 2020/12/13 01:25:24 1.api_test.go:56: [{"id":0,"ip":"192.168.65.3:30005","party_type":0,"path":{"data_input":"/Users/nailixing/Test/falcon_demon_12_11/p1/data/","data_output":"/Users/nailixing/Test/falcon_demon_12_11/p1/dout/","model_path":"/Users/nailixing/Test/falcon_demon_12_11/p1/model/"}},{"id":1,"ip":"192.168.65.3:30006","party_type":1,"path":{"data_input":"/Users/nailixing/Test/falcon_demon_12_11/p2/data/","data_output":"/Users/nailixing/Test/falcon_demon_12_11/p2/dout/","model_path":"/Users/nailixing/Test/falcon_demon_12_11/p2/model/"}}] <nil>
+2020/12/13 14:52:41 5.rand_test.go:20: [38 255 129 3 1 1 13 83 104 117 116 100 111 119 110 82 101 112 108 121 1 255 130 0 1 1 1 6 78 116 97 115 107 115 1 4 0 0 0 6 255 130 1 255 246 0]
+2020/12/13 14:52:41 5.rand_test.go:24: 123

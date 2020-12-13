@@ -238,8 +238,8 @@ func (this *Master) generateNetworkConfig(urls []string) string {
 	}
 
 	cfg := common.NetworkConfig{
-		Ip:    ips,
-		Port:  []*common.Port{},
+		Ips:    ips,
+		PortArrays:  []*common.PortArray{},
 	}
 
 	// for each ip address
@@ -251,8 +251,8 @@ func (this *Master) generateNetworkConfig(urls []string) string {
 			pint, _ := strconv.Atoi(port)
 			ports = append(ports, int32(pint))
 		}
-		p := &common.Port{Port: ports}
-		cfg.Port = append(cfg.Port, p)
+		p := &common.PortArray{Ports: ports}
+		cfg.PortArrays = append(cfg.PortArrays, p)
 	}
 
 	out, err := proto.Marshal(&cfg)

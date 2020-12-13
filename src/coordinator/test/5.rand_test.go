@@ -3,6 +3,7 @@ package test
 import (
 	"coordinator/common"
 	"coordinator/distributed/entitiy"
+	"coordinator/exceptions"
 	"coordinator/logger"
 	"encoding/json"
 	"fmt"
@@ -49,17 +50,17 @@ func TestRandomFunc2(t *testing.T) {
 
 
 	p := common.NetworkConfig{
-		Ip:    []string{"1","123","123","3"},
-		Port:  []*common.Port{},
+		Ips:    []string{"1","123","123","3"},
+		PortArrays:  []*common.PortArray{},
 	}
 
-	p1 := &common.Port{Port: []int32{1,2,34,5}}
-	p2 := &common.Port{Port: []int32{1,2,34,5}}
-	p3 := &common.Port{Port: []int32{1,2,34,5}}
+	p1 := &common.PortArray{Ports: []int32{1,2,34,5}}
+	p2 := &common.PortArray{Ports: []int32{1,2,34,5}}
+	p3 := &common.PortArray{Ports: []int32{1,2,34,5}}
 
-	p.Port = append(p.Port, p1)
-	p.Port = append(p.Port, p2)
-	p.Port = append(p.Port, p3)
+	p.PortArrays = append(p.PortArrays, p1)
+	p.PortArrays = append(p.PortArrays, p2)
+	p.PortArrays = append(p.PortArrays, p3)
 
 	out, err := proto.Marshal(&p)
 	if err != nil {
@@ -73,5 +74,15 @@ func TestRandomFunc2(t *testing.T) {
 	}
 
 	fmt.Println(px)
+
+}
+
+
+
+func TestErrors(t *testing.T) {
+
+	if exceptions.CallingError().Error() ==  exceptions.CallingErr{
+		fmt.Println("asdf")
+	}
 
 }

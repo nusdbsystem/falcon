@@ -1,47 +1,65 @@
 package client
 
 import (
+	"coordinator/exceptions"
 	"coordinator/logger"
 	"net/rpc"
 	"time"
 )
 
 func Call(srv string, proxy string, rpcname string, args interface{}, reply interface{}) bool {
+	/**
+	 * @Author
+	 * @Description if connection error, retry, otherwise, return false
+	 * @Date 3:01 下午 13/12/20
+	 * @Param
+	 * @return,
+			true: successfully,
+			false: error happens
+	 **/
 
 	NTimes := 20
 	for {
 		if NTimes<0{
-			panic("RpcCall failed!")
+			logger.Do.Printf("RpcCall: Connection error, max retry reached!")
+			return false
 		}
 		res := doCall(srv, proxy, rpcname, args, reply)
-		if res == false{
-			logger.Do.Printf("RpcCall: failed, retry.......")
-			time.Sleep(time.Second*3)
-			NTimes--
-		}else if res == true{
-			logger.Do.Printf("RpcCall: successfully")
-			return res
+		if res != nil{
+
+			if res.Error() == exceptions.ConnectionErr{
+				logger.Do.Printf("RpcCall: Connection error, retry.......")
+				time.Sleep(time.Second*3)
+				NTimes--
+			}
+
+			if res.Error() == exceptions.CallingErr{
+				logger.Do.Printf("RpcCall: Call method error, return")
+				return false
+			}
+
+		}else{
+			logger.Do.Printf("RpcCall: Calling successfully")
+			return true
 		}
 	}
 }
 
-func doCall(srv string, proxy string, rpcname string, args interface{}, reply interface{}) bool {
+func doCall(srv string, proxy string, rpcname string, args interface{}, reply interface{}) error {
 
 	logger.Do.Printf("---------------in Calling----------------Address of this call, proxy: %s, address: %s, methodName: %s \n", proxy, srv, rpcname)
 	c, derr := rpc.Dial(proxy, srv)
 	if derr != nil {
-		logger.Do.Println("---------------in Calling----------------Error: Connection error", derr)
-		return false
+		logger.Do.Printf("---------------in Calling----------------Error: Connection error, <<%s>>\n", derr)
+		return exceptions.ConnectionError()
 	}
 	defer c.Close()
 
-	logger.Do.Println("---------------in Calling----------------method of this call", rpcname)
 	cerr := c.Call(rpcname, args, reply)
 	if cerr == nil {
-		logger.Do.Println("---------------in Calling----------------Calling Done")
-		return true
+		return nil
 	} else {
-		logger.Do.Println("---------------in Calling----------------Error: call method error--", cerr)
-		return false
+		logger.Do.Printf("---------------in Calling----------------Error: Call method error, <<%s>>\n", cerr)
+		return exceptions.CallingError()
 	}
 }
