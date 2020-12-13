@@ -22,7 +22,8 @@ int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
 
   int party_id, party_num, party_type, fl_setting, use_existing_key;
-  std::string network_file, log_file, data_file, key_file, algorithm_name, algorithm_params;
+  std::string network_file, log_file, data_input_file, data_output_file, key_file, model_save_file, model_report_file;
+  std::string algorithm_name, algorithm_params;
 
   try {
     namespace po = boost::program_options;
@@ -36,11 +37,14 @@ int main(int argc, char *argv[]) {
         ("fl-setting", po::value<int>(&fl_setting), "federated learning setting, horizontal or vertical")
         ("network-file", po::value<std::string>(&network_file), "file name of network configurations")
         ("log-file", po::value<std::string>(&log_file), "file name of log destination")
-        ("data-file", po::value<std::string>(&data_file), "file name of dataset")
+        ("data-input-file", po::value<std::string>(&data_input_file), "input file name of dataset")
+        ("data-output-file", po::value<std::string>(&data_output_file), "output file name of dataset")
         ("existing-key", po::value<int>(&use_existing_key), "whether use existing phe keys")
         ("key-file", po::value<std::string>(&key_file), "file name of phe keys")
         ("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run")
-        ("algorithm-params", po::value<std::string>(&algorithm_params), "parameters for the algorithm");
+        ("algorithm-params", po::value<std::string>(&algorithm_params), "parameters for the algorithm")
+        ("model-save-file", po::value<std::string>(&model_save_file), "model save file name")
+        ("model-report-file", po::value<std::string>(&model_report_file), "model report file name");
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
@@ -59,10 +63,13 @@ int main(int argc, char *argv[]) {
     std::cout << "existing-key: " << vm["existing-key"].as<int>() << std::endl;
     std::cout << "network-file: " << vm["network-file"].as< std::string >() << std::endl;
     std::cout << "log-file: " << vm["log-file"].as< std::string >() << std::endl;
-    std::cout << "data-file: " << vm["data-file"].as< std::string >() << std::endl;
+    std::cout << "data-input-file: " << vm["data-input-file"].as< std::string >() << std::endl;
+    std::cout << "data-output-file: " << vm["data-output-file"].as< std::string >() << std::endl;
     std::cout << "key-file: " << vm["key-file"].as< std::string >() << std::endl;
     std::cout << "algorithm-name: " << vm["algorithm-name"].as< std::string >() << std::endl;
     std::cout << "algorithm-params: " << vm["algorithm-params"].as< std::string >() << std::endl;
+    std::cout << "model-save-file: " << vm["model-save-file"].as< std::string >() << std::endl;
+    std::cout << "model-report-file: " << vm["model-report-file"].as< std::string >() << std::endl;
   }
   catch(std::exception& e)
   {
@@ -80,16 +87,19 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "use_existing_key: " << use_existing_key;
   LOG(INFO) << "network_file: " << network_file;
   LOG(INFO) << "log_file: " << log_file;
-  LOG(INFO) << "data_file: " << data_file;
+  LOG(INFO) << "data_input_file: " << data_input_file;
+  LOG(INFO) << "data_output_file: " << data_output_file;
   LOG(INFO) << "key_file: " << key_file;
   LOG(INFO) << "algorithm_name: " << algorithm_name;
   LOG(INFO) << "algorithm_params: " << algorithm_params;
+  LOG(INFO) << "model_save_file: " << model_save_file;
+  LOG(INFO) << "model_report_file: " << model_report_file;
 
   Party party(party_id, party_num,
       static_cast<falcon::PartyType>(party_type),
       static_cast<falcon::FLSetting>(fl_setting),
       network_file,
-      data_file,
+      data_input_file,
       use_existing_key,
       key_file);
 
