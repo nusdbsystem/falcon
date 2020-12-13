@@ -8,7 +8,6 @@ message NetworkConfig {
   repeated string ips = 1;
   // an array of PortArray
   repeated PortArray port_arrays = 2;
-
 }
 
 message PortArray {

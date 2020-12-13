@@ -105,7 +105,7 @@ void protobuf_AddDesc_lr_5fparams_2eproto() {
     "_rate\030\006 \001(\002\022\r\n\005decay\030\007 \001(\002\022\017\n\007penalty\030\010 "
     "\001(\t\022\021\n\toptimizer\030\t \001(\t\022\023\n\013multi_class\030\n "
     "\001(\t\022\016\n\006metric\030\013 \001(\t\022#\n\033differential_priv"
-    "acy_budget\030\014 \001(\002b\006proto3", 344);
+    "acy_budget\030\014 \001(\002B\010Z\006commonb\006proto3", 354);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "lr_params.proto", &protobuf_RegisterTypes);
   LogisticRegressionParams::default_instance_ = new LogisticRegressionParams();

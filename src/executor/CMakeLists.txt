@@ -20,6 +20,8 @@ set(SOURCE_FILES
         ../../include/falcon/utils/pb_converter/lr_params_converter.h
         utils/pb_converter/lr_params_converter.cc
         ../../include/falcon/utils/metric/accuracy.h
+        ../../include/falcon/utils/pb_converter/network_converter.h
+        utils/pb_converter/network_converter.cc
         utils/metric/accuracy.cc
         include/message/common.pb.h
         include/message/common.pb.cc
@@ -29,6 +31,8 @@ set(SOURCE_FILES
         include/message/phe_keys.pb.cc
         include/message/lr_params.pb.h
         include/message/lr_params.pb.cc
+        include/message/network.pb.h
+        include/message/network.pb.cc
         ../../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
         ../../include/falcon/operator/phe/djcs_t_aux.h
