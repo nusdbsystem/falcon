@@ -13,7 +13,7 @@ import (
 
 
 
-type RpcBase struct {
+type RpcBaseClass struct {
 	sync.Mutex
 	Name 		string
 	Proxy 		string
@@ -25,7 +25,7 @@ type RpcBase struct {
 	Cancel context.CancelFunc
 }
 
-func (rb *RpcBase) InitRpc(Address string) {
+func (rb *RpcBaseClass) InitRpcBase(Address string) {
 	rb.Proxy = "tcp"
 	rb.Address = Address
 
@@ -38,7 +38,7 @@ func (rb *RpcBase) InitRpc(Address string) {
 
 
 
-func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
+func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 
 
 	logger.Do.Printf("%s: listening on %s, %s \n", rb.Name, rb.Proxy, "0.0.0.0:"+rb.Port)
@@ -95,7 +95,7 @@ func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 // stopRPCServer stops the master RPC server.
 // This must be done through an RPC to avoid
 // race conditions between the RPC server thread and the current thread.
-func (rb *RpcBase) StopRPCServer(addr, targetSvc string) {
+func (rb *RpcBaseClass) StopRPCServer(addr, targetSvc string) {
 	var reply entitiy.ShutdownReply
 
 	logger.Do.Printf("%s: begin to call %s\n", rb.Name, targetSvc)

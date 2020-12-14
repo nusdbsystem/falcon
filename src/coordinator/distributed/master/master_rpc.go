@@ -15,7 +15,6 @@ func RunMaster(masterAddr string, qItem *cache.QItem, taskType string) (ms *Mast
 	 * @Param  launch 2 thread, one is rpc server, another is scheduler, once got party info, assign work
 	 * @return
 	 **/
-	logger.Do.Println("Master: addr is :", masterAddr)
 	ms = newMaster(masterAddr, len(qItem.IPs))
 
 	ms.reset()
@@ -51,8 +50,13 @@ func RunMaster(masterAddr string, qItem *cache.QItem, taskType string) (ms *Mast
 
 	// set time out, no worker comes within 1 min, stop master
 	time.AfterFunc(1*time.Minute, func() {
-		if len(ms.workers) <ms.workerNum {
-			logger.Do.Println("Master: Wait for 1 Min, No enough worker come, stop")
+		if len(ms.workers) < ms.workerNum {
+
+			logger.Do.Printf("Master: Wait for 1 Min, No enough worker come, stop, required %d, got %d ",
+				ms.workerNum,
+				len(ms.workers),
+				)
+
 			finish()
 		}
 	})

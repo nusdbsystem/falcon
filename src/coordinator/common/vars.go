@@ -144,6 +144,8 @@ var (
 
 	// those are init by user
 	ServiceNameGlobal = getEnv("SERVICE_NAME", "coord")
+	LocalPath = ""
+
 	CoordAddrGlobal = ""
 	ListenAddrGlobal = ""
 	ListenBasePath = ""

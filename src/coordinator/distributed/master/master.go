@@ -15,7 +15,7 @@ import (
 
 type Master struct {
 
-	base.RpcBase
+	base.RpcBaseClass
 
 	doneChannel chan bool
 
@@ -39,7 +39,7 @@ type Master struct {
 
 func newMaster(masterAddr string, workerNum int) (ms *Master) {
 	ms = new(Master)
-	ms.InitRpc(masterAddr)
+	ms.InitRpcBase(masterAddr)
 	ms.Name = common.Master
 	ms.beginCountDown = sync.NewCond(ms)
 	ms.allWorkerReady = sync.NewCond(ms)
@@ -75,7 +75,6 @@ func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 		}
 		select {
 		case this.tmpWorkers <- args.WorkerAddr:
-			logger.Do.Println("Master: Register worker", args.WorkerAddr)
 			return nil
 		default:
 			logger.Do.Println("Master: Register worker, no consumer,retry...", args.WorkerAddr)
@@ -88,6 +87,7 @@ func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 // sends information of worker to ch. which is used by scheduler
 func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 
+	logger.Do.Printf("Master: start forwardRegistrations... ")
 	var requiredIp []string
 
 	for i := 0; i < len(qItem.IPs); i++ {
@@ -95,7 +95,7 @@ func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 		requiredIp = append(requiredIp, ip)
 	}
 
-	loop:
+loop:
 	for {
 		select {
 		case <- this.Ctx.Done():
@@ -113,7 +113,7 @@ func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 
 			for i, ip := range requiredIp{
 				if addrIp == ip{
-					logger.Do.Println("Master: Found one worker")
+					logger.Do.Println("Master: Found one worker", addr)
 
 					this.Lock()
 					this.workers  = append(this.workers, addr)
@@ -132,9 +132,6 @@ func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 				this.allWorkerReady.Broadcast()
 			}
 			this.Unlock()
-
-		default:
-			time.Sleep(time.Second*2)
 		}
 	}
 }

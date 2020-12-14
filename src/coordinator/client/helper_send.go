@@ -35,7 +35,6 @@ func Get(addr string) string {
 		panic(err)
 	}
 
-	logger.Do.Println("Get response is ",string(body))
 	return string(body)
 }
 
@@ -77,8 +76,6 @@ func PostForm(addr string, data map[string][]string) error {
 	var res map[string]interface{}
 
 	_ = json.NewDecoder(resp.Body).Decode(&res)
-
-	logger.Do.Println("PostForm, res: ", res)
 
 	return nil
 }

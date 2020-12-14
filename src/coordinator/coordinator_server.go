@@ -9,6 +9,7 @@ import (
 	"coordinator/distributed/worker"
 	"coordinator/listener"
 	"coordinator/logger"
+	"fmt"
 	"os"
 	"runtime"
 	"time"
@@ -25,7 +26,16 @@ func init() {
 
 func initLogger(){
 	// this path is fixed, used to creating folder inside container
-	fixedPath:="./logs"
+	var fixedPath string
+	if common.Env == common.DevEnv{
+		common.LocalPath = os.Getenv("DATA_BASE_PATH")
+		fixedPath = common.LocalPath+"runtimeLogs"
+	}else{
+		fixedPath ="./logs"
+	}
+
+	fmt.Println("Loging to ", fixedPath)
+
 	_ = os.Mkdir(fixedPath, os.ModePerm)
 	// Use layout string for time format.
 	const layout = "2006-01-02T15:04:05"

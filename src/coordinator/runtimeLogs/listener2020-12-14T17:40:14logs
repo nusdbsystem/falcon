@@ -1,0 +1,8 @@
+2020/12/14 17:40:14 vars.go:190: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: COORDINATOR_IP, value: 172.25.123.254 >>>>>>>>>>>>>
+2020/12/14 17:40:14 vars.go:187: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: COORD_TARGET_PORT, default: 30004 >>>>>>>>>>>>>
+2020/12/14 17:40:14 vars.go:190: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: LISTENER_IP, value: 172.25.123.254 >>>>>>>>>>>>>
+2020/12/14 17:40:14 vars.go:187: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: DATA_BASE_PATH, default:  >>>>>>>>>>>>>
+2020/12/14 17:40:14 coordinator_server.go:51: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordSvcURLGlobal, value: 172.25.123.254:30004 >>>>>>>>>>>>>
+2020/12/14 17:40:14 vars.go:187: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: LISTENER_NODE_PORT, default:  >>>>>>>>>>>>>
+2020/12/14 17:40:14 vars.go:187: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: PARTY_NUMBER, default:  >>>>>>>>>>>>>
+2020/12/14 17:40:14 coordinator_server.go:110: Error: Input Error, either CoordAddrGlobal or ListenAddrGlobal not provided
