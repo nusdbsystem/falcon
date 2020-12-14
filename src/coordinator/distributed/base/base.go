@@ -1,6 +1,9 @@
 package base
 
 import (
+	"context"
+	"coordinator/client"
+	"coordinator/distributed/entitiy"
 	"coordinator/logger"
 	"net"
 	"net/rpc"
@@ -8,16 +11,18 @@ import (
 	"sync"
 )
 
+
+
 type RpcBase struct {
 	sync.Mutex
 	Name 		string
 	Proxy 		string
 	Address  	string //  which is the ip+port address of worker
-	Port  	string //  which is the port address of worker
+	Port  		string //  which is the port address of worker
 	Listener 	net.Listener
 
-	// if the master is stopped
-	IsStop 		bool
+	Ctx    context.Context
+	Cancel context.CancelFunc
 }
 
 func (rb *RpcBase) InitRpc(Address string) {
@@ -27,7 +32,8 @@ func (rb *RpcBase) InitRpc(Address string) {
 	h := strings.Split(Address, ":")
 
 	rb.Port = h[1]
-	rb.IsStop = false
+
+	rb.Ctx, rb.Cancel = context.WithCancel(context.Background())
 }
 
 
@@ -39,8 +45,7 @@ func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 	listener, e := net.Listen(rb.Proxy, "0.0.0.0:"+rb.Port)
 
 	if e != nil {
-		logger.Do.Printf("%s: StartRPCServer error, %s\n", rb.Name, e)
-		panic(e)
+		logger.Do.Fatalf("%s: StartRPCServer error, %s\n", rb.Name, e)
 	}
 
 	rb.Listener = listener
@@ -85,7 +90,19 @@ func (rb *RpcBase) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 			}
 		}
 	}
+}
 
+// stopRPCServer stops the master RPC server.
+// This must be done through an RPC to avoid
+// race conditions between the RPC server thread and the current thread.
+func (rb *RpcBase) StopRPCServer(addr, targetSvc string) {
+	var reply entitiy.ShutdownReply
 
+	logger.Do.Printf("%s: begin to call %s\n", rb.Name, targetSvc)
+	ok := client.Call(addr, rb.Proxy, targetSvc, new(struct{}), &reply)
+	if ok == false {
+		logger.Do.Printf("%s: Cleanup: RPC %s error\n", rb.Name, addr)
+	}
+	logger.Do.Printf("%s: cleanupRegistration: done\n", rb.Name)
 }
 

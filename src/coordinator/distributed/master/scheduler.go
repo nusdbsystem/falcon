@@ -1,12 +1,15 @@
 package master
 
 import (
+	"context"
 	"coordinator/cache"
 	"coordinator/client"
 	c "coordinator/client"
 	"coordinator/common"
 	"coordinator/distributed/entitiy"
 	"coordinator/logger"
+	"encoding/json"
+	"fmt"
 	"google.golang.org/protobuf/proto"
 	"strconv"
 	"strings"
@@ -14,9 +17,14 @@ import (
 	"time"
 )
 
-type taskHandler func(workerAddr,svcName string, args *entitiy.DoTaskArgs, JobId uint, wg *sync.WaitGroup)
+type taskHandler func(
+	workerAddr,svcName string,
+	args *entitiy.DoTaskArgs,
+	wg *sync.WaitGroup,
+	trainStatuses *[]entitiy.DoTaskReply)
 
-func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskType string) {
+
+func (this *Master) schedule(qItem *cache.QItem, taskType string) {
 	logger.Do.Println("Scheduler: Begin to schedule")
 
 	// checking if the ip of worker match the qItem
@@ -24,24 +32,22 @@ func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskT
 	this.allWorkerReady.Wait()
 	this.Unlock()
 
-	logger.Do.Println("Scheduler: All worker found")
-
-	// extract ip from register chan to static slice
-	var workerAddress []string
-
-	for i := 0; i < len(qItem.IPs); i++ {
-		addr := <-registerChan
-		logger.Do.Printf("Scheduler: Reading worker %s from registerChan\n", addr)
-		logger.Do.Printf("Scheduler: Reading corresponding listenerUrl %s from registerChan\n", qItem.IPs[i])
-		workerAddress = append(workerAddress, addr)
-	}
-
+	logger.Do.Println("Scheduler: All worker found: ", this.workers)
 
 	if taskType == common.TrainExecutor{
 
-		taskFunc := this.trainTaskHandler
+		jsonString := this.schedulerHelper(this.TaskHandler, common.Worker, qItem)
 
-		this.schedulerHelper(taskFunc, common.Worker, qItem, workerAddress)
+		logger.Do.Println("Scheduler: Finish schedule all tasks, update status")
+
+		client.JobUpdateResInfo(
+			common.CoordSvcURLGlobal,
+			"",
+			string(jsonString),
+			"",
+			qItem.JobId)
+
+		client.JobUpdateStatus(common.CoordSvcURLGlobal, this.jobStatus, qItem.JobId)
 
 		client.ModelUpdate(
 			common.CoordSvcURLGlobal,
@@ -49,14 +55,15 @@ func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskT
 			qItem.JobId)
 
 		// stop worker after finishing the job
-		this.stats = this.killWorkers()
+		this.killWorkers()
 
 	}else if taskType == common.PredictExecutor{
 
-		taskFunc := this.predictTaskHandler
+		this.schedulerHelper(this.TaskHandler, common.ModelService,qItem)
 
-		this.schedulerHelper(taskFunc, common.ModelService,qItem,workerAddress)
+		logger.Do.Println("Scheduler: Finish schedule all tasks, update status")
 
+		client.ModelServiceUpdateStatus(common.CoordSvcURLGlobal, this.jobStatus, qItem.JobId)
 	}
 }
 
@@ -64,16 +71,21 @@ func (this *Master) schedule(registerChan chan string, qItem *cache.QItem, taskT
 func (this *Master) schedulerHelper(
 
 	taskHandler taskHandler,
-
 	svcName string,
-	qItem *cache.QItem,
-	workerAddress []string){
+	qItem *cache.QItem) string{
+
 
 	wg := sync.WaitGroup{}
 
 	// execute the task
-	logger.Do.Println("Scheduler: qitem.ips are ", qItem.IPs)
+	logger.Do.Println("Scheduler: qItem.ips are ", qItem.IPs)
 	netCfg := this.generateNetworkConfig(qItem.IPs)
+
+	var trainStatuses []entitiy.DoTaskReply
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go this.TaskStatusMonitor(&trainStatuses, ctx)
 
 	for i, v := range qItem.IPs {
 		vip := strings.Split(v, ":")[0]
@@ -89,24 +101,27 @@ func (this *Master) schedulerHelper(
 		args.NetWorkFile = netCfg
 
 		MaxSearchNumber := 100
-		for len(workerAddress) > 0{
+		for len(this.workers) > 0{
 
 			if MaxSearchNumber <=0{
 				panic("Max search Number reaches, Ip not Match Error ")
 			}
 
-			item := workerAddress[0]
-			ip := strings.Split(item, ":")[0]
-			workerAddress = workerAddress[1:]
+			addr := this.workers[0]
+			ip := strings.Split(addr, ":")[0]
+			this.workers = this.workers[1:]
 
 			// match using ip
 			if ip == vip {
 				wg.Add(1)
 				// execute the task
-				go taskHandler(item,svcName,args,qItem.JobId,&wg)
+				// append will allocate new memory inside the func stack,
+				// must pass address of slice to func. such that multi goroutines can
+				// update the original slices.
+				go taskHandler(addr, svcName, args, &wg, &trainStatuses)
 				break
 			}else{
-				workerAddress = append(workerAddress, item)
+				this.workers = append(this.workers, addr)
 				MaxSearchNumber--
 			}
 		}
@@ -114,120 +129,43 @@ func (this *Master) schedulerHelper(
 	// wait all job has been finished successfully
 	wg.Wait()
 
-	logger.Do.Println("Scheduler: Finish schedule all prediction task ")
+	// shutdown all goroutines.
+	cancel()
+	jsonString, e := json.Marshal(trainStatuses)
+	if e!=nil{
+		logger.Do.Fatalln(e)
+	}
+	return string(jsonString)
 }
 
 
-func (this *Master) trainTaskHandler(
+func (this *Master) TaskHandler(
 	workerAddr,
 	svcName string,
 	args *entitiy.DoTaskArgs,
-	JobId uint,
-	wg *sync.WaitGroup){
+	wg *sync.WaitGroup,
+	trainStatuses *[]entitiy.DoTaskReply,
+){
 
 	defer wg.Done()
 
 	argAddr := entitiy.EncodeDoTaskArgs(args)
 	var rep entitiy.DoTaskReply
-
-	// todo, now master call worker.Dotask, worker start to train, until training is done, so how long it will wait? before timeout
 
 	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", svcName, workerAddr)
 	ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
 
 	if !ok {
 		logger.Do.Printf("Scheduler: Master calling %s, DoTask error\n", workerAddr)
+		rep.ErrorMsg.RpcCallErrorMsg = "RpcCallError"
+		rep.RpcCallError = true
 
-		client.JobUpdateResInfo(
-			common.CoordSvcURLGlobal,
-			"call Worker.DoTask error",
-			"call Worker.DoTask error",
-			"call Worker.DoTask error",
-			JobId)
-		client.JobUpdateStatus(common.CoordSvcURLGlobal, common.JobFailed, JobId)
-
-		// todo define return or panic, how to handle panic if one panic, and others normal?
-
-		time.Sleep(time.Minute*30)
-		panic("trainTaskHandler error")
 	}else{
 		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", svcName, workerAddr)
+		rep.RpcCallError = false
 	}
-
-	errLen := 4096
-	outLen := 4096
-	errMsg := rep.ErrLogs[common.PreProcessing] + common.ModelTraining + rep.ErrLogs[common.ModelTraining]
-	outMsg := rep.OutLogs[common.PreProcessing] + common.ModelTraining + rep.OutLogs[common.ModelTraining]
-	if len(errMsg) < errLen {
-		errLen = len(errMsg)
-	}
-
-	if len(outMsg) < outLen {
-		outLen = len(outMsg)
-	}
-
-	logger.Do.Println("Scheduler: max length is", outLen, errLen)
-
-	if rep.Killed == true {
-	} else if rep.Errs[common.PreProcessing] != common.SubProcessNormal {
-		// if pre-processing failed
-		client.JobUpdateResInfo(
-			common.CoordSvcURLGlobal,
-			rep.ErrLogs[common.PreProcessing],
-			rep.OutLogs[common.PreProcessing],
-			"PreProcessing Failed",
-			JobId)
-		client.JobUpdateStatus(common.CoordSvcURLGlobal, common.JobFailed, JobId)
-
-		// if pre-processing pass, but train failed
-	} else if rep.Errs[common.ModelTraining] != common.SubProcessNormal {
-		client.JobUpdateResInfo(
-			common.CoordSvcURLGlobal,
-			errMsg[:errLen],
-			outMsg[:outLen],
-			"PreProcessing Passed, ModelTraining Failed",
-			JobId)
-		client.JobUpdateStatus(common.CoordSvcURLGlobal, common.JobFailed, JobId)
-
-		// if both train and process pass
-	} else {
-		client.JobUpdateResInfo(
-			common.CoordSvcURLGlobal,
-			errMsg[:errLen],
-			outMsg[:outLen],
-			"PreProcessing Passed, ModelTraining Passed",
-			JobId)
-		client.JobUpdateStatus(common.CoordSvcURLGlobal, common.JobSuccessful, JobId)
-	}
+	*trainStatuses = append(*trainStatuses, rep)
 }
-
-
-func (this *Master) predictTaskHandler(
-	workerAddr,
-	svcName string,
-	args *entitiy.DoTaskArgs,
-	JobId uint,
-	wg *sync.WaitGroup){
-
-	defer wg.Done()
-
-	argAddr := entitiy.EncodeDoTaskArgs(args)
-	var rep entitiy.DoTaskReply
-
-	logger.Do.Printf("Scheduler: begin to call %s.DoTask\n", svcName)
-
-	ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
-
-	if !ok {
-		logger.Do.Printf("Scheduler: %s.CreateService error\n", svcName)
-
-		client.ModelServiceUpdateStatus(common.CoordSvcURLGlobal, common.JobFailed, JobId)
-		return
-	}else{
-		client.ModelServiceUpdateStatus(common.CoordSvcURLGlobal, common.JobRunning, JobId)
-	}
-}
-
 
 func (this *Master) generateNetworkConfig(urls []string) string {
 
@@ -264,4 +202,40 @@ func (this *Master) generateNetworkConfig(urls []string) string {
 
 	return string(out)
 
+}
+
+
+func (this *Master) TaskStatusMonitor(status *[]entitiy.DoTaskReply, ctx context.Context) {
+
+	/**
+	 * @Author
+	 * @Description  if one task got error, kill all workers.
+	 * @Date 6:48 下午 13/12/20
+	 * @Param
+	 * @return
+	 **/
+
+	for {
+		select {
+		case <- ctx.Done():
+			fmt.Println("Scheduler: Stop TaskStatusMonitor")
+			this.jobStatus = common.JobSuccessful
+			return
+		default:
+			for _, v:= range *status{
+				if v.RuntimeError == true || v.RpcCallError == true {
+					this.jobStatus = common.JobFailed
+					// kill all workers.
+					this.killWorkers()
+					return
+				}
+
+				if v.Killed==true{
+					this.jobStatus = common.JobKilled
+					return
+				}
+			}
+		}
+		time.Sleep(2*time.Second)
+	}
 }

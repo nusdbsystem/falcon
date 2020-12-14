@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"fmt"
@@ -12,27 +13,28 @@ import (
 func TestSubProc(t *testing.T) {
 	logger.Do, logger.F = logger.GetLogger("./TestSubProc")
 
-	//dir := "/Users/nailixing/GOProj/src/coordinator/falcon_ml"
+	//out, err := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2").Output()
+	//fmt.Println(out, err)
 
-	out, err := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2").Output()
-	fmt.Println(out, err)
-
-
-	cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
+	cmd := exec.Command(
+		"python3",
+		"/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml/preprocessing.py",
+		"-a=1", "-b=2", "-c=123")
 	var envs []string
 
 	pm := taskmanager.InitSubProcessManager()
+	pm.Ctx, pm.Cancel = context.WithCancel(context.Background())
 
-	//go func(){
-	//	for i:=8;i>0;i--{
-	//		time.Sleep(time.Second*1)
-	//		logger.Do.Println("Before kill process",i)
-	//	}
-	//	pm.IsStop <-true
-	//}()
+	go func(){
+		for i:=8;i>0;i--{
+			time.Sleep(time.Second*1)
+			logger.Do.Println("Before kill process",i)
+		}
+		pm.Cancel()
+	}()
 
-	killed, el, e:= pm.CreateResources(cmd, envs)
-	logger.Do.Println(killed, e, el)
+	el, e:= pm.CreateResources(cmd, envs)
+	logger.Do.Println(e, el)
 
 	//logger.Do.Println("Worker:task model training start")
 	//args = []string{"plot_out_of_core_classification.py", "-a 1 -b 1"}
