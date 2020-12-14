@@ -1,6 +1,7 @@
 package taskmanager
 
 import (
+	"context"
 	"coordinator/common"
 	"coordinator/logger"
 	"errors"
@@ -17,67 +18,54 @@ import (
 type SubProcessManager struct {
 	sync.Mutex
 
-	// if stop the subprocess
-	IsStop chan bool
+	// if the subprocess be killed
+	IsKilled 	bool
 	// number of subprocess
-	NumProc int
-
-	// if the subprocess is killed
-	// if the subprocess is finished normally
+	NumProc 	int
+	// context
+	Ctx 		context.Context
+	Cancel		context.CancelFunc
 
 }
 
 func InitSubProcessManager() *SubProcessManager {
 	pm := new(SubProcessManager)
-
-	pm.IsStop = make(chan bool)
 	pm.NumProc = 0
-
 	return pm
-
 }
 
-func (pm *SubProcessManager) KillSubProc(pid int, isKilled, isFinish chan bool) {
 
-	killed := false
+func (pm *SubProcessManager) SubProcessMonitor(pid int) {
+
 loop:
 	for {
 		select {
-		case stop := <-pm.IsStop:
-			if stop == true {
+		case <- pm.Ctx.Done():
 
-				err := syscall.Kill(pid, syscall.SIGQUIT)
+			_, err := syscall.Getpgid(pid)
+			if err == nil {
+				err = syscall.Kill(pid, syscall.SIGQUIT)
 				if err != nil {
-					logger.Do.Println(err)
-					//logger.Do.Fatal(err)
+					logger.Do.Println("SubProcessManager: Manually Killed PID=cmd.Process.Pid Error",err)
+				}else{
+					logger.Do.Println("SubProcessManager: Manually Killed PID=cmd.Process.Pid", pid)
 				}
-				logger.Do.Println("SubProcessManager: Manually Killed PID=cmd.Process.Pid", pid)
-				killed = true
-
-				<-isFinish
-				logger.Do.Println("SubProcessManager: Put true to isKilled")
-				isKilled <- killed
-				logger.Do.Println("SubProcessManager: Put true to isKilled done")
-
-				logger.Do.Println("SubProcessManager: break the loop, quite KillSubProc thread")
-				break loop
+			}else{
+				logger.Do.Printf("SubProcessManager: PID %d is not running\n", pid)
 			}
-		case finish := <-isFinish:
-			if finish == true {
-				killed = false
-				isKilled <- killed
-				break loop
-			}
+			break loop
 		default:
+			time.Sleep(time.Second*1)
 		}
 	}
 }
+
 
 func (pm *SubProcessManager) CreateResources(
 	cmd *exec.Cmd,
 	envs []string,
 
-) (bool, string, string) {
+) (string, string) {
 /**
  * @Author
  * @Description
@@ -100,12 +88,11 @@ func (pm *SubProcessManager) CreateResources(
  * @return
  **/
 	defer func() {
-		logger.Do.Println("SubProcessManager: Getting lock")
+		logger.Do.Println("SubProcessManager: lock")
 		pm.Lock()
 		pm.NumProc -= 1
-		logger.Do.Println("SubProcessManager: Unlock")
 		pm.Unlock()
-		logger.Do.Println("SubProcessManager: Unlock done")
+		logger.Do.Println("SubProcessManager: Unlock ")
 	}()
 
 	if len(envs) > 0 {
@@ -115,7 +102,7 @@ func (pm *SubProcessManager) CreateResources(
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		logger.Do.Println(err)
-		return false, err.Error(), ""
+		return err.Error(), ""
 	}
 
 	// shutdown the process after 2 hour, if still not finish
@@ -124,54 +111,45 @@ func (pm *SubProcessManager) CreateResources(
 		err := syscall.Kill(cmd.Process.Pid, syscall.SIGQUIT)
 		logger.Do.Println("SubProcessManager: Timeout, Killed PID=cmd.Process.Pid")
 		if err != nil {
-			logger.Do.Fatal(err)
+			logger.Do.Printf("SubProcessManager: Timeout, Killed PID=%d error\n", cmd.Process.Pid)
+
 		}
 	})
 
 	if err := cmd.Start(); err != nil {
 		logger.Do.Println(err)
-		return false, err.Error(), ""
+		return err.Error(), ""
 	}
 
-	isKilled := make(chan bool, 1)
-	isFinish := make(chan bool, 1)
 	// if start successfully
 	if cmd.Process != nil {
 		logger.Do.Println("SubProcessManager: Open subProcess, PID=", cmd.Process.Pid)
 
-		go pm.KillSubProc(cmd.Process.Pid, isKilled, isFinish)
+		go pm.SubProcessMonitor(cmd.Process.Pid)
 		// if there is a running KillSubProc, nTasks add 1
 		pm.Lock()
 		pm.NumProc += 1
 		pm.Unlock()
 
+		exitStatus := cmd.Wait()
 		errLog, _ := ioutil.ReadAll(stderr)
-		outErr := cmd.Wait()
 
-		var oe string
-		if outErr != nil {
-			oe = outErr.Error()
+		// oe is
+		var exitStr string
+		if exitStatus != nil {
+			exitStr = exitStatus.Error()
 		} else {
-			oe = common.SubProcessNormal
+			exitStr = common.SubProcessNormal
 		}
-		for {
 
-			select {
-			case killed := <-isKilled:
-				logger.Do.Println("SubProcessManager: Job Done, return")
-				return killed, oe, string(errLog)
-			case isFinish <- true:
-				logger.Do.Println("SubProcessManager: Write to isFinish")
-			default:
-			}
-		}
+		logger.Do.Println("SubProcessManager: subprocess exitStr:", exitStr)
+		logger.Do.Println("SubProcessManager: subprocess errorLogs:", string(errLog))
+		return exitStr, string(errLog)
 
 	} else {
-		return false, errors.New("SubProcessManager: cmd.Process is Nil, start error").Error(), ""
+		return errors.New("SubProcessManager: cmd.Process is Nil, start error").Error(), ""
 	}
-
 }
-
 
 
 
@@ -180,7 +158,13 @@ func (pm *SubProcessManager) ExecuteSubProcStream(
 	args []string,
 	envs []string,
 ) (bool, string, string, string) {
-
+	/**
+	 * @Author
+	 * @Description dont use this for now.
+	 * @Date 4:04 下午 14/12/20
+	 * @Param
+	 * @return
+	 **/
 	defer func() {
 		logger.Do.Println("SubProcessManager: Getting lock")
 		pm.Lock()
@@ -223,13 +207,11 @@ func (pm *SubProcessManager) ExecuteSubProcStream(
 		return false, err.Error(), "", ""
 	}
 
-	isKilled := make(chan bool, 1)
-	isFinish := make(chan bool, 1)
 	// if start successfully
 	if cmd.Process != nil {
 		logger.Do.Println("SubProcessManager: Open subProcess, PID=", cmd.Process.Pid)
 
-		go pm.KillSubProc(cmd.Process.Pid, isKilled, isFinish)
+		go pm.SubProcessMonitor(cmd.Process.Pid)
 		// if there is a running KillSubProc, nTasks add 1
 		pm.Lock()
 		pm.NumProc += 1
@@ -246,17 +228,7 @@ func (pm *SubProcessManager) ExecuteSubProcStream(
 		} else {
 			oe = common.SubProcessNormal
 		}
-		for {
-
-			select {
-			case killed := <-isKilled:
-				logger.Do.Println("SubProcessManager: Job Done, return")
-				return killed, oe, "", ""
-			case isFinish <- true:
-				logger.Do.Println("SubProcessManager: Write to isFinish")
-			default:
-			}
-		}
+		return true, oe, "", ""
 
 	} else {
 		return false, errors.New("SubProcessManager: cmd.Process is Nil, start error").Error(), "", ""

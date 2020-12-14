@@ -18,7 +18,7 @@ func Call(srv string, proxy string, rpcname string, args interface{}, reply inte
 			false: error happens
 	 **/
 
-	NTimes := 20
+	NTimes := 3
 	for {
 		if NTimes<0{
 			logger.Do.Printf("RpcCall: Connection error, max retry reached!")

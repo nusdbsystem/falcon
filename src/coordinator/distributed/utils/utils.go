@@ -67,3 +67,14 @@ func GetFreePort4K8s() (int, error) {
 		}
 	}
 }
+
+
+
+func Contains(str string, l []string) bool {
+	for _, ls :=  range l{
+		if ls == str{
+			return true
+		}
+	}
+	return false
+}

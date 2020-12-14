@@ -9,6 +9,7 @@ import (
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -16,8 +17,8 @@ type Worker struct {
 
 	base.RpcBase
 
-	pm         *taskmanager.SubProcessManager
-	taskFinish chan bool
+	pm         		*taskmanager.SubProcessManager
+	taskFinish 		chan bool
 
 	latestHeardTime int64
 	SuicideTimeout  int
@@ -26,7 +27,30 @@ type Worker struct {
 
 func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
-	wk.MlTaskProcess(arg, rep)
+	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
+
+	wg := sync.WaitGroup{}
+
+	wg.Add(2)
+
+	go wk.MpcTaskProcess(dta, "algName")
+	go wk.MlTaskProcess(dta, rep, &wg)
+
+	// wait until all the task done
+	wg.Wait()
+
+	// kill all the monitors
+	wk.pm.Cancel()
+
+	wk.pm.Lock()
+	rep.Killed = wk.pm.IsKilled
+	if wk.pm.IsKilled == true{
+		wk.pm.Unlock()
+		wk.taskFinish <- true
+	}else{
+		wk.pm.Unlock()
+	}
+
 	//go TestTaskProcess()
 	return nil
 
@@ -39,34 +63,40 @@ func (wk *Worker) register(master string) {
 
 	logger.Do.Printf("Worker: begin to call Master.Register to register address= %s \n", args.WorkerAddr)
 	ok := client.Call(master, wk.Proxy, "Master.Register", args, new(struct{}))
+	// if not register successfully, close
 	if ok == false {
-		logger.Do.Printf("Worker: Register RPC %s, register error\n", master)
+		logger.Do.Fatalf("Worker: Register RPC %s, register error\n", master)
 	}
 }
 
 // Shutdown is called by the master when all work has been completed.
 // We should respond with the number of tasks we have processed.
-func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
+func (wk *Worker) Shutdown(_, _ *struct{}) error {
 	logger.Do.Println("Worker: Shutdown", wk.Address)
 
-	// there are running subprocess
-	wk.pm.Lock()
-
 	// shutdown other related thread
-	wk.IsStop = true
+	wk.Cancel()
 
+	// check if there are running subprocess
+	wk.pm.Lock()
 	if wk.pm.NumProc > 0 {
+		// if there is still running job, kill the job
+		wk.pm.IsKilled = true
 		wk.pm.Unlock()
 
-		wk.pm.IsStop <- true
+		// do the kill
+		wk.pm.Cancel()
 
-		logger.Do.Println("Worker: Waiting to finish DoTask...", wk.pm.NumProc)
+		logger.Do.Println("Worker: Waiting to finish the killing process of DoTask...", wk.pm.NumProc)
+
+		// wait until kill successfully
 		<-wk.taskFinish
-		logger.Do.Println("Worker: DoTask returned, Close the listener...")
+
 	} else {
 		wk.pm.Unlock()
-
 	}
+
+	logger.Do.Println("Worker: DoTask returned, Close the listener...")
 
 	err := wk.Listener.Close() // close the connection, cause error, and then ,break the worker
 	if err != nil {
@@ -79,39 +109,45 @@ func (wk *Worker) Shutdown(_ *struct{}, res *entitiy.ShutdownReply) error {
 
 func (wk *Worker) eventLoop() {
 	time.Sleep(time.Second * 5)
+
+loop:
 	for {
-
-		wk.Lock()
-		if wk.IsStop == true {
+		select {
+		case <-wk.Ctx.Done():
 			logger.Do.Printf("Worker: isStop=true, server %s quite eventLoop \n", wk.Address)
+			break loop
+		default:
+			elapseTime := time.Now().UnixNano() - wk.latestHeardTime
+			if int(elapseTime/int64(time.Millisecond)) >= wk.SuicideTimeout {
 
-			wk.Unlock()
-			break
-		}
+				logger.Do.Printf("Worker: Timeout, server %s begin to suicide \n", wk.Address)
 
-		elapseTime := time.Now().UnixNano() - wk.latestHeardTime
-		if int(elapseTime/int64(time.Millisecond)) >= wk.SuicideTimeout {
-
-			logger.Do.Printf("Worker: Timeout, server %s begin to suicide \n", wk.Address)
-
-			var reply entitiy.ShutdownReply
-			ok := client.Call(wk.Address, wk.Proxy, "Worker.Shutdown", new(struct{}), &reply)
-			if ok == false {
-				logger.Do.Printf("Worker: RPC %s shutdown error\n", wk.Address)
-			} else {
-				logger.Do.Printf("Worker: worker timeout, RPC %s shutdown successfule\n", wk.Address)
+				var reply entitiy.ShutdownReply
+				ok := client.Call(wk.Address, wk.Proxy, "Worker.Shutdown", new(struct{}), &reply)
+				if ok == false {
+					logger.Do.Printf("Worker: RPC %s shutdown error\n", wk.Address)
+				} else {
+					logger.Do.Printf("Worker: worker timeout, RPC %s shutdown successfule\n", wk.Address)
+				}
+				// quite event loop no matter ok or not
+				break
 			}
-			// quite event loop no matter ok or not
-			break
-		}
-		wk.Unlock()
+			wk.Unlock()
 
-		time.Sleep(time.Millisecond * common.WorkerTimeout / 5)
-		fmt.Printf("Worker: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
+			time.Sleep(time.Millisecond * common.WorkerTimeout / 5)
+			fmt.Printf("Worker: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
+		}
 	}
 }
 
 func (wk *Worker) ResetTime(_ *struct{}, _ *struct{}) error {
+	/**
+	 * @Author
+	 * @Description which will be called by master
+	 * @Date 11:44 上午 14/12/20
+	 * @Param
+	 * @return
+	 **/
 	fmt.Println("Worker: reset the countdown")
 	wk.reset()
 	return nil
@@ -121,5 +157,4 @@ func (wk *Worker) reset() {
 	wk.Lock()
 	wk.latestHeardTime = time.Now().UnixNano()
 	wk.Unlock()
-
 }

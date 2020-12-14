@@ -14,14 +14,14 @@ import (
 
 func TestRandomFunc(t *testing.T) {
 
-	a := entitiy.ShutdownReply{Ntasks: 123}
+	a := entitiy.ShutdownReply{}
 
 	res := entitiy.EncodeDoTaskArgsGeneral(&a)
 	logger.Do.Println(res)
 
 	rr := entitiy.ShutdownReply{}
 	entitiy.DecodeDoTaskArgsGeneral(res, &rr)
-	logger.Do.Println(rr.Ntasks)
+	logger.Do.Println()
 
 }
 

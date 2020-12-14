@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"coordinator/common"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
@@ -18,20 +19,23 @@ func RunWorker(masterAddress, workerAddress string) {
 	wk.pm = taskmanager.InitSubProcessManager()
 	wk.taskFinish = make(chan bool)
 
+	// subprocess manager hold a global context
+	wk.pm.Ctx, wk.pm.Cancel = context.WithCancel(context.Background())
 	wk.reset()
-	go wk.eventLoop()
 
+	// 0 thread: start event Loop
+	go wk.eventLoop()
 
 	rpcSvc := rpc.NewServer()
 	err := rpcSvc.Register(wk)
 	if err!= nil{
-		logger.Do.Printf("%s: start Error \n", wk.Name)
-		return
+		logger.Do.Fatalf("%s: start Error \n", wk.Name)
 	}
 
-	logger.Do.Println("Worker: register to masterAddress= ", masterAddress)
+	logger.Do.Println("Worker: register to masterAddress = ", masterAddress)
 	wk.register(masterAddress)
 
+	// start rpc server blocking...
 	wk.StartRPCServer(rpcSvc, true)
 
 	// once  worker is killed, clear the resources.

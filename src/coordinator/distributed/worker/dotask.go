@@ -5,15 +5,13 @@ import (
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
+	"encoding/json"
 	"fmt"
 	"os/exec"
+	"sync"
 	"time"
 )
 
-
-func DoMPCTask(){
-
-}
 
 
 func DoMlTask(
@@ -27,7 +25,7 @@ func DoMlTask(
 
 	netFile string,
 
-) func(string, string, string,string, string,string, string,string) (string, bool, map[string]string ) {
+) func(string, string, string,string, string,string, string,string) (string, map[string]string ) {
 
 	/**
 	 * @Author
@@ -49,7 +47,7 @@ func DoMlTask(
 		dataOutputFile string,
 		modelSaveFile string,
 		modelReport string,
-	)(string, bool, map[string]string ){
+	)(string, map[string]string ){
 
 		var envs []string
 
@@ -72,15 +70,15 @@ func DoMlTask(
 			" --model-report-file "+modelReport,
 		)
 
-		killed, err, el := pm.CreateResources(cmd, envs)
+		exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)
 
-		res[algName] = el
-		return err, killed, res
+		res[algName] = runTimeErrorLog
+		return exitStr, res
 	}
 }
 
 
-func (wk *Worker) MlTaskProcess(arg []byte, rep *entitiy.DoTaskReply)  {
+func (wk *Worker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply, wg *sync.WaitGroup)  {
 	/**
 	 * @Author
 	 * @Description
@@ -106,10 +104,10 @@ func (wk *Worker) MlTaskProcess(arg []byte, rep *entitiy.DoTaskReply)  {
 
 	 * @return
 	 **/
+	defer wg.Done()
 
 	logger.Do.Printf("Worker: %s task started \n", wk.Address)
 
-	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
 
 	partyId := dta.AssignID
 	partyNum := dta.PartyNums
@@ -124,14 +122,8 @@ func (wk *Worker) MlTaskProcess(arg []byte, rep *entitiy.DoTaskReply)  {
 
 	modelReportFile := dta.TaskInfos.ModelTraining.OutputConfigs.EvaluationReport
 
-
-
-	time.Sleep(time.Second*1)
 	var algParams string
 	var KeyFile string
-
-	rep.Errs = make(map[string]string)
-	rep.OutLogs = make(map[string]string)
 
 	doTrain := DoMlTask(
 		wk.pm,
@@ -143,11 +135,10 @@ func (wk *Worker) MlTaskProcess(arg []byte, rep *entitiy.DoTaskReply)  {
 		dta.NetWorkFile,
 	)
 
-	var isOk string
-	var killed bool
+	var exitStr string
 	var res map[string]string
 	var logFile string
-
+	fmt.Println(res)
 
 	if  dta.TaskInfos.PreProcessing.AlgorithmName!=""{
 		logger.Do.Println("Worker:task 1 pre processing start")
@@ -155,7 +146,7 @@ func (wk *Worker) MlTaskProcess(arg []byte, rep *entitiy.DoTaskReply)  {
 		KeyFile = dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Key
 
 		algParams = dta.TaskInfos.PreProcessing.InputConfigs.SerializedAlgorithmConfig
-		isOk, killed, res = doTrain(
+		exitStr, res = doTrain(
 			dta.TaskInfos.PreProcessing.AlgorithmName,
 			algParams,
 			KeyFile,
@@ -164,19 +155,10 @@ func (wk *Worker) MlTaskProcess(arg []byte, rep *entitiy.DoTaskReply)  {
 			dataOutFile,
 			"", "",
 		)
-		rep.ErrLogs = res
-		if isOk != common.SubProcessNormal {
-			// return res is used to control the rpc call status, always return nil, but
-			// keep error at rep.Errs
+		if exit := wk.execResHandler(exitStr, res, rep); exit==true{
 			return
 		}
-
-		rep.Killed = killed
-		if killed {
-			wk.taskFinish <- true
-			return
-		}
-		logger.Do.Println("Worker:task 1 pre processing done", killed, isOk)
+		logger.Do.Println("Worker:task 1 pre processing done", rep)
 	}
 
 	if  dta.TaskInfos.ModelTraining.AlgorithmName!="" {
@@ -186,7 +168,7 @@ func (wk *Worker) MlTaskProcess(arg []byte, rep *entitiy.DoTaskReply)  {
 		KeyFile = dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Key
 
 		algParams = dta.TaskInfos.ModelTraining.InputConfigs.SerializedAlgorithmConfig
-		isOk, killed, res = doTrain(
+		exitStr, res = doTrain(
 			dta.TaskInfos.ModelTraining.AlgorithmName,
 			algParams,
 			KeyFile,
@@ -196,16 +178,12 @@ func (wk *Worker) MlTaskProcess(arg []byte, rep *entitiy.DoTaskReply)  {
 			modelFile,
 			modelReportFile,
 		)
-		rep.ErrLogs = res
-		if isOk != common.SubProcessNormal {
+
+		if exit := wk.execResHandler(exitStr, res, rep); exit==true{
 			return
 		}
 
-		rep.Killed = killed
-		if killed {
-			wk.taskFinish <- true
-		}
-		logger.Do.Println("Worker:task model training", killed, isOk)
+		logger.Do.Println("Worker:task model training", rep)
 	}
 
 	// 2 thread will ready from isStop channel, only one is running at the any time
@@ -221,4 +199,74 @@ func (wk *Worker) MlTaskProcess(arg []byte, rep *entitiy.DoTaskReply)  {
 
 func TestTaskProcess(){
 
+}
+
+func (wk *Worker) MpcTaskProcess(dta *entitiy.DoTaskArgs, algName string){
+	/**
+	 * @Author
+	 * @Description
+	 * @Date 2:52 下午 12/12/20
+	 * @Param
+
+		./semi-party.x -F -N 3 -I -p 0 -h 10.0.0.33 -pn 6000 algorithm_name
+			-N party_num
+			-p party_id
+			-h ip
+			-pn port
+			algorithm_name
+
+	 * @return
+	 **/
+
+	partyId := dta.AssignID
+	partyNum := dta.PartyNums
+
+	var envs []string
+
+	cmd := exec.Command(
+		common.MpcExe,
+		" --F ",
+		" -N  " + fmt.Sprintf("%d",partyNum),
+		" --I ",
+		" --p " + fmt.Sprintf("%d",partyId),
+		" --h " + dta.IP,
+		" --pn " + wk.Port,
+		" "+algName,
+		)
+
+	wk.pm.CreateResources(cmd, envs)
+
+	return
+
+}
+
+func (wk *Worker) execResHandler(
+	exitStr string,
+	RuntimeErrorMsg map[string]string,
+	rep *entitiy.DoTaskReply) bool{
+	/**
+	 * @Author
+	 * @Description
+	 * @Date 3:55 下午 14/12/20
+	 * @Param
+			true: has error, exit
+			false: no error, keep running
+	 * @return
+	 **/
+	js, err := json.Marshal(RuntimeErrorMsg)
+	if err !=nil{
+		logger.Do.Println("Worker: Serialize job status error", err)
+		return true
+	}
+	rep.TaskMsg.RuntimeMsg = string(js)
+
+	if exitStr != common.SubProcessNormal {
+		rep.RuntimeError = true
+		// return is used to control the rpc call status, always return nil, but
+		// keep error at rep.ErrorMsg
+		return true
+	}
+
+	rep.RuntimeError = false
+	return false
 }

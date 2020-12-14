@@ -22,19 +22,33 @@ type DoTaskArgs struct {
 // RegisterArgs is the argument passed when a worker registers with the master.
 // the worker's UNIX-domain socket name, i.e. its RPC address
 type RegisterArgs struct {
+	// this is worker url
 	WorkerAddr string
 }
 
 type ShutdownReply struct {
-	Ntasks int
+	// todo, no need to collect shutdown reply message?
 }
 
 type DoTaskReply struct {
+	// indicate if the job is killed
 	Killed  bool
-	Errs    map[string]string
-	ErrLogs map[string]string
-	OutLogs map[string]string
+
+	// indicate if the job has error
+	RuntimeError bool
+
+	// indicate if the job has error
+	RpcCallError bool
+
+	TaskMsg TaskMsg
 }
+
+type TaskMsg struct {
+	RuntimeMsg string
+	RpcCallMsg string
+}
+
+
 
 func argTypeRegister() {
 	gob.Register([]interface{}{})

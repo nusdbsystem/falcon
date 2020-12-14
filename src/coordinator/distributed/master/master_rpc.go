@@ -19,6 +19,8 @@ func RunMaster(masterAddr string, qItem *cache.QItem, taskType string) (ms *Mast
 	ms = newMaster(masterAddr, len(qItem.IPs))
 
 	ms.reset()
+
+	// thread 0, heartBeat
 	go ms.eventLoop()
 
 	rpcSvc := rpc.NewServer()
@@ -29,37 +31,35 @@ func RunMaster(masterAddr string, qItem *cache.QItem, taskType string) (ms *Mast
 	}
 
 	// thread 1
+	go ms.forwardRegistrations(qItem)
+
+	// thread 2
 	// launch a rpc server thread to process the requests.
 	ms.StartRPCServer(rpcSvc, false)
+
+	scheduler:= func() {
+		ms.schedule(qItem, taskType)
+	}
+
+	finish := func() {
+		// stop other related threads
+		// close eventLoop and forwardRegistrations
+		ms.Cancel()
+		// stop both master after finishing the job
+		ms.StopRPCServer(ms.Address,"Master.Shutdown")
+	}
 
 	// set time out, no worker comes within 1 min, stop master
 	time.AfterFunc(1*time.Minute, func() {
 		if len(ms.workers) <ms.workerNum {
 			logger.Do.Println("Master: Wait for 1 Min, No enough worker come, stop")
-
-			ms.stopRPCServer()
+			finish()
 		}
 	})
 
-
-	scheduler:= func() {
-		ch := make(chan string, len(qItem.IPs))
-		go ms.forwardRegistrations(ch, qItem)
-		ms.schedule(ch, qItem, taskType)
-	}
-
-	clean := func() {
-		// stop both master after finishing the job
-		ms.stopRPCServer()
-		// stop other related threads
-		ms.Lock()
-		ms.IsStop = true
-		ms.Unlock()
-	}
-
-	// thread 2
+	// thread 3
 	// launch a thread to process the do the scheduling.
-	go ms.run(scheduler,clean)
+	go ms.run(scheduler,finish)
 
 	return
 }

@@ -2,15 +2,12 @@ package master
 
 import (
 	"coordinator/cache"
-	"coordinator/client"
 	"coordinator/common"
 	"coordinator/distributed/base"
 	"coordinator/distributed/entitiy"
 	"coordinator/distributed/taskmanager"
+	"coordinator/distributed/utils"
 	"coordinator/logger"
-	"fmt"
-	"reflect"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -22,14 +19,16 @@ type Master struct {
 
 	doneChannel chan bool
 
-	newCond        *sync.Cond
 	beginCountDown *sync.Cond
 	allWorkerReady *sync.Cond
 
+	// tmp slice to store registered workers
+	tmpWorkers chan string
+	// slice to store valid workers
 	workers   []string
 	workerNum int
 
-	stats []int
+	jobStatus uint
 
 	lastSendTime     int64
 	heartbeatTimeout int
@@ -42,108 +41,101 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 	ms = new(Master)
 	ms.InitRpc(masterAddr)
 	ms.Name = common.Master
-	ms.newCond = sync.NewCond(ms)
 	ms.beginCountDown = sync.NewCond(ms)
 	ms.allWorkerReady = sync.NewCond(ms)
 
 	ms.doneChannel = make(chan bool)
+	ms.tmpWorkers = make(chan string)
 	ms.workerNum = workerNum
 	ms.heartbeatTimeout = common.MasterTimeout
 	return
 }
 
-func (this *Master) Test(args string, reply *string) error {
-	logger.Do.Println(args)
-	return nil
-}
-
 // Register is an RPC method that is called by workers after they have started
 // up to report that they are ready to receive tasks.
 func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
+
+	/**
+	 * @Author
+	 * @Description
+			retry 3 times, until put to the tmpWorkers, if failed, it means there is
+			no consumer, when the server will be closed, manually call cancel
+			client wait 3 seconds max
+	 * @Date 9:37 上午 14/12/20
+	 * @Param
+	 * @return
+	 **/
 	this.Lock()
 	defer this.Unlock()
-	logger.Do.Println("Master: Register: worker", args.WorkerAddr)
 
-	if contains(args.WorkerAddr, this.workers){
-		logger.Do.Printf("Master: the worker %s already registered, skip \n", args.WorkerAddr)
-		return nil
+	NTimes := 3
+	for {
+		if NTimes<0{
+			return nil
+		}
+		select {
+		case this.tmpWorkers <- args.WorkerAddr:
+			logger.Do.Println("Master: Register worker", args.WorkerAddr)
+			return nil
+		default:
+			logger.Do.Println("Master: Register worker, no consumer,retry...", args.WorkerAddr)
+			time.Sleep(time.Second*1)
+			NTimes--
+		}
 	}
-
-	if len(this.workers) <= this.workerNum {
-		this.workers = append(this.workers, args.WorkerAddr)
-
-		// tell forwardRegistrations() that there's a new workers[] entry.
-		this.newCond.Broadcast()
-		this.beginCountDown.Broadcast()
-	} else {
-		logger.Do.Println("Master: Register Already got enough worker")
-	}
-	return nil
 }
 
 // sends information of worker to ch. which is used by scheduler
-func (this *Master) forwardRegistrations(ch chan string, qItem *cache.QItem) {
-	indexWorker := 0
+func (this *Master) forwardRegistrations(qItem *cache.QItem) {
+
+	var requiredIp []string
+
+	for i := 0; i < len(qItem.IPs); i++ {
+		ip := strings.Split(qItem.IPs[i], ":")[0]
+		requiredIp = append(requiredIp, ip)
+	}
+
+	loop:
 	for {
-		this.Lock()
-		// if current worker number == already checked worker, and also ==  total worker number needed
-		if len(this.workers) == indexWorker && len(this.workers) == this.workerNum {
-			// if got enough worker, break out loop and tell scheduler to schedule
+		select {
+		case <- this.Ctx.Done():
+			logger.Do.Printf("Master: %s quite forwardRegistrations \n", this.Port)
+			break loop
 
-			// verify if ip match
-			var reIps []string
-			var qIpsMatch []string
-			var qIps = qItem.IPs
-
-			for i := 0; i < len(qIps); i++ {
-				ip := strings.Split(qIps[i], ":")[0]
-				qIpsMatch = append(qIpsMatch, ip)
+		case addr := <- this.tmpWorkers:
+			// 1. check if this work already exist
+			if utils.Contains(addr, this.workers){
+				logger.Do.Printf("Master: the worker %s already registered, skip \n", addr)
 			}
 
-			for i := 0; i < len(qIps); i++ {
-				addr := this.workers[i]
-				ip := strings.Split(addr, ":")[0]
-				reIps = append(reIps, ip)
+			// 2. check if this worker is needed
+			addrIp := strings.Split(addr, ":")[0]
+
+			for i, ip := range requiredIp{
+				if addrIp == ip{
+					logger.Do.Println("Master: Found one worker")
+
+					this.Lock()
+					this.workers  = append(this.workers, addr)
+					this.Unlock()
+					this.beginCountDown.Broadcast()
+
+					// remove the i th ip
+					requiredIp = append(requiredIp[0:i+1], requiredIp[i+1:]...)
+					break
+				}
 			}
 
-			// compare if 2 slice are the same
-			var c = make([]string, len(reIps))
-			var d = make([]string, len(qIpsMatch))
-
-			copy(c, reIps)
-			copy(d, qIpsMatch)
-
-			sort.Strings(c)
-			sort.Strings(d)
-
-			// if registered ip and job ip not match
-
-			if ok := reflect.DeepEqual(c, d); !ok {
-				logger.Do.Println("Scheduler: Ip are not match")
-				this.Unlock()
-				return
+			this.Lock()
+			if len(this.workers) == this.workerNum {
+				// it is not strictly necessary for you to hold the lock on M sync.Mutex when calling C.Broadcast()
+				this.allWorkerReady.Broadcast()
 			}
-
-			this.allWorkerReady.Broadcast()
-
 			this.Unlock()
-			break
+
+		default:
+			time.Sleep(time.Second*2)
 		}
-		if len(this.workers) > indexWorker {
-			logger.Do.Println("Master: Found one worker")
-			// there's a worker that we haven't told schedule() about.
-			w := this.workers[indexWorker]
-			go func() {
-				ch <- w
-			}()
-			indexWorker += 1
-			logger.Do.Println("Master: worker index is ", indexWorker)
-		} else {
-			// wait for Register() to add an entry to workers[]
-			// in response to an RPC from a new worker.
-			this.newCond.Wait()
-		}
-		this.Unlock()
 	}
 }
 
@@ -158,34 +150,6 @@ func (this *Master) run(schedule func(), finish func()) {
 	this.doneChannel <- true
 }
 
-func (this *Master) killWorkers() []int {
-	this.Lock()
-	defer this.Unlock()
-
-	nStat := make([]int, 0, len(this.workers))
-
-	for _, worker := range this.workers {
-
-		var reply entitiy.ShutdownReply
-
-		logger.Do.Println("Master: begin to call Worker.Shutdown")
-
-		ok := client.Call(worker, this.Proxy, "Worker.Shutdown", new(struct{}), &reply)
-		if ok == false {
-			logger.Do.Printf("Master: RPC %s shutdown error\n", worker)
-		} else {
-			// save the res of each call
-			nStat = append(nStat, reply.Ntasks)
-		}
-	}
-	return nStat
-}
-
-func (this *Master) KillJob(_, _ *struct{}) error {
-	this.stats = this.killWorkers()
-	this.stopRPCServer()
-	return nil
-}
 
 func (this *Master) Wait() {
 	<-this.doneChannel
@@ -194,112 +158,41 @@ func (this *Master) Wait() {
 		km := taskmanager.InitK8sManager(true,  "")
 		km.DeleteService(common.ExecutorCurrentName)
 	}
-
-}
-
-func (this *Master) CheckWorker() bool {
-
-	this.Lock()
-
-	if len(this.workers) > 0 {
-		this.foundWorker = true
-	} else {
-		this.foundWorker = false
-	}
-
-	this.Unlock()
-	return this.foundWorker
-}
-
-func (this *Master) eventLoop() {
-
-	for {
-
-		this.Lock()
-		if this.IsStop == true {
-			logger.Do.Printf("Master: isStop=true, server %s quite eventLoop \n", this.Port)
-			this.Unlock()
-			break
-		}
-		this.Unlock()
-
-		if !this.CheckWorker() {
-
-			this.Lock()
-			this.beginCountDown.Wait()
-			this.Unlock()
-
-		} else {
-
-			this.Lock()
-			elapseTime := time.Now().UnixNano() - this.lastSendTime
-			fmt.Printf("Master: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
-
-			if int(elapseTime/int64(time.Millisecond)) >= this.heartbeatTimeout {
-
-				this.Unlock()
-				fmt.Println("Master: Timeout, server begin to send hb to worker")
-				this.broadcastHeartbeat()
-
-			} else {
-				this.Unlock()
-			}
-		}
-
-		time.Sleep(time.Millisecond * common.MasterTimeout / 5)
-	}
-}
-
-func (this *Master) broadcastHeartbeat() {
-	// update lastSendTime
-	this.reset()
-	for _, worker := range this.workers {
-
-		ok := client.Call(worker, this.Proxy, "Worker.ResetTime", new(struct{}), new(struct{}))
-		if ok == false {
-			logger.Do.Printf("Master: RPC %s send heartbeat error\n", worker)
-		}
-	}
-}
-
-func (this *Master) reset() {
-	this.Lock()
-	this.lastSendTime = time.Now().UnixNano()
-	this.Unlock()
-
-}
-
-
-
-// stopRPCServer stops the master RPC server.
-// This must be done through an RPC to avoid
-// race conditions between the RPC server thread and the current thread.
-func (this *Master) stopRPCServer() {
-	var reply entitiy.ShutdownReply
-
-	logger.Do.Println("Master: begin to call Master.Shutdown")
-	ok := client.Call(this.Address, this.Proxy, "Master.Shutdown", new(struct{}), &reply)
-	if ok == false {
-		logger.Do.Printf("Master: Cleanup: RPC %s error\n", this.Address)
-	}
-	logger.Do.Println("Master: cleanupRegistration: done")
 }
 
 // Shutdown is an RPC method that shuts down the Master's RPC server.
 // for rpc method, must be public method, only 2 params, second one must be pointer,return err type
 func (this *Master) Shutdown(_, _ *struct{}) error {
-	logger.Do.Println("Master: Shutdown: registration server")
+	logger.Do.Println("Master: Shutdown server")
 	_ = this.Listener.Close() // causes the Accept to fail, then break out the accetp loop
 	return nil
 }
 
 
+func (this *Master) killWorkers() {
 
-func contains(str string, l []string) bool {
-	for _, ls :=  range l{
-		if ls == str{
-			return true
-		}
+	this.Lock()
+	defer this.Unlock()
+
+	for _, worker := range this.workers {
+
+		logger.Do.Println("Master: begin to call Worker.Shutdown")
+
+		this.StopRPCServer(worker,"Worker.Shutdown")
 	}
-	return false
+}
+
+func (this *Master) KillJob(_, _ *struct{}) error {
+	/**
+	 * @Author
+	 * @Description called by coordinator, to shutdown the running job
+	 * @Date 9:47 上午 14/12/20
+	 * @Param
+	 * @return
+	 **/
+	this.killWorkers()
+
+	this.Cancel()
+	this.StopRPCServer(this.Address,"Master.Shutdown")
+	return nil
 }
