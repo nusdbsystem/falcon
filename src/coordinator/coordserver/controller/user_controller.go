@@ -6,14 +6,14 @@ import (
 
 func CreateUser() {
 
-	ms := models.InitMetaStore()
+	jobDB := models.InitJobDB()
 
-	ms.Connect()
-	ms.Tx = ms.Db.Begin()
+	jobDB.Connect()
+	jobDB.Tx = jobDB.Db.Begin()
 
-	e := ms.CreateAdminUser()
+	e := jobDB.CreateAdminUser()
 
-	ms.Commit(e)
-	ms.DisConnect()
+	jobDB.Commit(e)
+	jobDB.DisConnect()
 
 }

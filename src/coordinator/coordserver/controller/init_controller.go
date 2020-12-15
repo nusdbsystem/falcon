@@ -9,75 +9,75 @@ import (
 
 func CreateTables() {
 
-	ms := models.InitMetaStore()
+	jobDB := models.InitJobDB()
 
-	ms.Connect()
-	ms.Tx = ms.Db.Begin()
+	jobDB.Connect()
+	jobDB.Tx = jobDB.Db.Begin()
 
-	ms.DefineTables()
+	jobDB.DefineTables()
 
-	ms.Commit(nil)
-	ms.DisConnect()
+	jobDB.Commit(nil)
+	jobDB.DisConnect()
 
 }
 
 func CreateSpecificSysPorts(port string) {
 
-	ms := models.InitMetaStore()
+	jobDB := models.InitJobDB()
 
-	ms.Connect()
-	ms.Tx = ms.Db.Begin()
+	jobDB.Connect()
+	jobDB.Tx = jobDB.Db.Begin()
 	var e1 error
 	portInt, _:= strconv.Atoi(port)
-	if !ms.CheckPort(uint(portInt)){
-		e1, _ = ms.AddPort(uint(portInt))
+	if !jobDB.CheckPort(uint(portInt)){
+		e1, _ = jobDB.AddPort(uint(portInt))
 	}
-	ms.Commit(e1)
-	ms.DisConnect()
+	jobDB.Commit(e1)
+	jobDB.DisConnect()
 
 }
 
 func CreateSysPorts() {
 
-	ms := models.InitMetaStore()
+	jobDB := models.InitJobDB()
 
-	ms.Connect()
-	ms.Tx = ms.Db.Begin()
+	jobDB.Connect()
+	jobDB.Tx = jobDB.Db.Begin()
 
 	var e1 error
 	var e2 error
 	var e3 error
 
 	mysqlPort, _:= strconv.Atoi(common.MsMysqlNodePort)
-	if !ms.CheckPort(uint(mysqlPort)){
-		e1, _ = ms.AddPort(uint(mysqlPort))
+	if !jobDB.CheckPort(uint(mysqlPort)){
+		e1, _ = jobDB.AddPort(uint(mysqlPort))
 	}
 
 	redisPort, _:= strconv.Atoi(common.RedisNodePort)
-	if !ms.CheckPort(uint(redisPort)){
-		e2, _ = ms.AddPort(uint(redisPort))
+	if !jobDB.CheckPort(uint(redisPort)){
+		e2, _ = jobDB.AddPort(uint(redisPort))
 
 	}
 
 	coordPort, _:= strconv.Atoi(common.CoordPort)
-	if !ms.CheckPort(uint(coordPort)){
-		e3, _ = ms.AddPort(uint(coordPort))
+	if !jobDB.CheckPort(uint(coordPort)){
+		e3, _ = jobDB.AddPort(uint(coordPort))
 
 	}
 
-	ms.Commit([]error{e1,e2,e3})
-	ms.DisConnect()
+	jobDB.Commit([]error{e1,e2,e3})
+	jobDB.DisConnect()
 
 }
 
 func PartyServerAdd(ctx *entity.Context, partyserverAddr,Port string) {
 
-	_, _ = ctx.Ms.PartyServerAdd(partyserverAddr, Port)
+	_, _ = ctx.JobDB.PartyServerAdd(partyserverAddr, Port)
 
 }
 
 func PartyServerDelete(ctx *entity.Context, partyserverAddr string) {
 
-	_ = ctx.Ms.PartyServerDelete(partyserverAddr)
+	_ = ctx.JobDB.PartyServerDelete(partyserverAddr)
 
 }

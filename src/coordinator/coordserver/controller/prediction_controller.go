@@ -13,15 +13,15 @@ import (
 
 func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (uint,string){
 
-	ctx.Ms.Tx = ctx.Ms.Db.Begin()
+	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 
-	e1, u1 := ctx.Ms.ModelGetByID(jobId)
+	e1, u1 := ctx.JobDB.ModelGetByID(jobId)
 
-	e2, u := ctx.Ms.CreateService(appName, u1.ID, jobId, extInfo)
+	e2, u := ctx.JobDB.CreateService(appName, u1.ID, jobId, extInfo)
 
-	e3, u2 := ctx.Ms.JobGetByJobID(jobId)
+	e3, u2 := ctx.JobDB.JobGetByJobID(jobId)
 
-	ctx.Ms.Commit([]error{e1, e2, e3})
+	ctx.JobDB.Commit([]error{e1, e2, e3})
 
 
 	var pInfo []common.PartyInfo
@@ -71,10 +71,10 @@ func DeleteService(job *common.Job, ctx *entity.Context) {
 
 
 func PublishService(jobId uint, isPublish uint, ctx *entity.Context) {
-	ctx.Ms.Tx = ctx.Ms.Db.Begin()
+	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 
-	e, _ := ctx.Ms.PublishService(jobId, isPublish)
-	ctx.Ms.Commit(e)
+	e, _ := ctx.JobDB.PublishService(jobId, isPublish)
+	ctx.JobDB.Commit(e)
 }
 
 
@@ -83,8 +83,8 @@ func LaunchService(job *common.Job, ctx *entity.Context) {
 
 
 func ModelServiceUpdateStatus(jobId uint, status uint, ctx *entity.Context){
-	ctx.Ms.Tx = ctx.Ms.Db.Begin()
-	e, _ := ctx.Ms.ModelServiceUpdateStatus(jobId, status)
-	ctx.Ms.Commit(e)
+	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
+	e, _ := ctx.JobDB.ModelServiceUpdateStatus(jobId, status)
+	ctx.JobDB.Commit(e)
 
 }

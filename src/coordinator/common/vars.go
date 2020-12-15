@@ -54,7 +54,7 @@ const (
 	PartyServerPortKey = "partyserverPort"
 
 	JobId      = "job_id"
-	JobErrMsg  = "error_msg"
+	JobErrMsg  = "error_jobDBg"
 	JobResult  = "job_result"
 	JobExtInfo = "ext_info"
 
@@ -113,7 +113,7 @@ var (
 	// and then, add to here												//
 	//////////////////////////////////////////////////////////////////////////
 
-	// MetaStore and Database Configs
+	// JobDB and Database Configs
 	MsEngine       = ""
 	MsSqliteDb     = ""
 	MsHost         = ""

@@ -59,13 +59,13 @@ go build <go-program>.go
     bash scripts/dev_start_coord.sh
     ```
 
-2. Setup listener:
+2. Setup partyserver:
     
-    Update config_listener.properties
-    choose the LISTENER_IP, COORDINATOR_IP, LISTENER_NODE_PORT
+    Update config_partyserver.properties
+    choose the PARTYSERVER_IP, COORDINATOR_IP, PARTYSERVER_NODE_PORT
     finally run script with following
     ```
-    bash scripts/dev_start_listener.sh
+    bash scripts/dev_start_partyserver.sh
     ```
    
 ## Platform setup production instruction
@@ -85,25 +85,25 @@ go build <go-program>.go
     bash scripts/start_coord.sh
     ```
 
-2. Setup listener:
-    Update config_listener.properties
-    choose the LISTENER_IP, COORDINATOR_IP, LISTENER_NODE_PORT
+2. Setup partyserver:
+    Update config_partyserver.properties
+    choose the PARTYSERVER_IP, COORDINATOR_IP, PARTYSERVER_NODE_PORT
     finally run script with following
 
     ```
-    bash scripts/start_listener.sh
+    bash scripts/start_partyserver.sh
     ```
       
 ## Use the platform
 
-1. define your dsl.json, similar to the example provided in ./data/dsl.json
+1. define your job.json, similar to the example provided in ./data/job.json
 
 2. submit job:
     
-    python coordinator_client.py -url <ip address of coordinator>:6573 -method submit -path ./data/dsl.json
+    python coordinator_client.py -url <ip address of coordinator>:6573 -method submit -path ./data/job.json
     
     ```
-    python coordinator_client.py -url 172.25.121.4:6573 -method submit -path ./data/dsl.json
+    python coordinator_client.py -url 172.25.121.4:6573 -method submit -path ./data/job.json
     ```
 
 

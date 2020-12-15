@@ -22,7 +22,7 @@ import (
 
 ("existing-key", po::value<int>(&use_existing_key), "whether use existing phe keys")
 ("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run")
-("algorithm-params", po::value<std::string>(&algorithm_params), "parameters for the algorithm");
+("algorithm-parajobDB", po::value<std::string>(&algorithm_parajobDB), "parameters for the algorithm");
 
 
 ("network-file", po::value<std::string>(&network_file), "file name of network configurations")

@@ -127,8 +127,8 @@ func GetFreePort(ServerAddr string) string{
 }
 
 func GetExistPort(ServerAddr, PartyServerIp string) string{
-	params := url.Values{}
-	params.Set(common.PartyServerAddr, PartyServerIp)
+	parajobDB := url.Values{}
+	parajobDB.Set(common.PartyServerAddr, PartyServerIp)
 
 	rawUrl := "http://" + strings.TrimSpace(ServerAddr) + "/" + common.GetPartyServerPort
 
@@ -140,7 +140,7 @@ func GetExistPort(ServerAddr, PartyServerIp string) string{
 
 	//3.整合请求URL和参数
 	//Encode方法将请求参数编码为url编码格式("bar=baz&foo=quux")，编码时会以键进行排序。
-	reqURL.RawQuery = params.Encode()
+	reqURL.RawQuery = parajobDB.Encode()
 
 	//4.发送HTTP请求
 	//说明: reqURL.String() String将URL重构为一个合法URL字符串。

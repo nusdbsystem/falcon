@@ -7,7 +7,7 @@ import (
 
 
 
-func (ms *MetaStore) CreateService(
+func (jobDB *JobDB) CreateService(
 	AppName string,
 	ModelId uint,
 	JobId uint,
@@ -28,13 +28,13 @@ func (ms *MetaStore) CreateService(
 		ExtInfo:          ExtInfo,
 	}
 
-	err := ms.Db.Create(u).Error
+	err := jobDB.Db.Create(u).Error
 	return err, u
 
 }
 
 
-func (ms *MetaStore) PublishService(
+func (jobDB *JobDB) PublishService(
 	jobId uint,
 	IsPublished uint,
 
@@ -42,7 +42,7 @@ func (ms *MetaStore) PublishService(
 
 	u := &ModelRecord{}
 
-	err := ms.Db.Model(u).
+	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
 		Update("is_published", IsPublished).
 		Update("update_time", time.Now()).Error
@@ -52,7 +52,7 @@ func (ms *MetaStore) PublishService(
 }
 
 
-func (ms *MetaStore) ModelServiceUpdateStatus(
+func (jobDB *JobDB) ModelServiceUpdateStatus(
 	jobId, status uint,
 
 ) (error, *ModelServiceInfo) {
@@ -60,7 +60,7 @@ func (ms *MetaStore) ModelServiceUpdateStatus(
 	//todo Should we use job id to update moder_serve？add index to it if we use later
 
 	u := &ModelServiceInfo{}
-	err := ms.Db.Model(u).
+	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
 		Update("status", status).Error
 	return err, u

@@ -6,18 +6,18 @@ import (
 )
 
 type Context struct {
-	Ms       *models.MetaStore
+	JobDB       *models.JobDB
 	HttpHost string
 	HttpPort string
 	UsrId    uint
 }
 
 func InitContext() *Context {
-	ad := new(Context)
-	ad.Ms = models.InitMetaStore()
+	ctx := new(Context)
+	ctx.JobDB = models.InitJobDB()
 
-	ad.HttpHost = common.CoordAddrGlobal
-	ad.HttpPort = common.CoordPort
+	ctx.HttpHost = common.CoordAddrGlobal
+	ctx.HttpPort = common.CoordPort
 
-	return ad
+	return ctx
 }

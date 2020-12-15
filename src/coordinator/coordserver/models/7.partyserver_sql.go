@@ -1,26 +1,26 @@
 package models
 
-func (ms *MetaStore) PartyServerAdd(PartyServerAddr, Port string) (error, *PartyServers) {
-	u := &PartyServers{
+func (jobDB *JobDB) PartyServerAdd(PartyServerAddr, Port string) (error, *PartyServer) {
+	u := &PartyServer{
 		PartyServerAddr: PartyServerAddr,
 		Port: Port,
 	}
 
-	err := ms.Db.Create(u).Error
+	err := jobDB.Db.Create(u).Error
 	return err, u
 }
 
-func (ms *MetaStore) PartyServerDelete(PartyServerAddr string) error {
+func (jobDB *JobDB) PartyServerDelete(PartyServerAddr string) error {
 
-	e := ms.Db.Where("partyserver_addr = ?", PartyServerAddr).Delete(PartyServers{}).Error
+	e := jobDB.Db.Where("partyserver_addr = ?", PartyServerAddr).Delete(PartyServer{}).Error
 
 	return e
 }
 
 
-func (ms *MetaStore) PartyServerGet(PartyServerAddr string) (error, *PartyServers) {
+func (jobDB *JobDB) PartyServerGet(PartyServerAddr string) (error, *PartyServer) {
 
-	u := &PartyServers{}
-	err := ms.Db.Where("partyserver_addr = ?", PartyServerAddr).First(u).Error
+	u := &PartyServer{}
+	err := jobDB.Db.Where("partyserver_addr = ?", PartyServerAddr).First(u).Error
 	return err, u
 }

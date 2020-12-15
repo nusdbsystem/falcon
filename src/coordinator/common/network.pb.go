@@ -39,9 +39,9 @@ type NetworkConfig struct {
 func (x *NetworkConfig) Reset() {
 	*x = NetworkConfig{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_network_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
+		mi := &file_network_proto_jobDBgTypes[0]
+		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		jobDB.StoreMessageInfo(mi)
 	}
 }
 
@@ -52,13 +52,13 @@ func (x *NetworkConfig) String() string {
 func (*NetworkConfig) ProtoMessage() {}
 
 func (x *NetworkConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_network_proto_msgTypes[0]
+	mi := &file_network_proto_jobDBgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
+		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if jobDB.LoadMessageInfo() == nil {
+			jobDB.StoreMessageInfo(mi)
 		}
-		return ms
+		return jobDB
 	}
 	return mi.MessageOf(x)
 }
@@ -93,9 +93,9 @@ type PortArray struct {
 func (x *PortArray) Reset() {
 	*x = PortArray{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_network_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
+		mi := &file_network_proto_jobDBgTypes[1]
+		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		jobDB.StoreMessageInfo(mi)
 	}
 }
 
@@ -106,13 +106,13 @@ func (x *PortArray) String() string {
 func (*PortArray) ProtoMessage() {}
 
 func (x *PortArray) ProtoReflect() protoreflect.Message {
-	mi := &file_network_proto_msgTypes[1]
+	mi := &file_network_proto_jobDBgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
+		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if jobDB.LoadMessageInfo() == nil {
+			jobDB.StoreMessageInfo(mi)
 		}
-		return ms
+		return jobDB
 	}
 	return mi.MessageOf(x)
 }
@@ -159,7 +159,7 @@ func file_network_proto_rawDescGZIP() []byte {
 	return file_network_proto_rawDescData
 }
 
-var file_network_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_network_proto_jobDBgTypes = make([]protoimpl.MessageInfo, 2)
 var file_network_proto_goTypes = []interface{}{
 	(*NetworkConfig)(nil), // 0: com.nus.dbsytem.falcon.v0.NetworkConfig
 	(*PortArray)(nil),     // 1: com.nus.dbsytem.falcon.v0.PortArray
@@ -179,7 +179,7 @@ func file_network_proto_init() {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_network_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_network_proto_jobDBgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*NetworkConfig); i {
 			case 0:
 				return &v.state
@@ -191,7 +191,7 @@ func file_network_proto_init() {
 				return nil
 			}
 		}
-		file_network_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_network_proto_jobDBgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PortArray); i {
 			case 0:
 				return &v.state
@@ -209,14 +209,14 @@ func file_network_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_network_proto_rawDesc,
-			NumEnums:      0,
+			NumEnujobDB:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_network_proto_goTypes,
 		DependencyIndexes: file_network_proto_depIdxs,
-		MessageInfos:      file_network_proto_msgTypes,
+		MessageInfos:      file_network_proto_jobDBgTypes,
 	}.Build()
 	File_network_proto = out.File
 	file_network_proto_rawDesc = nil

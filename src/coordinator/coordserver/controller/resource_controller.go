@@ -9,9 +9,9 @@ import (
 
 func AssignPort(ctx *entity.Context) uint {
 
-	ctx.Ms.Tx = ctx.Ms.Db.Begin()
+	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 
-	e, ports := ctx.Ms.GetPorts()
+	e, ports := ctx.JobDB.GetPorts()
 
 	maxPort := findMax(ports)
 
@@ -19,7 +19,7 @@ func AssignPort(ctx *entity.Context) uint {
 	var u *models.PortRecord
 	i:=1
 	for {
-		err, u = ctx.Ms.AddPort(maxPort + uint(i))
+		err, u = ctx.JobDB.AddPort(maxPort + uint(i))
 		if err != nil{
 			logger.Do.Println("AssignPort, error ", err)
 			logger.Do.Println("AssignPort: retry...")
@@ -30,18 +30,18 @@ func AssignPort(ctx *entity.Context) uint {
 		}
 	}
 
-	ctx.Ms.Commit([]error{e, err})
+	ctx.JobDB.Commit([]error{e, err})
 
 	return u.Port
 }
 
 func AddPort(newPort uint, ctx *entity.Context) uint {
 
-	ctx.Ms.Tx = ctx.Ms.Db.Begin()
+	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 
-	e2, _ := ctx.Ms.AddPort(newPort)
+	e2, _ := ctx.JobDB.AddPort(newPort)
 
-	ctx.Ms.Commit([]error{e2})
+	ctx.JobDB.Commit([]error{e2})
 
 	return newPort
 
@@ -65,11 +65,11 @@ func findMax(l []uint) uint {
 
 func GetPartyServerPort(PartyServerAddr string, ctx *entity.Context) string {
 
-	ctx.Ms.Tx = ctx.Ms.Db.Begin()
+	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 
-	e, u := ctx.Ms.PartyServerGet(PartyServerAddr)
+	e, u := ctx.JobDB.PartyServerGet(PartyServerAddr)
 
-	ctx.Ms.Commit([]error{e})
+	ctx.JobDB.Commit([]error{e})
 
 	return u.Port
 

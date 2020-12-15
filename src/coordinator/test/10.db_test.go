@@ -23,10 +23,10 @@ func TestDb(t *testing.T){
 	common.MsMysqlPort = "30001"
 	common.MsMysqlOptions = "?parseTime=true"
 
-	ms := models.InitMetaStore()
-	ms.Connect()
-	ms.Tx = ms.Db.Begin()
-	ms.DefineTables()
+	jobDB := models.InitJobDB()
+	jobDB.Connect()
+	jobDB.Tx = jobDB.Db.Begin()
+	jobDB.DefineTables()
 
 	var err error
 	var u *models.PortRecord
@@ -36,7 +36,7 @@ func TestDb(t *testing.T){
 		if NTimes<0{
 			panic("\"SetupPartyServer: connecting to coord Db...retry\"")
 		}
-		err, u = ms.AddPort(uint(30001))
+		err, u = jobDB.AddPort(uint(30001))
 		if err != nil{
 			logger.Do.Println(err)
 			logger.Do.Printf("SetupPartyServer: connecting to coord %s ...retry \n", common.CoordSvcURLGlobal)
@@ -49,8 +49,8 @@ func TestDb(t *testing.T){
 	}
 
 
-	res := ms.CheckPort(uint(1123))
-	fmt.Println(ms.GetPorts())
+	res := jobDB.CheckPort(uint(1123))
+	fmt.Println(jobDB.GetPorts())
 
 	fmt.Println(res)
 

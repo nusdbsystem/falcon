@@ -14,7 +14,7 @@ func InitContext(f func(w http.ResponseWriter, r *http.Request, c *entity.Contex
 		context := entity.InitContext()
 
 		// connect to db
-		context.Ms.Connect()
+		context.JobDB.Connect()
 
 		// check if needs verify
 		var isVerify = true
@@ -37,7 +37,7 @@ func InitContext(f func(w http.ResponseWriter, r *http.Request, c *entity.Contex
 		f(w, r, context)
 
 		// disConnect to db
-		context.Ms.DisConnect()
+		context.JobDB.DisConnect()
 	}
 }
 
@@ -47,7 +47,7 @@ func UserVerify(w http.ResponseWriter, r *http.Request, ctx *entity.Context) err
 
 	//token := r.Header.Get("token")
 
-	e, u := ctx.Ms.GetUserByUserID(1)
+	e, u := ctx.JobDB.GetUserByUserID(1)
 
 	if e != nil {
 		http.Error(w, "User not exist", http.StatusBadRequest)

@@ -13,7 +13,7 @@ type Job struct {
 	JobDecs   	 	string      				`json:"job_decs"`
 	JobFlType  		string      				`json:"job_fl_type"`
 	ExistingKey  	uint      					`json:"existing_key"`
-	PartyNums  		uint        				`json:"party_nums,uint"`
+	PartyNujobDB  		uint        				`json:"party_nujobDB,uint"`
 	TaskNum    		uint        				`json:"task_num,uint"`
 	PartyInfos 		[]PartyInfo 				`json:"party_info"`
 	Tasks      		Tasks      					`json:"tasks"`
@@ -82,13 +82,13 @@ func ParseJob(contents string, jobInfo *Job) error {
 	// if there is PreProcessing, serialize it
 	if jobInfo.Tasks.PreProcessing.AlgorithmName!=""{
 		jobInfo.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig=
-			GeneratePreProcessParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+			GeneratePreProcessParajobDB(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 	// if there is ModelTraining, serialize it
 	if jobInfo.Tasks.ModelTraining.AlgorithmName!=""{
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
-			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+			GenerateLrParajobDB(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 
 	ep := jobVerify(jobInfo)
@@ -127,21 +127,21 @@ func ParseIps(pInfo []PartyInfo) ([]string){
 	return iPs
 }
 
-func GenerateLrParams(cfg map[string]interface{}) string {
+func GenerateLrParajobDB(cfg map[string]interface{}) string {
 
 	jb, err := json.Marshal(cfg)
 	if err!=nil{
-		panic("GenerateLrParams error in doing Marshal")
+		panic("GenerateLrParajobDB error in doing Marshal")
 	}
 
 	res := LogisticRegression{}
 
 	if err := json.Unmarshal(jb, &res); err != nil {
 		// do error check
-		panic("GenerateLrParams error in doing Unmarshal")
+		panic("GenerateLrParajobDB error in doing Unmarshal")
 	}
 
-	lrp := LogisticRegressionParams{
+	lrp := LogisticRegressionParajobDB{
 		BatchSize:res.BatchSize,
 		MaxIteration:res.MaxIteration,
 		ConvergeThreshold:res.ConvergeThreshold,
@@ -160,13 +160,13 @@ func GenerateLrParams(cfg map[string]interface{}) string {
 	if err != nil {
 
 		// todo, should we exit from here directly ????? error handler management?
-		log.Fatalln("Failed to encode GenerateLrParams:", err)
+		log.Fatalln("Failed to encode GenerateLrParajobDB:", err)
 	}
 
 	return string(out)
 }
 
 
-func GeneratePreProcessParams(cfg map[string]interface{}) string {
+func GeneratePreProcessParajobDB(cfg map[string]interface{}) string {
 	return ""
 }

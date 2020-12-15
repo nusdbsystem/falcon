@@ -13,12 +13,12 @@ import (
 
 func TestSql(t *testing.T) {
 
-	ms := models.InitMetaStore()
+	jobDB := models.InitJobDB()
 
-	ms.Connect()
-	e, u := ms.JobGetByJobID(1)
-	ms.Commit(e)
-	ms.DisConnect()
+	jobDB.Connect()
+	e, u := jobDB.JobGetByJobID(1)
+	jobDB.Commit(e)
+	jobDB.DisConnect()
 
 	logger.Do.Println(u)
 

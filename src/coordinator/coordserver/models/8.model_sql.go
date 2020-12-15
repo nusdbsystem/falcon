@@ -3,7 +3,7 @@ package models
 import "time"
 
 
-func (ms *MetaStore) ModelCreate(
+func (jobDB *JobDB) ModelCreate(
 	JobId uint,
 	ModelName string,
 	ModelDecs string,
@@ -31,14 +31,14 @@ func (ms *MetaStore) ModelCreate(
 	}
 
 
-	err := ms.Db.Create(u).Error
+	err := jobDB.Db.Create(u).Error
 	return err, u
 
 }
 
 
 
-func (ms *MetaStore) ModelUpdate(
+func (jobDB *JobDB) ModelUpdate(
 	jobId uint,
 	IsTrained uint,
 
@@ -46,7 +46,7 @@ func (ms *MetaStore) ModelUpdate(
 
 	u := &ModelRecord{}
 
-	err := ms.Db.Model(u).
+	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
 		Update("is_trained", IsTrained).
 		Update("update_time", time.Now()).Error
@@ -58,14 +58,14 @@ func (ms *MetaStore) ModelUpdate(
 
 
 
-func (ms *MetaStore) ModelGetByID(
+func (jobDB *JobDB) ModelGetByID(
 	jobId uint,
 
 ) (error, *ModelRecord) {
 
 	u := &ModelRecord{}
 
-	err := ms.Db.Where("job_id = ?", jobId).First(u).Error
+	err := jobDB.Db.Where("job_id = ?", jobId).First(u).Error
 
 	return err, u
 

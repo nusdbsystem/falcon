@@ -1,5 +1,5 @@
 # Golang giignore
-# Binaries for programs and plugins
+# Binaries for prograjobDB and plugins
 *.exe
 *.exe~
 *.dll
@@ -21,9 +21,9 @@ coordinator_server
 # sqlite3 db
 falcon.db
 .falcon_runtime_resources/*
-.falcon_listener/*
-.falcon_listener_1/*
-.falcon_listener_2/*
-.falcon_listener_3/*
-.falcon_listener_4/*
-.falcon_listener_5/*
+.falcon_partyserver/*
+.falcon_partyserver_1/*
+.falcon_partyserver_2/*
+.falcon_partyserver_3/*
+.falcon_partyserver_4/*
+.falcon_partyserver_5/*
