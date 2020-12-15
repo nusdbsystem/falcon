@@ -1,8 +1,8 @@
 package router
 
 import (
-	"coordinator/api/controller"
-	"coordinator/api/entity"
+	"coordinator/coordserver/controller"
+	"coordinator/coordserver/entity"
 	"coordinator/client"
 	"coordinator/common"
 	"fmt"

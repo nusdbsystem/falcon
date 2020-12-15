@@ -34,9 +34,9 @@ spec:
           - containerPort: 30007  #这里containerPort是容器内部的port
             name:
         volumeMounts:
-          - name: falcon-listener
+          - name: falcon-partyserver
             mountPath: ./logs
     volumes:
-      - name: falcon-listener
+      - name: falcon-partyserver
         hostPath:
-          path: /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_listener//run_time_logs
+          path: /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_partyserver//run_time_logs

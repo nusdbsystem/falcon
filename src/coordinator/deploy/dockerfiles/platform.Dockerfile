@@ -9,5 +9,5 @@ COPY bin/coordinator_server ./coordinator_server
 ADD deploy ./deploy
 ADD scripts ./scripts
 RUN chmod -R 777 ./deploy && chmod -R 777 ./scripts
-#COPY config_listener.properties ./config_listener.properties
+#COPY config_partyserver.properties ./config_partyserver.properties
 CMD ["./coordinator_server"]

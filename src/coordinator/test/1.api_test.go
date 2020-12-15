@@ -1,7 +1,7 @@
 package test
 
 import (
-	"coordinator/api/models"
+	"coordinator/coordserver/models"
 	"coordinator/common"
 	"coordinator/logger"
 	"encoding/json"

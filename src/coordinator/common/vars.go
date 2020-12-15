@@ -27,7 +27,7 @@ const (
 	MasterTimeout = 10000 //  send hb every 10 second
 	WorkerTimeout = 20000 //  receive hb within every 20 second
 
-	// router path for api
+	// router path for coordserver
 	Register         = "register"
 	SubmitJob        = "submit"
 	StopJob          = "stop"
@@ -40,18 +40,18 @@ const (
 
 	AssignPort  = "port-assign"
 	AddPort  = "portadd"
-	GetListenerPort  = "port-get"
+	GetPartyServerPort  = "port-get"
 
-	ListenerAdd    = "listener-add"
-	ListenerDelete = "listener-del"
+	PartyServerAdd    = "partyserver-add"
+	PartyServerDelete = "partyserver-del"
 
-	// router path for listener
+	// router path for partyserver
 	SetupWorker = "setup-worker" // RFC 5789
 
 	// shared key of map
-	ListenerAddr = "listenerAddress"
+	PartyServerAddr = "partyserverAddress"
 	MasterAddr   = "masterAddress"
-	ListenerPortKey = "listenerPort"
+	PartyServerPortKey = "partyserverPort"
 
 	JobId      = "job_id"
 	JobErrMsg  = "error_msg"
@@ -137,8 +137,8 @@ var (
 
 	// sys port, here COORD_TARGET_PORT must equal to
 	CoordPort   = ""
-	ListenerPort = ""
-	ListenerId = ""
+	PartyServerPort = ""
+	PartyServerId = ""
 	// envs
 	Env = getEnv("Env", DevEnv)
 

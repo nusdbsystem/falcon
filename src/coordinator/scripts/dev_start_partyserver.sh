@@ -2,13 +2,13 @@
 
 OS=$1
 
-. config_listener.properties
+. config_partyserver.properties
 export Env=dev
-export SERVICE_NAME=listener
+export SERVICE_NAME=partyserver
 export COORDINATOR_IP=$COORDINATOR_IP
-export LISTENER_IP=$LISTENER_IP
+export PARTYSERVER_IP=$PARTYSERVER_IP
 export DATA_BASE_PATH=$DATA_BASE_PATH
-export LISTENER_NODE_PORT=$LISTENER_NODE_PORT
+export PARTYSERVER_NODE_PORT=$PARTYSERVER_NODE_PORT
 
 make $OS
 ./bin/coordinator_server

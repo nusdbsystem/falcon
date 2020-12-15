@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"coordinator/api/models"
+	"coordinator/coordserver/models"
 	"coordinator/common"
 )
 

@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"coordinator/api/entity"
-	"coordinator/api/models"
+	"coordinator/coordserver/entity"
+	"coordinator/coordserver/models"
 	"coordinator/common"
 	"strconv"
 )
@@ -70,14 +70,14 @@ func CreateSysPorts() {
 
 }
 
-func ListenerAdd(ctx *entity.Context, listenerAddr,Port string) {
+func PartyServerAdd(ctx *entity.Context, partyserverAddr,Port string) {
 
-	_, _ = ctx.Ms.ListenerAdd(listenerAddr, Port)
+	_, _ = ctx.Ms.PartyServerAdd(partyserverAddr, Port)
 
 }
 
-func ListenerDelete(ctx *entity.Context, listenerAddr string) {
+func PartyServerDelete(ctx *entity.Context, partyserverAddr string) {
 
-	_ = ctx.Ms.ListenerDelete(listenerAddr)
+	_ = ctx.Ms.PartyServerDelete(partyserverAddr)
 
 }

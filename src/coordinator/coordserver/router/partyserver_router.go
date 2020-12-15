@@ -8,29 +8,29 @@ import (
 	"net/http"
 )
 
-func ListenerAdd(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
+func PartyServerAdd(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	client.ReceiveForm(r)
 
-	listenerAddr := r.FormValue(common.ListenerAddr)
-	ListenerPort := r.FormValue(common.ListenerPortKey)
+	partyserverAddr := r.FormValue(common.PartyServerAddr)
+	PartyServerPort := r.FormValue(common.PartyServerPortKey)
 
-	controller.ListenerAdd(ctx, listenerAddr, ListenerPort)
+	controller.PartyServerAdd(ctx, partyserverAddr, PartyServerPort)
 
 }
 
-func ListenerDelete(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
+func PartyServerDelete(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	client.ReceiveForm(r)
 
-	listenerAddr := r.FormValue(common.ListenerAddr)
+	partyserverAddr := r.FormValue(common.PartyServerAddr)
 
-	controller.ListenerDelete(ctx, listenerAddr)
+	controller.PartyServerDelete(ctx, partyserverAddr)
 
 }
 
 
-func GetListenerPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context)  {
+func GetPartyServerPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context)  {
 
 	defer func(){
 		_=r.Body.Close()
@@ -38,6 +38,6 @@ func GetListenerPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 	params := r.URL.Query()
 
-	port := controller.GetListenerPort(params.Get(common.ListenerAddr), ctx)
+	port := controller.GetPartyServerPort(params.Get(common.PartyServerAddr), ctx)
 	_, _ = w.Write([]byte(port))
 }

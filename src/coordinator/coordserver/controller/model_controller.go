@@ -1,6 +1,6 @@
 package controller
 
-import "coordinator/api/entity"
+import "coordinator/coordserver/entity"
 
 
 

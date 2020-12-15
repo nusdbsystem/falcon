@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"coordinator/api/entity"
+	"coordinator/coordserver/entity"
 	"coordinator/logger"
 	"net/http"
 	"time"

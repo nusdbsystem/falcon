@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"coordinator/api/entity"
-	"coordinator/api/models"
+	"coordinator/coordserver/entity"
+	"coordinator/coordserver/models"
 	"coordinator/logger"
 )
 
@@ -63,11 +63,11 @@ func findMax(l []uint) uint {
 }
 
 
-func GetListenerPort(ListenerAddr string, ctx *entity.Context) string {
+func GetPartyServerPort(PartyServerAddr string, ctx *entity.Context) string {
 
 	ctx.Ms.Tx = ctx.Ms.Db.Begin()
 
-	e, u := ctx.Ms.ListenerGet(ListenerAddr)
+	e, u := ctx.Ms.PartyServerGet(PartyServerAddr)
 
 	ctx.Ms.Commit([]error{e})
 

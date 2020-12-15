@@ -3,7 +3,7 @@ package router
 import (
 	"coordinator/client"
 	"coordinator/common"
-	"coordinator/listener/controller"
+	"coordinator/partyserver/controller"
 	"coordinator/logger"
 	"net/http"
 )

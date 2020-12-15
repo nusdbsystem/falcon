@@ -1,7 +1,7 @@
 package test
 
 import (
-	"coordinator/api/models"
+	"coordinator/coordserver/models"
 	"coordinator/common"
 	"coordinator/logger"
 	"fmt"
@@ -34,12 +34,12 @@ func TestDb(t *testing.T){
 	NTimes := 20
 	for {
 		if NTimes<0{
-			panic("\"SetupListener: connecting to coord Db...retry\"")
+			panic("\"SetupPartyServer: connecting to coord Db...retry\"")
 		}
 		err, u = ms.AddPort(uint(30001))
 		if err != nil{
 			logger.Do.Println(err)
-			logger.Do.Printf("SetupListener: connecting to coord %s ...retry \n", common.CoordSvcURLGlobal)
+			logger.Do.Printf("SetupPartyServer: connecting to coord %s ...retry \n", common.CoordSvcURLGlobal)
 			time.Sleep(time.Second*5)
 			NTimes--
 		}else{

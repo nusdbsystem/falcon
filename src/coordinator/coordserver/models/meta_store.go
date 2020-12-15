@@ -130,10 +130,10 @@ func (ms *MetaStore) DefineTables() {
 		ms.Db.CreateTable(&User{})
 	}
 
-	if ms.Db.HasTable(&Listeners{}) {
-		ms.Db.AutoMigrate(&Listeners{})
+	if ms.Db.HasTable(&PartyServers{}) {
+		ms.Db.AutoMigrate(&PartyServers{})
 	} else {
-		ms.Db.CreateTable(&Listeners{})
+		ms.Db.CreateTable(&PartyServers{})
 	}
 
 	if ms.Db.HasTable(&TestTable{}) {

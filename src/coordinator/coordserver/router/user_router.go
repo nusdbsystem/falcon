@@ -1,7 +1,7 @@
 package router
 
 import (
-	"coordinator/api/entity"
+	"coordinator/coordserver/entity"
 	"net/http"
 )
 

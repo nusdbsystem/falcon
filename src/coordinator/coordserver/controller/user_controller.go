@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"coordinator/api/models"
+	"coordinator/coordserver/models"
 )
 
 func CreateUser() {

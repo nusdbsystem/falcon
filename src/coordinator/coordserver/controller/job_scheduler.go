@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"coordinator/api/models"
+	"coordinator/coordserver/models"
 	"coordinator/cache"
 	"coordinator/common"
 	dist "coordinator/distributed"

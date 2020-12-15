@@ -71,9 +71,9 @@ type User struct {
 	Name   string `gorm:"type:varchar(256)"`
 }
 
-type Listeners struct {
+type PartyServer struct {
 	ID           uint   `gorm:"primary_key;AUTO_INCREMENT"`
-	ListenerAddr string `gorm:"type:varchar(256)"`
+	PartyServerAddr string `gorm:"type:varchar(256)"`
 	Port string `gorm:"type:varchar(256)"`
 }
 
@@ -83,7 +83,7 @@ type TestTable struct {
 }
 
 //////////////////////////////////////////////////////////////////
-///////////////////// ListenerDatabase  //////////////////////////
+///////////////////// PartyServerDatabase  //////////////////////////
 //////////////////////////////////////////////////////////////////
 
 

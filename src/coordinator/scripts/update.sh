@@ -8,7 +8,7 @@ rm -rf $DATA_BASE_PATH/database
 rm -rf $DATA_BASE_PATH/run_time_logs/*
 rm -rf $DATA_BASE_PATH/logs/*
 
-. config_listener.properties
+. config_partyserver.properties
 rm -rf $DATA_BASE_PATH/run_time_logs/*
 rm -rf $DATA_BASE_PATH/logs/*
 

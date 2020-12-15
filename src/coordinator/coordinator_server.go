@@ -1,13 +1,13 @@
 package main
 
 import (
-	"coordinator/api"
+	"coordinator/coordserver"
 	"coordinator/cache"
 	"coordinator/common"
 	"coordinator/distributed"
 	"coordinator/distributed/prediction"
 	"coordinator/distributed/worker"
-	"coordinator/listener"
+	"coordinator/partyserver"
 	"coordinator/logger"
 	"fmt"
 	"os"
@@ -86,30 +86,30 @@ func InitEnvs(svcName string){
 		common.CoordSvcURLGlobal = getCoordUrl(common.CoordAddrGlobal + ":" + common.CoordPort)
 
 		if len(common.ServiceNameGlobal) == 0{
-			logger.Do.Println("Error: Input Error, ServiceNameGlobal is either 'coord' or 'listener' ")
+			logger.Do.Println("Error: Input Error, ServiceNameGlobal is either 'coord' or 'partyserver' ")
 			os.Exit(1)
 		}
 
-	}else if svcName=="listener"{
+	}else if svcName=="partyserver"{
 
-		// listener needs coord ip+port,lis port
+		// partyserver needs coord ip+port,lis port
 		common.CoordAddrGlobal = common.GetEnv("COORDINATOR_IP", "")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
-		common.ListenAddrGlobal = common.GetEnv("LISTENER_IP", "")
+		common.ListenAddrGlobal = common.GetEnv("PARTYSERVER_IP", "")
 		common.ListenBasePath = common.GetEnv("DATA_BASE_PATH", "")
 
-		// listener communicate coord with ip+port
+		// partyserver communicate coord with ip+port
 		common.CoordSvcURLGlobal = getCoordUrl(common.CoordAddrGlobal + ":" + common.CoordPort)
 
-		// run listener requires to get a new listener port
-		common.ListenerPort = common.GetEnv("LISTENER_NODE_PORT", "")
+		// run partyserver requires to get a new partyserver port
+		common.PartyServerPort = common.GetEnv("PARTYSERVER_NODE_PORT", "")
 
-		common.ListenerId = common.GetEnv("PARTY_NUMBER", "")
+		common.PartyServerId = common.GetEnv("PARTY_NUMBER", "")
 
-		// listener needs will send this to coord
-		common.ListenURLGlobal = common.ListenAddrGlobal + ":" + common.ListenerPort
+		// partyserver needs will send this to coord
+		common.ListenURLGlobal = common.ListenAddrGlobal + ":" + common.PartyServerPort
 
-		if common.CoordAddrGlobal=="" || common.ListenAddrGlobal==""||common.ListenerPort=="" {
+		if common.CoordAddrGlobal=="" || common.ListenAddrGlobal==""||common.PartyServerPort=="" {
 			logger.Do.Println("Error: Input Error, either CoordAddrGlobal or ListenAddrGlobal not provided")
 			os.Exit(1)
 		}
@@ -202,15 +202,15 @@ func main() {
 	if common.ServiceNameGlobal == "coord" {
 		logger.Do.Println("Launch coordinator_server, the common.ServiceNameGlobal", common.ServiceNameGlobal)
 
-		api.SetupHttp(3)
+		coordserver.SetupHttp(3)
 	}
 
 	// start work in remote machine automatically
-	if common.ServiceNameGlobal == "listener" {
+	if common.ServiceNameGlobal == "partyserver" {
 
 		logger.Do.Println("Launch coordinator_server, the common.ServiceNameGlobal", common.ServiceNameGlobal)
 
-		listener.SetupListener()
+		partyserver.SetupPartyServer()
 	}
 
 

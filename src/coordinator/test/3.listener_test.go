@@ -1,12 +1,12 @@
 package test
 
 import (
-	"coordinator/listener"
+	"coordinator/partyserver"
 	"testing"
 )
 
 func TestWorker(t *testing.T) {
 
 
-	listener.SetupListener()
+	partyserver.SetupPartyServer()
 }

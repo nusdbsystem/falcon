@@ -7,23 +7,23 @@ import (
 	"strings"
 )
 
-func ListenerAdd(ServerAddress, listenerAddr, listenerPort string) error {
+func PartyServerAdd(ServerAddress, partyserverAddr, partyserverPort string) error {
 	data := url.Values{
-		common.ListenerAddr: {listenerAddr},
-		common.ListenerPortKey: {listenerPort},
+		common.PartyServerAddr: {partyserverAddr},
+		common.PartyServerPortKey: {partyserverPort},
 		}
 
-	reqUrl := ServerAddress + "/" + common.ListenerAdd
+	reqUrl := ServerAddress + "/" + common.PartyServerAdd
 
 	e := PostForm(reqUrl, data)
 	return e
 
 }
 
-func ListenerDelete(ServerAddress, listenerAddr string) {
-	data := url.Values{common.ListenerAddr: {listenerAddr}}
+func PartyServerDelete(ServerAddress, partyserverAddr string) {
+	data := url.Values{common.PartyServerAddr: {partyserverAddr}}
 
-	reqUrl := ServerAddress + "/" + common.ListenerDelete
+	reqUrl := ServerAddress + "/" + common.PartyServerDelete
 
 	_ = PostForm(reqUrl, data)
 }
@@ -126,11 +126,11 @@ func GetFreePort(ServerAddr string) string{
 	return port
 }
 
-func GetExistPort(ServerAddr, ListenerIp string) string{
+func GetExistPort(ServerAddr, PartyServerIp string) string{
 	params := url.Values{}
-	params.Set(common.ListenerAddr, ListenerIp)
+	params.Set(common.PartyServerAddr, PartyServerIp)
 
-	rawUrl := "http://" + strings.TrimSpace(ServerAddr) + "/" + common.GetListenerPort
+	rawUrl := "http://" + strings.TrimSpace(ServerAddr) + "/" + common.GetPartyServerPort
 
 	reqURL, err := url.ParseRequestURI(rawUrl)
 	if err != nil {

@@ -1,27 +1,27 @@
-package listener
+package partyserver
 
 import (
 	"context"
 	c "coordinator/client"
 	"coordinator/common"
-	rt "coordinator/listener/router"
+	rt "coordinator/partyserver/router"
 	"coordinator/logger"
 	"net/http"
 	"os"
 )
 
-func SetupListener() {
-	// host: listenerAddr
+func SetupPartyServer() {
+	// host: partyserverAddr
 	// ServerAddress: the address for main http server
-	// host port:  for listener,
+	// host port:  for partyserver,
 	defer logger.HandleErrors()
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/"+common.SetupWorker, rt.SetupWorker())
-	logger.Do.Println("SetupListener: registering listenerPort to coord", common.ListenerPort)
+	logger.Do.Println("SetupPartyServer: registering partyserverPort to coord", common.PartyServerPort)
 
 	server := &http.Server{
-		Addr:    "0.0.0.0:" + common.ListenerPort,
+		Addr:    "0.0.0.0:" + common.PartyServerPort,
 		Handler: mux,
 	}
 	// report address to flow htp server
@@ -34,23 +34,23 @@ func SetupListener() {
 			logger.Do.Fatal("ShutDown the server", err)
 		}
 
-		c.ListenerDelete(common.CoordSvcURLGlobal, common.ListenAddrGlobal)
+		c.PartyServerDelete(common.CoordSvcURLGlobal, common.ListenAddrGlobal)
 	}()
 
-	logger.Do.Printf("SetupListener: connecting to coord  %s to AddPort\n", common.CoordSvcURLGlobal)
+	logger.Do.Printf("SetupPartyServer: connecting to coord  %s to AddPort\n", common.CoordSvcURLGlobal)
 
-	err := c.AddPort(common.CoordSvcURLGlobal, common.ListenerPort)
+	err := c.AddPort(common.CoordSvcURLGlobal, common.PartyServerPort)
 
 	if err!=nil{
-		panic("SetupListener: Server closed under request, "+err.Error())
+		panic("SetupPartyServer: Server closed under request, "+err.Error())
 	}
 
-	logger.Do.Printf("SetupListener: ListenerAdd %s ...retry \n", common.ListenAddrGlobal)
+	logger.Do.Printf("SetupPartyServer: PartyServerAdd %s ...retry \n", common.ListenAddrGlobal)
 
-	err = c.ListenerAdd(common.CoordSvcURLGlobal, common.ListenAddrGlobal, common.ListenerPort)
+	err = c.PartyServerAdd(common.CoordSvcURLGlobal, common.ListenAddrGlobal, common.PartyServerPort)
 
 	if err!=nil{
-		panic("SetupListener: ListenerAdd error, "+err.Error())
+		panic("SetupPartyServer: PartyServerAdd error, "+err.Error())
 	}
 
 	logger.Do.Println("Starting HTTP server...")

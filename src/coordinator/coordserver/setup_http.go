@@ -1,10 +1,10 @@
-package api
+package coordserver
 
 import (
 	"context"
-	"coordinator/api/controller"
-	md "coordinator/api/middleware"
-	rt "coordinator/api/router"
+	"coordinator/coordserver/controller"
+	md "coordinator/coordserver/middleware"
+	rt "coordinator/coordserver/router"
 	"coordinator/common"
 	"coordinator/logger"
 	"net/http"
@@ -18,7 +18,7 @@ func SetupHttp(nConsumer int) {
 	defer logger.HandleErrors()
 	mux := http.NewServeMux()
 
-	md.SysLvPath = []string{common.Register, common.ListenerAdd}
+	md.SysLvPath = []string{common.Register, common.PartyServerAdd}
 
 	//job post
 	mux.HandleFunc("/"+common.SubmitJob, md.AddRouter(rt.JobSubmit, http.MethodPost))
@@ -30,11 +30,11 @@ func SetupHttp(nConsumer int) {
 	//job post
 	mux.HandleFunc("/"+common.QueryJobStatus, md.AddRouter(rt.JobStatusQuery, http.MethodGet))
 
-	//listener
+	//partyserver
 	mux.HandleFunc("/"+common.Register, md.AddRouter(rt.UserRegister, http.MethodPost))
-	mux.HandleFunc("/"+common.ListenerAdd, md.AddRouter(rt.ListenerAdd, http.MethodPost))
-	mux.HandleFunc("/"+common.ListenerDelete, md.AddRouter(rt.ListenerDelete, http.MethodPost))
-	mux.HandleFunc("/"+common.GetListenerPort, md.AddRouter(rt.GetListenerPort, http.MethodGet))
+	mux.HandleFunc("/"+common.PartyServerAdd, md.AddRouter(rt.PartyServerAdd, http.MethodPost))
+	mux.HandleFunc("/"+common.PartyServerDelete, md.AddRouter(rt.PartyServerDelete, http.MethodPost))
+	mux.HandleFunc("/"+common.GetPartyServerPort, md.AddRouter(rt.GetPartyServerPort, http.MethodGet))
 
 	// model serving
 	mux.HandleFunc("/"+common.ModelUpdate, md.AddRouter(rt.ModelUpdate, http.MethodPost))
