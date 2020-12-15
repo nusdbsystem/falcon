@@ -48,7 +48,7 @@ func CreateSysPorts() {
 	var e2 error
 	var e3 error
 
-	mysqlPort, _:= strconv.Atoi(common.MsMysqlNodePort)
+	mysqlPort, _:= strconv.Atoi(common.JobDbMysqlNodePort)
 	if !jobDB.CheckPort(uint(mysqlPort)){
 		e1, _ = jobDB.AddPort(uint(mysqlPort))
 	}

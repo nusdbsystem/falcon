@@ -14,14 +14,14 @@ func TestDb(t *testing.T){
 
 	logger.Do, logger.F = logger.GetLogger("./TestSubProc")
 
-	common.MsEngine = "mysql"
-	common.MsHost = "127.0.0.1"
-	common.MsMysqlUser = "falcon"
-	common.MsMysqlPwd = "falcon"
-	common.MsMysqlDb = "falcon"
-	common.MsEngine = "mysql"
-	common.MsMysqlPort = "30001"
-	common.MsMysqlOptions = "?parseTime=true"
+	common.JobDbEngine = "mysql"
+	common.JobDbHost = "127.0.0.1"
+	common.JobDbMysqlUser = "falcon"
+	common.JobDbMysqlPwd = "falcon"
+	common.JobDbMysqlDb = "falcon"
+	common.JobDbEngine = "mysql"
+	common.JobDbMysqlPort = "30001"
+	common.JobDbMysqlOptions = "?parseTime=true"
 
 	jobDB := models.InitJobDB()
 	jobDB.Connect()

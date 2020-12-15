@@ -30,18 +30,18 @@ type NetworkConfig struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ip of parties
+	// ips of different parties
 	Ips []string `protobuf:"bytes,1,rep,name=ips,proto3" json:"ips,omitempty"`
-	// ip of par
+	// an array of PortArray
 	PortArrays []*PortArray `protobuf:"bytes,2,rep,name=port_arrays,json=portArrays,proto3" json:"port_arrays,omitempty"`
 }
 
 func (x *NetworkConfig) Reset() {
 	*x = NetworkConfig{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_network_proto_jobDBgTypes[0]
-		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		jobDB.StoreMessageInfo(mi)
+		mi := &file_network_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
 	}
 }
 
@@ -52,13 +52,13 @@ func (x *NetworkConfig) String() string {
 func (*NetworkConfig) ProtoMessage() {}
 
 func (x *NetworkConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_network_proto_jobDBgTypes[0]
+	mi := &file_network_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
-		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if jobDB.LoadMessageInfo() == nil {
-			jobDB.StoreMessageInfo(mi)
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
 		}
-		return jobDB
+		return ms
 	}
 	return mi.MessageOf(x)
 }
@@ -87,15 +87,16 @@ type PortArray struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// ports of each part
 	Ports []int32 `protobuf:"varint,1,rep,packed,name=ports,proto3" json:"ports,omitempty"`
 }
 
 func (x *PortArray) Reset() {
 	*x = PortArray{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_network_proto_jobDBgTypes[1]
-		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		jobDB.StoreMessageInfo(mi)
+		mi := &file_network_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
 	}
 }
 
@@ -106,13 +107,13 @@ func (x *PortArray) String() string {
 func (*PortArray) ProtoMessage() {}
 
 func (x *PortArray) ProtoReflect() protoreflect.Message {
-	mi := &file_network_proto_jobDBgTypes[1]
+	mi := &file_network_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
-		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if jobDB.LoadMessageInfo() == nil {
-			jobDB.StoreMessageInfo(mi)
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
 		}
-		return jobDB
+		return ms
 	}
 	return mi.MessageOf(x)
 }
@@ -159,7 +160,7 @@ func file_network_proto_rawDescGZIP() []byte {
 	return file_network_proto_rawDescData
 }
 
-var file_network_proto_jobDBgTypes = make([]protoimpl.MessageInfo, 2)
+var file_network_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_network_proto_goTypes = []interface{}{
 	(*NetworkConfig)(nil), // 0: com.nus.dbsytem.falcon.v0.NetworkConfig
 	(*PortArray)(nil),     // 1: com.nus.dbsytem.falcon.v0.PortArray
@@ -179,7 +180,7 @@ func file_network_proto_init() {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_network_proto_jobDBgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_network_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*NetworkConfig); i {
 			case 0:
 				return &v.state
@@ -191,7 +192,7 @@ func file_network_proto_init() {
 				return nil
 			}
 		}
-		file_network_proto_jobDBgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_network_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PortArray); i {
 			case 0:
 				return &v.state
@@ -209,14 +210,14 @@ func file_network_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_network_proto_rawDesc,
-			NumEnujobDB:      0,
+			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_network_proto_goTypes,
 		DependencyIndexes: file_network_proto_depIdxs,
-		MessageInfos:      file_network_proto_jobDBgTypes,
+		MessageInfos:      file_network_proto_msgTypes,
 	}.Build()
 	File_network_proto = out.File
 	file_network_proto_rawDesc = nil

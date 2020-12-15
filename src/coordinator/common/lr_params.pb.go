@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.25.0
 // 	protoc        v3.14.0
-// source: lr_parajobDB.proto
+// source: lr_params.proto
 
 package common
 
@@ -26,7 +26,7 @@ const (
 const _ = proto.ProtoPackageIsVersion4
 
 // This message denotes the logistic regression parameters
-type LogisticRegressionParajobDB struct {
+type LogisticRegressionParams struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -57,125 +57,125 @@ type LogisticRegressionParajobDB struct {
 	DifferentialPrivacyBudget float32 `protobuf:"fixed32,12,opt,name=differential_privacy_budget,json=differentialPrivacyBudget,proto3" json:"differential_privacy_budget,omitempty"`
 }
 
-func (x *LogisticRegressionParajobDB) Reset() {
-	*x = LogisticRegressionParajobDB{}
+func (x *LogisticRegressionParams) Reset() {
+	*x = LogisticRegressionParams{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_lr_parajobDB_proto_jobDBgTypes[0]
-		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		jobDB.StoreMessageInfo(mi)
+		mi := &file_lr_params_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
 	}
 }
 
-func (x *LogisticRegressionParajobDB) String() string {
+func (x *LogisticRegressionParams) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LogisticRegressionParajobDB) ProtoMessage() {}
+func (*LogisticRegressionParams) ProtoMessage() {}
 
-func (x *LogisticRegressionParajobDB) ProtoReflect() protoreflect.Message {
-	mi := &file_lr_parajobDB_proto_jobDBgTypes[0]
+func (x *LogisticRegressionParams) ProtoReflect() protoreflect.Message {
+	mi := &file_lr_params_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
-		jobDB := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if jobDB.LoadMessageInfo() == nil {
-			jobDB.StoreMessageInfo(mi)
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
 		}
-		return jobDB
+		return ms
 	}
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LogisticRegressionParajobDB.ProtoReflect.Descriptor instead.
-func (*LogisticRegressionParajobDB) Descriptor() ([]byte, []int) {
-	return file_lr_parajobDB_proto_rawDescGZIP(), []int{0}
+// Deprecated: Use LogisticRegressionParams.ProtoReflect.Descriptor instead.
+func (*LogisticRegressionParams) Descriptor() ([]byte, []int) {
+	return file_lr_params_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *LogisticRegressionParajobDB) GetBatchSize() int32 {
+func (x *LogisticRegressionParams) GetBatchSize() int32 {
 	if x != nil {
 		return x.BatchSize
 	}
 	return 0
 }
 
-func (x *LogisticRegressionParajobDB) GetMaxIteration() int32 {
+func (x *LogisticRegressionParams) GetMaxIteration() int32 {
 	if x != nil {
 		return x.MaxIteration
 	}
 	return 0
 }
 
-func (x *LogisticRegressionParajobDB) GetConvergeThreshold() float32 {
+func (x *LogisticRegressionParams) GetConvergeThreshold() float32 {
 	if x != nil {
 		return x.ConvergeThreshold
 	}
 	return 0
 }
 
-func (x *LogisticRegressionParajobDB) GetWithRegularization() int32 {
+func (x *LogisticRegressionParams) GetWithRegularization() int32 {
 	if x != nil {
 		return x.WithRegularization
 	}
 	return 0
 }
 
-func (x *LogisticRegressionParajobDB) GetAlpha() float32 {
+func (x *LogisticRegressionParams) GetAlpha() float32 {
 	if x != nil {
 		return x.Alpha
 	}
 	return 0
 }
 
-func (x *LogisticRegressionParajobDB) GetLearningRate() float32 {
+func (x *LogisticRegressionParams) GetLearningRate() float32 {
 	if x != nil {
 		return x.LearningRate
 	}
 	return 0
 }
 
-func (x *LogisticRegressionParajobDB) GetDecay() float32 {
+func (x *LogisticRegressionParams) GetDecay() float32 {
 	if x != nil {
 		return x.Decay
 	}
 	return 0
 }
 
-func (x *LogisticRegressionParajobDB) GetPenalty() string {
+func (x *LogisticRegressionParams) GetPenalty() string {
 	if x != nil {
 		return x.Penalty
 	}
 	return ""
 }
 
-func (x *LogisticRegressionParajobDB) GetOptimizer() string {
+func (x *LogisticRegressionParams) GetOptimizer() string {
 	if x != nil {
 		return x.Optimizer
 	}
 	return ""
 }
 
-func (x *LogisticRegressionParajobDB) GetMultiClass() string {
+func (x *LogisticRegressionParams) GetMultiClass() string {
 	if x != nil {
 		return x.MultiClass
 	}
 	return ""
 }
 
-func (x *LogisticRegressionParajobDB) GetMetric() string {
+func (x *LogisticRegressionParams) GetMetric() string {
 	if x != nil {
 		return x.Metric
 	}
 	return ""
 }
 
-func (x *LogisticRegressionParajobDB) GetDifferentialPrivacyBudget() float32 {
+func (x *LogisticRegressionParams) GetDifferentialPrivacyBudget() float32 {
 	if x != nil {
 		return x.DifferentialPrivacyBudget
 	}
 	return 0
 }
 
-var File_lr_parajobDB_proto protoreflect.FileDescriptor
+var File_lr_params_proto protoreflect.FileDescriptor
 
-var file_lr_parajobDB_proto_rawDesc = []byte{
+var file_lr_params_proto_rawDesc = []byte{
 	0x0a, 0x0f, 0x6c, 0x72, 0x5f, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x12, 0x19, 0x63, 0x6f, 0x6d, 0x2e, 0x6e, 0x75, 0x73, 0x2e, 0x64, 0x62, 0x73, 0x79, 0x74,
 	0x65, 0x6d, 0x2e, 0x66, 0x61, 0x6c, 0x63, 0x6f, 0x6e, 0x2e, 0x76, 0x30, 0x22, 0xc0, 0x03, 0x0a,
@@ -212,22 +212,22 @@ var file_lr_parajobDB_proto_rawDesc = []byte{
 }
 
 var (
-	file_lr_parajobDB_proto_rawDescOnce sync.Once
-	file_lr_parajobDB_proto_rawDescData = file_lr_parajobDB_proto_rawDesc
+	file_lr_params_proto_rawDescOnce sync.Once
+	file_lr_params_proto_rawDescData = file_lr_params_proto_rawDesc
 )
 
-func file_lr_parajobDB_proto_rawDescGZIP() []byte {
-	file_lr_parajobDB_proto_rawDescOnce.Do(func() {
-		file_lr_parajobDB_proto_rawDescData = protoimpl.X.CompressGZIP(file_lr_parajobDB_proto_rawDescData)
+func file_lr_params_proto_rawDescGZIP() []byte {
+	file_lr_params_proto_rawDescOnce.Do(func() {
+		file_lr_params_proto_rawDescData = protoimpl.X.CompressGZIP(file_lr_params_proto_rawDescData)
 	})
-	return file_lr_parajobDB_proto_rawDescData
+	return file_lr_params_proto_rawDescData
 }
 
-var file_lr_parajobDB_proto_jobDBgTypes = make([]protoimpl.MessageInfo, 1)
-var file_lr_parajobDB_proto_goTypes = []interface{}{
-	(*LogisticRegressionParajobDB)(nil), // 0: com.nus.dbsytem.falcon.v0.LogisticRegressionParajobDB
+var file_lr_params_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_lr_params_proto_goTypes = []interface{}{
+	(*LogisticRegressionParams)(nil), // 0: com.nus.dbsytem.falcon.v0.LogisticRegressionParams
 }
-var file_lr_parajobDB_proto_depIdxs = []int32{
+var file_lr_params_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -235,14 +235,14 @@ var file_lr_parajobDB_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_lr_parajobDB_proto_init() }
-func file_lr_parajobDB_proto_init() {
-	if File_lr_parajobDB_proto != nil {
+func init() { file_lr_params_proto_init() }
+func file_lr_params_proto_init() {
+	if File_lr_params_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_lr_parajobDB_proto_jobDBgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LogisticRegressionParajobDB); i {
+		file_lr_params_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LogisticRegressionParams); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -258,18 +258,18 @@ func file_lr_parajobDB_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_lr_parajobDB_proto_rawDesc,
-			NumEnujobDB:      0,
+			RawDescriptor: file_lr_params_proto_rawDesc,
+			NumEnums:      0,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_lr_parajobDB_proto_goTypes,
-		DependencyIndexes: file_lr_parajobDB_proto_depIdxs,
-		MessageInfos:      file_lr_parajobDB_proto_jobDBgTypes,
+		GoTypes:           file_lr_params_proto_goTypes,
+		DependencyIndexes: file_lr_params_proto_depIdxs,
+		MessageInfos:      file_lr_params_proto_msgTypes,
 	}.Build()
-	File_lr_parajobDB_proto = out.File
-	file_lr_parajobDB_proto_rawDesc = nil
-	file_lr_parajobDB_proto_goTypes = nil
-	file_lr_parajobDB_proto_depIdxs = nil
+	File_lr_params_proto = out.File
+	file_lr_params_proto_rawDesc = nil
+	file_lr_params_proto_goTypes = nil
+	file_lr_params_proto_depIdxs = nil
 }

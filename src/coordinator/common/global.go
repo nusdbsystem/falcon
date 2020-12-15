@@ -114,16 +114,16 @@ var (
 	//////////////////////////////////////////////////////////////////////////
 
 	// JobDB and Database Configs
-	MsEngine       = ""
-	MsSqliteDb     = ""
-	MsHost         = ""
-	MsMysqlUser    = ""
-	MsMysqlPwd     = ""
-	MsMysqlDb      = ""
-	MsMysqlOptions = ""
+	JobDbEngine       = ""
+	JobDbSqliteDb     = ""
+	JobDbHost         = ""
+	JobDbMysqlUser    = ""
+	JobDbMysqlPwd     = ""
+	JobDbMysqlDb      = ""
+	JobDbMysqlOptions = ""
 
 	// find the cluster port, call internally
-	MsMysqlPort    = ""
+	JobDbMysqlPort    = ""
 
 	// redis
 	RedisHost      = ""
@@ -132,7 +132,7 @@ var (
 	// find the cluster port, call internally
 	RedisPort       = ""
 
-	MsMysqlNodePort = ""
+	JobDbMysqlNodePort = ""
 	RedisNodePort    = ""
 
 	// sys port, here COORD_TARGET_PORT must equal to

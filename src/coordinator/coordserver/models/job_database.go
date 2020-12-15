@@ -24,29 +24,29 @@ type JobDB struct {
 
 func InitJobDB() *JobDB {
 	jobDB := new(JobDB)
-	jobDB.engine = common.MsEngine
-	jobDB.host = common.MsHost
+	jobDB.engine = common.JobDbEngine
+	jobDB.host = common.JobDbHost
 	jobDB.user = ""
 	jobDB.password = ""
 	jobDB.database = ""
 
 	if jobDB.engine == "mysql" {
-		jobDB.user = common.MsMysqlUser
-		jobDB.password = common.MsMysqlPwd
-		jobDB.database = common.MsMysqlDb
+		jobDB.user = common.JobDbMysqlUser
+		jobDB.password = common.JobDbMysqlPwd
+		jobDB.database = common.JobDbMysqlDb
 
 		mysql_url := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s%s",
 			jobDB.user,
 			jobDB.password,
 			jobDB.host,
-			common.MsMysqlPort,
+			common.JobDbMysqlPort,
 			jobDB.database,
-			common.MsMysqlOptions,
+			common.JobDbMysqlOptions,
 		)
 		jobDB.url = mysql_url
 	} else if jobDB.engine == "sqlite3" {
-		jobDB.url = common.LocalPath + common.MsSqliteDb
+		jobDB.url = common.LocalPath + common.JobDbSqliteDb
 	}
 	return jobDB
 }

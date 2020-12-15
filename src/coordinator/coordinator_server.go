@@ -60,21 +60,21 @@ func InitEnvs(svcName string){
 
 	if svcName=="coord"{
 		// coord needs db information
-		common.MsEngine       = common.GetEnv("MS_ENGINE", "sqlite3")
-		common.MsSqliteDb     = common.GetEnv("MS_SQLITE_DB", "falcon")
-		common.MsHost         = common.GetEnv("MS_HOST","localhost")
-		common.MsMysqlUser    = common.GetEnv("MS_MYSQL_USER", "falcon")
-		common.MsMysqlPwd     = common.GetEnv("MS_MYSQL_PWD", "falcon")
-		common.MsMysqlDb      = common.GetEnv("MS_MYSQL_DB", "falcon")
-		common.MsMysqlOptions = common.GetEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
-		common.MsMysqlPort    = common.GetEnv("MYSQL_CLUSTER_PORT", "30000")
+		common.JobDbEngine       = common.GetEnv("MS_ENGINE", "sqlite3")
+		common.JobDbSqliteDb     = common.GetEnv("MS_SQLITE_DB", "falcon")
+		common.JobDbHost         = common.GetEnv("MS_HOST","localhost")
+		common.JobDbMysqlUser    = common.GetEnv("MS_MYSQL_USER", "falcon")
+		common.JobDbMysqlPwd     = common.GetEnv("MS_MYSQL_PWD", "falcon")
+		common.JobDbMysqlDb      = common.GetEnv("MS_MYSQL_DB", "falcon")
+		common.JobDbMysqlOptions = common.GetEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
+		common.JobDbMysqlPort    = common.GetEnv("MYSQL_CLUSTER_PORT", "30000")
 
 		common.RedisHost      = common.GetEnv("REDIS_HOST","localhost")
 		common.RedisPwd       = common.GetEnv("REDIS_PWD", "falcon")
 		// coord needs redis information
 		common.RedisPort       = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
 		// find the cluster port, call internally
-		common.MsMysqlNodePort    = common.GetEnv("MYSQL_NODE_PORT", "30001")
+		common.JobDbMysqlNodePort    = common.GetEnv("MYSQL_NODE_PORT", "30001")
 		common.RedisNodePort    = common.GetEnv("REDIS_NODE_PORT", "30003")
 
 		// find the cluster port, call internally
