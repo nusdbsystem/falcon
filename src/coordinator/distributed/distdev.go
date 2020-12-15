@@ -50,7 +50,7 @@ func SetupWorkerHelperDev(masterAddress, taskType, jobId, dataPath, modelPath, d
 
 	workerPort := c.GetFreePort(common.CoordSvcURLGlobal)
 
-	workerAddress := common.ListenAddrGlobal + ":" + workerPort
+	workerAddress := common.PartyServerAddrGlobal + ":" + workerPort
 	var serviceName string
 
 	// in dev, use thread
@@ -62,7 +62,7 @@ func SetupWorkerHelperDev(masterAddress, taskType, jobId, dataPath, modelPath, d
 	if taskType == common.TrainExecutor{
 
 		serviceName = "worker-jid" + jobId + "-train-" + common.PartyServerId
-		common.TaskRuntimeLogs = common.ListenBasePath+"/"+"run_time_logs/"+serviceName
+		common.TaskRuntimeLogs = common.PartyServeBasePath+"/"+"run_time_logs/"+serviceName
 
 		logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainExecutor")
 		worker.RunWorker(masterAddress, workerAddress)
@@ -70,7 +70,7 @@ func SetupWorkerHelperDev(masterAddress, taskType, jobId, dataPath, modelPath, d
 	}else if taskType == common.PredictExecutor{
 
 		serviceName = "worker-jid" + jobId + "-predict-" + common.PartyServerId
-		common.TaskRuntimeLogs = common.ListenBasePath+"/"+"run_time_logs/"+serviceName
+		common.TaskRuntimeLogs = common.PartyServeBasePath+"/"+"run_time_logs/"+serviceName
 
 		logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictExecutor")
 		prediction.RunPrediction(masterAddress, workerAddress)

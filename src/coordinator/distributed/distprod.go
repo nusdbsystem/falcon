@@ -84,7 +84,7 @@ func SetupWorkerHelperProd(masterAddress, taskType, jobId, dataPath, modelPath, 
 
 	workerPort := c.GetFreePort(common.CoordSvcURLGlobal)
 
-	workerAddress := common.ListenAddrGlobal + ":" + workerPort
+	workerAddress := common.PartyServerAddrGlobal + ":" + workerPort
 	var serviceName string
 
 	// in dev, use thread
@@ -111,7 +111,7 @@ func SetupWorkerHelperProd(masterAddress, taskType, jobId, dataPath, modelPath, 
 		workerAddress, 	// 5. worker url
 		taskType,   	// 6. serviceName train or predict
 		common.Env,  	// 7. env or prod
-		common.ListenBasePath,  // 8. folder to store logs, the same as partyserver folder currently,
+		common.PartyServeBasePath,  // 8. folder to store logs, the same as partyserver folder currently,
 		dataPath, 		// 9. folder to read train data
 		modelPath, 		// 10. folder to store models
 		dataOutput, 	// 11. folder to store processed data

@@ -147,8 +147,8 @@ var (
 	LocalPath = ""
 
 	CoordAddrGlobal = ""
-	ListenAddrGlobal = ""
-	ListenBasePath = ""
+	PartyServerAddrGlobal = ""
+	PartyServeBasePath = ""
 	// those are init by coordinator
 	ExecutorTypeGlobal = ""
 	WorkerURLGlobal = ""

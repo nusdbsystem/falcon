@@ -95,8 +95,8 @@ func InitEnvs(svcName string){
 		// partyserver needs coord ip+port,lis port
 		common.CoordAddrGlobal = common.GetEnv("COORDINATOR_IP", "")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
-		common.ListenAddrGlobal = common.GetEnv("PARTYSERVER_IP", "")
-		common.ListenBasePath = common.GetEnv("DATA_BASE_PATH", "")
+		common.PartyServerAddrGlobal = common.GetEnv("PARTYSERVER_IP", "")
+		common.PartyServeBasePath = common.GetEnv("DATA_BASE_PATH", "")
 
 		// partyserver communicate coord with ip+port
 		common.CoordSvcURLGlobal = getCoordUrl(common.CoordAddrGlobal + ":" + common.CoordPort)
@@ -107,10 +107,10 @@ func InitEnvs(svcName string){
 		common.PartyServerId = common.GetEnv("PARTY_NUMBER", "")
 
 		// partyserver needs will send this to coord
-		common.ListenURLGlobal = common.ListenAddrGlobal + ":" + common.PartyServerPort
+		common.ListenURLGlobal = common.PartyServerAddrGlobal + ":" + common.PartyServerPort
 
-		if common.CoordAddrGlobal=="" || common.ListenAddrGlobal==""||common.PartyServerPort=="" {
-			logger.Do.Println("Error: Input Error, either CoordAddrGlobal or ListenAddrGlobal not provided")
+		if common.CoordAddrGlobal=="" || common.PartyServerAddrGlobal==""||common.PartyServerPort=="" {
+			logger.Do.Println("Error: Input Error, either CoordAddrGlobal or PartyServerAddrGlobal not provided")
 			os.Exit(1)
 		}
 
