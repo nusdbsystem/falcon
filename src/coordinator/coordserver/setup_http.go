@@ -60,7 +60,7 @@ func SetupHttp(nConsumer int) {
 	controller.CreateUser()
 
 
-	dslScheduler := controller.Init(nConsumer)
+	jobScheduler := controller.Init(nConsumer)
 
 	done := make(chan os.Signal)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -70,11 +70,11 @@ func SetupHttp(nConsumer int) {
 
 		logger.Do.Println("HTTP: Stop multi consumers")
 
-		dslScheduler.StopMonitor()
+		jobScheduler.StopMonitor()
 		logger.Do.Println("HTTP: Monitor Stopped")
 
 		for i := 0; i < nConsumer; i++ {
-			dslScheduler.StopConsumer()
+			jobScheduler.StopConsumer()
 		}
 
 		//todo, this will shutdown the master thread at the same time
@@ -92,9 +92,9 @@ func SetupHttp(nConsumer int) {
 
 	for i := 0; i < nConsumer; i++ {
 
-		go dslScheduler.Consume(i)
+		go jobScheduler.Consume(i)
 	}
-	go dslScheduler.MonitorConsumers()
+	go jobScheduler.MonitorConsumers()
 
 	logger.Do.Println("HTTP: Starting HTTP server...")
 	err := server.ListenAndServe()

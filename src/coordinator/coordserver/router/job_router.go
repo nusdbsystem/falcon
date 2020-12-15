@@ -38,7 +38,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	var buf bytes.Buffer
 
-	err, contents := client.ReceiveFile(r, buf, common.DslFile)
+	err, contents := client.ReceiveFile(r, buf, common.JobFile)
 	if err != nil {
 		logger.Do.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -46,9 +46,9 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	}
 
 	// parse it
-	var dsl common.DSL
+	var job common.DSL
 
-	e := common.ParseDsl(contents, &dsl)
+	e := common.ParseJob(contents, &job)
 
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusBadRequest)
@@ -56,7 +56,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	}
 
 	// submit it
-	JobId, JobName, UserId, PartyIds, TaskNum, Status := controller.JobSubmit(&dsl, ctx)
+	JobId, JobName, UserId, PartyIds, TaskNum, Status := controller.JobSubmit(&job, ctx)
 
 	buf.Reset()
 

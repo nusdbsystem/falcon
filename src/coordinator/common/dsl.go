@@ -71,7 +71,7 @@ type DataInput struct{
 }
 
 
-func ParseDsl(contents string, jobInfo *DSL) error {
+func ParseJob(contents string, jobInfo *DSL) error {
 	// the error here can only check if field type is correct or not.
 	// if the field is not filled, still pass, default to 0
 	e := json.Unmarshal([]byte(contents), jobInfo)
@@ -91,14 +91,14 @@ func ParseDsl(contents string, jobInfo *DSL) error {
 			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 
-	ep := dslVerify(jobInfo)
+	ep := jobVerify(jobInfo)
 	if ep != nil {
 		return errors.New("parse verify error")
 	}
 	return nil
 }
 
-func dslVerify(jobInfo *DSL) error {
+func jobVerify(jobInfo *DSL) error {
 
 	// verify task_num
 	if jobInfo.TaskNum <= 0 {

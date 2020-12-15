@@ -41,21 +41,21 @@ func TestJson(t *testing.T) {
 }
 
 func TestParseJson(t *testing.T) {
-	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/dsl.json")
+	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/job.json")
 	logger.Do.Println(err)
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
 	// we initialize our Users array
-	var dsl common.DSL
+	var job common.DSL
 
-	e2 := json.Unmarshal(byteValue, &dsl)
+	e2 := json.Unmarshal(byteValue, &job)
 	logger.Do.Println(e2)
 
-	b, err := json.Marshal(dsl.PartyInfos)
+	b, err := json.Marshal(job.PartyInfos)
 	logger.Do.Println(string(b), err)
 
-	jb, _ := json.Marshal(dsl.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	jb, _ := json.Marshal(job.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	res := common.LogisticRegression{}
 	_=json.Unmarshal(jb,&res)
 	fmt.Println(res)

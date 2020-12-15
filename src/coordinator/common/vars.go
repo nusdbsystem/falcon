@@ -61,7 +61,7 @@ const (
 	JobStatus        = "status"
 	SubProcessNormal = "ok"
 
-	DslFile = "dsl"
+	JobFile = "job"
 
 	PreProcessing = "pre_processing"
 	ModelTraining = "model_training"

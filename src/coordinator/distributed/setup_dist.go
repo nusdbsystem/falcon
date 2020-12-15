@@ -86,7 +86,7 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 		logger.Do.Printf("SetupDist: master is calling partyserver: %s ...\n", ip)
 
 		// todo, manage partyserver port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, taskType), such that user dont need
-		//  to provide port in dsl
+		//  to provide port in job
 
 		dataPath := qItem.PartyInfos[index].PartyPaths.DataInput
 		dataOutput := qItem.PartyInfos[index].PartyPaths.DataOutput

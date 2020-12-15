@@ -6,7 +6,7 @@ def submit_job(url, path):
     url = "http://"+url+"/submit"
     with open(path, 'rb') as f:
         print("requesting to ", url)
-        res = requests.post(url, files={'dsl': f})
+        res = requests.post(url, files={'job': f})
         print(res.status_code)
         try:
             print(res.json())
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 
 '''
-python coordinator_client.py -url 127.0.0.1:30004 -method submit -path /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/dsl.json
+python coordinator_client.py -url 127.0.0.1:30004 -method submit -path /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/job.json
 python coordinator_client.py -url 172.25.123.254:30004 -method kill -job 60
 python coordinator_client.py -url 172.25.123.254:30004 -method query_status -job 60
 '''

@@ -50,22 +50,22 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 }
 
 
-func UpdateService(dsl *common.DSL, ctx *entity.Context) {
+func UpdateService(job *common.DSL, ctx *entity.Context) {
 
 }
 
 
-func QueryService(dsl *common.DSL, ctx *entity.Context) {
+func QueryService(job *common.DSL, ctx *entity.Context) {
 
 }
 
 
-func StopService(dsl *common.DSL, ctx *entity.Context) {
+func StopService(job *common.DSL, ctx *entity.Context) {
 
 }
 
 
-func DeleteService(dsl *common.DSL, ctx *entity.Context) {
+func DeleteService(job *common.DSL, ctx *entity.Context) {
 
 }
 
@@ -78,7 +78,7 @@ func PublishService(jobId uint, isPublish uint, ctx *entity.Context) {
 }
 
 
-func LaunchService(dsl *common.DSL, ctx *entity.Context) {
+func LaunchService(job *common.DSL, ctx *entity.Context) {
 }
 
 

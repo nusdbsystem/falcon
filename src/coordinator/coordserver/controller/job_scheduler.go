@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type DslScheduler struct {
+type JobScheduler struct {
 	sync.Mutex
 
 	isStop        chan bool
@@ -20,9 +20,9 @@ type DslScheduler struct {
 	curConsumers  int
 }
 
-func Init(nConsumer int) *DslScheduler {
+func Init(nConsumer int) *JobScheduler {
 	// n worker
-	ds := new(DslScheduler)
+	ds := new(JobScheduler)
 
 	ds.isStop = make(chan bool, nConsumer)
 	ds.isStopMonitor = make(chan bool, 1)
@@ -34,7 +34,7 @@ func Init(nConsumer int) *DslScheduler {
 	return ds
 }
 
-func (ds *DslScheduler) Consume(consumerId int) {
+func (ds *JobScheduler) Consume(consumerId int) {
 	defer func() {
 		err := recover()
 		logger.Do.Println("Consume: Error of this thread, ", consumerId, err)
@@ -76,11 +76,11 @@ loop:
 	logger.Do.Println("Consumer stopped")
 }
 
-func (ds *DslScheduler) StopConsumer() {
+func (ds *JobScheduler) StopConsumer() {
 	ds.isStop <- true
 }
 
-func (ds *DslScheduler) MonitorConsumers() {
+func (ds *JobScheduler) MonitorConsumers() {
 
 loop:
 	for {
@@ -104,6 +104,6 @@ loop:
 
 }
 
-func (ds *DslScheduler) StopMonitor() {
+func (ds *JobScheduler) StopMonitor() {
 	ds.isStopMonitor <- true
 }
