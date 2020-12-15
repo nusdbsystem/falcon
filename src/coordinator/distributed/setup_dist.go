@@ -88,9 +88,9 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, workerType string) st
 		// todo, manage partyserver port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, workerType), such that user dont need
 		//  to provide port in job
 
-		dataPath := qItem.PartyInfos[index].PartyPaths.DataInput
-		dataOutput := qItem.PartyInfos[index].PartyPaths.DataOutput
-		modelPath := qItem.PartyInfos[index].PartyPaths.ModelPath
+		dataPath := qItem.PartyInfo[index].PartyPaths.DataInput
+		dataOutput := qItem.PartyInfo[index].PartyPaths.DataOutput
+		modelPath := qItem.PartyInfo[index].PartyPaths.ModelPath
 
 		c.SetupWorker(ip, masterAddress, workerType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
 	}

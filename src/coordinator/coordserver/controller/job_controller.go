@@ -15,10 +15,10 @@ func JobSubmit(job *common.Job, ctx *entity.Context) (uint, string, uint, string
 
 	// generate.sh item pushed to the queue
 
-	iPs := common.ParseIps(job.PartyInfos)
+	iPs := common.ParseIps(job.PartyInfo)
 
 	// generate.sh strings used to write to db
-	partyIds, err := json.Marshal(job.PartyInfos)
+	partyIds, err := json.Marshal(job.PartyInfo)
 	taskInfos, err := json.Marshal(job.Tasks)
 	if err != nil {
 		panic("json.Marshal(job.PartyIds) error")
@@ -26,7 +26,7 @@ func JobSubmit(job *common.Job, ctx *entity.Context) (uint, string, uint, string
 
 	ModelName :=  job.Tasks.ModelTraining.AlgorithmName
 	ModelDecs := job.Tasks.ModelTraining.AlgorithmName
-	PartyNumber := uint(len(job.PartyInfos))
+	PartyNumber := uint(len(job.PartyInfo))
 	ExtInfo := job.Tasks.ModelTraining.AlgorithmName
 
 	// write to db
@@ -52,7 +52,7 @@ func JobSubmit(job *common.Job, ctx *entity.Context) (uint, string, uint, string
 	qItem.JobFlType = job.JobFlType
 	qItem.ExistingKey = job.ExistingKey
 	qItem.PartyNums = job.PartyNums
-	qItem.PartyInfos = job.PartyInfos
+	qItem.PartyInfo = job.PartyInfo
 	qItem.Tasks = job.Tasks
 
 	go func() {

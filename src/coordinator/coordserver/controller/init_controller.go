@@ -17,7 +17,7 @@ func CreateTables() {
 	jobDB.DefineTables()
 
 	jobDB.Commit(nil)
-	jobDB.DisConnect()
+	jobDB.Disconnect()
 
 }
 
@@ -33,7 +33,7 @@ func CreateSpecificSysPorts(port string) {
 		e1, _ = jobDB.AddPort(uint(portInt))
 	}
 	jobDB.Commit(e1)
-	jobDB.DisConnect()
+	jobDB.Disconnect()
 
 }
 
@@ -66,7 +66,7 @@ func CreateSysPorts() {
 	}
 
 	jobDB.Commit([]error{e1,e2,e3})
-	jobDB.DisConnect()
+	jobDB.Disconnect()
 
 }
 

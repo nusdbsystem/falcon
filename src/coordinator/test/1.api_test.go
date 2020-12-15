@@ -18,7 +18,7 @@ func TestSql(t *testing.T) {
 	jobDB.Connect()
 	e, u := jobDB.JobGetByJobID(1)
 	jobDB.Commit(e)
-	jobDB.DisConnect()
+	jobDB.Disconnect()
 
 	logger.Do.Println(u)
 
@@ -52,7 +52,7 @@ func TestParseJson(t *testing.T) {
 	e2 := json.Unmarshal(byteValue, &job)
 	logger.Do.Println(e2)
 
-	b, err := json.Marshal(job.PartyInfos)
+	b, err := json.Marshal(job.PartyInfo)
 	logger.Do.Println(string(b), err)
 
 	jb, _ := json.Marshal(job.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
