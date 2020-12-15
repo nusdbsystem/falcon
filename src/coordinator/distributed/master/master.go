@@ -10,7 +10,6 @@ import (
 	"coordinator/logger"
 	"strings"
 	"sync"
-	"time"
 )
 
 type Master struct {
@@ -55,33 +54,8 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 // up to report that they are ready to receive tasks.
 func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 
-	/**
-	 * @Author
-	 * @Description
-			retry 3 times, until put to the tmpWorkers, if failed, it means there is
-			no consumer, when the server will be closed, manually call cancel
-			client wait 3 seconds max
-	 * @Date 9:37 上午 14/12/20
-	 * @Param
-	 * @return
-	 **/
-	this.Lock()
-	defer this.Unlock()
-
-	NTimes := 3
-	for {
-		if NTimes<0{
-			return nil
-		}
-		select {
-		case this.tmpWorkers <- args.WorkerAddr:
-			return nil
-		default:
-			logger.Do.Println("Master: Register worker, no consumer,retry...", args.WorkerAddr)
-			time.Sleep(time.Second*1)
-			NTimes--
-		}
-	}
+	this.tmpWorkers <- args.WorkerAddr
+	return nil
 }
 
 // sends information of worker to ch. which is used by scheduler
