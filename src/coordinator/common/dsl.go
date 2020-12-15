@@ -8,7 +8,7 @@ import (
 )
 
 // protoc -I=/Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/ --go_out=/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/common /Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/job.proto
-type DSL struct {
+type Job struct {
 	JobName    		string      				`json:"job_name"`
 	JobDecs   	 	string      				`json:"job_decs"`
 	JobFlType  		string      				`json:"job_fl_type"`
@@ -71,7 +71,7 @@ type DataInput struct{
 }
 
 
-func ParseJob(contents string, jobInfo *DSL) error {
+func ParseJob(contents string, jobInfo *Job) error {
 	// the error here can only check if field type is correct or not.
 	// if the field is not filled, still pass, default to 0
 	e := json.Unmarshal([]byte(contents), jobInfo)
@@ -98,7 +98,7 @@ func ParseJob(contents string, jobInfo *DSL) error {
 	return nil
 }
 
-func jobVerify(jobInfo *DSL) error {
+func jobVerify(jobInfo *Job) error {
 
 	// verify task_num
 	if jobInfo.TaskNum <= 0 {

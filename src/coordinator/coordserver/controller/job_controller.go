@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 )
 
-func JobSubmit(job *common.DSL, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
+func JobSubmit(job *common.Job, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
 
 	logger.Do.Println("HTTP server: in SubmitJob, put to the JobQueue")
 

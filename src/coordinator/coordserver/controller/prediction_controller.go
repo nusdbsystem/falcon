@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"coordinator/coordserver/entity"
 	"coordinator/cache"
 	"coordinator/common"
+	"coordinator/coordserver/entity"
 	dist "coordinator/distributed"
 	"coordinator/logger"
 	"encoding/json"
@@ -50,22 +50,22 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 }
 
 
-func UpdateService(job *common.DSL, ctx *entity.Context) {
+func UpdateService(job *common.Job, ctx *entity.Context) {
 
 }
 
 
-func QueryService(job *common.DSL, ctx *entity.Context) {
+func QueryService(job *common.Job, ctx *entity.Context) {
 
 }
 
 
-func StopService(job *common.DSL, ctx *entity.Context) {
+func StopService(job *common.Job, ctx *entity.Context) {
 
 }
 
 
-func DeleteService(job *common.DSL, ctx *entity.Context) {
+func DeleteService(job *common.Job, ctx *entity.Context) {
 
 }
 
@@ -78,7 +78,7 @@ func PublishService(jobId uint, isPublish uint, ctx *entity.Context) {
 }
 
 
-func LaunchService(job *common.DSL, ctx *entity.Context) {
+func LaunchService(job *common.Job, ctx *entity.Context) {
 }
 
 

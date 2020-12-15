@@ -46,7 +46,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	}
 
 	// parse it
-	var job common.DSL
+	var job common.Job
 
 	e := common.ParseJob(contents, &job)
 
