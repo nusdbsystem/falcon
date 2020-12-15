@@ -18,13 +18,13 @@ import (
 )
 
 type taskHandler func(
-	workerAddr,svcName string,
+	workerAddr string,
 	args *entitiy.DoTaskArgs,
 	wg *sync.WaitGroup,
 	trainStatuses *[]entitiy.DoTaskReply)
 
 
-func (this *Master) schedule(qItem *cache.QItem, taskType string) {
+func (this *Master) schedule(qItem *cache.QItem) {
 
 	// checking if the ip of worker match the qItem
 	this.Lock()
@@ -33,46 +33,40 @@ func (this *Master) schedule(qItem *cache.QItem, taskType string) {
 
 	logger.Do.Println("Scheduler: All worker found: ", this.workers, " required: ",qItem.IPs)
 
-	if taskType == common.TrainExecutor{
+	jsonString := this.schedulerHelper(this.TaskHandler, qItem)
 
-		jsonString := this.schedulerHelper(this.TaskHandler, common.Worker, qItem)
+	// update
+	if this.workerType == common.TrainWorker{
 
 		logger.Do.Println("Scheduler: Finish schedule all tasks, update status")
 
 		client.JobUpdateResInfo(
-			common.CoordSvcURLGlobal,
+			common.CoordinatorUrl,
 			"",
 			string(jsonString),
 			"",
 			qItem.JobId)
 
-		client.JobUpdateStatus(common.CoordSvcURLGlobal, this.jobStatus, qItem.JobId)
+		client.JobUpdateStatus(common.CoordinatorUrl, this.jobStatus, qItem.JobId)
 
 		client.ModelUpdate(
-			common.CoordSvcURLGlobal,
+			common.CoordinatorUrl,
 			1,
 			qItem.JobId)
 
 		// stop worker after finishing the job
 		this.killWorkers()
 
-	}else if taskType == common.PredictExecutor{
-
-		this.schedulerHelper(this.TaskHandler, common.ModelService,qItem)
+	}else if this.workerType == common.PredictWorker{
 
 		logger.Do.Println("Scheduler: Finish schedule all tasks, update status")
 
-		client.ModelServiceUpdateStatus(common.CoordSvcURLGlobal, this.jobStatus, qItem.JobId)
+		client.ModelServiceUpdateStatus(common.CoordinatorUrl, this.jobStatus, qItem.JobId)
 	}
 }
 
 
-func (this *Master) schedulerHelper(
-
-	taskHandler taskHandler,
-	svcName string,
-	qItem *cache.QItem) string{
-
+func (this *Master) schedulerHelper(taskHandler taskHandler,  qItem *cache.QItem) string{
 
 	wg := sync.WaitGroup{}
 
@@ -120,7 +114,7 @@ func (this *Master) schedulerHelper(
 				// append will allocate new memory inside the func stack,
 				// must pass address of slice to func. such that multi goroutines can
 				// update the original slices.
-				go taskHandler(addr, svcName, args, &wg, &trainStatuses)
+				go taskHandler(addr, args, &wg, &trainStatuses)
 				break
 			}else{
 				tmpStack = append(tmpStack, addr)
@@ -142,8 +136,7 @@ func (this *Master) schedulerHelper(
 
 
 func (this *Master) TaskHandler(
-	workerAddr,
-	svcName string,
+	workerAddr string,
 	args *entitiy.DoTaskArgs,
 	wg *sync.WaitGroup,
 	trainStatuses *[]entitiy.DoTaskReply,
@@ -154,8 +147,8 @@ func (this *Master) TaskHandler(
 	argAddr := entitiy.EncodeDoTaskArgs(args)
 	var rep entitiy.DoTaskReply
 
-	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", svcName, workerAddr)
-	ok := client.Call(workerAddr, this.Proxy, svcName+".DoTask", argAddr, &rep)
+	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", this.workerType, workerAddr)
+	ok := client.Call(workerAddr, this.Proxy, this.workerType+".DoTask", argAddr, &rep)
 
 	if !ok {
 		logger.Do.Printf("Scheduler: Master calling %s, DoTask error\n", workerAddr)
@@ -163,7 +156,7 @@ func (this *Master) TaskHandler(
 		rep.RpcCallError = true
 
 	}else{
-		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", svcName, workerAddr)
+		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", this.workerType, workerAddr)
 		rep.RpcCallError = false
 	}
 	*trainStatuses = append(*trainStatuses, rep)
@@ -188,7 +181,7 @@ func (this *Master) generateNetworkConfig(urls []string) string {
 		var ports []int32
 		//generate n ports
 		for i:=0; i<partyNums; i++{
-			port := c.GetFreePort(common.CoordSvcURLGlobal)
+			port := c.GetFreePort(common.CoordinatorUrl)
 			pint, _ := strconv.Atoi(port)
 			ports = append(ports, int32(pint))
 		}

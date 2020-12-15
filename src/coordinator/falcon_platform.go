@@ -5,7 +5,6 @@ import (
 	"coordinator/common"
 	"coordinator/coordserver"
 	"coordinator/distributed"
-	"coordinator/distributed/prediction"
 	"coordinator/distributed/worker"
 	"coordinator/logger"
 	"coordinator/partyserver"
@@ -20,7 +19,7 @@ func init() {
 	// prority: env >  user provided > default value
 	runtime.GOMAXPROCS(4)
 	initLogger()
-	InitEnvs(common.ServiceNameGlobal)
+	InitEnvs(common.ServiceName)
 
 }
 
@@ -43,7 +42,7 @@ func initLogger(){
 	rawTime := time.Now()
 
 	var logFileName string
-	logFileName = fixedPath + "/" + common.ServiceNameGlobal + rawTime.Format(layout) + "logs"
+	logFileName = fixedPath + "/" + common.ServiceName + rawTime.Format(layout) + "logs"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }
@@ -51,7 +50,7 @@ func initLogger(){
 
 func getCoordUrl(url string) string{
 		// using service name+ port to connect to coord
-	    logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordSvcURLGlobal, value: %s >>>>>>>>>>>>>\n",url)
+	    logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordinatorUrl, value: %s >>>>>>>>>>>>>\n",url)
 		return url
 }
 
@@ -78,43 +77,40 @@ func InitEnvs(svcName string){
 		common.RedisNodePort    = common.GetEnv("REDIS_NODE_PORT", "30003")
 
 		// find the cluster port, call internally
-		common.CoordAddrGlobal = common.GetEnv("COORDINATOR_IP", "")
+		common.CoordIP = common.GetEnv("COORDINATOR_IP", "")
 		common.CoordPort   = common.GetEnv("COORD_TARGET_PORT", "30004")
 
-		common.CoordSvcName = common.GetEnv("COORD_SVC_NAME", "")
+		common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 
-		common.CoordSvcURLGlobal = getCoordUrl(common.CoordAddrGlobal + ":" + common.CoordPort)
+		common.CoordinatorUrl = getCoordUrl(common.CoordIP + ":" + common.CoordPort)
 
-		if len(common.ServiceNameGlobal) == 0{
-			logger.Do.Println("Error: Input Error, ServiceNameGlobal is either 'coord' or 'partyserver' ")
+		if len(common.ServiceName) == 0{
+			logger.Do.Println("Error: Input Error, ServiceName is either 'coord' or 'partyserver' ")
 			os.Exit(1)
 		}
 
 	}else if svcName=="partyserver"{
 
 		// partyserver needs coord ip+port,lis port
-		common.CoordAddrGlobal = common.GetEnv("COORDINATOR_IP", "")
+		common.CoordIP = common.GetEnv("COORDINATOR_IP", "")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
-		common.PartyServerAddrGlobal = common.GetEnv("PARTY_SERVER_IP", "")
+		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
 		common.PartyServeBasePath = common.GetEnv("DATA_BASE_PATH", "")
 
 		// partyserver communicate coord with ip+port
-		common.CoordSvcURLGlobal = getCoordUrl(common.CoordAddrGlobal + ":" + common.CoordPort)
+		common.CoordinatorUrl = getCoordUrl(common.CoordIP + ":" + common.CoordPort)
 
 		// run partyserver requires to get a new partyserver port
 		common.PartyServerPort = common.GetEnv("PARTY_SERVER_NODE_PORT", "")
 
-		common.PartyServerId = common.GetEnv("PARTY_NUMBER", "")
+		common.PartyServerId = common.GetEnv("PARTY_SERVER_ID", "")
 
-		// partyserver needs will send this to coord
-		common.ListenURLGlobal = common.PartyServerAddrGlobal + ":" + common.PartyServerPort
-
-		if common.CoordAddrGlobal=="" || common.PartyServerAddrGlobal==""||common.PartyServerPort=="" {
-			logger.Do.Println("Error: Input Error, either CoordAddrGlobal or PartyServerAddrGlobal not provided")
+		if common.CoordIP=="" || common.PartyServerIP==""||common.PartyServerPort=="" {
+			logger.Do.Println("Error: Input Error, either CoordIP or PartyServerIP not provided")
 			os.Exit(1)
 		}
 
-	}else if svcName==common.MasterExecutor {
+	}else if svcName==common.Master {
 
 		// master needs redis information
 		common.RedisHost      = common.GetEnv("REDIS_HOST","localhost")
@@ -125,64 +121,64 @@ func InitEnvs(svcName string){
 
 		// master needs queue item, task type
 		common.MasterQItem =common.GetEnv("ITEM_KEY", "")
-		common.ExecutorTypeGlobal = common.GetEnv("EXECUTOR_TYPE", "")
-		common.MasterURLGlobal = common.GetEnv("MASTER_URL", "")
+		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
+		common.MasterUrl = common.GetEnv("MASTER_URL", "")
 
-		common.CoordSvcName = common.GetEnv("COORD_SVC_NAME", "")
+		common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 
-		common.ExecutorCurrentName = common.GetEnv("EXECUTOR_NAME", "")
+		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 
 		// master communicate coord with ip+port in dev, with name+port in prod
 		if common.Env==common.DevEnv{
 
-			logger.Do.Println("CoordAddrGlobal: ", common.CoordAddrGlobal  + ":" + common.CoordPort)
+			logger.Do.Println("CoordIP: ", common.CoordIP  + ":" + common.CoordPort)
 
-			common.CoordSvcURLGlobal = getCoordUrl(common.CoordAddrGlobal + ":" + common.CoordPort)
+			common.CoordinatorUrl = getCoordUrl(common.CoordIP + ":" + common.CoordPort)
 
 		}else if common.Env==common.ProdEnv{
 
-			logger.Do.Println("CoordSvcName: ", common.CoordSvcName  + ":" + common.CoordPort)
+			logger.Do.Println("CoordK8sSvcName: ", common.CoordK8sSvcName  + ":" + common.CoordPort)
 
-			common.CoordSvcURLGlobal = getCoordUrl(common.CoordSvcName  + ":" + common.CoordPort)
+			common.CoordinatorUrl = getCoordUrl(common.CoordK8sSvcName  + ":" + common.CoordPort)
 		}
 
 
-		if common.CoordSvcURLGlobal==""{
-			logger.Do.Println("Error: Input Error, CoordSvcURLGlobal not provided")
+		if common.CoordinatorUrl==""{
+			logger.Do.Println("Error: Input Error, CoordinatorUrl not provided")
 			os.Exit(1)
 		}
 
-	}else if svcName==common.TrainExecutor{
-		// this will be executed only in production, in dev, the common.ExecutorTypeGlobal==""
+	}else if svcName==common.TrainWorker{
+		// this will be executed only in production, in dev, the common.WorkerType==""
 
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
 		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
 		common.TaskDataOutput = common.GetEnv("TASK_DATA_OUTPUT", "")
 		common.TaskRuntimeLogs = common.GetEnv("RUN_TIME_LOGS", "")
 
-		common.ExecutorTypeGlobal = common.GetEnv("EXECUTOR_TYPE", "")
-		common.WorkerURLGlobal = common.GetEnv("WORKER_URL", "")
-		common.MasterURLGlobal = common.GetEnv("MASTER_URL", "")
-		common.ExecutorCurrentName = common.GetEnv("EXECUTOR_NAME", "")
-		if common.MasterURLGlobal=="" || common.WorkerURLGlobal=="" {
+		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
+		common.WorkerUrl = common.GetEnv("WORKER_URL", "")
+		common.MasterUrl = common.GetEnv("MASTER_URL", "")
+		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
+		if common.MasterUrl=="" || common.WorkerUrl=="" {
 			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
 			os.Exit(1)
 		}
 
-	}else if svcName==common.PredictExecutor{
+	}else if svcName==common.PredictWorker{
 
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
 		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
 		common.TaskDataOutput = common.GetEnv("TASK_DATA_OUTPUT", "")
 		common.TaskRuntimeLogs = common.GetEnv("RUN_TIME_LOGS", "")
 
-		// this will be executed only in production, in dev, the common.ExecutorTypeGlobal==""
+		// this will be executed only in production, in dev, the common.WorkerType==""
 
-		common.ExecutorTypeGlobal = common.GetEnv("EXECUTOR_TYPE", "")
-		common.WorkerURLGlobal = common.GetEnv("WORKER_URL", "")
-		common.MasterURLGlobal = common.GetEnv("MASTER_URL", "")
-		common.ExecutorCurrentName = common.GetEnv("EXECUTOR_NAME", "")
-		if common.MasterURLGlobal=="" || common.WorkerURLGlobal=="" {
+		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
+		common.WorkerUrl = common.GetEnv("WORKER_URL", "")
+		common.MasterUrl = common.GetEnv("MASTER_URL", "")
+		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
+		if common.MasterUrl=="" || common.WorkerUrl=="" {
 			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
 			os.Exit(1)
 		}
@@ -199,16 +195,16 @@ func main() {
 	}()
 
 
-	if common.ServiceNameGlobal == "coord" {
-		logger.Do.Println("Launch falcon_platform, the common.ServiceNameGlobal", common.ServiceNameGlobal)
+	if common.ServiceName == "coord" {
+		logger.Do.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
 
 		coordserver.SetupHttp(3)
 	}
 
 	// start work in remote machine automatically
-	if common.ServiceNameGlobal == "partyserver" {
+	if common.ServiceName == "partyserver" {
 
-		logger.Do.Println("Launch falcon_platform, the common.ServiceNameGlobal", common.ServiceNameGlobal)
+		logger.Do.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
 
 		partyserver.SetupPartyServer()
 	}
@@ -221,35 +217,35 @@ func main() {
 
 	//those 2 is only called internally
 
-	if common.ServiceNameGlobal == common.MasterExecutor {
+	if common.ServiceName == common.Master {
 
-		logger.Do.Println("Lunching falcon_platform, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
+		logger.Do.Println("Lunching falcon_platform, the common.WorkerType", common.WorkerType)
 
 		// this should be the service name, defined at runtime,
-		masterUrl := common.MasterURLGlobal
+		masterUrl := common.MasterUrl
 
 		qItem := cache.Deserialize(cache.InitRedisClient().Get(common.MasterQItem))
 
-		taskType := common.ExecutorTypeGlobal
+		workerType := common.WorkerType
 
-		distributed.SetupMaster(masterUrl, qItem, taskType)
-
-	}
-
-	if common.ServiceNameGlobal == common.TrainExecutor {
-
-		logger.Do.Println("Lunching falcon_platform, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
-
-		worker.RunWorker(common.MasterURLGlobal, common.WorkerURLGlobal)
-	}
-
-	if common.ServiceNameGlobal == common.PredictExecutor {
-
-		logger.Do.Println("Lunching falcon_platform, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
-
-		prediction.RunPrediction(common.MasterURLGlobal, common.WorkerURLGlobal)
+		distributed.SetupMaster(masterUrl, qItem, workerType)
 
 	}
 
+	if common.ServiceName == common.TrainWorker {
 
+		logger.Do.Println("Lunching falcon_platform, the common.WorkerType", common.WorkerType)
+
+		wk := worker.InitTrainWorker(common.MasterUrl, common.WorkerUrl)
+		wk.RunWorker(wk)
+	}
+
+	if common.ServiceName == common.PredictWorker {
+
+		logger.Do.Println("Lunching falcon_platform, the common.WorkerType", common.WorkerType)
+
+		wk := worker.InitPredictWorker(common.MasterUrl, common.WorkerUrl)
+		wk.RunWorker(wk)
+
+	}
 }

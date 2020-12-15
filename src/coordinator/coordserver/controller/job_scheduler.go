@@ -66,7 +66,7 @@ loop:
 				// lunching the master
 				go func(){
 					defer logger.HandleErrors()
-					dist.SetupDist(qItem, common.TrainExecutor)
+					dist.SetupDist(qItem, common.TrainWorker)
 				}()
 			}
 

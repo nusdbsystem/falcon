@@ -34,6 +34,9 @@ type Master struct {
 
 	foundWorker bool
 
+	// common.TrainWorker or common.PredictWorker
+	workerType string
+
 }
 
 func newMaster(masterAddr string, workerNum int) (ms *Master) {
@@ -127,7 +130,7 @@ func (this *Master) Wait() {
 
 	if common.Env==common.ProdEnv{
 		km := taskmanager.InitK8sManager(true,  "")
-		km.DeleteService(common.ExecutorCurrentName)
+		km.DeleteService(common.WorkerK8sSvcName)
 	}
 }
 

@@ -17,7 +17,7 @@ func initSvcName() string{
 	return res
 }
 
-func SetupDist(qItem *cache.QItem, taskType string) {
+func SetupDist(qItem *cache.QItem, workerType string) {
 	/**
 	 * @Author
 	 * @Description run master, and then, master will call lister to run worker
@@ -27,13 +27,13 @@ func SetupDist(qItem *cache.QItem, taskType string) {
 	 **/
 
 	if common.Env == common.DevEnv{
-		SetupDistDev(qItem, taskType)
+		SetupDistDev(qItem, workerType)
 	}else if common.Env == common.ProdEnv{
-		SetupDistProd(qItem, taskType)
+		SetupDistProd(qItem, workerType)
 	}
 }
 
-func SetupWorkerHelper(masterAddress, taskType, jobId, dataPath, modelPath, dataOutput string)  {
+func SetupWorkerHelper(masterAddress, workerType, jobId, dataPath, modelPath, dataOutput string)  {
 
 	/**
 	 * @Author
@@ -47,15 +47,15 @@ func SetupWorkerHelper(masterAddress, taskType, jobId, dataPath, modelPath, data
 
 	// in dev, use thread
 	if common.Env == common.DevEnv{
-		SetupWorkerHelperDev(masterAddress, taskType, jobId, dataPath, modelPath, dataOutput)
+		SetupWorkerHelperDev(masterAddress, workerType, jobId, dataPath, modelPath, dataOutput)
 		// in prod, use k8s to run train/predict server as a isolate process
 	}else if common.Env == common.ProdEnv{
-		SetupWorkerHelperProd(masterAddress, taskType, jobId, dataPath, modelPath, dataOutput)
+		SetupWorkerHelperProd(masterAddress, workerType, jobId, dataPath, modelPath, dataOutput)
 	}
 }
 
 
-func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) string {
+func SetupMaster(masterAddress string, qItem *cache.QItem, workerType string) string {
 	/**
 	 * @Author
 	 * @Description : run train rpc server in a thread, used to test only
@@ -65,13 +65,13 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 	 **/
 	logger.Do.Println("SetupDist: Lunching master")
 
-	ms := master.RunMaster(masterAddress, qItem, taskType)
+	ms := master.RunMaster(masterAddress, qItem, workerType)
 
 
 	// update job's master address
-	if taskType == common.TrainExecutor{
+	if workerType == common.TrainWorker{
 
-		c.JobUpdateMaster(common.CoordSvcURLGlobal, masterAddress, qItem.JobId)
+		c.JobUpdateMaster(common.CoordinatorUrl, masterAddress, qItem.JobId)
 	}
 
 	// master will call lister's endpoint to launch worker, to train or predict
@@ -81,18 +81,18 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 		// maybe check table wit ip, and + port got from table also
 
 		// send a request to http
-		//lisPort := c.GetExistPort(common.CoordSvcURLGlobal, ip)
+		//lisPort := c.GetExistPort(common.CoordinatorUrl, ip)
 
 		logger.Do.Printf("SetupDist: master is calling partyserver: %s ...\n", ip)
 
-		// todo, manage partyserver port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, taskType), such that user dont need
+		// todo, manage partyserver port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, workerType), such that user dont need
 		//  to provide port in job
 
 		dataPath := qItem.PartyInfos[index].PartyPaths.DataInput
 		dataOutput := qItem.PartyInfos[index].PartyPaths.DataOutput
 		modelPath := qItem.PartyInfos[index].PartyPaths.ModelPath
 
-		c.SetupWorker(ip, masterAddress, taskType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
+		c.SetupWorker(ip, masterAddress, workerType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
 	}
 
 	logger.Do.Printf("SetupDist: master is running at %s ... waiting job complete\n", masterAddress)

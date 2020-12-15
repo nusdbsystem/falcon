@@ -19,8 +19,8 @@ import (
 
 const (
 	Master = "Master"
-	Worker = "Worker"
-	ModelService = "ModelService"
+	TrainWorker = "TrainWorker"
+	PredictWorker = "PredictWorker"
 
 	// master& wokrer heartbeat
 
@@ -49,9 +49,9 @@ const (
 	SetupWorker = "setup-worker" // RFC 5789
 
 	// shared key of map
-	PartyServerAddr = "partyserverAddress"
-	MasterAddr   = "masterAddress"
-	PartyServerPortKey = "partyserverPort"
+	PartyServerAddrKey = "psAddress"
+	MasterAddrKey   = "masterAddress"
+	PartyServerPortKey = "psPort"
 
 	JobId      = "job_id"
 	JobErrMsg  = "error_jobDBg"
@@ -63,14 +63,12 @@ const (
 
 	JobFile = "job"
 
-	PreProcessing = "pre_processing"
-	ModelTraining = "model_training"
-
-	TaskType = "task-type"
+	TaskTypeKey = "task-type"
 
 	TrainDataPath  = "train-data-path"
 	TrainDataOutput  = "train-data-output"
 	ModelPath = "model-path"
+
 	// model endpoint
 	ModelUpdate  = "model-update"
 	IsTrained = "is_trained"
@@ -89,10 +87,6 @@ const (
 	JobFailed     = 3
 	JobKilled     = 4
 
-	MasterExecutor = "master"
-	TrainExecutor = "train"
-	PredictExecutor = "predict"
-
 	DevEnv = "dev"
 	ProdEnv = "prod"
 
@@ -100,7 +94,6 @@ const (
 	MasterYamlCreatePath = "./scripts/_create_runtime_master.sh"
 
 	YamlBasePath = "./deploy/template/"
-
 
 	MpcExe = "./semi-party.x"
 	FalconTrainExe = "./falcon"
@@ -131,42 +124,43 @@ var (
 
 	// find the cluster port, call internally
 	RedisPort       = ""
-
 	JobDbMysqlNodePort = ""
 	RedisNodePort    = ""
 
 	// sys port, here COORD_TARGET_PORT must equal to
+	CoordIP = ""
 	CoordPort   = ""
+
+	PartyServerIP = ""
 	PartyServerPort = ""
 	PartyServerId = ""
+
 	// envs
 	Env = getEnv("Env", DevEnv)
 
 	// those are init by user
-	ServiceNameGlobal = getEnv("SERVICE_NAME", "coord")
+	ServiceName = getEnv("SERVICE_NAME", "coord")
 	LocalPath = ""
 
-	CoordAddrGlobal = ""
-	PartyServerAddrGlobal = ""
 	PartyServeBasePath = ""
+
 	// those are init by coordinator
-	ExecutorTypeGlobal = ""
-	WorkerURLGlobal = ""
-	MasterURLGlobal = ""
+	WorkerType = ""
+	WorkerUrl = ""
+	MasterUrl = ""
 
-	ExecutorCurrentName = ""
-	// this is ip + port
-	ListenURLGlobal = ""
-
+	// this is the worker's k8s service name, only used in production
+	WorkerK8sSvcName = ""
 	// enable other service access master with clusterIp+clusterPort, from inside the cluster
-	CoordSvcName = ""
+	CoordK8sSvcName = ""
 
 	// for coord, node port is the same as cluster port, so all use coorport
 	// this is service name + port
-	CoordSvcURLGlobal = ""
+	CoordinatorUrl = ""
 
 	MasterQItem = ""
 
+	// paths used in training
 	TaskDataPath = ""
 	TaskDataOutput = ""
 	TaskModelPath = ""

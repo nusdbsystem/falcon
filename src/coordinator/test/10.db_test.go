@@ -39,7 +39,7 @@ func TestDb(t *testing.T){
 		err, u = jobDB.AddPort(uint(30001))
 		if err != nil{
 			logger.Do.Println(err)
-			logger.Do.Printf("SetupPartyServer: connecting to coord %s ...retry \n", common.CoordSvcURLGlobal)
+			logger.Do.Printf("SetupPartyServer: connecting to coord %s ...retry \n", common.CoordinatorUrl)
 			time.Sleep(time.Second*5)
 			NTimes--
 		}else{

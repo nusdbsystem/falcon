@@ -58,7 +58,7 @@ func (this *Master) broadcastHeartbeat() {
 	 **/
 	for _, worker := range this.workers {
 
-		ok := client.Call(worker, this.Proxy, "Worker.ResetTime", new(struct{}), new(struct{}))
+		ok := client.Call(worker, this.Proxy, this.workerType+".ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
 			logger.Do.Printf("Master: RPC %s send heartbeat error\n", worker)
 		}

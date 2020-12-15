@@ -34,20 +34,20 @@ func SetupPartyServer() {
 			logger.Do.Fatal("ShutDown the server", err)
 		}
 
-		c.PartyServerDelete(common.CoordSvcURLGlobal, common.PartyServerAddrGlobal)
+		c.PartyServerDelete(common.CoordinatorUrl, common.PartyServerIP)
 	}()
 
-	logger.Do.Printf("SetupPartyServer: connecting to coord  %s to AddPort\n", common.CoordSvcURLGlobal)
+	logger.Do.Printf("SetupPartyServer: connecting to coord  %s to AddPort\n", common.CoordinatorUrl)
 
-	err := c.AddPort(common.CoordSvcURLGlobal, common.PartyServerPort)
+	err := c.AddPort(common.CoordinatorUrl, common.PartyServerPort)
 
 	if err!=nil{
 		panic("SetupPartyServer: Server closed under request, "+err.Error())
 	}
 
-	logger.Do.Printf("SetupPartyServer: PartyServerAdd %s ...retry \n", common.PartyServerAddrGlobal)
+	logger.Do.Printf("SetupPartyServer: PartyServerAdd %s ...retry \n", common.PartyServerIP)
 
-	err = c.PartyServerAdd(common.CoordSvcURLGlobal, common.PartyServerAddrGlobal, common.PartyServerPort)
+	err = c.PartyServerAdd(common.CoordinatorUrl, common.PartyServerIP, common.PartyServerPort)
 
 	if err!=nil{
 		panic("SetupPartyServer: PartyServerAdd error, "+err.Error())

@@ -4,14 +4,13 @@ import (
 	"coordinator/cache"
 	c "coordinator/client"
 	"coordinator/common"
-	"coordinator/distributed/prediction"
 	"coordinator/distributed/worker"
 	"coordinator/logger"
 )
 
 
 
-func SetupDistDev(qItem *cache.QItem, taskType string) {
+func SetupDistDev(qItem *cache.QItem, workerType string) {
 	/**
 	 * @Author
 	 * @Description run master, and then, master will call lister to run worker
@@ -20,22 +19,22 @@ func SetupDistDev(qItem *cache.QItem, taskType string) {
 	 * @return
 	 **/
 
-	masterPort := c.GetFreePort(common.CoordSvcURLGlobal)
+	masterPort := c.GetFreePort(common.CoordinatorUrl)
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
-	masterIp := common.CoordAddrGlobal
+	masterIp := common.CoordIP
 	masterAddress := masterIp + ":" + masterPort
 
 	logger.Do.Println("SetupDist: Launch master DevEnv")
 
 	// use a thread
-	SetupMaster(masterAddress, qItem, taskType)
+	SetupMaster(masterAddress, qItem, workerType)
 
 	logger.Do.Println("SetupDist: setup master done")
 }
 
 
-func SetupWorkerHelperDev(masterAddress, taskType, jobId, dataPath, modelPath, dataOutput string)  {
+func SetupWorkerHelperDev(masterAddress, workerType, jobId, dataPath, modelPath, dataOutput string)  {
 
 	/**
 	 * @Author
@@ -46,11 +45,11 @@ func SetupWorkerHelperDev(masterAddress, taskType, jobId, dataPath, modelPath, d
 		masterAddress： IP of the master address
 		masterAddress： train or predictor
 	 **/
-	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddress, taskType)
+	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddress, workerType)
 
-	workerPort := c.GetFreePort(common.CoordSvcURLGlobal)
+	workerPort := c.GetFreePort(common.CoordinatorUrl)
 
-	workerAddress := common.PartyServerAddrGlobal + ":" + workerPort
+	workerAddress := common.PartyServerIP + ":" + workerPort
 	var serviceName string
 
 	// in dev, use thread
@@ -59,21 +58,26 @@ func SetupWorkerHelperDev(masterAddress, taskType, jobId, dataPath, modelPath, d
 	common.TaskDataOutput = dataOutput
 	common.TaskModelPath = modelPath
 
-	if taskType == common.TrainExecutor{
+	if workerType == common.TrainWorker{
 
 		serviceName = "worker-jid" + jobId + "-train-" + common.PartyServerId
 		common.TaskRuntimeLogs = common.PartyServeBasePath+"/"+"run_time_logs/"+serviceName
 
-		logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainExecutor")
-		worker.RunWorker(masterAddress, workerAddress)
+		logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainWorker")
 
-	}else if taskType == common.PredictExecutor{
+		wk := worker.InitTrainWorker(masterAddress, workerAddress)
+		wk.RunWorker(wk)
+
+	}else if workerType == common.PredictWorker{
 
 		serviceName = "worker-jid" + jobId + "-predict-" + common.PartyServerId
 		common.TaskRuntimeLogs = common.PartyServeBasePath+"/"+"run_time_logs/"+serviceName
 
-		logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictExecutor")
-		prediction.RunPrediction(masterAddress, workerAddress)
+		logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictWorker")
+
+		wk := worker.InitPredictWorker(masterAddress, workerAddress)
+		wk.RunWorker(wk)
+
 	}
 
 		// in prod, use k8s to run train/predict server as a isolate process
