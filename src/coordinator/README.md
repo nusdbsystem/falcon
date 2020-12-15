@@ -34,20 +34,7 @@ go build <go-program>.go
 
 0. Build Golang executable file
    
-   If in Linux:
-   ```
-   make build_linux
-   ```
-   
-   If in MAC:
-      ```
-      make build_mac
-      ```
-   
-   If in windows:
-      ```
-      make build_windows
-      ```
+
 
 1. Setup coordinator:
     
@@ -55,19 +42,43 @@ go build <go-program>.go
     choose the JOB_DB_ENGINE, DATA_BASE_PATH, COORDINATOR_IP
     finally run script with following
     
-    ```
-    bash scripts/dev_start_coord.sh
-    ```
+   If in Linux:
+       ```
+       bash scripts/dev_start_coord.sh build_linux
+       ```
+       
+   If in MAC:
+          ```
+          bash scripts/dev_start_coord.sh build_mac
+          ```
+       
+   If in windows:
+          ```
+          bash scripts/dev_start_coord.sh build_windows
+          ```
+          
 
 2. Setup partyserver:
     
     Update config_partyserver.properties
     choose the PARTY_SERVER_IP, COORDINATOR_IP, PARTY_SERVER_NODE_PORT
     finally run script with following
-    ```
-    bash scripts/dev_start_partyserver.sh
-    ```
-   
+    
+   If in Linux:
+       ```
+       bash scripts/dev_start_partyserver.sh build_linux
+       ```
+       
+   If in MAC:
+          ```
+          bash scripts/dev_start_partyserver.sh build_mac
+          ```
+       
+   If in windows:
+          ```
+          bash scripts/dev_start_partyserver.sh build_windows
+          ```
+
 ## Platform setup production instruction
 
 0. docker image is upload, if u wanna build yourself, try with:
