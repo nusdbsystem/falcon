@@ -9,13 +9,12 @@ import (
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"fmt"
-	"sync"
 	"time"
 )
 
 type Worker struct {
 
-	base.RpcBase
+	base.RpcBaseClass
 
 	pm         		*taskmanager.SubProcessManager
 	taskFinish 		chan bool
@@ -28,30 +27,30 @@ type Worker struct {
 func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
 	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
+	//
+	//wg := sync.WaitGroup{}
+	//
+	//wg.Add(2)
+	//
+	//go wk.MpcTaskProcess(dta, "algName")
+	//go wk.MlTaskProcess(dta, rep, &wg)
+	//
+	//// wait until all the task done
+	//wg.Wait()
+	//
+	//// kill all the monitors
+	//wk.pm.Cancel()
+	//
+	//wk.pm.Lock()
+	//rep.Killed = wk.pm.IsKilled
+	//if wk.pm.IsKilled == true{
+	//	wk.pm.Unlock()
+	//	wk.taskFinish <- true
+	//}else{
+	//	wk.pm.Unlock()
+	//}
 
-	wg := sync.WaitGroup{}
-
-	wg.Add(2)
-
-	go wk.MpcTaskProcess(dta, "algName")
-	go wk.MlTaskProcess(dta, rep, &wg)
-
-	// wait until all the task done
-	wg.Wait()
-
-	// kill all the monitors
-	wk.pm.Cancel()
-
-	wk.pm.Lock()
-	rep.Killed = wk.pm.IsKilled
-	if wk.pm.IsKilled == true{
-		wk.pm.Unlock()
-		wk.taskFinish <- true
-	}else{
-		wk.pm.Unlock()
-	}
-
-	//go TestTaskProcess()
+	TestTaskProcess(dta)
 	return nil
 
 }
@@ -114,7 +113,7 @@ loop:
 	for {
 		select {
 		case <-wk.Ctx.Done():
-			logger.Do.Printf("Worker: isStop=true, server %s quite eventLoop \n", wk.Address)
+			logger.Do.Printf("Worker: server %s quite eventLoop \n", wk.Address)
 			break loop
 		default:
 			elapseTime := time.Now().UnixNano() - wk.latestHeardTime
@@ -132,7 +131,6 @@ loop:
 				// quite event loop no matter ok or not
 				break
 			}
-			wk.Unlock()
 
 			time.Sleep(time.Millisecond * common.WorkerTimeout / 5)
 			fmt.Printf("Worker: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))

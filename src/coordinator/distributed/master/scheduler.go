@@ -25,14 +25,13 @@ type taskHandler func(
 
 
 func (this *Master) schedule(qItem *cache.QItem, taskType string) {
-	logger.Do.Println("Scheduler: Begin to schedule")
 
 	// checking if the ip of worker match the qItem
 	this.Lock()
 	this.allWorkerReady.Wait()
 	this.Unlock()
 
-	logger.Do.Println("Scheduler: All worker found: ", this.workers)
+	logger.Do.Println("Scheduler: All worker found: ", this.workers, " required: ",qItem.IPs)
 
 	if taskType == common.TrainExecutor{
 
@@ -78,7 +77,6 @@ func (this *Master) schedulerHelper(
 	wg := sync.WaitGroup{}
 
 	// execute the task
-	logger.Do.Println("Scheduler: qItem.ips are ", qItem.IPs)
 	netCfg := this.generateNetworkConfig(qItem.IPs)
 
 	var trainStatuses []entitiy.DoTaskReply
@@ -86,6 +84,10 @@ func (this *Master) schedulerHelper(
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go this.TaskStatusMonitor(&trainStatuses, ctx)
+
+
+	tmpStack :=  make([]string, len(this.workers))
+	copy(tmpStack, this.workers)
 
 	for i, v := range qItem.IPs {
 		vip := strings.Split(v, ":")[0]
@@ -101,15 +103,15 @@ func (this *Master) schedulerHelper(
 		args.NetWorkFile = netCfg
 
 		MaxSearchNumber := 100
-		for len(this.workers) > 0{
+		for len(tmpStack) > 0{
 
 			if MaxSearchNumber <=0{
 				panic("Max search Number reaches, Ip not Match Error ")
 			}
 
-			addr := this.workers[0]
+			addr := tmpStack[0]
 			ip := strings.Split(addr, ":")[0]
-			this.workers = this.workers[1:]
+			tmpStack = tmpStack[1:]
 
 			// match using ip
 			if ip == vip {
@@ -121,7 +123,7 @@ func (this *Master) schedulerHelper(
 				go taskHandler(addr, svcName, args, &wg, &trainStatuses)
 				break
 			}else{
-				this.workers = append(this.workers, addr)
+				tmpStack = append(tmpStack, addr)
 				MaxSearchNumber--
 			}
 		}
@@ -157,7 +159,7 @@ func (this *Master) TaskHandler(
 
 	if !ok {
 		logger.Do.Printf("Scheduler: Master calling %s, DoTask error\n", workerAddr)
-		rep.ErrorMsg.RpcCallErrorMsg = "RpcCallError"
+		rep.TaskMsg.RpcCallMsg = ""
 		rep.RpcCallError = true
 
 	}else{
@@ -168,6 +170,7 @@ func (this *Master) TaskHandler(
 }
 
 func (this *Master) generateNetworkConfig(urls []string) string {
+	logger.Do.Println("Scheduler: Generating NetworkCfg ...")
 
 	partyNums := len(urls)
 	var ips []string
@@ -198,7 +201,6 @@ func (this *Master) generateNetworkConfig(urls []string) string {
 		logger.Do.Println("Scheduler: Generate NetworkCfg failed ", err)
 		panic(err)
 	}
-	logger.Do.Println("Scheduler: Generate NetworkCfg successfully")
 
 	return string(out)
 

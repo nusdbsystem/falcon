@@ -47,7 +47,7 @@ func InitMetaStore() *MetaStore {
 		)
 		ms.url = mysql_url
 	} else if ms.engine == "sqlite3" {
-		ms.url = common.MsSqliteDb
+		ms.url = common.LocalPath+common.MsSqliteDb
 	}
 	return ms
 }

@@ -2,7 +2,7 @@
 
 
 
-BINARY="bin/coordinator_server"
+BINARY="./bin/coordinator_server"
 
 
 build_linux:

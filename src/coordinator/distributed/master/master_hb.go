@@ -34,7 +34,7 @@ loop:
 				if int(elapseTime/int64(time.Millisecond)) >= this.heartbeatTimeout {
 
 					this.Unlock()
-					fmt.Println("Master: Timeout, server begin to send hb to worker")
+					fmt.Println("Master: Timeout, server begin to send heart beat to worker")
 					this.broadcastHeartbeat()
 
 				} else {

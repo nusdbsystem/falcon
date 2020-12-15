@@ -34,13 +34,14 @@ func GetLogger(fileName string) (*log.Logger,*os.File) {
 
 func HandleErrors(){
 	// cache global unexpected error
-	Do.Println("HandlerErrors: Catching error ...")
 	err := recover()
 	if err != nil{
+		Do.Println("HandlerErrors: Catching error ...")
 		var buf [4096]byte
 		n := runtime.Stack(buf[:], false)
 		Do.Println(err)
 		Do.Printf("==> %s\n", string(buf[:n]))
 		//os.Exit(1)
 	}
+	Do.Println("HandlerErrors: exit current thread")
 }

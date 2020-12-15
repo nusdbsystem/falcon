@@ -10,7 +10,7 @@ import (
 func RunPrediction(masterAddress, predAddress string){
 
 	msvc := new(ModelService)
-	msvc.InitRpc(predAddress)
+	msvc.InitRpcBase(predAddress)
 	msvc.Name = common.ModelService
 	msvc.pm = taskmanager.InitSubProcessManager()
 

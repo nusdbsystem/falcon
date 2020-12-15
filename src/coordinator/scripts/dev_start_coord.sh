@@ -11,4 +11,4 @@ export DATA_BASE_PATH=$DATA_BASE_PATH
 export MS_ENGINE=$MS_ENGINE
 
 make $OS
-./bn/coordinator_server
+./bin/coordinator_server

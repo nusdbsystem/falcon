@@ -11,7 +11,7 @@ import (
 func RunWorker(masterAddress, workerAddress string) {
 
 	wk := new(Worker)
-	wk.InitRpc(workerAddress)
+	wk.InitRpcBase(workerAddress)
 	wk.Name = common.Worker
 	wk.SuicideTimeout = common.WorkerTimeout
 

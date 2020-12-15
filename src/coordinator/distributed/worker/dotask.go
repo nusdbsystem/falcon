@@ -14,7 +14,7 @@ import (
 
 
 
-func DoMlTask(
+func doMlTask(
 	pm *taskmanager.SubProcessManager,
 
 	partyId string,
@@ -125,7 +125,7 @@ func (wk *Worker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskRepl
 	var algParams string
 	var KeyFile string
 
-	doTrain := DoMlTask(
+	doTrain := doMlTask(
 		wk.pm,
 		fmt.Sprintf("%d", partyId),
 		fmt.Sprintf("%d", partyNum),
@@ -182,7 +182,6 @@ func (wk *Worker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskRepl
 		if exit := wk.execResHandler(exitStr, res, rep); exit==true{
 			return
 		}
-
 		logger.Do.Println("Worker:task model training", rep)
 	}
 
@@ -197,9 +196,6 @@ func (wk *Worker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskRepl
 	logger.Do.Printf("Worker: %s: task done\n", wk.Address)
 }
 
-func TestTaskProcess(){
-
-}
 
 func (wk *Worker) MpcTaskProcess(dta *entitiy.DoTaskArgs, algName string){
 	/**
@@ -269,4 +265,12 @@ func (wk *Worker) execResHandler(
 
 	rep.RuntimeError = false
 	return false
+}
+
+
+
+func TestTaskProcess(arg *entitiy.DoTaskArgs){
+
+	logger.Do.Println(arg)
+	time.Sleep(time.Minute)
 }

@@ -11,7 +11,7 @@ import (
 )
 
 type ModelService struct{
-	base.RpcBase
+	base.RpcBaseClass
 	pm         *taskmanager.SubProcessManager
 
 }

@@ -10,12 +10,11 @@ import (
 	"coordinator/logger"
 	"strings"
 	"sync"
-	"time"
 )
 
 type Master struct {
 
-	base.RpcBase
+	base.RpcBaseClass
 
 	doneChannel chan bool
 
@@ -39,7 +38,7 @@ type Master struct {
 
 func newMaster(masterAddr string, workerNum int) (ms *Master) {
 	ms = new(Master)
-	ms.InitRpc(masterAddr)
+	ms.InitRpcBase(masterAddr)
 	ms.Name = common.Master
 	ms.beginCountDown = sync.NewCond(ms)
 	ms.allWorkerReady = sync.NewCond(ms)
@@ -55,39 +54,14 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 // up to report that they are ready to receive tasks.
 func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 
-	/**
-	 * @Author
-	 * @Description
-			retry 3 times, until put to the tmpWorkers, if failed, it means there is
-			no consumer, when the server will be closed, manually call cancel
-			client wait 3 seconds max
-	 * @Date 9:37 上午 14/12/20
-	 * @Param
-	 * @return
-	 **/
-	this.Lock()
-	defer this.Unlock()
-
-	NTimes := 3
-	for {
-		if NTimes<0{
-			return nil
-		}
-		select {
-		case this.tmpWorkers <- args.WorkerAddr:
-			logger.Do.Println("Master: Register worker", args.WorkerAddr)
-			return nil
-		default:
-			logger.Do.Println("Master: Register worker, no consumer,retry...", args.WorkerAddr)
-			time.Sleep(time.Second*1)
-			NTimes--
-		}
-	}
+	this.tmpWorkers <- args.WorkerAddr
+	return nil
 }
 
 // sends information of worker to ch. which is used by scheduler
 func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 
+	logger.Do.Printf("Master: start forwardRegistrations... ")
 	var requiredIp []string
 
 	for i := 0; i < len(qItem.IPs); i++ {
@@ -95,7 +69,7 @@ func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 		requiredIp = append(requiredIp, ip)
 	}
 
-	loop:
+loop:
 	for {
 		select {
 		case <- this.Ctx.Done():
@@ -113,7 +87,7 @@ func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 
 			for i, ip := range requiredIp{
 				if addrIp == ip{
-					logger.Do.Println("Master: Found one worker")
+					logger.Do.Println("Master: Found one worker", addr)
 
 					this.Lock()
 					this.workers  = append(this.workers, addr)
@@ -132,9 +106,6 @@ func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 				this.allWorkerReady.Broadcast()
 			}
 			this.Unlock()
-
-		default:
-			time.Sleep(time.Second*2)
 		}
 	}
 }
