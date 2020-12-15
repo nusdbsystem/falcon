@@ -54,7 +54,7 @@ const (
 	PartyServerPortKey = "psPort"
 
 	JobId      = "job_id"
-	JobErrMsg  = "error_jobDBg"
+	JobErrMsg  = "error_msg"
 	JobResult  = "job_result"
 	JobExtInfo = "ext_info"
 

@@ -88,10 +88,10 @@ func (this *Master) schedulerHelper(taskHandler taskHandler,  qItem *cache.QItem
 
 		args := new(entitiy.DoTaskArgs)
 		args.IP = vip
-		args.AssignID = qItem.PartyInfos[i].ID
+		args.AssignID = qItem.PartyInfo[i].ID
 		args.PartyNums = qItem.PartyNums
 		args.JobFlType = qItem.JobFlType
-		args.PartyInfo = qItem.PartyInfos[i]
+		args.PartyInfo = qItem.PartyInfo[i]
 		args.ExistingKey = qItem.ExistingKey
 		args.TaskInfos = qItem.Tasks
 		args.NetWorkFile = netCfg

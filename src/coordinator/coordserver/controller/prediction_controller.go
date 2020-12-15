@@ -38,7 +38,7 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 	qItem := new(cache.QItem)
 	qItem.IPs = iPs
 	qItem.JobId = jobId
-	qItem.PartyInfos = pInfo
+	qItem.PartyInfo = pInfo
 	qItem.Tasks = taskInfos
 
 	go func(){

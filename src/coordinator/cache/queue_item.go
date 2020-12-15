@@ -13,7 +13,7 @@ type QItem struct {
 	JobFlType  		string
 	ExistingKey  	uint
 	PartyNums  		uint
-	PartyInfos 		[]common.PartyInfo
+	PartyInfo 		[]common.PartyInfo
 	Tasks      		common.Tasks
 }
 

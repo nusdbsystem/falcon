@@ -77,7 +77,7 @@ func (jobDB *JobDB) Connect() {
 }
 
 // disconnect , should call after jobDB.Commit
-func (jobDB *JobDB) DisConnect() {
+func (jobDB *JobDB) Disconnect() {
 
 	e := jobDB.Db.Close()
 	if e != nil {

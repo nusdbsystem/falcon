@@ -15,7 +15,7 @@ type Job struct {
 	ExistingKey  	uint      					`json:"existing_key"`
 	PartyNums  		uint        				`json:"party_nums,uint"`
 	TaskNum    		uint        				`json:"task_num,uint"`
-	PartyInfos 		[]PartyInfo 				`json:"party_info"`
+	PartyInfo 		[]PartyInfo 				`json:"party_info"`
 	Tasks      		Tasks      					`json:"tasks"`
 }
 
@@ -106,7 +106,7 @@ func jobVerify(jobInfo *Job) error {
 	}
 
 	// verify party info
-	for _, v := range jobInfo.PartyInfos {
+	for _, v := range jobInfo.PartyInfo {
 
 		if len(v.IP) == 0 {
 			return errors.New("ip must be provided")

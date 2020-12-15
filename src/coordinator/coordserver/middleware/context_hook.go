@@ -37,7 +37,7 @@ func InitContext(f func(w http.ResponseWriter, r *http.Request, c *entity.Contex
 		f(w, r, context)
 
 		// disConnect to db
-		context.JobDB.DisConnect()
+		context.JobDB.Disconnect()
 	}
 }
 

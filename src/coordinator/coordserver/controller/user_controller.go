@@ -14,6 +14,6 @@ func CreateUser() {
 	e := jobDB.CreateAdminUser()
 
 	jobDB.Commit(e)
-	jobDB.DisConnect()
+	jobDB.Disconnect()
 
 }

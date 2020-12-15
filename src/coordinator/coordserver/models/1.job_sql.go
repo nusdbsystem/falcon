@@ -68,7 +68,7 @@ func (jobDB *JobDB) JobUpdateResInfo(jobId uint, jobErrMsg, jobResult, jobExtInf
 	u := &JobRecord{}
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
-		Update("error_jobDBg", jobErrMsg).
+		Update("error_msg", jobErrMsg).
 		Update("job_result", jobResult).
 		Update("ext_info", jobExtInfo).Error
 	return err, u
@@ -88,5 +88,5 @@ func JobUpdateStatus(jobId uint, status uint) {
 	e2, _ := jobDB.JobUpdateStatus(jobId, status)
 
 	jobDB.Commit(e2)
-	jobDB.DisConnect()
+	jobDB.Disconnect()
 }
