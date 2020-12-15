@@ -33,16 +33,16 @@ PARTYSERVER_YAML=./deploy/template/partyserver.yaml
 cp ./deploy/template/partyserver.yaml.template $PARTYSERVER_YAML || exit 1
 
 # replace var in common yaml with customer defined variables
-sed -i -e "s/PARTYSERVER_PORT/$PARTYSERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
-sed -i -e "s/PARTYSERVER_TARGET_PORT/$PARTYSERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
-sed -i -e "s/PARTYSERVER_NODE_PORT/$PARTYSERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
+sed -i -e "s/PARTYSERVER_PORT/$PARTY_SERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
+sed -i -e "s/PARTYSERVER_TARGET_PORT/$PARTY_SERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
+sed -i -e "s/PARTY_SERVER_NODE_PORT/$PARTY_SERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
 sed -i -e "s/FALCON_COORDINATOR_IMAGE/$IMAGE/g" $PARTYSERVER_YAML || exit 1
 sed -i -e "s/HOST_PATH/$BASE_PATH/g" $PARTYSERVER_YAML || exit 1
 sed -i -e "s/PARTY_NUMBER/$PARTY_NUMBER/g" $PARTYSERVER_YAML || exit 1
 
 # apply the job
 kubectl apply -f $PARTYSERVER_YAML || exit 1
-echo "-------------------------- finish creating partyserver, running at port $PARTYSERVER_NODE_PORT ------------------------"
+echo "-------------------------- finish creating partyserver, running at port $PARTY_SERVER_NODE_PORT ------------------------"
 
 # delete common
 rm -f $COMBINE_PROPERTIES

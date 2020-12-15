@@ -1,14 +1,14 @@
 package main
 
 import (
-	"coordinator/coordserver"
 	"coordinator/cache"
 	"coordinator/common"
+	"coordinator/coordserver"
 	"coordinator/distributed"
 	"coordinator/distributed/prediction"
 	"coordinator/distributed/worker"
-	"coordinator/partyserver"
 	"coordinator/logger"
+	"coordinator/partyserver"
 	"fmt"
 	"os"
 	"runtime"
@@ -60,13 +60,13 @@ func InitEnvs(svcName string){
 
 	if svcName=="coord"{
 		// coord needs db information
-		common.JobDbEngine       = common.GetEnv("MS_ENGINE", "sqlite3")
-		common.JobDbSqliteDb     = common.GetEnv("MS_SQLITE_DB", "falcon")
-		common.JobDbHost         = common.GetEnv("MS_HOST","localhost")
-		common.JobDbMysqlUser    = common.GetEnv("MS_MYSQL_USER", "falcon")
-		common.JobDbMysqlPwd     = common.GetEnv("MS_MYSQL_PWD", "falcon")
-		common.JobDbMysqlDb      = common.GetEnv("MS_MYSQL_DB", "falcon")
-		common.JobDbMysqlOptions = common.GetEnv("MS_MYSQL_OPTIONS", "?parseTime=true")
+		common.JobDbEngine       = common.GetEnv("JOB_DB_ENGINE", "sqlite3")
+		common.JobDbSqliteDb     = common.GetEnv("JOB_DB_SQLITE_DB", "falcon")
+		common.JobDbHost         = common.GetEnv("JOB_DB_HOST","localhost")
+		common.JobDbMysqlUser    = common.GetEnv("JOB_DB_MYSQL_USER", "falcon")
+		common.JobDbMysqlPwd     = common.GetEnv("JOB_DB_MYSQL_PWD", "falcon")
+		common.JobDbMysqlDb      = common.GetEnv("JOB_DB_MYSQL_DB", "falcon")
+		common.JobDbMysqlOptions = common.GetEnv("JOB_DB_MYSQL_OPTIONS", "?parseTime=true")
 		common.JobDbMysqlPort    = common.GetEnv("MYSQL_CLUSTER_PORT", "30000")
 
 		common.RedisHost      = common.GetEnv("REDIS_HOST","localhost")
@@ -95,14 +95,14 @@ func InitEnvs(svcName string){
 		// partyserver needs coord ip+port,lis port
 		common.CoordAddrGlobal = common.GetEnv("COORDINATOR_IP", "")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
-		common.PartyServerAddrGlobal = common.GetEnv("PARTYSERVER_IP", "")
+		common.PartyServerAddrGlobal = common.GetEnv("PARTY_SERVER_IP", "")
 		common.PartyServeBasePath = common.GetEnv("DATA_BASE_PATH", "")
 
 		// partyserver communicate coord with ip+port
 		common.CoordSvcURLGlobal = getCoordUrl(common.CoordAddrGlobal + ":" + common.CoordPort)
 
 		// run partyserver requires to get a new partyserver port
-		common.PartyServerPort = common.GetEnv("PARTYSERVER_NODE_PORT", "")
+		common.PartyServerPort = common.GetEnv("PARTY_SERVER_NODE_PORT", "")
 
 		common.PartyServerId = common.GetEnv("PARTY_NUMBER", "")
 
