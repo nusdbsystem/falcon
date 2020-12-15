@@ -9,7 +9,6 @@ import (
 
 	_ "gorm.io/driver/mysql"
 	_ "gorm.io/driver/sqlite"
-
 )
 
 type MetaStore struct {
@@ -47,7 +46,7 @@ func InitMetaStore() *MetaStore {
 		)
 		ms.url = mysql_url
 	} else if ms.engine == "sqlite3" {
-		ms.url = common.LocalPath+common.MsSqliteDb
+		ms.url = common.LocalPath + common.MsSqliteDb
 	}
 	return ms
 }
@@ -60,16 +59,16 @@ func (ms *MetaStore) Connect() {
 	NTimes := 20
 
 	for {
-		if NTimes<0{
+		if NTimes < 0 {
 			break
 		}
 		db, err = gorm.Open(ms.engine, ms.url)
 		if err != nil {
 			logger.Do.Println(err)
 			logger.Do.Println("MetaStore: connecting Db...retry")
-			time.Sleep(time.Second*5)
+			time.Sleep(time.Second * 5)
 			NTimes--
-		}else{
+		} else {
 			ms.Db = db
 			return
 		}
@@ -130,10 +129,10 @@ func (ms *MetaStore) DefineTables() {
 		ms.Db.CreateTable(&User{})
 	}
 
-	if ms.Db.HasTable(&PartyServers{}) {
-		ms.Db.AutoMigrate(&PartyServers{})
+	if ms.Db.HasTable(&PartyServer{}) {
+		ms.Db.AutoMigrate(&PartyServer{})
 	} else {
-		ms.Db.CreateTable(&PartyServers{})
+		ms.Db.CreateTable(&PartyServer{})
 	}
 
 	if ms.Db.HasTable(&TestTable{}) {
