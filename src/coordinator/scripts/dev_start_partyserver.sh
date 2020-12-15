@@ -11,4 +11,4 @@ export DATA_BASE_PATH=$DATA_BASE_PATH
 export PARTYSERVER_NODE_PORT=$PARTYSERVER_NODE_PORT
 
 make $OS
-./bin/coordinator_server
+./bin/falcon_platform

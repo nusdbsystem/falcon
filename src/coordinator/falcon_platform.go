@@ -200,7 +200,7 @@ func main() {
 
 
 	if common.ServiceNameGlobal == "coord" {
-		logger.Do.Println("Launch coordinator_server, the common.ServiceNameGlobal", common.ServiceNameGlobal)
+		logger.Do.Println("Launch falcon_platform, the common.ServiceNameGlobal", common.ServiceNameGlobal)
 
 		coordserver.SetupHttp(3)
 	}
@@ -208,7 +208,7 @@ func main() {
 	// start work in remote machine automatically
 	if common.ServiceNameGlobal == "partyserver" {
 
-		logger.Do.Println("Launch coordinator_server, the common.ServiceNameGlobal", common.ServiceNameGlobal)
+		logger.Do.Println("Launch falcon_platform, the common.ServiceNameGlobal", common.ServiceNameGlobal)
 
 		partyserver.SetupPartyServer()
 	}
@@ -223,7 +223,7 @@ func main() {
 
 	if common.ServiceNameGlobal == common.MasterExecutor {
 
-		logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
+		logger.Do.Println("Lunching falcon_platform, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
 		// this should be the service name, defined at runtime,
 		masterUrl := common.MasterURLGlobal
@@ -238,14 +238,14 @@ func main() {
 
 	if common.ServiceNameGlobal == common.TrainExecutor {
 
-		logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
+		logger.Do.Println("Lunching falcon_platform, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
 		worker.RunWorker(common.MasterURLGlobal, common.WorkerURLGlobal)
 	}
 
 	if common.ServiceNameGlobal == common.PredictExecutor {
 
-		logger.Do.Println("Lunching coordinator_server, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
+		logger.Do.Println("Lunching falcon_platform, the common.ExecutorTypeGlobal", common.ExecutorTypeGlobal)
 
 		prediction.RunPrediction(common.MasterURLGlobal, common.WorkerURLGlobal)
 

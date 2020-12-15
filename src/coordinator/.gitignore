@@ -5,7 +5,7 @@
 *.dll
 *.so
 *.dylib
-coordinator_server
+falcon_platform
 
 # Test binary, built with `go test -c`
 *.test

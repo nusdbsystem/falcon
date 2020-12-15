@@ -21,7 +21,7 @@ RUN pip install --upgrade pip
 # remove the cahce, == "python -u"
 ENV PYTHONUNBUFFERED 1
 
-COPY bin/coordinator_server ./coordinator_server
+COPY bin/falcon_platform ./falcon_platform
 
 COPY test/testggg.go ./testggg.go
 COPY falcon_ml/readwrite.py ./readwrite.py
