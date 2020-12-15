@@ -30,9 +30,9 @@ type NetworkConfig struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ip of parties
+	// ips of different parties
 	Ips []string `protobuf:"bytes,1,rep,name=ips,proto3" json:"ips,omitempty"`
-	// ip of par
+	// an array of PortArray
 	PortArrays []*PortArray `protobuf:"bytes,2,rep,name=port_arrays,json=portArrays,proto3" json:"port_arrays,omitempty"`
 }
 
@@ -87,6 +87,7 @@ type PortArray struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// ports of each part
 	Ports []int32 `protobuf:"varint,1,rep,packed,name=ports,proto3" json:"ports,omitempty"`
 }
 

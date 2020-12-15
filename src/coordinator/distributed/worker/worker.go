@@ -27,7 +27,7 @@ type Worker struct {
 func (wk *Worker) DoTask(arg []byte, rep *entitiy.DoTaskReply) error {
 
 	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
-	//
+
 	//wg := sync.WaitGroup{}
 	//
 	//wg.Add(2)
@@ -95,7 +95,7 @@ func (wk *Worker) Shutdown(_, _ *struct{}) error {
 		wk.pm.Unlock()
 	}
 
-	logger.Do.Println("Worker: DoTask returned, Close the listener...")
+	logger.Do.Println("Worker: DoTask returned, Close the partyserver...")
 
 	err := wk.Listener.Close() // close the connection, cause error, and then ,break the worker
 	if err != nil {

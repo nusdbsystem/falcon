@@ -78,7 +78,7 @@ help
 create_folders
 
 title "Creating the cluster role binding"
-# ensure python api in pod has auth to control kubernetes
+# ensure python coordserver in pod has auth to control kubernetes
 kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default
 
 # Pull images from Docker Hub

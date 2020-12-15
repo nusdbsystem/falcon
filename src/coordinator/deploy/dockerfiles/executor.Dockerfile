@@ -21,10 +21,10 @@ RUN pip install --upgrade pip
 # remove the cahce, == "python -u"
 ENV PYTHONUNBUFFERED 1
 
-COPY ./bin/coordinator_server ./coordinator_server
+COPY ./bin/falcon_platform ./falcon_platform
 RUN mkdir /go/trainDataOutput && mkdir /go/trainModels && mkdir /go/trainData
 
 ADD deploy ./deploy
 ADD scripts ./scripts
 RUN chmod -R 777 ./deploy && chmod -R 777 ./scripts
-CMD ["./coordinator_server"]
+CMD ["./falcon_platform"]

@@ -8,7 +8,7 @@ export Env=dev
 export SERVICE_NAME=coord
 export COORDINATOR_IP=$COORDINATOR_IP
 export DATA_BASE_PATH=$DATA_BASE_PATH
-export MS_ENGINE=$MS_ENGINE
+export JOB_DB_ENGINE=$JOB_DB_ENGINE
 
 make $OS
-./bin/coordinator_server
+./bin/falcon_platform

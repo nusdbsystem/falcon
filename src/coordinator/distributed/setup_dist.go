@@ -37,10 +37,10 @@ func SetupWorkerHelper(masterAddress, taskType, jobId, dataPath, modelPath, data
 
 	/**
 	 * @Author
-	 * @Description: this func is only called by listener
+	 * @Description: this func is only called by partyserver
 	 * @Date 2:14 下午 1/12/20
 	 * @Param
-	 	httpHost： 		IP of the listener address
+	 	httpHost： 		IP of the partyserver address
 		masterAddress： IP of the master address
 		masterAddress： train or predictor
 	 **/
@@ -83,10 +83,10 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, taskType string) stri
 		// send a request to http
 		//lisPort := c.GetExistPort(common.CoordSvcURLGlobal, ip)
 
-		logger.Do.Printf("SetupDist: master is calling listener: %s ...\n", ip)
+		logger.Do.Printf("SetupDist: master is calling partyserver: %s ...\n", ip)
 
-		// todo, manage listener port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, taskType), such that user dont need
-		//  to provide port in dsl
+		// todo, manage partyserver port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, taskType), such that user dont need
+		//  to provide port in job
 
 		dataPath := qItem.PartyInfos[index].PartyPaths.DataInput
 		dataOutput := qItem.PartyInfos[index].PartyPaths.DataOutput

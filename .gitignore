@@ -44,3 +44,6 @@ log/
 cmake-build-debug/
 third_party/MP-SPDZ/
 third_party/libhcs/
+
+# coordinator dependencies
+pkg/*

@@ -73,10 +73,10 @@ func SetupWorkerHelperProd(masterAddress, taskType, jobId, dataPath, modelPath, 
 
 	/**
 	 * @Author
-	 * @Description: this func is only called by listener
+	 * @Description: this func is only called by partyserver
 	 * @Date 2:14 下午 1/12/20
 	 * @Param
-	 	httpHost： 		IP of the listener address
+	 	httpHost： 		IP of the partyserver address
 		masterAddress： IP of the master address
 		masterAddress： train or predictor
 	 **/
@@ -84,19 +84,19 @@ func SetupWorkerHelperProd(masterAddress, taskType, jobId, dataPath, modelPath, 
 
 	workerPort := c.GetFreePort(common.CoordSvcURLGlobal)
 
-	workerAddress := common.ListenAddrGlobal + ":" + workerPort
+	workerAddress := common.PartyServerAddrGlobal + ":" + workerPort
 	var serviceName string
 
 	// in dev, use thread
 
 	if taskType == common.TrainExecutor{
 
-		serviceName = "worker-jid" + jobId + "-train-" + common.ListenerId
+		serviceName = "worker-jid" + jobId + "-train-" + common.PartyServerId
 
 		logger.Do.Println("SetupWorkerHelper: Current in Prod, TrainExecutor, svcName", serviceName)
 	}else if taskType == common.PredictExecutor{
 
-		serviceName = "worker-jid" + jobId + "-predict-" + common.ListenerId
+		serviceName = "worker-jid" + jobId + "-predict-" + common.PartyServerId
 
 		logger.Do.Println("SetupWorkerHelper: Current in Prod, PredictExecutor, svcName", serviceName)
 	}
@@ -111,7 +111,7 @@ func SetupWorkerHelperProd(masterAddress, taskType, jobId, dataPath, modelPath, 
 		workerAddress, 	// 5. worker url
 		taskType,   	// 6. serviceName train or predict
 		common.Env,  	// 7. env or prod
-		common.ListenBasePath,  // 8. folder to store logs, the same as listener folder currently,
+		common.PartyServeBasePath,  // 8. folder to store logs, the same as partyserver folder currently,
 		dataPath, 		// 9. folder to read train data
 		modelPath, 		// 10. folder to store models
 		dataOutput, 	// 11. folder to store processed data

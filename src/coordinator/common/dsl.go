@@ -8,7 +8,7 @@ import (
 )
 
 // protoc -I=/Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/ --go_out=/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/common /Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/job.proto
-type DSL struct {
+type Job struct {
 	JobName    		string      				`json:"job_name"`
 	JobDecs   	 	string      				`json:"job_decs"`
 	JobFlType  		string      				`json:"job_fl_type"`
@@ -71,7 +71,7 @@ type DataInput struct{
 }
 
 
-func ParseDsl(contents string, jobInfo *DSL) error {
+func ParseJob(contents string, jobInfo *Job) error {
 	// the error here can only check if field type is correct or not.
 	// if the field is not filled, still pass, default to 0
 	e := json.Unmarshal([]byte(contents), jobInfo)
@@ -82,7 +82,7 @@ func ParseDsl(contents string, jobInfo *DSL) error {
 	// if there is PreProcessing, serialize it
 	if jobInfo.Tasks.PreProcessing.AlgorithmName!=""{
 		jobInfo.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig=
-			GeneratePreProcessParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+			GeneratePreProcessparams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 	// if there is ModelTraining, serialize it
 	if jobInfo.Tasks.ModelTraining.AlgorithmName!=""{
@@ -91,14 +91,14 @@ func ParseDsl(contents string, jobInfo *DSL) error {
 			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 
-	ep := dslVerify(jobInfo)
+	ep := jobVerify(jobInfo)
 	if ep != nil {
 		return errors.New("parse verify error")
 	}
 	return nil
 }
 
-func dslVerify(jobInfo *DSL) error {
+func jobVerify(jobInfo *Job) error {
 
 	// verify task_num
 	if jobInfo.TaskNum <= 0 {
@@ -160,13 +160,13 @@ func GenerateLrParams(cfg map[string]interface{}) string {
 	if err != nil {
 
 		// todo, should we exit from here directly ????? error handler management?
-		log.Fatalln("Failed to encode GenerateLrParams:", err)
+		log.Fatalln("Failed to encode GenerateLrparams:", err)
 	}
 
 	return string(out)
 }
 
 
-func GeneratePreProcessParams(cfg map[string]interface{}) string {
+func GeneratePreProcessparams(cfg map[string]interface{}) string {
 	return ""
 }

@@ -48,7 +48,7 @@ spec:
         - containerPort: WORKER_TARGET_PORT  #这里containerPort是容器内部的port
           name: "port-WORKER_TARGET_PORT"  # .ports[0].name: Invalid value: "train-8490548680670953438": must be no more than 15 characters
       volumeMounts:
-        - name: falcon-listener
+        - name: falcon-partyserver
           mountPath: /go/logs
         - name: falcon-train-data
           mountPath: /go/trainData
@@ -57,7 +57,7 @@ spec:
         - name: falcon-processed-data
           mountPath: /go/trainDataOutput  # spec.containers[0].volumeMounts[3].mountPath: Invalid value: /go/trainModels: must be unique
   volumes:
-    - name: falcon-listener
+    - name: falcon-partyserver
       hostPath:
         path: HOST_PATH/run_time_logs/WORKER_NAME
     - name: falcon-train-data
