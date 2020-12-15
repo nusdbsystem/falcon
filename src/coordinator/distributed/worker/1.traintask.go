@@ -13,72 +13,32 @@ import (
 )
 
 
+func(wk *TrainWorker) TrainTask(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply){
 
-func doMlTask(
-	pm *taskmanager.SubProcessManager,
+	wg := sync.WaitGroup{}
 
-	partyId string,
-	partyNum string,
-	partyType string,
-	flSetting string,
-	existingKey string,
+	wg.Add(2)
 
-	netFile string,
+	go wk.MpcTaskProcess(dta, "algName")
+	go wk.MlTaskProcess(dta, rep, &wg)
 
-) func(string, string, string,string, string,string, string,string) (string, map[string]string ) {
+	// wait until all the task done
+	wg.Wait()
 
-	/**
-	 * @Author
-	 * @Description  record if the task is fail or not
-	 * @Date 7:32 下午 12/12/20
-	 * @Param key, algorithm name, value: error message
-	 * @return
-	 **/
+	// kill all the monitors
+	wk.Pm.Cancel()
 
-	res := make(map[string]string)
-
-	return func(
-		algName string,
-		algParams string,
-
-		KeyFile string,
-		logFile string,
-		dataInputFile string,
-		dataOutputFile string,
-		modelSaveFile string,
-		modelReport string,
-	)(string, map[string]string ){
-
-		var envs []string
-
-		cmd := exec.Command(
-			common.FalconTrainExe,
-			" --party-id "+partyId,
-			" --party-num "+partyNum,
-			" --party-type "+partyType,
-			" --fl-setting "+flSetting,
-			" --existing-key "+existingKey,
-			" --key-file "+KeyFile,
-			" --network-file "+netFile,
-
-			" --algorithm-name "+algName,
-			" --algorithm-params "+algParams,
-			" --log-file "+logFile,
-			" --data-input-file "+dataInputFile,
-			" --data-output-file "+dataOutputFile,
-			" --model-save-file "+modelSaveFile,
-			" --model-report-file "+modelReport,
-		)
-
-		exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)
-
-		res[algName] = runTimeErrorLog
-		return exitStr, res
+	wk.Pm.Lock()
+	rep.Killed = wk.Pm.IsKilled
+	if wk.Pm.IsKilled == true{
+		wk.Pm.Unlock()
+		wk.TaskFinish <- true
+	}else{
+		wk.Pm.Unlock()
 	}
 }
 
-
-func (wk *Worker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply, wg *sync.WaitGroup)  {
+func (wk *TrainWorker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply, wg *sync.WaitGroup)  {
 	/**
 	 * @Author
 	 * @Description
@@ -126,7 +86,7 @@ func (wk *Worker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskRepl
 	var KeyFile string
 
 	doTrain := doMlTask(
-		wk.pm,
+		wk.Pm,
 		fmt.Sprintf("%d", partyId),
 		fmt.Sprintf("%d", partyNum),
 		fmt.Sprintf("%d", partyType),
@@ -196,8 +156,7 @@ func (wk *Worker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskRepl
 	logger.Do.Printf("Worker: %s: task done\n", wk.Address)
 }
 
-
-func (wk *Worker) MpcTaskProcess(dta *entitiy.DoTaskArgs, algName string){
+func (wk *TrainWorker) MpcTaskProcess(dta *entitiy.DoTaskArgs, algName string){
 	/**
 	 * @Author
 	 * @Description
@@ -230,13 +189,13 @@ func (wk *Worker) MpcTaskProcess(dta *entitiy.DoTaskArgs, algName string){
 		" "+algName,
 		)
 
-	wk.pm.CreateResources(cmd, envs)
+	wk.Pm.CreateResources(cmd, envs)
 
 	return
 
 }
 
-func (wk *Worker) execResHandler(
+func (wk *TrainWorker) execResHandler(
 	exitStr string,
 	RuntimeErrorMsg map[string]string,
 	rep *entitiy.DoTaskReply) bool{
@@ -267,10 +226,72 @@ func (wk *Worker) execResHandler(
 	return false
 }
 
-
-
 func TestTaskProcess(arg *entitiy.DoTaskArgs){
 
 	logger.Do.Println(arg)
 	time.Sleep(time.Minute)
+}
+
+func doMlTask(
+	pm *taskmanager.SubProcessManager,
+
+	partyId string,
+	partyNum string,
+	partyType string,
+	flSetting string,
+	existingKey string,
+
+	netFile string,
+
+) func(string, string, string,string, string,string, string,string) (string, map[string]string ) {
+
+	/**
+	 * @Author
+	 * @Description  record if the task is fail or not
+	 * @Date 7:32 下午 12/12/20
+	 * @Param key, algorithm name, value: error message
+	 * @return
+	 **/
+
+	// Closure
+	res := make(map[string]string)
+
+	return func(
+		algName string,
+		algParams string,
+
+		KeyFile string,
+		logFile string,
+		dataInputFile string,
+		dataOutputFile string,
+		modelSaveFile string,
+		modelReport string,
+	)(string, map[string]string ){
+
+		var envs []string
+
+		cmd := exec.Command(
+			common.FalconTrainExe,
+			" --party-id "+partyId,
+			" --party-num "+partyNum,
+			" --party-type "+partyType,
+			" --fl-setting "+flSetting,
+			" --existing-key "+existingKey,
+			" --key-file "+KeyFile,
+			" --network-file "+netFile,
+
+			" --algorithm-name "+algName,
+			" --algorithm-params "+algParams,
+			" --log-file "+logFile,
+			" --data-input-file "+dataInputFile,
+			" --data-output-file "+dataOutputFile,
+			" --model-save-file "+modelSaveFile,
+			" --model-report-file "+modelReport,
+		)
+
+		exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)
+
+		res[algName] = runTimeErrorLog
+		return exitStr, res
+	}
 }

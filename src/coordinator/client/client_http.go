@@ -9,7 +9,7 @@ import (
 
 func PartyServerAdd(ServerAddress, partyserverAddr, partyserverPort string) error {
 	data := url.Values{
-		common.PartyServerAddr: {partyserverAddr},
+		common.PartyServerAddrKey: {partyserverAddr},
 		common.PartyServerPortKey: {partyserverPort},
 		}
 
@@ -21,17 +21,17 @@ func PartyServerAdd(ServerAddress, partyserverAddr, partyserverPort string) erro
 }
 
 func PartyServerDelete(ServerAddress, partyserverAddr string) {
-	data := url.Values{common.PartyServerAddr: {partyserverAddr}}
+	data := url.Values{common.PartyServerAddrKey: {partyserverAddr}}
 
 	reqUrl := ServerAddress + "/" + common.PartyServerDelete
 
 	_ = PostForm(reqUrl, data)
 }
 
-func SetupWorker(ServerAddr string, masterAddress string, taskType string, jobId,dataPath,modelPath,dataOutput string) {
+func SetupWorker(ServerAddr string, masterAddress string, workerType string, jobId,dataPath,modelPath,dataOutput string) {
 	data := url.Values{
-		common.MasterAddr: {masterAddress},
-		common.TaskType:   {taskType},
+		common.MasterAddrKey: {masterAddress},
+		common.TaskTypeKey:   {workerType},
 		common.JobId:   {jobId},
 		common.TrainDataPath : {dataPath},
 		common.ModelPath : {modelPath},
@@ -46,7 +46,7 @@ func SetupWorker(ServerAddr string, masterAddress string, taskType string, jobId
 func JobUpdateMaster(ServerAddr string, masterAddress string, jobId uint) {
 
 	data := url.Values{
-		common.MasterAddr: {masterAddress},
+		common.MasterAddrKey: {masterAddress},
 		common.JobId:      {fmt.Sprintf("%d", jobId)}}
 
 	reqUrl := ServerAddr + "/" + common.UpdateJobMaster
@@ -128,7 +128,7 @@ func GetFreePort(ServerAddr string) string{
 
 func GetExistPort(ServerAddr, PartyServerIp string) string{
 	params := url.Values{}
-	params.Set(common.PartyServerAddr, PartyServerIp)
+	params.Set(common.PartyServerAddrKey, PartyServerIp)
 
 	rawUrl := "http://" + strings.TrimSpace(ServerAddr) + "/" + common.GetPartyServerPort
 

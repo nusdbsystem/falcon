@@ -14,9 +14,9 @@ func TestClient(t *testing.T) {
 	masterAddress:="127.0.0.1:41414"
 	qItem:=&cache.QItem{}
 	qItem.IPs=[]string{"127.0.0.1"}
-	taskType:="train"
+	workerType:=common.TrainWorker
 
-	common.CoordSvcURLGlobal = "127.0.0.1:30004"
-	distributed.SetupMaster(masterAddress, qItem, taskType)
+	common.CoordinatorUrl = "127.0.0.1:30004"
+	distributed.SetupMaster(masterAddress, qItem, workerType)
 
 }

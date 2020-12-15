@@ -16,7 +16,7 @@ func InitContext() *Context {
 	ctx := new(Context)
 	ctx.JobDB = models.InitJobDB()
 
-	ctx.HttpHost = common.CoordAddrGlobal
+	ctx.HttpHost = common.CoordIP
 	ctx.HttpPort = common.CoordPort
 
 	return ctx

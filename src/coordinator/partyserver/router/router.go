@@ -14,8 +14,8 @@ func SetupWorker() func(w http.ResponseWriter, r *http.Request) {
 		client.ReceiveForm(r)
 
 		// this is sent from main http server
-		masterAddress := r.FormValue(common.MasterAddr)
-		taskType := r.FormValue(common.TaskType)
+		masterAddress := r.FormValue(common.MasterAddrKey)
+		workerTypeKey := r.FormValue(common.TaskTypeKey)
 		jobId := r.FormValue(common.JobId)
 		dataPath := r.FormValue(common.TrainDataPath)
 		modelPath := r.FormValue(common.ModelPath)
@@ -23,7 +23,7 @@ func SetupWorker() func(w http.ResponseWriter, r *http.Request) {
 
 		go func(){
 			defer logger.HandleErrors()
-			controller.SetupWorker(masterAddress, taskType, jobId, dataPath,modelPath, dataOutput)
+			controller.SetupWorker(masterAddress, workerTypeKey, jobId, dataPath,modelPath, dataOutput)
 		}()
 
 	}

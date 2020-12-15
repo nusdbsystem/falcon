@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func RunMaster(masterAddr string, qItem *cache.QItem, taskType string) (ms *Master) {
+func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (ms *Master) {
 	/**
 	 * @Author
 	 * @Description
@@ -16,7 +16,7 @@ func RunMaster(masterAddr string, qItem *cache.QItem, taskType string) (ms *Mast
 	 * @return
 	 **/
 	ms = newMaster(masterAddr, len(qItem.IPs))
-
+	ms.workerType = workerType
 	ms.reset()
 
 	// thread 0, heartBeat
@@ -37,7 +37,7 @@ func RunMaster(masterAddr string, qItem *cache.QItem, taskType string) (ms *Mast
 	ms.StartRPCServer(rpcSvc, false)
 
 	scheduler:= func() {
-		ms.schedule(qItem, taskType)
+		ms.schedule(qItem)
 	}
 
 	finish := func() {

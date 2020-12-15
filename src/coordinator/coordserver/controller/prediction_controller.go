@@ -43,7 +43,7 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 
 	go func(){
 		defer logger.HandleErrors()
-		dist.SetupDist(qItem, common.PredictExecutor)
+		dist.SetupDist(qItem, common.PredictWorker)
 	}()
 
 	return u.ID, u.ModelServiceName

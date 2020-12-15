@@ -112,7 +112,7 @@ func JobUpdateMaster(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 	client.ReceiveForm(r)
 
 	JobId := r.FormValue(common.JobId)
-	MasterAddr := r.FormValue(common.MasterAddr)
+	MasterAddr := r.FormValue(common.MasterAddrKey)
 
 	jobId, e := strconv.Atoi(JobId)
 	if e != nil {
