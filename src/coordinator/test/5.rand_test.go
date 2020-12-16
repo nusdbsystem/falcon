@@ -64,13 +64,13 @@ func TestRandomFunc2(t *testing.T) {
 
 	out, err := proto.Marshal(&p)
 	if err != nil {
-		log.Fatalln("Failed to encode url book:", err)
+		log.Fatalln("Failed to encode addr book:", err)
 	}
 	fmt.Println(string(out))
 
 	px := &common.NetworkConfig{}
 	if err := proto.Unmarshal(out, px); err != nil {
-		log.Fatalln("Failed to parse url book:", err)
+		log.Fatalln("Failed to parse addr book:", err)
 	}
 
 	fmt.Println(px)

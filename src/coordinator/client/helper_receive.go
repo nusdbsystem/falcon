@@ -35,7 +35,7 @@ func ReceiveForm(r *http.Request) {
 	//logger.Do.Printf( "PostFrom = %v\n", r.PostForm)
 
 	//name := r.FormValue("name")
-	//url := r.FormValue("url")
+	//addr := r.FormValue("addr")
 }
 
 func Tests() {

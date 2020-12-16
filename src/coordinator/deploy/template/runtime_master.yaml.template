@@ -35,8 +35,8 @@ spec:
           value: "SERVICE_NAME_PLACEHOLDER"
         - name: COORD_SVC_NAME
           value: "COORD_SVC_NAME_PLACEHOLDER"
-        - name: MASTER_URL
-          value: "MASTER_URL_PLACEHOLDER"
+        - name: MASTER_ADDR
+          value: "MASTER_ADDR_PLACEHOLDER"
         - name: COORD_TARGET_PORT
           value: "COORD_TARGET_PORT_PLACEHOLDER"
         - name: Env

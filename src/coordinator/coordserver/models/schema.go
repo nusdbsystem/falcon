@@ -29,7 +29,7 @@ type JobRecord struct {
 	UpdateTime    time.Time `gorm:"type:datetime"`
 	DeleteTime    time.Time `gorm:"type:datetime"`
 	ExtInfo       string    `gorm:"type:varchar(1024)"`
-	MasterUrl string    `gorm:"type:varchar(256)"`
+	MasterAddr string    `gorm:"type:varchar(256)"`
 }
 
 type TaskRecord struct {
@@ -53,8 +53,8 @@ type TaskRecord struct {
 type ServiceRecord struct {
 	ID         uint   `gorm:"primary_key;AUTO_INCREMENT"`
 	JobID      uint   `gorm:"unique_index"`
-	MasterUrl string `gorm:"type:varchar(256)"`
-	WorkerUrl string `gorm:"type:varchar(256)"`
+	MasterAddr string `gorm:"type:varchar(256)"`
+	WorkerAddr string `gorm:"type:varchar(256)"`
 }
 
 
@@ -73,7 +73,7 @@ type User struct {
 
 type PartyServer struct {
 	ID           uint   `gorm:"primary_key;AUTO_INCREMENT"`
-	PartyServerUrl string `gorm:"type:varchar(256)"`
+	PartyServerAddr string `gorm:"type:varchar(256)"`
 	Port string `gorm:"type:varchar(256)"`
 }
 

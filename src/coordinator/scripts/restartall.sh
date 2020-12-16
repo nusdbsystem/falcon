@@ -2,9 +2,9 @@
 
 
 
-bash scripts/stopall.sh
+bash scripts/stopall.sh || exit 1
 
-bash scripts/img_build.sh
+bash scripts/img_build.sh || exit 1
 
 bash scripts/start_coord.sh
 

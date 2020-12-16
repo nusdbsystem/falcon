@@ -27,7 +27,7 @@ spec:
         app: falcon-partyserver-PARTY_SERVER_ID
     spec:
       containers:
-        - image: FALCON_COORDINATOR_IMAGE
+        - image: FALCON_COORD_IMAGE
           name: partyserver
           imagePullPolicy: IfNotPresent
           envFrom:

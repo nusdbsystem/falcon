@@ -22,12 +22,12 @@ const (
 	TrainWorker = "TrainWorker"
 	PredictWorker = "PredictWorker"
 
-	// master& wokrer heartbeat
+	// master& worker heartbeat
 
 	MasterTimeout = 10000 //  send hb every 10 second
 	WorkerTimeout = 20000 //  receive hb within every 20 second
 
-	// router path for coordserver
+	// router path for coordServer
 	Register         = "register"
 	SubmitJob        = "submit"
 	StopJob          = "stop"
@@ -42,15 +42,15 @@ const (
 	AddPort  = "portadd"
 	GetPartyServerPort  = "port-get"
 
-	PartyServerAdd    = "partyserver-add"
-	PartyServerDelete = "partyserver-del"
+	PartyServerAdd    = "party-server-add"
+	PartyServerDelete = "party-server-del"
 
 	// router path for partyserver
 	SetupWorker = "setup-worker" // RFC 5789
 
 	// shared key of map
-	PartyServerUrlKey = "psUrl"
-	MasterUrlKey   = "masterUrl"
+	PartyServerAddrKey = "psAddr"
+	MasterAddrKey   = "masterAddr"
 	PartyServerPortKey = "psPort"
 
 	JobId      = "job_id"
@@ -146,8 +146,8 @@ var (
 
 	// those are init by coordinator
 	WorkerType = ""
-	WorkerUrl = ""
-	MasterUrl = ""
+	WorkerAddr = ""
+	MasterAddr = ""
 
 	// this is the worker's k8s service name, only used in production
 	WorkerK8sSvcName = ""
@@ -156,7 +156,7 @@ var (
 
 	// for coord, node port is the same as cluster port, so all use coorport
 	// this is service name + port
-	CoordinatorUrl = ""
+	CoordAddr = ""
 
 	MasterQItem = ""
 

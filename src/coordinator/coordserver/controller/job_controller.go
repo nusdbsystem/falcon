@@ -15,7 +15,7 @@ func JobSubmit(job *common.Job, ctx *entity.Context) (uint, string, uint, string
 
 	// generate.sh item pushed to the queue
 
-	iPs := common.ParseIps(job.PartyInfo)
+	addresses := common.ParseIps(job.PartyInfo)
 
 	// generate.sh strings used to write to db
 	partyIds, err := json.Marshal(job.PartyInfo)
@@ -46,7 +46,7 @@ func JobSubmit(job *common.Job, ctx *entity.Context) (uint, string, uint, string
 
 
 	qItem := new(cache.QItem)
-	qItem.IPs = iPs
+	qItem.AddrList = addresses
 	qItem.JobId = u.JobId
 	qItem.JobName = job.JobName
 	qItem.JobFlType = job.JobFlType
@@ -68,17 +68,17 @@ func JobKill(jobId uint, ctx *entity.Context) {
 	e, u := ctx.JobDB.JobGetByJobID(jobId)
 	ctx.JobDB.Commit(e)
 
-	distributed.KillJob(u.MasterUrl, common.Proxy)
+	distributed.KillJob(u.MasterAddr, common.Proxy)
 
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 	e2, _ := ctx.JobDB.JobUpdateStatus(jobId, common.JobKilled)
 	ctx.JobDB.Commit(e2)
 }
 
-func JobUpdateMaster(jobId uint, masterUrl string, ctx *entity.Context) {
+func JobUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e, _ := ctx.JobDB.SvcUpdateMaster(jobId, masterUrl)
-	e2, _ := ctx.JobDB.JobUpdateMaster(jobId, masterUrl)
+	e, _ := ctx.JobDB.SvcUpdateMaster(jobId, masterAddr)
+	e2, _ := ctx.JobDB.JobUpdateMaster(jobId, masterAddr)
 	ctx.JobDB.Commit([]error{e, e2})
 }
 

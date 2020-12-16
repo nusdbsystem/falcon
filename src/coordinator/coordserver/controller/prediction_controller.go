@@ -33,10 +33,10 @@ func CreateService(jobId uint, appName, extInfo string, ctx *entity.Context) (ui
 		panic("json.Unmarshal(PartyIds or TaskInfos) error")
 	}
 
-	iPs := common.ParseIps(pInfo)
+	addresses := common.ParseIps(pInfo)
 
 	qItem := new(cache.QItem)
-	qItem.IPs = iPs
+	qItem.AddrList = addresses
 	qItem.JobId = jobId
 	qItem.PartyInfo = pInfo
 	qItem.Tasks = taskInfos

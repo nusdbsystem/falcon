@@ -18,7 +18,7 @@ func TestQueue(t *testing.T) {
 
 	fmt.Println("---------------------------------------------------------------")
 
-	fmt.Println(res2.IPs)
+	fmt.Println(res2.AddrList)
 	fmt.Println(res2.JobId)
 
 }

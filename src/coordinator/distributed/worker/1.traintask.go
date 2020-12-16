@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 )
@@ -19,8 +20,8 @@ func(wk *TrainWorker) TrainTask(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskRepl
 
 	wg.Add(2)
 
-	go wk.MpcTaskProcess(dta, "algName")
-	go wk.MlTaskProcess(dta, rep, &wg)
+	go wk.mpcTaskCallee(dta, "algName")
+	go wk.mlTaskCallee(dta, rep, &wg)
 
 	// wait until all the task done
 	wg.Wait()
@@ -38,7 +39,7 @@ func(wk *TrainWorker) TrainTask(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskRepl
 	}
 }
 
-func (wk *TrainWorker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply, wg *sync.WaitGroup)  {
+func (wk *TrainWorker) mlTaskCallee(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply, wg *sync.WaitGroup)  {
 	/**
 	 * @Author
 	 * @Description
@@ -66,7 +67,7 @@ func (wk *TrainWorker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTas
 	 **/
 	defer wg.Done()
 
-	logger.Do.Printf("Worker: %s task started \n", wk.Url)
+	logger.Do.Printf("Worker: %s task started \n", wk.Addr)
 
 
 	partyId := dta.AssignID
@@ -85,7 +86,7 @@ func (wk *TrainWorker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTas
 	var algParams string
 	var KeyFile string
 
-	doTrain := doMlTask(
+	run := doMlTask(
 		wk.Pm,
 		fmt.Sprintf("%d", partyId),
 		fmt.Sprintf("%d", partyNum),
@@ -106,7 +107,7 @@ func (wk *TrainWorker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTas
 		KeyFile = dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Key
 
 		algParams = dta.TaskInfos.PreProcessing.InputConfigs.SerializedAlgorithmConfig
-		exitStr, res = doTrain(
+		exitStr, res = run(
 			dta.TaskInfos.PreProcessing.AlgorithmName,
 			algParams,
 			KeyFile,
@@ -128,7 +129,7 @@ func (wk *TrainWorker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTas
 		KeyFile = dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Key
 
 		algParams = dta.TaskInfos.ModelTraining.InputConfigs.SerializedAlgorithmConfig
-		exitStr, res = doTrain(
+		exitStr, res = run(
 			dta.TaskInfos.ModelTraining.AlgorithmName,
 			algParams,
 			KeyFile,
@@ -146,17 +147,9 @@ func (wk *TrainWorker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTas
 	}
 
 	// 2 thread will ready from isStop channel, only one is running at the any time
-
-	for i := 10; i > 0; i-- {
-		logger.Do.Println("Worker: Counting down before job done... ", i)
-
-		time.Sleep(time.Second)
-	}
-
-	logger.Do.Printf("Worker: %s: task done\n", wk.Url)
 }
 
-func (wk *TrainWorker) MpcTaskProcess(dta *entitiy.DoTaskArgs, algName string){
+func (wk *TrainWorker) mpcTaskCallee(dta *entitiy.DoTaskArgs, algName string){
 	/**
 	 * @Author
 	 * @Description
@@ -226,9 +219,40 @@ func (wk *TrainWorker) execResHandler(
 	return false
 }
 
-func TestTaskProcess(arg *entitiy.DoTaskArgs){
+func TestTaskProcess(dta *entitiy.DoTaskArgs){
 
-	logger.Do.Println(arg)
+	partyId := dta.AssignID
+	partyNum := dta.PartyNums
+	partyType := dta.PartyInfo.PartyType
+	flSetting := dta.JobFlType
+	existingKey := dta.ExistingKey
+	dataInputFile := common.TaskDataPath +"/" + dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Data
+	modelFile := common.TaskModelPath +"/"+ dta.TaskInfos.ModelTraining.OutputConfigs.TrainedModel
+	algParams := dta.TaskInfos.ModelTraining.InputConfigs.SerializedAlgorithmConfig
+	modelReportFile := dta.TaskInfos.ModelTraining.OutputConfigs.EvaluationReport
+	logFile := common.TaskRuntimeLogs + "/" + dta.TaskInfos.PreProcessing.AlgorithmName
+	KeyFile := dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Key
+	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Data
+
+	logger.Do.Println("executed path is: ", strings.Join([]string{
+		common.FalconTrainExe,
+		" --party-id "+fmt.Sprintf("%d", partyId),
+		" --party-num "+fmt.Sprintf("%d", partyNum),
+		" --party-type "+fmt.Sprintf("%d", partyType),
+		" --fl-setting "+flSetting,
+		" --existing-key "+fmt.Sprintf("%d", existingKey),
+		" --key-file "+KeyFile,
+		" --network-file "+dta.NetWorkFile,
+
+		" --algorithm-name "+dta.TaskInfos.ModelTraining.AlgorithmName,
+		" --algorithm-params "+algParams,
+		" --log-file "+logFile,
+		" --data-input-file "+dataInputFile,
+		" --data-output-file "+modelInputFile,
+		" --model-save-file "+modelFile,
+		" --model-report-file "+modelReportFile,
+	}, " "))
+
 	time.Sleep(time.Minute)
 }
 

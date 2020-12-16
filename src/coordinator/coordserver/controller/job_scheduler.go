@@ -63,7 +63,7 @@ loop:
 
 				models.JobUpdateStatus(qItem.JobId, common.JobRunning)
 
-				// lunching the master
+				// Launching the master
 				go func(){
 					defer logger.HandleErrors()
 					dist.SetupDist(qItem, common.TrainWorker)

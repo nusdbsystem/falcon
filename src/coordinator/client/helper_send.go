@@ -38,17 +38,17 @@ func Get(url string) string {
 	return string(body)
 }
 
-func PostForm(url string, data map[string][]string) error {
+func PostForm(addr string, data map[string][]string) error {
 	/*
 
 		eg:
-			url: "http://localhost:9089/submit"
-			data：= url.Values {
+			addr: "http://localhost:9089/submit"
+			data：= addr.Values {
 					"name": {"John Doe"},
 					"occupation": {"gardener"}}
 
 	*/
-	url = "http://" + strings.TrimSpace(url)
+	url := "http://" + strings.TrimSpace(addr)
 
 	logger.Do.Printf("Sending post request to url: %q", url)
 

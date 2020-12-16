@@ -7,6 +7,16 @@ import (
 	"os/exec"
 )
 
+
+func(wk *PredictWorker)  PredictTask(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply){
+
+}
+
+
+
+
+
+
 func (wk *PredictWorker) CreateService(dta *entitiy.DoTaskArgs) {
 	// todo gobuild.sh sub process to run prediction job
 

@@ -24,14 +24,14 @@ spec:
       name: WORKER_NAME
       imagePullPolicy: IfNotPresent
       env:
-        - name: MASTER_URL
-          value: "MASTER_URL_PLACEHOLDER"
+        - name: MASTER_ADDR
+          value: "MASTER_ADDR_PLACEHOLDER"
         - name: SERVICE_NAME
           value: "SERVICE_NAME_PLACEHOLDER"
         - name: EXECUTOR_TYPE
           value: "EXECUTOR_TYPE_PLACEHOLDER"
-        - name: WORKER_URL
-          value: "WORKER_URL_PLACEHOLDER"
+        - name: WORKER_ADDR
+          value: "WORKER_ADDR_PLACEHOLDER"
         - name: Env
           value: "Env_PLACEHOLDER"
         - name: EXECUTOR_NAME

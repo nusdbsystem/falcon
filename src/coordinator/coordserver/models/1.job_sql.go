@@ -43,12 +43,12 @@ func (jobDB *JobDB) JobGetByJobID(jobId uint) (error, *JobRecord) {
 	return err, u
 }
 
-func (jobDB *JobDB) JobUpdateMaster(jobId uint, masterUrl string) (error, *JobRecord) {
+func (jobDB *JobDB) JobUpdateMaster(jobId uint, masterAddr string) (error, *JobRecord) {
 
 	u := &JobRecord{}
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
-		Update("master_url", masterUrl).Error
+		Update("master_addr", masterAddr).Error
 	return err, u
 
 }

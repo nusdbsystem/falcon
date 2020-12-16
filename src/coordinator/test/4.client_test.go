@@ -11,12 +11,12 @@ import (
 func TestClient(t *testing.T) {
 	logger.Do, logger.F = logger.GetLogger("./TestSubProc")
 
-	masterUrl:="127.0.0.1:41414"
+	masterAddr:="127.0.0.1:41414"
 	qItem:=&cache.QItem{}
-	qItem.IPs=[]string{"127.0.0.1"}
+	qItem.AddrList=[]string{"127.0.0.1"}
 	workerType:=common.TrainWorker
 
-	common.CoordinatorUrl = "127.0.0.1:30004"
-	distributed.SetupMaster(masterUrl, qItem, workerType)
+	common.CoordAddr = "127.0.0.1:30004"
+	distributed.SetupMaster(masterAddr, qItem, workerType)
 
 }

@@ -48,10 +48,10 @@ func initLogger(){
 }
 
 
-func getCoordUrl(url string) string{
+func getCoordAddr(addr string) string{
 		// using service name+ port to connect to coord
-	    logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordinatorUrl, value: %s >>>>>>>>>>>>>\n",url)
-		return url
+	    logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordAddr, value: %s >>>>>>>>>>>>>\n",addr)
+		return addr
 }
 
 
@@ -77,12 +77,12 @@ func InitEnvs(svcName string){
 		common.RedisNodePort    = common.GetEnv("REDIS_NODE_PORT", "30003")
 
 		// find the cluster port, call internally
-		common.CoordIP = common.GetEnv("COORDINATOR_IP", "")
+		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort   = common.GetEnv("COORD_TARGET_PORT", "30004")
 
 		common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 
-		common.CoordinatorUrl = getCoordUrl(common.CoordIP + ":" + common.CoordPort)
+		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
 
 		if len(common.ServiceName) == 0{
 			logger.Do.Println("Error: Input Error, ServiceName not provided, is either 'coord' or 'partyserver' ")
@@ -92,13 +92,13 @@ func InitEnvs(svcName string){
 	}else if svcName=="partyserver"{
 
 		// partyserver needs coord ip+port,lis port
-		common.CoordIP = common.GetEnv("COORDINATOR_IP", "")
+		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
 		common.PartyServeBasePath = common.GetEnv("DATA_BASE_PATH", "")
 
 		// partyserver communicate coord with ip+port
-		common.CoordinatorUrl = getCoordUrl(common.CoordIP + ":" + common.CoordPort)
+		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
 
 		// run partyserver requires to get a new partyserver port
 		common.PartyServerPort = common.GetEnv("PARTY_SERVER_NODE_PORT", "")
@@ -122,7 +122,7 @@ func InitEnvs(svcName string){
 		// master needs queue item, task type
 		common.MasterQItem =common.GetEnv("ITEM_KEY", "")
 		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
-		common.MasterUrl = common.GetEnv("MASTER_URL", "")
+		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 
 		common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 
@@ -133,18 +133,18 @@ func InitEnvs(svcName string){
 
 			logger.Do.Println("CoordIP: ", common.CoordIP  + ":" + common.CoordPort)
 
-			common.CoordinatorUrl = getCoordUrl(common.CoordIP + ":" + common.CoordPort)
+			common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
 
 		}else if common.Env==common.ProdEnv{
 
 			logger.Do.Println("CoordK8sSvcName: ", common.CoordK8sSvcName  + ":" + common.CoordPort)
 
-			common.CoordinatorUrl = getCoordUrl(common.CoordK8sSvcName  + ":" + common.CoordPort)
+			common.CoordAddr = getCoordAddr(common.CoordK8sSvcName  + ":" + common.CoordPort)
 		}
 
 
-		if common.CoordinatorUrl==""{
-			logger.Do.Println("Error: Input Error, CoordinatorUrl not provided")
+		if common.CoordAddr==""{
+			logger.Do.Println("Error: Input Error, CoordAddr not provided")
 			os.Exit(1)
 		}
 
@@ -157,11 +157,11 @@ func InitEnvs(svcName string){
 		common.TaskRuntimeLogs = common.GetEnv("RUN_TIME_LOGS", "")
 
 		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
-		common.WorkerUrl = common.GetEnv("WORKER_URL", "")
-		common.MasterUrl = common.GetEnv("MASTER_URL", "")
+		common.WorkerAddr = common.GetEnv("WORKER_ADDR", "")
+		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
-		if common.MasterUrl=="" || common.WorkerUrl=="" {
-			logger.Do.Println("Error: Input Error, either MasterUrl or WorkerUrl  not provided")
+		if common.MasterAddr=="" || common.WorkerAddr=="" {
+			logger.Do.Println("Error: Input Error, either MasterAddr or WorkerAddr  not provided")
 			os.Exit(1)
 		}
 
@@ -175,11 +175,11 @@ func InitEnvs(svcName string){
 		// this will be executed only in production, in dev, the common.WorkerType==""
 
 		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
-		common.WorkerUrl = common.GetEnv("WORKER_URL", "")
-		common.MasterUrl = common.GetEnv("MASTER_URL", "")
+		common.WorkerAddr = common.GetEnv("WORKER_ADDR", "")
+		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
-		if common.MasterUrl=="" || common.WorkerUrl=="" {
-			logger.Do.Println("Error: Input Error, either MasterUrl or WorkerUrl not provided")
+		if common.MasterAddr=="" || common.WorkerAddr=="" {
+			logger.Do.Println("Error: Input Error, either MasterAddr or WorkerAddr not provided")
 			os.Exit(1)
 		}
 	}
@@ -219,32 +219,32 @@ func main() {
 
 	if common.ServiceName == common.Master {
 
-		logger.Do.Println("Lunching falcon_platform, the common.WorkerType", common.WorkerType)
+		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
 		// this should be the service name, defined at runtime,
-		masterUrl := common.MasterUrl
+		masterAddr := common.MasterAddr
 
 		qItem := cache.Deserialize(cache.InitRedisClient().Get(common.MasterQItem))
 
 		workerType := common.WorkerType
 
-		distributed.SetupMaster(masterUrl, qItem, workerType)
+		distributed.SetupMaster(masterAddr, qItem, workerType)
 
 	}
 
 	if common.ServiceName == common.TrainWorker {
 
-		logger.Do.Println("Lunching falcon_platform, the common.WorkerType", common.WorkerType)
+		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
-		wk := worker.InitTrainWorker(common.MasterUrl, common.WorkerUrl)
+		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr)
 		wk.RunWorker(wk)
 	}
 
 	if common.ServiceName == common.PredictWorker {
 
-		logger.Do.Println("Lunching falcon_platform, the common.WorkerType", common.WorkerType)
+		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
-		wk := worker.InitPredictWorker(common.MasterUrl, common.WorkerUrl)
+		wk := worker.InitPredictWorker(common.MasterAddr, common.WorkerAddr)
 		wk.RunWorker(wk)
 
 	}

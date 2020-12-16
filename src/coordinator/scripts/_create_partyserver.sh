@@ -8,7 +8,7 @@ env=$2
 . ./deploy/property/svc.properties
 
 BASE_PATH=$(echo "$PARTYSERVER_BASE_PATH" | sed 's_/_\\/_g')
-IMAGE=$(echo "$FALCON_COORDINATOR_IMAGE" | sed 's_/_\\/_g')
+IMAGE=$(echo "$FALCON_COORD_IMAGE" | sed 's_/_\\/_g')
 
 
 # create multi properties files
@@ -36,7 +36,7 @@ cp ./deploy/template/partyserver.yaml.template $PARTYSERVER_YAML || exit 1
 sed -i -e "s/PARTYSERVER_PORT/$PARTY_SERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
 sed -i -e "s/PARTYSERVER_TARGET_PORT/$PARTY_SERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
 sed -i -e "s/PARTY_SERVER_NODE_PORT/$PARTY_SERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
-sed -i -e "s/FALCON_COORDINATOR_IMAGE/$IMAGE/g" $PARTYSERVER_YAML || exit 1
+sed -i -e "s/FALCON_COORD_IMAGE/$IMAGE/g" $PARTYSERVER_YAML || exit 1
 sed -i -e "s/HOST_PATH/$BASE_PATH/g" $PARTYSERVER_YAML || exit 1
 sed -i -e "s/PARTY_SERVER_ID/$PARTY_SERVER_ID/g" $PARTYSERVER_YAML || exit 1
 
