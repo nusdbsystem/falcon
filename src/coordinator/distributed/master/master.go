@@ -159,9 +159,7 @@ func (this *Master) killWorkers() {
 
 	for _, worker := range this.workers {
 
-		logger.Do.Println("Master: begin to call Worker.Shutdown")
-
-		this.StopRPCServer(worker,"Worker.Shutdown")
+		this.StopRPCServer(worker, this.workerType+".Shutdown")
 	}
 }
 
@@ -176,6 +174,6 @@ func (this *Master) KillJob(_, _ *struct{}) error {
 	this.killWorkers()
 
 	this.Cancel()
-	this.StopRPCServer(this.Address,"Master.Shutdown")
+	this.StopRPCServer(this.Address, "Master.Shutdown")
 	return nil
 }
