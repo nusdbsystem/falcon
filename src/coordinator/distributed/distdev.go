@@ -23,33 +23,33 @@ func SetupDistDev(qItem *cache.QItem, workerType string) {
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
 	masterIp := common.CoordIP
-	masterAddress := masterIp + ":" + masterPort
+	masterUrl := masterIp + ":" + masterPort
 
 	logger.Do.Println("SetupDist: Launch master DevEnv")
 
 	// use a thread
-	SetupMaster(masterAddress, qItem, workerType)
+	SetupMaster(masterUrl, qItem, workerType)
 
 	logger.Do.Println("SetupDist: setup master done")
 }
 
 
-func SetupWorkerHelperDev(masterAddress, workerType, jobId, dataPath, modelPath, dataOutput string)  {
+func SetupWorkerHelperDev(masterUrl, workerType, jobId, dataPath, modelPath, dataOutput string)  {
 
 	/**
 	 * @Author
 	 * @Description: this func is only called by partyserver
 	 * @Date 2:14 下午 1/12/20
 	 * @Param
-	 	httpHost： 		IP of the partyserver address
-		masterAddress： IP of the master address
-		masterAddress： train or predictor
+	 	httpHost： 		IP of the partyserver url
+		masterUrl： IP of the master url
+		masterUrl： train or predictor
 	 **/
-	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddress, workerType)
+	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterUrl, workerType)
 
 	workerPort := c.GetFreePort(common.CoordinatorUrl)
 
-	workerAddress := common.PartyServerIP + ":" + workerPort
+	workerUrl := common.PartyServerIP + ":" + workerPort
 	var serviceName string
 
 	// in dev, use thread
@@ -65,7 +65,7 @@ func SetupWorkerHelperDev(masterAddress, workerType, jobId, dataPath, modelPath,
 
 		logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainWorker")
 
-		wk := worker.InitTrainWorker(masterAddress, workerAddress)
+		wk := worker.InitTrainWorker(masterUrl, workerUrl)
 		wk.RunWorker(wk)
 
 	}else if workerType == common.PredictWorker{
@@ -75,7 +75,7 @@ func SetupWorkerHelperDev(masterAddress, workerType, jobId, dataPath, modelPath,
 
 		logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictWorker")
 
-		wk := worker.InitPredictWorker(masterAddress, workerAddress)
+		wk := worker.InitPredictWorker(masterUrl, workerUrl)
 		wk.RunWorker(wk)
 
 	}

@@ -33,29 +33,29 @@ func SetupDist(qItem *cache.QItem, workerType string) {
 	}
 }
 
-func SetupWorkerHelper(masterAddress, workerType, jobId, dataPath, modelPath, dataOutput string)  {
+func SetupWorkerHelper(masterUrl, workerType, jobId, dataPath, modelPath, dataOutput string)  {
 
 	/**
 	 * @Author
 	 * @Description: this func is only called by partyserver
 	 * @Date 2:14 下午 1/12/20
 	 * @Param
-	 	httpHost： 		IP of the partyserver address
-		masterAddress： IP of the master address
-		masterAddress： train or predictor
+	 	httpHost： 		IP of the partyserver url
+		masterUrl： IP of the master url
+		masterUrl： train or predictor
 	 **/
 
 	// in dev, use thread
 	if common.Env == common.DevEnv{
-		SetupWorkerHelperDev(masterAddress, workerType, jobId, dataPath, modelPath, dataOutput)
+		SetupWorkerHelperDev(masterUrl, workerType, jobId, dataPath, modelPath, dataOutput)
 		// in prod, use k8s to run train/predict server as a isolate process
 	}else if common.Env == common.ProdEnv{
-		SetupWorkerHelperProd(masterAddress, workerType, jobId, dataPath, modelPath, dataOutput)
+		SetupWorkerHelperProd(masterUrl, workerType, jobId, dataPath, modelPath, dataOutput)
 	}
 }
 
 
-func SetupMaster(masterAddress string, qItem *cache.QItem, workerType string) string {
+func SetupMaster(masterUrl string, qItem *cache.QItem, workerType string) string {
 	/**
 	 * @Author
 	 * @Description : run train rpc server in a thread, used to test only
@@ -65,13 +65,13 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, workerType string) st
 	 **/
 	logger.Do.Println("SetupDist: Lunching master")
 
-	ms := master.RunMaster(masterAddress, qItem, workerType)
+	ms := master.RunMaster(masterUrl, qItem, workerType)
 
 
-	// update job's master address
+	// update job's master url
 	if workerType == common.TrainWorker{
 
-		c.JobUpdateMaster(common.CoordinatorUrl, masterAddress, qItem.JobId)
+		c.JobUpdateMaster(common.CoordinatorUrl, masterUrl, qItem.JobId)
 	}
 
 	// master will call lister's endpoint to launch worker, to train or predict
@@ -85,23 +85,23 @@ func SetupMaster(masterAddress string, qItem *cache.QItem, workerType string) st
 
 		logger.Do.Printf("SetupDist: master is calling partyserver: %s ...\n", ip)
 
-		// todo, manage partyserver port more wisely eg: c.SetupWorker(ip+lisPort, masterAddress, workerType), such that user dont need
+		// todo, manage partyserver port more wisely eg: c.SetupWorker(ip+lisPort, masterUrl, workerType), such that user dont need
 		//  to provide port in job
 
 		dataPath := qItem.PartyInfo[index].PartyPaths.DataInput
 		dataOutput := qItem.PartyInfo[index].PartyPaths.DataOutput
 		modelPath := qItem.PartyInfo[index].PartyPaths.ModelPath
 
-		c.SetupWorker(ip, masterAddress, workerType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
+		c.SetupWorker(ip, masterUrl, workerType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
 	}
 
-	logger.Do.Printf("SetupDist: master is running at %s ... waiting job complete\n", masterAddress)
+	logger.Do.Printf("SetupDist: master is running at %s ... waiting job complete\n", masterUrl)
 
 	ms.Wait()
 
 	logger.Do.Println("SetupDist: master finish all jobs")
 
-	return masterAddress
+	return masterUrl
 }
 
 func CleanWorker(){
@@ -110,8 +110,8 @@ func CleanWorker(){
 }
 
 
-func KillJob(masterAddr, Proxy string) {
-	ok := c.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
+func KillJob(masterUrl, Proxy string) {
+	ok := c.Call(masterUrl, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {
 		logger.Do.Println("Master: KillJob error")
 		panic("Master: KillJob error")

@@ -24,7 +24,7 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
 	masterIp := common.CoordIP
-	masterAddress := masterIp + ":" + masterPort
+	masterUrl := masterIp + ":" + masterPort
 
 	logger.Do.Println("SetupDist: Launch master ProdEnv")
 
@@ -48,7 +48,7 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 		masterPort,
 		itemKey,
 		workerType,
-		masterAddress,
+		masterUrl,
 		common.Master,
 		common.CoordK8sSvcName,
 		common.Env,
@@ -69,22 +69,22 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 }
 
 
-func SetupWorkerHelperProd(masterAddress, workerType, jobId, dataPath, modelPath, dataOutput string)  {
+func SetupWorkerHelperProd(masterUrl, workerType, jobId, dataPath, modelPath, dataOutput string)  {
 
 	/**
 	 * @Author
 	 * @Description: this func is only called by partyserver
 	 * @Date 2:14 下午 1/12/20
 	 * @Param
-	 	httpHost： 		IP of the partyserver address
-		masterAddress： IP of the master address
-		masterAddress： train or predictor
+	 	httpHost： 		IP of the partyserver url
+		masterUrl： IP of the master url
+		masterUrl： train or predictor
 	 **/
-	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddress, workerType)
+	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterUrl, workerType)
 
 	workerPort := c.GetFreePort(common.CoordinatorUrl)
 
-	workerAddress := common.PartyServerIP + ":" + workerPort
+	workerUrl := common.PartyServerIP + ":" + workerPort
 	var serviceName string
 
 	// in dev, use thread
@@ -106,9 +106,9 @@ func SetupWorkerHelperProd(masterAddress, workerType, jobId, dataPath, modelPath
 		common.WorkerYamlCreatePath,
 		serviceName, 	// 1. worker service name
 		workerPort,  	// 2. worker service port
-		masterAddress,  // 3. master url
+		masterUrl,  // 3. master url
 		workerType,		// 4. train or predict job
-		workerAddress, 	// 5. worker url
+		workerUrl, 	// 5. worker url
 		workerType,   	// 6. serviceName train or predict
 		common.Env,  	// 7. env or prod
 		common.PartyServeBasePath,  // 8. folder to store logs, the same as partyserver folder currently,

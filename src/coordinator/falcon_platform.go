@@ -85,7 +85,7 @@ func InitEnvs(svcName string){
 		common.CoordinatorUrl = getCoordUrl(common.CoordIP + ":" + common.CoordPort)
 
 		if len(common.ServiceName) == 0{
-			logger.Do.Println("Error: Input Error, ServiceName is either 'coord' or 'partyserver' ")
+			logger.Do.Println("Error: Input Error, ServiceName not provided, is either 'coord' or 'partyserver' ")
 			os.Exit(1)
 		}
 
@@ -106,7 +106,7 @@ func InitEnvs(svcName string){
 		common.PartyServerId = common.GetEnv("PARTY_SERVER_ID", "")
 
 		if common.CoordIP=="" || common.PartyServerIP==""||common.PartyServerPort=="" {
-			logger.Do.Println("Error: Input Error, either CoordIP or PartyServerIP not provided")
+			logger.Do.Println("Error: Input Error, either CoordIP or PartyServerIP or PartyServerPort not provided")
 			os.Exit(1)
 		}
 
@@ -161,7 +161,7 @@ func InitEnvs(svcName string){
 		common.MasterUrl = common.GetEnv("MASTER_URL", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 		if common.MasterUrl=="" || common.WorkerUrl=="" {
-			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
+			logger.Do.Println("Error: Input Error, either MasterUrl or WorkerUrl  not provided")
 			os.Exit(1)
 		}
 
@@ -179,7 +179,7 @@ func InitEnvs(svcName string){
 		common.MasterUrl = common.GetEnv("MASTER_URL", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 		if common.MasterUrl=="" || common.WorkerUrl=="" {
-			logger.Do.Println("Error: Input Error, either WorkerAddrGlobal or MasterAddrGlobal or TaskTypeGlobal not provided")
+			logger.Do.Println("Error: Input Error, either MasterUrl or WorkerUrl not provided")
 			os.Exit(1)
 		}
 	}

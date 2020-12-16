@@ -9,12 +9,12 @@ import (
 
 // get one port
 func GetFreePort() (int, error) {
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	url, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {
 		return 0, err
 	}
 
-	l, err := net.ListenTCP("tcp", addr)
+	l, err := net.ListenTCP("tcp", url)
 	if err != nil {
 		return 0, err
 	}
@@ -26,12 +26,12 @@ func GetFreePort() (int, error) {
 func GetFreePorts(count int) ([]int, error) {
 	var ports []int
 	for i := 0; i < count; i++ {
-		addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+		url, err := net.ResolveTCPAddr("tcp", "localhost:0")
 		if err != nil {
 			return nil, err
 		}
 
-		l, err := net.ListenTCP("tcp", addr)
+		l, err := net.ListenTCP("tcp", url)
 		if err != nil {
 			return nil, err
 		}
@@ -48,17 +48,17 @@ func GetFreePort4K8s() (int, error) {
 	max := 32767
 	p := rand.Intn(max - min) + min
 
-	var addr *net.TCPAddr
+	var url *net.TCPAddr
 	var l *net.TCPListener
 	var err error
 
 	for {
-		addr, err = net.ResolveTCPAddr("tcp", "localhost:"+fmt.Sprintf("%d",p))
+		url, err = net.ResolveTCPAddr("tcp", "localhost:"+fmt.Sprintf("%d",p))
 		if err != nil {
 			return 0, err
 		}
 
-		l, err = net.ListenTCP("tcp",addr)
+		l, err = net.ListenTCP("tcp",url)
 		if err != nil {
 			p++
 		}else{

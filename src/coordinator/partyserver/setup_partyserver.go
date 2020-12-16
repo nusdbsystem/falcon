@@ -11,8 +11,8 @@ import (
 )
 
 func SetupPartyServer() {
-	// host: partyserverAddr
-	// ServerAddress: the address for main http server
+	// host: partyserverUrl
+	// ServerUrl: the url for main http server
 	// host port:  for partyserver,
 	defer logger.HandleErrors()
 	mux := http.NewServeMux()
@@ -24,7 +24,7 @@ func SetupPartyServer() {
 		Addr:    "0.0.0.0:" + common.PartyServerPort,
 		Handler: mux,
 	}
-	// report address to flow htp server
+	// report url to flow htp server
 	done := make(chan os.Signal)
 
 	go func() {

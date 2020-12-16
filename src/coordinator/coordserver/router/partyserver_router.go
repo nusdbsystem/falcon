@@ -12,10 +12,10 @@ func PartyServerAdd(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 
 	client.ReceiveForm(r)
 
-	partyserverAddr := r.FormValue(common.PartyServerAddrKey)
+	partyserverUrl := r.FormValue(common.PartyServerUrlKey)
 	PartyServerPort := r.FormValue(common.PartyServerPortKey)
 
-	controller.PartyServerAdd(ctx, partyserverAddr, PartyServerPort)
+	controller.PartyServerAdd(ctx, partyserverUrl, PartyServerPort)
 
 }
 
@@ -23,9 +23,9 @@ func PartyServerDelete(w http.ResponseWriter, r *http.Request, ctx *entity.Conte
 
 	client.ReceiveForm(r)
 
-	partyserverAddr := r.FormValue(common.PartyServerAddrKey)
+	partyserverUrl := r.FormValue(common.PartyServerUrlKey)
 
-	controller.PartyServerDelete(ctx, partyserverAddr)
+	controller.PartyServerDelete(ctx, partyserverUrl)
 
 }
 
@@ -38,6 +38,6 @@ func GetPartyServerPort(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 
 	params := r.URL.Query()
 
-	port := controller.GetPartyServerPort(params.Get(common.PartyServerAddrKey), ctx)
+	port := controller.GetPartyServerPort(params.Get(common.PartyServerUrlKey), ctx)
 	_, _ = w.Write([]byte(port))
 }

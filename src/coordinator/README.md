@@ -111,7 +111,7 @@ go build <go-program>.go
 
 2. submit job:
     
-    python coordinator_client.py -url <ip address of coordinator>:6573 -method submit -path ./data/job.json
+    python coordinator_client.py -url <ip url of coordinator>:6573 -method submit -path ./data/job.json
     
     ```
     python coordinator_client.py -url 172.25.121.4:6573 -method submit -path ./data/job.json
@@ -120,7 +120,7 @@ go build <go-program>.go
 
 3. kill job:
     
-    python coordinator_client.py -url <ip address of coordinator>:6573 -method kill -job <job_id>
+    python coordinator_client.py -url <ip url of coordinator>:6573 -method kill -job <job_id>
     
     ```
     python coordinator_client.py -url 172.25.121.4:6573 -method kill -job 60
@@ -128,7 +128,7 @@ go build <go-program>.go
 
 4. query job status:
     
-    python coordinator_client.py -url <ip address of coordinator>:6573 -method query_status -job <job_id>
+    python coordinator_client.py -url <ip url of coordinator>:6573 -method query_status -job <job_id>
     
     ```
     python coordinator_client.py -url 172.25.121.4:6573 -method query_status -job 60

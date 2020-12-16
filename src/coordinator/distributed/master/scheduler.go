@@ -18,7 +18,7 @@ import (
 )
 
 type taskHandler func(
-	workerAddr string,
+	workerUrl string,
 	args *entitiy.DoTaskArgs,
 	wg *sync.WaitGroup,
 	trainStatuses *[]entitiy.DoTaskReply)
@@ -103,8 +103,8 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 				panic("Max search Number reaches, Ip not Match Error ")
 			}
 
-			workerAddr := tmpStack[0]
-			ip := strings.Split(workerAddr, ":")[0]
+			workerUrl := tmpStack[0]
+			ip := strings.Split(workerUrl, ":")[0]
 			tmpStack = tmpStack[1:]
 
 			// match using ip
@@ -112,12 +112,12 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 				wg.Add(1)
 				// execute the task
 				// append will allocate new memory inside the func stack,
-				// must pass address of slice to func. such that multi goroutines can
+				// must pass url of slice to func. such that multi goroutines can
 				// update the original slices.
-				go this.TaskHandler(workerAddr, args, &wg, &trainStatuses)
+				go this.TaskHandler(workerUrl, args, &wg, &trainStatuses)
 				break
 			}else{
-				tmpStack = append(tmpStack, workerAddr)
+				tmpStack = append(tmpStack, workerUrl)
 				MaxSearchNumber--
 			}
 		}
@@ -136,7 +136,7 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 
 
 func (this *Master) TaskHandler(
-	workerAddr string,
+	workerUrl string,
 	args *entitiy.DoTaskArgs,
 	wg *sync.WaitGroup,
 	trainStatuses *[]entitiy.DoTaskReply,
@@ -144,19 +144,19 @@ func (this *Master) TaskHandler(
 
 	defer wg.Done()
 
-	argAddr := entitiy.EncodeDoTaskArgs(args)
+	argUrl := entitiy.EncodeDoTaskArgs(args)
 	var rep entitiy.DoTaskReply
 
-	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", this.workerType, workerAddr)
-	ok := client.Call(workerAddr, this.Proxy, this.workerType+".DoTask", argAddr, &rep)
+	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", this.workerType, workerUrl)
+	ok := client.Call(workerUrl, this.Proxy, this.workerType+".DoTask", argUrl, &rep)
 
 	if !ok {
-		logger.Do.Printf("Scheduler: Master calling %s, DoTask error\n", workerAddr)
+		logger.Do.Printf("Scheduler: Master calling %s, DoTask error\n", workerUrl)
 		rep.TaskMsg.RpcCallMsg = ""
 		rep.RpcCallError = true
 
 	}else{
-		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", this.workerType, workerAddr)
+		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", this.workerType, workerUrl)
 		rep.RpcCallError = false
 	}
 	*trainStatuses = append(*trainStatuses, rep)
@@ -176,7 +176,7 @@ func (this *Master) generateNetworkConfig(urls []string) string {
 		PortArrays:  []*common.PortArray{},
 	}
 
-	// for each ip address
+	// for each ip url
 	for i:=0; i<partyNums; i++{
 		var ports []int32
 		//generate n ports

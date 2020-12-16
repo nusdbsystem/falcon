@@ -10,11 +10,11 @@ import (
 	"time"
 )
 
-func Get(addr string) string {
+func Get(url string) string {
 
-	logger.Do.Println("send get requests to ", addr)
+	logger.Do.Println("send get requests to ", url)
 
-	resp, err := http.Get(addr)
+	resp, err := http.Get(url)
 
 	if err != nil {
 		logger.Do.Println(err)
@@ -38,19 +38,19 @@ func Get(addr string) string {
 	return string(body)
 }
 
-func PostForm(addr string, data map[string][]string) error {
+func PostForm(url string, data map[string][]string) error {
 	/*
 
 		eg:
-			addr: "http://localhost:9089/submit"
+			url: "http://localhost:9089/submit"
 			data：= url.Values {
 					"name": {"John Doe"},
 					"occupation": {"gardener"}}
 
 	*/
-	addr = "http://" + strings.TrimSpace(addr)
+	url = "http://" + strings.TrimSpace(url)
 
-	logger.Do.Printf("Sending post request to address: %q", addr)
+	logger.Do.Printf("Sending post request to url: %q", url)
 
 	NTimes := 20
 
@@ -62,7 +62,7 @@ func PostForm(addr string, data map[string][]string) error {
 			return err
 		}
 
-		resp, err = http.PostForm(addr, data)
+		resp, err = http.PostForm(url, data)
 
 		if err != nil{
 			logger.Do.Println("Post Requests Error happens retry ..... ,", err)
@@ -80,15 +80,15 @@ func PostForm(addr string, data map[string][]string) error {
 	return nil
 }
 
-func PostJson(addr string, js string) {
+func PostJson(url string, js string) {
 	/*
 		eg:
-			addr: "http://localhost:9089/submit"
+			url: "http://localhost:9089/submit"
 			var js string =`{"Name":"naili","Age":123}`
 	*/
-	addr = strings.TrimSpace(addr)
+	url = strings.TrimSpace(url)
 	var jsonStr = []byte(js)
-	req, err := http.NewRequest(http.MethodPost, addr, bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		panic("connection errro")
 	}
