@@ -25,29 +25,29 @@ type WorkerBase struct {
 	MasterAddr  	string
 }
 
-func(wk *WorkerBase) InitWorkerBase(workerAddress, name string) {
+func(w *WorkerBase) InitWorkerBase(workerAddress, name string) {
 
-	wk.InitRpcBase(workerAddress)
-	wk.Name = name
-	wk.SuicideTimeout = common.WorkerTimeout
+	w.InitRpcBase(workerAddress)
+	w.Name = name
+	w.SuicideTimeout = common.WorkerTimeout
 
 	// the lock needs to pass to multi funcs, must create a instance
-	wk.Pm = taskmanager.InitSubProcessManager()
-	wk.TaskFinish = make(chan bool)
+	w.Pm = taskmanager.InitSubProcessManager()
+	w.TaskFinish = make(chan bool)
 
 	// subprocess manager hold a global context
-	wk.Pm.Ctx, wk.Pm.Cancel = context.WithCancel(context.Background())
-	wk.reset()
+	w.Pm.Ctx, w.Pm.Cancel = context.WithCancel(context.Background())
+	w.reset()
 }
 
 
 // call the master's register method,
-func (wk *WorkerBase) Register(master string) {
+func (w *WorkerBase) Register(master string) {
 	args := new(entitiy.RegisterArgs)
-	args.WorkerAddr = wk.Address
+	args.WorkerAddr = w.Address
 
 	logger.Do.Printf("WorkerBase: begin to call Master.Register to register address= %s \n", args.WorkerAddr)
-	ok := client.Call(master, wk.Proxy, "Master.Register", args, new(struct{}))
+	ok := client.Call(master, w.Proxy, "Master.Register", args, new(struct{}))
 	// if not register successfully, close
 	if ok == false {
 		logger.Do.Fatalf("WorkerBase: Register RPC %s, register error\n", master)
@@ -56,75 +56,75 @@ func (wk *WorkerBase) Register(master string) {
 
 // Shutdown is called by the master when all work has been completed.
 // We should respond with the number of tasks we have processed.
-func (wk *WorkerBase) Shutdown(_, _ *struct{}) error {
-	logger.Do.Println("WorkerBase: Shutdown", wk.Address)
+func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
+	logger.Do.Printf("%s: Shutdown %s\n", w.Name, w.Address)
 
 	// shutdown other related thread
-	wk.Cancel()
+	w.Cancel()
 
 	// check if there are running subprocess
-	wk.Pm.Lock()
-	if wk.Pm.NumProc > 0 {
+	w.Pm.Lock()
+	if w.Pm.NumProc > 0 {
 		// if there is still running job, kill the job
-		wk.Pm.IsKilled = true
-		wk.Pm.Unlock()
+		w.Pm.IsKilled = true
+		w.Pm.Unlock()
 
 		// do the kill
-		wk.Pm.Cancel()
+		w.Pm.Cancel()
 
-		logger.Do.Println("WorkerBase: Waiting to finish the killing process of DoTask...", wk.Pm.NumProc)
+		logger.Do.Printf("%s: Waiting to finish the killing %d process of DoTask...\n", w.Name, w.Pm.NumProc)
 
 		// wait until kill successfully
-		<-wk.TaskFinish
+		<-w.TaskFinish
 
 	} else {
-		wk.Pm.Unlock()
+		w.Pm.Unlock()
 	}
 
-	logger.Do.Println("WorkerBase: DoTask returned, Close the partyserver...")
+	logger.Do.Printf("%s: DoTask returned, Close the party server...\n", w.Name)
 
-	err := wk.Listener.Close() // close the connection, cause error, and then ,break the WorkerBase
+	err := w.Listener.Close() // close the connection, cause error, and then ,break the WorkerBase
 	if err != nil {
-		logger.Do.Println("WorkerBase: WorkerBase close error, ", err)
+		logger.Do.Printf("%s: close error, %s \n", w.Name, err)
 	}
 	// this is used to define shut down the WorkerBase servers
 
 	return nil
 }
 
-func (wk *WorkerBase) EventLoop() {
+func (w *WorkerBase) EventLoop() {
 	time.Sleep(time.Second * 5)
 
 loop:
 	for {
 		select {
-		case <-wk.Ctx.Done():
-			logger.Do.Printf("WorkerBase: server %s quite eventLoop \n", wk.Address)
+		case <-w.Ctx.Done():
+			logger.Do.Printf("%s: server %s quite eventLoop \n", w.Name, w.Address)
 			break loop
 		default:
-			elapseTime := time.Now().UnixNano() - wk.latestHeardTime
-			if int(elapseTime/int64(time.Millisecond)) >= wk.SuicideTimeout {
+			elapseTime := time.Now().UnixNano() - w.latestHeardTime
+			if int(elapseTime/int64(time.Millisecond)) >= w.SuicideTimeout {
 
-				logger.Do.Printf("WorkerBase: Timeout, server %s begin to suicide \n", wk.Address)
+				logger.Do.Printf("%s: Timeout, server %s begin to suicide \n", w.Name, w.Address)
 
 				var reply entitiy.ShutdownReply
-				ok := client.Call(wk.Address, wk.Proxy, wk.Name+".Shutdown", new(struct{}), &reply)
+				ok := client.Call(w.Address, w.Proxy, w.Name+".Shutdown", new(struct{}), &reply)
 				if ok == false {
-					logger.Do.Printf("WorkerBase: RPC %s shutdown error\n", wk.Address)
+					logger.Do.Printf("%s: RPC %s shutdown error\n", w.Name, w.Address)
 				} else {
-					logger.Do.Printf("WorkerBase: WorkerBase timeout, RPC %s shutdown successfule\n", wk.Address)
+					logger.Do.Printf("%s: WorkerBase timeout, RPC %s shutdown successfule\n", w.Name, w.Address)
 				}
 				// quite event loop no matter ok or not
 				break
 			}
 
 			time.Sleep(time.Millisecond * common.WorkerTimeout / 5)
-			fmt.Printf("WorkerBase: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
+			fmt.Printf("%s: CountDown:....... %d \n", w.Name, int(elapseTime/int64(time.Millisecond)))
 		}
 	}
 }
 
-func (wk *WorkerBase) ResetTime(_ *struct{}, _ *struct{}) error {
+func (w *WorkerBase) ResetTime(_ *struct{}, _ *struct{}) error {
 	/**
 	 * @Author
 	 * @Description which will be called by master
@@ -132,13 +132,13 @@ func (wk *WorkerBase) ResetTime(_ *struct{}, _ *struct{}) error {
 	 * @Param
 	 * @return
 	 **/
-	fmt.Println("WorkerBase: reset the countdown")
-	wk.reset()
+	fmt.Printf("%s: reset the countdown\n", w.Name)
+	w.reset()
 	return nil
 }
 
-func (wk *WorkerBase) reset() {
-	wk.Lock()
-	wk.latestHeardTime = time.Now().UnixNano()
-	wk.Unlock()
+func (w *WorkerBase) reset() {
+	w.Lock()
+	w.latestHeardTime = time.Now().UnixNano()
+	w.Unlock()
 }

@@ -12,10 +12,10 @@ type Worker interface {
 	DoTask(arg []byte, rep *entitiy.DoTaskReply) error
 }
 
-func (wkbase *WorkerBase) RunWorker(worker Worker) {
+func (w *WorkerBase) RunWorker(worker Worker) {
 
 	worker.Run()
 
-	logger.Do.Printf("%s: runWorker exit", wkbase.Name)
+	logger.Do.Printf("%s: runWorker exit", w.Name)
 
 }
