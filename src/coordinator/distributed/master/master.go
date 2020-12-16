@@ -126,8 +126,17 @@ func (this *Master) run(schedule func(), finish func()) {
 
 
 func (this *Master) Wait() {
-	<-this.doneChannel
 
+	loop:
+	for {
+		select {
+		case <-this.Ctx.Done():
+			logger.Do.Printf("WorkerBase: server %s quite Waitting \n", this.Address)
+			break loop
+		case <-this.doneChannel:
+			break loop
+		}
+	}
 	if common.Env==common.ProdEnv{
 		km := taskmanager.InitK8sManager(true,  "")
 		km.DeleteService(common.WorkerK8sSvcName)
