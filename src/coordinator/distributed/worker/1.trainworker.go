@@ -13,11 +13,11 @@ type TrainWorker struct {
 	base.WorkerBase
 }
 
-func InitTrainWorker (masterAddress, workerAddress string) *TrainWorker{
+func InitTrainWorker (masterUrl, workerUrl string) *TrainWorker{
 
 	wk := TrainWorker{}
-	wk.InitWorkerBase(workerAddress, common.TrainWorker)
-	wk.MasterAddr = masterAddress
+	wk.InitWorkerBase(workerUrl, common.TrainWorker)
+	wk.MasterUrl = masterUrl
 
 	return &wk
 }
@@ -35,8 +35,8 @@ func (wk *TrainWorker) Run(){
 		logger.Do.Fatalf("%s: start Error \n", wk.Name)
 	}
 
-	logger.Do.Printf("%s: register to masterAddress = %s \n", wk.Name, wk.MasterAddr)
-	wk.Register(wk.MasterAddr)
+	logger.Do.Printf("%s: register to masterUrl = %s \n", wk.Name, wk.MasterUrl)
+	wk.Register(wk.MasterUrl)
 
 	// start rpc server blocking...
 	wk.StartRPCServer(rpcSvc, true)

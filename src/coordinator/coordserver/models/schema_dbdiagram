@@ -19,7 +19,7 @@ Table JobRecord {
   UpdateTime timestamp
   DeleteTime timestamp
   ExtInfo varchar
-  MasterAddress varchar
+  MasterUrl varchar
 
 }
 
@@ -27,8 +27,8 @@ Table JobRecord {
 Table ServiceRecord {
   id int [primary key]
   JobId int
-  MasterAddress varchar
-  WorkerAddr varchar
+  MasterUrl varchar
+  WorkerUrl varchar
 
 }
 

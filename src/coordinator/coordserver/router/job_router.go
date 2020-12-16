@@ -112,14 +112,14 @@ func JobUpdateMaster(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 	client.ReceiveForm(r)
 
 	JobId := r.FormValue(common.JobId)
-	MasterAddr := r.FormValue(common.MasterAddrKey)
+	MasterUrl := r.FormValue(common.MasterUrlKey)
 
 	jobId, e := strconv.Atoi(JobId)
 	if e != nil {
 		panic(e)
 	}
 
-	controller.JobUpdateMaster(uint(jobId), MasterAddr, ctx)
+	controller.JobUpdateMaster(uint(jobId), MasterUrl, ctx)
 
 }
 

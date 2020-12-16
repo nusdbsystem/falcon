@@ -68,17 +68,17 @@ func JobKill(jobId uint, ctx *entity.Context) {
 	e, u := ctx.JobDB.JobGetByJobID(jobId)
 	ctx.JobDB.Commit(e)
 
-	distributed.KillJob(u.MasterAddress, common.Proxy)
+	distributed.KillJob(u.MasterUrl, common.Proxy)
 
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 	e2, _ := ctx.JobDB.JobUpdateStatus(jobId, common.JobKilled)
 	ctx.JobDB.Commit(e2)
 }
 
-func JobUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
+func JobUpdateMaster(jobId uint, masterUrl string, ctx *entity.Context) {
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e, _ := ctx.JobDB.SvcUpdateMaster(jobId, masterAddr)
-	e2, _ := ctx.JobDB.JobUpdateMaster(jobId, masterAddr)
+	e, _ := ctx.JobDB.SvcUpdateMaster(jobId, masterUrl)
+	e2, _ := ctx.JobDB.JobUpdateMaster(jobId, masterUrl)
 	ctx.JobDB.Commit([]error{e, e2})
 }
 

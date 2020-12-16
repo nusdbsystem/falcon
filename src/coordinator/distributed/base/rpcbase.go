@@ -17,19 +17,19 @@ type RpcBaseClass struct {
 	sync.Mutex
 	Name 		string
 	Proxy 		string
-	Address  	string //  which is the ip+port address of worker
-	Port  		string //  which is the port address of worker
+	Url  	string //  which is the ip+port url of worker
+	Port  		string //  which is the port url of worker
 	Listener 	net.Listener
 
 	Ctx    context.Context
 	Cancel context.CancelFunc
 }
 
-func (rb *RpcBaseClass) InitRpcBase(Address string) {
+func (rb *RpcBaseClass) InitRpcBase(Url string) {
 	rb.Proxy = "tcp"
-	rb.Address = Address
+	rb.Url = Url
 
-	h := strings.Split(Address, ":")
+	h := strings.Split(Url, ":")
 
 	rb.Port = h[1]
 
@@ -95,13 +95,13 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 // stopRPCServer stops the master RPC server.
 // This must be done through an RPC to avoid
 // race conditions between the RPC server thread and the current thread.
-func (rb *RpcBaseClass) StopRPCServer(addr, targetSvc string) {
+func (rb *RpcBaseClass) StopRPCServer(url, targetSvc string) {
 	var reply entitiy.ShutdownReply
 
 	logger.Do.Printf("%s: begin to call %s\n", rb.Name, targetSvc)
-	ok := client.Call(addr, rb.Proxy, targetSvc, new(struct{}), &reply)
+	ok := client.Call(url, rb.Proxy, targetSvc, new(struct{}), &reply)
 	if ok == false {
-		logger.Do.Printf("%s: Cleanup: RPC %s error\n", rb.Name, addr)
+		logger.Do.Printf("%s: Cleanup: RPC %s error\n", rb.Name, url)
 	}
 	logger.Do.Printf("%s: cleanupRegistration: done\n", rb.Name)
 }

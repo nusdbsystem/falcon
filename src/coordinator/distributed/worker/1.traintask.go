@@ -66,7 +66,7 @@ func (wk *TrainWorker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTas
 	 **/
 	defer wg.Done()
 
-	logger.Do.Printf("Worker: %s task started \n", wk.Address)
+	logger.Do.Printf("Worker: %s task started \n", wk.Url)
 
 
 	partyId := dta.AssignID
@@ -153,7 +153,7 @@ func (wk *TrainWorker) MlTaskProcess(dta *entitiy.DoTaskArgs, rep *entitiy.DoTas
 		time.Sleep(time.Second)
 	}
 
-	logger.Do.Printf("Worker: %s: task done\n", wk.Address)
+	logger.Do.Printf("Worker: %s: task done\n", wk.Url)
 }
 
 func (wk *TrainWorker) MpcTaskProcess(dta *entitiy.DoTaskArgs, algName string){

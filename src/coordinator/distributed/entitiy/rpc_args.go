@@ -20,10 +20,10 @@ type DoTaskArgs struct {
 }
 
 // RegisterArgs is the argument passed when a worker registers with the master.
-// the worker's UNIX-domain socket name, i.e. its RPC address
+// the worker's UNIX-domain socket name, i.e. its RPC url
 type RegisterArgs struct {
 	// this is worker url
-	WorkerAddr string
+	WorkerUrl string
 }
 
 type ShutdownReply struct {

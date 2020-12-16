@@ -49,8 +49,8 @@ const (
 	SetupWorker = "setup-worker" // RFC 5789
 
 	// shared key of map
-	PartyServerAddrKey = "psAddress"
-	MasterAddrKey   = "masterAddress"
+	PartyServerUrlKey = "psUrl"
+	MasterUrlKey   = "masterUrl"
 	PartyServerPortKey = "psPort"
 
 	JobId      = "job_id"

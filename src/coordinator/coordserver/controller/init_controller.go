@@ -70,14 +70,14 @@ func CreateSysPorts() {
 
 }
 
-func PartyServerAdd(ctx *entity.Context, partyserverAddr,Port string) {
+func PartyServerAdd(ctx *entity.Context, partyserverUrl,Port string) {
 
-	_, _ = ctx.JobDB.PartyServerAdd(partyserverAddr, Port)
+	_, _ = ctx.JobDB.PartyServerAdd(partyserverUrl, Port)
 
 }
 
-func PartyServerDelete(ctx *entity.Context, partyserverAddr string) {
+func PartyServerDelete(ctx *entity.Context, partyserverUrl string) {
 
-	_ = ctx.JobDB.PartyServerDelete(partyserverAddr)
+	_ = ctx.JobDB.PartyServerDelete(partyserverUrl)
 
 }

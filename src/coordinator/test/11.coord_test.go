@@ -5,7 +5,7 @@ package test
 //	logger.Do, logger.F = logger.GetLogger("./TestSubProc2")
 //
 //	common.CoordinatorUrl = "127.0.0.1:30004"
-//	distributed.SetupMaster(masterAddress, qItem, workerType)
+//	distributed.SetupMaster(masterUrl, qItem, workerType)
 //
 //}
 
