@@ -17,7 +17,7 @@ type JobDB struct {
 	user     string
 	password string
 	database string
-	url      string
+	addr      string
 	Db       *gorm.DB
 	Tx       *gorm.DB
 }
@@ -35,7 +35,7 @@ func InitJobDB() *JobDB {
 		jobDB.password = common.JobDbMysqlPwd
 		jobDB.database = common.JobDbMysqlDb
 
-		mysql_url := fmt.Sprintf(
+		mysqlUrl := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s%s",
 			jobDB.user,
 			jobDB.password,
@@ -44,9 +44,9 @@ func InitJobDB() *JobDB {
 			jobDB.database,
 			common.JobDbMysqlOptions,
 		)
-		jobDB.url = mysql_url
+		jobDB.addr = mysqlUrl
 	} else if jobDB.engine == "sqlite3" {
-		jobDB.url = common.LocalPath + common.JobDbSqliteDb
+		jobDB.addr = common.LocalPath + common.JobDbSqliteDb
 	}
 	return jobDB
 }
@@ -62,7 +62,7 @@ func (jobDB *JobDB) Connect() {
 		if NTimes < 0 {
 			break
 		}
-		db, err = gorm.Open(jobDB.engine, jobDB.url)
+		db, err = gorm.Open(jobDB.engine, jobDB.addr)
 		if err != nil {
 			logger.Do.Println(err)
 			logger.Do.Println("JobDB: connecting Db...retry")

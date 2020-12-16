@@ -11,8 +11,8 @@ import (
 )
 
 func SetupPartyServer() {
-	// host: partyserverUrl
-	// ServerUrl: the url for main http server
+	// host: partyserverAddr
+	// ServerAddr: the addr for main http server
 	// host port:  for partyserver,
 	defer logger.HandleErrors()
 	mux := http.NewServeMux()
@@ -24,7 +24,7 @@ func SetupPartyServer() {
 		Addr:    "0.0.0.0:" + common.PartyServerPort,
 		Handler: mux,
 	}
-	// report url to flow htp server
+	// report addr to flow htp server
 	done := make(chan os.Signal)
 
 	go func() {
@@ -34,12 +34,12 @@ func SetupPartyServer() {
 			logger.Do.Fatal("ShutDown the server", err)
 		}
 
-		c.PartyServerDelete(common.CoordinatorUrl, common.PartyServerIP)
+		c.PartyServerDelete(common.CoordAddr, common.PartyServerIP)
 	}()
 
-	logger.Do.Printf("SetupPartyServer: connecting to coord  %s to AddPort\n", common.CoordinatorUrl)
+	logger.Do.Printf("SetupPartyServer: connecting to coord  %s to AddPort\n", common.CoordAddr)
 
-	err := c.AddPort(common.CoordinatorUrl, common.PartyServerPort)
+	err := c.AddPort(common.CoordAddr, common.PartyServerPort)
 
 	if err!=nil{
 		panic("SetupPartyServer: Server closed under request, "+err.Error())
@@ -47,7 +47,7 @@ func SetupPartyServer() {
 
 	logger.Do.Printf("SetupPartyServer: PartyServerAdd %s ...retry \n", common.PartyServerIP)
 
-	err = c.PartyServerAdd(common.CoordinatorUrl, common.PartyServerIP, common.PartyServerPort)
+	err = c.PartyServerAdd(common.CoordAddr, common.PartyServerIP, common.PartyServerPort)
 
 	if err!=nil{
 		panic("SetupPartyServer: PartyServerAdd error, "+err.Error())

@@ -9,7 +9,7 @@
 
     {
       "id": 0,
-      "ip": "192.168.65.3:30005",
+      "addr": "192.168.65.3:30005",
       "party_type": 0,
       "path": {
         "data_input": "/Users/nailixing/Test/falcon_demon_12_11/p1/data/",
@@ -18,7 +18,7 @@
     },
     {
       "id": 1,
-      "ip": "192.168.65.3:30006",
+      "addr": "192.168.65.3:30006",
       "party_type": 1,
       "path": {
         "data_input": "/Users/nailixing/Test/falcon_demon_12_11/p2/data/",

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func RunMaster(masterUrl string, qItem *cache.QItem, workerType string) (ms *Master) {
+func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (ms *Master) {
 	/**
 	 * @Author
 	 * @Description
@@ -15,7 +15,7 @@ func RunMaster(masterUrl string, qItem *cache.QItem, workerType string) (ms *Mas
 	 * @Param  launch 2 thread, one is rpc server, another is scheduler, once got party info, assign work
 	 * @return
 	 **/
-	ms = newMaster(masterUrl, len(qItem.IPs))
+	ms = newMaster(masterAddr, len(qItem.AddrList))
 	ms.workerType = workerType
 	ms.reset()
 
@@ -45,7 +45,7 @@ func RunMaster(masterUrl string, qItem *cache.QItem, workerType string) (ms *Mas
 		// close eventLoop and forwardRegistrations
 		ms.Cancel()
 		// stop both master after finishing the job
-		ms.StopRPCServer(ms.Url,"Master.Shutdown")
+		ms.StopRPCServer(ms.Addr,"Master.Shutdown")
 	}
 
 	// set time out, no worker comes within 1 min, stop master

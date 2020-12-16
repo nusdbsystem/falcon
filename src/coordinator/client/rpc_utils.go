@@ -47,7 +47,7 @@ func Call(srv string, proxy string, rpcname string, args interface{}, reply inte
 
 func doCall(srv string, proxy string, rpcname string, args interface{}, reply interface{}) error {
 
-	logger.Do.Printf("----in Calling----, Calling proxy: %s, url: %s, methodName: %s \n", proxy, srv, rpcname)
+	logger.Do.Printf("----in Calling----, Calling proxy: %s, addr: %s, methodName: %s \n", proxy, srv, rpcname)
 	c, derr := rpc.Dial(proxy, srv)
 	if derr != nil {
 		logger.Do.Printf("----in Calling----, Connection error, <<%s>>\n", derr)

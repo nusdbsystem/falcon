@@ -24,12 +24,12 @@ spec:
         name: train-8490548680670953438
         imagePullPolicy: IfNotPresent
         env:
-          - name: MASTER_URL
+          - name: MASTER_ADDR
             value: "192.168.65.3:30006"
           - name: EXECUTOR
             value: "train"
-          - name: WORKER_URL
-            value: "WORKER_URL_PLACEHOLDER"
+          - name: WORKER_ADDR
+            value: "WORKER_ADDR_PLACEHOLDER"
         ports:
           - containerPort: 30007  #这里containerPort是容器内部的port
             name:

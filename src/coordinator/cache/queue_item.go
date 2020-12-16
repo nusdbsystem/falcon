@@ -7,7 +7,7 @@ import (
 )
 
 type QItem struct {
-	IPs       		[]string
+	AddrList       	[]string
 	JobId     		uint
 	JobName    		string
 	JobFlType  		string

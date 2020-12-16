@@ -39,7 +39,7 @@ go build <go-program>.go
 1. Setup coordinator:
     
     Update config_coord.properties
-    choose the JOB_DB_ENGINE, DATA_BASE_PATH, COORDINATOR_IP
+    choose the JOB_DB_ENGINE, DATA_BASE_PATH, COORD_SERVER_IP
     finally run script with following
     
    If in Linux:
@@ -61,7 +61,7 @@ go build <go-program>.go
 2. Setup partyserver:
     
     Update config_partyserver.properties
-    choose the PARTY_SERVER_IP, COORDINATOR_IP, PARTY_SERVER_NODE_PORT
+    choose the PARTY_SERVER_IP, COORD_SERVER_IP, PARTY_SERVER_NODE_PORT
     finally run script with following
     
    If in Linux:
@@ -89,7 +89,7 @@ go build <go-program>.go
 
 1. Setup coordinator:
     Update config_coord.properties
-    choose the JOB_DB_ENGINE, DATA_BASE_PATH, COORDINATOR_IP
+    choose the JOB_DB_ENGINE, DATA_BASE_PATH, COORD_SERVER_IP
     finally run script with following
     
     ```
@@ -98,7 +98,7 @@ go build <go-program>.go
 
 2. Setup partyserver:
     Update config_partyserver.properties
-    choose the PARTY_SERVER_IP, COORDINATOR_IP, PARTY_SERVER_NODE_PORT
+    choose the PARTY_SERVER_IP, COORD_SERVER_IP, PARTY_SERVER_NODE_PORT
     finally run script with following
 
     ```

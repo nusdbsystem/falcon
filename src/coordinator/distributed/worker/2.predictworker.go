@@ -13,10 +13,10 @@ type PredictWorker struct {
 	base.WorkerBase
 }
 
-func InitPredictWorker (masterUrl, workerUrl string) *PredictWorker{
+func InitPredictWorker (masterAddr, workerAddr string) *PredictWorker{
 	wk := PredictWorker{}
-	wk.InitWorkerBase(workerUrl, common.PredictWorker)
-	wk.MasterUrl = masterUrl
+	wk.InitWorkerBase(workerAddr, common.PredictWorker)
+	wk.MasterAddr = masterAddr
 
 	return &wk
 }
@@ -33,8 +33,8 @@ func (wk *PredictWorker) Run(){
 		logger.Do.Fatalf("%s: start Error \n", wk.Name)
 	}
 
-	logger.Do.Printf("%s: register to masterUrl = %s \n", wk.Name, wk.MasterUrl)
-	wk.Register(wk.MasterUrl)
+	logger.Do.Printf("%s: register to masterAddr = %s \n", wk.Name, wk.MasterAddr)
+	wk.Register(wk.MasterAddr)
 
 	// start rpc server blocking...
 	wk.StartRPCServer(rpcSvc, true)

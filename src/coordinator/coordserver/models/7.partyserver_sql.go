@@ -1,8 +1,8 @@
 package models
 
-func (jobDB *JobDB) PartyServerAdd(PartyServerUrl, Port string) (error, *PartyServer) {
+func (jobDB *JobDB) PartyServerAdd(PartyServerAddr, Port string) (error, *PartyServer) {
 	u := &PartyServer{
-		PartyServerUrl: PartyServerUrl,
+		PartyServerAddr: PartyServerAddr,
 		Port: Port,
 	}
 
@@ -10,17 +10,17 @@ func (jobDB *JobDB) PartyServerAdd(PartyServerUrl, Port string) (error, *PartySe
 	return err, u
 }
 
-func (jobDB *JobDB) PartyServerDelete(PartyServerUrl string) error {
+func (jobDB *JobDB) PartyServerDelete(PartyServerAddr string) error {
 
-	e := jobDB.Db.Where("partyserver_url = ?", PartyServerUrl).Delete(PartyServer{}).Error
+	e := jobDB.Db.Where("partyserver_addr = ?", PartyServerAddr).Delete(PartyServer{}).Error
 
 	return e
 }
 
 
-func (jobDB *JobDB) PartyServerGet(PartyServerUrl string) (error, *PartyServer) {
+func (jobDB *JobDB) PartyServerGet(PartyServerAddr string) (error, *PartyServer) {
 
 	u := &PartyServer{}
-	err := jobDB.Db.Where("partyserver_url = ?", PartyServerUrl).First(u).Error
+	err := jobDB.Db.Where("partyserver_addr = ?", PartyServerAddr).First(u).Error
 	return err, u
 }

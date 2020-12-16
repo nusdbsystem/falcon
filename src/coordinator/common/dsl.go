@@ -21,7 +21,7 @@ type Job struct {
 
 type PartyInfo struct {
 	ID         		uint      `json:"id"`
-	IP         		string    `json:"ip"`
+	Addr         	string    `json:"addr"`
 	PartyType       uint      `json:"party_type"`
 	PartyPaths 		PartyPath `json:"path"`
 }
@@ -108,7 +108,7 @@ func jobVerify(jobInfo *Job) error {
 	// verify party info
 	for _, v := range jobInfo.PartyInfo {
 
-		if len(v.IP) == 0 {
+		if len(v.Addr) == 0 {
 			return errors.New("ip must be provided")
 		}
 	}
@@ -116,15 +116,15 @@ func jobVerify(jobInfo *Job) error {
 	return nil
 }
 
-func ParseIps(pInfo []PartyInfo) ([]string){
-	var iPs []string
+func ParseIps(pInfo []PartyInfo) []string {
+	var Addrs []string
 
 	for _, v := range pInfo {
 
 		// list of ip
-		iPs = append(iPs, v.IP)
+		Addrs = append(Addrs, v.Addr)
 	}
-	return iPs
+	return Addrs
 }
 
 func GenerateLrParams(cfg map[string]interface{}) string {

@@ -63,11 +63,11 @@ func findMax(l []uint) uint {
 }
 
 
-func GetPartyServerPort(PartyServerUrl string, ctx *entity.Context) string {
+func GetPartyServerPort(PartyServerAddr string, ctx *entity.Context) string {
 
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 
-	e, u := ctx.JobDB.PartyServerGet(PartyServerUrl)
+	e, u := ctx.JobDB.PartyServerGet(PartyServerAddr)
 
 	ctx.JobDB.Commit([]error{e})
 

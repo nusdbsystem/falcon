@@ -13,22 +13,22 @@ func (jobDB *JobDB) SvcCreate(jobId uint) (error, *ServiceRecord) {
 	return err, u
 }
 
-func (jobDB *JobDB) SvcUpdateMaster(jobId uint, masterUrl string) (error, *ServiceRecord) {
+func (jobDB *JobDB) SvcUpdateMaster(jobId uint, masterAddr string) (error, *ServiceRecord) {
 
 	u := &ServiceRecord{}
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
-		Update("master_url", masterUrl).Error
+		Update("master_addr", masterAddr).Error
 
 	return err, u
 }
 
-func (jobDB *JobDB) SvcUpdateWorker(workerUrl string) (error, *ServiceRecord) {
+func (jobDB *JobDB) SvcUpdateWorker(workerAddr string) (error, *ServiceRecord) {
 
 	u := &ServiceRecord{}
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", 123).
-		Update("worker_url", workerUrl).Error
+		Update("worker_addr", workerAddr).Error
 
 	return err, u
 }

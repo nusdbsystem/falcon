@@ -39,9 +39,9 @@ type Master struct {
 
 }
 
-func newMaster(masterUrl string, workerNum int) (ms *Master) {
+func newMaster(masterAddr string, workerNum int) (ms *Master) {
 	ms = new(Master)
-	ms.InitRpcBase(masterUrl)
+	ms.InitRpcBase(masterAddr)
 	ms.Name = common.Master
 	ms.beginCountDown = sync.NewCond(ms)
 	ms.allWorkerReady = sync.NewCond(ms)
@@ -57,7 +57,7 @@ func newMaster(masterUrl string, workerNum int) (ms *Master) {
 // up to report that they are ready to receive tasks.
 func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
 
-	this.tmpWorkers <- args.WorkerUrl
+	this.tmpWorkers <- args.WorkerAddr
 	return nil
 }
 
@@ -67,8 +67,8 @@ func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 	logger.Do.Printf("Master: start forwardRegistrations... ")
 	var requiredIp []string
 
-	for i := 0; i < len(qItem.IPs); i++ {
-		ip := strings.Split(qItem.IPs[i], ":")[0]
+	for i := 0; i < len(qItem.AddrList); i++ {
+		ip := strings.Split(qItem.AddrList[i], ":")[0]
 		requiredIp = append(requiredIp, ip)
 	}
 
@@ -79,21 +79,21 @@ loop:
 			logger.Do.Printf("Master: %s quite forwardRegistrations \n", this.Port)
 			break loop
 
-		case url := <- this.tmpWorkers:
+		case addr := <- this.tmpWorkers:
 			// 1. check if this work already exist
-			if utils.Contains(url, this.workers){
-				logger.Do.Printf("Master: the worker %s already registered, skip \n", url)
+			if utils.Contains(addr, this.workers){
+				logger.Do.Printf("Master: the worker %s already registered, skip \n", addr)
 			}
 
 			// 2. check if this worker is needed
-			tmpIp := strings.Split(url, ":")[0]
+			tmpIp := strings.Split(addr, ":")[0]
 
 			for i, ip := range requiredIp{
 				if tmpIp == ip{
-					logger.Do.Println("Master: Found one worker", url)
+					logger.Do.Println("Master: Found one worker", addr)
 
 					this.Lock()
-					this.workers  = append(this.workers, url)
+					this.workers  = append(this.workers, addr)
 					this.Unlock()
 					this.beginCountDown.Broadcast()
 
@@ -119,7 +119,7 @@ func (this *Master) run(schedule func(), finish func()) {
 	logger.Do.Println("Master: finish job, begin to close all")
 	finish()
 
-	logger.Do.Printf("Master %s: job completed\n", this.Url)
+	logger.Do.Printf("Master %s: job completed\n", this.Addr)
 
 	this.doneChannel <- true
 }
@@ -131,7 +131,7 @@ func (this *Master) Wait() {
 	for {
 		select {
 		case <-this.Ctx.Done():
-			logger.Do.Printf("WorkerBase: server %s quite Waitting \n", this.Url)
+			logger.Do.Printf("WorkerBase: server %s quite Waitting \n", this.Addr)
 			break loop
 		case <-this.doneChannel:
 			break loop
@@ -174,6 +174,6 @@ func (this *Master) KillJob(_, _ *struct{}) error {
 	this.killWorkers()
 
 	this.Cancel()
-	this.StopRPCServer(this.Url, "Master.Shutdown")
+	this.StopRPCServer(this.Addr, "Master.Shutdown")
 	return nil
 }

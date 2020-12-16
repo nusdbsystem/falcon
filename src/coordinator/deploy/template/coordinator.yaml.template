@@ -27,7 +27,7 @@ spec:
         app: coord
     spec:
       containers:
-        - image: FALCON_COORDINATOR_IMAGE
+        - image: FALCON_COORD_IMAGE
           name: coordinator
           imagePullPolicy: IfNotPresent
           envFrom:

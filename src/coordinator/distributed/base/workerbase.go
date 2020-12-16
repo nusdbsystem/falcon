@@ -21,13 +21,13 @@ type WorkerBase struct {
 	latestHeardTime int64
 	SuicideTimeout  int
 
-	// each worker has only one master url
-	MasterUrl  	string
+	// each worker has only one master addr
+	MasterAddr  	string
 }
 
-func(w *WorkerBase) InitWorkerBase(workerUrl, name string) {
+func(w *WorkerBase) InitWorkerBase(workerAddr, name string) {
 
-	w.InitRpcBase(workerUrl)
+	w.InitRpcBase(workerAddr)
 	w.Name = name
 	w.SuicideTimeout = common.WorkerTimeout
 
@@ -44,9 +44,9 @@ func(w *WorkerBase) InitWorkerBase(workerUrl, name string) {
 // call the master's register method,
 func (w *WorkerBase) Register(master string) {
 	args := new(entitiy.RegisterArgs)
-	args.WorkerUrl = w.Url
+	args.WorkerAddr = w.Addr
 
-	logger.Do.Printf("WorkerBase: begin to call Master.Register to register url= %s \n", args.WorkerUrl)
+	logger.Do.Printf("WorkerBase: begin to call Master.Register to register addr= %s \n", args.WorkerAddr)
 	ok := client.Call(master, w.Proxy, "Master.Register", args, new(struct{}))
 	// if not register successfully, close
 	if ok == false {
@@ -57,7 +57,7 @@ func (w *WorkerBase) Register(master string) {
 // Shutdown is called by the master when all work has been completed.
 // We should respond with the number of tasks we have processed.
 func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
-	logger.Do.Printf("%s: Shutdown %s\n", w.Name, w.Url)
+	logger.Do.Printf("%s: Shutdown %s\n", w.Name, w.Addr)
 
 	// shutdown other related thread
 	w.Cancel()
@@ -99,20 +99,20 @@ loop:
 	for {
 		select {
 		case <-w.Ctx.Done():
-			logger.Do.Printf("%s: server %s quite eventLoop \n", w.Name, w.Url)
+			logger.Do.Printf("%s: server %s quite eventLoop \n", w.Name, w.Addr)
 			break loop
 		default:
 			elapseTime := time.Now().UnixNano() - w.latestHeardTime
 			if int(elapseTime/int64(time.Millisecond)) >= w.SuicideTimeout {
 
-				logger.Do.Printf("%s: Timeout, server %s begin to suicide \n", w.Name, w.Url)
+				logger.Do.Printf("%s: Timeout, server %s begin to suicide \n", w.Name, w.Addr)
 
 				var reply entitiy.ShutdownReply
-				ok := client.Call(w.Url, w.Proxy, w.Name+".Shutdown", new(struct{}), &reply)
+				ok := client.Call(w.Addr, w.Proxy, w.Name+".Shutdown", new(struct{}), &reply)
 				if ok == false {
-					logger.Do.Printf("%s: RPC %s shutdown error\n", w.Name, w.Url)
+					logger.Do.Printf("%s: RPC %s shutdown error\n", w.Name, w.Addr)
 				} else {
-					logger.Do.Printf("%s: WorkerBase timeout, RPC %s shutdown successfule\n", w.Name, w.Url)
+					logger.Do.Printf("%s: WorkerBase timeout, RPC %s shutdown successfule\n", w.Name, w.Addr)
 				}
 				// quite event loop no matter ok or not
 				break

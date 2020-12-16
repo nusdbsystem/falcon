@@ -19,37 +19,37 @@ func SetupDistDev(qItem *cache.QItem, workerType string) {
 	 * @return
 	 **/
 
-	masterPort := c.GetFreePort(common.CoordinatorUrl)
+	masterPort := c.GetFreePort(common.CoordAddr)
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
 	masterIp := common.CoordIP
-	masterUrl := masterIp + ":" + masterPort
+	masterAddr := masterIp + ":" + masterPort
 
 	logger.Do.Println("SetupDist: Launch master DevEnv")
 
 	// use a thread
-	SetupMaster(masterUrl, qItem, workerType)
+	SetupMaster(masterAddr, qItem, workerType)
 
 	logger.Do.Println("SetupDist: setup master done")
 }
 
 
-func SetupWorkerHelperDev(masterUrl, workerType, jobId, dataPath, modelPath, dataOutput string)  {
+func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string)  {
 
 	/**
 	 * @Author
 	 * @Description: this func is only called by partyserver
 	 * @Date 2:14 下午 1/12/20
 	 * @Param
-	 	httpHost： 		IP of the partyserver url
-		masterUrl： IP of the master url
-		masterUrl： train or predictor
+	 	httpHost： 		IP of the partyserver addr
+		masterAddr： IP of the master addr
+		masterAddr： train or predictor
 	 **/
-	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterUrl, workerType)
+	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddr, workerType)
 
-	workerPort := c.GetFreePort(common.CoordinatorUrl)
+	workerPort := c.GetFreePort(common.CoordAddr)
 
-	workerUrl := common.PartyServerIP + ":" + workerPort
+	workerAddr := common.PartyServerIP + ":" + workerPort
 	var serviceName string
 
 	// in dev, use thread
@@ -65,7 +65,7 @@ func SetupWorkerHelperDev(masterUrl, workerType, jobId, dataPath, modelPath, dat
 
 		logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainWorker")
 
-		wk := worker.InitTrainWorker(masterUrl, workerUrl)
+		wk := worker.InitTrainWorker(masterAddr, workerAddr)
 		wk.RunWorker(wk)
 
 	}else if workerType == common.PredictWorker{
@@ -75,7 +75,7 @@ func SetupWorkerHelperDev(masterUrl, workerType, jobId, dataPath, modelPath, dat
 
 		logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictWorker")
 
-		wk := worker.InitPredictWorker(masterUrl, workerUrl)
+		wk := worker.InitPredictWorker(masterAddr, workerAddr)
 		wk.RunWorker(wk)
 
 	}
