@@ -33,7 +33,7 @@ func (this *Master) schedule(qItem *cache.QItem) {
 
 	logger.Do.Println("Scheduler: All worker found: ", this.workers, " required: ",qItem.IPs)
 
-	jsonString := this.schedulerHelper(this.TaskHandler, qItem)
+	jsonString := this.schedulerHelper(qItem)
 
 	// update
 	if this.workerType == common.TrainWorker{
@@ -66,7 +66,7 @@ func (this *Master) schedule(qItem *cache.QItem) {
 }
 
 
-func (this *Master) schedulerHelper(taskHandler taskHandler,  qItem *cache.QItem) string{
+func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 
 	wg := sync.WaitGroup{}
 
@@ -103,8 +103,8 @@ func (this *Master) schedulerHelper(taskHandler taskHandler,  qItem *cache.QItem
 				panic("Max search Number reaches, Ip not Match Error ")
 			}
 
-			addr := tmpStack[0]
-			ip := strings.Split(addr, ":")[0]
+			workerAddr := tmpStack[0]
+			ip := strings.Split(workerAddr, ":")[0]
 			tmpStack = tmpStack[1:]
 
 			// match using ip
@@ -114,10 +114,10 @@ func (this *Master) schedulerHelper(taskHandler taskHandler,  qItem *cache.QItem
 				// append will allocate new memory inside the func stack,
 				// must pass address of slice to func. such that multi goroutines can
 				// update the original slices.
-				go taskHandler(addr, args, &wg, &trainStatuses)
+				go this.TaskHandler(workerAddr, args, &wg, &trainStatuses)
 				break
 			}else{
-				tmpStack = append(tmpStack, addr)
+				tmpStack = append(tmpStack, workerAddr)
 				MaxSearchNumber--
 			}
 		}
