@@ -2,18 +2,18 @@
 {
   "job_name": "credit_card_training",
   "job_decs": "this is the job_decs",
-  "job_fl_type": "horizontal",
+  "job_fl_type": "vertical",
   "existing_key": 0,
   "party_nums": 1,
   "party_info": [
     {
       "id": 0,
-      "ip": "127.0.0.1:30005",
+      "addr": "127.0.0.1:30005",
       "party_type": 0,
       "path": {
-        "data_input": "/Users/nailixing/Test/falcon_demon_12_11/p1/data/",
-        "data_output": "/Users/nailixing/Test/falcon_demon_12_11/p1/dout/",
-        "model_path": "/Users/nailixing/Test/falcon_demon_12_11/p1/model/"}
+        "data_input": "/home/svd/Documents/Work/NUS-SOC/Federated_Learning_with_Yuncheng_Jul2020/lemonviv-falcon/demo_test_withNaili/data_input/",
+        "data_output": "/home/svd/Documents/Work/NUS-SOC/Federated_Learning_with_Yuncheng_Jul2020/lemonviv-falcon/demo_test_withNaili/data_output/",
+        "model_path": "/home/svd/Documents/Work/NUS-SOC/Federated_Learning_with_Yuncheng_Jul2020/lemonviv-falcon/demo_test_withNaili/trained_model/"}
     }
   ],
   "task_num": 2,
