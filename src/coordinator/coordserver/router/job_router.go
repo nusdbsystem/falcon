@@ -2,10 +2,10 @@ package router
 
 import (
 	"bytes"
-	"coordinator/coordserver/controller"
-	"coordinator/coordserver/entity"
 	"coordinator/client"
 	"coordinator/common"
+	"coordinator/coordserver/controller"
+	"coordinator/coordserver/entity"
 	"coordinator/logger"
 	"encoding/json"
 	"net/http"
@@ -40,7 +40,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	err, contents := client.ReceiveFile(r, buf, common.JobFile)
 	if err != nil {
-		logger.Do.Println(err)
+		logger.Do.Println("ReceiveFile Error", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -51,6 +51,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	e := common.ParseJob(contents, &job)
 
 	if e != nil {
+		logger.Do.Println("ParseJob Error", err)
 		http.Error(w, e.Error(), http.StatusBadRequest)
 		return
 	}
