@@ -27,3 +27,6 @@ falcon.db
 .falcon_partyserver_3/*
 .falcon_partyserver_4/*
 .falcon_partyserver_5/*
+
+# dev_test
+dev_test/*

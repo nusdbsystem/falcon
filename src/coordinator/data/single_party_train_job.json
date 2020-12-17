@@ -11,9 +11,9 @@
       "addr": "127.0.0.1:30005",
       "party_type": 0,
       "path": {
-        "data_input": "/home/svd/Documents/Work/NUS-SOC/Federated_Learning_with_Yuncheng_Jul2020/lemonviv-falcon/demo_test_withNaili/data_input/",
-        "data_output": "/home/svd/Documents/Work/NUS-SOC/Federated_Learning_with_Yuncheng_Jul2020/lemonviv-falcon/demo_test_withNaili/data_output/",
-        "model_path": "/home/svd/Documents/Work/NUS-SOC/Federated_Learning_with_Yuncheng_Jul2020/lemonviv-falcon/demo_test_withNaili/trained_model/"}
+        "data_input": "./dev_test/data_input/",
+        "data_output": "./dev_test/data_output/",
+        "model_path": "./dev_test/trained_model/"}
     }
   ],
   "task_num": 2,
