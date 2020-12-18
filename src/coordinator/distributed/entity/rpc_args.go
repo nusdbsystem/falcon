@@ -1,4 +1,4 @@
-package entitiy
+package entity
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ type DoTaskArgs struct {
 	JobFlType  		string
 	PartyInfo       common.PartyInfo
 	ExistingKey  	uint
-	TaskInfos       common.Tasks
+	TaskInfo       common.Tasks
 	NetWorkFile		string
 }
 

@@ -2,7 +2,7 @@ package worker
 
 import (
 	"coordinator/common"
-	"coordinator/distributed/entitiy"
+	"coordinator/distributed/entity"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"encoding/json"
@@ -14,7 +14,7 @@ import (
 )
 
 
-func(wk *TrainWorker) TrainTask(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply){
+func(wk *TrainWorker) TrainTask(dta *entity.DoTaskArgs, rep *entity.DoTaskReply){
 
 	wg := sync.WaitGroup{}
 
@@ -39,7 +39,7 @@ func(wk *TrainWorker) TrainTask(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskRepl
 	}
 }
 
-func (wk *TrainWorker) mlTaskCallee(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply, wg *sync.WaitGroup)  {
+func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskReply, wg *sync.WaitGroup)  {
 	/**
 	 * @Author
 	 * @Description
@@ -76,12 +76,12 @@ func (wk *TrainWorker) mlTaskCallee(dta *entitiy.DoTaskArgs, rep *entitiy.DoTask
 	flSetting := dta.JobFlType
 	existingKey := dta.ExistingKey
 
-	dataInputFile := common.TaskDataPath +"/" + dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Data
-	dataOutFile := common.TaskDataOutput  +"/" + dta.TaskInfos.PreProcessing.OutputConfigs.DataOutput
-	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Data
-	modelFile := common.TaskModelPath +"/"+ dta.TaskInfos.ModelTraining.OutputConfigs.TrainedModel
+	dataInputFile := common.TaskDataPath +"/" + dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
+	dataOutFile := common.TaskDataOutput  +"/" + dta.TaskInfo.PreProcessing.OutputConfigs.DataOutput
+	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
+	modelFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
 
-	modelReportFile := dta.TaskInfos.ModelTraining.OutputConfigs.EvaluationReport
+	modelReportFile := dta.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
 
 	var algParams string
 	var KeyFile string
@@ -101,14 +101,14 @@ func (wk *TrainWorker) mlTaskCallee(dta *entitiy.DoTaskArgs, rep *entitiy.DoTask
 	var logFile string
 	fmt.Println(res)
 
-	if  dta.TaskInfos.PreProcessing.AlgorithmName!=""{
+	if  dta.TaskInfo.PreProcessing.AlgorithmName!=""{
 		logger.Do.Println("Worker:task 1 pre processing start")
-		logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfos.PreProcessing.AlgorithmName
-		KeyFile = dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Key
+		logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfo.PreProcessing.AlgorithmName
+		KeyFile = dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
 
-		algParams = dta.TaskInfos.PreProcessing.InputConfigs.SerializedAlgorithmConfig
+		algParams = dta.TaskInfo.PreProcessing.InputConfigs.SerializedAlgorithmConfig
 		exitStr, res = run(
-			dta.TaskInfos.PreProcessing.AlgorithmName,
+			dta.TaskInfo.PreProcessing.AlgorithmName,
 			algParams,
 			KeyFile,
 			logFile,
@@ -122,15 +122,15 @@ func (wk *TrainWorker) mlTaskCallee(dta *entitiy.DoTaskArgs, rep *entitiy.DoTask
 		logger.Do.Println("Worker:task 1 pre processing done", rep)
 	}
 
-	if  dta.TaskInfos.ModelTraining.AlgorithmName!="" {
+	if  dta.TaskInfo.ModelTraining.AlgorithmName!="" {
 		// execute task 2: train
 		logger.Do.Println("Worker:task model training start")
-		logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfos.ModelTraining.AlgorithmName
-		KeyFile = dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Key
+		logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfo.ModelTraining.AlgorithmName
+		KeyFile = dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
 
-		algParams = dta.TaskInfos.ModelTraining.InputConfigs.SerializedAlgorithmConfig
+		algParams = dta.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
 		exitStr, res = run(
-			dta.TaskInfos.ModelTraining.AlgorithmName,
+			dta.TaskInfo.ModelTraining.AlgorithmName,
 			algParams,
 			KeyFile,
 			logFile,
@@ -149,7 +149,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entitiy.DoTaskArgs, rep *entitiy.DoTask
 	// 2 thread will ready from isStop channel, only one is running at the any time
 }
 
-func (wk *TrainWorker) mpcTaskCallee(dta *entitiy.DoTaskArgs, algName string){
+func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string){
 	/**
 	 * @Author
 	 * @Description
@@ -191,7 +191,7 @@ func (wk *TrainWorker) mpcTaskCallee(dta *entitiy.DoTaskArgs, algName string){
 func (wk *TrainWorker) execResHandler(
 	exitStr string,
 	RuntimeErrorMsg map[string]string,
-	rep *entitiy.DoTaskReply) bool{
+	rep *entity.DoTaskReply) bool{
 	/**
 	 * @Author
 	 * @Description
@@ -219,20 +219,20 @@ func (wk *TrainWorker) execResHandler(
 	return false
 }
 
-func TestTaskProcess(dta *entitiy.DoTaskArgs){
+func TestTaskProcess(dta *entity.DoTaskArgs){
 
 	partyId := dta.AssignID
 	partyNum := dta.PartyNums
 	partyType := dta.PartyInfo.PartyType
 	flSetting := dta.JobFlType
 	existingKey := dta.ExistingKey
-	dataInputFile := common.TaskDataPath +"/" + dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Data
-	modelFile := common.TaskModelPath +"/"+ dta.TaskInfos.ModelTraining.OutputConfigs.TrainedModel
-	algParams := dta.TaskInfos.ModelTraining.InputConfigs.SerializedAlgorithmConfig
-	modelReportFile := dta.TaskInfos.ModelTraining.OutputConfigs.EvaluationReport
-	logFile := common.TaskRuntimeLogs + "/" + dta.TaskInfos.PreProcessing.AlgorithmName
-	KeyFile := dta.TaskInfos.PreProcessing.InputConfigs.DataInput.Key
-	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfos.ModelTraining.InputConfigs.DataInput.Data
+	dataInputFile := common.TaskDataPath +"/" + dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
+	modelFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
+	algParams := dta.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
+	modelReportFile := dta.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
+	logFile := common.TaskRuntimeLogs + "/" + dta.TaskInfo.PreProcessing.AlgorithmName
+	KeyFile := dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
+	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
 
 	logger.Do.Println("executed path is: ", strings.Join([]string{
 		common.FalconTrainExe,
@@ -244,7 +244,7 @@ func TestTaskProcess(dta *entitiy.DoTaskArgs){
 		" --key-file "+KeyFile,
 		" --network-file "+dta.NetWorkFile,
 
-		" --algorithm-name "+dta.TaskInfos.ModelTraining.AlgorithmName,
+		" --algorithm-name "+dta.TaskInfo.ModelTraining.AlgorithmName,
 		" --algorithm-params "+algParams,
 		" --log-file "+logFile,
 		" --data-input-file "+dataInputFile,

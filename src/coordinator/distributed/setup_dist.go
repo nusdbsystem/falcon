@@ -104,12 +104,6 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 	return masterAddr
 }
 
-func CleanWorker(){
-
-	// todo delete the svc created for training, master will call this method after ms.Wait()
-}
-
-
 func KillJob(masterAddr, Proxy string) {
 	ok := c.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {

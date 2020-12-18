@@ -93,6 +93,12 @@ func (jobDB *JobDB) DefineTables() {
 		jobDB.Db.CreateTable(&JobRecord{})
 	}
 
+	if jobDB.Db.HasTable(&JobInfoRecord{}) {
+		jobDB.Db.AutoMigrate(&JobInfoRecord{})
+	} else {
+		jobDB.Db.CreateTable(&JobInfoRecord{})
+	}
+
 	if jobDB.Db.HasTable(&TaskRecord{}) {
 		jobDB.Db.AutoMigrate(&TaskRecord{})
 	} else {
@@ -133,6 +139,12 @@ func (jobDB *JobDB) DefineTables() {
 		jobDB.Db.AutoMigrate(&PartyServer{})
 	} else {
 		jobDB.Db.CreateTable(&PartyServer{})
+	}
+
+	if jobDB.Db.HasTable(&InferenceInfo{}) {
+		jobDB.Db.AutoMigrate(&InferenceInfo{})
+	} else {
+		jobDB.Db.CreateTable(&InferenceInfo{})
 	}
 
 	if jobDB.Db.HasTable(&TestTable{}) {

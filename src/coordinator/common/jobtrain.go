@@ -1,14 +1,16 @@
 package common
 
 import (
+	"coordinator/logger"
 	"encoding/json"
 	"errors"
 	"google.golang.org/protobuf/proto"
 	"log"
+	"strings"
 )
 
 // protoc -I=/Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/ --go_out=/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/common /Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/job.proto
-type Job struct {
+type TrainJob struct {
 	JobName    		string      				`json:"job_name"`
 	JobDecs   	 	string      				`json:"job_decs"`
 	JobFlType  		string      				`json:"job_fl_type"`
@@ -71,7 +73,7 @@ type DataInput struct{
 }
 
 
-func ParseJob(contents string, jobInfo *Job) error {
+func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 	// the error here can only check if field type is correct or not.
 	// if the field is not filled, still pass, default to 0
 	e := json.Unmarshal([]byte(contents), jobInfo)
@@ -91,14 +93,14 @@ func ParseJob(contents string, jobInfo *Job) error {
 			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 
-	ep := jobVerify(jobInfo)
+	ep := trainJobVerify(jobInfo)
 	if ep != nil {
 		return errors.New("parse verify error")
 	}
 	return nil
 }
 
-func jobVerify(jobInfo *Job) error {
+func trainJobVerify(jobInfo *TrainJob) error {
 
 	// verify task_num
 	if jobInfo.TaskNum <= 0 {
@@ -116,7 +118,7 @@ func jobVerify(jobInfo *Job) error {
 	return nil
 }
 
-func ParseIps(pInfo []PartyInfo) []string {
+func ParseAddress(pInfo []PartyInfo) []string {
 	var Addrs []string
 
 	for _, v := range pInfo {
@@ -169,4 +171,35 @@ func GenerateLrParams(cfg map[string]interface{}) string {
 
 func GeneratePreProcessparams(cfg map[string]interface{}) string {
 	return ""
+}
+
+
+func GenerateNetworkConfig(addrs []string, portArray [][]int32) string {
+	logger.Do.Println("Scheduler: Generating NetworkCfg ...")
+
+	partyNums := len(addrs)
+	var ips []string
+	for _, v := range addrs {
+		ips = append(ips, strings.Split(v, ":")[0])
+	}
+
+	cfg := NetworkConfig{
+		Ips:    ips,
+		PortArrays:  []*PortArray{},
+	}
+
+	// for each ip addr
+	for i:=0; i<partyNums; i++{
+		p := &PortArray{Ports: portArray[i]}
+		cfg.PortArrays = append(cfg.PortArrays, p)
+	}
+
+	out, err := proto.Marshal(&cfg)
+	if err != nil {
+		logger.Do.Println("Generate NetworkCfg failed ", err)
+		panic(err)
+	}
+
+	return string(out)
+
 }

@@ -47,7 +47,7 @@ func TestParseJson(t *testing.T) {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
 	// we initialize our Users array
-	var job common.Job
+	var job common.TrainJob
 
 	e2 := json.Unmarshal(byteValue, &job)
 	logger.Do.Println(e2)

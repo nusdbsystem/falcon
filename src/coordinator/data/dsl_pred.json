@@ -1,0 +1,15 @@
+
+{
+  "job_name": "credit_card_training",
+  "job_id": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "production_data_path": "/Users/nailixing/Test/falcon_demon_12_11/p1/data/"
+    },
+    {
+      "id": 1,
+      "production_data_path": "/Users/nailixing/Test/falcon_demon_12_11/p1/data/"
+    }
+  ]
+}

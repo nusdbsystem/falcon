@@ -4,8 +4,7 @@ import (
 	"coordinator/cache"
 	"coordinator/common"
 	"coordinator/distributed/base"
-	"coordinator/distributed/entitiy"
-	"coordinator/distributed/taskmanager"
+	"coordinator/distributed/entity"
 	"coordinator/distributed/utils"
 	"coordinator/logger"
 	"strings"
@@ -34,7 +33,7 @@ type Master struct {
 
 	foundWorker bool
 
-	// common.TrainWorker or common.PredictWorker
+	// common.TrainWorker or common.InferenceWorker
 	workerType string
 
 }
@@ -55,7 +54,7 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 
 // Register is an RPC method that is called by workers after they have started
 // up to report that they are ready to receive tasks.
-func (this *Master) Register(args *entitiy.RegisterArgs, _ *struct{}) error {
+func (this *Master) Register(args *entity.RegisterArgs, _ *struct{}) error {
 
 	this.tmpWorkers <- args.WorkerAddr
 	return nil
@@ -113,12 +112,19 @@ loop:
 	}
 }
 
-func (this *Master) run(schedule func(), finish func()) {
+func (this *Master) run(
+	schedule func() string,
+	updateStatus func(jsonString string),
+	finish func(),
+	) {
 
-	schedule()
+	jsonString := schedule()
+	logger.Do.Println("Master: finish job, begin to update to coord")
+
+	updateStatus(jsonString)
 	logger.Do.Println("Master: finish job, begin to close all")
-	finish()
 
+	finish()
 	logger.Do.Printf("Master %s: job completed\n", this.Addr)
 
 	this.doneChannel <- true
@@ -136,10 +142,6 @@ func (this *Master) Wait() {
 		case <-this.doneChannel:
 			break loop
 		}
-	}
-	if common.Env==common.ProdEnv{
-		km := taskmanager.InitK8sManager(true,  "")
-		km.DeleteService(common.WorkerK8sSvcName)
 	}
 }
 

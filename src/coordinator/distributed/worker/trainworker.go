@@ -3,8 +3,7 @@ package worker
 import (
 	"coordinator/common"
 	"coordinator/distributed/base"
-	"coordinator/distributed/entitiy"
-	"coordinator/distributed/taskmanager"
+	"coordinator/distributed/entity"
 	"coordinator/logger"
 	"net/rpc"
 	"time"
@@ -42,18 +41,12 @@ func (wk *TrainWorker) Run(){
 	// start rpc server blocking...
 	wk.StartRPCServer(rpcSvc, true)
 
-	// once  worker is killed, clear the resources.
-	if common.Env==common.ProdEnv{
-		km := taskmanager.InitK8sManager(true,  "")
-		km.DeleteService(common.WorkerK8sSvcName)
-	}
-
 }
 
 
-func (wk *TrainWorker) DoTask (arg []byte, rep *entitiy.DoTaskReply) error {
+func (wk *TrainWorker) DoTask (arg []byte, rep *entity.DoTaskReply) error {
 
-	var dta *entitiy.DoTaskArgs = entitiy.DecodeDoTaskArgs(arg)
+	var dta *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
 
 	TestTaskProcess(dta)
 	//wk.TrainTask(dta, rep)

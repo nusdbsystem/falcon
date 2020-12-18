@@ -46,9 +46,9 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	}
 
 	// parse it
-	var job common.Job
+	var job common.TrainJob
 
-	e := common.ParseJob(contents, &job)
+	e := common.ParseTrainJob(contents, &job)
 
 	if e != nil {
 		logger.Do.Println("ParseJob Error", err)

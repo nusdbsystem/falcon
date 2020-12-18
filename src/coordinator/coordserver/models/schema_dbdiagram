@@ -47,7 +47,6 @@ Table ModelRecord {
   ExecutablePath varchar
 
   IsTrained int
-  IsPublished int
   IsDelete int
 
 
@@ -59,11 +58,11 @@ Table ModelRecord {
 
 
 
-Table ModelServiceInfo {
+Table InferenceInfo {
   ID int [primary key]
 
 
-  ModelServiceName varchar
+  InferenceName varchar
 
   Status int
   ModelId int
@@ -71,7 +70,6 @@ Table ModelServiceInfo {
   PartyNumber int
   PartyIds varchar
 
-  IsPublished int
   IsDelete int
 
   CreateTime timestamp
@@ -86,5 +84,5 @@ Table ModelServiceInfo {
 // > many-to-one; < one-to-many; - one-to-one
 Ref: JobRecord.JobId - ServiceRecord.JobId
 Ref: JobRecord.JobId - ModelRecord.JobId
-Ref: JobRecord.JobId - ModelServiceInfo.JobId
+Ref: JobRecord.JobId - InferenceInfo.JobId
 

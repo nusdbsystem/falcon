@@ -8,7 +8,7 @@
   "party_info": [
     {
       "id": 0,
-      "ip": "127.0.0.1:30005",
+      "addr": "127.0.0.1:30005",
       "party_type": 0,
       "path": {
         "data_input": "/Users/nailixing/Test/falcon_demon_12_11/p1/data/",

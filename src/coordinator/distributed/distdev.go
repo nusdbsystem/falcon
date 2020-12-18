@@ -68,14 +68,14 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 		wk := worker.InitTrainWorker(masterAddr, workerAddr)
 		wk.RunWorker(wk)
 
-	}else if workerType == common.PredictWorker{
+	}else if workerType == common.InferenceWorker{
 
-		serviceName = "worker-jid" + jobId + "-predict-" + common.PartyServerId
+		serviceName = "worker-jid" + jobId + "-inference-" + common.PartyServerId
 		common.TaskRuntimeLogs = common.PartyServeBasePath+"/"+"run_time_logs/"+serviceName
 
-		logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictWorker")
+		logger.Do.Println("SetupWorkerHelper: Current in Dev, InferenceWorker")
 
-		wk := worker.InitPredictWorker(masterAddr, workerAddr)
+		wk := worker.InitInferenceWorker(masterAddr, workerAddr)
 		wk.RunWorker(wk)
 
 	}

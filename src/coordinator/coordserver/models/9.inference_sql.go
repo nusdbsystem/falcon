@@ -7,25 +7,19 @@ import (
 
 
 
-func (jobDB *JobDB) CreateService(
-	AppName string,
+func (jobDB *JobDB) CreateInference(
 	ModelId uint,
 	JobId uint,
-	ExtInfo string,
 
-) (error, *ModelServiceInfo) {
+) (error, *InferenceInfo) {
 
-	u := &ModelServiceInfo{
-		ModelServiceName: AppName,
+	u := &InferenceInfo{
 		Status:           common.JobInit,
 		JobId:            JobId,
 		ModelId:          ModelId,
-		IsPublished:      1,
-		IsDelete:         0,
 		CreateTime:       time.Now(),
 		UpdateTime:       time.Now(),
 		DeleteTime:       time.Now(),
-		ExtInfo:          ExtInfo,
 	}
 
 	err := jobDB.Db.Create(u).Error
@@ -34,9 +28,9 @@ func (jobDB *JobDB) CreateService(
 }
 
 
-func (jobDB *JobDB) PublishService(
+func (jobDB *JobDB) PublishInference(
 	jobId uint,
-	IsPublished uint,
+	IsTrained uint,
 
 ) (error, *ModelRecord) {
 
@@ -44,7 +38,7 @@ func (jobDB *JobDB) PublishService(
 
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
-		Update("is_published", IsPublished).
+		Update("is_trained", IsTrained).
 		Update("update_time", time.Now()).Error
 
 	return err, u
@@ -52,14 +46,14 @@ func (jobDB *JobDB) PublishService(
 }
 
 
-func (jobDB *JobDB) ModelServiceUpdateStatus(
+func (jobDB *JobDB) InferenceUpdateStatus(
 	jobId, status uint,
 
-) (error, *ModelServiceInfo) {
+) (error, *InferenceInfo) {
 
 	//todo Should we use job id to update moder_serve？add index to it if we use later
 
-	u := &ModelServiceInfo{}
+	u := &InferenceInfo{}
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
 		Update("status", status).Error
