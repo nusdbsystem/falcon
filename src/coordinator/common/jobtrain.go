@@ -115,6 +115,11 @@ func trainJobVerify(jobInfo *TrainJob) error {
 		}
 	}
 
+	// verify JobFlType
+	if jobInfo.JobFlType != HorizontalFl && jobInfo.JobFlType != VerticalFl{
+		return errors.New("job_fl_type must be either 'horizontal' or 'vertical' ")
+	}
+
 	return nil
 }
 

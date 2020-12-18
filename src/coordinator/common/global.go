@@ -98,6 +98,9 @@ const (
 	MpcExe = "./semi-party.x"
 	FalconTrainExe = "./falcon"
 
+	HorizontalFl = "horizontal"
+	VerticalFl = "vertical"
+
 )
 
 var (

@@ -51,7 +51,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	e := common.ParseTrainJob(contents, &job)
 
 	if e != nil {
-		logger.Do.Println("ParseJob Error", err)
+		logger.Do.Println("ParseJob Error", e)
 		http.Error(w, e.Error(), http.StatusBadRequest)
 		return
 	}
@@ -74,6 +74,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	js, err := json.Marshal(resIns)
 
 	if err != nil {
+		logger.Do.Println("json Marshal Error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

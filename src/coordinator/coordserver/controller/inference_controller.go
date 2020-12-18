@@ -12,14 +12,14 @@ import (
 
 
 
-func CreateInference(pJob common.InferenceJob, ctx *entity.Context) bool {
+func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) bool {
 
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 
-	e1, trainJob := ctx.JobDB.JobGetByJobID(pJob.JobId)
+	e1, trainJob := ctx.JobDB.JobGetByJobID(inferenceJob.JobId)
 
 	e2, JobInfo := ctx.JobDB.JobInfoGetById(trainJob.JobInfoID)
-	e3, model := ctx.JobDB.ModelGetByID(pJob.JobId)
+	e3, model := ctx.JobDB.ModelGetByID(inferenceJob.JobId)
 	ctx.JobDB.Commit([]error{e1, e2, e3})
 
 	// if train is not finished, return
@@ -29,7 +29,7 @@ func CreateInference(pJob common.InferenceJob, ctx *entity.Context) bool {
 
 	// if train is not finished, else create a inference job
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e1, _ = ctx.JobDB.CreateInference(model.ID, pJob.JobId)
+	e1, _ = ctx.JobDB.CreateInference(model.ID, inferenceJob.JobId)
 	ctx.JobDB.Commit(e1)
 
 	var pInfo []common.PartyInfo
@@ -43,23 +43,44 @@ func CreateInference(pJob common.InferenceJob, ctx *entity.Context) bool {
 
 	var inferencePartyInfo []common.PartyInfo
 
-	DataInfo := pJob.DataInfo
+	DataInfo := inferenceJob.DataInfo
 
-	for _, info := range DataInfo{
-		for _, v := range pInfo{
+	if JobInfo.FlSetting == common.HorizontalFl {
+		for _, info := range DataInfo{
+			for _, v := range pInfo{
 
-			if info.ID == v.ID{
-				tmp := common.PartyInfo{}
-				tmp.ID = info.ID
-				tmp.Addr = v.Addr
-				tmp.PartyType = v.PartyType
-				tmp.PartyPaths = common.PartyPath{}
-				tmp.PartyPaths.DataInput = info.InferenceDataPath
-				inferencePartyInfo = append(inferencePartyInfo, tmp)
+				// only deploy inference worker at party 0
+				if info.ID == v.ID && info.ID == 0{
+					tmp := common.PartyInfo{}
+					tmp.ID = info.ID
+					tmp.Addr = v.Addr
+					tmp.PartyType = v.PartyType
+					tmp.PartyPaths = common.PartyPath{}
+					tmp.PartyPaths.DataInput = info.InferenceDataPath
+					inferencePartyInfo = append(inferencePartyInfo, tmp)
+					break
+				}
+			}
+		}
+	}else if JobInfo.FlSetting == common.VerticalFl{
+		for _, info := range DataInfo{
+			for _, v := range pInfo{
+
+				if info.ID == v.ID{
+					tmp := common.PartyInfo{}
+					tmp.ID = info.ID
+					tmp.Addr = v.Addr
+					tmp.PartyType = v.PartyType
+					tmp.PartyPaths = common.PartyPath{}
+					tmp.PartyPaths.DataInput = info.InferenceDataPath
+					inferencePartyInfo = append(inferencePartyInfo, tmp)
+				}
 			}
 		}
 	}
 
+	logger.Do.Printf("CreateInference: JobType: %s, parsed partInfo : ",JobInfo.FlSetting)
+	logger.Do.Println(inferencePartyInfo)
 
 	addresses := common.ParseAddress(inferencePartyInfo)
 
@@ -70,7 +91,7 @@ func CreateInference(pJob common.InferenceJob, ctx *entity.Context) bool {
 	qItem.JobFlType = JobInfo.FlSetting
 	qItem.ExistingKey = JobInfo.ExistingKey
 	qItem.PartyNums = JobInfo.PartyNum
-	qItem.PartyInfo = pInfo
+	qItem.PartyInfo = inferencePartyInfo
 	qItem.Tasks = TaskInfo
 
 	go func(){
@@ -84,41 +105,6 @@ func CreateInference(pJob common.InferenceJob, ctx *entity.Context) bool {
 
 
 func UpdateInference(jobName string, ctx *entity.Context) {
-	userId := ctx.UsrId
-
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-
-	e1, JobInfo := ctx.JobDB.LatestJobInfoIdGetByUserIDAndJobName(userId, jobName)
-	e2, job := ctx.JobDB.JobGetByJobInfoID(JobInfo.Id)
-	e3, model := ctx.JobDB.ModelGetByID(job.JobId)
-	e4, _ := ctx.JobDB.CreateInference(model.ID, job.JobId)
-	ctx.JobDB.Commit([]error{e1, e2, e3, e4})
-
-	var pInfo []common.PartyInfo
-	var TaskInfo common.Tasks
-
-	err := json.Unmarshal([]byte(JobInfo.PartyIds), &pInfo)
-	err2 := json.Unmarshal([]byte(JobInfo.TaskInfo), &TaskInfo)
-	if err != nil || err2!=nil {
-		panic("json.Unmarshal(PartyIds or TaskInfo) error")
-	}
-
-	addresses := common.ParseAddress(pInfo)
-
-	qItem := new(cache.QItem)
-	qItem.AddrList = addresses
-	qItem.JobId = job.JobId
-	qItem.JobName = JobInfo.JobName
-	qItem.JobFlType = JobInfo.FlSetting
-	qItem.ExistingKey = JobInfo.ExistingKey
-	qItem.PartyNums = JobInfo.PartyNum
-	qItem.PartyInfo = pInfo
-	qItem.Tasks = TaskInfo
-
-	go func(){
-		defer logger.HandleErrors()
-		dist.SetupDist(qItem, common.InferenceWorker)
-	}()
 
 }
 
