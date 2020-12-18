@@ -12,12 +12,12 @@ func (jobDB *JobDB) JobSubmit(
 	UserID uint,
 	Status uint,
 	JobInfoID uint,
-) (error, *JobRecord) {
+) (error, *TrainJobRecord) {
 
-	u := &JobRecord{
+	u := &TrainJobRecord{
 		UserID:     UserID,
 		Status:     Status,
-		JobInfoID:	JobInfoID,
+		JobInfoID:  JobInfoID,
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
 		DeleteTime: time.Now(),
@@ -28,23 +28,23 @@ func (jobDB *JobDB) JobSubmit(
 
 }
 
-func (jobDB *JobDB) JobGetByJobID(jobId uint) (error, *JobRecord) {
+func (jobDB *JobDB) JobGetByJobID(jobId uint) (error, *TrainJobRecord) {
 
-	u := &JobRecord{}
+	u := &TrainJobRecord{}
 	err := jobDB.Db.Where("job_id = ?", jobId).First(u).Error
 	return err, u
 }
 
-func (jobDB *JobDB) JobGetByJobInfoID(jobInfoId uint) (error, *JobRecord) {
+func (jobDB *JobDB) JobGetByJobInfoID(jobInfoId uint) (error, *TrainJobRecord) {
 
-	u := &JobRecord{}
+	u := &TrainJobRecord{}
 	err := jobDB.Db.Where("job_info_id = ?", jobInfoId).First(u).Error
 	return err, u
 }
 
-func (jobDB *JobDB) JobUpdateMaster(jobId uint, masterAddr string) (error, *JobRecord) {
+func (jobDB *JobDB) JobUpdateMaster(jobId uint, masterAddr string) (error, *TrainJobRecord) {
 
-	u := &JobRecord{}
+	u := &TrainJobRecord{}
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
 		Update("master_addr", masterAddr).Error
@@ -52,9 +52,9 @@ func (jobDB *JobDB) JobUpdateMaster(jobId uint, masterAddr string) (error, *JobR
 
 }
 
-func (jobDB *JobDB) JobUpdateStatus(jobId uint, status uint) (error, *JobRecord) {
+func (jobDB *JobDB) JobUpdateStatus(jobId uint, status uint) (error, *TrainJobRecord) {
 
-	u := &JobRecord{}
+	u := &TrainJobRecord{}
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
 		Update("status", status).Error
@@ -62,9 +62,9 @@ func (jobDB *JobDB) JobUpdateStatus(jobId uint, status uint) (error, *JobRecord)
 
 }
 
-func (jobDB *JobDB) JobUpdateResInfo(jobId uint, jobErrMsg, jobResult, jobExtInfo string) (error, *JobRecord) {
+func (jobDB *JobDB) JobUpdateResInfo(jobId uint, jobErrMsg, jobResult, jobExtInfo string) (error, *TrainJobRecord) {
 
-	u := &JobRecord{}
+	u := &TrainJobRecord{}
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
 		Update("error_msg", jobErrMsg).
