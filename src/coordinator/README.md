@@ -1,3 +1,5 @@
+![Alt text](https://github.com/lemonviv/falcon/blob/dev/src/coordinator/photos/db.png)
+
 # Falcon Coordinator
 
 ## Dependencies for Development
