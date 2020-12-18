@@ -72,6 +72,10 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 	if workerType == common.TrainWorker{
 
 		c.JobUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
+
+	}else if workerType == common.InferenceWorker{
+
+		c.InferenceUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
 	}
 
 	// master will call lister's endpoint to launch worker, to train or predict

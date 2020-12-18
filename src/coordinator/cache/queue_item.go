@@ -8,7 +8,7 @@ import (
 
 type QItem struct {
 	AddrList       	[]string
-	JobId     		uint
+	JobId     		uint// train job_id, or inference jobId
 	JobName    		string
 	JobFlType  		string
 	ExistingKey  	uint

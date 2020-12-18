@@ -123,6 +123,7 @@ type InferenceJobRecord struct {
 
 	// 0: init, 1: running, 2:successful, 3: failed, 4: killed
 	Status uint
+	MasterAddr string `gorm:"type:varchar(256)"`
 
 	CreateTime time.Time
 	UpdateTime time.Time

@@ -12,7 +12,7 @@ import (
 
 
 
-func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) bool {
+func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (bool, uint) {
 
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 
@@ -24,13 +24,13 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) bool
 
 	// if train is not finished, return
 	if model.IsTrained == 0{
-		return false
+		return false, 0
 	}
 
 	// if train is not finished, else create a inference job
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e1, _ = ctx.JobDB.CreateInference(model.ID, inferenceJob.JobId)
-	ctx.JobDB.Commit(e1)
+	e4, inference := ctx.JobDB.CreateInference(model.ID, inferenceJob.JobId)
+	ctx.JobDB.Commit(e4)
 
 	var pInfo []common.PartyInfo
 	var TaskInfo common.Tasks
@@ -86,7 +86,7 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) bool
 
 	qItem := new(cache.QItem)
 	qItem.AddrList = addresses
-	qItem.JobId = trainJob.JobId
+	qItem.JobId = inference.ID
 	qItem.JobName = JobInfo.JobName
 	qItem.JobFlType = JobInfo.FlSetting
 	qItem.ExistingKey = JobInfo.ExistingKey
@@ -99,31 +99,20 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) bool
 		dist.SetupDist(qItem, common.InferenceWorker)
 	}()
 
-	return true
+	return true, inference.ID
 
 }
 
 
-func UpdateInference(jobName string, ctx *entity.Context) {
+func QueryRunningInferenceJobs(jobName string, ctx *entity.Context) []uint{
 
-}
+	InferenceIds, e := ctx.JobDB.InferenceGetCurrentRunningOneWithJobName(jobName, ctx.UsrId)
 
+	if e !=nil{
+		panic("QueryRunningJobs Error")
+	}
 
-func QueryInference(job *common.InferenceJob, ctx *entity.Context) {
-
-}
-
-
-func StopInference(job *common.InferenceJob, ctx *entity.Context) {
-
-}
-
-
-func PublishInference(jobId uint, isTrained uint, ctx *entity.Context) {
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-
-	e, _ := ctx.JobDB.PublishInference(jobId, isTrained)
-	ctx.JobDB.Commit(e)
+	return InferenceIds
 }
 
 
@@ -132,4 +121,10 @@ func InferenceUpdateStatus(jobId uint, status uint, ctx *entity.Context){
 	e, _ := ctx.JobDB.InferenceUpdateStatus(jobId, status)
 	ctx.JobDB.Commit(e)
 
+}
+
+func InferenceUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
+	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
+	e, _ := ctx.JobDB.InferenceUpdateMaster(jobId, masterAddr)
+	ctx.JobDB.Commit([]error{e})
 }

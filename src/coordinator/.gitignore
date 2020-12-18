@@ -20,3 +20,5 @@ falcon.db
 
 # dev_test
 .dev_test
+
+go.sum
