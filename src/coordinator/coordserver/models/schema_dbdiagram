@@ -57,6 +57,7 @@ Table InferenceJobRecord {
   ModelId int
   JobId int
   Status int
+  MasterAddr varchar
   CreateTime timestamp
   UpdateTime timestamp
   DeleteTime timestamp
