@@ -17,7 +17,7 @@ type JobDB struct {
 	user     string
 	password string
 	database string
-	addr      string
+	addr     string
 	Db       *gorm.DB
 	Tx       *gorm.DB
 }
@@ -87,10 +87,10 @@ func (jobDB *JobDB) Disconnect() {
 
 func (jobDB *JobDB) DefineTables() {
 
-	if jobDB.Db.HasTable(&JobRecord{}) {
-		jobDB.Db.AutoMigrate(&JobRecord{})
+	if jobDB.Db.HasTable(&TrainJobRecord{}) {
+		jobDB.Db.AutoMigrate(&TrainJobRecord{})
 	} else {
-		jobDB.Db.CreateTable(&JobRecord{})
+		jobDB.Db.CreateTable(&TrainJobRecord{})
 	}
 
 	if jobDB.Db.HasTable(&JobInfoRecord{}) {
@@ -141,10 +141,10 @@ func (jobDB *JobDB) DefineTables() {
 		jobDB.Db.CreateTable(&PartyServer{})
 	}
 
-	if jobDB.Db.HasTable(&InferenceInfo{}) {
-		jobDB.Db.AutoMigrate(&InferenceInfo{})
+	if jobDB.Db.HasTable(&InferenceJobRecord{}) {
+		jobDB.Db.AutoMigrate(&InferenceJobRecord{})
 	} else {
-		jobDB.Db.CreateTable(&InferenceInfo{})
+		jobDB.Db.CreateTable(&InferenceJobRecord{})
 	}
 
 	if jobDB.Db.HasTable(&TestTable{}) {

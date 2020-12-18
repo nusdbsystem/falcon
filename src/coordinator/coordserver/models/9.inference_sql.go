@@ -5,28 +5,25 @@ import (
 	"time"
 )
 
-
-
 func (jobDB *JobDB) CreateInference(
 	ModelId uint,
 	JobId uint,
 
-) (error, *InferenceInfo) {
+) (error, *InferenceJobRecord) {
 
-	u := &InferenceInfo{
-		Status:           common.JobInit,
-		JobId:            JobId,
-		ModelId:          ModelId,
-		CreateTime:       time.Now(),
-		UpdateTime:       time.Now(),
-		DeleteTime:       time.Now(),
+	u := &InferenceJobRecord{
+		Status:     common.JobInit,
+		JobId:      JobId,
+		ModelId:    ModelId,
+		CreateTime: time.Now(),
+		UpdateTime: time.Now(),
+		DeleteTime: time.Now(),
 	}
 
 	err := jobDB.Db.Create(u).Error
 	return err, u
 
 }
-
 
 func (jobDB *JobDB) PublishInference(
 	jobId uint,
@@ -45,15 +42,14 @@ func (jobDB *JobDB) PublishInference(
 
 }
 
-
 func (jobDB *JobDB) InferenceUpdateStatus(
 	jobId, status uint,
 
-) (error, *InferenceInfo) {
+) (error, *InferenceJobRecord) {
 
 	//todo Should we use job id to update moder_serve？add index to it if we use later
 
-	u := &InferenceInfo{}
+	u := &InferenceJobRecord{}
 	err := jobDB.Db.Model(u).
 		Where("job_id = ?", jobId).
 		Update("status", status).Error
