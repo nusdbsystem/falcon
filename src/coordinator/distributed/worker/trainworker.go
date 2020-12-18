@@ -48,8 +48,8 @@ func (wk *TrainWorker) DoTask (arg []byte, rep *entity.DoTaskReply) error {
 
 	var dta *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
 
-	TestTaskProcess(dta)
-	//wk.TrainTask(dta, rep)
+	//TestTaskProcess(dta)
+	wk.TrainTask(dta, rep)
 
 
 	for i := 10; i > 0; i-- {

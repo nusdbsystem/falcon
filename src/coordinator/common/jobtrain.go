@@ -81,13 +81,17 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 		panic("Parse error")
 	}
 
+	logger.Do.Println("Searching Algorithms...")
+
 	// if there is PreProcessing, serialize it
 	if jobInfo.Tasks.PreProcessing.AlgorithmName!=""{
+		logger.Do.Println("ParseTrainJob: Searching Algorithms, match !", jobInfo.Tasks.PreProcessing.AlgorithmName)
 		jobInfo.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig=
 			GeneratePreProcessparams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 	// if there is ModelTraining, serialize it
 	if jobInfo.Tasks.ModelTraining.AlgorithmName!=""{
+		logger.Do.Println("ParseTrainJob: Searching Algorithms, match !", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
 			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
@@ -95,8 +99,12 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 	ep := trainJobVerify(jobInfo)
 	if ep != nil {
-		return errors.New("parse verify error")
+		logger.Do.Println("ParseError", ep)
+		return errors.New("ParseError")
 	}
+
+	logger.Do.Println("Parsed result is: ", jobInfo)
+
 	return nil
 }
 
@@ -181,6 +189,7 @@ func GeneratePreProcessparams(cfg map[string]interface{}) string {
 
 func GenerateNetworkConfig(addrs []string, portArray [][]int32) string {
 	logger.Do.Println("Scheduler: Generating NetworkCfg ...")
+	logger.Do.Println("Scheduler: Assigned Ip and ports are: ", addrs, portArray)
 
 	partyNums := len(addrs)
 	var ips []string

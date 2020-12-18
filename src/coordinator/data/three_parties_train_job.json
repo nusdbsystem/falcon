@@ -3,13 +3,33 @@
   "job_decs": "this is the job_decs",
   "job_fl_type": "vertical",
   "existing_key": 0,
-  "party_nums": 1,
+  "party_nums": 3,
   "task_num": 1,
   "party_info": [
     {
       "id": 0,
       "addr": "127.0.0.1:30005",
       "party_type": 0,
+      "path": {
+        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
+        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
+        "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "127.0.0.1:30006",
+      "party_type": 1,
+      "path": {
+        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
+        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
+        "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "127.0.0.1:30007",
+      "party_type": 1,
       "path": {
         "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
         "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",

@@ -20,7 +20,7 @@ func(wk *TrainWorker) TrainTask(dta *entity.DoTaskArgs, rep *entity.DoTaskReply)
 
 	wg.Add(2)
 
-	go wk.mpcTaskCallee(dta, "algName")
+	go wk.mpcTaskCallee(dta, "algName",&wg)
 	go wk.mlTaskCallee(dta, rep, &wg)
 
 	// wait until all the task done
@@ -81,7 +81,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
 	modelFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
 
-	modelReportFile := dta.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
+	modelReportFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
 
 	var algParams string
 	var KeyFile string
@@ -129,6 +129,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 		KeyFile = dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
 
 		algParams = dta.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
+		logger.Do.Println("Worker: SerializedAlgorithmConfig is", algParams)
 		exitStr, res = run(
 			dta.TaskInfo.ModelTraining.AlgorithmName,
 			algParams,
@@ -149,7 +150,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 	// 2 thread will ready from isStop channel, only one is running at the any time
 }
 
-func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string){
+func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string,  wg *sync.WaitGroup){
 	/**
 	 * @Author
 	 * @Description
@@ -165,24 +166,25 @@ func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string){
 
 	 * @return
 	 **/
-
-	partyId := dta.AssignID
-	partyNum := dta.PartyNums
-
-	var envs []string
-
-	cmd := exec.Command(
-		common.MpcExe,
-		" --F ",
-		" -N  " + fmt.Sprintf("%d",partyNum),
-		" --I ",
-		" --p " + fmt.Sprintf("%d",partyId),
-		" --h " + dta.IP,
-		" --pn " + wk.Port,
-		" "+algName,
-		)
-
-	wk.Pm.CreateResources(cmd, envs)
+	defer wg.Done()
+	logger.Do.Println("mpcTask Done!")
+	//partyId := dta.AssignID
+	//partyNum := dta.PartyNums
+	//
+	//var envs []string
+	//
+	//cmd := exec.Command(
+	//	common.MpcExe,
+	//	" --F ",
+	//	" -N  " + fmt.Sprintf("%d",partyNum),
+	//	" --I ",
+	//	" --p " + fmt.Sprintf("%d",partyId),
+	//	" --h " + dta.IP,
+	//	" --pn " + wk.Port,
+	//	" "+algName,
+	//	)
+	//
+	//wk.Pm.CreateResources(cmd, envs)
 
 	return
 
@@ -226,14 +228,18 @@ func TestTaskProcess(dta *entity.DoTaskArgs){
 	partyType := dta.PartyInfo.PartyType
 	flSetting := dta.JobFlType
 	existingKey := dta.ExistingKey
-	dataInputFile := common.TaskDataPath +"/" + dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
+	//dataInputFile := common.TaskDataPath +"/" + dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
 	modelFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
 	algParams := dta.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
-	modelReportFile := dta.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
+	logger.Do.Println("Worker: SerializedAlgorithmConfig is", algParams)
+
+	modelReportFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
 	logFile := common.TaskRuntimeLogs + "/" + dta.TaskInfo.PreProcessing.AlgorithmName
 	KeyFile := dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
 	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
 
+	logger.Do.Printf("--------------------------------------------------\n")
+	logger.Do.Printf("\n")
 	logger.Do.Println("executed path is: ", strings.Join([]string{
 		common.FalconTrainExe,
 		" --party-id "+fmt.Sprintf("%d", partyId),
@@ -247,12 +253,13 @@ func TestTaskProcess(dta *entity.DoTaskArgs){
 		" --algorithm-name "+dta.TaskInfo.ModelTraining.AlgorithmName,
 		" --algorithm-params "+algParams,
 		" --log-file "+logFile,
-		" --data-input-file "+dataInputFile,
-		" --data-output-file "+modelInputFile,
+		" --data-input-file "+modelInputFile,
+		" --data-output-file ",
 		" --model-save-file "+modelFile,
 		" --model-report-file "+modelReportFile,
 	}, " "))
-
+	logger.Do.Printf("\n")
+	logger.Do.Printf("--------------------------------------------------\n")
 	time.Sleep(time.Minute)
 }
 
@@ -313,9 +320,21 @@ func doMlTask(
 			" --model-report-file "+modelReport,
 		)
 
-		exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)
+		logger.Do.Printf("-----------------------------------------------------------------\n")
+		logger.Do.Printf("\n")
 
-		res[algName] = runTimeErrorLog
-		return exitStr, res
+		logger.Do.Println(envs)
+		logger.Do.Println(cmd.String())
+
+		logger.Do.Printf("\n")
+		logger.Do.Printf("-----------------------------------------------------------------\n")
+		time.Sleep(time.Minute)
+
+		//exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)
+		//res[algName] = runTimeErrorLog
+		//return exitStr, res
+
+		res[algName] = "runTimeErrorLog"
+		return "exitStr", res
 	}
 }

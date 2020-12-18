@@ -101,6 +101,10 @@ const (
 	HorizontalFl = "horizontal"
 	VerticalFl = "vertical"
 
+	// algorithms
+
+	LogisticRegressionKey = "logistic_regression"
+
 )
 
 var (
