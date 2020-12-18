@@ -10,5 +10,5 @@ export PARTY_SERVER_IP=$PARTY_SERVER_IP
 export DATA_BASE_PATH=$DATA_BASE_PATH
 export PARTY_SERVER_NODE_PORT=$PARTY_SERVER_NODE_PORT
 
-make $OS
+make $OS || exit 1
 ./bin/falcon_platform

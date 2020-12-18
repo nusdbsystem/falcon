@@ -164,30 +164,33 @@ func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string,  wg
 			-pn port
 			algorithm_name
 
+		-h 是party_0的ip 端口目前只有一个 各个端口都相同就可以
+		-h 每个mpc进程的启动输入都是party_0的ip
 	 * @return
 	 **/
 	defer wg.Done()
+	partyId := dta.AssignID
+	partyNum := dta.PartyNums
+
+
+	var envs []string
+
+	cmd := exec.Command(
+		common.MpcExe,
+		" --F ",
+		" --N  " + fmt.Sprintf("%d",partyNum),
+		" --I ",
+		" --p " + fmt.Sprintf("%d",partyId),
+		" --h " + dta.MpcIp,
+		" --pn " + fmt.Sprintf("%d",dta.MpcPort),
+		" "+algName,
+		)
+
+	logger.Do.Println(envs, cmd.String())
 	logger.Do.Println("mpcTask Done!")
-	//partyId := dta.AssignID
-	//partyNum := dta.PartyNums
-	//
-	//var envs []string
-	//
-	//cmd := exec.Command(
-	//	common.MpcExe,
-	//	" --F ",
-	//	" -N  " + fmt.Sprintf("%d",partyNum),
-	//	" --I ",
-	//	" --p " + fmt.Sprintf("%d",partyId),
-	//	" --h " + dta.IP,
-	//	" --pn " + wk.Port,
-	//	" "+algName,
-	//	)
-	//
+
 	//wk.Pm.CreateResources(cmd, envs)
-
 	return
-
 }
 
 func (wk *TrainWorker) execResHandler(

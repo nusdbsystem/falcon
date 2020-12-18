@@ -57,15 +57,29 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 
 	go this.TaskStatusMonitor(&trainStatuses, ctx)
 
+	mpcPort := c.GetFreePort(common.CoordAddr)
+	mpcPint, _ := strconv.Atoi(mpcPort)
 
 	tmpStack :=  make([]string, len(this.workers))
 	copy(tmpStack, this.workers)
+
+	// find moc id address
+	var MpcIp string
+	for i, v := range qItem.AddrList {
+		// todo: check by id==0 or type==active???
+		if qItem.PartyInfo[i].ID==0{
+			vip := strings.Split(v, ":")[0]
+			MpcIp = vip
+		}
+	}
 
 	for i, v := range qItem.AddrList {
 		vip := strings.Split(v, ":")[0]
 
 		args := new(entity.DoTaskArgs)
 		args.IP = vip
+		args.MpcIp = MpcIp
+		args.MpcPort = uint(mpcPint)
 		args.AssignID = qItem.PartyInfo[i].ID
 		args.PartyNums = qItem.PartyNums
 		args.JobFlType = qItem.JobFlType
