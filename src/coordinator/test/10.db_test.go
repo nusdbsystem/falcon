@@ -16,17 +16,40 @@ func TestDb(t *testing.T){
 
 	common.JobDbEngine = "mysql"
 	common.JobDbHost = "127.0.0.1"
-	common.JobDbMysqlUser = "falcon"
-	common.JobDbMysqlPwd = "falcon"
-	common.JobDbMysqlDb = "falcon"
-	common.JobDbEngine = "mysql"
-	common.JobDbMysqlPort = "30001"
+	common.JobDbMysqlUser = "root"
+	common.JobDbMysqlPwd = "rootuser"
+	common.JobDbMysqlDb = "Test"
+	common.JobDbMysqlPort = "3306"
 	common.JobDbMysqlOptions = "?parseTime=true"
 
 	jobDB := models.InitJobDB()
 	jobDB.Connect()
 	jobDB.Tx = jobDB.Db.Begin()
 	jobDB.DefineTables()
+	jobDB.Commit(nil)
+
+	rrr,e := jobDB.InferenceGetCurrentRunningOneWithJobName("test", 1)
+
+	logger.Do.Println(rrr, e)
+
+	a := []uint{1,2,3,4,5,6,7,8,9,10}
+	jobDB.Tx = jobDB.Db.Begin()
+	var elist []error
+	for _, v :=  range a{
+
+		err, jobinfo := jobDB.JobInfoCreate("test", v,"","", "",0,"",0,0)
+		err2, job := jobDB.JobSubmit(v, 0, jobinfo.Id)
+		err3, _ := jobDB.CreateInference(0, job.JobId)
+		err4, _ := jobDB.InferenceUpdateStatus(job.JobId, 1)
+
+		elist = append(elist, err)
+		elist = append(elist, err2)
+		elist = append(elist, err3)
+		elist = append(elist, err4)
+	}
+	jobDB.Commit(jobDB)
+
+	jobDB.Disconnect()
 
 	var err error
 	var u *models.PortRecord

@@ -23,7 +23,7 @@ func SetupHttp(nConsumer int) {
 	//job
 	mux.HandleFunc("/"+common.SubmitJob, md.AddRouter(rt.JobSubmit, http.MethodPost))
 	mux.HandleFunc("/"+common.StopJob, md.AddRouter(rt.JobKill, http.MethodPost))
-	mux.HandleFunc("/"+common.UpdateJobMaster, md.AddRouter(rt.JobUpdateMaster, http.MethodPost))
+	mux.HandleFunc("/"+common.UpdateTrainJobMaster, md.AddRouter(rt.JobUpdateMaster, http.MethodPost))
 	mux.HandleFunc("/"+common.UpdateJobStatus, md.AddRouter(rt.JobUpdateStatus, http.MethodPost))
 	mux.HandleFunc("/"+common.UpdateJobResInfo, md.AddRouter(rt.JobUpdateResInfo, http.MethodPost))
 
@@ -39,7 +39,8 @@ func SetupHttp(nConsumer int) {
 	mux.HandleFunc("/"+common.ModelUpdate, md.AddRouter(rt.ModelUpdate, http.MethodPost))
 
 	// prediction service
-	mux.HandleFunc("/"+common.InferencePublish, md.AddRouter(rt.PublishInference, http.MethodPost))
+	mux.HandleFunc("/"+common.UpdateInferenceJobMaster, md.AddRouter(rt.InferenceUpdateMaster, http.MethodPost))
+	mux.HandleFunc("/"+common.InferenceUpdate, md.AddRouter(rt.UpdateInference, http.MethodPost))
 	mux.HandleFunc("/"+common.InferenceCreate, md.AddRouter(rt.CreateInference, http.MethodPost))
 	mux.HandleFunc("/"+common.InferenceStatusUpdate, md.AddRouter(rt.UpdateInferenceStatus, http.MethodPost))
 

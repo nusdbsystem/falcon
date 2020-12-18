@@ -49,10 +49,22 @@ func JobUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 		common.MasterAddrKey: {masterAddr},
 		common.JobId:      {fmt.Sprintf("%d", jobId)}}
 
-	reqUrl := ServerAddr + "/" + common.UpdateJobMaster
+	reqUrl := ServerAddr + "/" + common.UpdateTrainJobMaster
 
 	_ = PostForm(reqUrl, data)
 }
+
+func InferenceUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
+
+	data := url.Values{
+		common.MasterAddrKey: {masterAddr},
+		common.JobId:      {fmt.Sprintf("%d", jobId)}}
+
+	reqUrl := ServerAddr + "/" + common.UpdateInferenceJobMaster
+
+	_ = PostForm(reqUrl, data)
+}
+
 
 func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jobId uint) {
 	data := url.Values{

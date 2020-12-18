@@ -6,34 +6,18 @@ import (
 	"coordinator/coordserver/entity"
 	"coordinator/client"
 	"coordinator/common"
+	"coordinator/distributed"
 	"coordinator/logger"
 	"net/http"
 	"strconv"
 	"encoding/json"
-
+	"time"
 )
 
 
 type InferenceRes struct {
 	InferenceStatus   	string   `json:"inference_status"`
 }
-
-
-func PublishInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
-
-	// label the model is trained
-	client.ReceiveForm(r)
-	JobId := r.FormValue(common.JobId)
-
-	jobId, e := strconv.Atoi(JobId)
-	if e != nil {
-		panic(e)
-	}
-
-	controller.PublishInference(uint(jobId), 1, ctx)
-}
-
-
 
 func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// limit the max input length!
@@ -58,7 +42,7 @@ func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 		return
 	}
 
-	status := controller.CreateInference(InferenceJob, ctx)
+	status,_ := controller.CreateInference(InferenceJob, ctx)
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -85,18 +69,78 @@ func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
+	// 1. parse the dsl info,
+	_ = r.ParseMultipartForm(32 << 20)
+
+	var buf bytes.Buffer
+
+	err, contents := client.ReceiveFile(r, buf, common.JobFile)
+	if err != nil {
+		logger.Do.Println("client.ReceiveFile file error",err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var InferenceJob common.InferenceJob
+	e := common.ParseInferenceJob(contents, &InferenceJob)
+	if e != nil {
+		http.Error(w, e.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// 2. get current running inference jobs under user_id and job_name
+
+	InferenceIds := controller.QueryRunningInferenceJobs(InferenceJob.JobName,ctx)
+
+	// 3. create new inference job
+	status, newInfId := controller.CreateInference(InferenceJob, ctx)
+
+	// 4. if true, delete previous running job once it is running
+	if status == true{
+
+		go func(){
+
+			MaxCheck := 10
+			loop:
+				for{
+					if MaxCheck <0{
+						logger.Do.Println("UpdateInference: Update Failed, latest job is nor running")
+						break
+					}
+
+					ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
+					e, u := ctx.JobDB.InferenceGetByID(newInfId)
+					ctx.JobDB.Commit(e)
+
+					// if the latest inference is running, stop the old one
+					if u.Status == common.JobRunning{
+						for _, infId := range InferenceIds{
+
+							ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
+							e, u := ctx.JobDB.InferenceGetByID(infId)
+							ctx.JobDB.Commit(e)
+
+							distributed.KillJob(u.MasterAddr, common.Proxy)
+
+							ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
+							e2, _ := ctx.JobDB.InferenceUpdateStatus(infId, common.JobKilled)
+							ctx.JobDB.Commit(e2)
+						}
+						logger.Do.Println("UpdateInference: Update successfully")
+						break loop
+					}else{
+						MaxCheck--
+					}
+					// check db every 3 second
+					time.Sleep(time.Second*3)
+				}
+		}()
+
+	}else{
+		panic("Unable to update")
+	}
+
 }
-
-
-func QueryInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
-
-}
-
-
-func StopInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
-
-}
-
 
 func UpdateInferenceStatus(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	client.ReceiveForm(r)
@@ -113,5 +157,21 @@ func UpdateInferenceStatus(w http.ResponseWriter, r *http.Request, ctx *entity.C
 	}
 
 	controller.InferenceUpdateStatus(uint(jobId), uint(jobStatus), ctx)
+
+}
+
+func InferenceUpdateMaster(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
+
+	client.ReceiveForm(r)
+
+	InferenceId := r.FormValue(common.JobId)
+	MasterAddr := r.FormValue(common.MasterAddrKey)
+
+	infId, e := strconv.Atoi(InferenceId)
+	if e != nil {
+		panic(e)
+	}
+
+	controller.InferenceUpdateMaster(uint(infId), MasterAddr, ctx)
 
 }

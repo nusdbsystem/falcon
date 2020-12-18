@@ -26,14 +26,11 @@ func InitJobDB() *JobDB {
 	jobDB := new(JobDB)
 	jobDB.engine = common.JobDbEngine
 	jobDB.host = common.JobDbHost
-	jobDB.user = ""
-	jobDB.password = ""
-	jobDB.database = ""
+	jobDB.user = common.JobDbMysqlUser
+	jobDB.password =  common.JobDbMysqlPwd
+	jobDB.database = common.JobDbMysqlDb
 
 	if jobDB.engine == "mysql" {
-		jobDB.user = common.JobDbMysqlUser
-		jobDB.password = common.JobDbMysqlPwd
-		jobDB.database = common.JobDbMysqlDb
 
 		mysqlUrl := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s%s",

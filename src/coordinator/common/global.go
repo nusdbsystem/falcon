@@ -31,7 +31,8 @@ const (
 	Register         = "register"
 	SubmitJob        = "submit"
 	StopJob          = "stop"
-	UpdateJobMaster  = "update-master"
+	UpdateTrainJobMaster  = "update-train-master"
+	UpdateInferenceJobMaster  = "update-inference-master"
 	UpdateJobResInfo = "update-job-res"
 	UpdateJobStatus  = "update-job-status"
 	QueryJobStatus   = "query-job-status"
@@ -72,7 +73,7 @@ const (
 	// model endpoint
 	ModelUpdate  = "model-update"
 	IsTrained = "is_trained"
-	InferencePublish  = "prediction-service-publish"
+	InferenceUpdate  = "prediction-service-update"
 	InferenceCreate  = "prediction-service-create"
 
 	JobName = "job_name"

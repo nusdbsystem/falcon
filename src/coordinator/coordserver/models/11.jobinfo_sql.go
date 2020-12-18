@@ -43,13 +43,20 @@ func (jobDB *JobDB) JobInfoGetByUserID(userId uint) (error, *JobInfoRecord) {
 }
 
 
-func (jobDB *JobDB) LatestJobInfoIdGetByUserIDAndJobName(UserId uint, jobName string) (error, *JobInfoRecord) {
+func (jobDB *JobDB) JobInfoIdGetByUserIDAndJobName(UserId uint, jobName string) (error, []uint) {
 
-	u := &JobInfoRecord{}
+	var u []*JobInfoRecord
+	var res []uint
 
-	err := jobDB.Db.Where("user_id = ? AND job_name = ?", UserId, jobName).Last(&u).Error
+	err := jobDB.Db.Where("user_id = ? AND job_name = ?", UserId, jobName).Find(&u).Error
 
-	return err, u
+	if err==nil{
+		for _, item := range u{
+			res = append(res, item.Id)
+		}
+	}
+
+	return err, res
 }
 
 func (jobDB *JobDB) JobInfoGetById(Id uint) (error, *JobInfoRecord) {
