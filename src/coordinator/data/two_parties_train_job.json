@@ -43,19 +43,25 @@
       }
     },
     "model_training": {
-      "algorithm_name": "plot_out_of_core_classification",
+      "algorithm_name": "logistic_regression",
       "input_configs": {
         "data_input": {
-          "data": "outfile",
-          "key": "key"
+          "data": "client.txt",
+          "key": "keyasdfasdf"
         },
         "algorithm_config": {
           "batch_size": 128,
           "max_iteration": 500,
           "convergence_threshold": 0.0001,
-          "with_regulartization": 0,
+          "with_regularization": 0,
+          "alpha": 0.1,
           "learning_rate": 0.1,
-          "metric": "accuracy"
+          "decay": 0.1,
+          "penalty": "l1",
+          "optimizer": "sgd",
+          "multi_class": "ovr",
+          "metric": "acc",
+          "differential_privacy_budget": 0.1
         }
       },
       "output_configs": {

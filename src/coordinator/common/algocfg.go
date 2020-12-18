@@ -10,7 +10,7 @@ type LogisticRegression struct {
 	// tolerance of convergence
 	ConvergeThreshold float32 `json:"convergence_threshold"`
 	// whether use regularization or not
-	WithRegularization int32 `json:"with_regulartization"`
+	WithRegularization int32 `json:"with_regularization"`
 	// regularization parameter
 	Alpha float32 `json:"alpha"`
 	// learning rate for parameter updating
