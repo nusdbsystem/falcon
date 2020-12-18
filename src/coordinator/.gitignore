@@ -15,18 +15,8 @@ falcon_platform
 
 # Dependency directories (remove the comment below to include it)
 
-# logs
-*.log
-
 # sqlite3 db
 falcon.db
-.falcon_runtime_resources/*
-.falcon_partyserver/*
-.falcon_partyserver_1/*
-.falcon_partyserver_2/*
-.falcon_partyserver_3/*
-.falcon_partyserver_4/*
-.falcon_partyserver_5/*
 
 # dev_test
-dev_test/*
+.dev_test
