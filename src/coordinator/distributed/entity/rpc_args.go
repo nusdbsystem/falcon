@@ -15,8 +15,12 @@ type DoTaskArgs struct {
 	JobFlType  		string
 	PartyInfo       common.PartyInfo
 	ExistingKey  	uint
-	TaskInfo       common.Tasks
+	TaskInfo        common.Tasks
 	NetWorkFile		string
+
+	// this 2 for mpc
+	MpcIp			string
+	MpcPort			uint
 }
 
 // RegisterArgs is the argument passed when a worker registers with the master.
