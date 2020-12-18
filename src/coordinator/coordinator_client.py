@@ -31,7 +31,7 @@ def query_job_status(url, jobId):
     res = requests.get(url, json={'job_id': jobId})
     print(res.status_code)
     try:
-        print(res.content)
+        #  print(res.content)
         print(res.json())
     except:
         pass

@@ -1,9 +1,4 @@
-
-
-
-
 BINARY="./bin/falcon_platform"
-
 
 build_linux:
 	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o ${BINARY} falcon_platform.go
@@ -16,7 +11,6 @@ build_windows:
 
 run:
 	@go run ./
-
 
 clean:
 	@if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
