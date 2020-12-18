@@ -10,6 +10,7 @@
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/lr_params_converter.h>
+#include <falcon/utils/pb_converter/network_converter.h>
 
 TEST(PB_Converter, ModelPublishRequest) {
   int model_id = 1;
@@ -248,5 +249,33 @@ TEST(PB_Converter, LogisticRegressionParams) {
   EXPECT_TRUE(lr_params.metric == deserialized_lr_params.metric);
 }
 
+TEST(PB_Converter, NetworkConfig) {
+  // serialization
+  std::vector<std::string> ip_addresses, deserialized_ip_addresses;
+  std::vector< std::vector<int> > parties_port_nums, deserialized_parties_port_nums;
+  for (int i = 0; i < 3; i++) {
+    ip_addresses.emplace_back("127.0.0.1");
+    std::vector<int> ports;
+    for (int j = 0; j < 3; j++) {
+      ports.push_back(9000 + i * 20 + j);
+    }
+    parties_port_nums.push_back(ports);
+  }
+  std::string output_message;
+  serialize_network_configs(ip_addresses,
+      parties_port_nums,
+      output_message);
+
+  // deserialzation
+  deserialize_network_configs(deserialized_ip_addresses,
+      deserialized_parties_port_nums,
+      output_message);
+  for (int i = 0; i < 3; i++) {
+    EXPECT_TRUE(ip_addresses[i] == deserialized_ip_addresses[i]);
+    for (int j = 0; j < 3; j++) {
+      EXPECT_EQ(parties_port_nums[i][j], deserialized_parties_port_nums[i][j]);
+    }
+  }
+}
 
 

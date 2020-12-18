@@ -2,7 +2,7 @@
 {
   "job_name": "credit_card_training",
   "job_decs": "this is the job_decs",
-  "job_fl_type": "horizontal",
+  "job_fl_type": "vertical",
   "existing_key": 0,
   "party_nums": 1,
   "party_info": [
@@ -11,9 +11,9 @@
       "addr": "127.0.0.1:30005",
       "party_type": 0,
       "path": {
-        "data_input": "/Users/nailixing/Test/falcon_demon_12_11/p1/data/",
-        "data_output": "/Users/nailixing/Test/falcon_demon_12_11/p1/dout/",
-        "model_path": "/Users/nailixing/Test/falcon_demon_12_11/p1/model/"}
+        "data_input": "./dev_test/data_input/",
+        "data_output": "./dev_test/data_output/",
+        "model_path": "./dev_test/trained_model/"}
     }
   ],
   "task_num": 2,
