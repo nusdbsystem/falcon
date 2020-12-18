@@ -20,17 +20,16 @@ func SetupHttp(nConsumer int) {
 
 	md.SysLvPath = []string{common.Register, common.PartyServerAdd}
 
-	//job post
+	//job
 	mux.HandleFunc("/"+common.SubmitJob, md.AddRouter(rt.JobSubmit, http.MethodPost))
 	mux.HandleFunc("/"+common.StopJob, md.AddRouter(rt.JobKill, http.MethodPost))
 	mux.HandleFunc("/"+common.UpdateJobMaster, md.AddRouter(rt.JobUpdateMaster, http.MethodPost))
 	mux.HandleFunc("/"+common.UpdateJobStatus, md.AddRouter(rt.JobUpdateStatus, http.MethodPost))
 	mux.HandleFunc("/"+common.UpdateJobResInfo, md.AddRouter(rt.JobUpdateResInfo, http.MethodPost))
 
-	//job post
 	mux.HandleFunc("/"+common.QueryJobStatus, md.AddRouter(rt.JobStatusQuery, http.MethodGet))
 
-	//partyserver
+	//party server
 	mux.HandleFunc("/"+common.Register, md.AddRouter(rt.UserRegister, http.MethodPost))
 	mux.HandleFunc("/"+common.PartyServerAdd, md.AddRouter(rt.PartyServerAdd, http.MethodPost))
 	mux.HandleFunc("/"+common.PartyServerDelete, md.AddRouter(rt.PartyServerDelete, http.MethodPost))
@@ -38,15 +37,17 @@ func SetupHttp(nConsumer int) {
 
 	// model serving
 	mux.HandleFunc("/"+common.ModelUpdate, md.AddRouter(rt.ModelUpdate, http.MethodPost))
-	mux.HandleFunc("/"+common.SvcPublishing, md.AddRouter(rt.PublishService, http.MethodPost))
-	mux.HandleFunc("/"+common.SvcCreate, md.AddRouter(rt.CreateService, http.MethodPost))
-	mux.HandleFunc("/"+common.UpdateModelServiceStatus, md.AddRouter(rt.ModelServiceUpdateStatus, http.MethodPost))
+
+	// prediction service
+	mux.HandleFunc("/"+common.InferencePublish, md.AddRouter(rt.PublishInference, http.MethodPost))
+	mux.HandleFunc("/"+common.InferenceCreate, md.AddRouter(rt.CreateInference, http.MethodPost))
+	mux.HandleFunc("/"+common.InferenceStatusUpdate, md.AddRouter(rt.UpdateInferenceStatus, http.MethodPost))
 
 	// resource
-
 	mux.HandleFunc("/"+common.AssignPort, md.AddRouter(rt.AssignPort, http.MethodGet))
 	mux.HandleFunc("/"+common.AddPort, md.AddRouter(rt.AddPort, http.MethodPost))
 
+	// run
 	server := &http.Server{
 		Addr:    "0.0.0.0:" + common.CoordPort,
 		Handler: mux,

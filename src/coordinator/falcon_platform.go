@@ -5,6 +5,7 @@ import (
 	"coordinator/common"
 	"coordinator/coordserver"
 	"coordinator/distributed"
+	"coordinator/distributed/taskmanager"
 	"coordinator/distributed/worker"
 	"coordinator/logger"
 	"coordinator/partyserver"
@@ -42,7 +43,7 @@ func initLogger(){
 	rawTime := time.Now()
 
 	var logFileName string
-	logFileName = fixedPath + "/" + common.ServiceName + rawTime.Format(layout) + "logs"
+	logFileName = fixedPath + "/" + common.ServiceName + rawTime.Format(layout) + ".logs"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }
@@ -165,7 +166,7 @@ func InitEnvs(svcName string){
 			os.Exit(1)
 		}
 
-	}else if svcName==common.PredictWorker{
+	}else if svcName==common.InferenceWorker{
 
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
 		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
@@ -230,6 +231,8 @@ func main() {
 
 		distributed.SetupMaster(masterAddr, qItem, workerType)
 
+		km := taskmanager.InitK8sManager(true,  "")
+		km.DeleteService(common.WorkerK8sSvcName)
 	}
 
 	if common.ServiceName == common.TrainWorker {
@@ -238,14 +241,21 @@ func main() {
 
 		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr)
 		wk.RunWorker(wk)
+
+		// once  worker is killed, clear the resources.
+		km := taskmanager.InitK8sManager(true,  "")
+		km.DeleteService(common.WorkerK8sSvcName)
+
 	}
 
-	if common.ServiceName == common.PredictWorker {
+	if common.ServiceName == common.InferenceWorker {
 
 		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
-		wk := worker.InitPredictWorker(common.MasterAddr, common.WorkerAddr)
+		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr)
 		wk.RunWorker(wk)
-
 	}
+	// once  worker is killed, clear the resources.
+		km := taskmanager.InitK8sManager(true,  "")
+		km.DeleteService(common.WorkerK8sSvcName)
 }

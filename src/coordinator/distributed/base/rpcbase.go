@@ -3,7 +3,7 @@ package base
 import (
 	"context"
 	"coordinator/client"
-	"coordinator/distributed/entitiy"
+	"coordinator/distributed/entity"
 	"coordinator/logger"
 	"net"
 	"net/rpc"
@@ -96,7 +96,7 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 // This must be done through an RPC to avoid
 // race conditions between the RPC server thread and the current thread.
 func (rb *RpcBaseClass) StopRPCServer(addr, targetSvc string) {
-	var reply entitiy.ShutdownReply
+	var reply entity.ShutdownReply
 
 	logger.Do.Printf("%s: begin to call %s\n", rb.Name, targetSvc)
 	ok := client.Call(addr, rb.Proxy, targetSvc, new(struct{}), &reply)

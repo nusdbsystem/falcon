@@ -5,12 +5,20 @@ import (
 	"coordinator/client"
 	"coordinator/common"
 	_ "coordinator/common"
-	"coordinator/distributed/entitiy"
+	"coordinator/distributed/entity"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
 	"fmt"
 	"time"
 )
+
+
+type Worker interface {
+	// run worker rpc server
+	Run()
+	//  DoTask rpc call
+	DoTask(arg []byte, rep *entity.DoTaskReply) error
+}
 
 type WorkerBase struct {
 	RpcBaseClass
@@ -23,6 +31,14 @@ type WorkerBase struct {
 
 	// each worker has only one master addr
 	MasterAddr  	string
+}
+
+func (w *WorkerBase) RunWorker(worker Worker) {
+
+	worker.Run()
+
+	logger.Do.Printf("%s: runWorker exit", w.Name)
+
 }
 
 func(w *WorkerBase) InitWorkerBase(workerAddr, name string) {
@@ -43,7 +59,7 @@ func(w *WorkerBase) InitWorkerBase(workerAddr, name string) {
 
 // call the master's register method,
 func (w *WorkerBase) Register(master string) {
-	args := new(entitiy.RegisterArgs)
+	args := new(entity.RegisterArgs)
 	args.WorkerAddr = w.Addr
 
 	logger.Do.Printf("WorkerBase: begin to call Master.Register to register addr= %s \n", args.WorkerAddr)
@@ -107,7 +123,7 @@ loop:
 
 				logger.Do.Printf("%s: Timeout, server %s begin to suicide \n", w.Name, w.Addr)
 
-				var reply entitiy.ShutdownReply
+				var reply entity.ShutdownReply
 				ok := client.Call(w.Addr, w.Proxy, w.Name+".Shutdown", new(struct{}), &reply)
 				if ok == false {
 					logger.Do.Printf("%s: RPC %s shutdown error\n", w.Name, w.Addr)

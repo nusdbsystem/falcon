@@ -20,7 +20,7 @@ import (
 const (
 	Master = "Master"
 	TrainWorker = "TrainWorker"
-	PredictWorker = "PredictWorker"
+	InferenceWorker = "InferenceWorker"
 
 	// master& worker heartbeat
 
@@ -36,7 +36,7 @@ const (
 	UpdateJobStatus  = "update-job-status"
 	QueryJobStatus   = "query-job-status"
 
-	UpdateModelServiceStatus  = "update-prediction-status"
+	InferenceStatusUpdate  = "update-prediction-service-status"
 
 	AssignPort  = "port-assign"
 	AddPort  = "portadd"
@@ -72,10 +72,10 @@ const (
 	// model endpoint
 	ModelUpdate  = "model-update"
 	IsTrained = "is_trained"
-	SvcPublishing  = "model-publish"
-	SvcCreate  = "model-create"
+	InferencePublish  = "prediction-service-publish"
+	InferenceCreate  = "prediction-service-create"
 
-	AppName = "app_name"
+	JobName = "job_name"
 	ExtInfo = "ext_info"
 
 	Proxy = "tcp"
@@ -97,6 +97,9 @@ const (
 
 	MpcExe = "./semi-party.x"
 	FalconTrainExe = "./falcon"
+
+	HorizontalFl = "horizontal"
+	VerticalFl = "vertical"
 
 )
 

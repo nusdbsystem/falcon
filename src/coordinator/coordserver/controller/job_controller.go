@@ -9,17 +9,17 @@ import (
 	"encoding/json"
 )
 
-func JobSubmit(job *common.Job, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
+func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
 
 	logger.Do.Println("HTTP server: in SubmitJob, put to the JobQueue")
 
 	// generate.sh item pushed to the queue
 
-	addresses := common.ParseIps(job.PartyInfo)
+	addresses := common.ParseAddress(job.PartyInfo)
 
 	// generate.sh strings used to write to db
 	partyIds, err := json.Marshal(job.PartyInfo)
-	taskInfos, err := json.Marshal(job.Tasks)
+	TaskInfo, err := json.Marshal(job.Tasks)
 	if err != nil {
 		panic("json.Marshal(job.PartyIds) error")
 	}
@@ -27,27 +27,31 @@ func JobSubmit(job *common.Job, ctx *entity.Context) (uint, string, uint, string
 	ModelName :=  job.Tasks.ModelTraining.AlgorithmName
 	ModelDecs := job.Tasks.ModelTraining.AlgorithmName
 	PartyNumber := uint(len(job.PartyInfo))
-	ExtInfo := job.Tasks.ModelTraining.AlgorithmName
 
 	// write to db
 	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	errs, u := ctx.JobDB.JobSubmit(job.JobName, ctx.UsrId, string(partyIds), string(taskInfos), job.JobDecs, job.TaskNum, common.JobInit)
-	err2, _ := ctx.JobDB.SvcCreate(u.JobId)
-
-	err3, _ := ctx.JobDB.ModelCreate(
-		u.JobId,
-		ModelName,
-		ModelDecs,
-		PartyNumber,
+	err1, u1 := ctx.JobDB.JobInfoCreate(
+		job.JobName,
+		ctx.UsrId,
 		string(partyIds),
-		ExtInfo)
+		string(TaskInfo),
+		job.JobDecs,
+		PartyNumber,
+		job.JobFlType,
+		job.ExistingKey,
+		job.TaskNum)
 
-	ctx.JobDB.Commit([]error{errs, err2, err3})
+	err2, u2 := ctx.JobDB.JobSubmit(ctx.UsrId, common.JobInit, u1.Id)
+	err3, _ := ctx.JobDB.SvcCreate(u2.JobId)
+
+	err4, _ := ctx.JobDB.ModelCreate(u2.JobId, ModelName, ModelDecs)
+
+	ctx.JobDB.Commit([]error{err1, err2, err3, err4})
 
 
 	qItem := new(cache.QItem)
 	qItem.AddrList = addresses
-	qItem.JobId = u.JobId
+	qItem.JobId = u2.JobId
 	qItem.JobName = job.JobName
 	qItem.JobFlType = job.JobFlType
 	qItem.ExistingKey = job.ExistingKey
@@ -59,7 +63,7 @@ func JobSubmit(job *common.Job, ctx *entity.Context) (uint, string, uint, string
 		cache.JobQueue.Push(qItem)
 	}()
 
-	return u.JobId, u.JobName, u.UserID, u.PartyIds, u.TaskNum, u.Status
+	return u2.JobId, u1.JobName, u2.UserID, u1.PartyIds, u1.TaskNum, u2.Status
 }
 
 func JobKill(jobId uint, ctx *entity.Context) {

@@ -6,25 +6,17 @@ import (
 	"coordinator/client"
 	c "coordinator/client"
 	"coordinator/common"
-	"coordinator/distributed/entitiy"
+	"coordinator/distributed/entity"
 	"coordinator/logger"
 	"encoding/json"
 	"fmt"
-	"google.golang.org/protobuf/proto"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
-type taskHandler func(
-	workerAddr string,
-	args *entitiy.DoTaskArgs,
-	wg *sync.WaitGroup,
-	trainStatuses *[]entitiy.DoTaskReply)
-
-
-func (this *Master) schedule(qItem *cache.QItem) {
+func (this *Master) schedule(qItem *cache.QItem) string {
 
 	// checking if the ip of worker match the qItem
 	this.Lock()
@@ -34,35 +26,7 @@ func (this *Master) schedule(qItem *cache.QItem) {
 	logger.Do.Println("Scheduler: All worker found: ", this.workers, " required: ",qItem.AddrList)
 
 	jsonString := this.schedulerHelper(qItem)
-
-	// update
-	if this.workerType == common.TrainWorker{
-
-		logger.Do.Println("Scheduler: Finish schedule all tasks, update status")
-
-		client.JobUpdateResInfo(
-			common.CoordAddr,
-			"",
-			string(jsonString),
-			"",
-			qItem.JobId)
-
-		client.JobUpdateStatus(common.CoordAddr, this.jobStatus, qItem.JobId)
-
-		client.ModelUpdate(
-			common.CoordAddr,
-			1,
-			qItem.JobId)
-
-		// stop worker after finishing the job
-		this.killWorkers()
-
-	}else if this.workerType == common.PredictWorker{
-
-		logger.Do.Println("Scheduler: Finish schedule all tasks, update status")
-
-		client.ModelServiceUpdateStatus(common.CoordAddr, this.jobStatus, qItem.JobId)
-	}
+	return jsonString
 }
 
 
@@ -70,10 +34,24 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 
 	wg := sync.WaitGroup{}
 
-	// execute the task
-	netCfg := this.generateNetworkConfig(qItem.AddrList)
+	var portArray [][]int32
 
-	var trainStatuses []entitiy.DoTaskReply
+	// for each ip addr
+	for i:=0; i<len(qItem.AddrList); i++{
+		var ports []int32
+		//generate n ports
+		for i:=0; i<len(qItem.AddrList); i++{
+			port := c.GetFreePort(common.CoordAddr)
+			pint, _ := strconv.Atoi(port)
+			ports = append(ports, int32(pint))
+		}
+		portArray = append(portArray, ports)
+	}
+
+	// execute the task
+	netCfg := common.GenerateNetworkConfig(qItem.AddrList, portArray)
+
+	var trainStatuses []entity.DoTaskReply
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -86,14 +64,14 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 	for i, v := range qItem.AddrList {
 		vip := strings.Split(v, ":")[0]
 
-		args := new(entitiy.DoTaskArgs)
+		args := new(entity.DoTaskArgs)
 		args.IP = vip
 		args.AssignID = qItem.PartyInfo[i].ID
 		args.PartyNums = qItem.PartyNums
 		args.JobFlType = qItem.JobFlType
 		args.PartyInfo = qItem.PartyInfo[i]
 		args.ExistingKey = qItem.ExistingKey
-		args.TaskInfos = qItem.Tasks
+		args.TaskInfo = qItem.Tasks
 		args.NetWorkFile = netCfg
 
 		MaxSearchNumber := 100
@@ -137,15 +115,15 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 
 func (this *Master) TaskHandler(
 	workerAddr string,
-	args *entitiy.DoTaskArgs,
+	args *entity.DoTaskArgs,
 	wg *sync.WaitGroup,
-	trainStatuses *[]entitiy.DoTaskReply,
+	trainStatuses *[]entity.DoTaskReply,
 ){
 
 	defer wg.Done()
 
-	argAddr := entitiy.EncodeDoTaskArgs(args)
-	var rep entitiy.DoTaskReply
+	argAddr := entity.EncodeDoTaskArgs(args)
+	var rep entity.DoTaskReply
 
 	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", this.workerType, workerAddr)
 	ok := client.Call(workerAddr, this.Proxy, this.workerType+".DoTask", argAddr, &rep)
@@ -162,45 +140,7 @@ func (this *Master) TaskHandler(
 	*trainStatuses = append(*trainStatuses, rep)
 }
 
-func (this *Master) generateNetworkConfig(addrs []string) string {
-	logger.Do.Println("Scheduler: Generating NetworkCfg ...")
-
-	partyNums := len(addrs)
-	var ips []string
-	for _, v := range addrs {
-		ips = append(ips, strings.Split(v, ":")[0])
-	}
-
-	cfg := common.NetworkConfig{
-		Ips:    ips,
-		PortArrays:  []*common.PortArray{},
-	}
-
-	// for each ip addr
-	for i:=0; i<partyNums; i++{
-		var ports []int32
-		//generate n ports
-		for i:=0; i<partyNums; i++{
-			port := c.GetFreePort(common.CoordAddr)
-			pint, _ := strconv.Atoi(port)
-			ports = append(ports, int32(pint))
-		}
-		p := &common.PortArray{Ports: ports}
-		cfg.PortArrays = append(cfg.PortArrays, p)
-	}
-
-	out, err := proto.Marshal(&cfg)
-	if err != nil {
-		logger.Do.Println("Scheduler: Generate NetworkCfg failed ", err)
-		panic(err)
-	}
-
-	return string(out)
-
-}
-
-
-func (this *Master) TaskStatusMonitor(status *[]entitiy.DoTaskReply, ctx context.Context) {
+func (this *Master) TaskStatusMonitor(status *[]entity.DoTaskReply, ctx context.Context) {
 
 	/**
 	 * @Author

@@ -7,9 +7,6 @@ func (jobDB *JobDB) ModelCreate(
 	JobId uint,
 	ModelName string,
 	ModelDecs string,
-	PartyNumber uint,
-	PartyIds string,
-	ExtInfo string,
 
 ) (error, *ModelRecord) {
 
@@ -18,16 +15,11 @@ func (jobDB *JobDB) ModelCreate(
 		ModelName:    	ModelName,
 		ModelDecs:    	ModelDecs,
 
-		PartyNumber:    PartyNumber,
-		PartyIds:    	PartyIds,
-
 		IsTrained:			 0,
-		IsPublished:		 0,
-		IsDelete:    		 0,
+
 		CreateTime: 		 time.Now(),
 		UpdateTime: 		 time.Now(),
 		DeleteTime:  		 time.Now(),
-		ExtInfo:    		 ExtInfo,
 	}
 
 

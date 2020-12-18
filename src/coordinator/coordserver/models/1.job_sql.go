@@ -5,27 +5,19 @@ import (
 )
 
 ////////////////////////////////////
-/////////// JobInfo  ////////////
+/////////// Jobs        ////////////
 ////////////////////////////////////
 
 func (jobDB *JobDB) JobSubmit(
-	JobName string,
 	UserID uint,
-	PartyIds string,
-	TaskInfos string,
-	JobDecs string,
-	TaskNum uint,
 	Status uint,
+	JobInfoID uint,
 ) (error, *JobRecord) {
 
 	u := &JobRecord{
-		JobName:    JobName,
 		UserID:     UserID,
-		PartyIds:   PartyIds,
-		TaskInfos:  TaskInfos,
-		TaskNum:    TaskNum,
 		Status:     Status,
-		JobDecs:    JobDecs,
+		JobInfoID:	JobInfoID,
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
 		DeleteTime: time.Now(),
@@ -40,6 +32,13 @@ func (jobDB *JobDB) JobGetByJobID(jobId uint) (error, *JobRecord) {
 
 	u := &JobRecord{}
 	err := jobDB.Db.Where("job_id = ?", jobId).First(u).Error
+	return err, u
+}
+
+func (jobDB *JobDB) JobGetByJobInfoID(jobInfoId uint) (error, *JobRecord) {
+
+	u := &JobRecord{}
+	err := jobDB.Db.Where("job_info_id = ?", jobInfoId).First(u).Error
 	return err, u
 }
 

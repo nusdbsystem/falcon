@@ -105,17 +105,6 @@ func (pm *SubProcessManager) CreateResources(
 		return err.Error(), ""
 	}
 
-	// shutdown the process after 2 hour, if still not finish
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	time.AfterFunc(2*time.Hour, func() {
-		err := syscall.Kill(cmd.Process.Pid, syscall.SIGQUIT)
-		logger.Do.Println("SubProcessManager: Timeout, Killed PID=cmd.Process.Pid")
-		if err != nil {
-			logger.Do.Printf("SubProcessManager: Timeout, Killed PID=%d error\n", cmd.Process.Pid)
-
-		}
-	})
-
 	if err := cmd.Start(); err != nil {
 		logger.Do.Println(err)
 		return err.Error(), ""
