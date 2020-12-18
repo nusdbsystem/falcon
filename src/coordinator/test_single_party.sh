@@ -3,6 +3,7 @@
 
 # setup party 1
 # mkdir for relevant resources
+rm -rf .dev_test
 mkdir .dev_test
 cd .dev_test || exit 1
 mkdir party1
