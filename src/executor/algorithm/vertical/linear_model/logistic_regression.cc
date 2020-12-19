@@ -299,6 +299,8 @@ void LogisticRegression::train(Party party) {
     data_indexes.push_back(i);
   }
 
+  google::FlushLogFiles(google::INFO);
+
   // required by spdz connector and mpc computation
   bigint::init_thread();
 
@@ -312,6 +314,8 @@ void LogisticRegression::train(Party party) {
     std::vector<int> batch_indexes = select_batch_idx(party, data_indexes);
     int cur_batch_size = batch_indexes.size();
 
+    // std::cout << "step 2.1 success" << std::endl;
+
     // step 2.2: homomorphic batch aggregation (the precision should be 3 * prec now)
     EncodedNumber* encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
     compute_batch_phe_aggregation(party,
@@ -319,6 +323,8 @@ void LogisticRegression::train(Party party) {
         0,
         plaintext_samples_precision,
         encrypted_batch_aggregation);
+
+    // std::cout << "step 2.2 success" << std::endl;
 
     // step 2.3: convert the encrypted batch aggregation into secret shares
     int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
@@ -328,6 +334,8 @@ void LogisticRegression::train(Party party) {
         cur_batch_size,
         0,
         encrypted_batch_aggregation_precision);
+
+    // std::cout << "step 2.3 success" << std::endl;
 
     // step 2.4: communicate with spdz parties and receive results
     std::promise<std::vector<float>> promise_values;
@@ -344,6 +352,8 @@ void LogisticRegression::train(Party party) {
     std::vector<float> batch_loss_shares = future_values.get();
     spdz_thread.join();
 
+    // std::cout << "step 2.4 success" << std::endl;
+
     // step 2.5: update encrypted local weights
     // TODO: currently does not support with_regularization
     std::vector<float> truncated_weights_shares;
@@ -355,12 +365,15 @@ void LogisticRegression::train(Party party) {
         batch_indexes,
         update_precision);
 
+    // std::cout << "step 2.5 success" << std::endl;
+
     delete [] encrypted_batch_aggregation;
 
     const clock_t iter_finish_time = clock();
     float iter_consumed_time = float(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
     LOG(INFO) << "-------- The " << iter << "-th iteration consumed time = " << iter_consumed_time << " --------";
     std::cout << "-------- The " << iter << "-th iteration consumed time = " << iter_consumed_time << " --------" << std::endl;
+    google::FlushLogFiles(google::INFO);
   }
 
   const clock_t training_finish_time = clock();
@@ -468,6 +481,8 @@ void spdz_logistic_function_computation(int party_num,
   ssl_ctx ctx(mpc_player_path, "C" + to_string(party_id));
   ssl_service io_service;
   octetStream specification;
+  std::cout << "begin connect to spdz parties" << std::endl;
+  std::cout << "party_num = " << party_num << std::endl;
   for (int i = 0; i < party_num; i++)
   {
     set_up_client_socket(plain_sockets[i], party_host_names[i].c_str(), mpc_port_base + i);
@@ -482,6 +497,7 @@ void spdz_logistic_function_computation(int party_num,
                                                           " sockets = " << mpc_sockets[i] << ", port_num = " << mpc_port_base + i << ".";
   }
   LOG(INFO) << "Finish setup socket connections to spdz engines.";
+  std::cout << "Finish setup socket connections to spdz engines." << std::endl;
   int type = specification.get<int>();
   switch (type)
   {
@@ -543,6 +559,19 @@ void train_logistic_regression(Party party, std::string params_str) {
       testing_labels);
 
   LOG(INFO) << "Init logistic regression model";
+  LOG(INFO) << "params.batch_size = " << params.batch_size;
+  LOG(INFO) << "params.max_iteration = " << params.max_iteration;
+  LOG(INFO) << "params.converge_threshold = " << params.converge_threshold;
+  LOG(INFO) << "params.with_regularization = " << params.with_regularization;
+  LOG(INFO) << "params.alpha = " << params.alpha;
+  LOG(INFO) << "params.learning_rate = " << params.learning_rate;
+  LOG(INFO) << "params.decay = " << params.decay;
+  LOG(INFO) << "params.penalty = " << params.penalty;
+  LOG(INFO) << "params.optimizer = " << params.optimizer;
+  LOG(INFO) << "params.multi_class = " << params.multi_class;
+  LOG(INFO) << "params.metric = " << params.metric;
+  LOG(INFO) << "params.dp_budget = " << params.dp_budget;
+
   std::cout << "Init logistic regression model" << std::endl;
 
   LogisticRegression model(params,

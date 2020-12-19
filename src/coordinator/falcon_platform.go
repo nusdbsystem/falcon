@@ -29,7 +29,7 @@ func initLogger(){
 	var fixedPath string
 	if common.Env == common.DevEnv{
 		common.LocalPath = os.Getenv("DATA_BASE_PATH")
-		fixedPath = common.LocalPath+"runtimeLogs"
+		fixedPath = common.LocalPath+common.RuneTimeLogs
 	}else{
 		fixedPath ="./logs"
 	}

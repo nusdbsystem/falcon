@@ -18,22 +18,22 @@ func TestSubProc(t *testing.T) {
 
 	cmd := exec.Command(
 		"python3",
-		"/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml/preprocessing.py",
+		"-u", "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml/preprocessing.py",
 		"-a=1", "-b=2", "-c=123")
 	var envs []string
 
 	pm := taskmanager.InitSubProcessManager()
 	pm.Ctx, pm.Cancel = context.WithCancel(context.Background())
 
-	go func(){
-		for i:=8;i>0;i--{
-			time.Sleep(time.Second*1)
-			logger.Do.Println("Before kill process",i)
+	go func() {
+		for i := 8; i > 0; i-- {
+			time.Sleep(time.Second * 1)
+			logger.Do.Println("Before kill process", i)
 		}
 		pm.Cancel()
 	}()
 
-	el, e:= pm.CreateResources(cmd, envs)
+	el, e := pm.CreateResources(cmd, envs)
 	logger.Do.Println(e, el)
 
 	//logger.Do.Println("Worker:task model training start")
@@ -45,14 +45,14 @@ func TestSubProc(t *testing.T) {
 	time.Sleep(time.Second * 3)
 }
 
-func TestSubProcessShell(t *testing.T){
+func TestSubProcessShell(t *testing.T) {
 	logger.Do, logger.F = logger.GetLogger("./TestSubProc")
 
 	commend := "./scripts/_create_runtime_master.sh master-6369386254669931332 30006 6369386254669931332 train"
 	err := taskmanager.ExecuteBash(commend)
 	fmt.Println(err)
 
-	_=taskmanager.ExecuteBash("ls")
-	_=taskmanager.ExecuteBash("pwd")
+	_ = taskmanager.ExecuteBash("ls")
+	_ = taskmanager.ExecuteBash("pwd")
 
 }
