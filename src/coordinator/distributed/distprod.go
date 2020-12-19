@@ -106,7 +106,7 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 		common.WorkerYamlCreatePath,
 		serviceName, 	// 1. worker service name
 		workerPort,  	// 2. worker service port
-		masterAddr,  // 3. master addr
+		masterAddr,  	// 3. master addr
 		workerType,		// 4. train or predict job
 		workerAddr, 	// 5. worker addr
 		workerType,   	// 6. serviceName train or predict
