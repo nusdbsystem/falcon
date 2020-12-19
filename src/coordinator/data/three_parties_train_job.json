@@ -1,7 +1,7 @@
 {
   "job_name": "credit_card_training",
   "job_decs": "this is the job_decs",
-  "job_fl_type": "vertical",
+  "job_fl_type": "1",
   "existing_key": 0,
   "party_nums": 3,
   "task_num": 1,
@@ -11,8 +11,8 @@
       "addr": "127.0.0.1:30005",
       "party_type": 0,
       "path": {
-        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
-        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
+        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0",
+        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0",
         "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
       }
     },
@@ -21,8 +21,8 @@
       "addr": "127.0.0.1:30006",
       "party_type": 1,
       "path": {
-        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
-        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
+        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1",
+        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1",
         "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
       }
     },
@@ -31,8 +31,8 @@
       "addr": "127.0.0.1:30007",
       "party_type": 1,
       "path": {
-        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
-        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
+        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2",
+        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2",
         "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
       }
     }
@@ -46,8 +46,8 @@
           "key": "keyasdfasdf"
         },
         "algorithm_config": {
-          "batch_size": 128,
-          "max_iteration": 500,
+          "batch_size": 32,
+          "max_iteration": 50,
           "convergence_threshold": 0.0001,
           "with_regularization": 0,
           "alpha": 0.1,
