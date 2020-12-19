@@ -11,6 +11,7 @@ if [ ! -n "$1" ] ;then
      echo "No party number provided"
      exit 1
 fi
+export PARTY_SERVER_ID=$1
 
 export DATA_BASE_PATH="./.dev_test/party$1/logs/"
 let "port=$1+30004"

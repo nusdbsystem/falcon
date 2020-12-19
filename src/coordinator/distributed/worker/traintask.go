@@ -7,6 +7,7 @@ import (
 	"coordinator/logger"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"sync"
@@ -104,6 +105,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 	if  dta.TaskInfo.PreProcessing.AlgorithmName!=""{
 		logger.Do.Println("Worker:task 1 pre processing start")
 		logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfo.PreProcessing.AlgorithmName
+		_ = os.Mkdir(logFile, os.ModePerm)
 		KeyFile = dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
 
 		algParams = dta.TaskInfo.PreProcessing.InputConfigs.SerializedAlgorithmConfig
@@ -126,6 +128,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 		// execute task 2: train
 		logger.Do.Println("Worker:task model training start")
 		logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfo.ModelTraining.AlgorithmName
+		_ = os.Mkdir(logFile, os.ModePerm)
 		KeyFile = dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
 
 		algParams = dta.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
@@ -135,8 +138,8 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 			algParams,
 			KeyFile,
 			logFile,
-			"",
 			modelInputFile,
+			"",
 			modelFile,
 			modelReportFile,
 		)
@@ -325,19 +328,14 @@ func doMlTask(
 
 		logger.Do.Printf("-----------------------------------------------------------------\n")
 		logger.Do.Printf("\n")
-
-		logger.Do.Println(envs)
+		logger.Do.Println("envs",envs)
 		logger.Do.Println(cmd.String())
-
 		logger.Do.Printf("\n")
 		logger.Do.Printf("-----------------------------------------------------------------\n")
-		time.Sleep(time.Minute)
 
-		//exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)
-		//res[algName] = runTimeErrorLog
-		//return exitStr, res
+		exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)
+		res[algName] = runTimeErrorLog
+		return exitStr, res
 
-		res[algName] = "runTimeErrorLog"
-		return "exitStr", res
 	}
 }

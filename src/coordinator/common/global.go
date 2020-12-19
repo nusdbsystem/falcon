@@ -105,6 +105,7 @@ const (
 	// algorithms
 
 	LogisticRegressionKey = "logistic_regression"
+	RuneTimeLogs = "runtimeLogs"
 
 )
 
