@@ -116,7 +116,7 @@ var (
 	//////////////////////////////////////////////////////////////////////////
 
 	// JobDB and Database Configs
-	JobDbEngine       = ""
+	JobDatabase       = ""
 	JobDbSqliteDb     = ""
 	JobDbHost         = ""
 	JobDbMysqlUser    = ""

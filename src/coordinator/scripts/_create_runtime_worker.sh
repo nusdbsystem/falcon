@@ -9,7 +9,7 @@ EXECUTOR_TYPE_PLACEHOLDER=$4
 WORKER_ADDR_PLACEHOLDER=$5
 SERVICE_NAME_PLACEHOLDER=$6
 Env_PLACEHOLDER=$7
-DATA_BASE_PATH=$8 # used to store logs
+WORK_BASE_PATH=$8 # used to store logs
 
 HOST_DATA_PATH=$9 # used to store train data
 HOST_MODEL_PATH=${10}
@@ -17,7 +17,7 @@ HOST_DATA_OUTPUT=${11}
 
 echo "$WORKER_ADDR_PLACEHOLDER"
 
-BASE_PATH=$(echo "$DATA_BASE_PATH" | sed 's_/_\\/_g')
+BASE_PATH=$(echo "$WORK_BASE_PATH" | sed 's_/_\\/_g')
 
 DATA_INPUT_PATH=$(echo "$HOST_DATA_PATH" | sed 's_/_\\/_g')
 MODEL_PATH=$(echo "$HOST_MODEL_PATH" | sed 's_/_\\/_g')

@@ -19,15 +19,16 @@ func(wk *TrainWorker) TrainTask(dta *entity.DoTaskArgs, rep *entity.DoTaskReply)
 
 	wg := sync.WaitGroup{}
 
-	wg.Add(2)
+	wg.Add(1)
 
-	go wk.mpcTaskCallee(dta, "algName",&wg)
+	// no need to wait for mpc, once train task done, shutdown the mpc
+	go wk.mpcTaskCallee(dta, "algName")
 	go wk.mlTaskCallee(dta, rep, &wg)
 
 	// wait until all the task done
 	wg.Wait()
 
-	// kill all the monitors
+	// kill all the monitors, which will cause to kill all running sub processes
 	wk.Pm.Cancel()
 
 	wk.Pm.Lock()
@@ -153,7 +154,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 	// 2 thread will ready from isStop channel, only one is running at the any time
 }
 
-func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string,  wg *sync.WaitGroup){
+func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string){
 	/**
 	 * @Author
 	 * @Description
@@ -171,7 +172,6 @@ func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string,  wg
 		-h 每个mpc进程的启动输入都是party_0的ip
 	 * @return
 	 **/
-	defer wg.Done()
 	partyId := dta.AssignID
 	partyNum := dta.PartyNums
 

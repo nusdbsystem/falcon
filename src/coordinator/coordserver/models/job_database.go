@@ -23,7 +23,7 @@ type JobDB struct {
 
 func InitJobDB() *JobDB {
 	jobDB := new(JobDB)
-	jobDB.engine = common.JobDbEngine
+	jobDB.engine = common.JobDatabase
 	jobDB.host = common.JobDbHost
 	jobDB.user = common.JobDbMysqlUser
 	jobDB.password =  common.JobDbMysqlPwd

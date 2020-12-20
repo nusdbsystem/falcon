@@ -13,7 +13,7 @@ if [ ! -n "$1" ] ;then
 fi
 export PARTY_SERVER_ID=$1
 
-export DATA_BASE_PATH="./.dev_test/party$1/logs/"
+export WORK_BASE_PATH="./.dev_test/party$1/logs/"
 let "port=$1+30004"
 export PARTY_SERVER_NODE_PORT=$port
 
