@@ -2,16 +2,14 @@ package router
 
 import (
 	"bytes"
-	"coordinator/coordserver/controller"
-	"coordinator/coordserver/entity"
 	"coordinator/client"
 	"coordinator/common"
-	"coordinator/distributed"
+	"coordinator/coordserver/controller"
+	"coordinator/coordserver/entity"
 	"coordinator/logger"
+	"encoding/json"
 	"net/http"
 	"strconv"
-	"encoding/json"
-	"time"
 )
 
 
@@ -70,6 +68,7 @@ func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	// 1. parse the dsl info,
+	logger.Do.Println("[UpdateInference]: parse the dsl info,")
 	_ = r.ParseMultipartForm(32 << 20)
 
 	var buf bytes.Buffer
@@ -89,54 +88,19 @@ func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 	}
 
 	// 2. get current running inference jobs under user_id and job_name
-
+	logger.Do.Printf("[UpdateInference]: get current running inference jobs under user_id:%d and job_name:%s \n",ctx.UsrId,InferenceJob.JobName)
 	InferenceIds := controller.QueryRunningInferenceJobs(InferenceJob.JobName,ctx)
 
 	// 3. create new inference job
+	logger.Do.Println("[UpdateInference]: create new inference job InferenceJob:", InferenceJob)
 	status, newInfId := controller.CreateInference(InferenceJob, ctx)
 
 	// 4. if true, delete previous running job once it is running
 	if status == true{
-
-		go func(){
-
-			MaxCheck := 10
-			loop:
-				for{
-					if MaxCheck <0{
-						logger.Do.Println("UpdateInference: Update Failed, latest job is nor running")
-						break
-					}
-
-					e, u := ctx.JobDB.InferenceGetByID(newInfId)
-					if e!=nil{
-						panic(e)}
-
-					// if the latest inference is running, stop the old one
-					if u.Status == common.JobRunning{
-						for _, infId := range InferenceIds{
-
-							e, u := ctx.JobDB.InferenceGetByID(infId)
-							if e!=nil{
-								panic(e)}
-
-							distributed.KillJob(u.MasterAddr, common.Proxy)
-
-							tx := ctx.JobDB.Db.Begin()
-							e, _ = ctx.JobDB.InferenceUpdateStatus(tx, infId, common.JobKilled)
-							ctx.JobDB.Commit(tx, e)
-						}
-						logger.Do.Println("UpdateInference: Update successfully")
-						break loop
-					}else{
-						MaxCheck--
-					}
-					// check db every 3 second
-					time.Sleep(time.Second*3)
-				}
-		}()
-
+		logger.Do.Println("[UpdateInference]: CreateInference return true, now begin to delete previous running jobs, inferenceIds", InferenceIds)
+		go controller.UpdateInference(newInfId, InferenceIds, ctx)
 	}else{
+		logger.Do.Println("[UpdateInference]: CreateInference return false")
 		panic("Unable to update")
 	}
 

@@ -7,6 +7,7 @@ import (
 	dist "coordinator/distributed"
 	"coordinator/logger"
 	"encoding/json"
+	"time"
 )
 
 
@@ -134,4 +135,44 @@ func InferenceUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
 	tx := ctx.JobDB.Db.Begin()
 	e, _ := ctx.JobDB.InferenceUpdateMaster(tx, jobId, masterAddr)
 	ctx.JobDB.Commit(tx, []error{e})
+}
+
+
+func UpdateInference(newInfId uint, InferenceIds []uint, ctx *entity.Context) {
+
+	MaxCheck := 10
+loop:
+	for{
+		if MaxCheck <0{
+			logger.Do.Println("[UpdateInference]: Update Failed, latest job is nor running")
+			break
+		}
+
+		e, u := ctx.JobDB.InferenceGetByID(newInfId)
+		if e!=nil{
+			panic(e)}
+
+		// if the latest inference is running, stop the old one
+		if u.Status == common.JobRunning{
+			for _, infId := range InferenceIds{
+
+				e, u := ctx.JobDB.InferenceGetByID(infId)
+				if e!=nil{
+					panic(e)}
+
+				dist.KillJob(u.MasterAddr, common.Proxy)
+
+				tx := ctx.JobDB.Db.Begin()
+				e, _ = ctx.JobDB.InferenceUpdateStatus(tx, infId, common.JobKilled)
+				ctx.JobDB.Commit(tx, e)
+			}
+			logger.Do.Println("[UpdateInference]: Update successfully")
+			break loop
+		}else{
+			MaxCheck--
+		}
+		// check db every 3 second
+		time.Sleep(time.Second*3)
+	}
+
 }
