@@ -14,7 +14,7 @@ func TestDb(t *testing.T){
 
 	logger.Do, logger.F = logger.GetLogger("./TestSubProc")
 
-	common.JobDbEngine = "mysql"
+	common.JobDatabase = "mysql"
 	common.JobDbHost = "127.0.0.1"
 	common.JobDbMysqlUser = "root"
 	common.JobDbMysqlPwd = "rootuser"

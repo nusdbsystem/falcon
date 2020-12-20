@@ -60,7 +60,7 @@ func InitEnvs(svcName string){
 
 	if svcName=="coord"{
 		// coord needs db information
-		common.JobDbEngine       = common.GetEnv("JOB_DB_ENGINE", "sqlite3")
+		common.JobDatabase       = common.GetEnv("JOB_DATABASE", "sqlite3")
 		common.JobDbSqliteDb     = common.GetEnv("JOB_DB_SQLITE_DB", "falcon")
 		common.JobDbHost         = common.GetEnv("JOB_DB_HOST","localhost")
 		common.JobDbMysqlUser    = common.GetEnv("JOB_DB_MYSQL_USER", "falcon")
