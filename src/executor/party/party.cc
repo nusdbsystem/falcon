@@ -105,6 +105,13 @@ Party::Party(int m_party_id,
 
     LOG(INFO) << "Establish network communications with other parties";
 
+    for (int i = 0; i < ips.size(); i++) {
+      LOG(INFO) << "ips[" << i << "] = " << ips[i];
+      for (int j = 0; j < port_arrays[i].size(); j++) {
+        LOG(INFO) << "port_array[" << i << "][" << j << "] = " << port_arrays[i][j];
+      }
+    }
+
     // establish communication connections
     SocketPartyData me, other;
     for (int  i = 0;  i < party_num; ++ i) {
@@ -134,6 +141,7 @@ Party::Party(int m_party_id,
        channels.push_back(std::move(channel));
      }
     }
+    host_names = ips;
   }
 
   LOG(INFO) << "Init threshold partially homomorphic encryption keys";

@@ -97,10 +97,10 @@ const (
 	YamlBasePath = "./deploy/template/"
 
 	MpcExe = "./semi-party.x"
-	FalconTrainExe = "./falcon"
+	FalconTrainExe = "/home/wuyuncheng/Documents/falcon/build/src/executor/falcon"
 
-	HorizontalFl = "horizontal"
-	VerticalFl = "vertical"
+	HorizontalFl = "0"
+	VerticalFl = "1"
 
 	// algorithms
 

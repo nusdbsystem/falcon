@@ -139,7 +139,11 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 			KeyFile,
 			logFile,
 			modelInputFile,
+<<<<<<< HEAD
 			"",
+=======
+			"thisIsDataOutput",
+>>>>>>> 1b64ea272abfb3fc02e22361c2dc672d05c0d5dd
 			modelFile,
 			modelReportFile,
 		)
@@ -309,21 +313,21 @@ func doMlTask(
 
 		cmd := exec.Command(
 			common.FalconTrainExe,
-			" --party-id "+partyId,
-			" --party-num "+partyNum,
-			" --party-type "+partyType,
-			" --fl-setting "+flSetting,
-			" --existing-key "+existingKey,
-			" --key-file "+KeyFile,
-			" --network-file "+netFile,
+			"--party-id", partyId,
+			"--party-num", partyNum,
+			"--party-type", partyType,
+			"--fl-setting", flSetting,
+			"--existing-key", existingKey,
+			"--key-file", KeyFile,
+			"--network-file",netFile,
 
-			" --algorithm-name "+algName,
-			" --algorithm-params "+algParams,
-			" --log-file "+logFile,
-			" --data-input-file "+dataInputFile,
-			" --data-output-file "+dataOutputFile,
-			" --model-save-file "+modelSaveFile,
-			" --model-report-file "+modelReport,
+			"--algorithm-name", algName,
+			"--algorithm-params",algParams,
+			"--log-file", logFile,
+			"--data-input-file", dataInputFile,
+			"--data-output-file", dataOutputFile,
+			"--model-save-file", modelSaveFile,
+			"--model-report-file", modelReport,
 		)
 
 		logger.Do.Printf("-----------------------------------------------------------------\n")

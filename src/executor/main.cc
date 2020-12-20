@@ -56,6 +56,8 @@ int main(int argc, char *argv[]) {
       return 0;
     }
 
+    std::cout << "parse parameters correct" << std::endl;
+
     std::cout << "party-id: " << vm["party-id"].as<int>() << std::endl;
     std::cout << "party-num: " << vm["party-num"].as<int>() << std::endl;
     std::cout << "party-type: " << vm["party-type"].as<int>() << std::endl;
