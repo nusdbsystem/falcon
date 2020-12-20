@@ -16,8 +16,12 @@ func TestSql(t *testing.T) {
 	jobDB := models.InitJobDB()
 
 	jobDB.Connect()
+
 	e, u := jobDB.JobGetByJobID(1)
-	jobDB.Commit(e)
+	if e!=nil{
+		panic(e)
+	}
+
 	jobDB.Disconnect()
 
 	logger.Do.Println(u)

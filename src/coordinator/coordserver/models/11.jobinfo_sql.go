@@ -1,11 +1,13 @@
 package models
 
+import "github.com/jinzhu/gorm"
 
 ////////////////////////////////////
 /////////// JobInfo  ////////////
 ////////////////////////////////////
 
 func (jobDB *JobDB) JobInfoCreate(
+	tx *gorm.DB,
 	JobName string,
 	UserID uint,
 	PartyIds string,
@@ -29,7 +31,7 @@ func (jobDB *JobDB) JobInfoCreate(
 		TaskInfo:  TaskInfo,
 	}
 
-	err := jobDB.Db.Create(u).Error
+	err := tx.Create(u).Error
 	return err, u
 
 }

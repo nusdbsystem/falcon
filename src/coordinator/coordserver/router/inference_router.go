@@ -108,23 +108,23 @@ func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 						break
 					}
 
-					ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 					e, u := ctx.JobDB.InferenceGetByID(newInfId)
-					ctx.JobDB.Commit(e)
+					if e!=nil{
+						panic(e)}
 
 					// if the latest inference is running, stop the old one
 					if u.Status == common.JobRunning{
 						for _, infId := range InferenceIds{
 
-							ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 							e, u := ctx.JobDB.InferenceGetByID(infId)
-							ctx.JobDB.Commit(e)
+							if e!=nil{
+								panic(e)}
 
 							distributed.KillJob(u.MasterAddr, common.Proxy)
 
-							ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-							e2, _ := ctx.JobDB.InferenceUpdateStatus(infId, common.JobKilled)
-							ctx.JobDB.Commit(e2)
+							tx := ctx.JobDB.Db.Begin()
+							e, _ = ctx.JobDB.InferenceUpdateStatus(tx, infId, common.JobKilled)
+							ctx.JobDB.Commit(tx, e)
 						}
 						logger.Do.Println("UpdateInference: Update successfully")
 						break loop

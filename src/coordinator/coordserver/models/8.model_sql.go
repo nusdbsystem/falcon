@@ -1,9 +1,13 @@
 package models
 
-import "time"
+import (
+	"github.com/jinzhu/gorm"
+	"time"
+)
 
 
 func (jobDB *JobDB) ModelCreate(
+	tx *gorm.DB,
 	JobId uint,
 	ModelName string,
 	ModelDecs string,
@@ -23,7 +27,7 @@ func (jobDB *JobDB) ModelCreate(
 	}
 
 
-	err := jobDB.Db.Create(u).Error
+	err := tx.Create(u).Error
 	return err, u
 
 }
@@ -31,6 +35,7 @@ func (jobDB *JobDB) ModelCreate(
 
 
 func (jobDB *JobDB) ModelUpdate(
+	tx *gorm.DB,
 	jobId uint,
 	IsTrained uint,
 
@@ -38,7 +43,7 @@ func (jobDB *JobDB) ModelUpdate(
 
 	u := &ModelRecord{}
 
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("job_id = ?", jobId).
 		Update("is_trained", IsTrained).
 		Update("update_time", time.Now()).Error

@@ -43,7 +43,7 @@
       "input_configs": {
         "data_input": {
           "data": "client.txt",
-          "key": "keyasdfasdf"
+          "key": "mpcKeys"
         },
         "algorithm_config": {
           "batch_size": 32,

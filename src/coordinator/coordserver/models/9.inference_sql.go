@@ -3,10 +3,12 @@ package models
 import (
 	"coordinator/common"
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
 func (jobDB *JobDB) CreateInference(
+	tx *gorm.DB,
 	ModelId uint,
 	JobId uint,
 
@@ -21,12 +23,13 @@ func (jobDB *JobDB) CreateInference(
 		DeleteTime: time.Now(),
 	}
 
-	err := jobDB.Db.Create(u).Error
+	err := tx.Create(u).Error
 	return err, u
 
 }
 
 func (jobDB *JobDB) InferenceUpdateStatus(
+	tx *gorm.DB,
 	jobId, status uint,
 
 ) (error, *InferenceJobRecord) {
@@ -34,7 +37,7 @@ func (jobDB *JobDB) InferenceUpdateStatus(
 	//todo Should we use job id to update moder_serve？add index to it if we use later
 
 	u := &InferenceJobRecord{}
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("job_id = ?", jobId).
 		Update("status", status).Error
 	return err, u
@@ -42,10 +45,10 @@ func (jobDB *JobDB) InferenceUpdateStatus(
 }
 
 
-func (jobDB *JobDB) InferenceUpdateMaster(Id uint, masterAddr string) (error, *InferenceJobRecord) {
+func (jobDB *JobDB) InferenceUpdateMaster(tx *gorm.DB,Id uint, masterAddr string) (error, *InferenceJobRecord) {
 
 	u := &InferenceJobRecord{}
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("id = ?", Id).
 		Update("master_addr", masterAddr).Error
 	return err, u

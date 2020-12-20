@@ -14,13 +14,20 @@ import (
 
 func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (bool, uint) {
 
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
 
-	e1, trainJob := ctx.JobDB.JobGetByJobID(inferenceJob.JobId)
+	e, trainJob := ctx.JobDB.JobGetByJobID(inferenceJob.JobId)
 
-	e2, JobInfo := ctx.JobDB.JobInfoGetById(trainJob.JobInfoID)
-	e3, model := ctx.JobDB.ModelGetByID(inferenceJob.JobId)
-	ctx.JobDB.Commit([]error{e1, e2, e3})
+	if e!=nil{
+		panic(e)
+	}
+	e, JobInfo := ctx.JobDB.JobInfoGetById(trainJob.JobInfoID)
+	if e!=nil{
+		panic(e)
+	}
+	e, model := ctx.JobDB.ModelGetByID(inferenceJob.JobId)
+	if e!=nil{
+		panic(e)
+	}
 
 	// if train is not finished, return
 	if model.IsTrained == 0{
@@ -28,9 +35,9 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 	}
 
 	// if train is not finished, else create a inference job
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e4, inference := ctx.JobDB.CreateInference(model.ID, inferenceJob.JobId)
-	ctx.JobDB.Commit(e4)
+	tx := ctx.JobDB.Db.Begin()
+	e4, inference := ctx.JobDB.CreateInference(tx, model.ID, inferenceJob.JobId)
+	ctx.JobDB.Commit(tx, e4)
 
 	var pInfo []common.PartyInfo
 	var TaskInfo common.Tasks
@@ -117,14 +124,14 @@ func QueryRunningInferenceJobs(jobName string, ctx *entity.Context) []uint{
 
 
 func InferenceUpdateStatus(jobId uint, status uint, ctx *entity.Context){
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e, _ := ctx.JobDB.InferenceUpdateStatus(jobId, status)
-	ctx.JobDB.Commit(e)
+	tx := ctx.JobDB.Db.Begin()
+	e, _ := ctx.JobDB.InferenceUpdateStatus(tx, jobId, status)
+	ctx.JobDB.Commit(tx, e)
 
 }
 
 func InferenceUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e, _ := ctx.JobDB.InferenceUpdateMaster(jobId, masterAddr)
-	ctx.JobDB.Commit([]error{e})
+	tx := ctx.JobDB.Db.Begin()
+	e, _ := ctx.JobDB.InferenceUpdateMaster(tx, jobId, masterAddr)
+	ctx.JobDB.Commit(tx, []error{e})
 }

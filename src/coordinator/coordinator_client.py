@@ -8,10 +8,7 @@ def submit_job(url, path):
         print("requesting to ", url)
         res = requests.post(url, files={'job': f})
         print(res.status_code)
-        try:
-            print(res.json())
-        except:
-            pass
+        print(res.content)
 
 
 def kill_job(url, jobId):
@@ -19,10 +16,7 @@ def kill_job(url, jobId):
     print("requesting to ", url)
     res = requests.post(url, data={'job_id': jobId})
     print(res.status_code)
-    try:
-        print(res.json())
-    except:
-        pass
+    print(res.content)
 
 
 def query_job_status(url, jobId):
@@ -30,11 +24,7 @@ def query_job_status(url, jobId):
     print("requesting to ", url)
     res = requests.get(url, json={'job_id': jobId})
     print(res.status_code)
-    try:
-        print(res.content)
-        print(res.json())
-    except:
-        pass
+    print(res.content)
 
 
 if __name__ == '__main__':
