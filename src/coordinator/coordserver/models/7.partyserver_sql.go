@@ -1,18 +1,20 @@
 package models
 
-func (jobDB *JobDB) PartyServerAdd(PartyServerAddr, Port string) (error, *PartyServer) {
+import "github.com/jinzhu/gorm"
+
+func (jobDB *JobDB) PartyServerAdd(tx *gorm.DB,PartyServerAddr, Port string) (error, *PartyServer) {
 	u := &PartyServer{
 		PartyServerAddr: PartyServerAddr,
 		Port: Port,
 	}
 
-	err := jobDB.Db.Create(u).Error
+	err := tx.Create(u).Error
 	return err, u
 }
 
-func (jobDB *JobDB) PartyServerDelete(PartyServerAddr string) error {
+func (jobDB *JobDB) PartyServerDelete(tx *gorm.DB,PartyServerAddr string) error {
 
-	e := jobDB.Db.Where("partyserver_addr = ?", PartyServerAddr).Delete(PartyServer{}).Error
+	e := tx.Where("partyserver_addr = ?", PartyServerAddr).Delete(PartyServer{}).Error
 
 	return e
 }

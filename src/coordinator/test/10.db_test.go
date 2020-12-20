@@ -24,16 +24,20 @@ func TestDb(t *testing.T){
 
 	jobDB := models.InitJobDB()
 	jobDB.Connect()
-	jobDB.Tx = jobDB.Db.Begin()
+	tx := jobDB.Db.Begin()
 	jobDB.DefineTables()
-	jobDB.Commit(nil)
+	jobDB.Commit(tx,nil)
 
-	rrr,e := jobDB.InferenceGetCurrentRunningOneWithJobName("test", 1)
+	//rrr,e := jobDB.InferenceGetCurrentRunningOneWithJobName("test", 1)
+	//logger.Do.Println(rrr, e)
 
-	logger.Do.Println(rrr, e)
+	//eee, _ := jobDB.CreateInference(0, 123123123)
+	//jobDB.Commit(eee)
+
+
 
 	a := []uint{1,2,3,4,5,6,7,8,9,10}
-	jobDB.Tx = jobDB.Db.Begin()
+	tx = jobDB.Db.Begin()
 	var elist []error
 	for _, v :=  range a{
 
@@ -47,7 +51,7 @@ func TestDb(t *testing.T){
 		elist = append(elist, err3)
 		elist = append(elist, err4)
 	}
-	jobDB.Commit(jobDB)
+	jobDB.Commit(tx,elist)
 
 	jobDB.Disconnect()
 

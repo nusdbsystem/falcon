@@ -18,9 +18,8 @@ func timeUsage() Middleware {
 		return func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			defer func() {
-				logger.Do.Println("HTTP: Time of process func:", r.URL.Path, "is:", time.Since(start))
+				logger.Do.Printf("HTTP: processed request: [url] %s [time_usage] %s \n", r.Host+r.URL.Path, time.Since(start))
 			}()
-			//logger.Do.Println("HTTP: Checking time")
 			f(w, r)
 		}
 	}

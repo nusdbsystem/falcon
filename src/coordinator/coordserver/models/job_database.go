@@ -19,7 +19,6 @@ type JobDB struct {
 	database string
 	addr     string
 	Db       *gorm.DB
-	Tx       *gorm.DB
 }
 
 func InitJobDB() *JobDB {
@@ -158,7 +157,12 @@ func (jobDB *JobDB) DefineTables() {
 
 }
 
-func (jobDB *JobDB) Commit(el interface{}) {
+func (jobDB *JobDB) Commit(tx *gorm.DB, el interface{}) {
+
+	if el == nil{
+		tx.Commit()
+		return
+	}
 
 	switch el.(type) {
 	case []error:
@@ -166,19 +170,21 @@ func (jobDB *JobDB) Commit(el interface{}) {
 		for _, ev := range res {
 			if ev != nil {
 				logger.Do.Println("Sql error", ev)
-				jobDB.Tx.Rollback()
+				tx.Rollback()
 				panic(ev)
 			}
 		}
-		jobDB.Tx.Commit()
+		tx.Commit()
 	case error:
 		res, _ := el.(error)
 		if res != nil {
 			logger.Do.Println("Sql error", res)
-			jobDB.Tx.Rollback()
+			tx.Rollback()
 			panic(res)
 		}
-		jobDB.Tx.Commit()
+		tx.Commit()
+	default:
+		panic("Commit Not supported type")
 	}
 }
 
@@ -186,9 +192,3 @@ func (jobDB *JobDB) Commit(el interface{}) {
 /////////// Test falcon_sql ////////////
 ////////////////////////////////////
 
-func (jobDB *JobDB) InsertTest(name string) (error, *TestTable) {
-	u := &TestTable{Name: name}
-
-	err := jobDB.Db.Create(u).Error
-	return err, u
-}

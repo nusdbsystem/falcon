@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
@@ -9,6 +10,7 @@ import (
 ////////////////////////////////////
 
 func (jobDB *JobDB) JobSubmit(
+	tx *gorm.DB,
 	UserID uint,
 	Status uint,
 	JobInfoID uint,
@@ -23,7 +25,7 @@ func (jobDB *JobDB) JobSubmit(
 		DeleteTime: time.Now(),
 	}
 
-	err := jobDB.Db.Create(u).Error
+	err := tx.Create(u).Error
 	return err, u
 
 }
@@ -42,30 +44,30 @@ func (jobDB *JobDB) JobGetByJobInfoID(jobInfoId uint) (error, *TrainJobRecord) {
 	return err, u
 }
 
-func (jobDB *JobDB) JobUpdateMaster(jobId uint, masterAddr string) (error, *TrainJobRecord) {
+func (jobDB *JobDB) JobUpdateMaster(tx *gorm.DB,jobId uint, masterAddr string) (error, *TrainJobRecord) {
 
 	u := &TrainJobRecord{}
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("job_id = ?", jobId).
 		Update("master_addr", masterAddr).Error
 	return err, u
 
 }
 
-func (jobDB *JobDB) JobUpdateStatus(jobId uint, status uint) (error, *TrainJobRecord) {
+func (jobDB *JobDB) JobUpdateStatus(tx *gorm.DB,jobId uint, status uint) (error, *TrainJobRecord) {
 
 	u := &TrainJobRecord{}
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("job_id = ?", jobId).
 		Update("status", status).Error
 	return err, u
 
 }
 
-func (jobDB *JobDB) JobUpdateResInfo(jobId uint, jobErrMsg, jobResult, jobExtInfo string) (error, *TrainJobRecord) {
+func (jobDB *JobDB) JobUpdateResInfo(tx *gorm.DB,jobId uint, jobErrMsg, jobResult, jobExtInfo string) (error, *TrainJobRecord) {
 
 	u := &TrainJobRecord{}
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("job_id = ?", jobId).
 		Update("error_msg", jobErrMsg).
 		Update("job_result", jobResult).
@@ -82,10 +84,10 @@ func JobUpdateStatus(jobId uint, status uint) {
 	jobDB := InitJobDB()
 
 	jobDB.Connect()
-	jobDB.Tx = jobDB.Db.Begin()
+	tx := jobDB.Db.Begin()
 
-	e2, _ := jobDB.JobUpdateStatus(jobId, status)
+	e2, _ := jobDB.JobUpdateStatus(tx, jobId, status)
 
-	jobDB.Commit(e2)
+	jobDB.Commit(tx, e2)
 	jobDB.Disconnect()
 }

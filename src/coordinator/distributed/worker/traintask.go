@@ -139,11 +139,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 			KeyFile,
 			logFile,
 			modelInputFile,
-<<<<<<< HEAD
-			"",
-=======
 			"thisIsDataOutput",
->>>>>>> 1b64ea272abfb3fc02e22361c2dc672d05c0d5dd
 			modelFile,
 			modelReportFile,
 		)

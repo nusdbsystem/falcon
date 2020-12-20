@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"coordinator/coordserver/entity"
+	"fmt"
 	"net/http"
 )
 
@@ -46,11 +47,12 @@ func UserVerify(w http.ResponseWriter, r *http.Request, ctx *entity.Context) err
 	//todo check user id, got id from token
 
 	//token := r.Header.Get("token")
-
-	e, u := ctx.JobDB.GetUserByUserID(1)
+	userId := 1
+	e, u := ctx.JobDB.GetUserByUserID(uint(userId))
 
 	if e != nil {
-		http.Error(w, "User not exist", http.StatusBadRequest)
+		errMsg := fmt.Sprintf("User Id %d name %s not exist", userId, "admin")
+		http.Error(w, errMsg, http.StatusBadRequest)
 		return e
 	}
 

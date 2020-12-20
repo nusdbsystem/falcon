@@ -1,8 +1,8 @@
 package models
 
+import "github.com/jinzhu/gorm"
 
-
-func (jobDB *JobDB) GetPorts() (error, []uint){
+func (jobDB *JobDB) GetPorts() []uint {
 	/**
 	 * @Author
 	 * @Description fetch all records
@@ -19,26 +19,30 @@ func (jobDB *JobDB) GetPorts() (error, []uint){
 			res = append(res, item.Port)
 		}
 	}
-
-	return err, res
+	//  this func only called internally, the process logic is the same
+	//  so define error hand logic here for convience
+	if err!=nil{
+		panic(err)
+	}
+	return res
 }
 
-func (jobDB *JobDB) AddPort(port uint) (error, *PortRecord) {
+func (jobDB *JobDB) AddPort(tx *gorm.DB,port uint) (error, *PortRecord) {
 	u := &PortRecord{
 		Port: port,
 		IsDelete: 0,
 	}
 
-	err := jobDB.Db.Create(u).Error
+	err := tx.Create(u).Error
 
 	return err, u
 }
 
 
-func (jobDB *JobDB) DeletePort(port uint) (error, *PortRecord) {
+func (jobDB *JobDB) DeletePort(tx *gorm.DB ,port uint) (error, *PortRecord) {
 	u := &PortRecord{}
 
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("port = ?", port).
 		Update("isdelete", 1).Error
 	return err, u

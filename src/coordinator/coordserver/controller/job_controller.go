@@ -29,8 +29,9 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 	PartyNumber := uint(len(job.PartyInfo))
 
 	// write to db
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.Db.Begin()
 	err1, u1 := ctx.JobDB.JobInfoCreate(
+		tx,
 		job.JobName,
 		ctx.UsrId,
 		string(partyIds),
@@ -41,12 +42,12 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 		job.ExistingKey,
 		job.TaskNum)
 
-	err2, u2 := ctx.JobDB.JobSubmit(ctx.UsrId, common.JobInit, u1.Id)
-	err3, _ := ctx.JobDB.SvcCreate(u2.JobId)
+	err2, u2 := ctx.JobDB.JobSubmit(tx, ctx.UsrId, common.JobInit, u1.Id)
+	err3, _ := ctx.JobDB.SvcCreate(tx, u2.JobId)
 
-	err4, _ := ctx.JobDB.ModelCreate(u2.JobId, ModelName, ModelDecs)
+	err4, _ := ctx.JobDB.ModelCreate(tx, u2.JobId, ModelName, ModelDecs)
 
-	ctx.JobDB.Commit([]error{err1, err2, err3, err4})
+	ctx.JobDB.Commit(tx, []error{err1, err2, err3, err4})
 
 
 	qItem := new(cache.QItem)
@@ -68,40 +69,43 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 
 func JobKill(jobId uint, ctx *entity.Context) {
 
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e, u := ctx.JobDB.JobGetByJobID(jobId)
-	ctx.JobDB.Commit(e)
+	e,u := ctx.JobDB.JobGetByJobID(jobId)
+	if e!=nil{
+		panic(e)
+	}
 
 	distributed.KillJob(u.MasterAddr, common.Proxy)
 
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e2, _ := ctx.JobDB.JobUpdateStatus(jobId, common.JobKilled)
-	ctx.JobDB.Commit(e2)
+	tx := ctx.JobDB.Db.Begin()
+	e2, _ := ctx.JobDB.JobUpdateStatus(tx, jobId, common.JobKilled)
+	ctx.JobDB.Commit(tx, e2)
 }
 
 func JobUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e, _ := ctx.JobDB.SvcUpdateMaster(jobId, masterAddr)
-	e2, _ := ctx.JobDB.JobUpdateMaster(jobId, masterAddr)
-	ctx.JobDB.Commit([]error{e, e2})
+	tx := ctx.JobDB.Db.Begin()
+	e, _ := ctx.JobDB.SvcUpdateMaster(tx, jobId, masterAddr)
+	e2, _ := ctx.JobDB.JobUpdateMaster(tx, jobId, masterAddr)
+	ctx.JobDB.Commit(tx, []error{e, e2})
 }
 
 func JobUpdateResInfo(jobId uint, jobErrMsg, jobResult, jobExtInfo string, ctx *entity.Context) {
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e, _ := ctx.JobDB.JobUpdateResInfo(jobId, jobErrMsg, jobResult, jobExtInfo)
-	ctx.JobDB.Commit(e)
+	tx := ctx.JobDB.Db.Begin()
+	e, _ := ctx.JobDB.JobUpdateResInfo(tx, jobId, jobErrMsg, jobResult, jobExtInfo)
+	ctx.JobDB.Commit(tx, e)
 }
 
 func JobUpdateStatus(jobId uint, status uint, ctx *entity.Context) {
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e, _ := ctx.JobDB.JobUpdateStatus(jobId, status)
-	ctx.JobDB.Commit(e)
+	tx := ctx.JobDB.Db.Begin()
+	e, _ := ctx.JobDB.JobUpdateStatus(tx, jobId, status)
+	ctx.JobDB.Commit(tx, e)
 }
 
 func JobStatusQuery(jobId uint, ctx *entity.Context) uint {
-	ctx.JobDB.Tx = ctx.JobDB.Db.Begin()
-	e, u := ctx.JobDB.JobGetByJobID(jobId)
-	ctx.JobDB.Commit(e)
+	e,u := ctx.JobDB.JobGetByJobID(jobId)
+	if e!=nil{
+		panic(e)
+	}
+
 	return u.Status
 
 }
