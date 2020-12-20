@@ -1,12 +1,12 @@
 #!/bin/bash
 
-export DATA_BASE_PATH=$1
+export WORK_BASE_PATH=$1
 
 # load variables from properties
 . ./deploy/property/db.properties
 . ./deploy/property/svc.properties
 
-LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_redis.log
+LOG_FILE_PATH=$WORK_BASE_PATH/logs/start_redis.log
 
 {
 (kubectl create configmap redis-config --from-file=./deploy/property/redis-config &> $LOG_FILE_PATH)

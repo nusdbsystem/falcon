@@ -28,7 +28,7 @@ func initLogger(){
 	// this path is fixed, used to creating folder inside container
 	var fixedPath string
 	if common.Env == common.DevEnv{
-		common.LocalPath = os.Getenv("DATA_BASE_PATH")
+		common.LocalPath = os.Getenv("WORK_BASE_PATH")
 		fixedPath = common.LocalPath+common.RuneTimeLogs
 	}else{
 		fixedPath ="./logs"
@@ -96,7 +96,7 @@ func InitEnvs(svcName string){
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
-		common.PartyServeBasePath = common.GetEnv("DATA_BASE_PATH", "")
+		common.PartyServeBasePath = common.GetEnv("WORK_BASE_PATH", "")
 
 		// partyserver communicate coord with ip+port
 		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)

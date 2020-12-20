@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export DATA_BASE_PATH=$1
+export WORK_BASE_PATH=$1
 
 # load variables from properties
 . ./deploy/property/db.properties

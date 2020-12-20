@@ -41,7 +41,7 @@ go build <go-program>.go
 1. Setup coordinator:
     
     Update config_coord.properties
-    choose the JOB_DATABASE, DATA_BASE_PATH, COORD_SERVER_IP
+    choose the JOB_DATABASE, WORK_BASE_PATH, COORD_SERVER_IP
     finally run script with following
     
    If in Linux:
@@ -91,7 +91,7 @@ go build <go-program>.go
 
 1. Setup coordinator:
     Update config_coord.properties
-    choose the JOB_DATABASE, DATA_BASE_PATH, COORD_SERVER_IP
+    choose the JOB_DATABASE, WORK_BASE_PATH, COORD_SERVER_IP
     finally run script with following
     
     ```
@@ -138,6 +138,6 @@ go build <go-program>.go
 
 ## check the log
 
-1.  log is at folder `$DATA_BASE_PATH/run_time_logs/` , 
-    platform setup log is at `$DATA_BASE_PATH/logs/` ,
-    db is at     `$DATA_BASE_PATH/database/` 
+1.  log is at folder `$WORK_BASE_PATH/run_time_logs/` , 
+    platform setup log is at `$WORK_BASE_PATH/logs/` ,
+    db is at     `$WORK_BASE_PATH/database/` 
