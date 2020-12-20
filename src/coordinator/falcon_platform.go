@@ -51,7 +51,7 @@ func initLogger(){
 
 func getCoordAddr(addr string) string{
 		// using service name+ port to connect to coord
-	    logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordAddr, value: %s >>>>>>>>>>>>>\n",addr)
+	    logger.Do.Printf("<<<<<<<<< Read envs, User defined,   key: CoordAddr, value: %s >>>>>>>>>>>>>\n",addr)
 		return addr
 }
 
