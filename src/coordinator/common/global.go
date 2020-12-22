@@ -20,7 +20,7 @@ import (
 const (
 	Master = "Master"
 	TrainWorker = "TrainWorker"
-	PredictWorker = "PredictWorker"
+	InferenceWorker = "InferenceWorker"
 
 	// master& worker heartbeat
 
@@ -31,12 +31,13 @@ const (
 	Register         = "register"
 	SubmitJob        = "submit"
 	StopJob          = "stop"
-	UpdateJobMaster  = "update-master"
+	UpdateTrainJobMaster  = "update-train-master"
+	UpdateInferenceJobMaster  = "update-inference-master"
 	UpdateJobResInfo = "update-job-res"
 	UpdateJobStatus  = "update-job-status"
 	QueryJobStatus   = "query-job-status"
 
-	UpdateModelServiceStatus  = "update-prediction-status"
+	InferenceStatusUpdate  = "update-prediction-service-status"
 
 	AssignPort  = "port-assign"
 	AddPort  = "portadd"
@@ -72,10 +73,10 @@ const (
 	// model endpoint
 	ModelUpdate  = "model-update"
 	IsTrained = "is_trained"
-	SvcPublishing  = "model-publish"
-	SvcCreate  = "model-create"
+	InferenceUpdate  = "prediction-service-update"
+	InferenceCreate  = "prediction-service-create"
 
-	AppName = "app_name"
+	JobName = "job_name"
 	ExtInfo = "ext_info"
 
 	Proxy = "tcp"
@@ -96,7 +97,15 @@ const (
 	YamlBasePath = "./deploy/template/"
 
 	MpcExe = "./semi-party.x"
-	FalconTrainExe = "./falcon"
+	FalconTrainExe = "/home/wuyuncheng/Documents/falcon/build/src/executor/falcon"
+
+	HorizontalFl = "0"
+	VerticalFl = "1"
+
+	// algorithms
+
+	LogisticRegressionKey = "logistic_regression"
+	RuneTimeLogs = "runtimeLogs"
 
 )
 
@@ -107,7 +116,7 @@ var (
 	//////////////////////////////////////////////////////////////////////////
 
 	// JobDB and Database Configs
-	JobDbEngine       = ""
+	JobDatabase       = ""
 	JobDbSqliteDb     = ""
 	JobDbHost         = ""
 	JobDbMysqlUser    = ""

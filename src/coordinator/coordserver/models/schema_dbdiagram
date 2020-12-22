@@ -1,28 +1,29 @@
-Table JobRecord {
+Table JobInfoRecord {
   id int [primary key]
-  JobId int
-  AppId int
-  JobName varchar
   UserID int
-  PartyIds varchar
-  Status int
-
-  TaskNum int
-  FlSetting int
-  ErrorMsg varchar
-
+  JobName varchar
   JobDecs varchar
-  JobResult varchar
-  IsDelete int
+  FlSetting int
+  ExistingKey int
+  PartyNum int
+  PartyIds varchar
+  TaskNum int
+  TaskInfo varchar
+}
 
+Table TrainJobRecord {
+  JobId int [primary key]
+  UserID int
+  JobInfoID int
+  Status int
+  ErrorMsg varchar
+  JobResult varchar
+  ExtInfo varchar
+  MasterAddr varchar
   CreateTime timestamp
   UpdateTime timestamp
   DeleteTime timestamp
-  ExtInfo varchar
-  MasterAddr varchar
-
 }
-
 
 Table ServiceRecord {
   id int [primary key]
@@ -32,59 +33,56 @@ Table ServiceRecord {
 
 }
 
+Table PortRecord {
+	id int [primary key]
+	NodeId int
+	Port       int
+	IsDelete   int
+}
+
 
 Table ModelRecord {
   ID int [primary key]
   JobId int
-
   ModelName varchar
-  ModelPath varchar
   ModelDecs varchar
-
-  PartyNumber int
-  PartyIds varchar
-
-  ExecutablePath varchar
-
   IsTrained int
-  IsPublished int
-  IsDelete int
-
-
   CreateTime timestamp
   UpdateTime timestamp
   DeleteTime timestamp
-  ExtInfo varchar
 }
 
-
-
-Table ModelServiceInfo {
+Table InferenceJobRecord {
   ID int [primary key]
-
-
-  ModelServiceName varchar
-
-  Status int
   ModelId int
   JobId int
-  PartyNumber int
-  PartyIds varchar
-
-  IsPublished int
-  IsDelete int
-
+  Status int
+  MasterAddr varchar
   CreateTime timestamp
   UpdateTime timestamp
   DeleteTime timestamp
-  ExtInfo varchar
 }
 
+Table User {
+	UserID int [primary key]
+	Name   varchar
+}
+
+Table PartyServer {
+	ID int
+	PartyServerAddr varchar
+	Port varchar
+}
 
 // Creating references
 // You can also define relaionship separately
 // > many-to-one; < one-to-many; - one-to-one
-Ref: JobRecord.JobId - ServiceRecord.JobId
-Ref: JobRecord.JobId - ModelRecord.JobId
-Ref: JobRecord.JobId - ModelServiceInfo.JobId
+Ref: User.UserID - TrainJobRecord.UserID
+Ref: User.UserID - JobInfoRecord.UserID
+Ref: JobInfoRecord.id - TrainJobRecord.JobInfoID
+Ref: TrainJobRecord.JobId - ModelRecord.JobId
+Ref: TrainJobRecord.JobId - InferenceJobRecord.JobId
+
+Ref: TrainJobRecord.JobId - ServiceRecord.JobId
+
 

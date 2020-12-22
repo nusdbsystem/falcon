@@ -8,10 +8,7 @@ def submit_job(url, path):
         print("requesting to ", url)
         res = requests.post(url, files={'job': f})
         print(res.status_code)
-        try:
-            print(res.json())
-        except:
-            pass
+        print(res.content)
 
 
 def kill_job(url, jobId):
@@ -19,10 +16,7 @@ def kill_job(url, jobId):
     print("requesting to ", url)
     res = requests.post(url, data={'job_id': jobId})
     print(res.status_code)
-    try:
-        print(res.json())
-    except:
-        pass
+    print(res.content)
 
 
 def query_job_status(url, jobId):
@@ -30,11 +24,7 @@ def query_job_status(url, jobId):
     print("requesting to ", url)
     res = requests.get(url, json={'job_id': jobId})
     print(res.status_code)
-    try:
-        #  print(res.content)
-        print(res.json())
-    except:
-        pass
+    print(res.content)
 
 
 if __name__ == '__main__':
@@ -55,10 +45,3 @@ if __name__ == '__main__':
 
     if args.method == "query_status":
         query_job_status(args.url, args.job)
-
-
-'''
-python3 coordinator_client.py -url 127.0.0.1:30004 -method submit -path ./data/single_party_train_job.json
-python coordinator_client.py -url 172.25.123.254:30004 -method kill -job 60
-python coordinator_client.py -url 172.25.123.254:30004 -method query_status -job 60
-'''

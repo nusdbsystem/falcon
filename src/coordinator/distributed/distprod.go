@@ -94,11 +94,11 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 		serviceName = "worker-jid" + jobId + "-train-" + common.PartyServerId
 
 		logger.Do.Println("SetupWorkerHelper: Current in Prod, TrainWorker, svcName", serviceName)
-	}else if workerType == common.PredictWorker{
+	}else if workerType == common.InferenceWorker{
 
 		serviceName = "worker-jid" + jobId + "-predict-" + common.PartyServerId
 
-		logger.Do.Println("SetupWorkerHelper: Current in Prod, PredictWorker, svcName", serviceName)
+		logger.Do.Println("SetupWorkerHelper: Current in Prod, InferenceWorker, svcName", serviceName)
 	}
 
 	km := taskmanager.InitK8sManager(true,  "")
@@ -106,7 +106,7 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 		common.WorkerYamlCreatePath,
 		serviceName, 	// 1. worker service name
 		workerPort,  	// 2. worker service port
-		masterAddr,  // 3. master addr
+		masterAddr,  	// 3. master addr
 		workerType,		// 4. train or predict job
 		workerAddr, 	// 5. worker addr
 		workerType,   	// 6. serviceName train or predict

@@ -6,6 +6,7 @@ import (
 	"coordinator/common"
 	"coordinator/distributed/worker"
 	"coordinator/logger"
+	"os"
 )
 
 
@@ -61,21 +62,24 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 	if workerType == common.TrainWorker{
 
 		serviceName = "worker-jid" + jobId + "-train-" + common.PartyServerId
-		common.TaskRuntimeLogs = common.PartyServeBasePath+"/"+"run_time_logs/"+serviceName
+		common.TaskRuntimeLogs = common.PartyServeBasePath+"/"+common.RuneTimeLogs +"/"+serviceName
+		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
+		logger.Do.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
 
 		logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainWorker")
 
 		wk := worker.InitTrainWorker(masterAddr, workerAddr)
 		wk.RunWorker(wk)
 
-	}else if workerType == common.PredictWorker{
+	}else if workerType == common.InferenceWorker{
 
-		serviceName = "worker-jid" + jobId + "-predict-" + common.PartyServerId
-		common.TaskRuntimeLogs = common.PartyServeBasePath+"/"+"run_time_logs/"+serviceName
+		serviceName = "worker-jid" + jobId + "-inference-" + common.PartyServerId
+		common.TaskRuntimeLogs = common.PartyServeBasePath+"/" + common.RuneTimeLogs + "/"+serviceName
+		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
+		logger.Do.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
+		logger.Do.Println("SetupWorkerHelper: Current in Dev, InferenceWorker")
 
-		logger.Do.Println("SetupWorkerHelper: Current in Dev, PredictWorker")
-
-		wk := worker.InitPredictWorker(masterAddr, workerAddr)
+		wk := worker.InitInferenceWorker(masterAddr, workerAddr)
 		wk.RunWorker(wk)
 
 	}

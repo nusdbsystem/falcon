@@ -1,15 +1,16 @@
 package models
 
-import "time"
+import (
+	"github.com/jinzhu/gorm"
+	"time"
+)
 
 
 func (jobDB *JobDB) ModelCreate(
+	tx *gorm.DB,
 	JobId uint,
 	ModelName string,
 	ModelDecs string,
-	PartyNumber uint,
-	PartyIds string,
-	ExtInfo string,
 
 ) (error, *ModelRecord) {
 
@@ -18,20 +19,15 @@ func (jobDB *JobDB) ModelCreate(
 		ModelName:    	ModelName,
 		ModelDecs:    	ModelDecs,
 
-		PartyNumber:    PartyNumber,
-		PartyIds:    	PartyIds,
-
 		IsTrained:			 0,
-		IsPublished:		 0,
-		IsDelete:    		 0,
+
 		CreateTime: 		 time.Now(),
 		UpdateTime: 		 time.Now(),
 		DeleteTime:  		 time.Now(),
-		ExtInfo:    		 ExtInfo,
 	}
 
 
-	err := jobDB.Db.Create(u).Error
+	err := tx.Create(u).Error
 	return err, u
 
 }
@@ -39,6 +35,7 @@ func (jobDB *JobDB) ModelCreate(
 
 
 func (jobDB *JobDB) ModelUpdate(
+	tx *gorm.DB,
 	jobId uint,
 	IsTrained uint,
 
@@ -46,7 +43,7 @@ func (jobDB *JobDB) ModelUpdate(
 
 	u := &ModelRecord{}
 
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("job_id = ?", jobId).
 		Update("is_trained", IsTrained).
 		Update("update_time", time.Now()).Error

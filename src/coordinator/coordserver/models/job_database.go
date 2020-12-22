@@ -17,23 +17,19 @@ type JobDB struct {
 	user     string
 	password string
 	database string
-	addr      string
+	addr     string
 	Db       *gorm.DB
-	Tx       *gorm.DB
 }
 
 func InitJobDB() *JobDB {
 	jobDB := new(JobDB)
-	jobDB.engine = common.JobDbEngine
+	jobDB.engine = common.JobDatabase
 	jobDB.host = common.JobDbHost
-	jobDB.user = ""
-	jobDB.password = ""
-	jobDB.database = ""
+	jobDB.user = common.JobDbMysqlUser
+	jobDB.password =  common.JobDbMysqlPwd
+	jobDB.database = common.JobDbMysqlDb
 
 	if jobDB.engine == "mysql" {
-		jobDB.user = common.JobDbMysqlUser
-		jobDB.password = common.JobDbMysqlPwd
-		jobDB.database = common.JobDbMysqlDb
 
 		mysqlUrl := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s%s",
@@ -87,10 +83,16 @@ func (jobDB *JobDB) Disconnect() {
 
 func (jobDB *JobDB) DefineTables() {
 
-	if jobDB.Db.HasTable(&JobRecord{}) {
-		jobDB.Db.AutoMigrate(&JobRecord{})
+	if jobDB.Db.HasTable(&TrainJobRecord{}) {
+		jobDB.Db.AutoMigrate(&TrainJobRecord{})
 	} else {
-		jobDB.Db.CreateTable(&JobRecord{})
+		jobDB.Db.CreateTable(&TrainJobRecord{})
+	}
+
+	if jobDB.Db.HasTable(&JobInfoRecord{}) {
+		jobDB.Db.AutoMigrate(&JobInfoRecord{})
+	} else {
+		jobDB.Db.CreateTable(&JobInfoRecord{})
 	}
 
 	if jobDB.Db.HasTable(&TaskRecord{}) {
@@ -135,6 +137,12 @@ func (jobDB *JobDB) DefineTables() {
 		jobDB.Db.CreateTable(&PartyServer{})
 	}
 
+	if jobDB.Db.HasTable(&InferenceJobRecord{}) {
+		jobDB.Db.AutoMigrate(&InferenceJobRecord{})
+	} else {
+		jobDB.Db.CreateTable(&InferenceJobRecord{})
+	}
+
 	if jobDB.Db.HasTable(&TestTable{}) {
 		jobDB.Db.AutoMigrate(&TestTable{})
 	} else {
@@ -149,7 +157,12 @@ func (jobDB *JobDB) DefineTables() {
 
 }
 
-func (jobDB *JobDB) Commit(el interface{}) {
+func (jobDB *JobDB) Commit(tx *gorm.DB, el interface{}) {
+
+	if el == nil{
+		tx.Commit()
+		return
+	}
 
 	switch el.(type) {
 	case []error:
@@ -157,19 +170,21 @@ func (jobDB *JobDB) Commit(el interface{}) {
 		for _, ev := range res {
 			if ev != nil {
 				logger.Do.Println("Sql error", ev)
-				jobDB.Tx.Rollback()
+				tx.Rollback()
 				panic(ev)
 			}
 		}
-		jobDB.Tx.Commit()
+		tx.Commit()
 	case error:
 		res, _ := el.(error)
 		if res != nil {
 			logger.Do.Println("Sql error", res)
-			jobDB.Tx.Rollback()
+			tx.Rollback()
 			panic(res)
 		}
-		jobDB.Tx.Commit()
+		tx.Commit()
+	default:
+		panic("Commit Not supported type")
 	}
 }
 
@@ -177,9 +192,3 @@ func (jobDB *JobDB) Commit(el interface{}) {
 /////////// Test falcon_sql ////////////
 ////////////////////////////////////
 
-func (jobDB *JobDB) InsertTest(name string) (error, *TestTable) {
-	u := &TestTable{Name: name}
-
-	err := jobDB.Db.Create(u).Error
-	return err, u
-}

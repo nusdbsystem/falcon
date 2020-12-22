@@ -1,12 +1,12 @@
 #!/bin/bash
 
-export DATA_BASE_PATH=$1
+export WORK_BASE_PATH=$1
 
 # load variables from properties
 . ./deploy/property/db.properties
 . ./deploy/property/svc.properties
 
-LOG_FILE_PATH=$DATA_BASE_PATH/logs/start_db.log
+LOG_FILE_PATH=$WORK_BASE_PATH/logs/start_db.log
 {
   (kubectl create configmap mysql-initdb-config --from-file=./deploy/property &> $LOG_FILE_PATH)
     echo "-------------------------- finish creating config map for db --------------------------------"

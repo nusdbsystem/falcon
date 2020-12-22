@@ -1,3 +1,5 @@
+![Alt text](https://github.com/lemonviv/falcon/blob/dev/src/coordinator/photos/db.png)
+
 # Falcon Coordinator
 
 ## Dependencies for Development
@@ -39,7 +41,7 @@ go build <go-program>.go
 1. Setup coordinator:
     
     Update config_coord.properties
-    choose the JOB_DB_ENGINE, DATA_BASE_PATH, COORD_SERVER_IP
+    choose the JOB_DATABASE, WORK_BASE_PATH, COORD_SERVER_IP
     finally run script with following
     
    If in Linux:
@@ -89,7 +91,7 @@ go build <go-program>.go
 
 1. Setup coordinator:
     Update config_coord.properties
-    choose the JOB_DB_ENGINE, DATA_BASE_PATH, COORD_SERVER_IP
+    choose the JOB_DATABASE, WORK_BASE_PATH, COORD_SERVER_IP
     finally run script with following
     
     ```
@@ -114,7 +116,7 @@ go build <go-program>.go
     python coordinator_client.py -url <ip url of coordinator>:6573 -method submit -path ./data/job.json
     
     ```
-    python coordinator_client.py -url 172.25.121.4:6573 -method submit -path ./data/job.json
+    python3 coordinator_client.py -url 127.0.0.1:30004 -method submit -path ./data/three_parties_train_job.json
     ```
 
 
@@ -123,7 +125,7 @@ go build <go-program>.go
     python coordinator_client.py -url <ip url of coordinator>:6573 -method kill -job <job_id>
     
     ```
-    python coordinator_client.py -url 172.25.121.4:6573 -method kill -job 60
+    python coordinator_client.py -url 172.25.123.254:30004 -method kill -job 60
     ```
 
 4. query job status:
@@ -131,11 +133,11 @@ go build <go-program>.go
     python coordinator_client.py -url <ip url of coordinator>:6573 -method query_status -job <job_id>
     
     ```
-    python coordinator_client.py -url 172.25.121.4:6573 -method query_status -job 60
+    python coordinator_client.py -url 172.25.123.254:30004 -method query_status -job 60
     ```
 
 ## check the log
 
-1.  log is at folder `$DATA_BASE_PATH/run_time_logs/` , 
-    platform setup log is at `$DATA_BASE_PATH/logs/` ,
-    db is at     `$DATA_BASE_PATH/database/` 
+1.  log is at folder `$WORK_BASE_PATH/run_time_logs/` , 
+    platform setup log is at `$WORK_BASE_PATH/logs/` ,
+    db is at     `$WORK_BASE_PATH/database/` 

@@ -16,8 +16,12 @@ func TestSql(t *testing.T) {
 	jobDB := models.InitJobDB()
 
 	jobDB.Connect()
+
 	e, u := jobDB.JobGetByJobID(1)
-	jobDB.Commit(e)
+	if e!=nil{
+		panic(e)
+	}
+
 	jobDB.Disconnect()
 
 	logger.Do.Println(u)
@@ -47,7 +51,7 @@ func TestParseJson(t *testing.T) {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
 	// we initialize our Users array
-	var job common.Job
+	var job common.TrainJob
 
 	e2 := json.Unmarshal(byteValue, &job)
 	logger.Do.Println(e2)

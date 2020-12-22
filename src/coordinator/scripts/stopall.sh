@@ -21,9 +21,9 @@ kubectl delete configmap partyserver-config-1
 kubectl delete configmap partyserver-config-2
 
 . config_coord.properties
-rm -rf $DATA_BASE_PATH/database
-rm -rf $DATA_BASE_PATH/run_time_logs/*
-rm -rf $DATA_BASE_PATH/logs/*
+rm -rf $WORK_BASE_PATH/database
+rm -rf $WORK_BASE_PATH/run_time_logs/*
+rm -rf $WORK_BASE_PATH/logs/*
 
 . config_partyserver.properties
 

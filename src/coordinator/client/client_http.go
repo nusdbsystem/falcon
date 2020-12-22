@@ -49,10 +49,22 @@ func JobUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 		common.MasterAddrKey: {masterAddr},
 		common.JobId:      {fmt.Sprintf("%d", jobId)}}
 
-	reqUrl := ServerAddr + "/" + common.UpdateJobMaster
+	reqUrl := ServerAddr + "/" + common.UpdateTrainJobMaster
 
 	_ = PostForm(reqUrl, data)
 }
+
+func InferenceUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
+
+	data := url.Values{
+		common.MasterAddrKey: {masterAddr},
+		common.JobId:      {fmt.Sprintf("%d", jobId)}}
+
+	reqUrl := ServerAddr + "/" + common.UpdateInferenceJobMaster
+
+	_ = PostForm(reqUrl, data)
+}
+
 
 func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jobId uint) {
 	data := url.Values{
@@ -91,13 +103,13 @@ func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 }
 
 
-func ModelServiceUpdateStatus(ServerAddr string, jobId, status uint) {
+func InferenceUpdateStatus(ServerAddr string, jobId, status uint) {
 
 	data := url.Values{
 		common.JobId:     {fmt.Sprintf("%d", jobId)},
 		common.JobStatus: {fmt.Sprintf("%d", status)}}
 
-	reqUrl := ServerAddr + "/" + common.UpdateModelServiceStatus
+	reqUrl := ServerAddr + "/" + common.InferenceStatusUpdate
 
 	_ = PostForm(reqUrl, data)
 }
@@ -133,7 +145,7 @@ func GetExistPort(ServerAddr, PartyServerIp string) string{
 
 	reqURL, err := url.ParseRequestURI(rawUrl)
 	if err != nil {
-		fmt.Printf("url.ParseRequestURI()函数执行错误,错误为:%v\n", err)
+		fmt.Printf("url.ParseRequestURI() error: :%v\n", err)
 		return err.Error()
 	}
 

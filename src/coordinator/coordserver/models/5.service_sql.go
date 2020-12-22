@@ -1,32 +1,34 @@
 package models
 
+import "github.com/jinzhu/gorm"
+
 ////////////////////////////////////
 /////////// ServiceInfo  ////////////
 ////////////////////////////////////
 
-func (jobDB *JobDB) SvcCreate(jobId uint) (error, *ServiceRecord) {
+func (jobDB *JobDB) SvcCreate(tx *gorm.DB,jobId uint) (error, *ServiceRecord) {
 
 	u := &ServiceRecord{
 		JobID: jobId,
 	}
-	err := jobDB.Db.Create(u).Error
+	err := tx.Create(u).Error
 	return err, u
 }
 
-func (jobDB *JobDB) SvcUpdateMaster(jobId uint, masterAddr string) (error, *ServiceRecord) {
+func (jobDB *JobDB) SvcUpdateMaster(tx *gorm.DB,jobId uint, masterAddr string) (error, *ServiceRecord) {
 
 	u := &ServiceRecord{}
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("job_id = ?", jobId).
 		Update("master_addr", masterAddr).Error
 
 	return err, u
 }
 
-func (jobDB *JobDB) SvcUpdateWorker(workerAddr string) (error, *ServiceRecord) {
+func (jobDB *JobDB) SvcUpdateWorker(tx *gorm.DB,workerAddr string) (error, *ServiceRecord) {
 
 	u := &ServiceRecord{}
-	err := jobDB.Db.Model(u).
+	err := tx.Model(u).
 		Where("job_id = ?", 123).
 		Update("worker_addr", workerAddr).Error
 

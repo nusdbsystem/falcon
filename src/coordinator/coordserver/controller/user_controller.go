@@ -9,11 +9,11 @@ func CreateUser() {
 	jobDB := models.InitJobDB()
 
 	jobDB.Connect()
-	jobDB.Tx = jobDB.Db.Begin()
+	tx := jobDB.Db.Begin()
 
-	e := jobDB.CreateAdminUser()
+	e := jobDB.CreateAdminUser(tx)
 
-	jobDB.Commit(e)
+	jobDB.Commit(tx, e)
 	jobDB.Disconnect()
 
 }

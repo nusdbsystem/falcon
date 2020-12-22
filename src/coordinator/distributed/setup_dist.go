@@ -72,6 +72,10 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 	if workerType == common.TrainWorker{
 
 		c.JobUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
+
+	}else if workerType == common.InferenceWorker{
+
+		c.InferenceUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
 	}
 
 	// master will call lister's endpoint to launch worker, to train or predict
@@ -103,12 +107,6 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 
 	return masterAddr
 }
-
-func CleanWorker(){
-
-	// todo delete the svc created for training, master will call this method after ms.Wait()
-}
-
 
 func KillJob(masterAddr, Proxy string) {
 	ok := c.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))

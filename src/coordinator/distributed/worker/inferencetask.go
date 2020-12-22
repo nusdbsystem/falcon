@@ -2,25 +2,15 @@ package worker
 
 import (
 	"coordinator/common"
-	"coordinator/distributed/entitiy"
+	"coordinator/distributed/entity"
 	"coordinator/logger"
 	"os/exec"
 )
 
-
-func(wk *PredictWorker)  PredictTask(dta *entitiy.DoTaskArgs, rep *entitiy.DoTaskReply){
-
-}
-
-
-
-
-
-
-func (wk *PredictWorker) CreateService(dta *entitiy.DoTaskArgs) {
+func (wk *InferenceWorker) CreateInference(dta *entity.DoTaskArgs) {
 	// todo gobuild.sh sub process to run prediction job
 
-	logger.Do.Println("PredictWorker: CreateService")
+	logger.Do.Println("InferenceWorker: CreateService")
 
 	cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
 
@@ -40,24 +30,10 @@ func (wk *PredictWorker) CreateService(dta *entitiy.DoTaskArgs) {
 
 }
 
-
-func (wk *PredictWorker) LaunchService() error {
-
+func (wk *InferenceWorker) UpdateInference() error {
 	return nil
 }
 
-
-func (wk *PredictWorker) UpdateService() error {
-	return nil
-}
-
-func (wk *PredictWorker) QueryService() error {
-	return nil
-}
-
-func (wk *PredictWorker) StopService() {
-}
-
-func (wk *PredictWorker) DeleteService() error {
+func (wk *InferenceWorker) QueryInference() error {
 	return nil
 }

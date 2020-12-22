@@ -2,7 +2,7 @@ package test
 
 import (
 	"coordinator/common"
-	"coordinator/distributed/entitiy"
+	"coordinator/distributed/entity"
 	"coordinator/exceptions"
 	"coordinator/logger"
 	"encoding/json"
@@ -14,13 +14,13 @@ import (
 
 func TestRandomFunc(t *testing.T) {
 
-	a := entitiy.ShutdownReply{}
+	a := entity.ShutdownReply{}
 
-	res := entitiy.EncodeDoTaskArgsGeneral(&a)
+	res := entity.EncodeDoTaskArgsGeneral(&a)
 	logger.Do.Println(res)
 
-	rr := entitiy.ShutdownReply{}
-	entitiy.DecodeDoTaskArgsGeneral(res, &rr)
+	rr := entity.ShutdownReply{}
+	entity.DecodeDoTaskArgsGeneral(res, &rr)
 	logger.Do.Println()
 
 }

@@ -14,8 +14,5 @@ func SetupWorker(masterAddr, workerType, jobId,dataPath,modelPath,dataOutput str
 }
 
 func CleanWorker(masterAddr, workerType string) {
-
-	dist.CleanWorker()
-
 }
 

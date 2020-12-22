@@ -5,6 +5,7 @@ import (
 	"coordinator/common"
 	"coordinator/coordserver"
 	"coordinator/distributed"
+	"coordinator/distributed/taskmanager"
 	"coordinator/distributed/worker"
 	"coordinator/logger"
 	"coordinator/partyserver"
@@ -27,8 +28,8 @@ func initLogger(){
 	// this path is fixed, used to creating folder inside container
 	var fixedPath string
 	if common.Env == common.DevEnv{
-		common.LocalPath = os.Getenv("DATA_BASE_PATH")
-		fixedPath = common.LocalPath+"runtimeLogs"
+		common.LocalPath = os.Getenv("WORK_BASE_PATH")
+		fixedPath = common.LocalPath+common.RuneTimeLogs
 	}else{
 		fixedPath ="./logs"
 	}
@@ -42,7 +43,7 @@ func initLogger(){
 	rawTime := time.Now()
 
 	var logFileName string
-	logFileName = fixedPath + "/" + common.ServiceName + rawTime.Format(layout) + "logs"
+	logFileName = fixedPath + "/" + common.ServiceName + rawTime.Format(layout) + ".logs"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }
@@ -50,7 +51,7 @@ func initLogger(){
 
 func getCoordAddr(addr string) string{
 		// using service name+ port to connect to coord
-	    logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: CoordAddr, value: %s >>>>>>>>>>>>>\n",addr)
+	    logger.Do.Printf("<<<<<<<<< Read envs, User defined,   key: CoordAddr, value: %s >>>>>>>>>>>>>\n",addr)
 		return addr
 }
 
@@ -59,7 +60,7 @@ func InitEnvs(svcName string){
 
 	if svcName=="coord"{
 		// coord needs db information
-		common.JobDbEngine       = common.GetEnv("JOB_DB_ENGINE", "sqlite3")
+		common.JobDatabase       = common.GetEnv("JOB_DATABASE", "sqlite3")
 		common.JobDbSqliteDb     = common.GetEnv("JOB_DB_SQLITE_DB", "falcon")
 		common.JobDbHost         = common.GetEnv("JOB_DB_HOST","localhost")
 		common.JobDbMysqlUser    = common.GetEnv("JOB_DB_MYSQL_USER", "falcon")
@@ -95,7 +96,7 @@ func InitEnvs(svcName string){
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
-		common.PartyServeBasePath = common.GetEnv("DATA_BASE_PATH", "")
+		common.PartyServeBasePath = common.GetEnv("WORK_BASE_PATH", "")
 
 		// partyserver communicate coord with ip+port
 		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
@@ -165,7 +166,7 @@ func InitEnvs(svcName string){
 			os.Exit(1)
 		}
 
-	}else if svcName==common.PredictWorker{
+	}else if svcName==common.InferenceWorker{
 
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
 		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
@@ -230,6 +231,8 @@ func main() {
 
 		distributed.SetupMaster(masterAddr, qItem, workerType)
 
+		km := taskmanager.InitK8sManager(true,  "")
+		km.DeleteService(common.WorkerK8sSvcName)
 	}
 
 	if common.ServiceName == common.TrainWorker {
@@ -238,14 +241,21 @@ func main() {
 
 		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr)
 		wk.RunWorker(wk)
+
+		// once  worker is killed, clear the resources.
+		km := taskmanager.InitK8sManager(true,  "")
+		km.DeleteService(common.WorkerK8sSvcName)
+
 	}
 
-	if common.ServiceName == common.PredictWorker {
+	if common.ServiceName == common.InferenceWorker {
 
 		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
-		wk := worker.InitPredictWorker(common.MasterAddr, common.WorkerAddr)
+		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr)
 		wk.RunWorker(wk)
-
 	}
+	// once  worker is killed, clear the resources.
+		km := taskmanager.InitK8sManager(true,  "")
+		km.DeleteService(common.WorkerK8sSvcName)
 }

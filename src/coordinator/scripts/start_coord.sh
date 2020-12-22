@@ -4,10 +4,10 @@
 
 
 # load env variables
-if [ $DATA_BASE_PATH ];then
-	echo "DATA_BASE_PATH is exist, and echo to = $DATA_BASE_PATH"
+if [ $WORK_BASE_PATH ];then
+	echo "WORK_BASE_PATH is exist, and echo to = $WORK_BASE_PATH"
 else
-	export DATA_BASE_PATH=$PWD
+	export WORK_BASE_PATH=$PWD
 fi
 
 # if using this scripts, assume running in production
@@ -38,9 +38,9 @@ start_db()
 {
   title "Starting falcon DB..."
 
-  bash ./scripts/_create_mysql.sh $DATA_BASE_PATH || exit 1
+  bash ./scripts/_create_mysql.sh $WORK_BASE_PATH || exit 1
 
-  title "Starting falcon DB Done, Db are mounted at folder $DATA_BASE_PATH"
+  title "Starting falcon DB Done, Db are mounted at folder $WORK_BASE_PATH"
 
 }
 
@@ -48,9 +48,9 @@ start_redis()
 {
   title "Starting falcon cache..."
 
-  bash ./scripts/_create_redis.sh $DATA_BASE_PATH || exit 1
+  bash ./scripts/_create_redis.sh $WORK_BASE_PATH || exit 1
 
-  title "Starting falcon redis Done, redis are mounted at folder $DATA_BASE_PATH"
+  title "Starting falcon redis Done, redis are mounted at folder $WORK_BASE_PATH"
 
 }
 
@@ -58,7 +58,7 @@ start_coordinator()
 {
   title "Starting falcon coord..."
 
-  bash ./scripts/_create_coord.sh $DATA_BASE_PATH $env|| exit 1
+  bash ./scripts/_create_coord.sh $WORK_BASE_PATH $env|| exit 1
 
   title "falcon coord started"
 
@@ -67,9 +67,9 @@ start_coordinator()
 create_folders()
 {
       title "Creating folders"
-      mkdir $DATA_BASE_PATH
-      mkdir $DATA_BASE_PATH/logs
-      mkdir $DATA_BASE_PATH/run_time_logs
+      mkdir $WORK_BASE_PATH
+      mkdir $WORK_BASE_PATH/logs
+      mkdir $WORK_BASE_PATH/run_time_logs
 
 }
 
