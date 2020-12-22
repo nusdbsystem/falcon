@@ -22,5 +22,7 @@ falcon.db
 # dev_test
 .dev_test
 dev_test/*
+*.pid
+.logs/*
 
 go.sum
