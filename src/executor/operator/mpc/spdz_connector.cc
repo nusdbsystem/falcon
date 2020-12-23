@@ -18,7 +18,8 @@ std::vector<ssl_socket*> setup_sockets(int n_parties,
   // setup connections from this party to each spdz party socket
   vector<int> plain_sockets(n_parties);
   std::vector<ssl_socket*> sockets(n_parties);
-  ssl_ctx ctx(player_data_path, "C" + to_string(my_party_id));
+  // ssl_ctx ctx(player_data_path   , "C" + to_string(my_party_id));
+  ssl_ctx ctx("C" + to_string(my_party_id));
   ssl_service io_service;
   octetStream specification;
   for (int i = 0; i < n_parties; i++)
@@ -63,7 +64,8 @@ void setup_sockets(int n_parties,
   // setup connections from this party to each spdz party socket
   vector<int> plain_sockets(n_parties);
   //std::vector<ssl_socket*> sockets(n_parties);
-  ssl_ctx ctx(player_data_path, "C" + to_string(my_party_id));
+  // ssl_ctx ctx(player_data_path, "C" + to_string(my_party_id));
+  ssl_ctx ctx("C" + to_string(my_party_id));
   ssl_service io_service;
   octetStream specification;
   for (int i = 0; i < n_parties; i++)

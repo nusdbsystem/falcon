@@ -1,4 +1,0 @@
-version: "0.1"
-services:
-  environment:
-    - SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
