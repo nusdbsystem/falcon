@@ -107,7 +107,6 @@ RUN cd third_party/libhcs && \
 # Install third_party MP-SPDZ library
 WORKDIR /opt/falcon
 RUN cd third_party/MP-SPDZ && \
-    git fetch && git pull \
     make -j 8 tldr && \
     bash fast-make.sh && \
     ./compile.py Programs/Source/logistic_regression.mpc

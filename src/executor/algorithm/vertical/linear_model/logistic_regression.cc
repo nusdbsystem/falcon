@@ -478,7 +478,8 @@ void spdz_logistic_function_computation(int party_num,
   // would result in a problem when deleting the created sockets
   // setup connections from this party to each spdz party socket
   vector<int> plain_sockets(party_num);
-  ssl_ctx ctx(mpc_player_path, "C" + to_string(party_id));
+  // ssl_ctx ctx(mpc_player_path, "C" + to_string(party_id));
+  ssl_ctx ctx("C" + to_string(party_id));
   ssl_service io_service;
   octetStream specification;
   std::cout << "begin connect to spdz parties" << std::endl;
