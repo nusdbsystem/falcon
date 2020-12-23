@@ -7,7 +7,7 @@ RUN apt-get update && apt-get upgrade -y && \
         git \
         ssh
 
-#Accept input argument from docker-compose.yml
+#Accept input argument
 ARG SSH_PRIVATE_KEY
 
 #Pass the content of the private key into the container
@@ -97,7 +97,7 @@ RUN cd /usr/src/googletest/googletest && \
     sudo ln -s /usr/lib/libgtest.a /usr/local/lib/googletest/libgtest.a && \
     sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/googletest/libgtest_main.a
 
-# Install third_party threshold partially homomorphic encryption library libhcs
+# Install third_party threshold partially homomorphic encryption library
 WORKDIR /opt/falcon
 RUN cd third_party/libhcs && \
     cmake . && \
@@ -113,7 +113,7 @@ RUN cd third_party/MP-SPDZ && \
     ./compile.py Programs/Source/logistic_regression.mpc && \
     sudo ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
 
-# Build falcon executors
+# Build falcon executor
 WORKDIR /opt/falcon
 RUN mv src/executor/CMakeLists.txt.prod src/executor/CMakeLists.txt && \
     mv test/CMakeLists.txt.prod test/CMakeLists.txt && \
