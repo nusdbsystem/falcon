@@ -1,4 +1,5 @@
-![Alt text](https://github.com/lemonviv/falcon/blob/dev/src/coordinator/photos/db.png)
+<!-- ![Alt text](https://github.com/lemonviv/falcon/blob/dev/src/coordinator/photos/db.png) -->
+![Falcon Platform Architecture](./imgs/Falcon_Sys_Archi_Dec21version.svg)
 
 # Falcon Coordinator
 

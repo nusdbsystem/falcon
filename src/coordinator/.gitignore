@@ -6,6 +6,7 @@
 *.so
 *.dylib
 falcon_platform
+coordinator_server
 
 # Test binary, built with `go test -c`
 *.test
@@ -20,5 +21,8 @@ falcon.db
 
 # dev_test
 .dev_test
+dev_test/*
+*.pid
+.logs/*
 
 go.sum
