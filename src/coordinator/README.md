@@ -1,11 +1,11 @@
 <!-- ![Alt text](https://github.com/lemonviv/falcon/blob/dev/src/coordinator/photos/db.png) -->
-![Falcon Platform Architecture](./imgs/Falcon_Sys_Archi_Dec21version.svg)
+![Falcon Platform Architecture](./imgs/Falcon_Sys_Archi_Dec21version.jpg)
 
-# Falcon Coordinator
+# Falcon Platform (Coordinator+PartyServers)
 
 ## Dependencies for Development
 
-- Server-side is Go (1.14 and above)
+- Server-side is Go (1.13 or 1.14)
 - k8s (V1.9 best, V1.7 is also fine)
 - Client-side is any http client, such as Python3 `requests`
 - Storage default is file-based sqlite3, you can also connect to MySQL
@@ -33,56 +33,46 @@ go build <go-program>.go
 ```
 
 
-## Platform setup DEV instruction
-
-0. Build Golang executable file
-   
-
+## Platform setup DEV (development without k8)
 
 1. Setup coordinator:
     
-    Update config_coord.properties
-    choose the JOB_DATABASE, WORK_BASE_PATH, COORD_SERVER_IP
-    finally run script with following
+    Update configurations in `src/coordinator/config_coord.properties`, choose the `JOB_DATABASE, BASE_PATH, COORD_SERVER_IP`
+
+    Launch coordinator first:
     
-   If in Linux:
-       ```
-       bash scripts/dev_start_coord.sh build_linux
-       ```
-       
-   If in MAC:
-          ```
-          bash scripts/dev_start_coord.sh build_mac
-          ```
-       
-   If in windows:
-          ```
-          bash scripts/dev_start_coord.sh build_windows
-          ```
+    ```bash
+    #Usage:
+    bash dev_start_coord.sh <partyNumber>
+    ```
           
 
-2. Setup partyserver:
+1. Setup partyserver 1-N:
     
-    Update config_partyserver.properties
-    choose the PARTY_SERVER_IP, COORD_SERVER_IP, PARTY_SERVER_NODE_PORT
-    finally run script with following
-    
-   If in Linux:
-       ```
-       bash scripts/dev_start_partyserver.sh build_linux
-       ```
-       
-   If in MAC:
-          ```
-          bash scripts/dev_start_partyserver.sh build_mac
-          ```
-       
-   If in windows:
-          ```
-          bash scripts/dev_start_partyserver.sh build_windows
-          ```
+    Update `src/coordinator/config_partyserver.properties`
 
-## Platform setup production instruction
+    Launch Party 1:
+    
+    ```bash
+    #Usage:
+    bash dev_start_partyserver.sh 1
+    ```
+
+    Launch Party 2:
+    
+    ```bash
+    #Usage:
+    bash dev_start_partyserver.sh 2
+    ```
+
+    Launch Party X:
+    
+    ```bash
+    #Usage:
+    bash dev_start_partyserver.sh X
+    ```
+
+## Platform setup PROD (production with k8)
 
 0. docker image is upload, if u wanna build yourself, try with:
 
@@ -92,7 +82,7 @@ go build <go-program>.go
 
 1. Setup coordinator:
     Update config_coord.properties
-    choose the JOB_DATABASE, WORK_BASE_PATH, COORD_SERVER_IP
+    choose the JOB_DATABASE, BASE_PATH, COORD_SERVER_IP
     finally run script with following
     
     ```
@@ -108,7 +98,7 @@ go build <go-program>.go
     bash scripts/start_partyserver.sh
     ```
       
-## Use the platform
+## Interact with the platform (submit jobs, monitor jobs etc)
 
 1. define your job.json, similar to the example provided in ./data/job.json
 
@@ -139,6 +129,34 @@ go build <go-program>.go
 
 ## check the log
 
-1.  log is at folder `$WORK_BASE_PATH/run_time_logs/` , 
-    platform setup log is at `$WORK_BASE_PATH/logs/` ,
-    db is at     `$WORK_BASE_PATH/database/` 
+1.  log is at folder `$BASE_PATH/runtime_logs/` , 
+    platform setup log is at `$BASE_PATH/logs/` ,
+    db is at     `dev_test/coord/falcon.db` 
+
+```bash
+dev_test/
+├── coord
+│   ├── falcon.db
+│   └── runtime_logs
+│       └── coord2020-12-27T14:47:31.logs
+├── party1
+│   ├── data_input
+│   ├── data_output
+│   ├── logs
+│   │   └── runtime_logs
+│   │       └── partyserver2020-12-27T14:47:50.logs
+│   └── trained_models
+├── party2
+│   ├── data_input
+│   ├── data_output
+│   ├── logs
+│   │   └── runtime_logs
+│   │       └── partyserver2020-12-27T14:47:45.logs
+│   └── trained_models
+└── party3
+    ├── data_input
+    ├── data_output
+    ├── logs
+    └── trained_models
+...
+```
