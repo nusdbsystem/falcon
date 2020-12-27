@@ -12,7 +12,6 @@ import (
 )
 
 type Master struct {
-
 	base.RpcBaseClass
 
 	doneChannel chan bool
@@ -35,7 +34,6 @@ type Master struct {
 
 	// common.TrainWorker or common.InferenceWorker
 	workerType string
-
 }
 
 func newMaster(masterAddr string, workerNum int) (ms *Master) {
@@ -74,25 +72,25 @@ func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 loop:
 	for {
 		select {
-		case <- this.Ctx.Done():
-			logger.Do.Printf("Master: %s quite forwardRegistrations \n", this.Port)
+		case <-this.Ctx.Done():
+			logger.Do.Printf("Master: %s quit forwardRegistrations \n", this.Port)
 			break loop
 
-		case addr := <- this.tmpWorkers:
+		case addr := <-this.tmpWorkers:
 			// 1. check if this work already exist
-			if utils.Contains(addr, this.workers){
+			if utils.Contains(addr, this.workers) {
 				logger.Do.Printf("Master: the worker %s already registered, skip \n", addr)
 			}
 
 			// 2. check if this worker is needed
 			tmpIp := strings.Split(addr, ":")[0]
 
-			for i, ip := range requiredIp{
-				if tmpIp == ip{
+			for i, ip := range requiredIp {
+				if tmpIp == ip {
 					logger.Do.Println("Master: Found one worker", addr)
 
 					this.Lock()
-					this.workers  = append(this.workers, addr)
+					this.workers = append(this.workers, addr)
 					this.Unlock()
 					this.beginCountDown.Broadcast()
 
@@ -116,7 +114,7 @@ func (this *Master) run(
 	schedule func() string,
 	updateStatus func(jsonString string),
 	finish func(),
-	) {
+) {
 
 	jsonString := schedule()
 	logger.Do.Println("Master: finish job, begin to update to coord")
@@ -130,14 +128,13 @@ func (this *Master) run(
 	this.doneChannel <- true
 }
 
-
 func (this *Master) Wait() {
 
-	loop:
+loop:
 	for {
 		select {
 		case <-this.Ctx.Done():
-			logger.Do.Printf("WorkerBase: server %s quite Waitting \n", this.Addr)
+			logger.Do.Printf("WorkerBase: server %s quit Waitting \n", this.Addr)
 			break loop
 		case <-this.doneChannel:
 			break loop
@@ -152,7 +149,6 @@ func (this *Master) Shutdown(_, _ *struct{}) error {
 	_ = this.Listener.Close() // causes the Accept to fail, then break out the accetp loop
 	return nil
 }
-
 
 func (this *Master) killWorkers() {
 
