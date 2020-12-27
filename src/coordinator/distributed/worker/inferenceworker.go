@@ -12,7 +12,7 @@ type InferenceWorker struct {
 	base.WorkerBase
 }
 
-func InitInferenceWorker (masterAddr, workerAddr string) *InferenceWorker{
+func InitInferenceWorker(masterAddr, workerAddr string) *InferenceWorker {
 	wk := InferenceWorker{}
 	wk.InitWorkerBase(workerAddr, common.InferenceWorker)
 	wk.MasterAddr = masterAddr
@@ -20,7 +20,7 @@ func InitInferenceWorker (masterAddr, workerAddr string) *InferenceWorker{
 	return &wk
 }
 
-func (wk *InferenceWorker) Run(){
+func (wk *InferenceWorker) Run() {
 
 	// 0 thread: start event Loop
 	go wk.EventLoop()
@@ -28,7 +28,7 @@ func (wk *InferenceWorker) Run(){
 	rpcSvc := rpc.NewServer()
 
 	err := rpcSvc.Register(&wk)
-	if err!= nil{
+	if err != nil {
 		logger.Do.Fatalf("%s: start Error \n", wk.Name)
 	}
 
@@ -39,11 +39,10 @@ func (wk *InferenceWorker) Run(){
 	wk.StartRPCServer(rpcSvc, true)
 }
 
+func (wk *InferenceWorker) DoTask(arg []byte, rep *entity.DoTaskReply) error {
 
-func (wk *InferenceWorker) DoTask (arg []byte, rep *entity.DoTaskReply) error {
+	var doTaskArgs *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
 
-	var dta *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
-
-	go wk.CreateInference(dta)
+	go wk.CreateInference(doTaskArgs)
 	return nil
 }

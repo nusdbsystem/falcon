@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-func (wk *InferenceWorker) CreateInference(dta *entity.DoTaskArgs) {
+func (wk *InferenceWorker) CreateInference(doTaskArgs *entity.DoTaskArgs) {
 	// todo gobuild.sh sub process to run prediction job
 
 	logger.Do.Println("InferenceWorker: CreateService")
@@ -18,7 +18,7 @@ func (wk *InferenceWorker) CreateInference(dta *entity.DoTaskArgs) {
 
 	// 2 thread will ready from isStop channel, only one is running at the any time
 
-	el,e := wk.Pm.CreateResources(cmd, envs)
+	el, e := wk.Pm.CreateResources(cmd, envs)
 
 	logger.Do.Println("Worker:task 1 pre processing done", el)
 
