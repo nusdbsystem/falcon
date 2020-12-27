@@ -11,7 +11,7 @@ elif [[ "$unamestr" == 'WindowsNT' ]]; then
    makeOS='build_windows'
 fi
 
-. config_partyserver.properties
+source config_partyserver.properties
 
 export Env=dev
 export SERVICE_NAME=partyserver

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. config_coord.properties
+source config_coord.properties
 
 # detect the OS type with uname
 makeOS=''
