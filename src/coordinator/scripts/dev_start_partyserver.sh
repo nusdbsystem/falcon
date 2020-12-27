@@ -28,9 +28,9 @@ export Env=dev
 export SERVICE_NAME=partyserver
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export PARTY_SERVER_IP=$PARTY_SERVER_IP
-# export WORK_BASE_PATH=$WORK_BASE_PATH
+# export BASE_PATH=$BASE_PATH
 # export PARTY_SERVER_NODE_PORT=$PARTY_SERVER_NODE_PORT
-export WORK_BASE_PATH="./dev_test/party$PARTY_SERVER_ID/logs/"
+export BASE_PATH="./dev_test/party$PARTY_SERVER_ID/logs/"
 # increment coordinator server port by partyserver ID
 let port=$PARTY_SERVER_ID+$COORD_SERVER_PORT
 echo using $port for PARTY_SERVER_NODE_PORT

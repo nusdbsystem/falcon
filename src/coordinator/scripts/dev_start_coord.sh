@@ -28,7 +28,7 @@ fi
 export Env=dev
 export SERVICE_NAME=coord
 export COORD_SERVER_IP=$COORD_SERVER_IP
-export WORK_BASE_PATH=$WORK_BASE_PATH
+export BASE_PATH=$BASE_PATH
 export JOB_DATABASE=$JOB_DATABASE
 
 make $makeOS
