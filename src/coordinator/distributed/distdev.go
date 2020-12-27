@@ -9,8 +9,6 @@ import (
 	"os"
 )
 
-
-
 func SetupDistDev(qItem *cache.QItem, workerType string) {
 	/**
 	 * @Author
@@ -34,8 +32,7 @@ func SetupDistDev(qItem *cache.QItem, workerType string) {
 	logger.Do.Println("SetupDist: setup master done")
 }
 
-
-func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string)  {
+func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string) {
 
 	/**
 	 * @Author
@@ -59,10 +56,10 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 	common.TaskDataOutput = dataOutput
 	common.TaskModelPath = modelPath
 
-	if workerType == common.TrainWorker{
+	if workerType == common.TrainWorker {
 
 		serviceName = "worker-jid" + jobId + "-train-" + common.PartyServerId
-		common.TaskRuntimeLogs = common.PartyServeBasePath+"/"+common.RuneTimeLogs +"/"+serviceName
+		common.TaskRuntimeLogs = common.PartyServeBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
 		logger.Do.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
 
@@ -71,10 +68,10 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 		wk := worker.InitTrainWorker(masterAddr, workerAddr)
 		wk.RunWorker(wk)
 
-	}else if workerType == common.InferenceWorker{
+	} else if workerType == common.InferenceWorker {
 
 		serviceName = "worker-jid" + jobId + "-inference-" + common.PartyServerId
-		common.TaskRuntimeLogs = common.PartyServeBasePath+"/" + common.RuneTimeLogs + "/"+serviceName
+		common.TaskRuntimeLogs = common.PartyServeBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
 		logger.Do.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
 		logger.Do.Println("SetupWorkerHelper: Current in Dev, InferenceWorker")
@@ -84,7 +81,7 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 
 	}
 
-		// in prod, use k8s to run train/predict server as a isolate process
+	// in prod, use k8s to run train/predict server as a isolate process
 
 	logger.Do.Println("SetupDist: worker is running")
 

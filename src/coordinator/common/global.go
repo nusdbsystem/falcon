@@ -105,7 +105,7 @@ const (
 	// algorithms
 
 	LogisticRegressionKey = "logistic_regression"
-	RuneTimeLogs          = "runtime_logs"
+	RuntimeLogs           = "runtime_logs"
 )
 
 var (
