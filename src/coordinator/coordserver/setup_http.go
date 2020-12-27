@@ -76,11 +76,6 @@ func SetupHttp(nConsumer int) {
 		Handler: tracing(nextRequestID)(logging(http_logger)(mux)),
 	}
 
-	logger.Do.Printf(
-		"[coordinator server] listening on IP: %v, Port: %v\n",
-		common.CoordIP,
-		common.CoordPort)
-
 	logger.Do.Println("HTTP: Updating table...")
 	controller.CreateTables()
 	controller.CreateSysPorts()
@@ -124,7 +119,11 @@ func SetupHttp(nConsumer int) {
 	}
 	go jobScheduler.MonitorConsumers()
 
-	logger.Do.Println("HTTP: Starting HTTP server...")
+	logger.Do.Printf(
+		"[coordinator server] listening on IP: %v, Port: %v\n",
+		common.CoordIP,
+		common.CoordPort)
+
 	err := server.ListenAndServe()
 
 	if err != nil {
@@ -134,7 +133,6 @@ func SetupHttp(nConsumer int) {
 			logger.Do.Fatal("HTTP: Server closed unexpected\n", err)
 		}
 	}
-
 }
 
 // logging of http requests by https://gist.github.com/enricofoltran/10b4a980cd07cb02836f70a4ab3e72d7
