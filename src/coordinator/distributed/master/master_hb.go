@@ -12,9 +12,9 @@ func (this *Master) eventLoop() {
 
 loop:
 	for {
-		select{
-		case <- this.Ctx.Done():
-			logger.Do.Printf("Master: %s quite eventLoop \n", this.Port)
+		select {
+		case <-this.Ctx.Done():
+			logger.Do.Printf("Master: %s quit eventLoop \n", this.Port)
 			break loop
 
 		default:
@@ -65,7 +65,6 @@ func (this *Master) broadcastHeartbeat() {
 	}
 }
 
-
 func (this *Master) reset() {
 	this.Lock()
 	this.lastSendTime = time.Now().UnixNano()
@@ -86,4 +85,3 @@ func (this *Master) checkWorker() bool {
 	this.Unlock()
 	return this.foundWorker
 }
-

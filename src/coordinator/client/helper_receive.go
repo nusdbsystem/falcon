@@ -18,7 +18,7 @@ func ReceiveFile(r *http.Request, buf bytes.Buffer, key string) (error, string) 
 	defer file.Close()
 
 	name := strings.Split(header.Filename, ".")
-	logger.Do.Printf("File name %s\n", name[0])
+	logger.Do.Printf("File name = %s\n", name)
 	_, e := io.Copy(&buf, file)
 	if e != nil {
 		logger.Do.Println("copy error", e)

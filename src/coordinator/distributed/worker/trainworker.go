@@ -13,7 +13,7 @@ type TrainWorker struct {
 	base.WorkerBase
 }
 
-func InitTrainWorker (masterAddr, workerAddr string) *TrainWorker{
+func InitTrainWorker(masterAddr, workerAddr string) *TrainWorker {
 
 	wk := TrainWorker{}
 	wk.InitWorkerBase(workerAddr, common.TrainWorker)
@@ -22,8 +22,7 @@ func InitTrainWorker (masterAddr, workerAddr string) *TrainWorker{
 	return &wk
 }
 
-
-func (wk *TrainWorker) Run(){
+func (wk *TrainWorker) Run() {
 
 	// 0 thread: start event Loop
 	go wk.EventLoop()
@@ -31,7 +30,7 @@ func (wk *TrainWorker) Run(){
 	rpcSvc := rpc.NewServer()
 
 	err := rpcSvc.Register(wk)
-	if err!= nil{
+	if err != nil {
 		logger.Do.Fatalf("%s: start Error \n", wk.Name)
 	}
 
@@ -43,14 +42,12 @@ func (wk *TrainWorker) Run(){
 
 }
 
+func (wk *TrainWorker) DoTask(arg []byte, rep *entity.DoTaskReply) error {
 
-func (wk *TrainWorker) DoTask (arg []byte, rep *entity.DoTaskReply) error {
+	var doTaskArgs *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
 
-	var dta *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
-
-	//TestTaskProcess(dta)
-	wk.TrainTask(dta, rep)
-
+	//TestTaskProcess(doTaskArgs)
+	wk.TrainTask(doTaskArgs, rep)
 
 	for i := 10; i > 0; i-- {
 		logger.Do.Println("Worker: Counting down before job done... ", i)

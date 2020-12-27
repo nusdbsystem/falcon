@@ -39,4 +39,4 @@ spec:
     volumes:
       - name: falcon-partyserver
         hostPath:
-          path: /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_partyserver//run_time_logs
+          path: /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_partyserver//runtime_logs

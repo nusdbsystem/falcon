@@ -16,10 +16,9 @@ import (
  * @return
  **/
 
-
 const (
-	Master = "Master"
-	TrainWorker = "TrainWorker"
+	Master          = "Master"
+	TrainWorker     = "TrainWorker"
 	InferenceWorker = "InferenceWorker"
 
 	// master& worker heartbeat
@@ -28,20 +27,20 @@ const (
 	WorkerTimeout = 20000 //  receive hb within every 20 second
 
 	// router path for coordServer
-	Register         = "register"
-	SubmitJob        = "submit"
-	StopJob          = "stop"
-	UpdateTrainJobMaster  = "update-train-master"
-	UpdateInferenceJobMaster  = "update-inference-master"
-	UpdateJobResInfo = "update-job-res"
-	UpdateJobStatus  = "update-job-status"
-	QueryJobStatus   = "query-job-status"
+	Register                 = "register"
+	SubmitJob                = "submit"
+	StopJob                  = "stop"
+	UpdateTrainJobMaster     = "update-train-master"
+	UpdateInferenceJobMaster = "update-inference-master"
+	UpdateJobResInfo         = "update-job-res"
+	UpdateJobStatus          = "update-job-status"
+	QueryJobStatus           = "query-job-status"
 
-	InferenceStatusUpdate  = "update-prediction-service-status"
+	InferenceStatusUpdate = "update-prediction-service-status"
 
-	AssignPort  = "port-assign"
-	AddPort  = "portadd"
-	GetPartyServerPort  = "port-get"
+	AssignPort         = "port-assign"
+	AddPort            = "portadd"
+	GetPartyServerPort = "port-get"
 
 	PartyServerAdd    = "party-server-add"
 	PartyServerDelete = "party-server-del"
@@ -51,7 +50,7 @@ const (
 
 	// shared key of map
 	PartyServerAddrKey = "psAddr"
-	MasterAddrKey   = "masterAddr"
+	MasterAddrKey      = "masterAddr"
 	PartyServerPortKey = "psPort"
 
 	JobId      = "job_id"
@@ -66,15 +65,15 @@ const (
 
 	TaskTypeKey = "task-type"
 
-	TrainDataPath  = "train-data-path"
-	TrainDataOutput  = "train-data-output"
-	ModelPath = "model-path"
+	TrainDataPath   = "train-data-path"
+	TrainDataOutput = "train-data-output"
+	ModelPath       = "model-path"
 
 	// model endpoint
-	ModelUpdate  = "model-update"
-	IsTrained = "is_trained"
-	InferenceUpdate  = "prediction-service-update"
-	InferenceCreate  = "prediction-service-create"
+	ModelUpdate     = "model-update"
+	IsTrained       = "is_trained"
+	InferenceUpdate = "prediction-service-update"
+	InferenceCreate = "prediction-service-create"
 
 	JobName = "job_name"
 	ExtInfo = "ext_info"
@@ -82,13 +81,14 @@ const (
 	Proxy = "tcp"
 
 	// job status
+	// TODO: replace int with msgs
 	JobInit       = 0
 	JobRunning    = 1
 	JobSuccessful = 2
 	JobFailed     = 3
 	JobKilled     = 4
 
-	DevEnv = "dev"
+	DevEnv  = "dev"
 	ProdEnv = "prod"
 
 	WorkerYamlCreatePath = "./scripts/_create_runtime_worker.sh"
@@ -96,17 +96,16 @@ const (
 
 	YamlBasePath = "./deploy/template/"
 
-	MpcExe = "./semi-party.x"
+	MpcExe         = "./semi-party.x"
 	FalconTrainExe = "/home/wuyuncheng/Documents/falcon/build/src/executor/falcon"
 
-	HorizontalFl = "0"
-	VerticalFl = "1"
+	HorizontalFl = "horizontal"
+	VerticalFl   = "vertical"
 
 	// algorithms
 
 	LogisticRegressionKey = "logistic_regression"
-	RuneTimeLogs = "runtimeLogs"
-
+	RuntimeLogs           = "runtime_logs"
 )
 
 var (
@@ -125,31 +124,31 @@ var (
 	JobDbMysqlOptions = ""
 
 	// find the cluster port, call internally
-	JobDbMysqlPort    = ""
+	JobDbMysqlPort = ""
 
 	// redis
-	RedisHost      = ""
-	RedisPwd       = ""
+	RedisHost = ""
+	RedisPwd  = ""
 
 	// find the cluster port, call internally
-	RedisPort       = ""
+	RedisPort          = ""
 	JobDbMysqlNodePort = ""
-	RedisNodePort    = ""
+	RedisNodePort      = ""
 
 	// sys port, here COORD_TARGET_PORT must equal to
-	CoordIP = ""
-	CoordPort   = ""
+	CoordIP   = ""
+	CoordPort = ""
 
-	PartyServerIP = ""
+	PartyServerIP   = ""
 	PartyServerPort = ""
-	PartyServerId = ""
+	PartyServerId   = ""
 
 	// envs
 	Env = getEnv("Env", DevEnv)
 
 	// those are init by user
 	ServiceName = getEnv("SERVICE_NAME", "coord")
-	LocalPath = ""
+	LocalPath   = ""
 
 	PartyServeBasePath = ""
 
@@ -170,9 +169,9 @@ var (
 	MasterQItem = ""
 
 	// paths used in training
-	TaskDataPath = ""
-	TaskDataOutput = ""
-	TaskModelPath = ""
+	TaskDataPath    = ""
+	TaskDataOutput  = ""
+	TaskModelPath   = ""
 	TaskRuntimeLogs = ""
 )
 
@@ -187,13 +186,12 @@ func GetEnv(key, defaultValue string) string {
 	 **/
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, Set to default, key: %s, default: %s >>>>>>>>>>>>>\n",key, defaultValue)
+		logger.Do.Printf("Read envs, Set to default, key: %s, default: %s\n", key, defaultValue)
 		return defaultValue
 	}
-	logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
+	logger.Do.Printf("Read envs, User defined,   key: %s, value: %s\n", key, value)
 	return value
 }
-
 
 func getEnv(key, defaultValue string) string {
 	/**
@@ -205,10 +203,9 @@ func getEnv(key, defaultValue string) string {
 	 **/
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, Set to default, key: %s, default: %s >>>>>>>>>>>>>\n",key, defaultValue)
+		fmt.Printf("Read envs, Set to default, key: %s, default: %s\n", key, defaultValue)
 		return defaultValue
 	}
-	fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: %s, value: %s >>>>>>>>>>>>>\n",key, value)
+	fmt.Printf("Read envs, User defined,   key: %s, value: %s\n", key, value)
 	return value
 }
-

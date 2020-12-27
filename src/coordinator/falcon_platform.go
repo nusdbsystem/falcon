@@ -24,14 +24,14 @@ func init() {
 
 }
 
-func initLogger(){
+func initLogger() {
 	// this path is fixed, used to creating folder inside container
 	var fixedPath string
-	if common.Env == common.DevEnv{
-		common.LocalPath = os.Getenv("WORK_BASE_PATH")
-		fixedPath = common.LocalPath+common.RuneTimeLogs
-	}else{
-		fixedPath ="./logs"
+	if common.Env == common.DevEnv {
+		common.LocalPath = os.Getenv("BASE_PATH")
+		fixedPath = common.LocalPath + common.RuntimeLogs
+	} else {
+		fixedPath = "./logs"
 	}
 
 	fmt.Println("Loging to ", fixedPath)
@@ -48,55 +48,53 @@ func initLogger(){
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }
 
-
-func getCoordAddr(addr string) string{
-		// using service name+ port to connect to coord
-	    logger.Do.Printf("<<<<<<<<< Read envs, User defined,   key: CoordAddr, value: %s >>>>>>>>>>>>>\n",addr)
-		return addr
+func getCoordAddr(addr string) string {
+	// using service name+ port to connect to coord
+	logger.Do.Printf("Read envs, User defined,   key: CoordAddr, value: %s\n", addr)
+	return addr
 }
 
+func InitEnvs(svcName string) {
 
-func InitEnvs(svcName string){
-
-	if svcName=="coord"{
+	if svcName == "coord" {
 		// coord needs db information
-		common.JobDatabase       = common.GetEnv("JOB_DATABASE", "sqlite3")
-		common.JobDbSqliteDb     = common.GetEnv("JOB_DB_SQLITE_DB", "falcon")
-		common.JobDbHost         = common.GetEnv("JOB_DB_HOST","localhost")
-		common.JobDbMysqlUser    = common.GetEnv("JOB_DB_MYSQL_USER", "falcon")
-		common.JobDbMysqlPwd     = common.GetEnv("JOB_DB_MYSQL_PWD", "falcon")
-		common.JobDbMysqlDb      = common.GetEnv("JOB_DB_MYSQL_DB", "falcon")
+		common.JobDatabase = common.GetEnv("JOB_DATABASE", "sqlite3")
+		common.JobDbSqliteDb = common.GetEnv("JOB_DB_SQLITE_DB", "falcon.db")
+		common.JobDbHost = common.GetEnv("JOB_DB_HOST", "localhost")
+		common.JobDbMysqlUser = common.GetEnv("JOB_DB_MYSQL_USER", "falcon")
+		common.JobDbMysqlPwd = common.GetEnv("JOB_DB_MYSQL_PWD", "falcon")
+		common.JobDbMysqlDb = common.GetEnv("JOB_DB_MYSQL_DB", "falcon")
 		common.JobDbMysqlOptions = common.GetEnv("JOB_DB_MYSQL_OPTIONS", "?parseTime=true")
-		common.JobDbMysqlPort    = common.GetEnv("MYSQL_CLUSTER_PORT", "30000")
+		common.JobDbMysqlPort = common.GetEnv("MYSQL_CLUSTER_PORT", "30000")
 
-		common.RedisHost      = common.GetEnv("REDIS_HOST","localhost")
-		common.RedisPwd       = common.GetEnv("REDIS_PWD", "falcon")
+		common.RedisHost = common.GetEnv("REDIS_HOST", "localhost")
+		common.RedisPwd = common.GetEnv("REDIS_PWD", "falcon")
 		// coord needs redis information
-		common.RedisPort       = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
+		common.RedisPort = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
 		// find the cluster port, call internally
-		common.JobDbMysqlNodePort    = common.GetEnv("MYSQL_NODE_PORT", "30001")
-		common.RedisNodePort    = common.GetEnv("REDIS_NODE_PORT", "30003")
+		common.JobDbMysqlNodePort = common.GetEnv("MYSQL_NODE_PORT", "30001")
+		common.RedisNodePort = common.GetEnv("REDIS_NODE_PORT", "30003")
 
 		// find the cluster port, call internally
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
-		common.CoordPort   = common.GetEnv("COORD_TARGET_PORT", "30004")
+		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
 
 		common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 
 		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
 
-		if len(common.ServiceName) == 0{
+		if len(common.ServiceName) == 0 {
 			logger.Do.Println("Error: Input Error, ServiceName not provided, is either 'coord' or 'partyserver' ")
 			os.Exit(1)
 		}
 
-	}else if svcName=="partyserver"{
+	} else if svcName == "partyserver" {
 
 		// partyserver needs coord ip+port,lis port
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
-		common.PartyServeBasePath = common.GetEnv("WORK_BASE_PATH", "")
+		common.PartyServeBasePath = common.GetEnv("BASE_PATH", "")
 
 		// partyserver communicate coord with ip+port
 		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
@@ -106,22 +104,22 @@ func InitEnvs(svcName string){
 
 		common.PartyServerId = common.GetEnv("PARTY_SERVER_ID", "")
 
-		if common.CoordIP=="" || common.PartyServerIP==""||common.PartyServerPort=="" {
+		if common.CoordIP == "" || common.PartyServerIP == "" || common.PartyServerPort == "" {
 			logger.Do.Println("Error: Input Error, either CoordIP or PartyServerIP or PartyServerPort not provided")
 			os.Exit(1)
 		}
 
-	}else if svcName==common.Master {
+	} else if svcName == common.Master {
 
 		// master needs redis information
-		common.RedisHost      = common.GetEnv("REDIS_HOST","localhost")
-		common.RedisPwd       = common.GetEnv("REDIS_PWD", "falcon")
-		common.RedisPort       = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
-		common.RedisNodePort    = common.GetEnv("REDIS_NODE_PORT", "30003")
+		common.RedisHost = common.GetEnv("REDIS_HOST", "localhost")
+		common.RedisPwd = common.GetEnv("REDIS_PWD", "falcon")
+		common.RedisPort = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
+		common.RedisNodePort = common.GetEnv("REDIS_NODE_PORT", "30003")
 		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
 
 		// master needs queue item, task type
-		common.MasterQItem =common.GetEnv("ITEM_KEY", "")
+		common.MasterQItem = common.GetEnv("ITEM_KEY", "")
 		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 
@@ -130,26 +128,25 @@ func InitEnvs(svcName string){
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 
 		// master communicate coord with ip+port in dev, with name+port in prod
-		if common.Env==common.DevEnv{
+		if common.Env == common.DevEnv {
 
-			logger.Do.Println("CoordIP: ", common.CoordIP  + ":" + common.CoordPort)
+			logger.Do.Println("CoordIP: ", common.CoordIP+":"+common.CoordPort)
 
 			common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
 
-		}else if common.Env==common.ProdEnv{
+		} else if common.Env == common.ProdEnv {
 
-			logger.Do.Println("CoordK8sSvcName: ", common.CoordK8sSvcName  + ":" + common.CoordPort)
+			logger.Do.Println("CoordK8sSvcName: ", common.CoordK8sSvcName+":"+common.CoordPort)
 
-			common.CoordAddr = getCoordAddr(common.CoordK8sSvcName  + ":" + common.CoordPort)
+			common.CoordAddr = getCoordAddr(common.CoordK8sSvcName + ":" + common.CoordPort)
 		}
 
-
-		if common.CoordAddr==""{
+		if common.CoordAddr == "" {
 			logger.Do.Println("Error: Input Error, CoordAddr not provided")
 			os.Exit(1)
 		}
 
-	}else if svcName==common.TrainWorker{
+	} else if svcName == common.TrainWorker {
 		// this will be executed only in production, in dev, the common.WorkerType==""
 
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
@@ -161,12 +158,12 @@ func InitEnvs(svcName string){
 		common.WorkerAddr = common.GetEnv("WORKER_ADDR", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
-		if common.MasterAddr=="" || common.WorkerAddr=="" {
+		if common.MasterAddr == "" || common.WorkerAddr == "" {
 			logger.Do.Println("Error: Input Error, either MasterAddr or WorkerAddr  not provided")
 			os.Exit(1)
 		}
 
-	}else if svcName==common.InferenceWorker{
+	} else if svcName == common.InferenceWorker {
 
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
 		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
@@ -179,22 +176,20 @@ func InitEnvs(svcName string){
 		common.WorkerAddr = common.GetEnv("WORKER_ADDR", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
-		if common.MasterAddr=="" || common.WorkerAddr=="" {
+		if common.MasterAddr == "" || common.WorkerAddr == "" {
 			logger.Do.Println("Error: Input Error, either MasterAddr or WorkerAddr not provided")
 			os.Exit(1)
 		}
 	}
 }
 
-
 func main() {
 
 	defer logger.HandleErrors()
 
-	defer func(){
-		_=logger.F.Close()
+	defer func() {
+		_ = logger.F.Close()
 	}()
-
 
 	if common.ServiceName == "coord" {
 		logger.Do.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
@@ -209,7 +204,6 @@ func main() {
 
 		partyserver.SetupPartyServer()
 	}
-
 
 	//////////////////////////////////////////////////////////////////////////
 	//						 start tasks, called internally 				//
@@ -231,7 +225,7 @@ func main() {
 
 		distributed.SetupMaster(masterAddr, qItem, workerType)
 
-		km := taskmanager.InitK8sManager(true,  "")
+		km := taskmanager.InitK8sManager(true, "")
 		km.DeleteService(common.WorkerK8sSvcName)
 	}
 
@@ -243,7 +237,7 @@ func main() {
 		wk.RunWorker(wk)
 
 		// once  worker is killed, clear the resources.
-		km := taskmanager.InitK8sManager(true,  "")
+		km := taskmanager.InitK8sManager(true, "")
 		km.DeleteService(common.WorkerK8sSvcName)
 
 	}
@@ -256,6 +250,6 @@ func main() {
 		wk.RunWorker(wk)
 	}
 	// once  worker is killed, clear the resources.
-		km := taskmanager.InitK8sManager(true,  "")
-		km.DeleteService(common.WorkerK8sSvcName)
+	km := taskmanager.InitK8sManager(true, "")
+	km.DeleteService(common.WorkerK8sSvcName)
 }

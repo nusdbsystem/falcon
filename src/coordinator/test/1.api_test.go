@@ -1,8 +1,8 @@
 package test
 
 import (
-	"coordinator/coordserver/models"
 	"coordinator/common"
+	"coordinator/coordserver/models"
 	"coordinator/logger"
 	"encoding/json"
 	"fmt"
@@ -18,7 +18,7 @@ func TestSql(t *testing.T) {
 	jobDB.Connect()
 
 	e, u := jobDB.JobGetByJobID(1)
-	if e!=nil{
+	if e != nil {
 		panic(e)
 	}
 
@@ -45,7 +45,7 @@ func TestJson(t *testing.T) {
 }
 
 func TestParseJson(t *testing.T) {
-	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/data/job.json")
+	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/train_jobs/job.json")
 	logger.Do.Println(err)
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -61,7 +61,7 @@ func TestParseJson(t *testing.T) {
 
 	jb, _ := json.Marshal(job.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	res := common.LogisticRegression{}
-	_=json.Unmarshal(jb,&res)
+	_ = json.Unmarshal(jb, &res)
 	fmt.Println(res)
 
 }

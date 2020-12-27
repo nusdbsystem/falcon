@@ -13,9 +13,6 @@ import (
 	"time"
 )
 
-
-
-
 type SubProcessManager struct {
 	sync.Mutex
 
@@ -25,7 +22,7 @@ type SubProcessManager struct {
 	NumProc int
 
 	// if the subprocess is killed
-	IsWait  bool
+	IsWait bool
 	// if the subprocess is finished normally
 
 }
@@ -63,7 +60,7 @@ loop:
 				isKilled <- killed
 				fmt.Println("SubProcessManager: Put true to isKilled done")
 
-				fmt.Println("SubProcessManager: break the loop, quite KillSubProc thread")
+				fmt.Println("SubProcessManager: break the loop, quit KillSubProc thread")
 				break loop
 			}
 		case finish := <-isFinish:
@@ -110,7 +107,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 	var stdout io.ReadCloser
 	var err error
 
-	if pm.IsWait{
+	if pm.IsWait {
 		stderr, err = cmd.StderrPipe()
 		if err != nil {
 			fmt.Println(err)
@@ -124,7 +121,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 			return false, err.Error(), "", ""
 
 		}
-	}else{
+	} else {
 		_, err := cmd.StderrPipe()
 		if err != nil {
 			fmt.Println(err)
@@ -138,7 +135,6 @@ func (pm *SubProcessManager) ExecuteSubProc(
 
 		}
 	}
-
 
 	// shutdown the process after 2 hour, if still not finish
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
@@ -167,17 +163,15 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		pm.NumProc += 1
 		pm.Unlock()
 
-
 		var errLog []byte
 		var outLog []byte
 		var outErr error
 
-		if pm.IsWait{
+		if pm.IsWait {
 			errLog, _ = ioutil.ReadAll(stderr)
 			outLog, _ = ioutil.ReadAll(stdout)
 			outErr = cmd.Wait()
 		}
-
 
 		var oe string
 		if outErr != nil {
@@ -203,11 +197,8 @@ func (pm *SubProcessManager) ExecuteSubProc(
 
 }
 
-
-
-
-func main(){
-	dir:=""
+func main() {
+	dir := ""
 	stdIn := "input from keyboard"
 	commend := "python"
 	args := []string{"/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml/preprocessing.py"}

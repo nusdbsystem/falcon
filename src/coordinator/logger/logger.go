@@ -10,7 +10,7 @@ import (
 var Do *log.Logger
 var F *os.File
 
-func GetLogger(fileName string) (*log.Logger,*os.File) {
+func GetLogger(fileName string) (*log.Logger, *os.File) {
 
 	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
@@ -18,24 +18,25 @@ func GetLogger(fileName string) (*log.Logger,*os.File) {
 		os.Exit(1)
 	}
 
-
 	writers := []io.Writer{
 		f,
 		os.Stdout}
 
 	fileAndStdoutWriter := io.MultiWriter(writers...)
 
-	logger := log.New(fileAndStdoutWriter, "", log.Ldate|log.Ltime|log.Lshortfile)
+	// use log.Llongfile to display full path
+	// logger := log.New(fileAndStdoutWriter, "", log.Ldate|log.Ltime|log.Lshortfile)
+	logger := log.New(fileAndStdoutWriter, "[log]\t", log.Llongfile)
 
 	return logger, f
 
 }
 
-
-func HandleErrors(){
+func HandleErrors() {
 	// cache global unexpected error
 	err := recover()
-	if err != nil{
+	if err != nil {
+		Do.Printf("[Error]\t")
 		Do.Println("HandleErrors: Catching error ...")
 		var buf [4096]byte
 		n := runtime.Stack(buf[:], false)

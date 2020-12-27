@@ -10,7 +10,6 @@ import (
 	"strings"
 )
 
-
 func SetupDistProd(qItem *cache.QItem, workerType string) {
 	/**
 	 * @Author
@@ -29,7 +28,7 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 	logger.Do.Println("SetupDist: Launch master ProdEnv")
 
 	// in prod, use k8s to run train/predict server as a isolate process
-	itemKey := "jid"+fmt.Sprintf("%d", qItem.JobId)
+	itemKey := "job" + fmt.Sprintf("%d", qItem.JobId)
 
 	serviceName := "master-" + itemKey + "-" + strings.ToLower(workerType)
 
@@ -40,7 +39,7 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 
 	logger.Do.Printf("SetupDist: Get key, %s InitK8sManager\n", itemKey)
 
-	km := taskmanager.InitK8sManager(true,  "")
+	km := taskmanager.InitK8sManager(true, "")
 
 	command := []string{
 		common.MasterYamlCreatePath,
@@ -68,8 +67,7 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 	logger.Do.Println("SetupDist: setup master done")
 }
 
-
-func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string)  {
+func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string) {
 
 	/**
 	 * @Author
@@ -89,36 +87,36 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 
 	// in dev, use thread
 
-	if workerType == common.TrainWorker{
+	if workerType == common.TrainWorker {
 
-		serviceName = "worker-jid" + jobId + "-train-" + common.PartyServerId
+		serviceName = "worker-job" + jobId + "-train-" + common.PartyServerId
 
 		logger.Do.Println("SetupWorkerHelper: Current in Prod, TrainWorker, svcName", serviceName)
-	}else if workerType == common.InferenceWorker{
+	} else if workerType == common.InferenceWorker {
 
-		serviceName = "worker-jid" + jobId + "-predict-" + common.PartyServerId
+		serviceName = "worker-job" + jobId + "-predict-" + common.PartyServerId
 
 		logger.Do.Println("SetupWorkerHelper: Current in Prod, InferenceWorker, svcName", serviceName)
 	}
 
-	km := taskmanager.InitK8sManager(true,  "")
+	km := taskmanager.InitK8sManager(true, "")
 	command := []string{
 		common.WorkerYamlCreatePath,
-		serviceName, 	// 1. worker service name
-		workerPort,  	// 2. worker service port
-		masterAddr,  	// 3. master addr
-		workerType,		// 4. train or predict job
-		workerAddr, 	// 5. worker addr
-		workerType,   	// 6. serviceName train or predict
-		common.Env,  	// 7. env or prod
-		common.PartyServeBasePath,  // 8. folder to store logs, the same as partyserver folder currently,
-		dataPath, 		// 9. folder to read train data
-		modelPath, 		// 10. folder to store models
-		dataOutput, 	// 11. folder to store processed data
+		serviceName,               // 1. worker service name
+		workerPort,                // 2. worker service port
+		masterAddr,                // 3. master addr
+		workerType,                // 4. train or predict job
+		workerAddr,                // 5. worker addr
+		workerType,                // 6. serviceName train or predict
+		common.Env,                // 7. env or prod
+		common.PartyServeBasePath, // 8. folder to store logs, the same as partyserver folder currently,
+		dataPath,                  // 9. folder to read train data
+		modelPath,                 // 10. folder to store models
+		dataOutput,                // 11. folder to store processed data
 	}
 
-	_=taskmanager.ExecuteOthers("ls")
-	_=taskmanager.ExecuteOthers("pwd")
+	_ = taskmanager.ExecuteOthers("ls")
+	_ = taskmanager.ExecuteOthers("pwd")
 	km.UpdateYaml(strings.Join(command, " "))
 
 	filename := common.YamlBasePath + serviceName + ".yaml"
@@ -126,7 +124,6 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 	logger.Do.Println("SetupDist: Creating yaml done", filename)
 
 	km.CreateResources(filename)
-
 
 	logger.Do.Println("SetupDist: worker is running")
 

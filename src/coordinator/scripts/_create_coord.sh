@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export WORK_BASE_PATH=$1
+export BASE_PATH=$1
 env=$2
 
 # load variables from properties
@@ -9,7 +9,7 @@ env=$2
 . ./deploy/property/svc.properties
 
 IMAGE=$(echo "$FALCON_COORD_IMAGE" | sed 's_/_\\/_g')
-RUNTIMELOG_PATH=$(echo "$WORK_BASE_PATH"run_time_logs | sed 's_/_\\/_g')
+RUNTIMELOG_PATH=$(echo "$BASE_PATH"runtime_logs | sed 's_/_\\/_g')
 echo $RUNTIMELOG_PATH
 # create new yaml according template
 COORD_STORAGE_YAML=./deploy/template/storage.yaml
@@ -33,7 +33,7 @@ echo 'Env='$env >> $COMBINE_PROPERTIES
 echo 'SERVICE_NAME=coord' >> $COMBINE_PROPERTIES
 
 # create common map, 当多次使用 --from-env-file 来从多个数据源创建 ConfigMap 时，仅仅最后一个 env 文件有效。
-LOG_FILE_PATH=$WORK_BASE_PATH/logs/start_coord.log
+LOG_FILE_PATH=$BASE_PATH/logs/start_coord.log
 {
   (kubectl create configmap coord-config --from-env-file=$COMBINE_PROPERTIES &> $LOG_FILE_PATH)
   echo "-------------------------- finish creating config map for coordinator --------------------------------"

@@ -2,23 +2,39 @@ package coordserver
 
 import (
 	"context"
+	"coordinator/common"
 	"coordinator/coordserver/controller"
 	md "coordinator/coordserver/middleware"
 	rt "coordinator/coordserver/router"
-	"coordinator/common"
 	"coordinator/logger"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
+type key int
+
+const (
+	requestIDKey key = 0
+)
+
+func hello(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "hello from falcon coordinator\n")
+}
 
 func SetupHttp(nConsumer int) {
 	defer logger.HandleErrors()
 	mux := http.NewServeMux()
 
 	md.SysLvPath = []string{common.Register, common.PartyServerAdd}
+
+	// sanity check
+	mux.HandleFunc("/", hello)
 
 	//job
 	mux.HandleFunc("/"+common.SubmitJob, md.AddRouter(rt.JobSubmit, http.MethodPost))
@@ -48,10 +64,16 @@ func SetupHttp(nConsumer int) {
 	mux.HandleFunc("/"+common.AssignPort, md.AddRouter(rt.AssignPort, http.MethodGet))
 	mux.HandleFunc("/"+common.AddPort, md.AddRouter(rt.AddPort, http.MethodPost))
 
+	// for logging and tracing
+	nextRequestID := func() string {
+		return fmt.Sprintf("%d", time.Now().UnixNano())
+	}
+	http_logger := log.New(os.Stdout, "http: ", log.LstdFlags)
+
 	// run
 	server := &http.Server{
-		Addr:    "0.0.0.0:" + common.CoordPort,
-		Handler: mux,
+		Addr:    common.CoordAddr,
+		Handler: tracing(nextRequestID)(logging(http_logger)(mux)),
 	}
 
 	logger.Do.Println("HTTP: Updating table...")
@@ -61,13 +83,12 @@ func SetupHttp(nConsumer int) {
 	logger.Do.Println("HTTP: Creating admin user...")
 	controller.CreateUser()
 
-
 	jobScheduler := controller.Init(nConsumer)
 
 	done := make(chan os.Signal)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
 
+	go func() {
 		<-done
 
 		logger.Do.Println("HTTP: Stop multi consumers")
@@ -98,15 +119,49 @@ func SetupHttp(nConsumer int) {
 	}
 	go jobScheduler.MonitorConsumers()
 
-	logger.Do.Println("HTTP: Starting HTTP server...")
+	logger.Do.Printf(
+		"[coordinator server] listening on IP: %v, Port: %v\n",
+		common.CoordIP,
+		common.CoordPort)
+
 	err := server.ListenAndServe()
 
 	if err != nil {
 		if err == http.ErrServerClosed {
-			logger.Do.Print("HTTP: Server closed under request", err)
+			logger.Do.Print("HTTP: Server closed under request\n", err)
 		} else {
-			logger.Do.Fatal("HTTP: Server closed unexpected", err)
+			logger.Do.Fatal("HTTP: Server closed unexpected\n", err)
 		}
 	}
+}
 
+// logging of http requests by https://gist.github.com/enricofoltran/10b4a980cd07cb02836f70a4ab3e72d7
+func logging(logger *log.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				requestID, ok := r.Context().Value(requestIDKey).(string)
+				if !ok {
+					requestID = "unknown"
+				}
+				logger.Println(requestID[:3], r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent())
+			}()
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// tracing and logging by https://gist.github.com/enricofoltran/10b4a980cd07cb02836f70a4ab3e72d7
+func tracing(nextRequestID func() string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requestID := r.Header.Get("X-Request-Id")
+			if requestID == "" {
+				requestID = nextRequestID()
+			}
+			ctx := context.WithValue(r.Context(), requestIDKey, requestID)
+			w.Header().Set("X-Request-Id", requestID)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }

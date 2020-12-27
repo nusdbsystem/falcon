@@ -23,24 +23,23 @@ func (this *Master) schedule(qItem *cache.QItem) string {
 	this.allWorkerReady.Wait()
 	this.Unlock()
 
-	logger.Do.Println("Scheduler: All worker found: ", this.workers, " required: ",qItem.AddrList)
+	logger.Do.Println("Scheduler: All worker found: ", this.workers, " required: ", qItem.AddrList)
 
 	jsonString := this.schedulerHelper(qItem)
 	return jsonString
 }
 
-
-func (this *Master) schedulerHelper(qItem *cache.QItem) string{
+func (this *Master) schedulerHelper(qItem *cache.QItem) string {
 
 	wg := sync.WaitGroup{}
 
 	var portArray [][]int32
 
 	// for each ip addr
-	for i:=0; i<len(qItem.AddrList); i++{
+	for i := 0; i < len(qItem.AddrList); i++ {
 		var ports []int32
 		//generate n ports
-		for i:=0; i<len(qItem.AddrList); i++{
+		for i := 0; i < len(qItem.AddrList); i++ {
 			port := c.GetFreePort(common.CoordAddr)
 			pint, _ := strconv.Atoi(port)
 			ports = append(ports, int32(pint))
@@ -60,24 +59,25 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 	mpcPort := c.GetFreePort(common.CoordAddr)
 	mpcPint, _ := strconv.Atoi(mpcPort)
 
-	tmpStack :=  make([]string, len(this.workers))
+	tmpStack := make([]string, len(this.workers))
 	copy(tmpStack, this.workers)
 
-	// find moc id address
+	// find mpc address
 	var MpcIp string
-	for i, v := range qItem.AddrList {
+	for i, addr := range qItem.AddrList {
 		// todo: check by id==0 or type==active???
-		if qItem.PartyInfo[i].ID==0{
-			vip := strings.Split(v, ":")[0]
-			MpcIp = vip
+		// makes more sense to use party_type == active|passive
+		if qItem.PartyInfo[i].PartyType == "active" {
+			itemIP := strings.Split(addr, ":")[0]
+			MpcIp = itemIP
 		}
 	}
 
-	for i, v := range qItem.AddrList {
-		vip := strings.Split(v, ":")[0]
+	for i, addr := range qItem.AddrList {
+		itemIP := strings.Split(addr, ":")[0]
 
 		args := new(entity.DoTaskArgs)
-		args.IP = vip
+		args.IP = itemIP
 		args.MpcIp = MpcIp
 		args.MpcPort = uint(mpcPint)
 		args.AssignID = qItem.PartyInfo[i].ID
@@ -89,18 +89,18 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 		args.NetWorkFile = netCfg
 
 		MaxSearchNumber := 100
-		for len(tmpStack) > 0{
+		for len(tmpStack) > 0 {
 
-			if MaxSearchNumber <=0{
+			if MaxSearchNumber <= 0 {
 				panic("Max search Number reaches, Ip not Match Error ")
 			}
 
 			workerAddr := tmpStack[0]
-			ip := strings.Split(workerAddr, ":")[0]
+			workerIP := strings.Split(workerAddr, ":")[0]
 			tmpStack = tmpStack[1:]
 
 			// match using ip
-			if ip == vip {
+			if workerIP == itemIP {
 				wg.Add(1)
 				// execute the task
 				// append will allocate new memory inside the func stack,
@@ -108,7 +108,7 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 				// update the original slices.
 				go this.TaskHandler(workerAddr, args, &wg, &trainStatuses)
 				break
-			}else{
+			} else {
 				tmpStack = append(tmpStack, workerAddr)
 				MaxSearchNumber--
 			}
@@ -120,19 +120,18 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string{
 	// shutdown all goroutines.
 	cancel()
 	jsonString, e := json.Marshal(trainStatuses)
-	if e!=nil{
+	if e != nil {
 		logger.Do.Fatalln(e)
 	}
 	return string(jsonString)
 }
-
 
 func (this *Master) TaskHandler(
 	workerAddr string,
 	args *entity.DoTaskArgs,
 	wg *sync.WaitGroup,
 	trainStatuses *[]entity.DoTaskReply,
-){
+) {
 
 	defer wg.Done()
 
@@ -147,7 +146,7 @@ func (this *Master) TaskHandler(
 		rep.TaskMsg.RpcCallMsg = ""
 		rep.RpcCallError = true
 
-	}else{
+	} else {
 		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", this.workerType, workerAddr)
 		rep.RpcCallError = false
 	}
@@ -166,12 +165,12 @@ func (this *Master) TaskStatusMonitor(status *[]entity.DoTaskReply, ctx context.
 
 	for {
 		select {
-		case <- ctx.Done():
+		case <-ctx.Done():
 			fmt.Println("Scheduler: Stop TaskStatusMonitor")
 			this.jobStatus = common.JobSuccessful
 			return
 		default:
-			for _, v:= range *status{
+			for _, v := range *status {
 				if v.RuntimeError == true || v.RpcCallError == true {
 					this.jobStatus = common.JobFailed
 					// kill all workers.
@@ -179,12 +178,12 @@ func (this *Master) TaskStatusMonitor(status *[]entity.DoTaskReply, ctx context.
 					return
 				}
 
-				if v.Killed==true{
+				if v.Killed == true {
 					this.jobStatus = common.JobKilled
 					return
 				}
 			}
 		}
-		time.Sleep(2*time.Second)
+		time.Sleep(2 * time.Second)
 	}
 }

@@ -42,5 +42,5 @@ spec:
       volumes:
         - name: falcon-partyserver
           hostPath:
-            path: HOST_PATH/run_time_logs
+            path: HOST_PATH/runtime_logs
 

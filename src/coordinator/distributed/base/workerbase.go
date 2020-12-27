@@ -12,7 +12,6 @@ import (
 	"time"
 )
 
-
 type Worker interface {
 	// run worker rpc server
 	Run()
@@ -23,14 +22,14 @@ type Worker interface {
 type WorkerBase struct {
 	RpcBaseClass
 
-	Pm         		*taskmanager.SubProcessManager
-	TaskFinish 		chan bool
+	Pm         *taskmanager.SubProcessManager
+	TaskFinish chan bool
 
 	latestHeardTime int64
 	SuicideTimeout  int
 
 	// each worker has only one master addr
-	MasterAddr  	string
+	MasterAddr string
 }
 
 func (w *WorkerBase) RunWorker(worker Worker) {
@@ -41,7 +40,7 @@ func (w *WorkerBase) RunWorker(worker Worker) {
 
 }
 
-func(w *WorkerBase) InitWorkerBase(workerAddr, name string) {
+func (w *WorkerBase) InitWorkerBase(workerAddr, name string) {
 
 	w.InitRpcBase(workerAddr)
 	w.Name = name
@@ -55,7 +54,6 @@ func(w *WorkerBase) InitWorkerBase(workerAddr, name string) {
 	w.Pm.Ctx, w.Pm.Cancel = context.WithCancel(context.Background())
 	w.reset()
 }
-
 
 // call the master's register method,
 func (w *WorkerBase) Register(master string) {
@@ -115,7 +113,7 @@ loop:
 	for {
 		select {
 		case <-w.Ctx.Done():
-			logger.Do.Printf("%s: server %s quite eventLoop \n", w.Name, w.Addr)
+			logger.Do.Printf("%s: server %s quit eventLoop \n", w.Name, w.Addr)
 			break loop
 		default:
 			elapseTime := time.Now().UnixNano() - w.latestHeardTime
@@ -130,7 +128,7 @@ loop:
 				} else {
 					logger.Do.Printf("%s: WorkerBase timeout, RPC %s shutdown successfule\n", w.Name, w.Addr)
 				}
-				// quite event loop no matter ok or not
+				// quit event loop no matter ok or not
 				break
 			}
 

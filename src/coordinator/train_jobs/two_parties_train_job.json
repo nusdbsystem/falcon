@@ -1,15 +1,15 @@
 {
   "job_name": "credit_card_training",
   "job_decs": "this is the job_decs",
-  "job_fl_type": "1",
+  "job_fl_type": "vertical",
   "existing_key": 0,
-  "party_nums": 3,
+  "party_nums": 2,
   "task_num": 1,
   "party_info": [
     {
-      "id": 0,
+      "id": 1,
       "addr": "127.0.0.1:30005",
-      "party_type": 0,
+      "party_type": "active",
       "path": {
         "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0",
         "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0",
@@ -17,27 +17,33 @@
       }
     },
     {
-      "id": 1,
+      "id": 2,
       "addr": "127.0.0.1:30006",
-      "party_type": 1,
+      "party_type": "passive",
       "path": {
         "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1",
         "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1",
         "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
       }
-    },
-    {
-      "id": 2,
-      "addr": "127.0.0.1:30007",
-      "party_type": 1,
-      "path": {
-        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2",
-        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2",
-        "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
-      }
     }
   ],
   "tasks": {
+    "pre_processing": {
+      "algorithm_name": "preprocessing",
+      "input_configs": {
+        "data_input": {
+          "data": "file",
+          "key": "key"
+        },
+        "algorithm_config": {
+          "max_feature_bin": "32",
+          "iv_threshold": "0.5"
+        }
+      },
+      "output_configs": {
+        "data_output": "outfile"
+      }
+    },
     "model_training": {
       "algorithm_name": "logistic_regression",
       "input_configs": {

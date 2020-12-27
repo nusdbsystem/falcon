@@ -14,16 +14,15 @@ import (
 	"time"
 )
 
-
-func(wk *TrainWorker) TrainTask(dta *entity.DoTaskArgs, rep *entity.DoTaskReply){
+func (wk *TrainWorker) TrainTask(doTaskArgs *entity.DoTaskArgs, rep *entity.DoTaskReply) {
 
 	wg := sync.WaitGroup{}
 
 	wg.Add(1)
 
 	// no need to wait for mpc, once train task done, shutdown the mpc
-	go wk.mpcTaskCallee(dta, "algName")
-	go wk.mlTaskCallee(dta, rep, &wg)
+	go wk.mpcTaskCallee(doTaskArgs, "algName")
+	go wk.mlTaskCallee(doTaskArgs, rep, &wg)
 
 	// wait until all the task done
 	wg.Wait()
@@ -33,15 +32,15 @@ func(wk *TrainWorker) TrainTask(dta *entity.DoTaskArgs, rep *entity.DoTaskReply)
 
 	wk.Pm.Lock()
 	rep.Killed = wk.Pm.IsKilled
-	if wk.Pm.IsKilled == true{
+	if wk.Pm.IsKilled == true {
 		wk.Pm.Unlock()
 		wk.TaskFinish <- true
-	}else{
+	} else {
 		wk.Pm.Unlock()
 	}
 }
 
-func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskReply, wg *sync.WaitGroup)  {
+func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.DoTaskReply, wg *sync.WaitGroup) {
 	/**
 	 * @Author
 	 * @Description
@@ -71,19 +70,31 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 
 	logger.Do.Printf("Worker: %s task started \n", wk.Addr)
 
+	partyId := doTaskArgs.AssignID
+	partyNum := doTaskArgs.PartyNums
+	partyType := 1
+	partyTypeStr := doTaskArgs.PartyInfo.PartyType
+	// TODO: check with wyc if partyType 0 = active?
+	if partyTypeStr == "active" {
+		partyType = 0
+	} else if partyTypeStr == "passive" {
+		partyType = 1
+	}
+	flSetting := 1
+	flSettingStr := doTaskArgs.JobFlType
+	if flSettingStr == "vertical" {
+		flSetting = 1
+	} else if flSettingStr == "horizontal" {
+		flSetting = 0
+	}
+	existingKey := doTaskArgs.ExistingKey
 
-	partyId := dta.AssignID
-	partyNum := dta.PartyNums
-	partyType := dta.PartyInfo.PartyType
-	flSetting := dta.JobFlType
-	existingKey := dta.ExistingKey
+	dataInputFile := common.TaskDataPath + "/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
+	dataOutFile := common.TaskDataOutput + "/" + doTaskArgs.TaskInfo.PreProcessing.OutputConfigs.DataOutput
+	modelInputFile := common.TaskDataOutput + "/" + doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
+	modelFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
 
-	dataInputFile := common.TaskDataPath +"/" + dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
-	dataOutFile := common.TaskDataOutput  +"/" + dta.TaskInfo.PreProcessing.OutputConfigs.DataOutput
-	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
-	modelFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
-
-	modelReportFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
+	modelReportFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
 
 	var algParams string
 	var KeyFile string
@@ -93,9 +104,9 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 		fmt.Sprintf("%d", partyId),
 		fmt.Sprintf("%d", partyNum),
 		fmt.Sprintf("%d", partyType),
-		flSetting,
+		fmt.Sprintf("%d", flSetting),
 		fmt.Sprintf("%d", existingKey),
-		dta.NetWorkFile,
+		doTaskArgs.NetWorkFile,
 	)
 
 	var exitStr string
@@ -103,15 +114,15 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 	var logFile string
 	fmt.Println(res)
 
-	if  dta.TaskInfo.PreProcessing.AlgorithmName!=""{
+	if doTaskArgs.TaskInfo.PreProcessing.AlgorithmName != "" {
 		logger.Do.Println("Worker:task 1 pre processing start")
-		logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfo.PreProcessing.AlgorithmName
+		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.PreProcessing.AlgorithmName
 		_ = os.Mkdir(logFile, os.ModePerm)
-		KeyFile = dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
+		KeyFile = doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
 
-		algParams = dta.TaskInfo.PreProcessing.InputConfigs.SerializedAlgorithmConfig
+		algParams = doTaskArgs.TaskInfo.PreProcessing.InputConfigs.SerializedAlgorithmConfig
 		exitStr, res = run(
-			dta.TaskInfo.PreProcessing.AlgorithmName,
+			doTaskArgs.TaskInfo.PreProcessing.AlgorithmName,
 			algParams,
 			KeyFile,
 			logFile,
@@ -119,23 +130,23 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 			dataOutFile,
 			"", "",
 		)
-		if exit := wk.execResHandler(exitStr, res, rep); exit==true{
+		if exit := wk.execResHandler(exitStr, res, rep); exit == true {
 			return
 		}
 		logger.Do.Println("Worker:task 1 pre processing done", rep)
 	}
 
-	if  dta.TaskInfo.ModelTraining.AlgorithmName!="" {
+	if doTaskArgs.TaskInfo.ModelTraining.AlgorithmName != "" {
 		// execute task 2: train
 		logger.Do.Println("Worker:task model training start")
-		logFile = common.TaskRuntimeLogs + "/" + dta.TaskInfo.ModelTraining.AlgorithmName
+		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.ModelTraining.AlgorithmName
 		_ = os.Mkdir(logFile, os.ModePerm)
-		KeyFile = dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
+		KeyFile = doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
 
-		algParams = dta.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
+		algParams = doTaskArgs.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
 		logger.Do.Println("Worker: SerializedAlgorithmConfig is", algParams)
 		exitStr, res = run(
-			dta.TaskInfo.ModelTraining.AlgorithmName,
+			doTaskArgs.TaskInfo.ModelTraining.AlgorithmName,
 			algParams,
 			KeyFile,
 			logFile,
@@ -145,7 +156,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 			modelReportFile,
 		)
 
-		if exit := wk.execResHandler(exitStr, res, rep); exit==true{
+		if exit := wk.execResHandler(exitStr, res, rep); exit == true {
 			return
 		}
 		logger.Do.Println("Worker:task model training", rep)
@@ -154,7 +165,7 @@ func (wk *TrainWorker) mlTaskCallee(dta *entity.DoTaskArgs, rep *entity.DoTaskRe
 	// 2 thread will ready from isStop channel, only one is running at the any time
 }
 
-func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string){
+func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName string) {
 	/**
 	 * @Author
 	 * @Description
@@ -172,22 +183,21 @@ func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string){
 		-h 每个mpc进程的启动输入都是party_0的ip
 	 * @return
 	 **/
-	partyId := dta.AssignID
-	partyNum := dta.PartyNums
-
+	partyId := doTaskArgs.AssignID
+	partyNum := doTaskArgs.PartyNums
 
 	var envs []string
 
 	cmd := exec.Command(
 		common.MpcExe,
 		" --F ",
-		" --N  " + fmt.Sprintf("%d",partyNum),
+		" --N  "+fmt.Sprintf("%d", partyNum),
 		" --I ",
-		" --p " + fmt.Sprintf("%d",partyId),
-		" --h " + dta.MpcIp,
-		" --pn " + fmt.Sprintf("%d",dta.MpcPort),
+		" --p "+fmt.Sprintf("%d", partyId),
+		" --h "+doTaskArgs.MpcIp,
+		" --pn "+fmt.Sprintf("%d", doTaskArgs.MpcPort),
 		" "+algName,
-		)
+	)
 
 	logger.Do.Println(envs, cmd.String())
 	logger.Do.Println("mpcTask Done!")
@@ -199,7 +209,7 @@ func (wk *TrainWorker) mpcTaskCallee(dta *entity.DoTaskArgs, algName string){
 func (wk *TrainWorker) execResHandler(
 	exitStr string,
 	RuntimeErrorMsg map[string]string,
-	rep *entity.DoTaskReply) bool{
+	rep *entity.DoTaskReply) bool {
 	/**
 	 * @Author
 	 * @Description
@@ -210,7 +220,7 @@ func (wk *TrainWorker) execResHandler(
 	 * @return
 	 **/
 	js, err := json.Marshal(RuntimeErrorMsg)
-	if err !=nil{
+	if err != nil {
 		logger.Do.Println("Worker: Serialize job status error", err)
 		return true
 	}
@@ -227,42 +237,55 @@ func (wk *TrainWorker) execResHandler(
 	return false
 }
 
-func TestTaskProcess(dta *entity.DoTaskArgs){
+func TestTaskProcess(doTaskArgs *entity.DoTaskArgs) {
 
-	partyId := dta.AssignID
-	partyNum := dta.PartyNums
-	partyType := dta.PartyInfo.PartyType
-	flSetting := dta.JobFlType
-	existingKey := dta.ExistingKey
-	//dataInputFile := common.TaskDataPath +"/" + dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
-	modelFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
-	algParams := dta.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
+	partyId := doTaskArgs.AssignID
+	partyNum := doTaskArgs.PartyNums
+	partyType := 1
+	partyTypeStr := doTaskArgs.PartyInfo.PartyType
+	// TODO: check with wyc if partyType 0 = active?
+	if partyTypeStr == "active" {
+		partyType = 0
+	} else if partyTypeStr == "passive" {
+		partyType = 1
+	}
+	flSetting := 1
+	flSettingStr := doTaskArgs.JobFlType
+	if flSettingStr == "vertical" {
+		flSetting = 1
+	} else if flSettingStr == "horizontal" {
+		flSetting = 0
+	}
+	existingKey := doTaskArgs.ExistingKey
+	//dataInputFile := common.TaskDataPath +"/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
+	modelFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
+	algParams := doTaskArgs.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
 	logger.Do.Println("Worker: SerializedAlgorithmConfig is", algParams)
 
-	modelReportFile := common.TaskModelPath +"/"+ dta.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
-	logFile := common.TaskRuntimeLogs + "/" + dta.TaskInfo.PreProcessing.AlgorithmName
-	KeyFile := dta.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
-	modelInputFile := common.TaskDataOutput +"/"+ dta.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
+	modelReportFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
+	logFile := common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.PreProcessing.AlgorithmName
+	KeyFile := doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
+	modelInputFile := common.TaskDataOutput + "/" + doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
 
 	logger.Do.Printf("--------------------------------------------------\n")
 	logger.Do.Printf("\n")
 	logger.Do.Println("executed path is: ", strings.Join([]string{
 		common.FalconTrainExe,
-		" --party-id "+fmt.Sprintf("%d", partyId),
-		" --party-num "+fmt.Sprintf("%d", partyNum),
-		" --party-type "+fmt.Sprintf("%d", partyType),
-		" --fl-setting "+flSetting,
-		" --existing-key "+fmt.Sprintf("%d", existingKey),
-		" --key-file "+KeyFile,
-		" --network-file "+dta.NetWorkFile,
+		" --party-id " + fmt.Sprintf("%d", partyId),
+		" --party-num " + fmt.Sprintf("%d", partyNum),
+		" --party-type " + fmt.Sprintf("%d", partyType),
+		" --fl-setting " + fmt.Sprintf("%d", flSetting),
+		" --existing-key " + fmt.Sprintf("%d", existingKey),
+		" --key-file " + KeyFile,
+		" --network-file " + doTaskArgs.NetWorkFile,
 
-		" --algorithm-name "+dta.TaskInfo.ModelTraining.AlgorithmName,
-		" --algorithm-params "+algParams,
-		" --log-file "+logFile,
-		" --data-input-file "+modelInputFile,
+		" --algorithm-name " + doTaskArgs.TaskInfo.ModelTraining.AlgorithmName,
+		" --algorithm-params " + algParams,
+		" --log-file " + logFile,
+		" --data-input-file " + modelInputFile,
 		" --data-output-file ",
-		" --model-save-file "+modelFile,
-		" --model-report-file "+modelReportFile,
+		" --model-save-file " + modelFile,
+		" --model-report-file " + modelReportFile,
 	}, " "))
 	logger.Do.Printf("\n")
 	logger.Do.Printf("--------------------------------------------------\n")
@@ -280,8 +303,8 @@ func doMlTask(
 
 	netFile string,
 
-) func(string, string, string,string, string,string, string,string) (string, map[string]string ) {
-
+) func(string, string, string, string, string, string, string, string) (string, map[string]string) {
+	// WTF was that??! WTF were all those strings???!
 	/**
 	 * @Author
 	 * @Description  record if the task is fail or not
@@ -303,7 +326,7 @@ func doMlTask(
 		dataOutputFile string,
 		modelSaveFile string,
 		modelReport string,
-	)(string, map[string]string ){
+	) (string, map[string]string) {
 
 		var envs []string
 
@@ -315,10 +338,10 @@ func doMlTask(
 			"--fl-setting", flSetting,
 			"--existing-key", existingKey,
 			"--key-file", KeyFile,
-			"--network-file",netFile,
+			"--network-file", netFile,
 
 			"--algorithm-name", algName,
-			"--algorithm-params",algParams,
+			"--algorithm-params", algParams,
 			"--log-file", logFile,
 			"--data-input-file", dataInputFile,
 			"--data-output-file", dataOutputFile,
@@ -328,7 +351,7 @@ func doMlTask(
 
 		logger.Do.Printf("-----------------------------------------------------------------\n")
 		logger.Do.Printf("\n")
-		logger.Do.Println("envs",envs)
+		logger.Do.Println("envs", envs)
 		logger.Do.Println(cmd.String())
 		logger.Do.Printf("\n")
 		logger.Do.Printf("-----------------------------------------------------------------\n")
