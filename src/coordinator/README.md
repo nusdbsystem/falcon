@@ -32,6 +32,9 @@ to compile into a binary
 go build <go-program>.go
 ```
 
+## Load the Executor for FL
+
+and update the executor path in `src/coordinator/common/global.go`
 
 ## Platform setup DEV (development without k8)
 
@@ -100,14 +103,14 @@ go build <go-program>.go
       
 ## Interact with the platform (submit jobs, monitor jobs etc)
 
-1. define your job.json, similar to the example provided in ./data/job.json
+1. define your job.json, similar to the example provided in ./train_jobs/job.json
 
 2. submit job:
     
-    python coordinator_client.py -url <ip url of coordinator>:6573 -method submit -path ./data/job.json
+    python coordinator_client.py -url <ip url of coordinator>:6573 -method submit -path ./train_jobs/job.json
     
     ```
-    python3 coordinator_client.py -url 127.0.0.1:30004 -method submit -path ./data/three_parties_train_job.json
+    python3 coordinator_client.py -url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job.json
     ```
 
 
