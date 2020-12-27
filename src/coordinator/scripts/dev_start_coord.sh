@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [ ! -n "$1" ] ;then
+     echo "No party number provided"
+     echo "Usage: bash dev_start_coord.sh <partyNumber>"
+     exit 1
+fi
+
+partyNumber=$1
+
+# mkdir for relevant resources
+bash scripts/create_folder.sh $partyNumber
+
+# launch coordinator
 source config_coord.properties
 
 # detect the OS type with uname
