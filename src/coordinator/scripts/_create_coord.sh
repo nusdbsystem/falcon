@@ -9,7 +9,7 @@ env=$2
 . ./deploy/property/svc.properties
 
 IMAGE=$(echo "$FALCON_COORD_IMAGE" | sed 's_/_\\/_g')
-RUNTIMELOG_PATH=$(echo "$BASE_PATH"run_time_logs | sed 's_/_\\/_g')
+RUNTIMELOG_PATH=$(echo "$BASE_PATH"runtime_logs | sed 's_/_\\/_g')
 echo $RUNTIMELOG_PATH
 # create new yaml according template
 COORD_STORAGE_YAML=./deploy/template/storage.yaml

@@ -69,7 +69,7 @@ create_folders()
       title "Creating folders"
       mkdir $BASE_PATH
       mkdir $BASE_PATH/logs
-      mkdir $BASE_PATH/run_time_logs
+      mkdir $BASE_PATH/runtime_logs
 
 }
 
