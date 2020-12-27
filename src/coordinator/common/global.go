@@ -99,8 +99,8 @@ const (
 	MpcExe         = "./semi-party.x"
 	FalconTrainExe = "/home/wuyuncheng/Documents/falcon/build/src/executor/falcon"
 
-	HorizontalFl = "0"
-	VerticalFl   = "1"
+	HorizontalFl = "horizontal"
+	VerticalFl   = "vertical"
 
 	// algorithms
 
@@ -186,10 +186,10 @@ func GetEnv(key, defaultValue string) string {
 	 **/
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, Set to default, key: %s, default: %s >>>>>>>>>>>>>\n", key, defaultValue)
+		logger.Do.Printf("Read envs, Set to default, key: %s, default: %s\n", key, defaultValue)
 		return defaultValue
 	}
-	logger.Do.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: %s, value: %s >>>>>>>>>>>>>\n", key, value)
+	logger.Do.Printf("Read envs, User defined,   key: %s, value: %s\n", key, value)
 	return value
 }
 
@@ -203,9 +203,9 @@ func getEnv(key, defaultValue string) string {
 	 **/
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, Set to default, key: %s, default: %s >>>>>>>>>>>>>\n", key, defaultValue)
+		fmt.Printf("Read envs, Set to default, key: %s, default: %s\n", key, defaultValue)
 		return defaultValue
 	}
-	fmt.Printf("<<<<<<<<<<<<<<<<< Read envs, User defined,   key: %s, value: %s >>>>>>>>>>>>>\n", key, value)
+	fmt.Printf("Read envs, User defined,   key: %s, value: %s\n", key, value)
 	return value
 }

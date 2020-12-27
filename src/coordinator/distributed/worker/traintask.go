@@ -72,8 +72,21 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 
 	partyId := doTaskArgs.AssignID
 	partyNum := doTaskArgs.PartyNums
-	partyType := doTaskArgs.PartyInfo.PartyType
-	flSetting := doTaskArgs.JobFlType
+	partyType := 1
+	partyTypeStr := doTaskArgs.PartyInfo.PartyType
+	// TODO: check with wyc if partyType 0 = active?
+	if partyTypeStr == "active" {
+		partyType = 0
+	} else if partyTypeStr == "passive" {
+		partyType = 1
+	}
+	flSetting := 1
+	flSettingStr := doTaskArgs.JobFlType
+	if flSettingStr == "vertical" {
+		flSetting = 1
+	} else if flSettingStr == "horizontal" {
+		flSetting = 0
+	}
 	existingKey := doTaskArgs.ExistingKey
 
 	dataInputFile := common.TaskDataPath + "/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
@@ -91,7 +104,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 		fmt.Sprintf("%d", partyId),
 		fmt.Sprintf("%d", partyNum),
 		fmt.Sprintf("%d", partyType),
-		flSetting,
+		fmt.Sprintf("%d", flSetting),
 		fmt.Sprintf("%d", existingKey),
 		doTaskArgs.NetWorkFile,
 	)
@@ -228,8 +241,21 @@ func TestTaskProcess(doTaskArgs *entity.DoTaskArgs) {
 
 	partyId := doTaskArgs.AssignID
 	partyNum := doTaskArgs.PartyNums
-	partyType := doTaskArgs.PartyInfo.PartyType
-	flSetting := doTaskArgs.JobFlType
+	partyType := 1
+	partyTypeStr := doTaskArgs.PartyInfo.PartyType
+	// TODO: check with wyc if partyType 0 = active?
+	if partyTypeStr == "active" {
+		partyType = 0
+	} else if partyTypeStr == "passive" {
+		partyType = 1
+	}
+	flSetting := 1
+	flSettingStr := doTaskArgs.JobFlType
+	if flSettingStr == "vertical" {
+		flSetting = 1
+	} else if flSettingStr == "horizontal" {
+		flSetting = 0
+	}
 	existingKey := doTaskArgs.ExistingKey
 	//dataInputFile := common.TaskDataPath +"/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
 	modelFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
@@ -248,7 +274,7 @@ func TestTaskProcess(doTaskArgs *entity.DoTaskArgs) {
 		" --party-id " + fmt.Sprintf("%d", partyId),
 		" --party-num " + fmt.Sprintf("%d", partyNum),
 		" --party-type " + fmt.Sprintf("%d", partyType),
-		" --fl-setting " + flSetting,
+		" --fl-setting " + fmt.Sprintf("%d", flSetting),
 		" --existing-key " + fmt.Sprintf("%d", existingKey),
 		" --key-file " + KeyFile,
 		" --network-file " + doTaskArgs.NetWorkFile,

@@ -7,9 +7,9 @@
   "task_num": 1,
   "party_info": [
     {
-      "id": 0,
+      "id": 1,
       "addr": "127.0.0.1:30005",
-      "party_type": 0,
+      "party_type": "active",
       "path": {
         "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
         "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",

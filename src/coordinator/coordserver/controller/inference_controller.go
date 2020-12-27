@@ -10,28 +10,24 @@ import (
 	"time"
 )
 
-
-
-
 func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (bool, uint) {
-
 
 	e, trainJob := ctx.JobDB.JobGetByJobID(inferenceJob.JobId)
 
-	if e!=nil{
+	if e != nil {
 		panic(e)
 	}
 	e, JobInfo := ctx.JobDB.JobInfoGetById(trainJob.JobInfoID)
-	if e!=nil{
+	if e != nil {
 		panic(e)
 	}
 	e, model := ctx.JobDB.ModelGetByID(inferenceJob.JobId)
-	if e!=nil{
+	if e != nil {
 		panic(e)
 	}
 
 	// if train is not finished, return
-	if model.IsTrained == 0{
+	if model.IsTrained == 0 {
 		return false, 0
 	}
 
@@ -45,7 +41,7 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 
 	err := json.Unmarshal([]byte(JobInfo.PartyIds), &pInfo)
 	err2 := json.Unmarshal([]byte(JobInfo.TaskInfo), &TaskInfo)
-	if err != nil || err2!=nil {
+	if err != nil || err2 != nil {
 		panic("json.Unmarshal(PartyIds or TaskInfo) error")
 	}
 
@@ -54,11 +50,12 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 	DataInfo := inferenceJob.DataInfo
 
 	if JobInfo.FlSetting == common.HorizontalFl {
-		for _, info := range DataInfo{
-			for _, v := range pInfo{
+		for _, info := range DataInfo {
+			for _, v := range pInfo {
 
-				// only deploy inference worker at party 0
-				if info.ID == v.ID && info.ID == 0{
+				// only deploy inference worker at party 0 (WTF? inference works should be deployed at all parties!)
+				// TODO: should be on Active party, ie party type, not id==0
+				if info.ID == v.ID && info.ID == 0 {
 					tmp := common.PartyInfo{}
 					tmp.ID = info.ID
 					tmp.Addr = v.Addr
@@ -70,11 +67,11 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 				}
 			}
 		}
-	}else if JobInfo.FlSetting == common.VerticalFl{
-		for _, info := range DataInfo{
-			for _, v := range pInfo{
+	} else if JobInfo.FlSetting == common.VerticalFl {
+		for _, info := range DataInfo {
+			for _, v := range pInfo {
 
-				if info.ID == v.ID{
+				if info.ID == v.ID {
 					tmp := common.PartyInfo{}
 					tmp.ID = info.ID
 					tmp.Addr = v.Addr
@@ -87,7 +84,7 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 		}
 	}
 
-	logger.Do.Printf("CreateInference: JobType: %s, parsed partInfo : ",JobInfo.FlSetting)
+	logger.Do.Printf("CreateInference: JobType: %s, parsed partInfo : ", JobInfo.FlSetting)
 	logger.Do.Println(inferencePartyInfo)
 
 	addresses := common.ParseAddress(inferencePartyInfo)
@@ -102,7 +99,7 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 	qItem.PartyInfo = inferencePartyInfo
 	qItem.Tasks = TaskInfo
 
-	go func(){
+	go func() {
 		defer logger.HandleErrors()
 		dist.SetupDist(qItem, common.InferenceWorker)
 	}()
@@ -111,20 +108,18 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 
 }
 
-
-func QueryRunningInferenceJobs(jobName string, ctx *entity.Context) []uint{
+func QueryRunningInferenceJobs(jobName string, ctx *entity.Context) []uint {
 
 	InferenceIds, e := ctx.JobDB.InferenceGetCurrentRunningOneWithJobName(jobName, ctx.UsrId)
 
-	if e !=nil{
+	if e != nil {
 		panic("QueryRunningJobs Error")
 	}
 
 	return InferenceIds
 }
 
-
-func InferenceUpdateStatus(jobId uint, status uint, ctx *entity.Context){
+func InferenceUpdateStatus(jobId uint, status uint, ctx *entity.Context) {
 	tx := ctx.JobDB.Db.Begin()
 	e, _ := ctx.JobDB.InferenceUpdateStatus(tx, jobId, status)
 	ctx.JobDB.Commit(tx, e)
@@ -137,28 +132,29 @@ func InferenceUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
 	ctx.JobDB.Commit(tx, []error{e})
 }
 
-
 func UpdateInference(newInfId uint, InferenceIds []uint, ctx *entity.Context) {
 
 	MaxCheck := 10
 loop:
-	for{
-		if MaxCheck <0{
+	for {
+		if MaxCheck < 0 {
 			logger.Do.Println("[UpdateInference]: Update Failed, latest job is nor running")
 			break
 		}
 
 		e, u := ctx.JobDB.InferenceGetByID(newInfId)
-		if e!=nil{
-			panic(e)}
+		if e != nil {
+			panic(e)
+		}
 
 		// if the latest inference is running, stop the old one
-		if u.Status == common.JobRunning{
-			for _, infId := range InferenceIds{
+		if u.Status == common.JobRunning {
+			for _, infId := range InferenceIds {
 
 				e, u := ctx.JobDB.InferenceGetByID(infId)
-				if e!=nil{
-					panic(e)}
+				if e != nil {
+					panic(e)
+				}
 
 				dist.KillJob(u.MasterAddr, common.Proxy)
 
@@ -168,11 +164,11 @@ loop:
 			}
 			logger.Do.Println("[UpdateInference]: Update successfully")
 			break loop
-		}else{
+		} else {
 			MaxCheck--
 		}
 		// check db every 3 second
-		time.Sleep(time.Second*3)
+		time.Sleep(time.Second * 3)
 	}
 
 }
