@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# exit on error
+set -e
+
 if [ ! -n "$1" ] ;then
      echo "No party number provided"
      echo "Usage: bash dev_start_coord.sh <partyNumber>"

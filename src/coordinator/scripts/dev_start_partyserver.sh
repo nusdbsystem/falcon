@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# exit on error
+set -e
+
 if [ ! -n "$1" ] ;then
      echo "No partyserver ID provided"
      echo "Usage: bash dev_start_partyserver.sh <PARTY_SERVER_ID>"

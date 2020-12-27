@@ -6,12 +6,13 @@ rm -r dev_test
 mkdir dev_test/
 
 # setup coord folder
+echo "creating folders for coordinator"
 mkdir dev_test/coord
 
 # setup party 1-N folders
 for k in $(seq 1 $partyNumber)
 do
-    echo "making dir, $k"
+    echo "creating folders for party-$k"
     mkdir dev_test/party$k
     mkdir dev_test/party${k}/logs
     mkdir dev_test/party${k}/data_input
