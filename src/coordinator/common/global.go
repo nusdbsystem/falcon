@@ -23,8 +23,8 @@ const (
 
 	// master& worker heartbeat
 
-	MasterTimeout = 10000 //  send hb every 10 second
-	WorkerTimeout = 20000 //  receive hb within every 20 second
+	MasterTimeout = 10000 //  send heartbeat every 10 second
+	WorkerTimeout = 20000 //  receive heartbeat within every 20 second
 
 	// router path for coordServer
 	Register                 = "register"
@@ -78,7 +78,7 @@ const (
 	JobName = "job_name"
 	ExtInfo = "ext_info"
 
-	Proxy = "tcp"
+	Network = "tcp"
 
 	// job status
 	// TODO: replace int with msgs

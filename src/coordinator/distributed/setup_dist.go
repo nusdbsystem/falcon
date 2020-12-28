@@ -94,8 +94,8 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 	return masterAddr
 }
 
-func KillJob(masterAddr, Proxy string) {
-	ok := client.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
+func KillJob(masterAddr, network string) {
+	ok := client.Call(masterAddr, network, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {
 		logger.Do.Println("Master: KillJob error")
 		panic("Master: KillJob error")

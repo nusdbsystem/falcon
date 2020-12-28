@@ -156,7 +156,7 @@ loop:
 					panic(e)
 				}
 
-				dist.KillJob(u.MasterAddr, common.Proxy)
+				dist.KillJob(u.MasterAddr, common.Network)
 
 				tx := ctx.JobDB.Db.Begin()
 				e, _ = ctx.JobDB.InferenceUpdateStatus(tx, infId, common.JobKilled)

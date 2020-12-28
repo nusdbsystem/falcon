@@ -14,7 +14,7 @@ import (
 type RpcBaseClass struct {
 	sync.Mutex
 	Name     string
-	Proxy    string
+	Network  string
 	Addr     string //  which is the ip+port addr of worker
 	Port     string //  which is the port addr of worker
 	Listener net.Listener
@@ -25,7 +25,7 @@ type RpcBaseClass struct {
 
 func (rb *RpcBaseClass) InitRpcBase(Addr string) {
 	logger.Do.Println("[rpcbase] InitRpcBase called with Addr ", Addr)
-	rb.Proxy = "tcp"
+	rb.Network = "tcp"
 	rb.Addr = Addr
 
 	h := strings.Split(Addr, ":")
@@ -37,8 +37,8 @@ func (rb *RpcBaseClass) InitRpcBase(Addr string) {
 
 func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
 
-	logger.Do.Printf("%s: listening on %s, %s \n", rb.Name, rb.Proxy, "0.0.0.0:"+rb.Port)
-	listener, e := net.Listen(rb.Proxy, "0.0.0.0:"+rb.Port)
+	logger.Do.Printf("%s: listening on %s, %s \n", rb.Name, rb.Network, "0.0.0.0:"+rb.Port)
+	listener, e := net.Listen(rb.Network, "0.0.0.0:"+rb.Port)
 
 	if e != nil {
 		logger.Do.Fatalf("%s: StartRPCServer error, %s\n", rb.Name, e)
@@ -95,7 +95,7 @@ func (rb *RpcBaseClass) StopRPCServer(addr, targetSvc string) {
 	var reply entity.ShutdownReply
 
 	logger.Do.Printf("%s: begin to call %s\n", rb.Name, targetSvc)
-	ok := client.Call(addr, rb.Proxy, targetSvc, new(struct{}), &reply)
+	ok := client.Call(addr, rb.Network, targetSvc, new(struct{}), &reply)
 	if ok == false {
 		logger.Do.Printf("%s: Cleanup: RPC %s error\n", rb.Name, addr)
 	}

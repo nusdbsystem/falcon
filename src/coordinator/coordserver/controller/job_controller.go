@@ -24,7 +24,7 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 		panic("json.Marshal(job.PartyIds) error")
 	}
 
-	ModelName :=  job.Tasks.ModelTraining.AlgorithmName
+	ModelName := job.Tasks.ModelTraining.AlgorithmName
 	ModelDecs := job.Tasks.ModelTraining.AlgorithmName
 	PartyNumber := uint(len(job.PartyInfo))
 
@@ -49,7 +49,6 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 
 	ctx.JobDB.Commit(tx, []error{err1, err2, err3, err4})
 
-
 	qItem := new(cache.QItem)
 	qItem.AddrList = addresses
 	qItem.JobId = u2.JobId
@@ -69,12 +68,12 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 
 func JobKill(jobId uint, ctx *entity.Context) {
 
-	e,u := ctx.JobDB.JobGetByJobID(jobId)
-	if e!=nil{
+	e, u := ctx.JobDB.JobGetByJobID(jobId)
+	if e != nil {
 		panic(e)
 	}
 
-	distributed.KillJob(u.MasterAddr, common.Proxy)
+	distributed.KillJob(u.MasterAddr, common.Network)
 
 	tx := ctx.JobDB.Db.Begin()
 	e2, _ := ctx.JobDB.JobUpdateStatus(tx, jobId, common.JobKilled)
@@ -101,8 +100,8 @@ func JobUpdateStatus(jobId uint, status uint, ctx *entity.Context) {
 }
 
 func JobStatusQuery(jobId uint, ctx *entity.Context) uint {
-	e,u := ctx.JobDB.JobGetByJobID(jobId)
-	if e!=nil{
+	e, u := ctx.JobDB.JobGetByJobID(jobId)
+	if e != nil {
 		panic(e)
 	}
 

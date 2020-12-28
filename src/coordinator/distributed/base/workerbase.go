@@ -61,7 +61,7 @@ func (w *WorkerBase) Register(master string) {
 	args.WorkerAddr = w.Addr
 
 	logger.Do.Printf("WorkerBase: begin to call Master.RegisterWorker to register addr= %s \n", args.WorkerAddr)
-	ok := client.Call(master, w.Proxy, "Master.RegisterWorker", args, new(struct{}))
+	ok := client.Call(master, w.Network, "Master.RegisterWorker", args, new(struct{}))
 	// if not register successfully, close
 	if ok == false {
 		logger.Do.Fatalf("WorkerBase: Register RPC %s, register error\n", master)
@@ -124,7 +124,7 @@ loop:
 				logger.Do.Printf("%s: Timeout, server %s begin to suicide \n", w.Name, w.Addr)
 
 				var reply entity.ShutdownReply
-				ok := client.Call(w.Addr, w.Proxy, w.Name+".Shutdown", new(struct{}), &reply)
+				ok := client.Call(w.Addr, w.Network, w.Name+".Shutdown", new(struct{}), &reply)
 				if ok == false {
 					logger.Do.Printf("%s: RPC %s shutdown error\n", w.Name, w.Addr)
 				} else {

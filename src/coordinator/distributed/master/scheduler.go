@@ -138,7 +138,7 @@ func (master *Master) TaskHandler(
 	var rep entity.DoTaskReply
 
 	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", master.workerType, workerAddr)
-	ok := client.Call(workerAddr, master.Proxy, master.workerType+".DoTask", argAddr, &rep)
+	ok := client.Call(workerAddr, master.Network, master.workerType+".DoTask", argAddr, &rep)
 
 	if !ok {
 		logger.Do.Printf("Scheduler: Master calling %s, DoTask error\n", workerAddr)
