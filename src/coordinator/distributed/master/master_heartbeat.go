@@ -8,37 +8,37 @@ import (
 	"time"
 )
 
-func (this *Master) eventLoop() {
+func (master *Master) eventLoop() {
 
 loop:
 	for {
 		select {
-		case <-this.Ctx.Done():
-			logger.Do.Printf("Master: %s quit eventLoop \n", this.Port)
+		case <-master.Ctx.Done():
+			logger.Do.Printf("Master: %s quit eventLoop \n", master.Port)
 			break loop
 
 		default:
-			if !this.checkWorker() {
+			if !master.checkWorker() {
 
 				// if not worker found, wait here
-				this.Lock()
-				this.beginCountDown.Wait()
-				this.Unlock()
+				master.Lock()
+				master.beginCountDown.Wait()
+				master.Unlock()
 
 			} else {
 
-				this.Lock()
-				elapseTime := time.Now().UnixNano() - this.lastSendTime
+				master.Lock()
+				elapseTime := time.Now().UnixNano() - master.lastSendTime
 				fmt.Printf("Master: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
 
-				if int(elapseTime/int64(time.Millisecond)) >= this.heartbeatTimeout {
+				if int(elapseTime/int64(time.Millisecond)) >= master.heartbeatTimeout {
 
-					this.Unlock()
+					master.Unlock()
 					fmt.Println("Master: Timeout, server begin to send heart beat to worker")
-					this.broadcastHeartbeat()
+					master.broadcastHeartbeat()
 
 				} else {
-					this.Unlock()
+					master.Unlock()
 				}
 			}
 		}
@@ -46,42 +46,37 @@ loop:
 	}
 }
 
-func (this *Master) broadcastHeartbeat() {
+// boardcast heartbeat to current workers in worker list
+func (master *Master) broadcastHeartbeat() {
 	// update lastSendTime
-	this.reset()
-	/**
-	 * @Author
-	 * @Description boardCast hb to current workers in worker list
-	 * @Date 7:07 下午 13/12/20
-	 * @Param
-	 * @return
-	 **/
-	for _, worker := range this.workers {
+	master.reset()
 
-		ok := client.Call(worker, this.Proxy, this.workerType+".ResetTime", new(struct{}), new(struct{}))
+	for _, worker := range master.workers {
+
+		ok := client.Call(worker, master.Proxy, master.workerType+".ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
 			logger.Do.Printf("Master: RPC %s send heartbeat error\n", worker)
 		}
 	}
 }
 
-func (this *Master) reset() {
-	this.Lock()
-	this.lastSendTime = time.Now().UnixNano()
-	this.Unlock()
+func (master *Master) reset() {
+	master.Lock()
+	master.lastSendTime = time.Now().UnixNano()
+	master.Unlock()
 
 }
 
-func (this *Master) checkWorker() bool {
+func (master *Master) checkWorker() bool {
 
-	this.Lock()
+	master.Lock()
 
-	if len(this.workers) > 0 {
-		this.foundWorker = true
+	if len(master.workers) > 0 {
+		master.foundWorker = true
 	} else {
-		this.foundWorker = false
+		master.foundWorker = false
 	}
 
-	this.Unlock()
-	return this.foundWorker
+	master.Unlock()
+	return master.foundWorker
 }

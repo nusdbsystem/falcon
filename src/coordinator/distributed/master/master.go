@@ -52,14 +52,14 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 
 // Register is an RPC method that is called by workers after they have started
 // up to report that they are ready to receive tasks.
-func (this *Master) Register(args *entity.RegisterArgs, _ *struct{}) error {
-
-	this.tmpWorkers <- args.WorkerAddr
+func (master *Master) Register(args *entity.RegisterArgs, _ *struct{}) error {
+	logger.Do.Println("[master/Register] register with master")
+	master.tmpWorkers <- args.WorkerAddr
 	return nil
 }
 
 // sends information of worker to ch. which is used by scheduler
-func (this *Master) forwardRegistrations(qItem *cache.QItem) {
+func (master *Master) forwardRegistrations(qItem *cache.QItem) {
 
 	logger.Do.Printf("Master: start forwardRegistrations... ")
 	var requiredIp []string
@@ -72,13 +72,13 @@ func (this *Master) forwardRegistrations(qItem *cache.QItem) {
 loop:
 	for {
 		select {
-		case <-this.Ctx.Done():
-			logger.Do.Printf("Master: %s quit forwardRegistrations \n", this.Port)
+		case <-master.Ctx.Done():
+			logger.Do.Printf("Master: %s quit forwardRegistrations \n", master.Port)
 			break loop
 
-		case addr := <-this.tmpWorkers:
+		case addr := <-master.tmpWorkers:
 			// 1. check if this work already exist
-			if utils.Contains(addr, this.workers) {
+			if utils.Contains(addr, master.workers) {
 				logger.Do.Printf("Master: the worker %s already registered, skip \n", addr)
 			}
 
@@ -89,10 +89,10 @@ loop:
 				if tmpIp == ip {
 					logger.Do.Println("Master: Found one worker", addr)
 
-					this.Lock()
-					this.workers = append(this.workers, addr)
-					this.Unlock()
-					this.beginCountDown.Broadcast()
+					master.Lock()
+					master.workers = append(master.workers, addr)
+					master.Unlock()
+					master.beginCountDown.Broadcast()
 
 					// remove the i th ip
 					requiredIp = append(requiredIp[0:i+1], requiredIp[i+1:]...)
@@ -100,17 +100,17 @@ loop:
 				}
 			}
 
-			this.Lock()
-			if len(this.workers) == this.workerNum {
+			master.Lock()
+			if len(master.workers) == master.workerNum {
 				// it is not strictly necessary for you to hold the lock on M sync.Mutex when calling C.Broadcast()
-				this.allWorkerReady.Broadcast()
+				master.allWorkerReady.Broadcast()
 			}
-			this.Unlock()
+			master.Unlock()
 		}
 	}
 }
 
-func (this *Master) run(
+func (master *Master) run(
 	schedule func() string,
 	updateStatus func(jsonString string),
 	finish func(),
@@ -123,20 +123,20 @@ func (this *Master) run(
 	logger.Do.Println("Master: finish job, begin to close all")
 
 	finish()
-	logger.Do.Printf("Master %s: job completed\n", this.Addr)
+	logger.Do.Printf("Master %s: job completed\n", master.Addr)
 
-	this.doneChannel <- true
+	master.doneChannel <- true
 }
 
-func (this *Master) Wait() {
+func (master *Master) Wait() {
 
 loop:
 	for {
 		select {
-		case <-this.Ctx.Done():
-			logger.Do.Printf("WorkerBase: server %s quit Waitting \n", this.Addr)
+		case <-master.Ctx.Done():
+			logger.Do.Printf("WorkerBase: server %s quit Waitting \n", master.Addr)
 			break loop
-		case <-this.doneChannel:
+		case <-master.doneChannel:
 			break loop
 		}
 	}
@@ -144,34 +144,28 @@ loop:
 
 // Shutdown is an RPC method that shuts down the Master's RPC server.
 // for rpc method, must be public method, only 2 params, second one must be pointer,return err type
-func (this *Master) Shutdown(_, _ *struct{}) error {
+func (master *Master) Shutdown(_, _ *struct{}) error {
 	logger.Do.Println("Master: Shutdown server")
-	_ = this.Listener.Close() // causes the Accept to fail, then break out the accetp loop
+	_ = master.Listener.Close() // causes the Accept to fail, then break out the accetp loop
 	return nil
 }
 
-func (this *Master) killWorkers() {
+func (master *Master) killWorkers() {
 
-	this.Lock()
-	defer this.Unlock()
+	master.Lock()
+	defer master.Unlock()
 
-	for _, worker := range this.workers {
+	for _, worker := range master.workers {
 
-		this.StopRPCServer(worker, this.workerType+".Shutdown")
+		master.StopRPCServer(worker, master.workerType+".Shutdown")
 	}
 }
 
-func (this *Master) KillJob(_, _ *struct{}) error {
-	/**
-	 * @Author
-	 * @Description called by coordinator, to shutdown the running job
-	 * @Date 9:47 上午 14/12/20
-	 * @Param
-	 * @return
-	 **/
-	this.killWorkers()
+// called by coordinator, to shutdown the running job
+func (master *Master) KillJob(_, _ *struct{}) error {
+	master.killWorkers()
 
-	this.Cancel()
-	this.StopRPCServer(this.Addr, "Master.Shutdown")
+	master.Cancel()
+	master.StopRPCServer(master.Addr, "Master.Shutdown")
 	return nil
 }
