@@ -2,7 +2,7 @@ package distributed
 
 import (
 	"coordinator/cache"
-	client "coordinator/client"
+	"coordinator/client"
 	"coordinator/common"
 	"coordinator/distributed/master"
 	"coordinator/logger"

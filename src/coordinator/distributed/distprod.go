@@ -2,7 +2,7 @@ package distributed
 
 import (
 	"coordinator/cache"
-	c "coordinator/client"
+	"coordinator/client"
 	"coordinator/common"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
@@ -13,7 +13,7 @@ import (
 func SetupDistProd(qItem *cache.QItem, workerType string) {
 	// run master to call partyserver to set up worker
 
-	masterPort := c.GetFreePort(common.CoordAddr)
+	masterPort := client.GetFreePort(common.CoordAddr)
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
 	masterIp := common.CoordIP
@@ -74,7 +74,7 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 	 **/
 	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddr, workerType)
 
-	workerPort := c.GetFreePort(common.CoordAddr)
+	workerPort := client.GetFreePort(common.CoordAddr)
 
 	workerAddr := common.PartyServerIP + ":" + workerPort
 	var serviceName string

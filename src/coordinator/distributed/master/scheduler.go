@@ -4,7 +4,6 @@ import (
 	"context"
 	"coordinator/cache"
 	"coordinator/client"
-	c "coordinator/client"
 	"coordinator/common"
 	"coordinator/distributed/entity"
 	"coordinator/logger"
@@ -40,7 +39,7 @@ func (master *Master) schedulerHelper(qItem *cache.QItem) string {
 		var ports []int32
 		//generate n ports
 		for i := 0; i < len(qItem.AddrList); i++ {
-			port := c.GetFreePort(common.CoordAddr)
+			port := client.GetFreePort(common.CoordAddr)
 			pint, _ := strconv.Atoi(port)
 			ports = append(ports, int32(pint))
 		}
@@ -56,7 +55,7 @@ func (master *Master) schedulerHelper(qItem *cache.QItem) string {
 
 	go master.TaskStatusMonitor(&trainStatuses, ctx)
 
-	mpcPort := c.GetFreePort(common.CoordAddr)
+	mpcPort := client.GetFreePort(common.CoordAddr)
 	mpcPint, _ := strconv.Atoi(mpcPort)
 
 	tmpStack := make([]string, len(master.workers))
