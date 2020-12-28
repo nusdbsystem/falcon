@@ -94,7 +94,7 @@ func InitEnvs(svcName string) {
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
-		common.PartyServeBasePath = common.GetEnv("BASE_PATH", "")
+		common.PartyServerBasePath = common.GetEnv("BASE_PATH", "")
 
 		// partyserver communicate coord with ip+port
 		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)

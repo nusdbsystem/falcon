@@ -4,7 +4,6 @@ import (
 	"coordinator/logger"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -89,13 +88,13 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 	// if there is PreProcessing, serialize it
 	if jobInfo.Tasks.PreProcessing.AlgorithmName != "" {
-		logger.Do.Println("ParseTrainJob: Searching Algorithms, match !", jobInfo.Tasks.PreProcessing.AlgorithmName)
+		logger.Do.Println("ParseTrainJob: PreProcessing AlgorithmName match <-->", jobInfo.Tasks.PreProcessing.AlgorithmName)
 		jobInfo.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig =
 			GeneratePreProcessparams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 	// if there is ModelTraining, serialize it
 	if jobInfo.Tasks.ModelTraining.AlgorithmName != "" {
-		logger.Do.Println("ParseTrainJob: Searching Algorithms, match !", jobInfo.Tasks.ModelTraining.AlgorithmName)
+		logger.Do.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
 			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
@@ -107,7 +106,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 		return errors.New("train job verify error")
 	}
 
-	logger.Do.Println("Parsed result is: ", jobInfo)
+	logger.Do.Println("Parsed jobInfo: ", jobInfo)
 
 	return nil
 }
@@ -129,7 +128,7 @@ func trainJobVerify(jobInfo *TrainJob) error {
 	}
 
 	// verify Job federated learning Type | fl-setting
-	fmt.Println(jobInfo.JobFlType, HorizontalFl, VerticalFl)
+	// fmt.Println(jobInfo.JobFlType, HorizontalFl, VerticalFl)
 	if jobInfo.JobFlType != HorizontalFl && jobInfo.JobFlType != VerticalFl {
 		return errors.New("job_fl_type must be either 'horizontal' or 'vertical' ")
 	}

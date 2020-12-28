@@ -34,7 +34,7 @@ func (wk *TrainWorker) Run() {
 		logger.Do.Fatalf("%s: start Error \n", wk.Name)
 	}
 
-	logger.Do.Printf("%s: register to masterAddr = %s \n", wk.Name, wk.MasterAddr)
+	logger.Do.Printf("%s register to masterAddr(%s)\n", wk.Name, wk.MasterAddr)
 	wk.Register(wk.MasterAddr)
 
 	// start rpc server blocking...

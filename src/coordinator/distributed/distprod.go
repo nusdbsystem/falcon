@@ -2,7 +2,7 @@ package distributed
 
 import (
 	"coordinator/cache"
-	c "coordinator/client"
+	"coordinator/client"
 	"coordinator/common"
 	"coordinator/distributed/taskmanager"
 	"coordinator/logger"
@@ -11,15 +11,9 @@ import (
 )
 
 func SetupDistProd(qItem *cache.QItem, workerType string) {
-	/**
-	 * @Author
-	 * @Description run master, and then, master will call lister to run worker
-	 * @Date 2:36 下午 5/12/20
-	 * @Param
-	 * @return
-	 **/
+	// run master to call partyserver to set up worker
 
-	masterPort := c.GetFreePort(common.CoordAddr)
+	masterPort := client.GetFreePort(common.CoordAddr)
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
 	masterIp := common.CoordIP
@@ -80,7 +74,7 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 	 **/
 	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddr, workerType)
 
-	workerPort := c.GetFreePort(common.CoordAddr)
+	workerPort := client.GetFreePort(common.CoordAddr)
 
 	workerAddr := common.PartyServerIP + ":" + workerPort
 	var serviceName string
@@ -102,17 +96,17 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 	km := taskmanager.InitK8sManager(true, "")
 	command := []string{
 		common.WorkerYamlCreatePath,
-		serviceName,               // 1. worker service name
-		workerPort,                // 2. worker service port
-		masterAddr,                // 3. master addr
-		workerType,                // 4. train or predict job
-		workerAddr,                // 5. worker addr
-		workerType,                // 6. serviceName train or predict
-		common.Env,                // 7. env or prod
-		common.PartyServeBasePath, // 8. folder to store logs, the same as partyserver folder currently,
-		dataPath,                  // 9. folder to read train data
-		modelPath,                 // 10. folder to store models
-		dataOutput,                // 11. folder to store processed data
+		serviceName,                // 1. worker service name
+		workerPort,                 // 2. worker service port
+		masterAddr,                 // 3. master addr
+		workerType,                 // 4. train or predict job
+		workerAddr,                 // 5. worker addr
+		workerType,                 // 6. serviceName train or predict
+		common.Env,                 // 7. env or prod
+		common.PartyServerBasePath, // 8. folder to store logs, the same as partyserver folder currently,
+		dataPath,                   // 9. folder to read train data
+		modelPath,                  // 10. folder to store models
+		dataOutput,                 // 11. folder to store processed data
 	}
 
 	_ = taskmanager.ExecuteOthers("ls")

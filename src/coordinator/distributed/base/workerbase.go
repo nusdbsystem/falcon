@@ -60,8 +60,8 @@ func (w *WorkerBase) Register(master string) {
 	args := new(entity.RegisterArgs)
 	args.WorkerAddr = w.Addr
 
-	logger.Do.Printf("WorkerBase: begin to call Master.Register to register addr= %s \n", args.WorkerAddr)
-	ok := client.Call(master, w.Proxy, "Master.Register", args, new(struct{}))
+	logger.Do.Printf("WorkerBase: begin to call Master.RegisterWorker to register addr= %s \n", args.WorkerAddr)
+	ok := client.Call(master, w.Network, "Master.RegisterWorker", args, new(struct{}))
 	// if not register successfully, close
 	if ok == false {
 		logger.Do.Fatalf("WorkerBase: Register RPC %s, register error\n", master)
@@ -106,9 +106,11 @@ func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
 	return nil
 }
 
+// TODO: rename EventLoop to HeartBeat
 func (w *WorkerBase) EventLoop() {
 	time.Sleep(time.Second * 5)
 
+	//define a label and break to that label
 loop:
 	for {
 		select {
@@ -122,11 +124,11 @@ loop:
 				logger.Do.Printf("%s: Timeout, server %s begin to suicide \n", w.Name, w.Addr)
 
 				var reply entity.ShutdownReply
-				ok := client.Call(w.Addr, w.Proxy, w.Name+".Shutdown", new(struct{}), &reply)
+				ok := client.Call(w.Addr, w.Network, w.Name+".Shutdown", new(struct{}), &reply)
 				if ok == false {
 					logger.Do.Printf("%s: RPC %s shutdown error\n", w.Name, w.Addr)
 				} else {
-					logger.Do.Printf("%s: WorkerBase timeout, RPC %s shutdown successfule\n", w.Name, w.Addr)
+					logger.Do.Printf("%s: WorkerBase timeout, RPC %s shutdown successfully\n", w.Name, w.Addr)
 				}
 				// quit event loop no matter ok or not
 				break
@@ -139,13 +141,7 @@ loop:
 }
 
 func (w *WorkerBase) ResetTime(_ *struct{}, _ *struct{}) error {
-	/**
-	 * @Author
-	 * @Description which will be called by master
-	 * @Date 11:44 上午 14/12/20
-	 * @Param
-	 * @return
-	 **/
+	// called by master to reset workerbase time
 	fmt.Printf("%s: reset the countdown\n", w.Name)
 	w.reset()
 	return nil

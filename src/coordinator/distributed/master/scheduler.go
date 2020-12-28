@@ -4,7 +4,6 @@ import (
 	"context"
 	"coordinator/cache"
 	"coordinator/client"
-	c "coordinator/client"
 	"coordinator/common"
 	"coordinator/distributed/entity"
 	"coordinator/logger"
@@ -16,20 +15,20 @@ import (
 	"time"
 )
 
-func (this *Master) schedule(qItem *cache.QItem) string {
+func (master *Master) schedule(qItem *cache.QItem) string {
 
 	// checking if the ip of worker match the qItem
-	this.Lock()
-	this.allWorkerReady.Wait()
-	this.Unlock()
+	master.Lock()
+	master.allWorkerReady.Wait()
+	master.Unlock()
 
-	logger.Do.Println("Scheduler: All worker found: ", this.workers, " required: ", qItem.AddrList)
+	logger.Do.Println("Scheduler: All worker found: ", master.workers, " required: ", qItem.AddrList)
 
-	jsonString := this.schedulerHelper(qItem)
+	jsonString := master.schedulerHelper(qItem)
 	return jsonString
 }
 
-func (this *Master) schedulerHelper(qItem *cache.QItem) string {
+func (master *Master) schedulerHelper(qItem *cache.QItem) string {
 
 	wg := sync.WaitGroup{}
 
@@ -40,7 +39,7 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string {
 		var ports []int32
 		//generate n ports
 		for i := 0; i < len(qItem.AddrList); i++ {
-			port := c.GetFreePort(common.CoordAddr)
+			port := client.GetFreePort(common.CoordAddr)
 			pint, _ := strconv.Atoi(port)
 			ports = append(ports, int32(pint))
 		}
@@ -54,13 +53,13 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go this.TaskStatusMonitor(&trainStatuses, ctx)
+	go master.TaskStatusMonitor(&trainStatuses, ctx)
 
-	mpcPort := c.GetFreePort(common.CoordAddr)
+	mpcPort := client.GetFreePort(common.CoordAddr)
 	mpcPint, _ := strconv.Atoi(mpcPort)
 
-	tmpStack := make([]string, len(this.workers))
-	copy(tmpStack, this.workers)
+	tmpStack := make([]string, len(master.workers))
+	copy(tmpStack, master.workers)
 
 	// find mpc address
 	var MpcIp string
@@ -106,7 +105,7 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string {
 				// append will allocate new memory inside the func stack,
 				// must pass addr of slice to func. such that multi goroutines can
 				// update the original slices.
-				go this.TaskHandler(workerAddr, args, &wg, &trainStatuses)
+				go master.TaskHandler(workerAddr, args, &wg, &trainStatuses)
 				break
 			} else {
 				tmpStack = append(tmpStack, workerAddr)
@@ -126,7 +125,7 @@ func (this *Master) schedulerHelper(qItem *cache.QItem) string {
 	return string(jsonString)
 }
 
-func (this *Master) TaskHandler(
+func (master *Master) TaskHandler(
 	workerAddr string,
 	args *entity.DoTaskArgs,
 	wg *sync.WaitGroup,
@@ -138,8 +137,8 @@ func (this *Master) TaskHandler(
 	argAddr := entity.EncodeDoTaskArgs(args)
 	var rep entity.DoTaskReply
 
-	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", this.workerType, workerAddr)
-	ok := client.Call(workerAddr, this.Proxy, this.workerType+".DoTask", argAddr, &rep)
+	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the worker: %s \n", master.workerType, workerAddr)
+	ok := client.Call(workerAddr, master.Network, master.workerType+".DoTask", argAddr, &rep)
 
 	if !ok {
 		logger.Do.Printf("Scheduler: Master calling %s, DoTask error\n", workerAddr)
@@ -147,13 +146,13 @@ func (this *Master) TaskHandler(
 		rep.RpcCallError = true
 
 	} else {
-		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", this.workerType, workerAddr)
+		logger.Do.Printf("Scheduler: calling %s.DoTask of the worker: %s successful \n", master.workerType, workerAddr)
 		rep.RpcCallError = false
 	}
 	*trainStatuses = append(*trainStatuses, rep)
 }
 
-func (this *Master) TaskStatusMonitor(status *[]entity.DoTaskReply, ctx context.Context) {
+func (master *Master) TaskStatusMonitor(status *[]entity.DoTaskReply, ctx context.Context) {
 
 	/**
 	 * @Author
@@ -167,19 +166,19 @@ func (this *Master) TaskStatusMonitor(status *[]entity.DoTaskReply, ctx context.
 		select {
 		case <-ctx.Done():
 			fmt.Println("Scheduler: Stop TaskStatusMonitor")
-			this.jobStatus = common.JobSuccessful
+			master.jobStatus = common.JobSuccessful
 			return
 		default:
 			for _, v := range *status {
 				if v.RuntimeError == true || v.RpcCallError == true {
-					this.jobStatus = common.JobFailed
+					master.jobStatus = common.JobFailed
 					// kill all workers.
-					this.killWorkers()
+					master.killWorkers()
 					return
 				}
 
 				if v.Killed == true {
-					this.jobStatus = common.JobKilled
+					master.jobStatus = common.JobKilled
 					return
 				}
 			}

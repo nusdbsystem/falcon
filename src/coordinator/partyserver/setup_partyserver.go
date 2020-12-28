@@ -2,7 +2,7 @@ package partyserver
 
 import (
 	"context"
-	c "coordinator/client"
+	"coordinator/client"
 	"coordinator/common"
 	"coordinator/logger"
 	rt "coordinator/partyserver/router"
@@ -42,12 +42,12 @@ func SetupPartyServer() {
 			logger.Do.Fatal("ShutDown the server", err)
 		}
 
-		c.PartyServerDelete(common.CoordAddr, common.PartyServerIP)
+		client.PartyServerDelete(common.CoordAddr, common.PartyServerIP)
 	}()
 
 	logger.Do.Printf("SetupPartyServer: connecting to coord  %s to AddPort\n", common.CoordAddr)
 
-	err := c.AddPort(common.CoordAddr, common.PartyServerPort)
+	err := client.AddPort(common.CoordAddr, common.PartyServerPort)
 
 	if err != nil {
 		panic("SetupPartyServer: Server closed under request, " + err.Error())
@@ -55,7 +55,7 @@ func SetupPartyServer() {
 
 	logger.Do.Printf("SetupPartyServer: PartyServerAdd %s ...retry \n", common.PartyServerIP)
 
-	err = c.PartyServerAdd(common.CoordAddr, common.PartyServerIP, common.PartyServerPort)
+	err = client.PartyServerAdd(common.CoordAddr, common.PartyServerIP, common.PartyServerPort)
 
 	if err != nil {
 		panic("SetupPartyServer: PartyServerAdd error, " + err.Error())
