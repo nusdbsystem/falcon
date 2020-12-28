@@ -51,7 +51,7 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 	if workerType == common.TrainWorker {
 
 		serviceName = "worker-job" + jobId + "-train-" + common.PartyServerId
-		common.TaskRuntimeLogs = common.PartyServeBasePath + "/" + common.RuntimeLogs + "/" + serviceName
+		common.TaskRuntimeLogs = common.PartyServerBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
 		logger.Do.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
 
@@ -63,11 +63,14 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 	} else if workerType == common.InferenceWorker {
 
 		serviceName = "worker-job" + jobId + "-inference-" + common.PartyServerId
-		common.TaskRuntimeLogs = common.PartyServeBasePath + "/" + common.RuntimeLogs + "/" + serviceName
+		common.TaskRuntimeLogs = common.PartyServerBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
-		logger.Do.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
-		logger.Do.Println("SetupWorkerHelper: Current in Dev, InferenceWorker")
+		if ee != nil {
+			logger.Do.Fatalln("Error in creating runtimelogsfolder", ee)
+		}
+		logger.Do.Println("SetupWorkerHelper: Created runtimelogsfolder")
 
+		logger.Do.Println("SetupWorkerHelper:  will init InferenceWorker")
 		wk := worker.InitInferenceWorker(masterAddr, workerAddr)
 		wk.RunWorker(wk)
 

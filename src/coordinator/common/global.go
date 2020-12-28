@@ -150,7 +150,7 @@ var (
 	ServiceName = getEnv("SERVICE_NAME", "coord")
 	LocalPath   = ""
 
-	PartyServeBasePath = ""
+	PartyServerBasePath = ""
 
 	// those are init by coordinator
 	WorkerType = ""

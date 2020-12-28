@@ -11,21 +11,20 @@ import (
 	"sync"
 )
 
-
-
 type RpcBaseClass struct {
 	sync.Mutex
-	Name 		string
-	Proxy 		string
-	Addr  	string //  which is the ip+port addr of worker
-	Port  		string //  which is the port addr of worker
-	Listener 	net.Listener
+	Name     string
+	Proxy    string
+	Addr     string //  which is the ip+port addr of worker
+	Port     string //  which is the port addr of worker
+	Listener net.Listener
 
 	Ctx    context.Context
 	Cancel context.CancelFunc
 }
 
 func (rb *RpcBaseClass) InitRpcBase(Addr string) {
+	logger.Do.Println("[rpcbase] InitRpcBase called with Addr ", Addr)
 	rb.Proxy = "tcp"
 	rb.Addr = Addr
 
@@ -36,10 +35,7 @@ func (rb *RpcBaseClass) InitRpcBase(Addr string) {
 	rb.Ctx, rb.Cancel = context.WithCancel(context.Background())
 }
 
-
-
-func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
-
+func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
 
 	logger.Do.Printf("%s: listening on %s, %s \n", rb.Name, rb.Proxy, "0.0.0.0:"+rb.Port)
 	listener, e := net.Listen(rb.Proxy, "0.0.0.0:"+rb.Port)
@@ -50,7 +46,7 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 
 	rb.Listener = listener
 
-	if !isBlocking{
+	if !isBlocking {
 		// accept connection
 		go func() {
 			// define loop label used for break
@@ -65,14 +61,14 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool){
 					}()
 				} else {
 
-					logger.Do.Printf("%s: RegistrationServer: Accept errored, %v \n",rb.Name, err)
+					logger.Do.Printf("%s: RegistrationServer: Accept errored, %v \n", rb.Name, err)
 					break
 				}
 			}
 			logger.Do.Printf("%s: masterServer: done\n", rb.Name)
 		}()
 
-	}else{
+	} else {
 
 		for {
 			// create a connection
@@ -105,4 +101,3 @@ func (rb *RpcBaseClass) StopRPCServer(addr, targetSvc string) {
 	}
 	logger.Do.Printf("%s: cleanupRegistration: done\n", rb.Name)
 }
-

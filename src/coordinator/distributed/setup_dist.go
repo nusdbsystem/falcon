@@ -28,16 +28,7 @@ func SetupDist(qItem *cache.QItem, workerType string) {
 }
 
 func SetupWorkerHelper(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string) {
-
-	/**
-	 * @Author
-	 * @Description: this func is only called by partyserver
-	 * @Date 2:14 下午 1/12/20
-	 * @Param
-	 	httpHost： 		IP of the partyserver addr
-		masterAddr： IP of the master addr
-		masterAddr： train or predictor
-	 **/
+	// this func is only called by partyserver
 
 	// in dev, use thread
 	if common.Env == common.DevEnv {
@@ -49,13 +40,8 @@ func SetupWorkerHelper(masterAddr, workerType, jobId, dataPath, modelPath, dataO
 }
 
 func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) string {
-	/**
-	 * @Author
-	 * @Description : run train rpc server in a thread, used to test only
-	 * @Date 2:26 下午 1/12/20
-	 * @Param
-	 * @return
-	 **/
+	// run train rpc server in a thread
+
 	logger.Do.Printf("[SetupMaster] masterAddr=%s workerType=%s\n", masterAddr, workerType)
 
 	logger.Do.Println("[SetupMaster] call master.RunMaster with qItem:")
