@@ -50,10 +50,10 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 	return
 }
 
-// Register is an RPC method that is called by workers after they have started
+// RegisterWorker is an RPC method that is called by workers after they have started
 // up to report that they are ready to receive tasks.
-func (master *Master) Register(args *entity.RegisterArgs, _ *struct{}) error {
-	logger.Do.Println("[master/Register] register with master")
+func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) error {
+	logger.Do.Println("[master/RegisterWorker] register with master, called by worker")
 	master.tmpWorkers <- args.WorkerAddr
 	return nil
 }
