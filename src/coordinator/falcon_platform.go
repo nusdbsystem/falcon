@@ -77,7 +77,7 @@ func InitEnvs(svcName string) {
 
 		// find the cluster port, call internally
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
-		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
+		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 
 		common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 
@@ -92,7 +92,7 @@ func InitEnvs(svcName string) {
 
 		// partyserver needs coord ip+port,lis port
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
-		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
+		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
 		common.PartyServeBasePath = common.GetEnv("BASE_PATH", "")
 
@@ -116,7 +116,7 @@ func InitEnvs(svcName string) {
 		common.RedisPwd = common.GetEnv("REDIS_PWD", "falcon")
 		common.RedisPort = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
 		common.RedisNodePort = common.GetEnv("REDIS_NODE_PORT", "30003")
-		common.CoordPort = common.GetEnv("COORD_TARGET_PORT", "30004")
+		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 
 		// master needs queue item, task type
 		common.MasterQItem = common.GetEnv("ITEM_KEY", "")

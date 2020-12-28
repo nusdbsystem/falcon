@@ -25,11 +25,10 @@ fi
 
 source config_partyserver.properties
 
-COORD_SERVER_PORT=30004
-
 export Env=dev
 export SERVICE_NAME=partyserver
 export COORD_SERVER_IP=$COORD_SERVER_IP
+export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export PARTY_SERVER_IP=$PARTY_SERVER_IP
 # export BASE_PATH=$BASE_PATH
 # export PARTY_SERVER_NODE_PORT=$PARTY_SERVER_NODE_PORT

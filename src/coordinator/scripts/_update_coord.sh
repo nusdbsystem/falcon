@@ -16,7 +16,7 @@ COORD_YAML=./deploy/template/coordinator.yaml
 cp ./deploy/template/coordinator.yaml.template $COORD_YAML || exit 1
 
 # replace var in common yaml with customer defined variables
-sed -i -e "s/COORD_PORT/$COORD_PORT/g" $COORD_YAML || exit 1
+sed -i -e "s/COORD_CLUSTER_PORT/$COORD_CLUSTER_PORT/g" $COORD_YAML || exit 1
 sed -i -e "s/COORD_TARGET_PORT/$COORD_TARGET_PORT/g" $COORD_YAML || exit 1
 sed -i -e "s/COORD_NODE_PORT/$COORD_NODE_PORT/g" $COORD_YAML || exit 1
 sed -i -e "s/FALCON_COORD_IMAGE/$IMAGE/g" $COORD_YAML || exit 1
