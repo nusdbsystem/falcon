@@ -21,7 +21,9 @@ func (wk *TrainWorker) TrainTask(doTaskArgs *entity.DoTaskArgs, rep *entity.DoTa
 	wg.Add(1)
 
 	// no need to wait for mpc, once train task done, shutdown the mpc
+	logger.Do.Println("[TrainTask] spawn thread for mpcTaskCallee")
 	go wk.mpcTaskCallee(doTaskArgs, "algName")
+	logger.Do.Println("[TrainTask] spawn thread for mlTaskCallee")
 	go wk.mlTaskCallee(doTaskArgs, rep, &wg)
 
 	// wait until all the task done
@@ -66,13 +68,14 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 
 	 * @return
 	 **/
+	logger.Do.Println("mlTaskCallee called")
 	defer wg.Done()
 
-	logger.Do.Printf("Worker: %s task started \n", wk.Addr)
+	logger.Do.Printf("Worker: %s task started\n", wk.Addr)
 
 	partyId := doTaskArgs.AssignID
 	partyNum := doTaskArgs.PartyNums
-	partyType := 1
+	partyType := 1 // default passive
 	partyTypeStr := doTaskArgs.PartyInfo.PartyType
 	// TODO: check with wyc if partyType 0 = active?
 	if partyTypeStr == "active" {
@@ -80,7 +83,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	} else if partyTypeStr == "passive" {
 		partyType = 1
 	}
-	flSetting := 1
+	flSetting := 1 // default vertical
 	flSettingStr := doTaskArgs.JobFlType
 	if flSettingStr == "vertical" {
 		flSetting = 1
@@ -99,6 +102,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	var algParams string
 	var KeyFile string
 
+	logger.Do.Println("[mlTaskCallee] call doMlTask")
 	run := doMlTask(
 		wk.Pm,
 		fmt.Sprintf("%d", partyId),
@@ -112,10 +116,10 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	var exitStr string
 	var res map[string]string
 	var logFile string
-	fmt.Println(res)
+	logger.Do.Println("res from doMlTask is = ", res)
 
 	if doTaskArgs.TaskInfo.PreProcessing.AlgorithmName != "" {
-		logger.Do.Println("Worker:task 1 pre processing start")
+		logger.Do.Println("Worker: task pre processing start")
 		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.PreProcessing.AlgorithmName
 		_ = os.Mkdir(logFile, os.ModePerm)
 		KeyFile = doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
@@ -133,18 +137,19 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 		if exit := wk.execResHandler(exitStr, res, rep); exit == true {
 			return
 		}
-		logger.Do.Println("Worker:task 1 pre processing done", rep)
+		logger.Do.Println("Worker: task pre processing done", rep)
 	}
 
 	if doTaskArgs.TaskInfo.ModelTraining.AlgorithmName != "" {
 		// execute task 2: train
-		logger.Do.Println("Worker:task model training start")
+		logger.Do.Println("Worker: task model training start")
 		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.ModelTraining.AlgorithmName
 		_ = os.Mkdir(logFile, os.ModePerm)
 		KeyFile = doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
 
 		algParams = doTaskArgs.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
-		logger.Do.Println("Worker: SerializedAlgorithmConfig is", algParams)
+		logger.Do.Println("Worker: SerializedAlgorithmConfig = ", algParams)
+
 		exitStr, res = run(
 			doTaskArgs.TaskInfo.ModelTraining.AlgorithmName,
 			algParams,
@@ -183,6 +188,7 @@ func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName stri
 		-h 每个mpc进程的启动输入都是party_0的ip
 	 * @return
 	 **/
+	logger.Do.Println("mpcTaskCallee called with algName ", algName)
 	partyId := doTaskArgs.AssignID
 	partyNum := doTaskArgs.PartyNums
 
@@ -199,10 +205,14 @@ func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName stri
 		" "+algName,
 	)
 
-	logger.Do.Println(envs, cmd.String())
-	logger.Do.Println("mpcTask Done!")
+	logger.Do.Printf("-----------------------------------------------------------------\n")
+	logger.Do.Println("envs", envs)
+	logger.Do.Println(cmd.String())
+	logger.Do.Printf("-----------------------------------------------------------------\n")
 
-	//wk.Pm.CreateResources(cmd, envs)
+	logger.Do.Println("mpcTaskCallee done")
+
+	wk.Pm.CreateResources(cmd, envs)
 	return
 }
 
@@ -350,10 +360,8 @@ func doMlTask(
 		)
 
 		logger.Do.Printf("-----------------------------------------------------------------\n")
-		logger.Do.Printf("\n")
 		logger.Do.Println("envs", envs)
 		logger.Do.Println(cmd.String())
-		logger.Do.Printf("\n")
 		logger.Do.Printf("-----------------------------------------------------------------\n")
 
 		exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)

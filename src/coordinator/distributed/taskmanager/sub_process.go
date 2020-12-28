@@ -103,7 +103,9 @@ func (pm *SubProcessManager) CreateResources(
 	var out outStream
 	cmd.Stdout = out
 
+	// start with a short statement to execute before the condition
 	if err := cmd.Start(); err != nil {
+		logger.Do.Println("cmd.Start() Error:")
 		logger.Do.Println(err)
 		return err.Error(), ""
 	}
@@ -131,9 +133,9 @@ func (pm *SubProcessManager) CreateResources(
 
 		logger.Do.Printf("[SubProcessManager]: subprocess exit status: << %s >> \n", exitStr)
 		logger.Do.Printf("[SubProcessManager]: subprocess error logs: \n"+
-			"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n "+
+			"<<<<<\n "+
 			"%s \n"+
-			"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n",
+			"<<<<<\n",
 			string(errLog))
 
 		return exitStr, string(errLog)
