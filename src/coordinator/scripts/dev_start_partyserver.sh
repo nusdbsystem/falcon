@@ -3,14 +3,27 @@
 # exit on error
 set -e
 
-if [ ! -n "$1" ] ;then
-     echo "No partyserver ID provided"
-     echo "Usage: bash dev_start_partyserver.sh <PARTY_SERVER_ID>"
-     exit 1
-fi
+# from https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+while [[ $# -gt 0 ]]
+do
+key="$1"
 
-export PARTY_SERVER_ID=$1
-# echo $PARTY_SERVER_ID
+case $key in
+    --partyID)
+    PARTY_SERVER_ID="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    echo "No party ID provided"
+    echo "Usage: bash dev_start_partyserver.sh --partyID <PARTY_SERVER_ID>"
+    exit 1
+    shift # past argument
+    ;;
+esac
+done
+
+echo "PARTY_SERVER_ID = ${PARTY_SERVER_ID}"
 
 # detect the OS type with uname
 makeOS=''
