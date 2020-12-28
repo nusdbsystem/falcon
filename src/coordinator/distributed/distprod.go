@@ -11,13 +11,7 @@ import (
 )
 
 func SetupDistProd(qItem *cache.QItem, workerType string) {
-	/**
-	 * @Author
-	 * @Description run master, and then, master will call lister to run worker
-	 * @Date 2:36 下午 5/12/20
-	 * @Param
-	 * @return
-	 **/
+	// run master to call partyserver to set up worker
 
 	masterPort := c.GetFreePort(common.CoordAddr)
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
