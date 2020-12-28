@@ -2,7 +2,7 @@ package distributed
 
 import (
 	"coordinator/cache"
-	c "coordinator/client"
+	client "coordinator/client"
 	"coordinator/common"
 	"coordinator/distributed/master"
 	"coordinator/logger"
@@ -58,40 +58,48 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 	 **/
 	logger.Do.Printf("[SetupMaster] masterAddr=%s workerType=%s\n", masterAddr, workerType)
 
+	logger.Do.Println("[SetupMaster] call master.RunMaster with qItem:")
+	logger.Do.Println("qItem = ", qItem)
 	ms := master.RunMaster(masterAddr, qItem, workerType)
 
 	// update job's master addr
 	if workerType == common.TrainWorker {
-
-		c.JobUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
+		logger.Do.Printf(
+			"[SetupMaster] TrainWorker => call client.JobUpdateMaster at CoordArrd=%s, masterAddr=%s, JobId=%d\n",
+			common.CoordAddr, masterAddr, qItem.JobId)
+		client.JobUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
 
 	} else if workerType == common.InferenceWorker {
-
-		c.InferenceUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
+		logger.Do.Printf(
+			"[SetupMaster] InferenceWorker => call client.InferenceUpdateMaster at CoordArrd=%s, masterAddr=%s, JobId=%d\n",
+			common.CoordAddr, masterAddr, qItem.JobId)
+		client.InferenceUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
 	}
 
 	// master will call partyserver's endpoint to launch worker, to train or predict
-	for index, addr := range qItem.AddrList {
+	for index, partyAddr := range qItem.AddrList {
 
 		// Launch the worker
 		// maybe check table wit ip, and + port got from table also
 
 		// send a request to http
-		//lisPort := c.GetExistPort(common.CoordAddr, ip)
+		//lisPort := client.GetExistPort(common.CoordAddr, ip)
 
-		logger.Do.Printf("[SetupMaster] master is calling partyserver: %s ...\n", addr)
-
-		// todo, manage partyserver port more wisely eg: c.SetupWorker(ip+lisPort, masterAddr, workerType), such that user dont need
+		// todo, manage partyserver port more wisely eg: client.SetupWorker(ip+lisPort, masterAddr, workerType), such that user dont need
 		//  to provide port in job
 
 		dataPath := qItem.PartyInfo[index].PartyPaths.DataInput
 		dataOutput := qItem.PartyInfo[index].PartyPaths.DataOutput
 		modelPath := qItem.PartyInfo[index].PartyPaths.ModelPath
 
-		c.SetupWorker(addr, masterAddr, workerType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
-	}
+		logger.Do.Printf("[SetupMaster] master register/dispatch job to partyserver: %s ...\n", partyAddr)
+		logger.Do.Printf("[SetupMaster] JobId=%d\n", qItem.JobId)
+		logger.Do.Printf("[SetupMaster] dataPath=%s\n", dataPath)
+		logger.Do.Printf("[SetupMaster] modelPath=%s\n", modelPath)
+		logger.Do.Printf("[SetupMaster] dataOutput=%s\n", dataOutput)
 
-	logger.Do.Printf("[SetupMaster] master is running at %s ... waiting job complete\n", masterAddr)
+		client.SetupWorker(partyAddr, masterAddr, workerType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
+	}
 
 	ms.Wait()
 
@@ -101,7 +109,7 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 }
 
 func KillJob(masterAddr, Proxy string) {
-	ok := c.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
+	ok := client.Call(masterAddr, Proxy, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {
 		logger.Do.Println("Master: KillJob error")
 		panic("Master: KillJob error")
