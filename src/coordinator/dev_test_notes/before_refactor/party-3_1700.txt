@@ -1,0 +1,766 @@
+﻿(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ bash sdug/dev_partyserver.sh 3
+No OS provided, default to linux
+CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o "./bin/falcon_platform" falcon_platform.go
+<<<<<<<<<<<<<<<<< Read envs, User defined,   key: Env, value: dev >>>>>>>>>>>>>
+<<<<<<<<<<<<<<<<< Read envs, User defined,   key: SERVICE_NAME, value: partyserver >>>>>>>>>>>>>
+Loging to  ./.dev_test/party3/logs/runtimeLogs
+2020/12/29 16:57:43 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: COORD_SERVER_IP, value: 127.0.0.1 >>>>>>>>>>>>>
+2020/12/29 16:57:43 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: COORD_TARGET_PORT, default: 30004 >>>>>>>>>>>>>
+2020/12/29 16:57:43 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: PARTY_SERVER_IP, value: 127.0.0.1 >>>>>>>>>>>>>
+2020/12/29 16:57:43 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: WORK_BASE_PATH, value: ./.dev_test/party3/logs/ >>>>>>>>>>>>>
+2020/12/29 16:57:43 falcon_platform.go:54: <<<<<<<<< Read envs, User defined,   key: CoordAddr, value: 127.0.0.1:30004 >>>>>>>>>>>>>
+2020/12/29 16:57:43 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: PARTY_SERVER_NODE_PORT, value: 30007 >>>>>>>>>>>>>
+2020/12/29 16:57:43 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: PARTY_SERVER_ID, value: 3 >>>>>>>>>>>>>
+2020/12/29 16:57:43 falcon_platform.go:208: Launch falcon_platform, the common.ServiceName partyserver
+2020/12/29 16:57:43 setup_partyserver.go:21: SetupPartyServer: registering partyserverPort to coord 30007
+2020/12/29 16:57:43 setup_partyserver.go:40: SetupPartyServer: connecting to coord  127.0.0.1:30004 to AddPort
+2020/12/29 16:57:43 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/portadd"
+2020/12/29 16:57:43 setup_partyserver.go:48: SetupPartyServer: PartyServerAdd 127.0.0.1 ...retry 
+2020/12/29 16:57:43 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/party-server-add"
+2020/12/29 16:57:43 setup_partyserver.go:56: Starting HTTP server...
+2020/12/29 16:59:11 distdev.go:49: SetupWorkerHelper: Creating parameters: 127.0.0.1:30008 TrainWorker
+2020/12/29 16:59:11 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:11 distdev.go:67: SetupWorkerHelper: Creating runtimelogsfolder error <nil>
+2020/12/29 16:59:11 distdev.go:69: SetupWorkerHelper: Current in Dev, TrainWorker
+2020/12/29 16:59:11 rpc.Register: method "EventLoop" has 1 input parameters; needs exactly three
+2020/12/29 16:59:11 rpc.Register: method "InitRpcBase" has 2 input parameters; needs exactly three
+2020/12/29 16:59:11 rpc.Register: reply type of method "InitWorkerBase" is not a pointer: "string"
+2020/12/29 16:59:11 rpc.Register: method "Lock" has 1 input parameters; needs exactly three
+2020/12/29 16:59:11 rpc.Register: method "Register" has 2 input parameters; needs exactly three
+2020/12/29 16:59:11 rpc.Register: method "Run" has 1 input parameters; needs exactly three
+2020/12/29 16:59:11 rpc.Register: method "RunWorker" has 2 input parameters; needs exactly three
+2020/12/29 16:59:11 rpc.Register: reply type of method "StartRPCServer" is not a pointer: "bool"
+2020/12/29 16:59:11 rpc.Register: reply type of method "StopRPCServer" is not a pointer: "string"
+2020/12/29 16:59:11 rpc.Register: method "TrainTask" has 0 output parameters; needs exactly one
+2020/12/29 16:59:11 rpc.Register: method "Unlock" has 1 input parameters; needs exactly three
+2020/12/29 16:59:11 trainworker.go:38: TrainWorker: register to masterAddr = 127.0.0.1:30008 
+2020/12/29 16:59:11 workerbase.go:65: WorkerBase: begin to call Master.Register to register addr= 127.0.0.1:30011 
+2020/12/29 16:59:11 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30008, methodName: Master.Register 
+2020/12/29 16:59:11 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 16:59:11 rpcbase.go:44: TrainWorker: listening on tcp, 0.0.0.0:30011 
+2020/12/29 16:59:12 rpcbase.go:81: Worker: got new conn
+2020/12/29 16:59:12 traintask.go:72: Worker: 127.0.0.1:30011 task started 
+map[]
+2020/12/29 16:59:12 traintask.go:192: [] ./semi-party.x  --F   --N  3  --I   --p 2  --h 127.0.0.1  --pn 30021  algName
+2020/12/29 16:59:12 traintask.go:193: mpcTask Done!
+2020/12/29 16:59:12 traintask.go:130: Worker:task model training start
+2020/12/29 16:59:12 traintask.go:136: Worker: SerializedAlgorithmConfig is #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���=
+2020/12/29 16:59:12 traintask.go:329: -----------------------------------------------------------------
+2020/12/29 16:59:12 traintask.go:330: 
+2020/12/29 16:59:12 traintask.go:331: envs []
+2020/12/29 16:59:12 traintask.go:332: /home/wuyuncheng/Documents/falcon/build/src/executor/falcon --party-id 2 --party-num 3 --party-type 1 --fl-setting 1 --existing-key 0 --key-file mpcKeys --network-file 
+	127.0.0.1
+	127.0.0.1
+	127.0.0.1#
+
+	��#��#��##
+
+	��#��#��##
+
+	��#��#��# --algorithm-name logistic_regression --algorithm-params #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���= --log-file ./.dev_test/party3/logs//runtimeLogs/worker-jid1-train-3/logistic_regression --data-input-file /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2/client.txt --data-output-file thisIsDataOutput --model-save-file /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model --model-report-file /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model.txt
+2020/12/29 16:59:12 traintask.go:333: 
+2020/12/29 16:59:12 traintask.go:334: -----------------------------------------------------------------
+2020/12/29 16:59:12 sub_process.go:113: [SubProcessManager]: open subProcess, PID= 6934
+[SubProcessManager]: subprocess' output log ----------> parse parameters correct
+party-id: 2
+party-num: 3
+party-type: 1
+fl-setting: 1
+existing-key: 0
+network-file: 
+	127.0.0.1
+	127.0.0.1
+	127.0.0.1#
+
+	��#��#��##
+
+	��#��#��##
+
+	��#��#��#
+log-file: ./.dev_test/party3/logs//runtimeLogs/worker-jid1-train-3/logistic_regression
+data-input-file: /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2/client.txt
+data-output-file: thisIsDataOutput
+key-file: mpcKeys
+algorithm-name: logistic_regression
+algorithm-params: #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���=
+model-save-file: /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model
+[SubProcessManager]: subprocess' output log ----------> model-report-file: /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model.txt
+[SubProcessManager]: subprocess' output log ----------> Failed to connect. sleeping for 500 milliseconds, connect: Connection refused
+[SubProcessManager]: subprocess' output log ----------> accepting...
+[SubProcessManager]: subprocess' output log ----------> accepting...
+[SubProcessManager]: subprocess' output log ----------> Parse algorithm name and run the program
+[SubProcessManager]: subprocess' output log ----------> Run the example logistic regression train
+[SubProcessManager]: subprocess' output log ----------> Init logistic regression model
+[SubProcessManager]: subprocess' output log ----------> Init model success
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 0 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 0-th iteration consumed time = 0.233361 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 1 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 1-th iteration consumed time = 0.229468 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 2 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 2-th iteration consumed time = 0.226832 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 3 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 3-th iteration consumed time = 0.228199 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 4 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 4-th iteration consumed time = 0.228935 --------
+-------- Iteration 5 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 5-th iteration consumed time = 0.229772 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 6 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 6-th iteration consumed time = 0.232197 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 7 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 7-th iteration consumed time = 0.229211 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 8 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 8-th iteration consumed time = 0.227696 --------
+-------- Iteration 9 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 9-th iteration consumed time = 0.228395 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 10 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 10-th iteration consumed time = 0.227004 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 11 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 11-th iteration consumed time = 0.22587 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 12 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 12-th iteration consumed time = 0.22744 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 13 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 13-th iteration consumed time = 0.229216 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 14 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 14-th iteration consumed time = 0.260983 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 15 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 15-th iteration consumed time = 0.230163 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 16 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+TrainWorker: CountDown:....... 5000 
+[SubProcessManager]: subprocess' output log ----------> -------- The 16-th iteration consumed time = 0.229556 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 17 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 17-th iteration consumed time = 0.229193 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 18 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+2020/12/29 16:59:21 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+[SubProcessManager]: subprocess' output log ----------> -------- The 18-th iteration consumed time = 0.229159 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 19 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 19-th iteration consumed time = 0.229813 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 20 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 20-th iteration consumed time = 0.226651 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 21 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 21-th iteration consumed time = 0.227672 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 22 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 22-th iteration consumed time = 0.227136 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 23 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 23-th iteration consumed time = 0.267393 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 24 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 24-th iteration consumed time = 0.236781 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 25 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 25-th iteration consumed time = 0.227623 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 26 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 26-th iteration consumed time = 0.227767 --------
+-------- Iteration 27 --------
+TrainWorker: CountDown:....... 9000 
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 27-th iteration consumed time = 0.230578 --------
+-------- Iteration 28 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 28-th iteration consumed time = 0.227707 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 29 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 29-th iteration consumed time = 0.246643 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 30 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 30-th iteration consumed time = 0.226841 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 31 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 31-th iteration consumed time = 0.228459 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 32 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 32-th iteration consumed time = 0.225939 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 33 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 33-th iteration consumed time = 0.22661 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 34 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 34-th iteration consumed time = 0.229798 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 35 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 35-th iteration consumed time = 0.233131 --------
+-------- Iteration 36 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 36-th iteration consumed time = 0.227518 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 37 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 37-th iteration consumed time = 0.231645 --------
+-------- Iteration 38 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+TrainWorker: CountDown:....... 3223 
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 38-th iteration consumed time = 0.25853 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 39 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 39-th iteration consumed time = 0.232274 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 40 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 40-th iteration consumed time = 0.231811 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 41 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 41-th iteration consumed time = 0.264386 --------
+-------- Iteration 42 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 42-th iteration consumed time = 0.246094 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 43 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 43-th iteration consumed time = 0.227355 --------
+-------- Iteration 44 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 44-th iteration consumed time = 0.22629 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 45 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 45-th iteration consumed time = 0.231201 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 46 --------
+2020/12/29 16:59:31 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 46-th iteration consumed time = 0.229489 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 47 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 47-th iteration consumed time = 0.248245 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 48 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 48-th iteration consumed time = 0.260671 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 49 --------
+TrainWorker: CountDown:....... 7223 
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 49-th iteration consumed time = 0.237466 --------
+TrainWorker: CountDown:....... 1222 
+TrainWorker: CountDown:....... 5222 
+2020/12/29 16:59:41 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+TrainWorker: CountDown:....... 9222 
+TrainWorker: CountDown:....... 3220 
+[SubProcessManager]: subprocess' output log ----------> Finish algorithm 
+2020/12/29 16:59:50 sub_process.go:132: [SubProcessManager]: subprocess exit status: << ok >> 
+2020/12/29 16:59:50 sub_process.go:133: [SubProcessManager]: subprocess error logs: 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 
+2020/12/29 16:59:50 sub_process.go:87: [SubProcessManager]: lock
+2020/12/29 16:59:50 sub_process.go:91: [SubProcessManager]: Unlock 
+2020/12/29 16:59:50 traintask.go:151: Worker:task model training &{false false false {{"logistic_regression":""} }}
+2020/12/29 16:59:50 trainworker.go:56: Worker: Counting down before job done...  10
+2020/12/29 16:59:51 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+2020/12/29 16:59:51 sub_process.go:51: [SubProcessManager]: PID 6934 is not running
+2020/12/29 16:59:51 trainworker.go:56: Worker: Counting down before job done...  9
+TrainWorker: CountDown:....... 7221 
+2020/12/29 16:59:52 trainworker.go:56: Worker: Counting down before job done...  8
+2020/12/29 16:59:53 trainworker.go:56: Worker: Counting down before job done...  7
+2020/12/29 16:59:54 trainworker.go:56: Worker: Counting down before job done...  6
+2020/12/29 16:59:55 trainworker.go:56: Worker: Counting down before job done...  5
+TrainWorker: CountDown:....... 1218 
+2020/12/29 16:59:56 trainworker.go:56: Worker: Counting down before job done...  4
+2020/12/29 16:59:57 trainworker.go:56: Worker: Counting down before job done...  3
+2020/12/29 16:59:58 trainworker.go:56: Worker: Counting down before job done...  2
+2020/12/29 16:59:59 trainworker.go:56: Worker: Counting down before job done...  1
+TrainWorker: CountDown:....... 5218 
+2020/12/29 17:00:00 trainworker.go:59: Worker: 127.0.0.1:30011: task done
+2020/12/29 17:00:00 rpcbase.go:81: Worker: got new conn
+2020/12/29 17:00:00 workerbase.go:76: TrainWorker: Shutdown 127.0.0.1:30011
+2020/12/29 17:00:00 workerbase.go:100: TrainWorker: DoTask returned, Close the party server...
+2020/12/29 17:00:00 rpcbase.go:88: Worker: got conn error accept tcp [::]:30011: use of closed network connection
+2020/12/29 17:00:00 workerbase.go:40: TrainWorker: runWorker exit
+2020/12/29 17:00:00 distdev.go:89: SetupDist: worker is running
+2020/12/29 17:00:00 logger.go:46: HandleErrors: exit current thread
+TrainWorker: CountDown:....... 9218 
+2020/12/29 17:00:04 workerbase.go:118: TrainWorker: server 127.0.0.1:30011 quite eventLoop 
+2020/12/29 17:00:29 distdev.go:49: SetupWorkerHelper: Creating parameters: 127.0.0.1:30022 TrainWorker
+2020/12/29 17:00:29 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:29 distdev.go:67: SetupWorkerHelper: Creating runtimelogsfolder error <nil>
+2020/12/29 17:00:29 distdev.go:69: SetupWorkerHelper: Current in Dev, TrainWorker
+2020/12/29 17:00:29 rpc.Register: method "EventLoop" has 1 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: method "InitRpcBase" has 2 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: reply type of method "InitWorkerBase" is not a pointer: "string"
+2020/12/29 17:00:29 rpc.Register: method "Lock" has 1 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: method "Register" has 2 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: method "Run" has 1 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: method "RunWorker" has 2 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: reply type of method "StartRPCServer" is not a pointer: "bool"
+2020/12/29 17:00:29 rpc.Register: reply type of method "StopRPCServer" is not a pointer: "string"
+2020/12/29 17:00:29 rpc.Register: method "TrainTask" has 0 output parameters; needs exactly one
+2020/12/29 17:00:29 rpc.Register: method "Unlock" has 1 input parameters; needs exactly three
+2020/12/29 17:00:29 trainworker.go:38: TrainWorker: register to masterAddr = 127.0.0.1:30022 
+2020/12/29 17:00:29 workerbase.go:65: WorkerBase: begin to call Master.Register to register addr= 127.0.0.1:30025 
+2020/12/29 17:00:29 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30022, methodName: Master.Register 
+2020/12/29 17:00:29 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:29 rpcbase.go:44: TrainWorker: listening on tcp, 0.0.0.0:30025 
+2020/12/29 17:00:30 rpcbase.go:81: Worker: got new conn
+2020/12/29 17:00:30 traintask.go:72: Worker: 127.0.0.1:30025 task started 
+map[]
+2020/12/29 17:00:30 traintask.go:192: [] ./semi-party.x  --F   --N  3  --I   --p 2  --h 127.0.0.1  --pn 30035  algName
+2020/12/29 17:00:30 traintask.go:193: mpcTask Done!
+2020/12/29 17:00:30 traintask.go:130: Worker:task model training start
+2020/12/29 17:00:30 traintask.go:136: Worker: SerializedAlgorithmConfig is #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���=
+2020/12/29 17:00:30 traintask.go:329: -----------------------------------------------------------------
+2020/12/29 17:00:30 traintask.go:330: 
+2020/12/29 17:00:30 traintask.go:331: envs []
+2020/12/29 17:00:30 traintask.go:332: /home/wuyuncheng/Documents/falcon/build/src/executor/falcon --party-id 2 --party-num 3 --party-type 1 --fl-setting 1 --existing-key 0 --key-file mpcKeys --network-file 
+	127.0.0.1
+	127.0.0.1
+	127.0.0.1#
+
+	��#��#��##
+
+	��#��#��##
+
+	��#��#��# --algorithm-name logistic_regression --algorithm-params #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���= --log-file ./.dev_test/party3/logs//runtimeLogs/worker-jid2-train-3/logistic_regression --data-input-file /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2/client.txt --data-output-file thisIsDataOutput --model-save-file /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model --model-report-file /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model.txt
+2020/12/29 17:00:30 traintask.go:333: 
+2020/12/29 17:00:30 traintask.go:334: -----------------------------------------------------------------
+2020/12/29 17:00:30 sub_process.go:113: [SubProcessManager]: open subProcess, PID= 7254
+[SubProcessManager]: subprocess' output log ----------> parse parameters correct
+party-id: 2
+party-num: 3
+party-type: 1
+fl-setting: 1
+existing-key: 0
+network-file: 
+	127.0.0.1
+	127.0.0.1
+	127.0.0.1#
+
+	��#��#��##
+
+	��#��#��##
+
+	��#��#��#
+log-file: ./.dev_test/party3/logs//runtimeLogs/worker-jid2-train-3/logistic_regression
+data-input-file: /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2/client.txt
+data-output-file: thisIsDataOutput
+[SubProcessManager]: subprocess' output log ----------> key-file: mpcKeys
+algorithm-name: logistic_regression
+algorithm-params: #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���=
+model-save-file: /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model
+model-report-file: /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model.txt
+[SubProcessManager]: subprocess' output log ----------> Failed to connect. sleeping for 500 milliseconds, connect: Connection refused
+[SubProcessManager]: subprocess' output log ----------> accepting...
+[SubProcessManager]: subprocess' output log ----------> accepting...
+[SubProcessManager]: subprocess' output log ----------> Parse algorithm name and run the program
+[SubProcessManager]: subprocess' output log ----------> Run the example logistic regression train
+[SubProcessManager]: subprocess' output log ----------> Init logistic regression model
+[SubProcessManager]: subprocess' output log ----------> Init model success
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 0 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 0-th iteration consumed time = 0.229515 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 1 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 1-th iteration consumed time = 0.224744 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 2 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 2-th iteration consumed time = 0.225404 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 3 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 3-th iteration consumed time = 0.223348 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 4 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 4-th iteration consumed time = 0.230588 --------
+-------- Iteration 5 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 5-th iteration consumed time = 0.240912 --------
+-------- Iteration 6 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 6-th iteration consumed time = 0.231475 --------
+-------- Iteration 7 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 7-th iteration consumed time = 0.227305 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 8 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 8-th iteration consumed time = 0.226044 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 9 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 9-th iteration consumed time = 0.247826 --------
+-------- Iteration 10 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 10-th iteration consumed time = 0.224299 --------
+-------- Iteration 11 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 11-th iteration consumed time = 0.22579 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 12 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 12-th iteration consumed time = 0.239433 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 13 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 13-th iteration consumed time = 0.238907 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 14 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 14-th iteration consumed time = 0.238364 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 15 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 15-th iteration consumed time = 0.225586 --------
+-------- Iteration 16 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 16-th iteration consumed time = 0.226024 --------
+-------- Iteration 17 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 17-th iteration consumed time = 0.22489 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 18 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+TrainWorker: CountDown:....... 5000 
+[SubProcessManager]: subprocess' output log ----------> -------- The 18-th iteration consumed time = 0.228867 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 19 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 19-th iteration consumed time = 0.228065 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 20 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 20-th iteration consumed time = 0.224673 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 21 --------
+2020/12/29 17:00:39 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 21-th iteration consumed time = 0.229035 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 22 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 22-th iteration consumed time = 0.228955 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 23 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 23-th iteration consumed time = 0.228081 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 24 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 24-th iteration consumed time = 0.229212 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 25 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 25-th iteration consumed time = 0.22589 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 26 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 26-th iteration consumed time = 0.23741 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 27 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 27-th iteration consumed time = 0.226384 --------
+-------- Iteration 28 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 28-th iteration consumed time = 0.265713 --------
+-------- Iteration 29 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+TrainWorker: CountDown:....... 9000 
+[SubProcessManager]: subprocess' output log ----------> -------- The 29-th iteration consumed time = 0.231631 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 30 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 30-th iteration consumed time = 0.227457 --------
+-------- Iteration 31 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 31-th iteration consumed time = 0.227538 --------
+-------- Iteration 32 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 32-th iteration consumed time = 0.257564 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 33 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 33-th iteration consumed time = 0.223846 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 34 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 34-th iteration consumed time = 0.225586 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 35 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 35-th iteration consumed time = 0.255859 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 36 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 36-th iteration consumed time = 0.224509 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 37 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 37-th iteration consumed time = 0.224997 --------
+-------- Iteration 38 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 38-th iteration consumed time = 0.227044 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 39 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 39-th iteration consumed time = 0.282023 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 40 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+TrainWorker: CountDown:....... 3200 
+[SubProcessManager]: subprocess' output log ----------> -------- The 40-th iteration consumed time = 0.22589 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 41 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 41-th iteration consumed time = 0.227302 --------
+-------- Iteration 42 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 42-th iteration consumed time = 0.225256 --------
+-------- Iteration 43 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 43-th iteration consumed time = 0.255571 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 44 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 44-th iteration consumed time = 0.24624 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 45 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 45-th iteration consumed time = 0.230216 --------
+-------- Iteration 46 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 46-th iteration consumed time = 0.229071 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 47 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 47-th iteration consumed time = 0.22966 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 48 --------
+2020/12/29 17:00:49 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 48-th iteration consumed time = 0.244173 --------
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 49 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+[SubProcessManager]: subprocess' output log ----------> Finish setup socket connections to spdz engines.
+[SubProcessManager]: subprocess' output log ----------> -------- The 49-th iteration consumed time = 0.226522 --------
+TrainWorker: CountDown:....... 7201 
+TrainWorker: CountDown:....... 1199 
+TrainWorker: CountDown:....... 5199 
+2020/12/29 17:00:59 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+TrainWorker: CountDown:....... 9199 
+TrainWorker: CountDown:....... 3198 
+[SubProcessManager]: subprocess' output log ----------> Finish algorithm 
+2020/12/29 17:01:08 sub_process.go:132: [SubProcessManager]: subprocess exit status: << ok >> 
+2020/12/29 17:01:08 sub_process.go:133: [SubProcessManager]: subprocess error logs: 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 
+2020/12/29 17:01:08 sub_process.go:87: [SubProcessManager]: lock
+2020/12/29 17:01:08 sub_process.go:91: [SubProcessManager]: Unlock 
+2020/12/29 17:01:08 traintask.go:151: Worker:task model training &{false false false {{"logistic_regression":""} }}
+2020/12/29 17:01:08 trainworker.go:56: Worker: Counting down before job done...  10
+2020/12/29 17:01:08 sub_process.go:51: [SubProcessManager]: PID 7254 is not running
+2020/12/29 17:01:09 trainworker.go:56: Worker: Counting down before job done...  9
+2020/12/29 17:01:09 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+2020/12/29 17:01:10 trainworker.go:56: Worker: Counting down before job done...  8
+TrainWorker: CountDown:....... 7198 
+2020/12/29 17:01:11 trainworker.go:56: Worker: Counting down before job done...  7
+2020/12/29 17:01:12 trainworker.go:56: Worker: Counting down before job done...  6
+2020/12/29 17:01:13 trainworker.go:56: Worker: Counting down before job done...  5
+2020/12/29 17:01:14 trainworker.go:56: Worker: Counting down before job done...  4
+TrainWorker: CountDown:....... 1195 
+2020/12/29 17:01:15 trainworker.go:56: Worker: Counting down before job done...  3
+2020/12/29 17:01:16 trainworker.go:56: Worker: Counting down before job done...  2
+2020/12/29 17:01:17 trainworker.go:56: Worker: Counting down before job done...  1
+2020/12/29 17:01:18 trainworker.go:59: Worker: 127.0.0.1:30025: task done
+2020/12/29 17:01:18 rpcbase.go:81: Worker: got new conn
+2020/12/29 17:01:18 workerbase.go:76: TrainWorker: Shutdown 127.0.0.1:30025
+2020/12/29 17:01:18 workerbase.go:100: TrainWorker: DoTask returned, Close the party server...
+2020/12/29 17:01:18 rpcbase.go:88: Worker: got conn error accept tcp [::]:30025: use of closed network connection
+2020/12/29 17:01:18 workerbase.go:40: TrainWorker: runWorker exit
+2020/12/29 17:01:18 distdev.go:89: SetupDist: worker is running
+2020/12/29 17:01:18 logger.go:46: HandleErrors: exit current thread
+TrainWorker: CountDown:....... 5195 
+2020/12/29 17:01:18 workerbase.go:118: TrainWorker: server 127.0.0.1:30025 quite eventLoop 
+^C

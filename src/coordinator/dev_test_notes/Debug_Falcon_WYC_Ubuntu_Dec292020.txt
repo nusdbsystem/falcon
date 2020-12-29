@@ -1,0 +1,146 @@
+﻿Dec 29th 2020 4:45pm debug on yuncheng PC:
+
+First needs to set up the MPC service on three terminals:
+
+terminal 1:
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/third_party/MP-SPDZ$ ./semi-party.x -F -N 3 -p 0 -I logistic_regression
+No modulus found in /home/wuyuncheng/Documents/falcon/third_party/MP-SPDZ/Player-Data//3-Dp-128/Params-Data, generating 128-bit prime
+Start listening on thread 139681258862336
+Party 0 is listening on port 14000 for external client connections.
+Listening for socket connections on base port 14000
+Starting a new iteration.
+Thread 139681258862336 found server.
+
+terminal 2:
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/third_party/MP-SPDZ$ ./semi-party.x -F -N 3 -p 1 -I logistic_regression
+No modulus found in /home/wuyuncheng/Documents/falcon/third_party/MP-SPDZ/Player-Data//3-Dp-128/Params-Data, generating 128-bit prime
+Start listening on thread 140711781910272
+Party 1 is listening on port 14001 for external client connections.
+Listening for socket connections on base port 14000
+Starting a new iteration.
+Thread 140711781910272 found server.
+
+terminal 3:
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/third_party/MP-SPDZ$ ./semi-party.x -F -N 3 -p 2 -I logistic_regression
+No modulus found in /home/wuyuncheng/Documents/falcon/third_party/MP-SPDZ/Player-Data//3-Dp-128/Params-Data, generating 128-bit prime
+Start listening on thread 140573868549888
+Party 2 is listening on port 14002 for external client connections.
+Listening for socket connections on base port 14000
+Starting a new iteration.
+Thread 140573868549888 found server.
+
+
+
+
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method submit -path ./data/three_parties_train_job.json
+127.0.0.1:30004 ./data/three_parties_train_job.json ./data/three_parties_train_job.json
+requesting to  http://127.0.0.1:30004/submit
+200
+b'{"job_id":1,"job_name":"credit_card_training","user_id":1,"party_ids":"[{\\"id\\":0,\\"addr\\":\\"127.0.0.1:30005\\",\\"party_type\\":0,\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}},{\\"id\\":1,\\"addr\\":\\"127.0.0.1:30006\\",\\"party_type\\":1,\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}},{\\"id\\":2,\\"addr\\":\\"127.0.0.1:30007\\",\\"party_type\\":1,\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}}]","task_num":1,"status":0}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":1,"status":1}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":1,"status":0}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 2
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'record not foundInternal Server Error\n'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method submit -path ./data/three_parties_train_job.json
+127.0.0.1:30004 ./data/three_parties_train_job.json ./data/three_parties_train_job.json
+requesting to  http://127.0.0.1:30004/submit
+200
+b'{"job_id":2,"job_name":"credit_card_training","user_id":1,"party_ids":"[{\\"id\\":0,\\"addr\\":\\"127.0.0.1:30005\\",\\"party_type\\":0,\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}},{\\"id\\":1,\\"addr\\":\\"127.0.0.1:30006\\",\\"party_type\\":1,\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}},{\\"id\\":2,\\"addr\\":\\"127.0.0.1:30007\\",\\"party_type\\":1,\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}}]","task_num":1,"status":0}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 2
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":2,"status":1}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 2
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":2,"status":1}'
+
+
+
+Try another time:
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'record not foundInternal Server Error\n'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method submit -path ./data/three_parties_train_job.json
+127.0.0.1:30004 ./data/three_parties_train_job.json ./data/three_parties_train_job.json
+requesting to  http://127.0.0.1:30004/submit
+200
+b'{"job_id":1,"job_name":"credit_card_training","user_id":1,"party_ids":"[{\\"id\\":0,\\"addr\\":\\"127.0.0.1:30005\\",\\"party_type\\":0,\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}},{\\"id\\":1,\\"addr\\":\\"127.0.0.1:30006\\",\\"party_type\\":1,\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}},{\\"id\\":2,\\"addr\\":\\"127.0.0.1:30007\\",\\"party_type\\":1,\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}}]","task_num":1,"status":0}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":1,"status":1}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":1,"status":0}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":1,"status":0}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":1,"status":0}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 2
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'record not foundInternal Server Error\n'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":1,"status":0}'
+
+
+NOTE: if NOT using existing mpcKeys, then the src/coordinator/mpcKeys will be generated on the spot (thus git diff will show the difference)
+
+when using existing mpcKeys, party-1 will generate tons of error message in the log:
+r is overflow.\nE20201229 17:28:44.102138  9924 fixed_point_encoder.cc:156] Encoded number is overflow.\nE20201229 17:28:44.102147  9924 fixed_point_encoder.cc:156] Encoded number is overflow.\nE20201229 17:28:44.102157  9924 fixed_point_encoder.cc:156] Encoded number is overflow.\nE20201229 17:28:44.102167  9924 fixed_point_encoder.cc:156] Encoded number is overflow.\nE20201229 17:28:44.102176  9924 fixed_point_encoder.cc:156] Encoded number is overflow.\nE20201229 17:28:44.102185  9924 fixed_point_encoder.cc:156] Encoded number is overflow.\n"} }}
+
+git pull and test
+first without MPC service manual start beforehand:
+
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job.json
+127.0.0.1:30004 ./train_jobs/three_parties_train_job.json ./train_jobs/three_parties_train_job.json
+requesting to  http://127.0.0.1:30004/submit
+200
+b'{"job_id":1,"job_name":"credit_card_training","user_id":1,"party_ids":"[{\\"id\\":1,\\"addr\\":\\"127.0.0.1:30005\\",\\"party_type\\":\\"active\\",\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}},{\\"id\\":2,\\"addr\\":\\"127.0.0.1:30006\\",\\"party_type\\":\\"passive\\",\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}},{\\"id\\":3,\\"addr\\":\\"127.0.0.1:30007\\",\\"party_type\\":\\"passive\\",\\"path\\":{\\"data_input\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2\\",\\"data_output\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2\\",\\"model_path\\":\\"/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data\\"}}]","task_num":1,"status":0}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":1,"status":1}'
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 1
+127.0.0.1:30004 None None
+requesting to  http://127.0.0.1:30004/query-job-status
+200
+b'{"job_id":1,"status":3}'
+
+then with MPC started in CLion:
+this time run into party-2 with segmentation fault...
+
+probably due to previous overflow bug...
+
+try with previous commit again:
+

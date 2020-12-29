@@ -46,7 +46,7 @@ and update the executor path in `src/coordinator/common/global.go`
     
     ```bash
     #Usage:
-    bash dev_start_coord.sh --partyNumber <partyNumber>
+    bash scripts/dev_start_coord.sh --partyNumber <partyNumber>
     ```
           
 
@@ -58,21 +58,21 @@ and update the executor path in `src/coordinator/common/global.go`
     
     ```bash
     #Usage:
-    bash dev_start_partyserver.sh --partyID 1
+    bash scripts/dev_start_partyserver.sh --partyID 1
     ```
 
     Launch Party 2:
     
     ```bash
     #Usage:
-    bash dev_start_partyserver.sh --partyID 2
+    bash scripts/dev_start_partyserver.sh --partyID 2
     ```
 
     Launch Party X:
     
     ```bash
     #Usage:
-    bash dev_start_partyserver.sh --partyID X
+    bash scripts/dev_start_partyserver.sh --partyID X
     ```
 
 ## Platform setup PROD (production with k8)

@@ -1,0 +1,163 @@
+﻿(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ bash sdug/dev_partyserver.sh 2
+No OS provided, default to linux
+CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o "./bin/falcon_platform" falcon_platform.go
+<<<<<<<<<<<<<<<<< Read envs, User defined,   key: Env, value: dev >>>>>>>>>>>>>
+<<<<<<<<<<<<<<<<< Read envs, User defined,   key: SERVICE_NAME, value: partyserver >>>>>>>>>>>>>
+Loging to  ./.dev_test/party2/logs/runtimeLogs
+2020/12/29 17:21:10 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: COORD_SERVER_IP, value: 127.0.0.1 >>>>>>>>>>>>>
+2020/12/29 17:21:10 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: COORD_TARGET_PORT, default: 30004 >>>>>>>>>>>>>
+2020/12/29 17:21:10 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: PARTY_SERVER_IP, value: 127.0.0.1 >>>>>>>>>>>>>
+2020/12/29 17:21:10 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: WORK_BASE_PATH, value: ./.dev_test/party2/logs/ >>>>>>>>>>>>>
+2020/12/29 17:21:10 falcon_platform.go:54: <<<<<<<<< Read envs, User defined,   key: CoordAddr, value: 127.0.0.1:30004 >>>>>>>>>>>>>
+2020/12/29 17:21:10 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: PARTY_SERVER_NODE_PORT, value: 30006 >>>>>>>>>>>>>
+2020/12/29 17:21:10 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: PARTY_SERVER_ID, value: 2 >>>>>>>>>>>>>
+2020/12/29 17:21:10 falcon_platform.go:208: Launch falcon_platform, the common.ServiceName partyserver
+2020/12/29 17:21:10 setup_partyserver.go:21: SetupPartyServer: registering partyserverPort to coord 30006
+2020/12/29 17:21:10 setup_partyserver.go:40: SetupPartyServer: connecting to coord  127.0.0.1:30004 to AddPort
+2020/12/29 17:21:10 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/portadd"
+2020/12/29 17:21:11 setup_partyserver.go:48: SetupPartyServer: PartyServerAdd 127.0.0.1 ...retry 
+2020/12/29 17:21:11 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/party-server-add"
+2020/12/29 17:21:11 setup_partyserver.go:56: Starting HTTP server...
+2020/12/29 17:22:04 distdev.go:49: SetupWorkerHelper: Creating parameters: 127.0.0.1:30008 TrainWorker
+2020/12/29 17:22:04 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:22:04 distdev.go:67: SetupWorkerHelper: Creating runtimelogsfolder error <nil>
+2020/12/29 17:22:04 distdev.go:69: SetupWorkerHelper: Current in Dev, TrainWorker
+2020/12/29 17:22:04 rpc.Register: method "EventLoop" has 1 input parameters; needs exactly three
+2020/12/29 17:22:04 rpc.Register: method "InitRpcBase" has 2 input parameters; needs exactly three
+2020/12/29 17:22:04 rpc.Register: reply type of method "InitWorkerBase" is not a pointer: "string"
+2020/12/29 17:22:04 rpc.Register: method "Lock" has 1 input parameters; needs exactly three
+2020/12/29 17:22:04 rpc.Register: method "Register" has 2 input parameters; needs exactly three
+2020/12/29 17:22:04 rpc.Register: method "Run" has 1 input parameters; needs exactly three
+2020/12/29 17:22:04 rpc.Register: method "RunWorker" has 2 input parameters; needs exactly three
+2020/12/29 17:22:04 rpc.Register: reply type of method "StartRPCServer" is not a pointer: "bool"
+2020/12/29 17:22:04 rpc.Register: reply type of method "StopRPCServer" is not a pointer: "string"
+2020/12/29 17:22:04 rpc.Register: method "TrainTask" has 0 output parameters; needs exactly one
+2020/12/29 17:22:04 rpc.Register: method "Unlock" has 1 input parameters; needs exactly three
+2020/12/29 17:22:04 trainworker.go:38: TrainWorker: register to masterAddr = 127.0.0.1:30008 
+2020/12/29 17:22:04 workerbase.go:65: WorkerBase: begin to call Master.Register to register addr= 127.0.0.1:30010 
+2020/12/29 17:22:04 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30008, methodName: Master.Register 
+2020/12/29 17:22:04 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:22:04 rpcbase.go:44: TrainWorker: listening on tcp, 0.0.0.0:30010 
+2020/12/29 17:22:05 rpcbase.go:81: Worker: got new conn
+2020/12/29 17:22:05 traintask.go:72: Worker: 127.0.0.1:30010 task started 
+map[]
+2020/12/29 17:22:05 traintask.go:192: [] ./semi-party.x  --F   --N  3  --I   --p 1  --h 127.0.0.1  --pn 30021  algName
+2020/12/29 17:22:05 traintask.go:193: mpcTask Done!
+2020/12/29 17:22:05 traintask.go:130: Worker:task model training start
+2020/12/29 17:22:05 traintask.go:136: Worker: SerializedAlgorithmConfig is #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���=
+2020/12/29 17:22:05 traintask.go:329: -----------------------------------------------------------------
+2020/12/29 17:22:05 traintask.go:330: 
+2020/12/29 17:22:05 traintask.go:331: envs []
+2020/12/29 17:22:05 traintask.go:332: /home/wuyuncheng/Documents/falcon/build/src/executor/falcon --party-id 1 --party-num 3 --party-type 1 --fl-setting 1 --existing-key 1 --key-file mpcKeys --network-file 
+	127.0.0.1
+	127.0.0.1
+	127.0.0.1#
+
+	��#��#��##
+
+	��#��#��##
+
+	��#��#��# --algorithm-name logistic_regression --algorithm-params #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���= --log-file ./.dev_test/party2/logs//runtimeLogs/worker-jid1-train-2/logistic_regression --data-input-file /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1/client.txt --data-output-file thisIsDataOutput --model-save-file /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model --model-report-file /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model.txt
+2020/12/29 17:22:05 traintask.go:333: 
+2020/12/29 17:22:05 traintask.go:334: -----------------------------------------------------------------
+2020/12/29 17:22:05 sub_process.go:113: [SubProcessManager]: open subProcess, PID= 9258
+[SubProcessManager]: subprocess' output log ----------> parse parameters correct
+party-id: 1
+party-num: 3
+party-type: 1
+fl-setting: 1
+existing-key: 1
+network-file: 
+	127.0.0.1
+	127.0.0.1
+	127.0.0.1#
+
+	��#��#��##
+
+	��#��#��##
+
+	��#��#��#
+[SubProcessManager]: subprocess' output log ----------> log-file: ./.dev_test/party2/logs//runtimeLogs/worker-jid1-train-2/logistic_regression
+data-input-file: /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1/client.txt
+data-output-file: thisIsDataOutput
+key-file: mpcKeys
+algorithm-name: logistic_regression
+algorithm-params: #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���=
+model-save-file: /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model
+model-report-file: /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/model.txt
+[SubProcessManager]: subprocess' output log ----------> Failed to connect. sleeping for 500 milliseconds, connect: Connection refused
+[SubProcessManager]: subprocess' output log ----------> accepting...
+[SubProcessManager]: subprocess' output log ----------> Failed to connect. sleeping for 500 milliseconds, connect: Connection refused
+[SubProcessManager]: subprocess' output log ----------> accepting...
+[SubProcessManager]: subprocess' output log ----------> Parse algorithm name and run the program
+[SubProcessManager]: subprocess' output log ----------> Run the example logistic regression train
+[SubProcessManager]: subprocess' output log ----------> Init logistic regression model
+[SubProcessManager]: subprocess' output log ----------> Init model success
+[SubProcessManager]: subprocess' output log ----------> -------- Iteration 0 --------
+[SubProcessManager]: subprocess' output log ----------> begin connect to spdz parties
+party_num = 3
+TrainWorker: CountDown:....... 5000 
+2020/12/29 17:22:14 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+TrainWorker: CountDown:....... 9000 
+TrainWorker: CountDown:....... 3103 
+2020/12/29 17:22:24 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+TrainWorker: CountDown:....... 7103 
+TrainWorker: CountDown:....... 1098 
+TrainWorker: CountDown:....... 5099 
+2020/12/29 17:22:34 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+TrainWorker: CountDown:....... 9099 
+TrainWorker: CountDown:....... 3094 
+2020/12/29 17:22:44 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+TrainWorker: CountDown:....... 7095 
+TrainWorker: CountDown:....... 1090 
+TrainWorker: CountDown:....... 5090 
+2020/12/29 17:22:54 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+TrainWorker: CountDown:....... 9090 
+TrainWorker: CountDown:....... 3088 
+2020/12/29 17:23:04 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+TrainWorker: CountDown:....... 7088 
+TrainWorker: CountDown:....... 1086 
+TrainWorker: CountDown:....... 5086 
+[SubProcessManager]: subprocess' output log ----------> 25 attempts
+2020/12/29 17:23:14 sub_process.go:132: [SubProcessManager]: subprocess exit status: << signal: aborted (core dumped) >> 
+2020/12/29 17:23:14 sub_process.go:133: [SubProcessManager]: subprocess error logs: 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+ wuyuncheng-OptiPlex-7040 : set_up_socket:connect:127.0.0.1: Connection refused
+terminate called after throwing an instance of 'bad_value'
+  what():  Some value is wrong somewhere
+ 
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 
+2020/12/29 17:23:14 sub_process.go:87: [SubProcessManager]: lock
+2020/12/29 17:23:14 sub_process.go:91: [SubProcessManager]: Unlock 
+2020/12/29 17:23:14 trainworker.go:56: Worker: Counting down before job done...  10
+2020/12/29 17:23:14 rpcbase.go:81: Worker: got new conn
+TrainWorker: reset the countdown
+2020/12/29 17:23:14 sub_process.go:51: [SubProcessManager]: PID 9258 is not running
+2020/12/29 17:23:15 trainworker.go:56: Worker: Counting down before job done...  9
+2020/12/29 17:23:16 trainworker.go:56: Worker: Counting down before job done...  8
+2020/12/29 17:23:17 trainworker.go:56: Worker: Counting down before job done...  7
+TrainWorker: CountDown:....... 9086 
+2020/12/29 17:23:18 trainworker.go:56: Worker: Counting down before job done...  6
+2020/12/29 17:23:19 trainworker.go:56: Worker: Counting down before job done...  5
+2020/12/29 17:23:20 trainworker.go:56: Worker: Counting down before job done...  4
+2020/12/29 17:23:21 trainworker.go:56: Worker: Counting down before job done...  3
+TrainWorker: CountDown:....... 3083 
+2020/12/29 17:23:22 trainworker.go:56: Worker: Counting down before job done...  2
+2020/12/29 17:23:23 trainworker.go:56: Worker: Counting down before job done...  1
+2020/12/29 17:23:24 trainworker.go:59: Worker: 127.0.0.1:30010: task done
+2020/12/29 17:23:24 rpcbase.go:81: Worker: got new conn
+2020/12/29 17:23:24 workerbase.go:76: TrainWorker: Shutdown 127.0.0.1:30010
+2020/12/29 17:23:24 workerbase.go:100: TrainWorker: DoTask returned, Close the party server...
+2020/12/29 17:23:24 rpcbase.go:88: Worker: got conn error accept tcp [::]:30010: use of closed network connection
+2020/12/29 17:23:24 workerbase.go:40: TrainWorker: runWorker exit
+2020/12/29 17:23:24 distdev.go:89: SetupDist: worker is running
+2020/12/29 17:23:24 logger.go:46: HandleErrors: exit current thread
+TrainWorker: CountDown:....... 7083 
+2020/12/29 17:23:25 workerbase.go:118: TrainWorker: server 127.0.0.1:30010 quite eventLoop 
+^C

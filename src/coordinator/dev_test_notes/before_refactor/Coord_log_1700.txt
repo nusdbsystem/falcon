@@ -1,0 +1,458 @@
+﻿(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ bash sdug/dev_coord.sh 3
+making dir, 1
+.dev_test/
+├── coord
+└── party1
+    ├── data_input
+    ├── logs
+    └── trained_models
+
+5 directories, 0 files
+making dir, 2
+.dev_test/
+├── coord
+├── party1
+│   ├── data_input
+│   ├── logs
+│   └── trained_models
+└── party2
+    ├── data_input
+    ├── logs
+    └── trained_models
+
+9 directories, 0 files
+making dir, 3
+.dev_test/
+├── coord
+├── party1
+│   ├── data_input
+│   ├── logs
+│   └── trained_models
+├── party2
+│   ├── data_input
+│   ├── logs
+│   └── trained_models
+└── party3
+    ├── data_input
+    ├── logs
+    └── trained_models
+
+13 directories, 0 files
+CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o "./bin/falcon_platform" falcon_platform.go
+<<<<<<<<<<<<<<<<< Read envs, User defined,   key: Env, value: dev >>>>>>>>>>>>>
+<<<<<<<<<<<<<<<<< Read envs, User defined,   key: SERVICE_NAME, value: coord >>>>>>>>>>>>>
+Loging to  ./.dev_test/coord/runtimeLogs
+2020/12/29 16:56:45 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: JOB_DATABASE, value: sqlite3 >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: JOB_DB_SQLITE_DB, default: falcon >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: JOB_DB_HOST, default: localhost >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: JOB_DB_MYSQL_USER, default: falcon >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: JOB_DB_MYSQL_PWD, default: falcon >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: JOB_DB_MYSQL_DB, default: falcon >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: JOB_DB_MYSQL_OPTIONS, default: ?parseTime=true >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: MYSQL_CLUSTER_PORT, default: 30000 >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: REDIS_HOST, default: localhost >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: REDIS_PWD, default: falcon >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: REDIS_CLUSTER_PORT, default: 30002 >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: MYSQL_NODE_PORT, default: 30001 >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: REDIS_NODE_PORT, default: 30003 >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:193: <<<<<<<<<<<<<<<<< Read envs, User defined,   key: COORD_SERVER_IP, value: 127.0.0.1 >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: COORD_TARGET_PORT, default: 30004 >>>>>>>>>>>>>
+2020/12/29 16:56:45 global.go:190: <<<<<<<<<<<<<<<<< Read envs, Set to default, key: COORD_SVC_NAME, default:  >>>>>>>>>>>>>
+2020/12/29 16:56:45 falcon_platform.go:54: <<<<<<<<< Read envs, User defined,   key: CoordAddr, value: 127.0.0.1:30004 >>>>>>>>>>>>>
+2020/12/29 16:56:45 falcon_platform.go:200: Launch falcon_platform, the common.ServiceName coord
+2020/12/29 16:56:45 setup_http.go:57: HTTP: Updating table...
+2020/12/29 16:56:47 setup_http.go:61: HTTP: Creating admin user...
+2020/12/29 16:56:47 setup_http.go:91: HTTP: Starting multi consumers...
+2020/12/29 16:56:47 setup_http.go:101: HTTP: Starting HTTP server...
+2020/12/29 16:57:26 middleware.go:21: HTTP: [url] 127.0.0.1:30004/portadd [time_usage] 143.236641ms 
+2020/12/29 16:57:26 middleware.go:21: HTTP: [url] 127.0.0.1:30004/party-server-add [time_usage] 75.469244ms 
+2020/12/29 16:57:34 middleware.go:21: HTTP: [url] 127.0.0.1:30004/portadd [time_usage] 119.077601ms 
+2020/12/29 16:57:34 middleware.go:21: HTTP: [url] 127.0.0.1:30004/party-server-add [time_usage] 242.172024ms 
+2020/12/29 16:57:43 middleware.go:21: HTTP: [url] 127.0.0.1:30004/portadd [time_usage] 116.595614ms 
+2020/12/29 16:57:43 middleware.go:21: HTTP: [url] 127.0.0.1:30004/party-server-add [time_usage] 67.049295ms 
+2020/12/29 16:59:10 helper_receive.go:21: File name three_parties_train_job
+2020/12/29 16:59:10 jobtrain.go:84: Searching Algorithms...
+2020/12/29 16:59:10 jobtrain.go:94: ParseTrainJob: Searching Algorithms, match ! logistic_regression
+2020/12/29 16:59:10 jobtrain.go:106: Parsed result is:  &{credit_card_training this is the job_decs 1 0 3 1 [{0 127.0.0.1:30005 0 {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}} {1 127.0.0.1:30006 1 {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}} {2 127.0.0.1:30007 1 {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}}] {{ {{ } map[] } {}} {logistic_regression {{client.txt mpcKeys} map[alpha:0.1 batch_size:32 convergence_threshold:0.0001 decay:0.1 differential_privacy_budget:0.1 learning_rate:0.1 max_iteration:50 metric:acc multi_class:ovr optimizer:sgd penalty:l1 with_regularization:0] #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���=} {model model.txt}}}}
+2020/12/29 16:59:10 job_controller.go:14: HTTP server: in SubmitJob, put to the JobQueue
+2020/12/29 16:59:10 middleware.go:21: HTTP: [url] 127.0.0.1:30004/submit [time_usage] 143.361604ms 
+2020/12/29 16:59:10 job_scheduler.go:62: Consume:2 Got from queue
+2020/12/29 16:59:10 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:10 resource_controller.go:28: AssignPort: AssignSuccessful port is  30008
+2020/12/29 16:59:10 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 86.307021ms 
+2020/12/29 16:59:10 distdev.go:24: SetupDist: Launch master Get port 30008
+2020/12/29 16:59:10 distdev.go:29: SetupDist: Launch master DevEnv
+2020/12/29 16:59:10 setup_dist.go:66: SetupDist: Launching master
+2020/12/29 16:59:10 rpc.Register: method "InitRpcBase" has 2 input parameters; needs exactly three
+2020/12/29 16:59:10 rpc.Register: method "Lock" has 1 input parameters; needs exactly three
+2020/12/29 16:59:10 rpc.Register: reply type of method "StartRPCServer" is not a pointer: "bool"
+2020/12/29 16:59:10 rpc.Register: reply type of method "StopRPCServer" is not a pointer: "string"
+2020/12/29 16:59:10 rpc.Register: method "TaskHandler" has 5 input parameters; needs exactly three
+2020/12/29 16:59:10 rpc.Register: reply type of method "TaskStatusMonitor" is not a pointer: "context.Context"
+2020/12/29 16:59:10 rpc.Register: method "Unlock" has 1 input parameters; needs exactly three
+2020/12/29 16:59:10 rpc.Register: method "Wait" has 1 input parameters; needs exactly three
+2020/12/29 16:59:10 rpcbase.go:44: Master: listening on tcp, 0.0.0.0:30008 
+2020/12/29 16:59:10 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/update-train-master"
+2020/12/29 16:59:10 master.go:66: Master: start forwardRegistrations... 
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/update-train-master [time_usage] 82.697459ms 
+2020/12/29 16:59:11 setup_dist.go:90: SetupDist: master is calling partyserver: 127.0.0.1:30005 ...
+2020/12/29 16:59:11 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30005/setup-worker"
+2020/12/29 16:59:11 setup_dist.go:90: SetupDist: master is calling partyserver: 127.0.0.1:30006 ...
+2020/12/29 16:59:11 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30006/setup-worker"
+2020/12/29 16:59:11 setup_dist.go:90: SetupDist: master is calling partyserver: 127.0.0.1:30007 ...
+2020/12/29 16:59:11 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30007/setup-worker"
+2020/12/29 16:59:11 setup_dist.go:102: SetupDist: master is running at 127.0.0.1:30008 ... waiting job complete
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30009
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 90.205901ms 
+2020/12/29 16:59:11 rpcbase.go:60: Master: got new conn
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30010
+2020/12/29 16:59:11 master.go:92: Master: Found one worker 127.0.0.1:30009
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 206.925372ms 
+2020/12/29 16:59:11 rpcbase.go:60: Master: got new conn
+2020/12/29 16:59:11 master.go:92: Master: Found one worker 127.0.0.1:30010
+2020/12/29 16:59:11 resource_controller.go:24: AssignPort, error  UNIQUE constraint failed: port_records.port
+2020/12/29 16:59:11 resource_controller.go:25: AssignPort: retry...
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30011
+
+(/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/models/10.resource_sql.go:36) 
+[2020-12-29 16:59:11]  UNIQUE constraint failed: port_records.port 
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 340.437995ms 
+2020/12/29 16:59:11 rpcbase.go:60: Master: got new conn
+2020/12/29 16:59:11 master.go:92: Master: Found one worker 127.0.0.1:30011
+2020/12/29 16:59:11 scheduler.go:26: Scheduler: All worker found:  [127.0.0.1:30009 127.0.0.1:30010 127.0.0.1:30011]  required:  [127.0.0.1:30005 127.0.0.1:30006 127.0.0.1:30007]
+2020/12/29 16:59:11 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30012
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 90.800813ms 
+2020/12/29 16:59:11 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30013
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 74.882408ms 
+2020/12/29 16:59:11 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30014
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 66.680096ms 
+2020/12/29 16:59:11 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30015
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 83.374516ms 
+2020/12/29 16:59:11 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30016
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 92.866228ms 
+2020/12/29 16:59:11 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30017
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 99.891139ms 
+2020/12/29 16:59:11 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30018
+2020/12/29 16:59:11 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 66.478719ms 
+2020/12/29 16:59:11 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:11 resource_controller.go:28: AssignPort: AssignSuccessful port is  30019
+2020/12/29 16:59:12 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 91.761113ms 
+2020/12/29 16:59:12 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:12 resource_controller.go:28: AssignPort: AssignSuccessful port is  30020
+2020/12/29 16:59:12 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 83.266609ms 
+2020/12/29 16:59:12 jobtrain.go:191: Scheduler: Generating NetworkCfg ...
+2020/12/29 16:59:12 jobtrain.go:192: Scheduler: Assigned Ip and ports are:  [127.0.0.1:30005 127.0.0.1:30006 127.0.0.1:30007] [[30012 30013 30014] [30015 30016 30017] [30018 30019 30020]]
+2020/12/29 16:59:12 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 16:59:12 resource_controller.go:28: AssignPort: AssignSuccessful port is  30021
+2020/12/29 16:59:12 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 82.865697ms 
+2020/12/29 16:59:12 scheduler.go:142: Scheduler: begin to call TrainWorker.DoTask of the worker: 127.0.0.1:30011 
+2020/12/29 16:59:12 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.DoTask 
+2020/12/29 16:59:12 scheduler.go:142: Scheduler: begin to call TrainWorker.DoTask of the worker: 127.0.0.1:30010 
+2020/12/29 16:59:12 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.DoTask 
+2020/12/29 16:59:12 scheduler.go:142: Scheduler: begin to call TrainWorker.DoTask of the worker: 127.0.0.1:30009 
+2020/12/29 16:59:12 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.DoTask 
+Master: CountDown:....... 2203 
+Master: CountDown:....... 4203 
+Master: CountDown:....... 6203 
+Master: CountDown:....... 8203 
+Master: CountDown:....... 10203 
+Master: Timeout, server begin to send heart beat to worker
+2020/12/29 16:59:21 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:21 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 16:59:21 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:21 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 16:59:21 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:21 rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2001 
+Master: CountDown:....... 4001 
+Master: CountDown:....... 6001 
+Master: CountDown:....... 8001 
+Master: CountDown:....... 10001 
+Master: Timeout, server begin to send heart beat to worker
+2020/12/29 16:59:31 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:31 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 16:59:31 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:31 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 16:59:31 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:31 rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2001 
+Master: CountDown:....... 4001 
+Master: CountDown:....... 6001 
+Master: CountDown:....... 8001 
+Master: CountDown:....... 10001 
+Master: Timeout, server begin to send heart beat to worker
+2020/12/29 16:59:41 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:41 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 16:59:41 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:41 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 16:59:41 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:41 rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2001 
+Master: CountDown:....... 4001 
+Master: CountDown:....... 6001 
+Master: CountDown:....... 8001 
+Master: CountDown:....... 10001 
+Master: Timeout, server begin to send heart beat to worker
+2020/12/29 16:59:51 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:51 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 16:59:51 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:51 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 16:59:51 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.ResetTime 
+2020/12/29 16:59:51 rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2002 
+Master: CountDown:....... 4002 
+2020/12/29 16:59:56 middleware.go:21: HTTP: [url] 127.0.0.1:30004/query-job-status [time_usage] 479.611µs 
+Master: CountDown:....... 6003 
+Master: CountDown:....... 8003 
+2020/12/29 17:00:00 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:00 scheduler.go:151: Scheduler: calling TrainWorker.DoTask of the worker: 127.0.0.1:30010 successful 
+2020/12/29 17:00:00 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:00 scheduler.go:151: Scheduler: calling TrainWorker.DoTask of the worker: 127.0.0.1:30011 successful 
+2020/12/29 17:00:00 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:00 scheduler.go:151: Scheduler: calling TrainWorker.DoTask of the worker: 127.0.0.1:30009 successful 
+2020/12/29 17:00:00 master.go:122: Master: finish job, begin to update to coord
+2020/12/29 17:00:00 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/update-job-res"
+2020/12/29 17:00:00 middleware.go:21: HTTP: [url] 127.0.0.1:30004/update-job-res [time_usage] 137.808644ms 
+2020/12/29 17:00:00 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/update-job-status"
+2020/12/29 17:00:00 middleware.go:21: HTTP: [url] 127.0.0.1:30004/update-job-status [time_usage] 83.126281ms 
+2020/12/29 17:00:00 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/model-update"
+2020/12/29 17:00:00 middleware.go:21: HTTP: [url] 127.0.0.1:30004/model-update [time_usage] 83.119316ms 
+2020/12/29 17:00:00 master.go:125: Master: finish job, begin to close all
+2020/12/29 17:00:00 rpcbase.go:101: Master: begin to call TrainWorker.Shutdown
+2020/12/29 17:00:00 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.Shutdown 
+2020/12/29 17:00:00 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:00 rpcbase.go:106: Master: cleanupRegistration: done
+2020/12/29 17:00:00 rpcbase.go:101: Master: begin to call TrainWorker.Shutdown
+2020/12/29 17:00:00 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.Shutdown 
+2020/12/29 17:00:00 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:00 rpcbase.go:106: Master: cleanupRegistration: done
+2020/12/29 17:00:00 rpcbase.go:101: Master: begin to call TrainWorker.Shutdown
+2020/12/29 17:00:00 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.Shutdown 
+2020/12/29 17:00:00 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:00 rpcbase.go:106: Master: cleanupRegistration: done
+2020/12/29 17:00:00 rpcbase.go:101: Master: begin to call Master.Shutdown
+2020/12/29 17:00:00 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30008, methodName: Master.Shutdown 
+2020/12/29 17:00:00 master.go:78: Master: 30008 quite forwardRegistrations 
+2020/12/29 17:00:00 master.go:140: WorkerBase: server 127.0.0.1:30008 quite Waitting 
+2020/12/29 17:00:00 setup_dist.go:106: SetupDist: master finish all jobs
+2020/12/29 17:00:00 distdev.go:34: SetupDist: setup master done
+2020/12/29 17:00:00 logger.go:46: HandleErrors: exit current thread
+2020/12/29 17:00:00 rpcbase.go:60: Master: got new conn
+2020/12/29 17:00:00 master.go:151: Master: Shutdown server
+2020/12/29 17:00:00 rpcbase.go:68: Master: RegistrationServer: Accept errored, accept tcp [::]:30008: use of closed network connection 
+2020/12/29 17:00:00 rpcbase.go:72: Master: masterServer: done
+2020/12/29 17:00:00 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:00 rpcbase.go:106: Master: cleanupRegistration: done
+2020/12/29 17:00:00 master.go:128: Master 127.0.0.1:30008: job completed
+2020/12/29 17:00:01 master_hb.go:17: Master: 30008 quite eventLoop 
+Scheduler: Stop TaskStatusMonitor
+2020/12/29 17:00:19 middleware.go:21: HTTP: [url] 127.0.0.1:30004/query-job-status [time_usage] 458.488µs 
+2020/12/29 17:00:22 error_handler.go:12: HTTP Error Handler: Processing /query-job-status Error: record not found 
+2020/12/29 17:00:22 http: superfluous response.WriteHeader call from coordinator/coordserver/middleware.handlePanic (error_handler.go:15)
+2020/12/29 17:00:22 middleware.go:21: HTTP: [url] 127.0.0.1:30004/query-job-status [time_usage] 471.511µs 
+2020/12/29 17:00:29 helper_receive.go:21: File name three_parties_train_job
+2020/12/29 17:00:29 jobtrain.go:84: Searching Algorithms...
+2020/12/29 17:00:29 jobtrain.go:94: ParseTrainJob: Searching Algorithms, match ! logistic_regression
+2020/12/29 17:00:29 jobtrain.go:106: Parsed result is:  &{credit_card_training this is the job_decs 1 0 3 1 [{0 127.0.0.1:30005 0 {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}} {1 127.0.0.1:30006 1 {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}} {2 127.0.0.1:30007 1 {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}}] {{ {{ } map[] } {}} {logistic_regression {{client.txt mpcKeys} map[alpha:0.1 batch_size:32 convergence_threshold:0.0001 decay:0.1 differential_privacy_budget:0.1 learning_rate:0.1 max_iteration:50 metric:acc multi_class:ovr optimizer:sgd penalty:l1 with_regularization:0] #2##��8-���=5���==���=B#l1J#sgdR#ovrZ#acce���=} {model model.txt}}}}
+2020/12/29 17:00:29 job_controller.go:14: HTTP server: in SubmitJob, put to the JobQueue
+2020/12/29 17:00:29 middleware.go:21: HTTP: [url] 127.0.0.1:30004/submit [time_usage] 141.129023ms 
+2020/12/29 17:00:29 job_scheduler.go:62: Consume:0 Got from queue
+2020/12/29 17:00:29 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:29 resource_controller.go:28: AssignPort: AssignSuccessful port is  30022
+2020/12/29 17:00:29 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 83.801716ms 
+2020/12/29 17:00:29 distdev.go:24: SetupDist: Launch master Get port 30022
+2020/12/29 17:00:29 distdev.go:29: SetupDist: Launch master DevEnv
+2020/12/29 17:00:29 setup_dist.go:66: SetupDist: Launching master
+2020/12/29 17:00:29 rpc.Register: method "InitRpcBase" has 2 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: method "Lock" has 1 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: reply type of method "StartRPCServer" is not a pointer: "bool"
+2020/12/29 17:00:29 rpc.Register: reply type of method "StopRPCServer" is not a pointer: "string"
+2020/12/29 17:00:29 rpc.Register: method "TaskHandler" has 5 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: reply type of method "TaskStatusMonitor" is not a pointer: "context.Context"
+2020/12/29 17:00:29 rpc.Register: method "Unlock" has 1 input parameters; needs exactly three
+2020/12/29 17:00:29 rpc.Register: method "Wait" has 1 input parameters; needs exactly three
+2020/12/29 17:00:29 rpcbase.go:44: Master: listening on tcp, 0.0.0.0:30022 
+2020/12/29 17:00:29 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/update-train-master"
+2020/12/29 17:00:29 master.go:66: Master: start forwardRegistrations... 
+2020/12/29 17:00:29 middleware.go:21: HTTP: [url] 127.0.0.1:30004/update-train-master [time_usage] 91.061279ms 
+2020/12/29 17:00:29 setup_dist.go:90: SetupDist: master is calling partyserver: 127.0.0.1:30005 ...
+2020/12/29 17:00:29 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30005/setup-worker"
+2020/12/29 17:00:29 setup_dist.go:90: SetupDist: master is calling partyserver: 127.0.0.1:30006 ...
+2020/12/29 17:00:29 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30006/setup-worker"
+2020/12/29 17:00:29 setup_dist.go:90: SetupDist: master is calling partyserver: 127.0.0.1:30007 ...
+2020/12/29 17:00:29 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30007/setup-worker"
+2020/12/29 17:00:29 setup_dist.go:102: SetupDist: master is running at 127.0.0.1:30022 ... waiting job complete
+2020/12/29 17:00:29 resource_controller.go:28: AssignPort: AssignSuccessful port is  30023
+2020/12/29 17:00:29 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 74.329443ms 
+2020/12/29 17:00:29 rpcbase.go:60: Master: got new conn
+2020/12/29 17:00:29 master.go:92: Master: Found one worker 127.0.0.1:30023
+2020/12/29 17:00:29 resource_controller.go:24: AssignPort, error  UNIQUE constraint failed: port_records.port
+2020/12/29 17:00:29 resource_controller.go:25: AssignPort: retry...
+
+(/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/models/10.resource_sql.go:36) 
+[2020-12-29 17:00:29]  UNIQUE constraint failed: port_records.port 
+2020/12/29 17:00:29 resource_controller.go:28: AssignPort: AssignSuccessful port is  30024
+2020/12/29 17:00:29 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 175.919451ms 
+2020/12/29 17:00:29 rpcbase.go:60: Master: got new conn
+2020/12/29 17:00:29 master.go:92: Master: Found one worker 127.0.0.1:30024
+2020/12/29 17:00:29 resource_controller.go:24: AssignPort, error  UNIQUE constraint failed: port_records.port
+2020/12/29 17:00:29 resource_controller.go:25: AssignPort: retry...
+
+(/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/models/10.resource_sql.go:36) 
+[2020-12-29 17:00:29]  UNIQUE constraint failed: port_records.port 
+2020/12/29 17:00:29 resource_controller.go:24: AssignPort, error  UNIQUE constraint failed: port_records.port
+2020/12/29 17:00:29 resource_controller.go:25: AssignPort: retry...
+
+(/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/models/10.resource_sql.go:36) 
+[2020-12-29 17:00:29]  UNIQUE constraint failed: port_records.port 
+2020/12/29 17:00:29 resource_controller.go:28: AssignPort: AssignSuccessful port is  30025
+2020/12/29 17:00:29 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 276.25662ms 
+2020/12/29 17:00:29 rpcbase.go:60: Master: got new conn
+2020/12/29 17:00:29 master.go:92: Master: Found one worker 127.0.0.1:30025
+2020/12/29 17:00:29 scheduler.go:26: Scheduler: All worker found:  [127.0.0.1:30023 127.0.0.1:30024 127.0.0.1:30025]  required:  [127.0.0.1:30005 127.0.0.1:30006 127.0.0.1:30007]
+2020/12/29 17:00:29 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:29 resource_controller.go:28: AssignPort: AssignSuccessful port is  30026
+2020/12/29 17:00:29 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 98.98305ms 
+2020/12/29 17:00:29 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:29 resource_controller.go:28: AssignPort: AssignSuccessful port is  30027
+2020/12/29 17:00:29 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 75.076571ms 
+2020/12/29 17:00:29 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:29 resource_controller.go:28: AssignPort: AssignSuccessful port is  30028
+2020/12/29 17:00:30 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 91.737521ms 
+2020/12/29 17:00:30 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:30 resource_controller.go:28: AssignPort: AssignSuccessful port is  30029
+2020/12/29 17:00:30 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 66.591762ms 
+2020/12/29 17:00:30 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:30 resource_controller.go:28: AssignPort: AssignSuccessful port is  30030
+2020/12/29 17:00:30 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 91.497241ms 
+2020/12/29 17:00:30 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:30 resource_controller.go:28: AssignPort: AssignSuccessful port is  30031
+2020/12/29 17:00:30 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 75.417051ms 
+2020/12/29 17:00:30 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:30 resource_controller.go:28: AssignPort: AssignSuccessful port is  30032
+2020/12/29 17:00:30 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 83.536352ms 
+2020/12/29 17:00:30 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:30 resource_controller.go:28: AssignPort: AssignSuccessful port is  30033
+2020/12/29 17:00:30 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 83.340897ms 
+2020/12/29 17:00:30 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:30 resource_controller.go:28: AssignPort: AssignSuccessful port is  30034
+2020/12/29 17:00:30 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 83.728179ms 
+2020/12/29 17:00:30 jobtrain.go:191: Scheduler: Generating NetworkCfg ...
+2020/12/29 17:00:30 jobtrain.go:192: Scheduler: Assigned Ip and ports are:  [127.0.0.1:30005 127.0.0.1:30006 127.0.0.1:30007] [[30026 30027 30028] [30029 30030 30031] [30032 30033 30034]]
+2020/12/29 17:00:30 helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+2020/12/29 17:00:30 resource_controller.go:28: AssignPort: AssignSuccessful port is  30035
+2020/12/29 17:00:30 middleware.go:21: HTTP: [url] 127.0.0.1:30004/port-assign [time_usage] 100.962646ms 
+2020/12/29 17:00:30 scheduler.go:142: Scheduler: begin to call TrainWorker.DoTask of the worker: 127.0.0.1:30025 
+2020/12/29 17:00:30 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30025, methodName: TrainWorker.DoTask 
+2020/12/29 17:00:30 scheduler.go:142: Scheduler: begin to call TrainWorker.DoTask of the worker: 127.0.0.1:30024 
+2020/12/29 17:00:30 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30024, methodName: TrainWorker.DoTask 
+2020/12/29 17:00:30 scheduler.go:142: Scheduler: begin to call TrainWorker.DoTask of the worker: 127.0.0.1:30023 
+2020/12/29 17:00:30 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30023, methodName: TrainWorker.DoTask 
+Master: CountDown:....... 2169 
+2020/12/29 17:00:32 middleware.go:21: HTTP: [url] 127.0.0.1:30004/query-job-status [time_usage] 492.858µs 
+Master: CountDown:....... 4169 
+Master: CountDown:....... 6169 
+2020/12/29 17:00:37 middleware.go:21: HTTP: [url] 127.0.0.1:30004/query-job-status [time_usage] 428.758µs 
+Master: CountDown:....... 8169 
+Master: CountDown:....... 10169 
+Master: Timeout, server begin to send heart beat to worker
+2020/12/29 17:00:39 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30023, methodName: TrainWorker.ResetTime 
+2020/12/29 17:00:39 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:39 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30024, methodName: TrainWorker.ResetTime 
+2020/12/29 17:00:39 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:39 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30025, methodName: TrainWorker.ResetTime 
+2020/12/29 17:00:39 rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2001 
+Master: CountDown:....... 4001 
+Master: CountDown:....... 6001 
+Master: CountDown:....... 8001 
+Master: CountDown:....... 10001 
+Master: Timeout, server begin to send heart beat to worker
+2020/12/29 17:00:49 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30023, methodName: TrainWorker.ResetTime 
+2020/12/29 17:00:49 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:49 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30024, methodName: TrainWorker.ResetTime 
+2020/12/29 17:00:49 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:49 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30025, methodName: TrainWorker.ResetTime 
+2020/12/29 17:00:49 rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2001 
+Master: CountDown:....... 4001 
+Master: CountDown:....... 6001 
+Master: CountDown:....... 8001 
+Master: CountDown:....... 10001 
+Master: Timeout, server begin to send heart beat to worker
+2020/12/29 17:00:59 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30023, methodName: TrainWorker.ResetTime 
+2020/12/29 17:00:59 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:59 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30024, methodName: TrainWorker.ResetTime 
+2020/12/29 17:00:59 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:00:59 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30025, methodName: TrainWorker.ResetTime 
+2020/12/29 17:00:59 rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2001 
+Master: CountDown:....... 4001 
+Master: CountDown:....... 6001 
+Master: CountDown:....... 8001 
+Master: CountDown:....... 10001 
+Master: Timeout, server begin to send heart beat to worker
+2020/12/29 17:01:09 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30023, methodName: TrainWorker.ResetTime 
+2020/12/29 17:01:09 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:01:09 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30024, methodName: TrainWorker.ResetTime 
+2020/12/29 17:01:09 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:01:09 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30025, methodName: TrainWorker.ResetTime 
+2020/12/29 17:01:09 rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2003 
+Master: CountDown:....... 4003 
+Master: CountDown:....... 6003 
+Master: CountDown:....... 8003 
+2020/12/29 17:01:18 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:01:18 scheduler.go:151: Scheduler: calling TrainWorker.DoTask of the worker: 127.0.0.1:30024 successful 
+2020/12/29 17:01:18 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:01:18 scheduler.go:151: Scheduler: calling TrainWorker.DoTask of the worker: 127.0.0.1:30025 successful 
+2020/12/29 17:01:18 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:01:18 scheduler.go:151: Scheduler: calling TrainWorker.DoTask of the worker: 127.0.0.1:30023 successful 
+2020/12/29 17:01:18 master.go:122: Master: finish job, begin to update to coord
+2020/12/29 17:01:18 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/update-job-res"
+2020/12/29 17:01:18 middleware.go:21: HTTP: [url] 127.0.0.1:30004/update-job-res [time_usage] 113.758935ms 
+2020/12/29 17:01:18 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/update-job-status"
+Scheduler: Stop TaskStatusMonitor
+2020/12/29 17:01:18 middleware.go:21: HTTP: [url] 127.0.0.1:30004/update-job-status [time_usage] 75.318403ms 
+2020/12/29 17:01:18 helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/model-update"
+2020/12/29 17:01:18 middleware.go:21: HTTP: [url] 127.0.0.1:30004/model-update [time_usage] 91.8517ms 
+2020/12/29 17:01:18 master.go:125: Master: finish job, begin to close all
+2020/12/29 17:01:18 rpcbase.go:101: Master: begin to call TrainWorker.Shutdown
+2020/12/29 17:01:18 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30023, methodName: TrainWorker.Shutdown 
+2020/12/29 17:01:18 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:01:18 rpcbase.go:106: Master: cleanupRegistration: done
+2020/12/29 17:01:18 rpcbase.go:101: Master: begin to call TrainWorker.Shutdown
+2020/12/29 17:01:18 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30024, methodName: TrainWorker.Shutdown 
+2020/12/29 17:01:18 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:01:18 rpcbase.go:106: Master: cleanupRegistration: done
+2020/12/29 17:01:18 rpcbase.go:101: Master: begin to call TrainWorker.Shutdown
+2020/12/29 17:01:18 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30025, methodName: TrainWorker.Shutdown 
+2020/12/29 17:01:18 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:01:18 rpcbase.go:106: Master: cleanupRegistration: done
+2020/12/29 17:01:18 rpcbase.go:101: Master: begin to call Master.Shutdown
+2020/12/29 17:01:18 rpc_utils.go:50: ----in Calling----, Calling proxy: tcp, addr: 127.0.0.1:30022, methodName: Master.Shutdown 
+2020/12/29 17:01:18 master.go:78: Master: 30022 quite forwardRegistrations 
+2020/12/29 17:01:18 master.go:140: WorkerBase: server 127.0.0.1:30022 quite Waitting 
+2020/12/29 17:01:18 setup_dist.go:106: SetupDist: master finish all jobs
+2020/12/29 17:01:18 distdev.go:34: SetupDist: setup master done
+2020/12/29 17:01:18 logger.go:46: HandleErrors: exit current thread
+2020/12/29 17:01:18 rpcbase.go:60: Master: got new conn
+2020/12/29 17:01:18 master.go:151: Master: Shutdown server
+2020/12/29 17:01:18 rpcbase.go:68: Master: RegistrationServer: Accept errored, accept tcp [::]:30022: use of closed network connection 
+2020/12/29 17:01:18 rpcbase.go:72: Master: masterServer: done
+2020/12/29 17:01:18 rpc_utils.go:42: RpcCall: Calling successfully
+2020/12/29 17:01:18 rpcbase.go:106: Master: cleanupRegistration: done
+2020/12/29 17:01:18 master.go:128: Master 127.0.0.1:30022: job completed
+2020/12/29 17:01:19 master_hb.go:17: Master: 30022 quite eventLoop 
+^C2020/12/29 17:02:15 setup_http.go:73: HTTP: Stop multi consumers
+2020/12/29 17:02:15 setup_http.go:76: HTTP: Monitor Stopped
+2020/12/29 17:02:15 setup_http.go:85: HTTP: Consumer Stopped
+2020/12/29 17:02:15 setup_http.go:106: HTTP: Server closed under requesthttp: Server closed
+2020/12/29 17:02:15 logger.go:46: HandleErrors: exit current thread
