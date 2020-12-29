@@ -1,0 +1,275 @@
+(base) wuyuncheng@wuyuncheng-OptiPlex-7040:~/Documents/falcon/src/coordinator$ bash scripts/dev_start_coord.sh --partyNumber 3
+partyNumber = 3
+creating folders for coordinator
+creating folders for party-1
+creating folders for party-2
+creating folders for party-3
+dev_test/
+├── coord
+├── party1
+│   ├── data_input
+│   ├── data_output
+│   ├── logs
+│   └── trained_models
+├── party2
+│   ├── data_input
+│   ├── data_output
+│   ├── logs
+│   └── trained_models
+└── party3
+    ├── data_input
+    ├── data_output
+    ├── logs
+    └── trained_models
+
+16 directories, 0 files
+CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o "./bin/falcon_platform" falcon_platform.go
+Read envs, User defined,   key: Env, value: dev
+Read envs, User defined,   key: SERVICE_NAME, value: coord
+Loging to  ./dev_test/coord/runtime_logs
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:192: Read envs, User defined,   key: JOB_DATABASE, value: sqlite3
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: JOB_DB_SQLITE_DB, default: falcon.db
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: JOB_DB_HOST, default: localhost
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: JOB_DB_MYSQL_USER, default: falcon
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: JOB_DB_MYSQL_PWD, default: falcon
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: JOB_DB_MYSQL_DB, default: falcon
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: JOB_DB_MYSQL_OPTIONS, default: ?parseTime=true
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: MYSQL_CLUSTER_PORT, default: 30000
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: REDIS_HOST, default: localhost
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: REDIS_PWD, default: falcon
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: REDIS_CLUSTER_PORT, default: 30002
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: MYSQL_NODE_PORT, default: 30001
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: REDIS_NODE_PORT, default: 30003
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:192: Read envs, User defined,   key: COORD_SERVER_IP, value: 127.0.0.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:192: Read envs, User defined,   key: COORD_SERVER_PORT, value: 30004
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/global.go:189: Read envs, Set to default, key: COORD_SVC_NAME, default:
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/falcon_platform.go:53: Read envs, User defined,   key: CoordAddr, value: 127.0.0.1:30004
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/falcon_platform.go:195: Launch falcon_platform, the common.ServiceName coord
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/setup_http.go:63: HTTP: Updating table...
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/setup_http.go:67: HTTP: Creating admin user...
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/setup_http.go:96: HTTP: Starting multi consumers...
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/setup_http.go:106: [coordinator server] listening on IP: 127.0.0.1, Port: 30004
+http: 2020/12/29 19:04:16 160 POST /portadd 127.0.0.1:57832 Go-http-client/1.1
+http: 2020/12/29 19:04:16 160 POST /party-server-add 127.0.0.1:57832 Go-http-client/1.1
+http: 2020/12/29 19:04:19 160 POST /portadd 127.0.0.1:57834 Go-http-client/1.1
+http: 2020/12/29 19:04:19 160 POST /party-server-add 127.0.0.1:57834 Go-http-client/1.1
+http: 2020/12/29 19:04:21 160 POST /portadd 127.0.0.1:57836 Go-http-client/1.1
+http: 2020/12/29 19:04:21 160 POST /party-server-add 127.0.0.1:57836 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/middleware/error_handler.go:12: HTTP Error Handler: Processing /query-job-status Error: record not found
+2020/12/29 19:04:44 http: superfluous response.WriteHeader call from coordinator/coordserver/middleware.handlePanic (error_handler.go:15)
+http: 2020/12/29 19:04:44 160 GET /query-job-status 127.0.0.1:57838 python-requests/2.22.0
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_receive.go:21: File name = [three_parties_train_job json]
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/jobtrain.go:87: Searching Algorithms...
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/jobtrain.go:97: ParseTrainJob: ModelTraining AlgorithmName match <--> logistic_regression
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/jobtrain.go:109: Parsed jobInfo:  &{credit_card_training this is the job_decs vertical 0 3 1 [{0 127.0.0.1:30005 active {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}} {1 127.0.0.1:30006 passive {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}} {2 127.0.0.1:30007 passive {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}}] {{ {{ } map[] } {}} {logistic_regression {{client.txt mpcKeys} map[alpha:0.1 batch_size:32 convergence_threshold:0.0001 decay:0.1 differential_privacy_budget:0.1 learning_rate:0.1 max_iteration:50 metric:acc multi_class:ovr optimizer:sgd penalty:l1 with_regularization:0] 2��8-���=5���==���=Bl1JsgdRovrZacce���=} {model model.txt}}}}
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/job_controller.go:14: HTTP server: in SubmitJob, put to the JobQueue
+http: 2020/12/29 19:04:47 160 POST /submit 127.0.0.1:57840 python-requests/2.22.0
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/job_scheduler.go:62: Consume:2 Got from queue
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30008
+http: 2020/12/29 19:04:47 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/distdev.go:16: SetupDist: Launch master Get port 30008
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/distdev.go:21: SetupDist: Launch master for Dev Env
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:45: [SetupMaster] masterAddr=127.0.0.1:30008 workerType=TrainWorker
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:47: [SetupMaster] call master.RunMaster with qItem:
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:48: qItem =  &{[127.0.0.1:30005 127.0.0.1:30006 127.0.0.1:30007] 1 credit_card_training vertical 0 3 [{0 127.0.0.1:30005 active {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}} {1 127.0.0.1:30006 passive {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}} {2 127.0.0.1:30007 passive {/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2 /home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data}}] {{ {{ } map[] } {}} {logistic_regression {{client.txt mpcKeys} map[alpha:0.1 batch_size:32 convergence_threshold:0.0001 decay:0.1 differential_privacy_budget:0.1 learning_rate:0.1 max_iteration:50 metric:acc multi_class:ovr optimizer:sgd penalty:l1 with_regularization:0] 2��8-���=5���==���=Bl1JsgdRovrZacce���=} {model model.txt}}}}
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:27: [rpcbase] InitRpcBase called with Addr  127.0.0.1:30008
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master_rpc.go:23: [master_rpc/RunMaster] rpcServer ready, now register with master
+2020/12/29 19:04:47 rpc.Register: method "InitRpcBase" has 2 input parameters; needs exactly three
+2020/12/29 19:04:47 rpc.Register: method "Lock" has 1 input parameters; needs exactly three
+2020/12/29 19:04:47 rpc.Register: reply type of method "StartRPCServer" is not a pointer: "bool"
+2020/12/29 19:04:47 rpc.Register: reply type of method "StopRPCServer" is not a pointer: "string"
+2020/12/29 19:04:47 rpc.Register: method "TaskHandler" has 5 input parameters; needs exactly three
+2020/12/29 19:04:47 rpc.Register: reply type of method "TaskStatusMonitor" is not a pointer: "context.Context"
+2020/12/29 19:04:47 rpc.Register: method "Unlock" has 1 input parameters; needs exactly three
+2020/12/29 19:04:47 rpc.Register: method "Wait" has 1 input parameters; needs exactly three
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master_rpc.go:33: [master_rpc/RunMaster] rpcServer registered with master
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:40: Master: listening on tcp, 0.0.0.0:30008
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:64: Master: start forwardRegistrations...
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:53: [SetupMaster] TrainWorker => call client.JobUpdateMaster at CoordArrd=127.0.0.1:30004, masterAddr=127.0.0.1:30008, JobId=1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/update-train-master"
+http: 2020/12/29 19:04:47 160 POST /update-train-master 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:81: [SetupMaster] master register/dispatch job to partyserver: 127.0.0.1:30005 ...
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:82: [SetupMaster] JobId=1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:83: [SetupMaster] dataPath=/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:84: [SetupMaster] modelPath=/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:85: [SetupMaster] dataOutput=/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:53: Sending post request to url: "http://127.0.0.1:30005/setup-worker"
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:81: [SetupMaster] master register/dispatch job to partyserver: 127.0.0.1:30006 ...
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:82: [SetupMaster] JobId=1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:83: [SetupMaster] dataPath=/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:84: [SetupMaster] modelPath=/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:85: [SetupMaster] dataOutput=/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:53: Sending post request to url: "http://127.0.0.1:30006/setup-worker"
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:81: [SetupMaster] master register/dispatch job to partyserver: 127.0.0.1:30007 ...
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:82: [SetupMaster] JobId=1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:83: [SetupMaster] dataPath=/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:84: [SetupMaster] modelPath=/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:85: [SetupMaster] dataOutput=/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client2
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:53: Sending post request to url: "http://127.0.0.1:30007/setup-worker"
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30009
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57832 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:56: Master: got new conn
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:56: [master/RegisterWorker] register with master, called by worker
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:90: Master: Found one worker 127.0.0.1:30009
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30010
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57834 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:56: Master: got new conn
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:56: [master/RegisterWorker] register with master, called by worker
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:90: Master: Found one worker 127.0.0.1:30010
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:24: AssignPort, error  UNIQUE constraint failed: port_records.port
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:25: AssignPort: retry...
+
+(/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/models/10.resource_sql.go:36)
+[2020-12-29 19:04:48]  UNIQUE constraint failed: port_records.port
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30011
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57836 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:56: Master: got new conn
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:56: [master/RegisterWorker] register with master, called by worker
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:90: Master: Found one worker 127.0.0.1:30011
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/scheduler.go:25: Scheduler: All worker found:  [127.0.0.1:30009 127.0.0.1:30010 127.0.0.1:30011]  required:  [127.0.0.1:30005 127.0.0.1:30006 127.0.0.1:30007]
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30012
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30013
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30014
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30015
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30016
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30017
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30018
+http: 2020/12/29 19:04:48 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30019
+http: 2020/12/29 19:04:49 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30020
+http: 2020/12/29 19:04:49 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/jobtrain.go:194: Scheduler: Generating NetworkCfg ...
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/common/jobtrain.go:195: Scheduler: Assigned Ip and ports are:  [127.0.0.1:30005 127.0.0.1:30006 127.0.0.1:30007] [[30012 30013 30014] [30015 30016 30017] [30018 30019 30020]]
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:15: send get requests to  http://127.0.0.1:30004/port-assign
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/coordserver/controller/resource_controller.go:28: AssignPort: AssignSuccessful port is  30021
+http: 2020/12/29 19:04:49 160 GET /port-assign 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/scheduler.go:140: Scheduler: begin to call TrainWorker.DoTask of the worker: 127.0.0.1:30009
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.DoTask
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/scheduler.go:140: Scheduler: begin to call TrainWorker.DoTask of the worker: 127.0.0.1:30010
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.DoTask
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/scheduler.go:140: Scheduler: begin to call TrainWorker.DoTask of the worker: 127.0.0.1:30011
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.DoTask
+Master: CountDown:....... 2179
+http: 2020/12/29 19:04:50 160 GET /query-job-status 127.0.0.1:57880 python-requests/2.22.0
+Master: CountDown:....... 4179
+Master: CountDown:....... 6179
+Master: CountDown:....... 8179
+Master: CountDown:....... 10179
+Master: Timeout, server begin to send heart beat to worker
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2001
+Master: CountDown:....... 4001
+Master: CountDown:....... 6001
+Master: CountDown:....... 8001
+Master: CountDown:....... 10001
+Master: Timeout, server begin to send heart beat to worker
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2001
+Master: CountDown:....... 4001
+Master: CountDown:....... 6001
+Master: CountDown:....... 8001
+http: 2020/12/29 19:05:18 160 GET /query-job-status 127.0.0.1:58794 python-requests/2.22.0
+Master: CountDown:....... 10001
+Master: Timeout, server begin to send heart beat to worker
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+http: 2020/12/29 19:05:19 160 GET /query-job-status 127.0.0.1:58802 python-requests/2.22.0
+Master: CountDown:....... 2001
+Master: CountDown:....... 4001
+Master: CountDown:....... 6001
+Master: CountDown:....... 8001
+Master: CountDown:....... 10001
+Master: Timeout, server begin to send heart beat to worker
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+Master: CountDown:....... 2001
+Master: CountDown:....... 4001
+Master: CountDown:....... 6001
+Master: CountDown:....... 8001
+http: 2020/12/29 19:05:36 160 GET /query-job-status 127.0.0.1:58810 python-requests/2.22.0
+http: 2020/12/29 19:05:37 160 GET /query-job-status 127.0.0.1:58812 python-requests/2.22.0
+Master: CountDown:....... 10002
+Master: Timeout, server begin to send heart beat to worker
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.ResetTime
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/scheduler.go:149: Scheduler: calling TrainWorker.DoTask of the worker: 127.0.0.1:30011 successful
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/scheduler.go:149: Scheduler: calling TrainWorker.DoTask of the worker: 127.0.0.1:30010 successful
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/scheduler.go:149: Scheduler: calling TrainWorker.DoTask of the worker: 127.0.0.1:30009 successful
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:120: Master: finish job, begin to update to coord
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/update-job-res"
+http: 2020/12/29 19:05:39 160 POST /update-job-res 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/update-job-status"
+http: 2020/12/29 19:05:39 160 POST /update-job-status 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/helper_send.go:53: Sending post request to url: "http://127.0.0.1:30004/model-update"
+http: 2020/12/29 19:05:39 160 POST /model-update 127.0.0.1:57842 Go-http-client/1.1
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:123: Master: finish job, begin to close all
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:97: Master: begin to call TrainWorker.Shutdown
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30009, methodName: TrainWorker.Shutdown
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:102: Master: cleanupRegistration: done
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:97: Master: begin to call TrainWorker.Shutdown
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30010, methodName: TrainWorker.Shutdown
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:102: Master: cleanupRegistration: done
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:97: Master: begin to call TrainWorker.Shutdown
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30011, methodName: TrainWorker.Shutdown
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:102: Master: cleanupRegistration: done
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:97: Master: begin to call Master.Shutdown
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:50: ----in Calling----, Calling network: tcp, addr: 127.0.0.1:30008, methodName: Master.Shutdown
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:76: Master: 30008 quit forwardRegistrations
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:137: WorkerBase: server 127.0.0.1:30008 quit Waitting
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/setup_dist.go:92: [SetupMaster] master finish all jobs
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/logger/logger.go:47: HandleErrors: exit current thread
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:56: Master: got new conn
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:148: Master: Shutdown server
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:64: Master: RegistrationServer: Accept errored, accept tcp [::]:30008: use of closed network connection
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:68: Master: masterServer: done
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/client/rpc_utils.go:42: RpcCall: Calling successfully
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/base/rpcbase.go:102: Master: cleanupRegistration: done
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master.go:126: Master 127.0.0.1:30008: job completed
+[log]	/home/wuyuncheng/Documents/falcon/src/coordinator/distributed/master/master_heartbeat.go:17: Master: 30008 quit eventLoop
+Scheduler: Stop TaskStatusMonitor
+http: 2020/12/29 19:05:43 160 GET /query-job-status 127.0.0.1:58828 python-requests/2.22.0

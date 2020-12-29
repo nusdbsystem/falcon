@@ -122,7 +122,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 		logger.Do.Println("Worker: task pre processing start")
 		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.PreProcessing.AlgorithmName
 		_ = os.Mkdir(logFile, os.ModePerm)
-		KeyFile = doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
+		KeyFile = common.TaskDataPath + "/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
 
 		algParams = doTaskArgs.TaskInfo.PreProcessing.InputConfigs.SerializedAlgorithmConfig
 		exitStr, res = run(
@@ -145,7 +145,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 		logger.Do.Println("Worker: task model training start")
 		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.ModelTraining.AlgorithmName
 		_ = os.Mkdir(logFile, os.ModePerm)
-		KeyFile = doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
+		KeyFile = common.TaskDataPath + "/" + doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
 
 		algParams = doTaskArgs.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
 		logger.Do.Println("Worker: SerializedAlgorithmConfig = ", algParams)
@@ -212,7 +212,7 @@ func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName stri
 
 	logger.Do.Println("mpcTaskCallee done")
 
-	wk.Pm.CreateResources(cmd, envs)
+// 	wk.Pm.CreateResources(cmd, envs)
 	return
 }
 
