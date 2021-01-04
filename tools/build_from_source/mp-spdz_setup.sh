@@ -21,4 +21,4 @@ Scripts/setup-clients.sh 3
 ./compile.py Programs/Source/logistic_regression.mpc
 
 
-# sudo ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
+sudo ln -s ./local/lib/libmpir* /usr/local/lib/
