@@ -60,7 +60,8 @@ export PARTY_SERVER_IP=$PARTY_SERVER_IP
 # export PARTY_SERVER_NODE_PORT=$PARTY_SERVER_NODE_PORT
 export BASE_PATH=$DEV_TEST_OUTDIR/logs
 # increment coordinator server port by partyserver ID
-let port=$PARTY_SERVER_ID+$COORD_SERVER_PORT
+# party ID can be 0, so needs to add extra 1
+let port=$PARTY_SERVER_ID+$COORD_SERVER_PORT+1
 echo using $port for PARTY_SERVER_NODE_PORT
 export PARTY_SERVER_NODE_PORT=$port
 export PARTY_SERVER_ID=$PARTY_SERVER_ID

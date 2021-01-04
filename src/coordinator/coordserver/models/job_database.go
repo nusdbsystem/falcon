@@ -4,8 +4,10 @@ import (
 	"coordinator/common"
 	"coordinator/logger"
 	"fmt"
-	"github.com/jinzhu/gorm"
+	"path"
 	"time"
+
+	"github.com/jinzhu/gorm"
 
 	_ "gorm.io/driver/mysql"
 	_ "gorm.io/driver/sqlite"
@@ -26,7 +28,7 @@ func InitJobDB() *JobDB {
 	jobDB.engine = common.JobDatabase
 	jobDB.host = common.JobDbHost
 	jobDB.user = common.JobDbMysqlUser
-	jobDB.password =  common.JobDbMysqlPwd
+	jobDB.password = common.JobDbMysqlPwd
 	jobDB.database = common.JobDbMysqlDb
 
 	if jobDB.engine == "mysql" {
@@ -42,7 +44,7 @@ func InitJobDB() *JobDB {
 		)
 		jobDB.addr = mysqlUrl
 	} else if jobDB.engine == "sqlite3" {
-		jobDB.addr = common.LocalPath + common.JobDbSqliteDb
+		jobDB.addr = path.Join(common.LocalPath, common.JobDbSqliteDb)
 	}
 	return jobDB
 }
@@ -159,7 +161,7 @@ func (jobDB *JobDB) DefineTables() {
 
 func (jobDB *JobDB) Commit(tx *gorm.DB, el interface{}) {
 
-	if el == nil{
+	if el == nil {
 		tx.Commit()
 		return
 	}
@@ -191,4 +193,3 @@ func (jobDB *JobDB) Commit(tx *gorm.DB, el interface{}) {
 ////////////////////////////////////
 /////////// Test falcon_sql ////////////
 ////////////////////////////////////
-
