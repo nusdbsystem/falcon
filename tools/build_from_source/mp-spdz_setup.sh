@@ -11,14 +11,14 @@ mv Math/Setup.h.prod Math/Setup.h
 make -j 8 tldr
 
 # set up online phase
+# Scripts/setup-ssl.sh 3 (included in fast-make.sh)
 bash fast-make.sh
 
 # set up ssl
-# Scripts/setup-ssl.sh 3
 Scripts/setup-clients.sh 3
 
 # compile high-level program
 ./compile.py Programs/Source/logistic_regression.mpc
 
-
+sudo rm /usr/local/lib/libmpir*
 sudo ln -s ./local/lib/libmpir* /usr/local/lib/

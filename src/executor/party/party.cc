@@ -145,6 +145,7 @@ Party::Party(int m_party_id,
   }
 
   LOG(INFO) << "Init threshold partially homomorphic encryption keys";
+  google::FlushLogFiles(google::INFO);
 
   // init phe keys: if use existing key, read key file
   // otherwise, generate keys and broadcast to others

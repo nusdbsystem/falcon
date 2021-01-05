@@ -96,8 +96,8 @@ const (
 
 	YamlBasePath = "./deploy/template/"
 
-	MpcExe         = "./semi-party.x"
-	FalconTrainExe = "/home/wuyuncheng/Documents/falcon/build/src/executor/falcon"
+	MpcExe         = "/opt/falcon/third_party/MP-SPDZ/semi-party.x"
+	FalconTrainExe = "/opt/falcon/build/src/executor/falcon"
 
 	HorizontalFl = "horizontal"
 	VerticalFl   = "vertical"
