@@ -5,7 +5,7 @@ set -x
 set -e
 
 # Install third_party MP-SPDZ library
-# cd /opt/falcon
+cd /opt/falcon
 cd third_party/MP-SPDZ
 mv Math/Setup.h.prod Math/Setup.h
 make -j 8 tldr
@@ -21,4 +21,5 @@ Scripts/setup-clients.sh 3
 ./compile.py Programs/Source/logistic_regression.mpc
 
 sudo rm /usr/local/lib/libmpir*
-sudo ln -s ./local/lib/libmpir* /usr/local/lib/
+# must specify the FULL PATH for symlink!!
+sudo ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
