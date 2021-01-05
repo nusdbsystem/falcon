@@ -20,6 +20,6 @@ Scripts/setup-clients.sh 3
 # compile high-level program
 ./compile.py Programs/Source/logistic_regression.mpc
 
-sudo rm /usr/local/lib/libmpir*
+sudo rm -f /usr/local/lib/libmpir*
 # must specify the FULL PATH for symlink!!
 sudo ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
