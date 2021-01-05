@@ -20,6 +20,9 @@ Scripts/setup-clients.sh 3
 # compile high-level program
 ./compile.py Programs/Source/logistic_regression.mpc
 
+# grant permission for Player-Data folder (and all its contents)
+sudo chmod -R 777 Player-Data/
+
 sudo rm -f /usr/local/lib/libmpir*
 # must specify the FULL PATH for symlink!!
 sudo ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
