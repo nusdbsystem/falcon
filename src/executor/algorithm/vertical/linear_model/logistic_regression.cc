@@ -513,6 +513,10 @@ void spdz_logistic_function_computation(int party_num,
       exit(1);
   }
   LOG(INFO) << "Finish initializing gfp field.";
+  std::cout << "Finish initializing gfp field." << std::endl;
+  std::cout << "batch aggregation size = " << batch_aggregation_shares.size() << std::endl;
+  google::FlushLogFiles(google::INFO);
+
   send_private_inputs(batch_aggregation_shares,mpc_sockets, party_num);
   std::vector<float> return_values = receive_result(mpc_sockets, party_num, cur_batch_size);
   batch_loss_shares->set_value(return_values);
