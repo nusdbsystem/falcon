@@ -22,6 +22,7 @@ falcon.db
 # dev_test
 .dev_test
 dev_test/*
+dev_test_notes/
 *.pid
 .logs/*
 
