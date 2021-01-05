@@ -5,6 +5,13 @@ LABEL maintainer="Yuncheng Wu <lemonwyc@gmail.com>"
 RUN apt-get update && apt-get upgrade -y && \
         apt-get install -y --no-install-recommends \
         git \
+        sqlite3 \
+        curl \
+        sudo \
+        unzip \
+        vim \
+        wget \
+        zip \
         ssh
 
 #Accept input argument
@@ -34,7 +41,6 @@ COPY --from=intermediate /opt/falcon /opt/falcon
 RUN apt-get update && apt-get upgrade -y && \
         apt-get install -y --no-install-recommends \
         libgmp-dev \
-        git \
         cmake \
         libboost-dev \
         libboost-all-dev \
@@ -43,9 +49,7 @@ RUN apt-get update && apt-get upgrade -y && \
         libcurl4-openssl-dev \
         build-essential \
         ca-certificates \
-        curl \
         gdb \
-        golang-go \
         libjsoncpp-dev \
         liblog4cpp5-dev \
         libprotobuf-c0-dev \
@@ -56,23 +60,16 @@ RUN apt-get update && apt-get upgrade -y && \
         protobuf-compiler \
         python \
         python3 \
-        python-pip \
-        unzip \
-        vim \
-        wget \
-        zip \
+        python3-pip \
         libgoogle-glog-dev \
         libgtest-dev \
         texinfo \
-        ocaml \
         yasm \
         automake \
-        sudo \
         libsodium-dev \
         libcrypto++-dev \
         libcrypto++-doc \
         libcrypto++-utils \
-        ssh \
         && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/*
@@ -122,6 +119,17 @@ RUN mv src/executor/CMakeLists.txt.prod src/executor/CMakeLists.txt && \
     cd build/ && \
     make
 
+# Install Go 1.14
+RUN apt-get update && apt-get install -y wget
+RUN \
+  mkdir -p /goroot && \
+  wget -q https://golang.org/dl/go1.14.13.linux-amd64.tar.gz -O go114.tar.gz && \
+  tar xzf go114.tar.gz -C /goroot
+
+# Set environment variables.
+ENV GOROOT /goroot
+ENV GOPATH /gopath
+ENV PATH $GOROOT/bin:$GOPATH/bin:$PATH
+
+# Define working directory.
 WORKDIR /opt
-
-

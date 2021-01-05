@@ -118,37 +118,49 @@ drwxr-xr-x 4 root root 4.0K Jan  5 14:30 CMakeFiles
 
 - Need to grant the dataset folder read/write permission
 
-for eaxample, the dataset at `falcon/data/dataset/bank_marketing_data/` should be writable, otherwise the `phe_keys` files will be result in `Open file error` in executor step.
+    for eaxample, the dataset at `falcon/data/dataset/bank_marketing_data/` should be writable, otherwise the `phe_keys` files will be result in `Open file error` in executor step.
+
+    `I0105 14:42:57.623278   786 io_util.cc:76] Open /opt/falcon/data/dataset/bank_marketing_data/client1/phe_keys file error.`
 
 - Need to grant the `Player-Data` folder read/write permissions
 
-for example, the `C0.key` file after installing Mp-SPDZ is `-rw-------  1 root root`.
+    for example, the `C0.key` file after installing Mp-SPDZ is `-rw-------  1 root root`.
 
-The above `600` permission of `C0.key` will result in the executor error:
+    The above `600` permission of `C0.key` will result in the executor error:
 
-```
- terminate called after throwing an instance of 'std::runtime_error'
-  what():  Cannot access /opt/falcon/third_party/MP-SPDZ/Player-Data/C0.key. Have you set up SSL?
-You can use `Scripts/setup-ssl.sh <nparties>`.
-```
+    ```
+    terminate called after throwing an instance of 'std::runtime_error'
+      what():  Cannot access /opt/falcon/third_party/MP-SPDZ/Player-Data/C0.key. Have you set up SSL?
+    You can use `Scripts/setup-ssl.sh <nparties>`.
+    ```
 
 
-In fact, the entier `Player-Data` needs to have the write permissions, otherwise the executor will report error:
+    In fact, the entier `Player-Data` needs to have the write permissions, otherwise the executor will report error:
 
-```
-svd@svd-ThinkPad-T460:/opt/falcon/third_party/MP-SPDZ$ ./semi-party.x -F -N 3 -p 0 -I logistic_regression
-No modulus found in Player-Data//3-Dp-128/Params-Data, generating 128-bit prime
-Start listening on thread 139922300319488
-Party 0 is listening on port 14000 for external client connections.
-Listening for socket connections on base port 14000
-Starting a new iteration.
-Thread 139922300319488 found server.
-Party 0 received external client connection from client id: 2
-Thread 139922300319488 found server.
-Party 0 received external client connection from client id: 1
-Thread 139922300319488 found server.
-Party 0 received external client connection from client id: 0
-terminate called after throwing an instance of 'file_error'
-  what():  File Error : IO problem when buffering gfp Triples from Player-Data//3-Dp-128/Triples-Dp-P0
-Aborted (core dumped)
-```
+    ```
+    svd@svd-ThinkPad-T460:/opt/falcon/third_party/MP-SPDZ$ ./semi-party.x -F -N 3 -p 0 -I logistic_regression
+    No modulus found in Player-Data//3-Dp-128/Params-Data, generating 128-bit prime
+    Start listening on thread 139922300319488
+    Party 0 is listening on port 14000 for external client connections.
+    Listening for socket connections on base port 14000
+    Starting a new iteration.
+    Thread 139922300319488 found server.
+    Party 0 received external client connection from client id: 2
+    Thread 139922300319488 found server.
+    Party 0 received external client connection from client id: 1
+    Thread 139922300319488 found server.
+    Party 0 received external client connection from client id: 0
+    terminate called after throwing an instance of 'file_error'
+      what():  File Error : IO problem when buffering gfp Triples from Player-Data//3-Dp-128/Triples-Dp-P0
+    Aborted (core dumped)
+    ```
+
+- `compile.py` in MP-SPDZ warnings about order of memory warnings is ok
+
+    ```
+    /third_party/MP-SPDZ$ ./compile.py Programs/Source/logistic_regression.mpc
+    WARNING: Order of memory instructions not preserved, errors possible
+    ```
+
+    the above warnings is not affecting the MPC program
+
