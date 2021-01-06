@@ -14,10 +14,3 @@ Useful docker build flags:
 - `-t`, tag flag, for specifying a tag for the image `name:tag` format
 - `--build-arg` for `ARG` in dockerfile
 
-
-### Problems
-
-1. the golang is installed by apt and only at version 1.10
-2. some dependencies like `ocaml` `python2` are installed
-3. database dependencies not installed
-

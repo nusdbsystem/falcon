@@ -120,7 +120,6 @@ RUN mv src/executor/CMakeLists.txt.prod src/executor/CMakeLists.txt && \
     make
 
 # Install Go 1.14
-RUN apt-get update && apt-get install -y wget
 RUN \
   mkdir -p /goroot && \
   wget -q https://golang.org/dl/go1.14.13.linux-amd64.tar.gz -O go114.tar.gz && \
