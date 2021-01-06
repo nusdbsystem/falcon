@@ -66,6 +66,9 @@ echo using $port for PARTY_SERVER_NODE_PORT
 export PARTY_SERVER_NODE_PORT=$port
 export PARTY_SERVER_ID=$PARTY_SERVER_ID
 
+export MPC_EXE_PATH=$MPC_EXE_PATH
+export FL_ENGINE_PATH=$FL_ENGINE_PATH
+
 # launch party server X
 # detect the OS type with uname
 makeOS=''

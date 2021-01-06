@@ -96,9 +96,6 @@ const (
 
 	YamlBasePath = "./deploy/template/"
 
-	MpcExe         = "/opt/falcon/third_party/MP-SPDZ/semi-party.x"
-	FalconTrainExe = "/opt/falcon/build/src/executor/falcon"
-
 	HorizontalFl = "horizontal"
 	VerticalFl   = "vertical"
 
@@ -173,6 +170,10 @@ var (
 	TaskDataOutput  = ""
 	TaskModelPath   = ""
 	TaskRuntimeLogs = ""
+
+	// paths for MPC and FL Engine
+	MpcExePath   = ""
+	FLEnginePath = ""
 )
 
 // GetEnv get key environment variable if exist otherwise return defalutValue

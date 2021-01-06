@@ -104,6 +104,14 @@ func InitEnvs(svcName string) {
 
 		common.PartyServerId = common.GetEnv("PARTY_SERVER_ID", "")
 
+		// get the MPC exe path
+		common.MpcExePath = common.GetEnv(
+			"MPC_EXE_PATH",
+			"/opt/falcon/third_party/MP-SPDZ/semi-party.x")
+		// get the FL engine exe path
+		common.FLEnginePath = common.GetEnv(
+			"FL_ENGINE_PATH",
+			"/opt/falcon/build/src/executor/falcon")
 		if common.CoordIP == "" || common.PartyServerIP == "" || common.PartyServerPort == "" {
 			logger.Do.Println("Error: Input Error, either CoordIP or PartyServerIP or PartyServerPort not provided")
 			os.Exit(1)
