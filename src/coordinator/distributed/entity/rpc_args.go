@@ -9,18 +9,18 @@ import (
 )
 
 type DoTaskArgs struct {
-	IP              string
-	AssignID	    uint
-	PartyNums  		uint
-	JobFlType  		string
-	PartyInfo       common.PartyInfo
-	ExistingKey  	uint
-	TaskInfo        common.Tasks
-	NetWorkFile		string
+	IP          string
+	AssignID    uint
+	PartyNums   uint
+	JobFlType   string
+	PartyInfo   common.PartyInfo
+	ExistingKey uint
+	TaskInfo    common.Tasks
+	NetWorkFile string
 
 	// this 2 for mpc
-	MpcIp			string
-	MpcPort			uint
+	MpcIP   string
+	MpcPort uint
 }
 
 // RegisterArgs is the argument passed when a worker registers with the master.
@@ -36,7 +36,7 @@ type ShutdownReply struct {
 
 type DoTaskReply struct {
 	// indicate if the job is killed
-	Killed  bool
+	Killed bool
 
 	// indicate if the job has error
 	RuntimeError bool
@@ -51,8 +51,6 @@ type TaskMsg struct {
 	RuntimeMsg string
 	RpcCallMsg string
 }
-
-
 
 func argTypeRegister() {
 	gob.Register([]interface{}{})

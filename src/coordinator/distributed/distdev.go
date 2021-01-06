@@ -15,8 +15,8 @@ func SetupDistDev(qItem *cache.QItem, workerType string) {
 	masterPort := client.GetFreePort(common.CoordAddr)
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
-	masterIp := common.CoordIP
-	masterAddr := masterIp + ":" + masterPort
+	masterIP := common.CoordIP
+	masterAddr := masterIP + ":" + masterPort
 
 	logger.Do.Println("SetupDist: Launch master for Dev Env")
 

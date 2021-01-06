@@ -62,11 +62,11 @@ func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) err
 func (master *Master) forwardRegistrations(qItem *cache.QItem) {
 
 	logger.Do.Printf("Master: start forwardRegistrations... ")
-	var requiredIp []string
+	var requiredIP []string
 
 	for i := 0; i < len(qItem.AddrList); i++ {
-		ip := strings.Split(qItem.AddrList[i], ":")[0]
-		requiredIp = append(requiredIp, ip)
+		IP := strings.Split(qItem.AddrList[i], ":")[0]
+		requiredIP = append(requiredIP, IP)
 	}
 
 loop:
@@ -83,10 +83,10 @@ loop:
 			}
 
 			// 2. check if this worker is needed
-			tmpIp := strings.Split(addr, ":")[0]
+			tmpIP := strings.Split(addr, ":")[0]
 
-			for i, ip := range requiredIp {
-				if tmpIp == ip {
+			for i, IP := range requiredIP {
+				if tmpIP == IP {
 					logger.Do.Println("Master: Found one worker", addr)
 
 					master.Lock()
@@ -94,8 +94,8 @@ loop:
 					master.Unlock()
 					master.beginCountDown.Broadcast()
 
-					// remove the i th ip
-					requiredIp = append(requiredIp[0:i+1], requiredIp[i+1:]...)
+					// remove the i-th IP
+					requiredIP = append(requiredIP[0:i+1], requiredIP[i+1:]...)
 					break
 				}
 			}

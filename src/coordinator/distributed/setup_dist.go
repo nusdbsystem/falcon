@@ -66,12 +66,12 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 	for index, partyAddr := range qItem.AddrList {
 
 		// Launch the worker
-		// maybe check table wit ip, and + port got from table also
+		// maybe check table wit IP, and + port got from table also
 
 		// send a request to http
-		//lisPort := client.GetExistPort(common.CoordAddr, ip)
+		//lisPort := client.GetExistPort(common.CoordAddr, IP)
 
-		// todo, manage partyserver port more wisely eg: client.SetupWorker(ip+lisPort, masterAddr, workerType), such that user dont need
+		// todo, manage partyserver port more wisely eg: client.SetupWorker(IP+lisPort, masterAddr, workerType), such that user dont need
 		//  to provide port in job
 
 		dataPath := qItem.PartyInfo[index].PartyPaths.DataInput

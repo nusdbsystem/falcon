@@ -3,9 +3,9 @@ kind: Service
 metadata:
   name: falcon-coordinator
 spec:
-  type: NodePort # by default, it's cluster Ip, if use nodePort, need to provide type here
+  type: NodePort # by default, it's cluster IP, if use nodePort, need to provide type here
   ports:
-    - port: COORD_CLUSTER_PORT  #这里port集群内部clusterIp 对应的端口
+    - port: COORD_CLUSTER_PORT  #这里port集群内部clusterIP 对应的端口
       targetPort: COORD_TARGET_PORT  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
       nodePort: COORD_NODE_PORT  #这里是物理机的端口
   selector:

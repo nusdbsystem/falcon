@@ -90,13 +90,13 @@ func InitEnvs(svcName string) {
 
 	} else if svcName == "partyserver" {
 
-		// partyserver needs coord ip+port,lis port
+		// partyserver needs coord IP+port,lis port
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
 		common.PartyServerBasePath = common.GetEnv("BASE_PATH", "")
 
-		// partyserver communicate coord with ip+port
+		// partyserver communicate coord with IP+port
 		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
 
 		// run partyserver requires to get a new partyserver port
@@ -135,7 +135,7 @@ func InitEnvs(svcName string) {
 
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 
-		// master communicate coord with ip+port in dev, with name+port in prod
+		// master communicate coord with IP+port in dev, with name+port in prod
 		if common.Env == common.DevEnv {
 
 			logger.Do.Println("CoordIP: ", common.CoordIP+":"+common.CoordPort)

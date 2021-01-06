@@ -156,7 +156,7 @@ var (
 
 	// this is the worker's k8s service name, only used in production
 	WorkerK8sSvcName = ""
-	// enable other service access master with clusterIp+clusterPort, from inside the cluster
+	// enable other service access master with clusterIP+clusterPort, from inside the cluster
 	CoordK8sSvcName = ""
 
 	// for coord, node port is the same as cluster port, so all use coorport
