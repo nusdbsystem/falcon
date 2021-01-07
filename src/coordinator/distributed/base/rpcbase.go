@@ -15,8 +15,8 @@ type RpcBaseClass struct {
 	sync.Mutex
 	Name     string
 	Network  string
-	Addr     string //  which is the IP+port addr of worker
-	Port     string //  which is the port addr of worker
+	Addr     string //  IP + Port = addr of worker
+	Port     string //  Port of worker
 	Listener net.Listener
 
 	Ctx    context.Context

@@ -17,6 +17,7 @@ import (
  **/
 
 const (
+	// TODO: are these the names assigned for master and workers?
 	Master          = "Master"
 	TrainWorker     = "TrainWorker"
 	InferenceWorker = "InferenceWorker"
@@ -138,7 +139,7 @@ var (
 
 	PartyServerIP   = ""
 	PartyServerPort = ""
-	PartyServerId   = ""
+	PartyID         = ""
 
 	// envs
 	Env = getEnv("Env", DevEnv)
