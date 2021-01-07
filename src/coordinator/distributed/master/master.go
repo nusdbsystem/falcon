@@ -54,7 +54,8 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 // up to report that they are ready to receive tasks.
 func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) error {
 	logger.Do.Println("[master/RegisterWorker] register with master, called by worker")
-	master.tmpWorkers <- args.WorkerAddr
+	// Pass WorkerList (addr:partyID) into tmpWorkers for pre-processing
+	master.tmpWorkers <- args.WorkerList
 	return nil
 }
 

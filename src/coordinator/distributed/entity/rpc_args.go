@@ -10,7 +10,7 @@ import (
 
 type DoTaskArgs struct {
 	IP          string
-	AssignID    uint
+	PartyID     uint
 	PartyNums   uint
 	JobFlType   string
 	PartyInfo   common.PartyInfo
@@ -28,6 +28,8 @@ type DoTaskArgs struct {
 type RegisterArgs struct {
 	// this is worker addr
 	WorkerAddr string
+	PartyID    string
+	WorkerList string // = WorkerAddr:PartyID
 }
 
 type ShutdownReply struct {

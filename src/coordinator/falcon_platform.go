@@ -102,7 +102,7 @@ func InitEnvs(svcName string) {
 		// run partyserver requires to get a new partyserver port
 		common.PartyServerPort = common.GetEnv("PARTY_SERVER_NODE_PORT", "")
 
-		common.PartyServerId = common.GetEnv("PARTY_SERVER_ID", "")
+		common.PartyID = common.GetEnv("PARTY_ID", "")
 
 		// get the MPC exe path
 		common.MpcExePath = common.GetEnv(
@@ -241,7 +241,8 @@ func main() {
 
 		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
-		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr)
+		// init the train worker with addresses of master and worker, also the partyID
+		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr, common.PartyID)
 		wk.RunWorker(wk)
 
 		// once  worker is killed, clear the resources.
@@ -254,7 +255,7 @@ func main() {
 
 		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
-		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr)
+		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr, common.PartyID)
 		wk.RunWorker(wk)
 	}
 	// once  worker is killed, clear the resources.

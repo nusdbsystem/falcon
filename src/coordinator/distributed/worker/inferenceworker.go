@@ -12,10 +12,11 @@ type InferenceWorker struct {
 	base.WorkerBase
 }
 
-func InitInferenceWorker(masterAddr, workerAddr string) *InferenceWorker {
+func InitInferenceWorker(masterAddr, workerAddr string, PartyID string) *InferenceWorker {
 	wk := InferenceWorker{}
 	wk.InitWorkerBase(workerAddr, common.InferenceWorker)
 	wk.MasterAddr = masterAddr
+	wk.PartyID = PartyID
 
 	return &wk
 }
@@ -32,8 +33,8 @@ func (wk *InferenceWorker) Run() {
 		logger.Do.Fatalf("%s: start Error \n", wk.Name)
 	}
 
-	logger.Do.Printf("%s: register to masterAddr = %s \n", wk.Name, wk.MasterAddr)
-	wk.Register(wk.MasterAddr)
+	logger.Do.Printf("%s from PartyID %s: register to masterAddr = %s \n", wk.Name, wk.PartyID, wk.MasterAddr)
+	wk.Register(wk.MasterAddr, wk.PartyID)
 
 	// start rpc server blocking...
 	wk.StartRPCServer(rpcSvc, true)
