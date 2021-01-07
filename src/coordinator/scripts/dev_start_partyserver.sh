@@ -3,6 +3,12 @@
 # exit on error
 set -e
 
+if [ "$#" -ne 2 ]; then
+    echo "Illegal number of parameters"
+    echo "Usage: bash dev_start_partyserver.sh --partyID <PARTY_SERVER_ID>"
+    exit 1
+fi
+
 # from https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 while [[ $# -gt 0 ]]
 do
@@ -25,6 +31,45 @@ done
 
 echo "PARTY_SERVER_ID = ${PARTY_SERVER_ID}"
 
+# set up the folder/sub-folders inside dev_test
+# first create dev_test/ if not already exists
+mkdir -p dev_test/
+
+# create new group of sub-folders with each run
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
+DEV_TEST_OUTDIR=dev_test/Party-${PARTY_SERVER_ID}_${TIMESTAMP}
+
+# setup party X folders
+echo "creating folders for party-$PARTY_SERVER_ID"
+mkdir $DEV_TEST_OUTDIR
+mkdir $DEV_TEST_OUTDIR/logs
+mkdir $DEV_TEST_OUTDIR/data_input
+mkdir $DEV_TEST_OUTDIR/data_output
+mkdir $DEV_TEST_OUTDIR/trained_models
+
+# populate the environmental variables from
+# the config_.properties files, such as paths IP and Ports
+source config_partyserver.properties
+
+export Env=dev
+export SERVICE_NAME=partyserver
+export COORD_SERVER_IP=$COORD_SERVER_IP
+export COORD_SERVER_PORT=$COORD_SERVER_PORT
+export PARTY_SERVER_IP=$PARTY_SERVER_IP
+# export BASE_PATH=$BASE_PATH
+# export PARTY_SERVER_NODE_PORT=$PARTY_SERVER_NODE_PORT
+export BASE_PATH=$DEV_TEST_OUTDIR/logs
+# increment coordinator server port by partyserver ID
+# party ID can be 0, so needs to add extra 1
+let port=$PARTY_SERVER_ID+$COORD_SERVER_PORT+1
+echo using $port for PARTY_SERVER_NODE_PORT
+export PARTY_SERVER_NODE_PORT=$port
+export PARTY_SERVER_ID=$PARTY_SERVER_ID
+
+export MPC_EXE_PATH=$MPC_EXE_PATH
+export FL_ENGINE_PATH=$FL_ENGINE_PATH
+
+# launch party server X
 # detect the OS type with uname
 makeOS=''
 unamestr=`uname`
@@ -35,22 +80,5 @@ elif [[ "$unamestr" == 'Darwin' ]]; then
 elif [[ "$unamestr" == 'WindowsNT' ]]; then
    makeOS='build_windows'
 fi
-
-source config_partyserver.properties
-
-export Env=dev
-export SERVICE_NAME=partyserver
-export COORD_SERVER_IP=$COORD_SERVER_IP
-export COORD_SERVER_PORT=$COORD_SERVER_PORT
-export PARTY_SERVER_IP=$PARTY_SERVER_IP
-# export BASE_PATH=$BASE_PATH
-# export PARTY_SERVER_NODE_PORT=$PARTY_SERVER_NODE_PORT
-export BASE_PATH="./dev_test/party$PARTY_SERVER_ID/logs/"
-# increment coordinator server port by partyserver ID
-let port=$PARTY_SERVER_ID+$COORD_SERVER_PORT
-echo using $port for PARTY_SERVER_NODE_PORT
-export PARTY_SERVER_NODE_PORT=$port
-export PARTY_SERVER_ID=$PARTY_SERVER_ID
-
 make $makeOS
 ./bin/falcon_platform

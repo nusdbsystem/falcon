@@ -195,7 +195,7 @@ func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName stri
 	var envs []string
 
 	cmd := exec.Command(
-		common.MpcExe,
+		common.MpcExePath,
 		" --F ",
 		" --N  "+fmt.Sprintf("%d", partyNum),
 		" --I ",
@@ -212,7 +212,7 @@ func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName stri
 
 	logger.Do.Println("mpcTaskCallee done")
 
-// 	wk.Pm.CreateResources(cmd, envs)
+	// 	wk.Pm.CreateResources(cmd, envs)
 	return
 }
 
@@ -280,7 +280,7 @@ func TestTaskProcess(doTaskArgs *entity.DoTaskArgs) {
 	logger.Do.Printf("--------------------------------------------------\n")
 	logger.Do.Printf("\n")
 	logger.Do.Println("executed path is: ", strings.Join([]string{
-		common.FalconTrainExe,
+		common.FLEnginePath,
 		" --party-id " + fmt.Sprintf("%d", partyId),
 		" --party-num " + fmt.Sprintf("%d", partyNum),
 		" --party-type " + fmt.Sprintf("%d", partyType),
@@ -341,7 +341,7 @@ func doMlTask(
 		var envs []string
 
 		cmd := exec.Command(
-			common.FalconTrainExe,
+			common.FLEnginePath,
 			"--party-id", partyId,
 			"--party-num", partyNum,
 			"--party-type", partyType,

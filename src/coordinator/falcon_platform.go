@@ -11,6 +11,7 @@ import (
 	"coordinator/partyserver"
 	"fmt"
 	"os"
+	"path"
 	"runtime"
 	"time"
 )
@@ -25,25 +26,24 @@ func init() {
 }
 
 func initLogger() {
-	// this path is fixed, used to creating folder inside container
-	var fixedPath string
+	var runtimeLogPath string
 	if common.Env == common.DevEnv {
 		common.LocalPath = os.Getenv("BASE_PATH")
-		fixedPath = common.LocalPath + common.RuntimeLogs
+		runtimeLogPath = path.Join(common.LocalPath, common.RuntimeLogs)
 	} else {
-		fixedPath = "./logs"
+		runtimeLogPath = "./logs"
 	}
 
-	fmt.Println("Loging to ", fixedPath)
+	fmt.Println("common.RuntimeLogs at: ", runtimeLogPath)
 
-	_ = os.Mkdir(fixedPath, os.ModePerm)
+	_ = os.Mkdir(runtimeLogPath, os.ModePerm)
 	// Use layout string for time format.
 	const layout = "2006-01-02T15:04:05"
 	// Place now in the string.
 	rawTime := time.Now()
 
 	var logFileName string
-	logFileName = fixedPath + "/" + common.ServiceName + rawTime.Format(layout) + ".logs"
+	logFileName = runtimeLogPath + "/" + common.ServiceName + rawTime.Format(layout) + ".logs"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }
@@ -104,6 +104,14 @@ func InitEnvs(svcName string) {
 
 		common.PartyServerId = common.GetEnv("PARTY_SERVER_ID", "")
 
+		// get the MPC exe path
+		common.MpcExePath = common.GetEnv(
+			"MPC_EXE_PATH",
+			"/opt/falcon/third_party/MP-SPDZ/semi-party.x")
+		// get the FL engine exe path
+		common.FLEnginePath = common.GetEnv(
+			"FL_ENGINE_PATH",
+			"/opt/falcon/build/src/executor/falcon")
 		if common.CoordIP == "" || common.PartyServerIP == "" || common.PartyServerPort == "" {
 			logger.Do.Println("Error: Input Error, either CoordIP or PartyServerIP or PartyServerPort not provided")
 			os.Exit(1)

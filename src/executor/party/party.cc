@@ -145,6 +145,7 @@ Party::Party(int m_party_id,
   }
 
   LOG(INFO) << "Init threshold partially homomorphic encryption keys";
+  google::FlushLogFiles(google::INFO);
 
   // init phe keys: if use existing key, read key file
   // otherwise, generate keys and broadcast to others
@@ -157,8 +158,12 @@ Party::Party(int m_party_id,
     // the active party generates new phe keys and send to passive parties
     init_with_new_phe_keys(PHE_EPSILON, PHE_KEY_SIZE, party_num);
     std::string phe_keys_str;
+    // LOG(INFO) << "create keys succeed";
     serialize_phe_keys(phe_pub_key, phe_auth_server, phe_keys_str);
+    // LOG(INFO) << "serialize keys succeed";
     write_key_to_file(phe_keys_str, m_key_file);
+    // LOG(INFO) << "write keys succeed";
+    // google::FlushLogFiles(google::INFO);
   }
 }
 
@@ -198,6 +203,7 @@ Party::Party(const Party &party) {
 }
 
 void Party::init_with_new_phe_keys(int epsilon, int phe_key_size, int required_party_num) {
+  LOG(INFO) << "party type = " << party_type;
   if (party_type == falcon::ACTIVE_PARTY) {
     // generate phe keys
     hcs_random* random = hcs_init_random();
@@ -215,10 +221,12 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size, int required_p
     }
 
     // serialize phe keys and send to passive parties
+    LOG(INFO) << "party id = " << party_id;
     for(int i = 0; i < party_num; i++) {
       if (i == party_id) {
         djcs_t_public_key_copy(pub_key, phe_pub_key);
         djcs_t_auth_server_copy(auth_server[i], phe_auth_server);
+        // LOG(INFO) << "i = " << i << ", party id = " << party_id << ", copy succeed";
       } else {
         std::string phe_keys_message_i;
         serialize_phe_keys(pub_key, auth_server[i], phe_keys_message_i);
@@ -226,10 +234,11 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size, int required_p
       }
     }
 
+    google::FlushLogFiles(google::INFO);
+
     // free memory
     hcs_free_random(random);
     djcs_t_free_public_key(pub_key);
-    djcs_t_free_private_key(priv_key);
     djcs_t_free_polynomial(priv_key, coeff);
     for (int i = 0; i < party_num; i++) {
       mpz_clear(si[i]);
@@ -237,6 +246,11 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size, int required_p
     }
     free(si);
     free(auth_server);
+
+    djcs_t_free_private_key(priv_key);
+
+    // LOG(INFO) << "free succeed";
+    // google::FlushLogFiles(google::INFO);
   } else {
     // for passive parties, receive the phe keys message from the active party
     // and set its own keys with the received message
