@@ -5,6 +5,7 @@ import (
 	"coordinator/common"
 	"coordinator/logger"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -48,14 +49,20 @@ loop:
 
 // boardcast heartbeat to current workers in worker list
 func (master *Master) broadcastHeartbeat() {
+	logger.Do.Println("[broadcastHeartbeat]...")
 	// update lastSendTime
 	master.reset()
 
-	for _, worker := range master.workers {
+	for _, RegisteredWorker := range master.workers {
+		// RegisteredWorker is IP:Port:PartyID
+		logger.Do.Println("RegisteredWorker = ", RegisteredWorker)
+		// Addr = IP:Port
+		RegisteredWorkerAddr := strings.Join(strings.Split(RegisteredWorker, ":")[:2], ":")
+		logger.Do.Println("RegisteredWorkerAddr = ", RegisteredWorkerAddr)
 
-		ok := client.Call(worker, master.Network, master.workerType+".ResetTime", new(struct{}), new(struct{}))
+		ok := client.Call(RegisteredWorkerAddr, master.Network, master.workerType+".ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
-			logger.Do.Printf("Master: RPC %s send heartbeat error\n", worker)
+			logger.Do.Printf("Master: RPC %s send heartbeat error\n", RegisteredWorkerAddr)
 		}
 	}
 }

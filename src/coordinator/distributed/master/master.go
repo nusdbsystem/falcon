@@ -77,21 +77,23 @@ loop:
 			logger.Do.Printf("Master: %s quit forwardRegistrations \n", master.Port)
 			break loop
 
-		case addr := <-master.tmpWorkers:
+		// a list of master.workers:
+		// eg: [127.0.0.1:30009:0 127.0.0.1:30010:1 127.0.0.1:30011:2]
+		case tmpWorker := <-master.tmpWorkers:
 			// 1. check if this work already exist
-			if utils.Contains(addr, master.workers) {
-				logger.Do.Printf("Master: the worker %s already registered, skip \n", addr)
+			if utils.Contains(tmpWorker, master.workers) {
+				logger.Do.Printf("Master: the worker %s already registered, skip \n", tmpWorker)
 			}
 
 			// 2. check if this worker is needed
-			tmpIP := strings.Split(addr, ":")[0]
+			tmpIP := strings.Split(tmpWorker, ":")[0]
 
 			for i, IP := range requiredIP {
 				if tmpIP == IP {
-					logger.Do.Println("Master: Found one worker", addr)
+					logger.Do.Println("Master: Found one worker", tmpWorker)
 
 					master.Lock()
-					master.workers = append(master.workers, addr)
+					master.workers = append(master.workers, tmpWorker)
 					master.Unlock()
 					master.beginCountDown.Broadcast()
 
