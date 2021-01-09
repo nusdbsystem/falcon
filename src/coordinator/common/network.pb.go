@@ -30,8 +30,8 @@ type NetworkConfig struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ips of different parties
-	Ips []string `protobuf:"bytes,1,rep,name=ips,proto3" json:"ips,omitempty"`
+	// IPs of different parties
+	IPs []string `protobuf:"bytes,1,rep,name=ips,proto3" json:"ips,omitempty"`
 	// an array of PortArray
 	PortArrays []*PortArray `protobuf:"bytes,2,rep,name=port_arrays,json=portArrays,proto3" json:"port_arrays,omitempty"`
 }
@@ -68,9 +68,9 @@ func (*NetworkConfig) Descriptor() ([]byte, []int) {
 	return file_network_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *NetworkConfig) GetIps() []string {
+func (x *NetworkConfig) GetIPs() []string {
 	if x != nil {
-		return x.Ips
+		return x.IPs
 	}
 	return nil
 }

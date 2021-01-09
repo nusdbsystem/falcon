@@ -16,8 +16,8 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 	masterPort := client.GetFreePort(common.CoordAddr)
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
-	masterIp := common.CoordIP
-	masterAddr := masterIp + ":" + masterPort
+	masterIP := common.CoordIP
+	masterAddr := masterIP + ":" + masterPort
 
 	logger.Do.Println("SetupDist: Launch master ProdEnv")
 
@@ -83,12 +83,12 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 
 	if workerType == common.TrainWorker {
 
-		serviceName = "worker-job" + jobId + "-train-" + common.PartyServerId
+		serviceName = "worker-job" + jobId + "-train-" + common.PartyID
 
 		logger.Do.Println("SetupWorkerHelper: Current in Prod, TrainWorker, svcName", serviceName)
 	} else if workerType == common.InferenceWorker {
 
-		serviceName = "worker-job" + jobId + "-predict-" + common.PartyServerId
+		serviceName = "worker-job" + jobId + "-predict-" + common.PartyID
 
 		logger.Do.Println("SetupWorkerHelper: Current in Prod, InferenceWorker, svcName", serviceName)
 	}

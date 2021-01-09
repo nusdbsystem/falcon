@@ -22,7 +22,7 @@ echo 'SERVICE_NAME=partyserver' >> $COMBINE_PROPERTIES
 # create common map, 当多次使用 --from-env-file 来从多个数据源创建 ConfigMap 时，仅仅最后一个 env 文件有效。
 LOG_FILE_PATH=$PARTYSERVER_BASE_PATH/logs/start_partyserver.log
 {
-  (kubectl create configmap partyserver-config-$PARTY_SERVER_ID --from-env-file=$COMBINE_PROPERTIES &> $LOG_FILE_PATH)
+  (kubectl create configmap partyserver-config-$PARTY_ID --from-env-file=$COMBINE_PROPERTIES &> $LOG_FILE_PATH)
   echo "-------------------------- finish creating partyserver map for coordinator --------------------------------"
 } || {
 echo "--------------------------  creating config map error, check the log, --------------------------------"
@@ -38,7 +38,7 @@ sed -i -e "s/PARTYSERVER_TARGET_PORT/$PARTY_SERVER_NODE_PORT/g" $PARTYSERVER_YAM
 sed -i -e "s/PARTY_SERVER_NODE_PORT/$PARTY_SERVER_NODE_PORT/g" $PARTYSERVER_YAML || exit 1
 sed -i -e "s/FALCON_COORD_IMAGE/$IMAGE/g" $PARTYSERVER_YAML || exit 1
 sed -i -e "s/HOST_PATH/$BASE_PATH/g" $PARTYSERVER_YAML || exit 1
-sed -i -e "s/PARTY_SERVER_ID/$PARTY_SERVER_ID/g" $PARTYSERVER_YAML || exit 1
+sed -i -e "s/PARTY_ID/$PARTY_ID/g" $PARTYSERVER_YAML || exit 1
 
 # apply the job
 kubectl apply -f $PARTYSERVER_YAML || exit 1

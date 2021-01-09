@@ -54,7 +54,8 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 // up to report that they are ready to receive tasks.
 func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) error {
 	logger.Do.Println("[master/RegisterWorker] register with master, called by worker")
-	master.tmpWorkers <- args.WorkerAddr
+	// Pass WorkerList (addr:partyID) into tmpWorkers for pre-processing
+	master.tmpWorkers <- args.WorkerList
 	return nil
 }
 
@@ -62,11 +63,11 @@ func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) err
 func (master *Master) forwardRegistrations(qItem *cache.QItem) {
 
 	logger.Do.Printf("Master: start forwardRegistrations... ")
-	var requiredIp []string
+	var requiredIP []string
 
 	for i := 0; i < len(qItem.AddrList); i++ {
-		ip := strings.Split(qItem.AddrList[i], ":")[0]
-		requiredIp = append(requiredIp, ip)
+		IP := strings.Split(qItem.AddrList[i], ":")[0]
+		requiredIP = append(requiredIP, IP)
 	}
 
 loop:
@@ -76,26 +77,28 @@ loop:
 			logger.Do.Printf("Master: %s quit forwardRegistrations \n", master.Port)
 			break loop
 
-		case addr := <-master.tmpWorkers:
+		// a list of master.workers:
+		// eg: [127.0.0.1:30009:0 127.0.0.1:30010:1 127.0.0.1:30011:2]
+		case tmpWorker := <-master.tmpWorkers:
 			// 1. check if this work already exist
-			if utils.Contains(addr, master.workers) {
-				logger.Do.Printf("Master: the worker %s already registered, skip \n", addr)
+			if utils.Contains(tmpWorker, master.workers) {
+				logger.Do.Printf("Master: the worker %s already registered, skip \n", tmpWorker)
 			}
 
 			// 2. check if this worker is needed
-			tmpIp := strings.Split(addr, ":")[0]
+			tmpIP := strings.Split(tmpWorker, ":")[0]
 
-			for i, ip := range requiredIp {
-				if tmpIp == ip {
-					logger.Do.Println("Master: Found one worker", addr)
+			for i, IP := range requiredIP {
+				if tmpIP == IP {
+					logger.Do.Println("Master: Found one worker", tmpWorker)
 
 					master.Lock()
-					master.workers = append(master.workers, addr)
+					master.workers = append(master.workers, tmpWorker)
 					master.Unlock()
 					master.beginCountDown.Broadcast()
 
-					// remove the i th ip
-					requiredIp = append(requiredIp[0:i+1], requiredIp[i+1:]...)
+					// remove the i-th IP
+					requiredIP = append(requiredIP[0:i+1], requiredIP[i+1:]...)
 					break
 				}
 			}

@@ -15,8 +15,8 @@ func SetupDistDev(qItem *cache.QItem, workerType string) {
 	masterPort := client.GetFreePort(common.CoordAddr)
 	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
 
-	masterIp := common.CoordIP
-	masterAddr := masterIp + ":" + masterPort
+	masterIP := common.CoordIP
+	masterAddr := masterIP + ":" + masterPort
 
 	logger.Do.Println("SetupDist: Launch master for Dev Env")
 
@@ -50,19 +50,19 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 
 	if workerType == common.TrainWorker {
 
-		serviceName = "worker-job" + jobId + "-train-" + common.PartyServerId
+		serviceName = "worker-job" + jobId + "-train-" + common.PartyID
 		common.TaskRuntimeLogs = common.PartyServerBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
 		logger.Do.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
 
 		logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainWorker")
 
-		wk := worker.InitTrainWorker(masterAddr, workerAddr)
+		wk := worker.InitTrainWorker(masterAddr, workerAddr, common.PartyID)
 		wk.RunWorker(wk)
 
 	} else if workerType == common.InferenceWorker {
 
-		serviceName = "worker-job" + jobId + "-inference-" + common.PartyServerId
+		serviceName = "worker-job" + jobId + "-inference-" + common.PartyID
 		common.TaskRuntimeLogs = common.PartyServerBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
 		if ee != nil {
@@ -71,7 +71,7 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 		logger.Do.Println("SetupWorkerHelper: Created runtimelogsfolder")
 
 		logger.Do.Println("SetupWorkerHelper:  will init InferenceWorker")
-		wk := worker.InitInferenceWorker(masterAddr, workerAddr)
+		wk := worker.InitInferenceWorker(masterAddr, workerAddr, common.PartyID)
 		wk.RunWorker(wk)
 
 	}

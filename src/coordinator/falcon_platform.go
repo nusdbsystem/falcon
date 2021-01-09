@@ -90,19 +90,19 @@ func InitEnvs(svcName string) {
 
 	} else if svcName == "partyserver" {
 
-		// partyserver needs coord ip+port,lis port
+		// partyserver needs coord IP+port,lis port
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
 		common.PartyServerBasePath = common.GetEnv("BASE_PATH", "")
 
-		// partyserver communicate coord with ip+port
+		// partyserver communicate coord with IP+port
 		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
 
 		// run partyserver requires to get a new partyserver port
 		common.PartyServerPort = common.GetEnv("PARTY_SERVER_NODE_PORT", "")
 
-		common.PartyServerId = common.GetEnv("PARTY_SERVER_ID", "")
+		common.PartyID = common.GetEnv("PARTY_ID", "")
 
 		// get the MPC exe path
 		common.MpcExePath = common.GetEnv(
@@ -135,7 +135,7 @@ func InitEnvs(svcName string) {
 
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 
-		// master communicate coord with ip+port in dev, with name+port in prod
+		// master communicate coord with IP+port in dev, with name+port in prod
 		if common.Env == common.DevEnv {
 
 			logger.Do.Println("CoordIP: ", common.CoordIP+":"+common.CoordPort)
@@ -241,7 +241,8 @@ func main() {
 
 		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
-		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr)
+		// init the train worker with addresses of master and worker, also the partyID
+		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr, common.PartyID)
 		wk.RunWorker(wk)
 
 		// once  worker is killed, clear the resources.
@@ -254,7 +255,7 @@ func main() {
 
 		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
-		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr)
+		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr, common.PartyID)
 		wk.RunWorker(wk)
 	}
 	// once  worker is killed, clear the resources.

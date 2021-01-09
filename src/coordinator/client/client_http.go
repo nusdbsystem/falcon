@@ -11,7 +11,7 @@ func PartyServerAdd(ServerAddr, partyserverAddr, partyserverPort string) error {
 	data := url.Values{
 		common.PartyServerAddrKey: {partyserverAddr},
 		common.PartyServerPortKey: {partyserverPort},
-		}
+	}
 
 	reqUrl := ServerAddr + "/" + common.PartyServerAdd
 
@@ -28,14 +28,14 @@ func PartyServerDelete(ServerAddr, partyserverAddr string) {
 	_ = PostForm(reqUrl, data)
 }
 
-func SetupWorker(ServerAddr string, masterAddr string, workerType string, jobId,dataPath,modelPath,dataOutput string) {
+func SetupWorker(ServerAddr string, masterAddr string, workerType string, jobId, dataPath, modelPath, dataOutput string) {
 	data := url.Values{
-		common.MasterAddrKey: {masterAddr},
-		common.TaskTypeKey:   {workerType},
-		common.JobId:   {jobId},
-		common.TrainDataPath : {dataPath},
-		common.ModelPath : {modelPath},
-		common.TrainDataOutput : {dataOutput},
+		common.MasterAddrKey:   {masterAddr},
+		common.TaskTypeKey:     {workerType},
+		common.JobId:           {jobId},
+		common.TrainDataPath:   {dataPath},
+		common.ModelPath:       {modelPath},
+		common.TrainDataOutput: {dataOutput},
 	}
 
 	reqUrl := ServerAddr + "/" + common.SetupWorker
@@ -47,7 +47,7 @@ func JobUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 
 	data := url.Values{
 		common.MasterAddrKey: {masterAddr},
-		common.JobId:      {fmt.Sprintf("%d", jobId)}}
+		common.JobId:         {fmt.Sprintf("%d", jobId)}}
 
 	reqUrl := ServerAddr + "/" + common.UpdateTrainJobMaster
 
@@ -58,13 +58,12 @@ func InferenceUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 
 	data := url.Values{
 		common.MasterAddrKey: {masterAddr},
-		common.JobId:      {fmt.Sprintf("%d", jobId)}}
+		common.JobId:         {fmt.Sprintf("%d", jobId)}}
 
 	reqUrl := ServerAddr + "/" + common.UpdateInferenceJobMaster
 
 	_ = PostForm(reqUrl, data)
 }
-
 
 func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jobId uint) {
 	data := url.Values{
@@ -90,7 +89,6 @@ func JobUpdateStatus(ServerAddr string, status uint, jobId uint) {
 	_ = PostForm(reqUrl, data)
 }
 
-
 func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 
 	data := url.Values{
@@ -101,7 +99,6 @@ func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 
 	_ = PostForm(reqUrl, data)
 }
-
 
 func InferenceUpdateStatus(ServerAddr string, jobId, status uint) {
 
@@ -128,18 +125,17 @@ func JobGetStatus(ServerAddr string, jobId uint) uint {
 	return 1
 }
 
+func GetFreePort(ServerAddr string) string {
 
-func GetFreePort(ServerAddr string) string{
-
-	reqUrl := "http://" + strings.TrimSpace( ServerAddr + "/" + common.AssignPort)
+	reqUrl := "http://" + strings.TrimSpace(ServerAddr+"/"+common.AssignPort)
 	port := Get(reqUrl)
 
 	return port
 }
 
-func GetExistPort(ServerAddr, PartyServerIp string) string{
+func GetExistPort(ServerAddr, PartyServerIP string) string {
 	params := url.Values{}
-	params.Set(common.PartyServerAddrKey, PartyServerIp)
+	params.Set(common.PartyServerAddrKey, PartyServerIP)
 
 	rawUrl := "http://" + strings.TrimSpace(ServerAddr) + "/" + common.GetPartyServerPort
 
@@ -161,8 +157,7 @@ func GetExistPort(ServerAddr, PartyServerIp string) string{
 	return port
 }
 
-
-func AddPort(ServerAddr, port string) error{
+func AddPort(ServerAddr, port string) error {
 
 	data := url.Values{common.AddPort: {port}}
 

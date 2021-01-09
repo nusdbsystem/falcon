@@ -30,6 +30,9 @@ type WorkerBase struct {
 
 	// each worker has only one master addr
 	MasterAddr string
+
+	// each worker is linked to the PartyID
+	PartyID string
 }
 
 func (w *WorkerBase) RunWorker(worker Worker) {
@@ -56,15 +59,17 @@ func (w *WorkerBase) InitWorkerBase(workerAddr, name string) {
 }
 
 // call the master's register method,
-func (w *WorkerBase) Register(master string) {
+func (w *WorkerBase) Register(MasterAddr string, PartyID string) {
 	args := new(entity.RegisterArgs)
 	args.WorkerAddr = w.Addr
+	args.PartyID = PartyID
+	args.WorkerList = w.Addr + ":" + PartyID // IP:Port:PartyID
 
-	logger.Do.Printf("WorkerBase: begin to call Master.RegisterWorker to register addr= %s \n", args.WorkerAddr)
-	ok := client.Call(master, w.Network, "Master.RegisterWorker", args, new(struct{}))
+	logger.Do.Printf("WorkerBase: begin to call Master.RegisterWorker to register WorkerAddr: %s \n", args.WorkerAddr)
+	ok := client.Call(MasterAddr, w.Network, "Master.RegisterWorker", args, new(struct{}))
 	// if not register successfully, close
 	if ok == false {
-		logger.Do.Fatalf("WorkerBase: Register RPC %s, register error\n", master)
+		logger.Do.Fatalf("WorkerBase: Register RPC %s, register error\n", MasterAddr)
 	}
 }
 

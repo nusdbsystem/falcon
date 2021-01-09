@@ -17,6 +17,7 @@ import (
  **/
 
 const (
+	// TODO: are these the names assigned for master and workers?
 	Master          = "Master"
 	TrainWorker     = "TrainWorker"
 	InferenceWorker = "InferenceWorker"
@@ -138,7 +139,7 @@ var (
 
 	PartyServerIP   = ""
 	PartyServerPort = ""
-	PartyServerId   = ""
+	PartyID         = ""
 
 	// envs
 	Env = getEnv("Env", DevEnv)
@@ -156,7 +157,7 @@ var (
 
 	// this is the worker's k8s service name, only used in production
 	WorkerK8sSvcName = ""
-	// enable other service access master with clusterIp+clusterPort, from inside the cluster
+	// enable other service access master with clusterIP+clusterPort, from inside the cluster
 	CoordK8sSvcName = ""
 
 	// for coord, node port is the same as cluster port, so all use coorport

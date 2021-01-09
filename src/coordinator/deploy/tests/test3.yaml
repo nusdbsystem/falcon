@@ -5,7 +5,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 30007  #这里port集群内部clusterIp 对应的端口
+    - port: 30007  #这里port集群内部clusterIP 对应的端口
       targetPort: 30007  #这里是pod监听的端口， port和nodePort的流量最后都会到这里
       nodePort: 30007  #这里是物理机的端口
   selector:

@@ -123,7 +123,7 @@ func trainJobVerify(jobInfo *TrainJob) error {
 	for _, v := range jobInfo.PartyInfo {
 
 		if len(v.Addr) == 0 {
-			return errors.New("ip must be provided")
+			return errors.New("IP must be provided")
 		}
 	}
 
@@ -141,7 +141,7 @@ func ParseAddress(pInfo []PartyInfo) []string {
 
 	for _, v := range pInfo {
 
-		// list of ip
+		// list of addresses
 		Addrs = append(Addrs, v.Addr)
 	}
 	return Addrs
@@ -192,20 +192,20 @@ func GeneratePreProcessparams(cfg map[string]interface{}) string {
 
 func GenerateNetworkConfig(addrs []string, portArray [][]int32) string {
 	logger.Do.Println("Scheduler: Generating NetworkCfg ...")
-	logger.Do.Println("Scheduler: Assigned Ip and ports are: ", addrs, portArray)
+	logger.Do.Println("Scheduler: Assigned IP and ports are: ", addrs, portArray)
 
 	partyNums := len(addrs)
-	var ips []string
+	var IPs []string
 	for _, v := range addrs {
-		ips = append(ips, strings.Split(v, ":")[0])
+		IPs = append(IPs, strings.Split(v, ":")[0])
 	}
 
 	cfg := NetworkConfig{
-		Ips:        ips,
+		IPs:        IPs,
 		PortArrays: []*PortArray{},
 	}
 
-	// for each ip addr
+	// for each IP addr
 	for i := 0; i < partyNums; i++ {
 		p := &PortArray{Ports: portArray[i]}
 		cfg.PortArrays = append(cfg.PortArrays, p)

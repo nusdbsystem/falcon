@@ -63,7 +63,7 @@ func SetupPartyServer() {
 
 	logger.Do.Printf(
 		"[party server %v] listening on IP: %v, Port: %v\n",
-		common.PartyServerId,
+		common.PartyID,
 		common.PartyServerIP,
 		common.PartyServerPort)
 	err = server.ListenAndServe()

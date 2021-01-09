@@ -44,12 +44,7 @@ func (wk *TrainWorker) TrainTask(doTaskArgs *entity.DoTaskArgs, rep *entity.DoTa
 
 func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.DoTaskReply, wg *sync.WaitGroup) {
 	/**
-	 * @Author
-	 * @Description
-	 * @Date 2:52 下午 12/12/20
-	 * @Param
-		requires:
-
+		FL Engine requires:
 			("party-id", po::value<int>(&party_id), "current party id")
 			("party-num", po::value<int>(&party_num), "total party num")
 			("party-type", po::value<int>(&party_type), "type of this party, active or passive")
@@ -65,24 +60,25 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 			("existing-key", po::value<int>(&use_existing_key), "whether use existing phe keys")
 			("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run")
 			("algorithm-params", po::value<std::string>(&algorithm_params), "parameters for the algorithm");
-
-	 * @return
 	 **/
 	logger.Do.Println("mlTaskCallee called")
 	defer wg.Done()
 
 	logger.Do.Printf("Worker: %s task started\n", wk.Addr)
 
-	partyId := doTaskArgs.AssignID
+	partyId := doTaskArgs.PartyID
 	partyNum := doTaskArgs.PartyNums
+
+	// partyType 1=Passive, 0=Active
 	partyType := 1 // default passive
 	partyTypeStr := doTaskArgs.PartyInfo.PartyType
-	// TODO: check with wyc if partyType 0 = active?
 	if partyTypeStr == "active" {
 		partyType = 0
 	} else if partyTypeStr == "passive" {
 		partyType = 1
 	}
+
+	// fl-setting 1=vertical, 0=horizontal
 	flSetting := 1 // default vertical
 	flSettingStr := doTaskArgs.JobFlType
 	if flSettingStr == "vertical" {
@@ -90,6 +86,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	} else if flSettingStr == "horizontal" {
 		flSetting = 0
 	}
+
 	existingKey := doTaskArgs.ExistingKey
 
 	dataInputFile := common.TaskDataPath + "/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
@@ -102,7 +99,11 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	var algParams string
 	var KeyFile string
 
-	logger.Do.Println("[mlTaskCallee] call doMlTask")
+	logger.Do.Println("[mlTaskCallee] call doMlTask with partyId = ", partyId)
+	logger.Do.Println("[mlTaskCallee] call doMlTask with partyNum = ", partyNum)
+	logger.Do.Println("[mlTaskCallee] call doMlTask with partyType = ", partyType)
+	logger.Do.Println("[mlTaskCallee] call doMlTask with flSetting = ", flSetting)
+	logger.Do.Println("[mlTaskCallee] call doMlTask with existingKey = ", existingKey)
 	run := doMlTask(
 		wk.Pm,
 		fmt.Sprintf("%d", partyId),
@@ -180,16 +181,16 @@ func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName stri
 		./semi-party.x -F -N 3 -I -p 0 -h 10.0.0.33 -pn 6000 algorithm_name
 			-N party_num
 			-p party_id
-			-h ip
+			-h IP
 			-pn port
 			algorithm_name
 
-		-h 是party_0的ip 端口目前只有一个 各个端口都相同就可以
-		-h 每个mpc进程的启动输入都是party_0的ip
+		-h 是party_0的IP 端口目前只有一个 各个端口都相同就可以
+		-h 每个mpc进程的启动输入都是party_0的IP
 	 * @return
 	 **/
 	logger.Do.Println("mpcTaskCallee called with algName ", algName)
-	partyId := doTaskArgs.AssignID
+	partyId := doTaskArgs.PartyID // TODO: make PartyID all the same type, currently it is sometimes uint sometimes string!
 	partyNum := doTaskArgs.PartyNums
 
 	var envs []string
@@ -200,7 +201,7 @@ func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName stri
 		" --N  "+fmt.Sprintf("%d", partyNum),
 		" --I ",
 		" --p "+fmt.Sprintf("%d", partyId),
-		" --h "+doTaskArgs.MpcIp,
+		" --h "+doTaskArgs.MpcIP,
 		" --pn "+fmt.Sprintf("%d", doTaskArgs.MpcPort),
 		" "+algName,
 	)
@@ -249,7 +250,7 @@ func (wk *TrainWorker) execResHandler(
 
 func TestTaskProcess(doTaskArgs *entity.DoTaskArgs) {
 
-	partyId := doTaskArgs.AssignID
+	partyId := doTaskArgs.PartyID
 	partyNum := doTaskArgs.PartyNums
 	partyType := 1
 	partyTypeStr := doTaskArgs.PartyInfo.PartyType
