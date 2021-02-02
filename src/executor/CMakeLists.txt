@@ -44,7 +44,9 @@ set(SOURCE_FILES
         ../../include/falcon/algorithm/vertical/linear_model/logistic_regression.h
         algorithm/vertical/linear_model/logistic_regression.cc
         ../../include/falcon/algorithm/model.h
-        algorithm/model.cc)
+        algorithm/model.cc
+        ../../include/falcon/model/model_io.h
+        model/model_io.cc)
 
 #set(SPDZ_HOME "$ENV{HOME}/Documents/MP-SPDZ/")
 set(SPDZ_HOME "$ENV{HOME}/Documents/falcon/third_party/MP-SPDZ/")

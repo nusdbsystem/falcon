@@ -458,6 +458,18 @@ void LogisticRegression::test(Party party, int type, float &accuracy) {
   google::FlushLogFiles(google::INFO);
 }
 
+void LogisticRegression::setter_encoded_weights(EncodedNumber *s_weights) {
+  for (int i = 0; i < weight_size; i++) {
+    local_weights[i] = s_weights[i];
+  }
+}
+
+void LogisticRegression::getter_encoded_weights(EncodedNumber *g_weights) {
+  for (int i = 0; i < weight_size; i++) {
+    g_weights[i] = local_weights[i];
+  }
+}
+
 void spdz_logistic_function_computation(int party_num,
     int party_id,
     int mpc_port_base,

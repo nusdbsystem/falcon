@@ -165,6 +165,22 @@ class LogisticRegression : public Model {
    * @param accuracy: returned model accuracy, default metric "acc"
    */
   void test(Party party, int type, float& accuracy);
+
+  /** set weight size */
+  void setter_weight_size(int s_weight_size) {
+    weight_size = s_weight_size;
+  }
+
+  /** set weight params */
+  void setter_encoded_weights(EncodedNumber* s_weights);
+
+  /** get weight size */
+  int getter_weight_size() {
+    return weight_size;
+  }
+
+  /** set weight params */
+  void getter_encoded_weights(EncodedNumber* g_weights);
 };
 
 /**
@@ -188,6 +204,12 @@ void spdz_logistic_function_computation(int party_num,
     int cur_batch_size,
     std::promise<std::vector<float>> *batch_loss_shares);
 
+/**
+ * train a logistic regression model
+ *
+ * @param party: initialized party object
+ * @param params: LogisticRegressionParams serialized string
+ */
 void train_logistic_regression(Party party, std::string params);
 
 #endif //FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_H_
