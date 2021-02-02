@@ -1,7 +1,7 @@
 ## Linear model
 
-Here introduce the logistic regression (LR) model, the linear regression model is
-similar. In the vertical FL setting, the features are distributed among parties
+Here we introduce the logistic regression (LR) model, which is similar to the linear regression model.
+In the vertical FL setting, the features are distributed among parties
 while the label is held by only the active party. We use a hybrid of MPC and PHE 
 to train the LR model.
          
