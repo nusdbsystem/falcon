@@ -15,6 +15,7 @@
 #include <Networking/ssl_sockets.h>
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/utils/metric/accuracy.h>
+#include <falcon/common.h>
 
 LogisticRegression::LogisticRegression() {}
 
@@ -108,7 +109,6 @@ std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
 
 void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
     std::vector<int> batch_indexes,
-    int type,
     int precision,
     EncodedNumber *batch_phe_aggregation) {
   // retrieve phe pub key and phe random
@@ -320,7 +320,6 @@ void LogisticRegression::train(Party party) {
     EncodedNumber* encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
     compute_batch_phe_aggregation(party,
         batch_indexes,
-        0,
         plaintext_samples_precision,
         encrypted_batch_aggregation);
 
@@ -332,7 +331,7 @@ void LogisticRegression::train(Party party) {
     party.ciphers_to_secret_shares(encrypted_batch_aggregation,
         batch_aggregation_shares,
         cur_batch_size,
-        0,
+        ACTIVE_PARTY_ID,
         encrypted_batch_aggregation_precision);
 
     // std::cout << "step 2.3 success" << std::endl;
@@ -383,9 +382,9 @@ void LogisticRegression::train(Party party) {
   google::FlushLogFiles(google::INFO);
 }
 
-void LogisticRegression::test(Party party, int type, float &accuracy) {
-  std::string s = (type == 0 ? "training dataset" : "testing dataset");
-  LOG(INFO) << "************* Testing on " << s << " Start *************";
+void LogisticRegression::eval(Party party, int eval_type, float &accuracy) {
+  std::string dataset_str = (eval_type == 0 ? "training dataset" : "test-set");
+  LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
 
   /// the testing workflow is as follows:
@@ -399,8 +398,8 @@ void LogisticRegression::test(Party party, int type, float &accuracy) {
   party.getter_phe_pub_key(phe_pub_key);
 
   // step 1: init test data
-  int dataset_size = (type == 0) ? training_data.size() : testing_data.size();
-  std::vector< std::vector<float> > cur_test_dataset = (type == 0) ? training_data : testing_data;
+  int dataset_size = (eval_type == USE_TRAIN) ? training_data.size() : testing_data.size();
+  std::vector< std::vector<float> > cur_test_dataset = (eval_type == USE_TRAIN) ? training_data : testing_data;
 
   // step 2: every party computes partial phe summation and sends to active party
   std::vector<int> indexes;
@@ -412,7 +411,6 @@ void LogisticRegression::test(Party party, int type, float &accuracy) {
   EncodedNumber* encrypted_aggregation = new EncodedNumber[dataset_size];
   compute_batch_phe_aggregation(party,
       indexes,
-      type,
       plaintext_precision,
       encrypted_aggregation);
 
@@ -434,12 +432,12 @@ void LogisticRegression::test(Party party, int type, float &accuracy) {
         t = t >= 0.5 ? 1 : 0;
         vec.push_back(t);
       }
-      if (type == 0) {
+      if (eval_type == USE_TRAIN) {
         accuracy = accuracy_computation(vec, training_labels);
       } else {
         accuracy = accuracy_computation(vec, testing_labels);
       }
-      LOG(INFO) << "The testing accuracy on " << s << " is: " << accuracy;
+      LOG(INFO) << "The evaluation accuracy on " << dataset_str << " is: " << accuracy;
     } else {
       LOG(ERROR) << "The " << metric << " metric is not supported";
       return;
@@ -453,8 +451,8 @@ void LogisticRegression::test(Party party, int type, float &accuracy) {
 
   const clock_t testing_finish_time = clock();
   float testing_consumed_time = float(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  LOG(INFO) << "Testing time = " << testing_consumed_time;
-  LOG(INFO) << "************* Testing on " << s << " Finished *************";
+  LOG(INFO) << "Evaluation time = " << testing_consumed_time;
+  LOG(INFO) << "************* Evaluation on " << dataset_str << " Finished *************";
   google::FlushLogFiles(google::INFO);
 }
 
@@ -556,7 +554,7 @@ void train_logistic_regression(Party party, std::string params_str) {
   std::vector< std::vector<float> > testing_data;
   std::vector<float> training_labels;
   std::vector<float> testing_labels;
-  float split_percentage = 0.8;
+  float split_percentage = SPLIT_TRAIN_TEST_RATIO;
   party.split_train_test_data(split_percentage,
       training_data,
       testing_data,
@@ -579,7 +577,7 @@ void train_logistic_regression(Party party, std::string params_str) {
 
   std::cout << "Init logistic regression model" << std::endl;
 
-  LogisticRegression model(params,
+  LogisticRegression log_reg_model(params,
       weight_size,
       training_data,
       testing_data,
@@ -588,10 +586,10 @@ void train_logistic_regression(Party party, std::string params_str) {
       training_accuracy,
       testing_accuracy);
 
-  LOG(INFO) << "Init model success";
-  std::cout << "Init model success" << std::endl;
+  LOG(INFO) << "Init log_reg_model success";
+  std::cout << "Init log_reg_model success" << std::endl;
 
-  model.train(party);
-  model.test(party, 0, training_accuracy);
-  model.test(party, 1, testing_accuracy);
+  log_reg_model.train(party);
+  log_reg_model.eval(party, USE_TRAIN, training_accuracy);
+  log_reg_model.eval(party, USE_TEST, testing_accuracy);
 }
