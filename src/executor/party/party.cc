@@ -9,6 +9,7 @@
 #include <stack>
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
 
 #include <glog/logging.h>
 
@@ -19,6 +20,7 @@
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/network_converter.h>
+#include <falcon/common.h>
 
 Party::Party(){}
 
@@ -40,6 +42,10 @@ Party::Party(int m_party_id,
   local_data = read_dataset(m_data_file);
   sample_num = local_data.size();
   feature_num = local_data[0].size();
+
+  LOG(INFO) << "local_data is reading dataset from: " << m_data_file;
+  LOG(INFO) << "sample_num = " << sample_num;
+  LOG(INFO) << "feature_num = " << feature_num;
 
   // if this is active party, slice the last column as labels
   if (party_type == falcon::ACTIVE_PARTY) {
@@ -297,6 +303,8 @@ void Party::split_train_test_data(float split_percentage,
                           std::vector<float> &testing_labels) const {
   LOG(INFO) << "Split local data and labels into training and testing dataset.";
   int training_data_size = sample_num * split_percentage;
+  LOG(INFO) << "Split percentage for train-test = " << split_percentage;
+  LOG(INFO) << "training_data_size = " << training_data_size;
 
   std::vector<int> data_indexes;
 
@@ -306,9 +314,31 @@ void Party::split_train_test_data(float split_percentage,
     for (int i = 0; i < sample_num; i++) {
       data_indexes.push_back(i);
     }
-    std::random_device rd;
-    std::default_random_engine rng(rd());
+    // without seed: 
+    // std::random_device rd;
+    // std::default_random_engine rng(rd());
+    // using seed, for development:
+    std::default_random_engine rng(RANDOM_SEED);
     std::shuffle(std::begin(data_indexes), std::end(data_indexes), rng);
+
+    // save a copy of data_indexes vector<int> as string for local debugging
+    std::stringstream ss;
+    for (size_t i = 0; i < data_indexes.size(); ++i)
+    {
+      if (i != 0)
+        ss << ",";
+      ss << data_indexes[i];
+    }
+    std::string data_indexes_str = ss.str();
+    // save the data_indexes_str in a file for debugging
+    std::ofstream out("/tmp/falcon_client0_data_indexes_str.txt");
+    out << data_indexes_str;
+    out.close();
+
+    // check if the data_indexes match the saved txt in tmp
+    LOG(INFO) << "data_indexes[0] = " << data_indexes[0] << std::endl;
+    LOG(INFO) << "data_indexes[1] = " << data_indexes[1] << std::endl;
+    LOG(INFO) << "data_indexes[2] = " << data_indexes[2] << std::endl;
 
     // select the former training data size as training data, and the latter as testing data
     for (int i = 0; i < sample_num; i++) {
@@ -328,6 +358,7 @@ void Party::split_train_test_data(float split_percentage,
       if (i != party_id) {
         std::string shuffled_indexes_str;
         serialize_int_array(data_indexes, shuffled_indexes_str);
+        // send the shuffled_indexes_str protobuf over the network
         send_long_message(i, shuffled_indexes_str);
       }
     }
@@ -566,4 +597,3 @@ Party::~Party() {
   djcs_t_free_public_key(phe_pub_key);
   djcs_t_free_auth_server(phe_auth_server);
 }
-

@@ -19,6 +19,13 @@ namespace falcon{
   #define ROUNDED_PRECISION 1e-3
   #define NETWORK_CONFIG_PROTO 1
 
+  // for Logistic Regression
+  #define RANDOM_SEED 42
+  #define SPLIT_TRAIN_TEST_RATIO 0.8
+  #define USE_TRAIN 0
+  #define USE_TEST 1
+  #define ACTIVE_PARTY_ID 1
+
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};
   enum AlgorithmName {LR, DT};
