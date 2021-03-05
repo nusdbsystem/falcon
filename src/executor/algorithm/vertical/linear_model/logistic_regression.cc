@@ -125,7 +125,13 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
   int cur_batch_size = batch_indexes.size();
   std::vector< std::vector<float> > batch_samples;
   for (int i = 0; i < cur_batch_size; i++) {
-    batch_samples.push_back(training_data[batch_indexes[i]]);
+    if (type == falcon::TRAIN) {
+      batch_samples.push_back(training_data[batch_indexes[i]]);
+    } else if (type == falcon::TEST) {
+      batch_samples.push_back(testing_data[batch_indexes[i]]);
+    } else {
+      LOG(INFO) << "Not supported yet, reserved";
+    }
   }
   EncodedNumber** encoded_batch_samples = new EncodedNumber*[cur_batch_size];
   for (int i = 0; i < cur_batch_size; i++) {
@@ -323,7 +329,7 @@ void LogisticRegression::train(Party party) {
     EncodedNumber* encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
     compute_batch_phe_aggregation(party,
         batch_indexes,
-        0,
+        falcon::TRAIN,
         plaintext_samples_precision,
         encrypted_batch_aggregation);
 
@@ -386,7 +392,7 @@ void LogisticRegression::train(Party party) {
   google::FlushLogFiles(google::INFO);
 }
 
-void LogisticRegression::test(Party party, falcon::DataType type, float &accuracy) {
+void LogisticRegression::test(Party party, falcon::DatasetType type, float &accuracy) {
   std::string s = (type == falcon::TRAIN ? "training dataset" : "testing dataset");
   LOG(INFO) << "************* Testing on " << s << " Start *************";
   const clock_t testing_start_time = clock();

@@ -22,7 +22,7 @@ namespace falcon{
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};
   enum AlgorithmName {LR, DT};
-  enum DataType {TRAIN, TEST, VALIDATE};
+  enum DatasetType {TRAIN, TEST, VALIDATE};
 }
 
 #endif //FALCON_INCLUDE_COMMON_H_
