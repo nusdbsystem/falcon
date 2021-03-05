@@ -111,13 +111,13 @@ int main(int argc, char *argv[]) {
   falcon::AlgorithmName name = parse_algorithm_name(algorithm_name);
   switch(name) {
     case falcon::LR:
-      train_logistic_regression(party, algorithm_params);
+      train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
       break;
     case falcon::DT:
       LOG(INFO) << "Decision Tree algorithm is not supported now.";
       break;
     default:
-      train_logistic_regression(party, algorithm_params);
+      train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
       break;
   }
 

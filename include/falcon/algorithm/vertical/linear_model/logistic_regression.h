@@ -161,10 +161,10 @@ class LogisticRegression : public Model {
    * test a logistic regression model
    *
    * @param party: initialized party object
-   * @param type: 0 for training data and 1 for testing data
+   * @param type: falcon::DataType, TRAIN for training data and TEST for testing data
    * @param accuracy: returned model accuracy, default metric "acc"
    */
-  void test(Party party, int type, float& accuracy);
+  void test(Party party, falcon::DataType type, float &accuracy);
 
   /** set weight size */
   void setter_weight_size(int s_weight_size) {
@@ -209,7 +209,10 @@ void spdz_logistic_function_computation(int party_num,
  *
  * @param party: initialized party object
  * @param params: LogisticRegressionParams serialized string
+ * @param model_save_file: saved model file
+ * @param model_report_file: saved report file
  */
-void train_logistic_regression(Party party, std::string params);
+void train_logistic_regression(Party party, std::string params,
+    std::string model_save_file, std::string model_report_file);
 
 #endif //FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_H_

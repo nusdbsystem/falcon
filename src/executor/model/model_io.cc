@@ -81,15 +81,15 @@ void load_lr_model(const std::string& model_save_path, int& weight_size, Encoded
   model_infile.close();
 }
 
-void save_lr_report(LogisticRegression lr_model, const std::string& report_save_path) {
+void save_lr_report(float lr_training_accuracy,
+    float lr_testing_accuracy,
+    const std::string& report_save_path) {
   std::ofstream write_outfile(report_save_path);
   if (!write_outfile) {
     LOG(INFO) << "Open " << report_save_path.c_str() << " file error.";
     exit(EXIT_FAILURE);
   }
-  float training_accuracy = lr_model.getter_training_accuracy();
-  float testing_accuracy = lr_model.getter_testing_accuracy();
-  write_outfile << "The training accuracy of this model is: " << training_accuracy << "\n";
-  write_outfile << "The testing accuracy of this model is: " << testing_accuracy << "\n";
+  write_outfile << "The training accuracy of this model is: " << lr_training_accuracy << "\n";
+  write_outfile << "The testing accuracy of this model is: " << lr_testing_accuracy << "\n";
   write_outfile.close();
 }

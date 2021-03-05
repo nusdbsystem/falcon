@@ -30,10 +30,13 @@ void load_lr_model(const std::string& model_save_path, int& weight_size, Encoded
 /**
  * save the lr training report
  *
- * @param lr_model: trained lr model
+ * @param lr_training_accuracy: model training accuracy
+ * @param lr_testing_accuracy: model testing accuracy
  * @param report_save_path: report file to be saved
  */
-void save_lr_report(LogisticRegression lr_model, const std::string& report_save_path);
+void save_lr_report(float lr_training_accuracy,
+    float lr_testing_accuracy,
+    const std::string& report_save_path);
 
 
 #endif //FALCON_INCLUDE_FALCON_MODEL_MODEL_IO_H

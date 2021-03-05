@@ -5,6 +5,10 @@
 #include <falcon/algorithm/vertical/linear_model/logistic_regression.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/lr_params_converter.h>
+#include <falcon/operator/mpc/spdz_connector.h>
+#include <falcon/utils/metric/accuracy.h>
+#include <falcon/common.h>
+#include <falcon/model/model_io.h>
 
 #include <ctime>
 #include <random>
@@ -13,8 +17,7 @@
 
 #include <glog/logging.h>
 #include <Networking/ssl_sockets.h>
-#include <falcon/operator/mpc/spdz_connector.h>
-#include <falcon/utils/metric/accuracy.h>
+
 
 LogisticRegression::LogisticRegression() {}
 
@@ -383,8 +386,8 @@ void LogisticRegression::train(Party party) {
   google::FlushLogFiles(google::INFO);
 }
 
-void LogisticRegression::test(Party party, int type, float &accuracy) {
-  std::string s = (type == 0 ? "training dataset" : "testing dataset");
+void LogisticRegression::test(Party party, falcon::DataType type, float &accuracy) {
+  std::string s = (type == falcon::TRAIN ? "training dataset" : "testing dataset");
   LOG(INFO) << "************* Testing on " << s << " Start *************";
   const clock_t testing_start_time = clock();
 
@@ -399,8 +402,8 @@ void LogisticRegression::test(Party party, int type, float &accuracy) {
   party.getter_phe_pub_key(phe_pub_key);
 
   // step 1: init test data
-  int dataset_size = (type == 0) ? training_data.size() : testing_data.size();
-  std::vector< std::vector<float> > cur_test_dataset = (type == 0) ? training_data : testing_data;
+  int dataset_size = (type == falcon::TRAIN) ? training_data.size() : testing_data.size();
+  std::vector< std::vector<float> > cur_test_dataset = (type == falcon::TRAIN) ? training_data : testing_data;
 
   // step 2: every party computes partial phe summation and sends to active party
   std::vector<int> indexes;
@@ -540,7 +543,8 @@ void spdz_logistic_function_computation(int party_num,
   }
 }
 
-void train_logistic_regression(Party party, std::string params_str) {
+void train_logistic_regression(Party party, std::string params_str,
+    std::string model_save_file, std::string model_report_file) {
 
   LOG(INFO) << "Run the example logistic regression train";
   std::cout << "Run the example logistic regression train" << std::endl;
@@ -604,6 +608,14 @@ void train_logistic_regression(Party party, std::string params_str) {
   std::cout << "Init model success" << std::endl;
 
   model.train(party);
-  model.test(party, 0, training_accuracy);
-  model.test(party, 1, testing_accuracy);
+  model.test(party, falcon::TRAIN, training_accuracy);
+  model.test(party, falcon::TEST, testing_accuracy);
+
+  // save model and report
+  EncodedNumber* model_weights = new EncodedNumber[model.getter_weight_size()];
+  model.getter_encoded_weights(model_weights);
+  save_lr_model(model_weights, model.getter_weight_size(), model_save_file);
+  save_lr_report(training_accuracy, testing_accuracy, model_report_file);
+
+  delete [] model_weights;
 }
