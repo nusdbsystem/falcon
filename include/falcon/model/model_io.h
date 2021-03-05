@@ -9,8 +9,30 @@
 
 #include <glog/logging.h>
 
-void save_lr_model(LogisticRegression lr_model, const std::string& model_save_path);
+/**
+ * save the lr model weights after training
+ *
+ * @param model_weights: trained lr model weights
+ * @param weight_size: size of model
+ * @param model_save_path: model file to be saved
+ */
+void save_lr_model(EncodedNumber* model_weights, int weight_size, const std::string& model_save_path);
 
+/**
+ * load the saved lr model
+ *
+ * @param model_save_path: model file saved
+ * @param weight_size: number of weights
+ * @param saved_weights: encoded weights
+ */
+void load_lr_model(const std::string& model_save_path, int& weight_size, EncodedNumber* saved_weights);
+
+/**
+ * save the lr training report
+ *
+ * @param lr_model: trained lr model
+ * @param report_save_path: report file to be saved
+ */
 void save_lr_report(LogisticRegression lr_model, const std::string& report_save_path);
 
 

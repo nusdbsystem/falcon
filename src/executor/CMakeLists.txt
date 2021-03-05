@@ -23,6 +23,8 @@ set(SOURCE_FILES
         ../../include/falcon/utils/pb_converter/network_converter.h
         utils/pb_converter/network_converter.cc
         utils/metric/accuracy.cc
+        ../../include/falcon/utils/base64.h
+        utils/base64.cc
         include/message/common.pb.h
         include/message/common.pb.cc
         include/message/model.pb.h
