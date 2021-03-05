@@ -437,9 +437,10 @@ void LogisticRegression::test(Party party, falcon::DataType type, float &accurac
         t = t >= 0.5 ? 1 : 0;
         vec.push_back(t);
       }
-      if (type == 0) {
+      if (type == falcon::TRAIN) {
         accuracy = accuracy_computation(vec, training_labels);
-      } else {
+      }
+      if (type == falcon::TEST){
         accuracy = accuracy_computation(vec, testing_labels);
       }
       LOG(INFO) << "The testing accuracy on " << s << " is: " << accuracy;
