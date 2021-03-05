@@ -103,7 +103,7 @@ std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
     }
   } else {
     std::string recv_batch_indexes_str;
-    party.recv_long_message(0, recv_batch_indexes_str);
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_batch_indexes_str);
     deserialize_int_array(batch_indexes, recv_batch_indexes_str);
   }
   return batch_indexes;
@@ -188,11 +188,11 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
     std::string local_aggregation_str;
     serialize_encoded_number_array(local_batch_phe_aggregation,
         cur_batch_size, local_aggregation_str);
-    party.send_long_message(0, local_aggregation_str);
+    party.send_long_message(ACTIVE_PARTY_ID, local_aggregation_str);
 
     // receive the global batch aggregation from the active party
     std::string recv_global_aggregation_str;
-    party.recv_long_message(0, recv_global_aggregation_str);
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_global_aggregation_str);
     deserialize_encoded_number_array(batch_phe_aggregation,
         cur_batch_size, recv_global_aggregation_str);
   }
@@ -223,7 +223,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
   party.secret_shares_to_ciphers(encrypted_batch_losses,
                                  batch_loss_shares,
                                  cur_batch_size,
-                                 0,
+                                 ACTIVE_PARTY_ID,
                                  precision);
 
   std::vector<std::vector<float> > batch_samples;
@@ -430,7 +430,7 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
   party.collaborative_decrypt(encrypted_aggregation,
       decrypted_aggregation,
       dataset_size,
-      0);
+      ACTIVE_PARTY_ID);
 
   // step 4: active party computes the logistic function and compare the accuracy
   if (party.party_type == falcon::ACTIVE_PARTY) {
