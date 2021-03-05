@@ -158,13 +158,13 @@ class LogisticRegression : public Model {
   void train(Party party);
 
   /**
-   * test a logistic regression model
+   * evaluate a logistic regression model
    *
    * @param party: initialized party object
-   * @param type: falcon::DatasetType, TRAIN for training data and TEST for testing data
+   * @param eval_type: falcon::DatasetType, TRAIN for training data and TEST for testing data
    * @param accuracy: returned model accuracy, default metric "acc"
    */
-  void test(Party party, falcon::DatasetType type, float &accuracy);
+  void eval(Party party, falcon::DatasetType eval_type, float &accuracy);
 
   /** set weight size */
   void setter_weight_size(int s_weight_size) {
