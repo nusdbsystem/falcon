@@ -8,6 +8,7 @@
 #include <falcon/operator/phe/fixed_point_encoder.h>
 #include <falcon/algorithm/model.h>
 #include <falcon/party/party.h>
+#include <falcon/common.h>
 
 #include <vector>
 #include <string>
@@ -124,13 +125,13 @@ class LogisticRegression : public Model {
    *
    * @param party: initialized party object
    * @param batch_indexes: selected batch indexes
-   * @param type: denote training_data (0) or testing_data (1)
+   * @param dataset_type: denote the dataset type
    * @param precision: the fixed point precision of encoded plaintext samples
    * @param batch_aggregation: returned phe aggregation for the batch
    */
   void compute_batch_phe_aggregation(const Party& party,
       std::vector<int> batch_indexes,
-      int type,
+      falcon::DatasetType dataset_type,
       int precision,
       EncodedNumber *batch_phe_aggregation);
 

@@ -111,7 +111,7 @@ std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
 
 void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
     std::vector<int> batch_indexes,
-    int type,
+    falcon::DatasetType dataset_type,
     int precision,
     EncodedNumber *batch_phe_aggregation) {
   // retrieve phe pub key and phe random
@@ -125,9 +125,9 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
   int cur_batch_size = batch_indexes.size();
   std::vector< std::vector<float> > batch_samples;
   for (int i = 0; i < cur_batch_size; i++) {
-    if (type == falcon::TRAIN) {
+    if (dataset_type == falcon::TRAIN) {
       batch_samples.push_back(training_data[batch_indexes[i]]);
-    } else if (type == falcon::TEST) {
+    } else if (dataset_type == falcon::TEST) {
       batch_samples.push_back(testing_data[batch_indexes[i]]);
     } else {
       LOG(INFO) << "Not supported yet, reserved";
