@@ -25,6 +25,10 @@ int main(int argc, char *argv[]) {
   std::string network_file, log_file, data_input_file, data_output_file, key_file, model_save_file, model_report_file;
   std::string algorithm_name, algorithm_params;
 
+  // add for serving params
+  int is_inference;
+  std::string inference_endpoint;
+
   try {
     namespace po = boost::program_options;
     po::options_description description("Usage:");
@@ -44,7 +48,9 @@ int main(int argc, char *argv[]) {
         ("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run")
         ("algorithm-params", po::value<std::string>(&algorithm_params), "parameters for the algorithm")
         ("model-save-file", po::value<std::string>(&model_save_file), "model save file name")
-        ("model-report-file", po::value<std::string>(&model_report_file), "model report file name");
+        ("model-report-file", po::value<std::string>(&model_report_file), "model report file name")
+        ("is-inference", po::value<int>(&is_inference), "whether it is an inference job")
+        ("inference-endpoint", po::value<std::string>(&inference_endpoint), "endpoint to listen inference request");
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
@@ -72,6 +78,8 @@ int main(int argc, char *argv[]) {
     std::cout << "algorithm-params: " << vm["algorithm-params"].as< std::string >() << std::endl;
     std::cout << "model-save-file: " << vm["model-save-file"].as< std::string >() << std::endl;
     std::cout << "model-report-file: " << vm["model-report-file"].as< std::string >() << std::endl;
+    std::cout << "is-inference: " << vm["is-inference"].as<int>() << std::endl;
+    std::cout << "inference-endpoint: " << vm["inference-endpoint"].as< std::string >() << std::endl;
   }
   catch(std::exception& e)
   {
@@ -96,6 +104,8 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "algorithm_params: " << algorithm_params;
   LOG(INFO) << "model_save_file: " << model_save_file;
   LOG(INFO) << "model_report_file: " << model_report_file;
+  LOG(INFO) << "is_inference: " << is_inference;
+  LOG(INFO) << "inference_endpoint: " << inference_endpoint;
 
   Party party(party_id, party_num,
       static_cast<falcon::PartyType>(party_type),
@@ -109,19 +119,24 @@ int main(int argc, char *argv[]) {
   std::cout << "Parse algorithm name and run the program" << std::endl;
 
   falcon::AlgorithmName name = parse_algorithm_name(algorithm_name);
-  switch(name) {
-    case falcon::LR:
-      train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
-      break;
-    case falcon::DT:
-      LOG(INFO) << "Decision Tree algorithm is not supported now.";
-      break;
-    default:
-      train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
-      break;
-  }
+  if (!is_inference) {
+    switch(name) {
+      case falcon::LR:
+        train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
+        break;
+      case falcon::DT:
+        LOG(INFO) << "Decision Tree algorithm is not supported now.";
+        break;
+      default:
+        train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
+        break;
+    }
 
-  std::cout << "Finish algorithm " << std::endl;
+    std::cout << "Finish algorithm " << std::endl;
+  } else {
+    // invoke creating endpoint for inference requests
+
+  }
 
   return 0;
 }

@@ -47,6 +47,8 @@ set(SOURCE_FILES
         algorithm/vertical/linear_model/logistic_regression.cc
         ../../include/falcon/algorithm/model.h
         algorithm/model.cc
+        ../../include/falcon/algorithm/inference.h
+        algorithm/inference.cc
         ../../include/falcon/model/model_io.h
         model/model_io.cc)
 
