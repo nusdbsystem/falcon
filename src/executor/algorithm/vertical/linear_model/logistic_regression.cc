@@ -5,6 +5,10 @@
 #include <falcon/algorithm/vertical/linear_model/logistic_regression.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/lr_params_converter.h>
+#include <falcon/operator/mpc/spdz_connector.h>
+#include <falcon/utils/metric/accuracy.h>
+#include <falcon/common.h>
+#include <falcon/model/model_io.h>
 
 #include <ctime>
 #include <random>
@@ -13,9 +17,7 @@
 
 #include <glog/logging.h>
 #include <Networking/ssl_sockets.h>
-#include <falcon/operator/mpc/spdz_connector.h>
-#include <falcon/utils/metric/accuracy.h>
-#include <falcon/common.h>
+
 
 LogisticRegression::LogisticRegression() {}
 
@@ -101,7 +103,7 @@ std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
     }
   } else {
     std::string recv_batch_indexes_str;
-    party.recv_long_message(0, recv_batch_indexes_str);
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_batch_indexes_str);
     deserialize_int_array(batch_indexes, recv_batch_indexes_str);
   }
   return batch_indexes;
@@ -109,6 +111,7 @@ std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
 
 void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
     std::vector<int> batch_indexes,
+    falcon::DatasetType dataset_type,
     int precision,
     EncodedNumber *batch_phe_aggregation) {
   // retrieve phe pub key and phe random
@@ -122,7 +125,13 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
   int cur_batch_size = batch_indexes.size();
   std::vector< std::vector<float> > batch_samples;
   for (int i = 0; i < cur_batch_size; i++) {
-    batch_samples.push_back(training_data[batch_indexes[i]]);
+    if (dataset_type == falcon::TRAIN) {
+      batch_samples.push_back(training_data[batch_indexes[i]]);
+    } else if (dataset_type == falcon::TEST) {
+      batch_samples.push_back(testing_data[batch_indexes[i]]);
+    } else {
+      LOG(INFO) << "Not supported yet, reserved";
+    }
   }
   EncodedNumber** encoded_batch_samples = new EncodedNumber*[cur_batch_size];
   for (int i = 0; i < cur_batch_size; i++) {
@@ -179,11 +188,11 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
     std::string local_aggregation_str;
     serialize_encoded_number_array(local_batch_phe_aggregation,
         cur_batch_size, local_aggregation_str);
-    party.send_long_message(0, local_aggregation_str);
+    party.send_long_message(ACTIVE_PARTY_ID, local_aggregation_str);
 
     // receive the global batch aggregation from the active party
     std::string recv_global_aggregation_str;
-    party.recv_long_message(0, recv_global_aggregation_str);
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_global_aggregation_str);
     deserialize_encoded_number_array(batch_phe_aggregation,
         cur_batch_size, recv_global_aggregation_str);
   }
@@ -214,7 +223,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
   party.secret_shares_to_ciphers(encrypted_batch_losses,
                                  batch_loss_shares,
                                  cur_batch_size,
-                                 0,
+                                 ACTIVE_PARTY_ID,
                                  precision);
 
   std::vector<std::vector<float> > batch_samples;
@@ -320,6 +329,7 @@ void LogisticRegression::train(Party party) {
     EncodedNumber* encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
     compute_batch_phe_aggregation(party,
         batch_indexes,
+        falcon::TRAIN,
         plaintext_samples_precision,
         encrypted_batch_aggregation);
 
@@ -382,8 +392,8 @@ void LogisticRegression::train(Party party) {
   google::FlushLogFiles(google::INFO);
 }
 
-void LogisticRegression::eval(Party party, int eval_type, float &accuracy) {
-  std::string dataset_str = (eval_type == 0 ? "training dataset" : "test-set");
+void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float &accuracy) {
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
 
@@ -398,8 +408,8 @@ void LogisticRegression::eval(Party party, int eval_type, float &accuracy) {
   party.getter_phe_pub_key(phe_pub_key);
 
   // step 1: init test data
-  int dataset_size = (eval_type == USE_TRAIN) ? training_data.size() : testing_data.size();
-  std::vector< std::vector<float> > cur_test_dataset = (eval_type == USE_TRAIN) ? training_data : testing_data;
+  int dataset_size = (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
+  std::vector< std::vector<float> > cur_test_dataset = (eval_type == falcon::TRAIN) ? training_data : testing_data;
 
   // step 2: every party computes partial phe summation and sends to active party
   std::vector<int> indexes;
@@ -411,6 +421,7 @@ void LogisticRegression::eval(Party party, int eval_type, float &accuracy) {
   EncodedNumber* encrypted_aggregation = new EncodedNumber[dataset_size];
   compute_batch_phe_aggregation(party,
       indexes,
+      eval_type,
       plaintext_precision,
       encrypted_aggregation);
 
@@ -419,7 +430,7 @@ void LogisticRegression::eval(Party party, int eval_type, float &accuracy) {
   party.collaborative_decrypt(encrypted_aggregation,
       decrypted_aggregation,
       dataset_size,
-      0);
+      ACTIVE_PARTY_ID);
 
   // step 4: active party computes the logistic function and compare the accuracy
   if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -432,9 +443,10 @@ void LogisticRegression::eval(Party party, int eval_type, float &accuracy) {
         t = t >= 0.5 ? 1 : 0;
         vec.push_back(t);
       }
-      if (eval_type == USE_TRAIN) {
+      if (eval_type == falcon::TRAIN) {
         accuracy = accuracy_computation(vec, training_labels);
-      } else {
+      }
+      if (eval_type == falcon::TEST){
         accuracy = accuracy_computation(vec, testing_labels);
       }
       LOG(INFO) << "The evaluation accuracy on " << dataset_str << " is: " << accuracy;
@@ -454,6 +466,18 @@ void LogisticRegression::eval(Party party, int eval_type, float &accuracy) {
   LOG(INFO) << "Evaluation time = " << testing_consumed_time;
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Finished *************";
   google::FlushLogFiles(google::INFO);
+}
+
+void LogisticRegression::setter_encoded_weights(EncodedNumber *s_weights) {
+  for (int i = 0; i < weight_size; i++) {
+    local_weights[i] = s_weights[i];
+  }
+}
+
+void LogisticRegression::getter_encoded_weights(EncodedNumber *g_weights) {
+  for (int i = 0; i < weight_size; i++) {
+    g_weights[i] = local_weights[i];
+  }
 }
 
 void spdz_logistic_function_computation(int party_num,
@@ -526,7 +550,8 @@ void spdz_logistic_function_computation(int party_num,
   }
 }
 
-void train_logistic_regression(Party party, std::string params_str) {
+void train_logistic_regression(Party party, std::string params_str,
+    std::string model_save_file, std::string model_report_file) {
 
   LOG(INFO) << "Run the example logistic regression train";
   std::cout << "Run the example logistic regression train" << std::endl;
@@ -590,6 +615,14 @@ void train_logistic_regression(Party party, std::string params_str) {
   std::cout << "Init log_reg_model success" << std::endl;
 
   log_reg_model.train(party);
-  log_reg_model.eval(party, USE_TRAIN, training_accuracy);
-  log_reg_model.eval(party, USE_TEST, testing_accuracy);
+  log_reg_model.eval(party, falcon::TRAIN, training_accuracy);
+  log_reg_model.eval(party, falcon::TEST, testing_accuracy);
+
+  // save model and report
+  EncodedNumber* model_weights = new EncodedNumber[log_reg_model.getter_weight_size()];
+  log_reg_model.getter_encoded_weights(model_weights);
+  save_lr_model(model_weights, log_reg_model.getter_weight_size(), model_save_file);
+  save_lr_report(training_accuracy, testing_accuracy, model_report_file);
+
+  delete [] model_weights;
 }

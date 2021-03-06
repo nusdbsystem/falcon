@@ -45,5 +45,9 @@ cmake-build-debug/
 third_party/MP-SPDZ/
 third_party/libhcs/
 
+data/dataset/bank_marketing_data/client0/phe_keys
+data/dataset/bank_marketing_data/client1/phe_keys
+data/dataset/bank_marketing_data/client2/phe_keys
+
 # coordinator dependencies
 pkg/*

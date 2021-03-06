@@ -8,6 +8,7 @@
 #include <falcon/operator/phe/fixed_point_encoder.h>
 #include <falcon/algorithm/model.h>
 #include <falcon/party/party.h>
+#include <falcon/common.h>
 
 #include <vector>
 #include <string>
@@ -124,11 +125,13 @@ class LogisticRegression : public Model {
    *
    * @param party: initialized party object
    * @param batch_indexes: selected batch indexes
+   * @param dataset_type: denote the dataset type
    * @param precision: the fixed point precision of encoded plaintext samples
    * @param batch_aggregation: returned phe aggregation for the batch
    */
   void compute_batch_phe_aggregation(const Party& party,
       std::vector<int> batch_indexes,
+      falcon::DatasetType dataset_type,
       int precision,
       EncodedNumber *batch_phe_aggregation);
 
@@ -159,10 +162,26 @@ class LogisticRegression : public Model {
    * evaluate a logistic regression model
    *
    * @param party: initialized party object
-   * @param eval_type: 0 for training data and 1 for testing data
+   * @param eval_type: falcon::DatasetType, TRAIN for training data and TEST for testing data
    * @param accuracy: returned model accuracy, default metric "acc"
    */
-  void eval(Party party, int eval_type, float& accuracy);
+  void eval(Party party, falcon::DatasetType eval_type, float &accuracy);
+
+  /** set weight size */
+  void setter_weight_size(int s_weight_size) {
+    weight_size = s_weight_size;
+  }
+
+  /** set weight params */
+  void setter_encoded_weights(EncodedNumber* s_weights);
+
+  /** get weight size */
+  int getter_weight_size() {
+    return weight_size;
+  }
+
+  /** set weight params */
+  void getter_encoded_weights(EncodedNumber* g_weights);
 };
 
 /**
@@ -186,6 +205,15 @@ void spdz_logistic_function_computation(int party_num,
     int cur_batch_size,
     std::promise<std::vector<float>> *batch_loss_shares);
 
-void train_logistic_regression(Party party, std::string params);
+/**
+ * train a logistic regression model
+ *
+ * @param party: initialized party object
+ * @param params: LogisticRegressionParams serialized string
+ * @param model_save_file: saved model file
+ * @param model_report_file: saved report file
+ */
+void train_logistic_regression(Party party, std::string params,
+    std::string model_save_file, std::string model_report_file);
 
 #endif //FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_H_

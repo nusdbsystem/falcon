@@ -23,6 +23,8 @@ set(SOURCE_FILES
         ../../include/falcon/utils/pb_converter/network_converter.h
         utils/pb_converter/network_converter.cc
         utils/metric/accuracy.cc
+        ../../include/falcon/utils/base64.h
+        utils/base64.cc
         include/message/common.pb.h
         include/message/common.pb.cc
         include/message/model.pb.h
@@ -44,7 +46,9 @@ set(SOURCE_FILES
         ../../include/falcon/algorithm/vertical/linear_model/logistic_regression.h
         algorithm/vertical/linear_model/logistic_regression.cc
         ../../include/falcon/algorithm/model.h
-        algorithm/model.cc)
+        algorithm/model.cc
+        ../../include/falcon/model/model_io.h
+        model/model_io.cc)
 
 #set(SPDZ_HOME "$ENV{HOME}/Documents/MP-SPDZ/")
 set(SPDZ_HOME "$ENV{HOME}/Documents/falcon/third_party/MP-SPDZ/")

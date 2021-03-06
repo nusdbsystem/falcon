@@ -22,13 +22,12 @@ namespace falcon{
   // for Logistic Regression
   #define RANDOM_SEED 42
   #define SPLIT_TRAIN_TEST_RATIO 0.8
-  #define USE_TRAIN 0
-  #define USE_TEST 1
-  #define ACTIVE_PARTY_ID 1
+  #define ACTIVE_PARTY_ID 0
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};
   enum AlgorithmName {LR, DT};
+  enum DatasetType {TRAIN, TEST, VALIDATE};
 }
 
 #endif //FALCON_INCLUDE_COMMON_H_
