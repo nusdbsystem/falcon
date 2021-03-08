@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 project(falcon)
 set(CMAKE_CXX_STANDARD 11)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address")
@@ -58,8 +58,15 @@ set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
 
 add_library(executor ${SOURCE_FILES})
 
-include(FindProtobuf)
-find_package(Protobuf REQUIRED)
+#include(FindProtobuf)
+#find_package(Protobuf REQUIRED)
+# Find Protobuf installation
+# Looks for protobuf-config.cmake file installed by Protobuf's cmake installation.
+set(protobuf_MODULE_COMPATIBLE TRUE)
+find_package(Protobuf CONFIG REQUIRED)
+include_directories(${PROTOBUF_INCLUDE_DIRS})
+message(STATUS "Using protobuf ${Protobuf_VERSION}")
+
 find_package(Boost COMPONENTS program_options REQUIRED)
 
 target_include_directories(executor PUBLIC
@@ -123,3 +130,5 @@ target_link_libraries(falcon
         /usr/local/lib/libglog.so
         /usr/lib/x86_64-linux-gnu/libgmp.so
         /usr/lib/x86_64-linux-gnu/libgmpxx.so)
+
+add_subdirectory(inference/client)
