@@ -7,6 +7,7 @@
 
 #include <glog/logging.h>
 #include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/message_lite.h>
 
 void serialize_int_array(std::vector<int> vec, std::string& output_message) {
   com::nus::dbsytem::falcon::v0::IntArray int_array;

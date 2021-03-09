@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   std::string algorithm_name, algorithm_params;
 
   // add for serving params
-  int is_inference;
+  int is_inference = 0;
   std::string inference_endpoint;
 
   try {
@@ -79,8 +79,8 @@ int main(int argc, char *argv[]) {
     std::cout << "algorithm-params: " << vm["algorithm-params"].as< std::string >() << std::endl;
     std::cout << "model-save-file: " << vm["model-save-file"].as< std::string >() << std::endl;
     std::cout << "model-report-file: " << vm["model-report-file"].as< std::string >() << std::endl;
-    std::cout << "is-inference: " << vm["is-inference"].as<int>() << std::endl;
-    std::cout << "inference-endpoint: " << vm["inference-endpoint"].as< std::string >() << std::endl;
+    //std::cout << "is-inference: " << vm["is-inference"].as<int>() << std::endl;
+    //std::cout << "inference-endpoint: " << vm["inference-endpoint"].as< std::string >() << std::endl;
   }
   catch(std::exception& e)
   {
@@ -105,6 +105,10 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "algorithm_params: " << algorithm_params;
   LOG(INFO) << "model_save_file: " << model_save_file;
   LOG(INFO) << "model_report_file: " << model_report_file;
+
+  //is_inference = 1;
+  inference_endpoint = DEFAULT_INFERENCE_ENDPOINT;
+
   LOG(INFO) << "is_inference: " << is_inference;
   LOG(INFO) << "inference_endpoint: " << inference_endpoint;
 
@@ -120,8 +124,9 @@ int main(int argc, char *argv[]) {
   std::cout << "Parse algorithm name and run the program" << std::endl;
 
   falcon::AlgorithmName name = parse_algorithm_name(algorithm_name);
-  if (!is_inference) {
-    switch(name) {
+
+#if IS_INFERENCE == 0
+  switch(name) {
       case falcon::LR:
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
         break;
@@ -132,17 +137,15 @@ int main(int argc, char *argv[]) {
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
         break;
     }
-
-    std::cout << "Finish algorithm " << std::endl;
+  std::cout << "Finish algorithm " << std::endl;
+#else
+  // invoke creating endpoint for inference requests
+  if (party_type == falcon::ACTIVE_PARTY) {
+    RunServer(inference_endpoint, model_save_file, party);
   } else {
-    // invoke creating endpoint for inference requests
-    if (party_type == falcon::ACTIVE_PARTY) {
-      RunServer(inference_endpoint, model_save_file, party);
-    } else {
-      RunPassiveServer(model_save_file, party);
-    }
+    RunPassiveServer(model_save_file, party);
   }
-
+#endif
   return 0;
 }
 

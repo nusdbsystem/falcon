@@ -49,5 +49,13 @@ data/dataset/bank_marketing_data/client0/phe_keys
 data/dataset/bank_marketing_data/client1/phe_keys
 data/dataset/bank_marketing_data/client2/phe_keys
 
+data/dataset/bank_marketing_data/client0/model
+data/dataset/bank_marketing_data/client1/model
+data/dataset/bank_marketing_data/client2/model
+
+data/dataset/bank_marketing_data/client0/model.txt
+data/dataset/bank_marketing_data/client1/model.txt
+data/dataset/bank_marketing_data/client2/model.txt
+
 # coordinator dependencies
 pkg/*

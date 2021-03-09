@@ -26,6 +26,7 @@ namespace falcon{
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"
+  #define IS_INFERENCE 0
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};

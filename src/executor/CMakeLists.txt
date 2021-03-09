@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.10)
 project(falcon)
 set(CMAKE_CXX_STANDARD 11)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address")
@@ -84,9 +84,6 @@ find_package(Threads REQUIRED)
 
 # Find Protobuf installation
 # Looks for protobuf-config.cmake file installed by Protobuf's cmake installation.
-#set(protobuf_MODULE_COMPATIBLE TRUE)
-#find_package(Protobuf CONFIG REQUIRED)
-#message(STATUS "Using protobuf ${Protobuf_VERSION}")
 
 set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
 set(_REFLECTION gRPC::grpc++_reflection)
@@ -120,7 +117,7 @@ target_include_directories(executor PUBLIC
 
 target_link_libraries(executor
         $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
-        ${PROTOBUF_LIBRARY}
+        #${PROTOBUF_LIBRARY}
         ${Boost_LIBRARIES}
         ${SPDZ_HOME}/libSPDZ.a
         libboost_thread.a
@@ -157,7 +154,7 @@ add_executable(falcon main.cc)
 
 target_link_libraries(falcon
         $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
-        ${PROTOBUF_LIBRARY}
+        #${PROTOBUF_LIBRARY}
         ${Boost_LIBRARIES}
         executor
         libboost_thread.a
@@ -173,6 +170,9 @@ target_link_libraries(falcon
         sodium
         /usr/local/lib/libglog.so
         /usr/lib/x86_64-linux-gnu/libgmp.so
-        /usr/lib/x86_64-linux-gnu/libgmpxx.so)
+        /usr/lib/x86_64-linux-gnu/libgmpxx.so
+        ${_REFLECTION}
+        ${_GRPC_GRPCPP}
+        ${_PROTOBUF_LIBPROTOBUF})
 
 add_subdirectory(inference/client)

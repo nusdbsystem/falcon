@@ -30,7 +30,7 @@ class LRInferenceClient {
     PredictionRequest request;
     request.set_sample_num(sample_num);
     for (int i = 0; i < sample_num; i++) {
-      request.set_sample_ids(i, sample_ids[i]);
+      request.add_sample_ids(sample_ids[i]);
     }
 
     // Container for the data we expect from the server.
@@ -78,16 +78,20 @@ int main(int argc, char** argv) {
   // InsecureChannelCredentials()).
   // The parameters include number of samples, sample ids, endpoint
   int sample_num = std::stoi(argv[1]);
+  std::cout << "sample num = " << sample_num << std::endl;
   int * sample_ids = new int[sample_num];
   std::string endpoint;
   for (int i = 0; i < sample_num; i++) {
     sample_ids[i] = std::stoi(argv[i + 2]);
+    std::cout << "sample ids [" << i << "] = " << sample_ids[i] << std::endl;
   }
   if (argv[sample_num + 2]) {
     endpoint = argv[sample_num + 2];
   } else {
     endpoint = DEFAULT_INFERENCE_ENDPOINT;
   }
+
+  std::cout << "endpoint = " << endpoint << std::endl;
 
   LRInferenceClient client(grpc::CreateChannel(
       endpoint, grpc::InsecureChannelCredentials()));

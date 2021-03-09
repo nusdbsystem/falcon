@@ -25,6 +25,6 @@ void RunServer(const std::string& endpoint,
  * @param saved_model_file: saved model
  * @param party: initialized party
  */
-void RunPassiveServer(const std::string& saved_model_file, Party party);
+void RunPassiveServer(std::string saved_model_file, Party party);
 
 #endif //FALCON_SRC_EXECUTOR_INFERENCE_SERVER_INFERENCE_SERVER_H_
