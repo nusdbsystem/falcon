@@ -157,13 +157,14 @@ class LRInferenceServiceImpl final : public InferenceLR::Service {
     for (int i = 0; i < sample_num; i++) {
       float t;
       decrypted_aggregation[i].decode(t);
+      // std::cout << "t before logistic = " << t << std::endl;
       t = 1.0 / (1 + exp(0 - t));
-      std::cout << "t = " << t << std::endl;
+      // std::cout << "t after logistic = " << t << std::endl;
       std::vector<float> prob;
       prob.push_back(t);
       prob.push_back(1 - t);
       t = t >= 0.5 ? 1 : 0;
-      std::cout << "label = " << t << std::endl;
+      // std::cout << "label = " << t << std::endl;
       labels.push_back(t);
       probabilities.push_back(prob);
     }
@@ -176,7 +177,7 @@ class LRInferenceServiceImpl final : public InferenceLR::Service {
     for (int i = 0; i < sample_num; i++) {
       com::nus::dbsytem::falcon::v0::inference::PredictionOutput *output = response->add_outputs();
       output->set_label(labels[i]);
-      std::cout << "probabilities[0].size = " << probabilities[0].size() << std::endl;
+      // std::cout << "probabilities[0].size = " << probabilities[0].size() << std::endl;
       for (int j = 0; j < probabilities[0].size(); j++) {
         output->add_probabilities(probabilities[i][j]);
       }

@@ -54,7 +54,7 @@ class LRInferenceClient {
           float label = response.outputs(i).label();
           std::cout << "Sample " << sample_ids[i] << " predicted label = " << label << ", ";
           std::cout << "Probabilities = [ ";
-          for (int j = 0; j < response.outputs_size(); j++) {
+          for (int j = 0; j < response.outputs(0).probabilities_size(); j++) {
             std::cout << response.outputs(i).probabilities(j) << " ";
           }
           std::cout << "]" << std::endl;
