@@ -24,6 +24,9 @@ namespace falcon{
   #define SPLIT_TRAIN_TEST_RATIO 0.8
   #define ACTIVE_PARTY_ID 0
 
+  // for inference service
+  #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"
+
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};
   enum AlgorithmName {LR, DT};

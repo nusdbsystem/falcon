@@ -11,6 +11,7 @@
 #include "falcon/party/party.h"
 #include "falcon/operator/mpc/spdz_connector.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression.h"
+#include "falcon/inference/server/inference_server.h"
 
 #include <glog/logging.h>
 
@@ -135,7 +136,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Finish algorithm " << std::endl;
   } else {
     // invoke creating endpoint for inference requests
-
+    RunServer(inference_endpoint, model_save_file, party);
   }
 
   return 0;

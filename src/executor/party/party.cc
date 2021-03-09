@@ -208,6 +208,42 @@ Party::Party(const Party &party) {
   djcs_t_free_auth_server(tmp_auth_server);
 }
 
+Party& Party::operator = (const Party &party) {
+  // copy public variables
+  party_id = party.party_id;
+  party_num = party.party_num;
+  party_type = party.party_type;
+  fl_setting = party.fl_setting;
+  channels = party.channels;
+  host_names = party.host_names;
+
+  // copy private variables
+  feature_num = party.getter_feature_num();
+  sample_num = party.getter_sample_num();
+  local_data = party.getter_local_data();
+  labels = party.getter_labels();
+
+  // init phe keys and copy from party
+  phe_random = hcs_init_random();
+  phe_pub_key = djcs_t_init_public_key();
+  phe_auth_server = djcs_t_init_auth_server();
+  hcs_random* tmp_random = hcs_init_random();
+  djcs_t_public_key* tmp_pub_key = djcs_t_init_public_key();
+  djcs_t_auth_server* tmp_auth_server = djcs_t_init_auth_server();
+  party.getter_phe_random(tmp_random);
+  party.getter_phe_pub_key(tmp_pub_key);
+  party.getter_phe_auth_server(tmp_auth_server);
+  djcs_t_hcs_random_copy(tmp_random, phe_random);
+  djcs_t_public_key_copy(tmp_pub_key, phe_pub_key);
+  djcs_t_auth_server_copy(tmp_auth_server, phe_auth_server);
+
+  // free tmp phe key objects
+  hcs_free_random(tmp_random);
+  djcs_t_free_public_key(tmp_pub_key);
+  djcs_t_free_auth_server(tmp_auth_server);
+  return *this;
+}
+
 void Party::init_with_new_phe_keys(int epsilon, int phe_key_size, int required_party_num) {
   LOG(INFO) << "party type = " << party_type;
   if (party_type == falcon::ACTIVE_PARTY) {

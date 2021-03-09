@@ -9,6 +9,8 @@
 #include <grpcpp/grpcpp.h>
 #include "../../include/message/inference/lr_grpc.grpc.pb.h"
 
+#include <falcon/common.h>
+
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
@@ -26,6 +28,10 @@ class LRInferenceClient {
   std::string Prediction(int sample_num, int * sample_ids) {
     // Data we are sending to the server.
     PredictionRequest request;
+    request.set_sample_num(sample_num);
+    for (int i = 0; i < sample_num; i++) {
+      request.set_sample_ids(i, sample_ids[i]);
+    }
 
     // Container for the data we expect from the server.
     PredictionResponse response;
@@ -39,7 +45,22 @@ class LRInferenceClient {
 
     // Act upon its status.
     if (status.ok()) {
-      return "Success";
+      int received_sample_num = response.sample_num();
+      if (received_sample_num != sample_num) {
+        std::cout << "Received prediction number does not match\n";
+        return "Prediction failed";
+      } else {
+        for (int i = 0; i < received_sample_num; i++) {
+          float label = response.outputs(i).label();
+          std::cout << "Sample " << sample_ids[i] << " predicted label = " << label << ", ";
+          std::cout << "Probabilities = [ ";
+          for (int j = 0; j < response.outputs_size(); j++) {
+            std::cout << response.outputs(i).probabilities(j) << " ";
+          }
+          std::cout << "]" << std::endl;
+        }
+        return "Prediction success";
+      }
     } else {
       std::cout << status.error_code() << ": " << status.error_message() << std::endl;
       return "RPC failed";
@@ -52,30 +73,27 @@ class LRInferenceClient {
 
 int main(int argc, char** argv) {
   // Instantiate the client. It requires a channel, out of which the actual RPCs
-  // are created. This channel models a connection to an endpoint specified by
-  // the argument "--target=" which is the only expected argument.
+  // are created.
   // We indicate that the channel isn't authenticated (use of
   // InsecureChannelCredentials()).
-  std::string target_str;
-  std::string arg_str("--target");
-  if (argc > 1) {
-    std::string arg_val = argv[1];
-    size_t start_pos = arg_val.find(arg_str);
-    if (start_pos != std::string::npos) {
-      start_pos += arg_str.size();
-      if (arg_val[start_pos] == '=') {
-        target_str = arg_val.substr(start_pos + 1);
-      } else {
-        std::cout << "The only correct argument syntax is --target=" << std::endl;
-        return 0;
-      }
-    } else {
-      std::cout << "The only acceptable argument is --target=" << std::endl;
-      return 0;
-    }
+  // The parameters include number of samples, sample ids, endpoint
+  int sample_num = std::stoi(argv[1]);
+  int * sample_ids = new int[sample_num];
+  std::string endpoint;
+  for (int i = 0; i < sample_num; i++) {
+    sample_ids[i] = std::stoi(argv[i + 2]);
+  }
+  if (argv[sample_num + 2]) {
+    endpoint = argv[sample_num + 2];
   } else {
-    target_str = "localhost:50051";
+    endpoint = DEFAULT_INFERENCE_ENDPOINT;
   }
 
+  LRInferenceClient client(grpc::CreateChannel(
+      endpoint, grpc::InsecureChannelCredentials()));
+  std::string response_status = client.Prediction(sample_num, sample_ids);
+  std::cout << "Response received: " << response_status << std::endl;
+
+  delete [] sample_ids;
   return 0;
 }
