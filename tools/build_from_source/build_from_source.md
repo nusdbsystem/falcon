@@ -140,7 +140,7 @@ drwxr-xr-x 4 root root 4.0K Jan  5 14:30 CMakeFiles
     ```
 
 
-    In fact, the entier `Player-Data` needs to have the write permissions, otherwise the executor will report error:
+    In fact, the entire `Player-Data` needs to have the write permissions, otherwise the executor will report error:
 
     ```
     svd@svd-ThinkPad-T460:/opt/falcon/third_party/MP-SPDZ$ ./semi-party.x -F -N 3 -p 0 -I logistic_regression
@@ -188,5 +188,7 @@ drwxr-xr-x 4 root root 4.0K Jan  5 14:30 CMakeFiles
   
   **NOTE:** this is not related to whether to use "existing_key" in the train_job config. **this is key related to MPC, not the Falcon engine.**
 
-  Solution to this problem: rebuild from `bash fast-make.sh` steps onwards in `tools/build_from_source/mp-spdz_setup.sh`
+  Solution to this problem: rebuild from `tools/build_from_source/mp-spdz_setup.sh`
+
+  **NOTE: `mv Math/Setup.h.prod Math/Setup.h` is critical! `*.prod` specifies `/opt/falcon` as base path**
 

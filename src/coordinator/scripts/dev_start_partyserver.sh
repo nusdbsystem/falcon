@@ -81,4 +81,5 @@ elif [[ "$unamestr" == 'WindowsNT' ]]; then
    makeOS='build_windows'
 fi
 make $makeOS
-./bin/falcon_platform
+./bin/falcon_platform > $DEV_TEST_OUTDIR/Party-${PARTY_ID}-console.log &
+echo $! > dev_test/Party-${PARTY_ID}.pid
