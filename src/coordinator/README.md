@@ -32,9 +32,31 @@ to compile into a binary
 go build <go-program>.go
 ```
 
-## Load the Executor for FL
+## Set up the MPC servers for FL
 
-and update the executor path in `src/coordinator/common/global.go`
+### Run `semi-party.x` from compiled MP-SPDZ in falcon/third_party
+
+from `src/coordinator`, launch the script:
+
+```sh
+# start the 3 semi-party.x simulating 3 parties
+bash scripts/start_semi-party012.sh
+```
+
+To view the cmd outputs, inspect the `logs/semi-parties` folder in MP-SPDZ folder.
+
+To terminate the MPC, run:
+```sh
+bash scripts/terminate_semi-party012.sh
+```
+
+_NOTE: later the MPC and Falcon Engine will be launched internally by the platform after supplying `MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x"` in the config partyserver file_
+
+
+## Supply the Falcon Engine path
+
+Update the executor path in `src/coordinator/config_partyserver.properties`: `FL_ENGINE_PATH="/opt/falcon/build/src/executor/falcon"`
+
 
 ## Platform setup DEV (development without k8)
 
