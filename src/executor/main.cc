@@ -136,7 +136,11 @@ int main(int argc, char *argv[]) {
     std::cout << "Finish algorithm " << std::endl;
   } else {
     // invoke creating endpoint for inference requests
-    RunServer(inference_endpoint, model_save_file, party);
+    if (party_type == falcon::ACTIVE_PARTY) {
+      RunServer(inference_endpoint, model_save_file, party);
+    } else {
+      RunPassiveServer(model_save_file, party);
+    }
   }
 
   return 0;
