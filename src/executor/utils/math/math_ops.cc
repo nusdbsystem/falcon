@@ -60,6 +60,7 @@ float argmax(std::vector<float> inputs) {
   return index;
 }
 
+
 float logistic_function(float logit) {
   // Input logit to the logistic function
   // logistic function is a sigmoid function (S-shaped)
