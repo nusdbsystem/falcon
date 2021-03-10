@@ -40,14 +40,6 @@ std::vector<float> softmax(std::vector<float> inputs);
  */
 float argmax(std::vector<float> inputs);
 
-/**
- * compute the fraction of the matched elements
- *
- * @param a: first vector
- * @param b: second vector
- * @return
- */
-float accuracy_computation(std::vector<float> a, std::vector<float> b);
 
 /**
  * compute the logistic function for logit
