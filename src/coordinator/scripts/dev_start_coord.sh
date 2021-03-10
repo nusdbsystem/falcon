@@ -64,4 +64,5 @@ elif [[ "$unamestr" == 'WindowsNT' ]]; then
    makeOS='build_windows'
 fi
 make $makeOS
-./bin/falcon_platform
+./bin/falcon_platform > $DEV_TEST_OUTDIR/Coord-console.log &
+echo $! > dev_test/Coord.pid

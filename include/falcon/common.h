@@ -23,6 +23,8 @@ namespace falcon{
   #define RANDOM_SEED 42
   #define SPLIT_TRAIN_TEST_RATIO 0.8
   #define ACTIVE_PARTY_ID 0
+  // default threshold for LR is 50%
+  #define LOGREG_THRES 0.5
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};

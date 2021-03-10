@@ -32,50 +32,57 @@ to compile into a binary
 go build <go-program>.go
 ```
 
-## Load the Executor for FL
+## Set up the MPC servers for FL
 
-and update the executor path in `src/coordinator/common/global.go`
+### Run `semi-party.x` from compiled MP-SPDZ in falcon/third_party
+
+from `src/coordinator`, launch the script:
+
+```sh
+# start the 3 semi-party.x simulating 3 parties
+bash scripts/start_semi-party012.sh
+```
+
+To view the cmd outputs, inspect the `logs/semi-parties` folder in MP-SPDZ folder.
+
+To terminate the MPC, run:
+```sh
+bash scripts/terminate_semi-party012.sh
+```
+
+_NOTE: later the MPC and Falcon Engine will be launched internally by the platform after supplying `MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x"` in the config partyserver file_
+
+The console logs of the semi-party.x are captured in `third_party/MP-SPDZ/logs/semi-parties/` folder.
+
+
+## Supply the Falcon Engine path
+
+Update the executor path in `src/coordinator/config_partyserver.properties`: `FL_ENGINE_PATH="/opt/falcon/build/src/executor/falcon"`
+
 
 ## Platform setup DEV (development without k8)
 
-1. Setup coordinator:
-    
-    Update configurations in `src/coordinator/config_coord.properties`, choose the `JOB_DATABASE, BASE_PATH, COORD_SERVER_IP`
+Update configurations in `src/coordinator/config_coord.properties`, choose the `JOB_DATABASE, BASE_PATH, COORD_SERVER_IP`
 
-    Launch coordinator first:
-    
-    ```bash
-    #Usage:
-    bash scripts/dev_start_coord.sh
-    ```
-          
+Update `src/coordinator/config_partyserver.properties`
 
-2. Setup partyserver 1-N:
-    
-    Update `src/coordinator/config_partyserver.properties`
+**Simply call the `dev_start_all.sh` script**:
+```bash
+# launch the coordinator and partyserver 0~(PARTY_COUNT-1)
+bash scripts/dev_start_all.sh --partyCount <PARTY_COUNT>
+```
 
-    **Party ID must start with 0**
+To terminate the platform, call:
+```bash
+bash scripts/dev_terminate_all.sh --partyCount <PARTY_COUNT>
+```
 
-    Launch Party 0:
+The console outputs are captured in `src/coordinator/dev_test/` folder:
+- `Coord_TIMESTAMP/Coord-console.log`
+- `Party-0_TIMESTAMP/Party-0-console.log`
+- `Party-1_TIMESTAMP/Party-1-console.log`
+- `Party-2_TIMESTAMP/Party-2-console.log`
 
-    ```bash
-    #Usage:
-    bash scripts/dev_start_partyserver.sh --partyID 0
-    ```
-
-    Launch Party 1:
-    
-    ```bash
-    #Usage:
-    bash scripts/dev_start_partyserver.sh --partyID 1
-    ```
-
-    Launch Party 2:
-    
-    ```bash
-    #Usage:
-    bash scripts/dev_start_partyserver.sh --partyID 2
-    ```
 
 ## Platform setup PROD (production with k8)
 
