@@ -82,6 +82,12 @@ class Party {
   Party(const Party& party);
 
   /**
+   * assignment constructor
+   * @param party
+   */
+  Party& operator = (const Party &party);
+
+  /**
    * destructor
    */
   ~Party();
