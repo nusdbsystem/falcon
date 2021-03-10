@@ -23,6 +23,8 @@ namespace falcon{
   #define RANDOM_SEED 42
   #define SPLIT_TRAIN_TEST_RATIO 0.8
   #define ACTIVE_PARTY_ID 0
+  // default threshold for LR is 50%
+  #define LOGREG_THRES 0.5
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"

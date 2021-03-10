@@ -99,7 +99,12 @@ libmpirxx.so.8.4.3 -> /opt/falcon/third_party/MP-SPDZ/local/lib/libmpirxx.so.8.4
 
 `sudo bash tools/build_from_source/build_executor.sh`
 
-After edits of files in `src/executor`, simply re-make at `/opt/falcon/build`
+**NOTE**: After edits of files in `src/executor`, simply re-make at `/opt/falcon/build`:
+```sh
+# for rebuilding of executor
+# just cd build/ and
+make
+```
 
 Verify that the `executor` is built correctly in `/opt/falcon/build/src/executor`:
 
@@ -114,11 +119,11 @@ drwxr-xr-x 4 root root 4.0K Jan  5 14:30 CMakeFiles
 -rw-r--r-- 1 root root  31K Jan  5 14:30 Makefile
 ```
 
-### Gotchas
+## Gotchas and FAQ
 
 - Need to grant the dataset folder read/write permission
 
-    for eaxample, the dataset at `falcon/data/dataset/bank_marketing_data/` should be writable, otherwise the `phe_keys` files will be result in `Open file error` in executor step.
+    for example, the dataset at `falcon/data/dataset/bank_marketing_data/` should be writable, otherwise the `phe_keys` files will be result in `Open file error` in executor step.
 
     `I0105 14:42:57.623278   786 io_util.cc:76] Open /opt/falcon/data/dataset/bank_marketing_data/client1/phe_keys file error.`
 
@@ -135,7 +140,7 @@ drwxr-xr-x 4 root root 4.0K Jan  5 14:30 CMakeFiles
     ```
 
 
-    In fact, the entier `Player-Data` needs to have the write permissions, otherwise the executor will report error:
+    In fact, the entire `Player-Data` needs to have the write permissions, otherwise the executor will report error:
 
     ```
     svd@svd-ThinkPad-T460:/opt/falcon/third_party/MP-SPDZ$ ./semi-party.x -F -N 3 -p 0 -I logistic_regression
@@ -163,4 +168,27 @@ drwxr-xr-x 4 root root 4.0K Jan  5 14:30 CMakeFiles
     ```
 
     the above warnings is not affecting the MPC program
+
+- `Server-side handshake with C2 failed` due to certificates expire after a month.
+  ```sh
+  /opt/falcon/third_party/MP-SPDZ$ ./semi-party.x -F -N 3 -p 0 -I logistic_regression
+  No modulus found in Player-Data//3-Dp-128/Params-Data, generating 128-bit prime
+  Start listening on thread 140035952826112
+  Party 0 is listening on port 14000 for external client connections.
+  Listening for socket connections on base port 14000
+  Starting a new iteration.
+  Thread 140035952826112 found server.
+  Server-side handshake with C2 failed. Make sure they have the necessary certificate (Player-Data/P0.pem in the default configuration), and run `c_rehash <directory>` on its location.
+  Also make sure that it's still valid. Certificates generated with `Scripts/setup-ssl.sh` expire after a month.
+  terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >'
+    what():  handshake: stream truncated
+  Aborted (core dumped)
+  ```
+  This is due to certificates from the build have expired, the default expiry when setting up the certifates is 1 month.
+  
+  **NOTE:** this is not related to whether to use "existing_key" in the train_job config. **this is key related to MPC, not the Falcon engine.**
+
+  Solution to this problem: rebuild from `tools/build_from_source/mp-spdz_setup.sh`
+
+  **NOTE: `mv Math/Setup.h.prod Math/Setup.h` is critical! `*.prod` specifies `/opt/falcon` as base path**
 

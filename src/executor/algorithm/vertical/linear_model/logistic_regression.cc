@@ -7,6 +7,7 @@
 #include <falcon/utils/pb_converter/lr_params_converter.h>
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/utils/metric/accuracy.h>
+#include <falcon/utils/math/math_ops.h>
 #include <falcon/common.h>
 #include <falcon/model/model_io.h>
 
@@ -125,6 +126,8 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
   int cur_batch_size = batch_indexes.size();
   std::vector< std::vector<float> > batch_samples;
   for (int i = 0; i < cur_batch_size; i++) {
+    // NOTE: here is a function to calculate the inner product between
+    // sample feature values and encrypted weights, so needs to differentiate the dataset
     if (dataset_type == falcon::TRAIN) {
       batch_samples.push_back(training_data[batch_indexes[i]]);
     } else if (dataset_type == falcon::TEST) {
@@ -219,7 +222,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
 
   // convert batch loss shares back to encrypted losses
   int cur_batch_size = batch_indexes.size();
-  EncodedNumber *encrypted_batch_losses = new EncodedNumber[cur_batch_size];
+  EncodedNumber* encrypted_batch_losses = new EncodedNumber[cur_batch_size];
   party.secret_shares_to_ciphers(encrypted_batch_losses,
                                  batch_loss_shares,
                                  cur_batch_size,
@@ -230,7 +233,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
   for (int i = 0; i < cur_batch_size; i++) {
     batch_samples.push_back(training_data[batch_indexes[i]]);
   }
-  EncodedNumber **encoded_batch_samples = new EncodedNumber *[cur_batch_size];
+  EncodedNumber** encoded_batch_samples = new EncodedNumber *[cur_batch_size];
   for (int i = 0; i < cur_batch_size; i++) {
     encoded_batch_samples[i] = new EncodedNumber[weight_size];
   }
@@ -435,19 +438,33 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
   // step 4: active party computes the logistic function and compare the accuracy
   if (party.party_type == falcon::ACTIVE_PARTY) {
     if (metric == "acc") {
-      std::vector<float> vec;
+      // the output is a vector of integers (predicted classes)
+      int pred_class;
+      std::vector<int> pred_classes;
+
       for (int i = 0; i < dataset_size; i++) {
-        float t;
-        decrypted_aggregation[i].decode(t);
-        t = 1.0 / (1 + exp(0 - t));
-        t = t >= 0.5 ? 1 : 0;
-        vec.push_back(t);
+        float logit;  // logit or t
+        float est_prob;  // estimated probability
+        // prediction and label classes
+        // for binary classifier, positive and negative classes
+        int positive_class = 1;
+        int negative_class = 0;
+
+        decrypted_aggregation[i].decode(logit);
+        // decoded t score is called the logit
+        // now input logit t to the logistic function
+        // logistic function is a sigmoid function (S-shaped)
+        // logistic function outputs a float between 0 and 1
+        est_prob = logistic_function(logit);
+        // Logistic Regresison Model make its prediction
+        pred_class = (est_prob >= LOGREG_THRES) ? positive_class : negative_class;
+        pred_classes.push_back(pred_class);
       }
       if (eval_type == falcon::TRAIN) {
-        accuracy = accuracy_computation(vec, training_labels);
+        accuracy = accuracy_computation(pred_classes, training_labels);
       }
       if (eval_type == falcon::TEST){
-        accuracy = accuracy_computation(vec, testing_labels);
+        accuracy = accuracy_computation(pred_classes, testing_labels);
       }
       LOG(INFO) << "The evaluation accuracy on " << dataset_str << " is: " << accuracy;
     } else {

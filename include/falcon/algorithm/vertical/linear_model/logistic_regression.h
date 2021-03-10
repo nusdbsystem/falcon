@@ -35,6 +35,7 @@ struct LogisticRegressionParams {
   // optimization method, default 'sgd', currently support 'sgd'
   std::string optimizer;
   // strategy for handling multi-class classification, default 'ovr', currently support 'ovr'
+  // NOTE: ovr = one over rest
   std::string multi_class;
   // evaluation metric for training and testing, 'acc', 'auc', or 'ks', currently support 'acc'
   std::string metric;
@@ -63,6 +64,7 @@ class LogisticRegression : public Model {
   // optimization method, default 'sgd', currently support 'sgd'
   std::string optimizer;
   // strategy for handling multi-class classification, default 'ovr', currently support 'ovr'
+  // NOTE: ovr = one over rest
   std::string multi_class;
   // evaluation metric for training and testing, 'acc', 'auc', or 'ks', currently support 'acc'
   std::string metric;
