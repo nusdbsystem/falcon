@@ -13,7 +13,7 @@
       "path": {
         "data_input": "/opt/falcon/data/dataset/bank_marketing_data/client0",
         "data_output": "/opt/falcon/data/dataset/bank_marketing_data/client0",
-        "model_path": "/opt/falcon/data/dataset/bank_marketing_data"
+        "model_path": "/opt/falcon/data/dataset/bank_marketing_data/client0"
       }
     },
     {
@@ -23,7 +23,7 @@
       "path": {
         "data_input": "/opt/falcon/data/dataset/bank_marketing_data/client1",
         "data_output": "/opt/falcon/data/dataset/bank_marketing_data/client1",
-        "model_path": "/opt/falcon/data/dataset/bank_marketing_data"
+        "model_path": "/opt/falcon/data/dataset/bank_marketing_data/client1"
       }
     },
     {
@@ -33,7 +33,7 @@
       "path": {
         "data_input": "/opt/falcon/data/dataset/bank_marketing_data/client2",
         "data_output": "/opt/falcon/data/dataset/bank_marketing_data/client2",
-        "model_path": "/opt/falcon/data/dataset/bank_marketing_data"
+        "model_path": "/opt/falcon/data/dataset/bank_marketing_data/client2"
       }
     }
   ],
@@ -61,8 +61,8 @@
         }
       },
       "output_configs": {
-        "trained_model": "model",
-        "evaluation_report": "model.txt"
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
       }
     }
   }

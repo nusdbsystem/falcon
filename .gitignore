@@ -49,13 +49,13 @@ data/dataset/bank_marketing_data/client0/phe_keys
 data/dataset/bank_marketing_data/client1/phe_keys
 data/dataset/bank_marketing_data/client2/phe_keys
 
-data/dataset/bank_marketing_data/client0/model
-data/dataset/bank_marketing_data/client1/model
-data/dataset/bank_marketing_data/client2/model
+data/dataset/bank_marketing_data/client0/saved_model.pb
+data/dataset/bank_marketing_data/client1/saved_model.pb
+data/dataset/bank_marketing_data/client2/saved_model.pb
 
-data/dataset/bank_marketing_data/client0/model.txt
-data/dataset/bank_marketing_data/client1/model.txt
-data/dataset/bank_marketing_data/client2/model.txt
+data/dataset/bank_marketing_data/client0/report.txt
+data/dataset/bank_marketing_data/client1/report.txt
+data/dataset/bank_marketing_data/client2/report.txt
 
 # coordinator dependencies
 pkg/*

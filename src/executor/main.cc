@@ -140,10 +140,12 @@ int main(int argc, char *argv[]) {
   std::cout << "Finish algorithm " << std::endl;
 #else
   // invoke creating endpoint for inference requests
+  // TODO: there is a problem when using grpc server with spdz_logistic_function_computation
+  // TODO: now alleviate the problem by not including during training (need to check later)
   if (party_type == falcon::ACTIVE_PARTY) {
-    RunServer(inference_endpoint, model_save_file, party);
+    RunActiveServerLR(inference_endpoint, model_save_file, party);
   } else {
-    RunPassiveServer(model_save_file, party);
+    RunPassiveServerLR(model_save_file, party);
   }
 #endif
   return 0;

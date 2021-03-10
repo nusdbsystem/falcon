@@ -203,7 +203,7 @@ class LRInferenceServiceImpl final : public InferenceLR::Service {
   EncodedNumber* local_weights_;
 };
 
-void RunServer(const std::string& endpoint,
+void RunActiveServerLR(const std::string& endpoint,
     const std::string& saved_model_file,
     const Party& party) {
   LRInferenceServiceImpl service(saved_model_file, party);
@@ -225,10 +225,12 @@ void RunServer(const std::string& endpoint,
   server->Wait();
 }
 
-void RunPassiveServer(std::string saved_model_file, Party party) {
+void RunPassiveServerLR(std::string saved_model_file, Party party) {
   int weight_size = party.getter_feature_num();
   EncodedNumber* local_weights = new EncodedNumber[weight_size];
   load_lr_model(saved_model_file, weight_size, local_weights);
+
+  // keep listening requests from the active party
   while (true) {
     std::cout << "listen active party's request" << std::endl;
     // receive sample id from active party
