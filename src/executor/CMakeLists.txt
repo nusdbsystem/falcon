@@ -56,8 +56,7 @@ set(SOURCE_FILES
         ../../include/falcon/inference/server/inference_server.h
         inference/server/inference_server.cc)
 
-#set(SPDZ_HOME "$ENV{HOME}/Documents/MP-SPDZ/")
-set(SPDZ_HOME "$ENV{HOME}/Documents/falcon/third_party/MP-SPDZ/")
+set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
 
 add_library(executor ${SOURCE_FILES})
@@ -113,10 +112,10 @@ target_include_directories(executor PUBLIC
         ${PROTOBUF_INCLUDE_DIR}
         ${SPDZ_HOME}
         ${SPDZ_HOME}/local/include
-        $ENV{HOME}/Documents/falcon/include)
+        /opt/falcon/include)
 
 target_link_libraries(executor
-        $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
+        /opt/falcon/third_party/libhcs/lib/libhcs.so
         #${PROTOBUF_LIBRARY}
         ${Boost_LIBRARIES}
         ${SPDZ_HOME}/libSPDZ.a
@@ -153,7 +152,7 @@ include_directories(
 add_executable(falcon main.cc)
 
 target_link_libraries(falcon
-        $ENV{HOME}/Documents/projects/libhcs/lib/libhcs.so
+        /opt/falcon/third_party/libhcs/lib/libhcs.so
         #${PROTOBUF_LIBRARY}
         ${Boost_LIBRARIES}
         executor
