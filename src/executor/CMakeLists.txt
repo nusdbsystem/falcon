@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION 3.10)
 project(falcon)
 set(CMAKE_CXX_STANDARD 11)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options")
+# since the compiled executor at /opt/falcon is used for development debugging,
+# defer the "prod" status and activate ASAN with helpful debug flags
+# -g option gives more information
+# -fno-omit-frame-pointer gets nicer stack traces in error messages
+# -fno-common to make global variables protected by ASAN
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address -g -fno-common -fno-omit-frame-pointer")
 
 set(SOURCE_FILES
         ../../include/falcon/network/Comm.hpp
@@ -20,9 +26,11 @@ set(SOURCE_FILES
         ../../include/falcon/utils/pb_converter/lr_params_converter.h
         utils/pb_converter/lr_params_converter.cc
         ../../include/falcon/utils/metric/accuracy.h
+        ../../include/falcon/utils/math/math_ops.h
         ../../include/falcon/utils/pb_converter/network_converter.h
         utils/pb_converter/network_converter.cc
         utils/metric/accuracy.cc
+        utils/math/math_ops.cc
         ../../include/falcon/utils/base64.h
         utils/base64.cc
         include/message/common.pb.h

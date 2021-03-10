@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION 3.10)
 project(falcon_test)
 set(CMAKE_CXX_STANDARD 11)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -fsanitize=address")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp")
+# since the compiled executor at /opt/falcon is used for development debugging,
+# defer the "prod" status and activate ASAN with helpful debug flags
+# -g option gives more information
+# -fno-omit-frame-pointer gets nicer stack traces in error messages
+# -fno-common to make global variables protected by ASAN
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -fsanitize=address -g -fno-common -fno-omit-frame-pointer")
 
 #link_directories(/usr/ssl/lib)
 
