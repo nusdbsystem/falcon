@@ -142,13 +142,13 @@ class LogisticRegression : public Model {
    * from spdz parties, update the encrypted local weights
    *
    * @param party: initialized party object
-   * @param batch_loss_shares: secret shares of batch losses
+   * @param batch_logistic_shares: secret shares of batch losses
    * @param truncated_weight_shares: truncated global weights if with regularization
    * @param batch_indexes: selected batch indexes
    * @param precision: precision for the batch samples and shares
    */
   void update_encrypted_weights(Party& party,
-      std::vector<float> batch_loss_shares,
+      std::vector<float> batch_logistic_shares,
       std::vector<float> truncated_weight_shares,
       std::vector<int> batch_indexes,
       int precision);
