@@ -210,7 +210,7 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
 }
 
 void LogisticRegression::update_encrypted_weights(Party& party,
-    std::vector<float> batch_loss_shares,
+    std::vector<float> batch_logistic_shares,
     std::vector<float> truncated_weight_shares,
     std::vector<int> batch_indexes,
     int precision) {
@@ -224,10 +224,46 @@ void LogisticRegression::update_encrypted_weights(Party& party,
   int cur_batch_size = batch_indexes.size();
   EncodedNumber* encrypted_batch_losses = new EncodedNumber[cur_batch_size];
   party.secret_shares_to_ciphers(encrypted_batch_losses,
-                                 batch_loss_shares,
+                                 batch_logistic_shares,
                                  cur_batch_size,
                                  ACTIVE_PARTY_ID,
                                  precision);
+
+  // compute [f_t - y_t], i.e., [batch_losses]=[batch_losses]-[batch_labels] and broadcast
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::vector<float> batch_labels;
+    for (int i = 0; i < cur_batch_size; i++) {
+      batch_labels.push_back(training_labels[batch_indexes[i]]);
+    }
+    EncodedNumber* encrypted_ground_truth_labels = new EncodedNumber[cur_batch_size];
+    for (int i = 0; i < cur_batch_size; i++) {
+      // init "0-y_t"
+      encrypted_ground_truth_labels[i].set_float(phe_pub_key->n[0],
+                                                 0 - batch_labels[i], precision);
+      // encrypt [0-y_t]
+      djcs_t_aux_encrypt(phe_pub_key, phe_random,
+                         encrypted_ground_truth_labels[i], encrypted_ground_truth_labels[i]);
+      // compute phe addition [f_t - y_t]
+      djcs_t_aux_ee_add(phe_pub_key, encrypted_batch_losses[i],
+                        encrypted_batch_losses[i], encrypted_ground_truth_labels[i]);
+    }
+    std::string encrypted_batch_losses_str;
+    serialize_encoded_number_array(encrypted_batch_losses, cur_batch_size, encrypted_batch_losses_str);
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        party.send_long_message(i, encrypted_batch_losses_str);
+      }
+    }
+    delete [] encrypted_ground_truth_labels;
+    std::cout << "Finish compute encrypted loss and send to other parties" << std::endl;
+    LOG(INFO) << "Finish compute encrypted loss and send to other parties";
+  } else {
+    std::string recv_encrypted_batch_losses_str;
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_encrypted_batch_losses_str);
+    deserialize_encoded_number_array(encrypted_batch_losses, cur_batch_size, recv_encrypted_batch_losses_str);
+    std::cout << "Finish receive encrypted loss from the active party" << std::endl;
+    LOG(INFO) << "Finish receive encrypted loss from the active party";
+  }
 
   std::vector<std::vector<float> > batch_samples;
   for (int i = 0; i < cur_batch_size; i++) {
@@ -326,7 +362,7 @@ void LogisticRegression::train(Party party) {
     std::vector<int> batch_indexes = select_batch_idx(party, data_indexes);
     int cur_batch_size = batch_indexes.size();
 
-    // std::cout << "step 2.1 success" << std::endl;
+    std::cout << "step 2.1 success" << std::endl;
 
     // step 2.2: homomorphic batch aggregation (the precision should be 3 * prec now)
     EncodedNumber* encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
@@ -336,7 +372,7 @@ void LogisticRegression::train(Party party) {
         plaintext_samples_precision,
         encrypted_batch_aggregation);
 
-    // std::cout << "step 2.2 success" << std::endl;
+    std::cout << "step 2.2 success" << std::endl;
 
     // step 2.3: convert the encrypted batch aggregation into secret shares
     int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
@@ -347,7 +383,7 @@ void LogisticRegression::train(Party party) {
         ACTIVE_PARTY_ID,
         encrypted_batch_aggregation_precision);
 
-    // std::cout << "step 2.3 success" << std::endl;
+    std::cout << "step 2.3 success" << std::endl;
 
     // step 2.4: communicate with spdz parties and receive results
     std::promise<std::vector<float>> promise_values;
@@ -361,10 +397,10 @@ void LogisticRegression::train(Party party) {
         batch_aggregation_shares,
         cur_batch_size,
         &promise_values);
-    std::vector<float> batch_loss_shares = future_values.get();
+    std::vector<float> batch_logistic_shares = future_values.get();
     spdz_thread.join();
 
-    // std::cout << "step 2.4 success" << std::endl;
+    std::cout << "step 2.4 success" << std::endl;
 
     // step 2.5: update encrypted local weights
     // TODO: currently does not support with_regularization
@@ -372,12 +408,12 @@ void LogisticRegression::train(Party party) {
     // need to make sure that update_precision * 2 = encrypted_weights_precision
     int update_precision = PHE_FIXED_POINT_PRECISION;
     update_encrypted_weights(party,
-        batch_loss_shares,
+        batch_logistic_shares,
         truncated_weights_shares,
         batch_indexes,
         update_precision);
 
-    // std::cout << "step 2.5 success" << std::endl;
+    std::cout << "step 2.5 success" << std::endl;
 
     delete [] encrypted_batch_aggregation;
 
