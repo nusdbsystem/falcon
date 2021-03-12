@@ -81,7 +81,7 @@ float logistic_regression_loss(std::vector<float> pred_probs, std::vector<float>
     loss_i += (float) (labels[i] * log(pred_probs[i]));
     loss_i += (float) ((1.0 - labels[i]) * log(1.0 - pred_probs[i]));
     loss_sum += loss_i;
-//    if (i < 10) {
+//    if (i < 5) {
 //      std::cout << "predicted probability = " << pred_probs[i] <<
 //        ", ground truth label = " << labels[i] << ", loss_sum = " << loss_sum << std::endl;
 //    }
