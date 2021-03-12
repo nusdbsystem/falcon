@@ -50,4 +50,13 @@ float argmax(std::vector<float> inputs);
  */
 float logistic_function(float logit);
 
+/**
+ * compute the loss function of the binary logistic regression model
+ *
+ * @param pred_probs: predicted probabilities
+ * @param labels: ground truth labels
+ * @return
+ */
+float logistic_regression_loss(std::vector<float> pred_probs, std::vector<float> labels);
+
 #endif //FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_
