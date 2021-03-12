@@ -72,14 +72,14 @@ float logistic_function(float logit) {
 
 
 float logistic_regression_loss(std::vector<float> pred_probs, std::vector<float> labels) {
-  // L = -(1/n)[\sum_{i=1}^{n} -y_i \log{f} + (1-y_i) \log{1-f}]
+  // L = -(1/n)[\sum_{i=1}^{n} y_i \log{f} + (1-y_i) \log{1-f}]
   int n = pred_probs.size();
   // std::cout << "dataset size = " << n << std::endl;
   float loss_sum = 0.0;
   for (int i = 0; i < n; i++) {
     float loss_i = 0.0;
-    loss_i += (0 - labels[i]) * log(pred_probs[i]);
-    loss_i += (1.0 - labels[i]) * log(1.0 - pred_probs[i]);
+    loss_i += (float) (labels[i] * log(pred_probs[i]));
+    loss_i += (float) ((1.0 - labels[i]) * log(1.0 - pred_probs[i]));
     loss_sum += loss_i;
 //    if (i < 10) {
 //      std::cout << "predicted probability = " << pred_probs[i] <<
