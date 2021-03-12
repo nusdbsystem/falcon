@@ -169,6 +169,30 @@ class LogisticRegression : public Model {
    */
   void eval(Party party, falcon::DatasetType eval_type, float &accuracy);
 
+  /**
+   * compute the loss of the dataset in each iteration
+   *
+   * @param party: initialized party object
+   * @param dataset_type: falcon::DatasetType, TRAIN for training data and TEST for testing data
+   * @param loss: returned loss
+   */
+  void loss_computation(Party party, falcon::DatasetType dataset_type, float &loss);
+
+  /**
+   * print weights during training to view changes
+   *
+   * @param party: initialized party object
+   */
+  void display_weights(Party party);
+
+  /**
+   * print one ciphertext for debug
+   *
+   * @param party: initialized party object
+   * @param number: ciphertext to be decrypted
+   */
+  void display_one_ciphertext(Party party, EncodedNumber *number);
+
   /** set weight size */
   void setter_weight_size(int s_weight_size) {
     weight_size = s_weight_size;
