@@ -39,7 +39,7 @@ examples/.DS_Store
 examples/fraud_detection/.DS_Store
 build/
 src/cmake-build-debug/
-build/
+build1/
 log/
 cmake-build-debug/
 third_party/MP-SPDZ/

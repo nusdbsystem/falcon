@@ -48,6 +48,6 @@ target_link_libraries(falcon_test
         mpirxx
         mpir
         sodium
-        /usr/local/lib/libglog.so
+        /usr/lib/x86_64-linux-gnu/libglog.so
         /usr/lib/x86_64-linux-gnu/libgmp.so
         /usr/lib/x86_64-linux-gnu/libgmpxx.so)

@@ -69,8 +69,10 @@ set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
 
 add_library(executor ${SOURCE_FILES})
 
+# Need to Revise protobuf version to 3.14 that is compatible with grpc;
 #include(FindProtobuf)
 #find_package(Protobuf REQUIRED)
+
 # Find Protobuf installation
 # Looks for protobuf-config.cmake file installed by Protobuf's cmake installation.
 set(protobuf_MODULE_COMPATIBLE TRUE)
@@ -138,7 +140,7 @@ target_link_libraries(executor
         mpirxx
         mpir
         sodium
-        /usr/local/lib/libglog.so
+        /usr/lib/x86_64-linux-gnu/libglog.so
         /usr/lib/x86_64-linux-gnu/libgmp.so
         /usr/lib/x86_64-linux-gnu/libgmpxx.so
         ${_REFLECTION}
@@ -175,7 +177,7 @@ target_link_libraries(falcon
         mpirxx
         mpir
         sodium
-        /usr/local/lib/libglog.so
+        /usr/lib/x86_64-linux-gnu/libglog.so
         /usr/lib/x86_64-linux-gnu/libgmp.so
         /usr/lib/x86_64-linux-gnu/libgmpxx.so
         ${_REFLECTION}
