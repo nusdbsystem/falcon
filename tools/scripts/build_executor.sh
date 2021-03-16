@@ -19,4 +19,5 @@ cd build/
 make
 
 # for rebuilding of executor
-# just cd build/ && sudo make
+# if updates only involve executor c++ code
+# just cd build/ && make
