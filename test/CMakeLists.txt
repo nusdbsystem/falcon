@@ -24,12 +24,15 @@ include_directories(
         ${SPDZ_HOME}/local/include
         ${PROJECT_SOURCE_DIR}/src)
 
-set(TEST_SOURCE_FILES test_main.cc
+set(TEST_SOURCE_FILES
+        test_main.cc
         falcon/test_fixed_point.cc
         falcon/test_pb_converter.cc
         falcon/test_djcs_t_aux.cc
         falcon/test_io_util.cc
-        falcon/test_model_io.cc)
+        falcon/test_model_io.cc
+        falcon/test_math_ops.cc
+)
 
 add_executable(falcon_test ${TEST_SOURCE_FILES})
 
