@@ -1,6 +1,47 @@
-## Linear model
+# Linear model
 
-Here we introduce the logistic regression (LR) model, which is similar to the linear regression model.
+## Logistic Regression
+
+Here we introduce the logistic regression (LogR) model, a regression algorithm that is used for **classification** (the prediction is a discrete value).
+
+### Overview of Logistic Regression
+
+Logistic Regression, also called _Logit Regression_, is a model that estimates the probability of a sample being of positive class or negative class.
+
+If the estimated probability is greater than a **threshold (usually 50%)**, then the Logistic Regression model will predict a **positive class (labelled `1`)** for that sample with features `x`, otherwise a **negative class (labelled `0`)**. We will focus on the binary logistic regression.
+
+```
+if h(x) >= 0.5, predict y=1
+if h(x) < 0.5, predict y=0
+```
+
+### Estimating Probabilities
+
+The probabilities are estimated via `logistic_function` (in `src/executor/utils/math/math_ops.cc`). Logistic function, or sigmoid function, produces probabilities between 0 and 1.
+
+**Our classifier, the logistic function, will output values between 0 and 1.** The input to the logistic function, or _logit_, is the weighted sum of the input features.
+
+
+### Interpretation of Classifier Output
+
+The output of the logistic regression classifier is **the estimated probability that `y=1` given sample with features `x`**. For example, if `h(x)=0.7`, the interpretation of the classifier output is "70% chance of a positive class", or in other words, the estimated probability that `y` is equal to `1`, or `y` is positive:
+
+>probability that y=1, given x, parameterized by weights
+
+Since `y` must be either 0 or 1,
+```
+P(y=0|x; weights) + P(y=1|x; weights) = 1
+```
+The probability that `y=0` and `y=1`, given a sample with feature `x`, must add up to 1.
+
+**Decision boundaries is determined only by the paramaters or weights (theta)**.
+
+### Optimization Objective and Cost Function
+
+
+`LOGREG_THRES` classifier threshold for decision making
+
+
 In the vertical FL setting, the features are distributed among parties
 while the label is held by only the active party. We use a hybrid of MPC and PHE 
 to train the LR model.
@@ -56,3 +97,9 @@ The main algorithm includes the following steps (may add a diagram later).
         the comparison result 
         * the evaluation result is revealed to all parties
     * store the evaluation report to a specified path
+
+
+## References
+
+- Aurlien Gron. 2017. Hands-On Machine Learning with Scikit-Learn and TensorFlow: Concepts, Tools, and Techniques to Build Intelligent Systems (1st. ed.). O'Reilly Media, Inc.
+- Coursera Machine Learning Course by Andrew Ng https://www.coursera.org/learn/machine-learning
