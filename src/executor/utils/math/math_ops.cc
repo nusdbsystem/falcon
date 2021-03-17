@@ -8,7 +8,8 @@
 #include <glog/logging.h>
 #include <google/protobuf/io/coded_stream.h>
 
-#include <iostream>
+#include <iostream>     // std::cout
+#include <iomanip>      // std::setprecision
 
 
 float mean_squared_error(std::vector<float> a, std::vector<float> b) {
@@ -72,19 +73,34 @@ float logistic_function(float logit) {
 
 
 float logistic_regression_loss(std::vector<float> pred_probs, std::vector<float> labels) {
+  // the log taken here is with base e (natural log)
   // L = -(1/n)[\sum_{i=1}^{n} y_i \log{f} + (1-y_i) \log{1-f}]
   int n = pred_probs.size();
   // std::cout << "dataset size = " << n << std::endl;
   float loss_sum = 0.0;
   for (int i = 0; i < n; i++) {
     float loss_i = 0.0;
-    loss_i += (float) (labels[i] * log(pred_probs[i]));
-    loss_i += (float) ((1.0 - labels[i]) * log(1.0 - pred_probs[i]));
+    // NOTE: log(0) will produce -inf, causing loss_sum to be nan
+    // fix by setting bounds of pred_probs between 0~1
+    float UPPER = 0.99999;
+    float LOWER = 0.00001;
+    float est_prob;
+    if (pred_probs[i] > UPPER) {
+      est_prob = UPPER;
+    } else if (pred_probs[i] < LOWER) {
+      est_prob = LOWER;
+    } else {
+      est_prob = pred_probs[i];
+    }
+    // std::cout << "est_prob = " << std::setprecision(5) << est_prob << "\n";
+
+    loss_i += (float) (labels[i] * log(est_prob));
+    loss_i += (float) ((1.0 - labels[i]) * log(1.0 - est_prob));
     loss_sum += loss_i;
-//    if (i < 5) {
-//      std::cout << "predicted probability = " << pred_probs[i] <<
-//        ", ground truth label = " << labels[i] << ", loss_sum = " << loss_sum << std::endl;
-//    }
+    // if (i < 5) {
+    //   std::cout << "predicted probability = " << est_prob <<
+    //     ", ground truth label = " << labels[i] << ", loss_sum = " << loss_sum << std::endl;
+    // }
   }
   float loss = (0 - loss_sum) / n;
   return loss;
