@@ -43,19 +43,18 @@ from `src/coordinator`, launch the script:
 bash scripts/start_semi-party012.sh
 ```
 
-To view the cmd outputs, inspect the `logs/semi-parties` folder in MP-SPDZ folder.
+To view the MPC server outputs, go the path of where you put the MPC exe. In our example, the MPC server exes are in `MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x`. From that path, the console logs of the semi-party.x are captured in `third_party/MP-SPDZ/logs/semi-parties/` folder.
 
-To terminate the MPC, run:
+To terminate the MPC, from `src/coordinator`run:
 ```sh
 bash scripts/terminate_semi-party012.sh
 ```
 
-_NOTE: later the MPC and Falcon Engine will be launched internally by the platform after supplying `MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x"` in the config partyserver file_
-
-The console logs of the semi-party.x are captured in `third_party/MP-SPDZ/logs/semi-parties/` folder.
+_NOTE: in the future, MPC and FL Engine will be launched internally by the platform after supplying `MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x"` in the config partyserver file_
 
 
-## Supply the Falcon Engine path
+
+## Supply the FL Engine path
 
 Update the executor path in `src/coordinator/config_partyserver.properties`: `FL_ENGINE_PATH="/opt/falcon/build/src/executor/falcon"`
 

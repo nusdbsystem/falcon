@@ -43,4 +43,10 @@ do
   kill -9 $(cat dev_test/Party-$c.pid)
 done
 
+# just in case, kill after grep for keyword
+# The grep filters that based on your search string,
+# [x] is a trick to stop you picking up the actual grep process itself.
+# ref: https://stackoverflow.com/a/3510850
+kill $(ps aux | grep '[f]alcon_platform' | awk '{print $2}')
+
 echo DONE
