@@ -8,15 +8,6 @@
 #include <vector>
 
 
-/**
- * compute the fraction of the matched elements
- *
- * @param predictions: first vector
- * @param labels: second vector
- * @return
- */
-float accuracy_computation(std::vector<int> predictions, std::vector<float> labels);
-
 // a metrics class for classification performance
 class ClassificationMetrics{
   // inspired by scikit-learn's:
@@ -59,7 +50,10 @@ class ClassificationMetrics{
     double F1;
   
     // constructor
-    ClassificationMetrics(std::vector<int> predictions, std::vector<float> labels);
+    ClassificationMetrics();
+
+    // compute the metrics
+    void compute_metrics(std::vector<int> predictions, std::vector<float> labels);
 };
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_

@@ -450,6 +450,9 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
 
+  // Classification Metrics object for performance metrics
+  ClassificationMetrics ClfMetrics;
+
   /// the testing workflow is as follows:
   ///     step 1: init test data
   ///     step 2: every party computes partial phe summation and sends to active party
@@ -511,12 +514,12 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
         pred_classes.push_back(pred_class);
       }
       if (eval_type == falcon::TRAIN) {
-        accuracy = accuracy_computation(pred_classes, training_labels);
+        ClfMetrics.compute_metrics(pred_classes, training_labels);
       }
       if (eval_type == falcon::TEST){
-        accuracy = accuracy_computation(pred_classes, testing_labels);
+        ClfMetrics.compute_metrics(pred_classes, testing_labels);
       }
-      LOG(INFO) << "The evaluation accuracy on " << dataset_str << " is: " << accuracy;
+      LOG(INFO) << "The evaluation accuracy on " << dataset_str << " is: " << ClfMetrics.FP;
     } else {
       LOG(ERROR) << "The " << metric << " metric is not supported";
       return;

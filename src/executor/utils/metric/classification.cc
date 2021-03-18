@@ -9,26 +9,45 @@
 #include <iostream>
 
 
-float accuracy_computation(std::vector<int> predictions, std::vector<float> labels) {
-  // LOG(INFO) << "--- accuracy_computation() called ---";
+// a metrics class for classification performance
+
+// Constructor with initilizer
+ClassificationMetrics::ClassificationMetrics()
+  : TP(0), FP(0), FN(0), TN(0) {}
+
+// Compute the Metrics
+void ClassificationMetrics::compute_metrics(std::vector<int> predictions, std::vector<float> labels)
+   {
+  std::cout << "ClassificationMetrics constructor called" << std::endl;
+  // LOG(INFO) << "--- ClassificationMetrics constructor called ---";
   // LOG(INFO) << "predictions vector size = " << predictions.size();
   // LOG(INFO) << "labels vector size = " << labels.size();
   if (predictions.size() != labels.size()) {
-    LOG(ERROR) << "Accuracy computation wrong: sizes of the two vectors not same";
+    LOG(ERROR) << "Classification Metrics computation wrong: sizes of the two vectors not same";
   }
   int total_num = predictions.size();
-  int matched_num = 0;
+
+  // prediction and label classes
+  // for binary classifier, positive and negative classes
+  int positive_class = 1;
+  int negative_class = 0;
+
   for (int i = 0; i < total_num; i++) {
-    if (predictions[i] == (int) labels[i]) {
-      matched_num += 1;
+    if (predictions[i] == positive_class) {
+      if ((int) labels[i] == positive_class) {
+        TP += 1;
+      }
+      else if ((int) labels[i] == negative_class) {
+        FP += 1;
+      }
+    }
+    else if (predictions[i] == negative_class) {
+      if ((int) labels[i] == positive_class) {
+        FN += 1;
+      }
+      else if ((int) labels[i] == negative_class) {
+        TN += 1;
+      }
     }
   }
-  return (float) matched_num / (float) total_num;
-}
-
-
-// a metrics class for classification performance
-// constructor method
-ClassificationMetrics::ClassificationMetrics(std::vector<int> predictions, std::vector<float> labels) {
-  std::cout << "ClassificationMetrics constructor called" << std::endl;
 }

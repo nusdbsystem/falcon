@@ -1,27 +1,42 @@
-#include <cmath>
 #include <falcon/utils/metric/classification.h>
-
-#include <glog/logging.h>
+#include <cmath>
 #include <gtest/gtest.h>
 #include <vector>
 #include <iostream>
 
 
-TEST(metric_accuracy, ClassificationMetrics) {
-    std::vector<float> labels;
-    std::vector<int> predictions;
+TEST(Classification_metrics, test_TP) {
+    std::vector<int> predictions = {1,0,1,0,1};
+    std::vector<float> labels    = {1,1,1,1,1};
 
-    // ground truth = [1,1,0]
-    labels.push_back(1);
-    labels.push_back(1);
-    labels.push_back(0);
+    ClassificationMetrics ClfMetrics;
+    ClfMetrics.compute_metrics(predictions, labels);
+    EXPECT_EQ(ClfMetrics.TP, 3);
+}
 
-    // predicted probabilities = [1,1,1]
-    predictions.push_back(1);
-    predictions.push_back(1);
-    predictions.push_back(1);
+TEST(Classification_metrics, test_FP) {
+    std::vector<int> predictions = {1,0,1,0,1};
+    std::vector<float> labels    = {1,1,1,1,1};
 
-    ClassificationMetrics ClfMetrics(predictions, labels);
-    std::cout << "FN = " << ClfMetrics.FN << std::endl;
-    EXPECT_GT(0.2, 0.99);
+    ClassificationMetrics ClfMetrics;
+    ClfMetrics.compute_metrics(predictions, labels);
+    EXPECT_EQ(ClfMetrics.FP, 0);
+}
+
+TEST(Classification_metrics, test_FN) {
+    std::vector<int> predictions = {1, 1, 1, 0};
+    std::vector<float> labels    = {0, 1, 0, 1};
+
+    ClassificationMetrics ClfMetrics;
+    ClfMetrics.compute_metrics(predictions, labels);
+    EXPECT_EQ(ClfMetrics.FN, 1);
+}
+
+TEST(Classification_metrics, test_TN) {
+    std::vector<int> predictions = {1, 1, 0, 0};
+    std::vector<float> labels    = {0, 1, 0, 1};
+
+    ClassificationMetrics ClfMetrics;
+    ClfMetrics.compute_metrics(predictions, labels);
+    EXPECT_EQ(ClfMetrics.TN, 1);
 }
