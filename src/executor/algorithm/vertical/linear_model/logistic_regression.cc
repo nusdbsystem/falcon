@@ -6,7 +6,7 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/lr_params_converter.h>
 #include <falcon/operator/mpc/spdz_connector.h>
-#include <falcon/utils/metric/accuracy.h>
+#include <falcon/utils/metric/classification.h>
 #include <falcon/utils/math/math_ops.h>
 #include <falcon/common.h>
 #include <falcon/model/model_io.h>

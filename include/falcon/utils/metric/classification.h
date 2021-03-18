@@ -2,30 +2,22 @@
 // Created by wuyuncheng on 11/12/20.
 //
 
-#include <cmath>
-#include "falcon/utils/metric/accuracy.h"
+#ifndef FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_
+#define FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_
 
-#include <glog/logging.h>
-
-
-float accuracy_computation(std::vector<int> predictions, std::vector<float> labels) {
-  // LOG(INFO) << "--- accuracy_computation() called ---";
-  // LOG(INFO) << "predictions vector size = " << predictions.size();
-  // LOG(INFO) << "labels vector size = " << labels.size();
-  if (predictions.size() != labels.size()) {
-    LOG(ERROR) << "Accuracy computation wrong: sizes of the two vectors not same";
-  }
-  int total_num = predictions.size();
-  int matched_num = 0;
-  for (int i = 0; i < total_num; i++) {
-    if (predictions[i] == (int) labels[i]) {
-      matched_num += 1;
-    }
-  }
-  return (float) matched_num / (float) total_num;
-}
+#include <vector>
 
 
+/**
+ * compute the fraction of the matched elements
+ *
+ * @param predictions: first vector
+ * @param labels: second vector
+ * @return
+ */
+float accuracy_computation(std::vector<int> predictions, std::vector<float> labels);
+
+// a metrics class for classification performance
 class ClassificationMetrics{
   // inspired by scikit-learn's:
   // https://scikit-learn.org/stable/modules/model_evaluation.html
@@ -65,4 +57,9 @@ class ClassificationMetrics{
     // F1 = 2TP / (2TP + FP + FN)
     // F1 = 2 * (precision * recall) / (precision + recall)
     double F1;
+  
+    // constructor
+    ClassificationMetrics(std::vector<int> predictions, std::vector<float> labels);
 };
+
+#endif //FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_

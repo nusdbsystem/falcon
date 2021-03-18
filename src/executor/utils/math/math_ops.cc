@@ -2,7 +2,6 @@
 
 
 #include <cmath>
-#include "falcon/utils/metric/accuracy.h"
 #include <falcon/common.h>
 
 #include <glog/logging.h>
