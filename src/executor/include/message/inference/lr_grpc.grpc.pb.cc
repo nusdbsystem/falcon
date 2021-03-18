@@ -41,19 +41,19 @@ InferenceLR::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channe
   {}
 
 ::grpc::Status InferenceLR::Stub::Prediction(::grpc::ClientContext* context, const ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest& request, ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest, ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_Prediction_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Prediction_, context, request, response);
 }
 
 void InferenceLR::Stub::experimental_async::Prediction(::grpc::ClientContext* context, const ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest* request, ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest, ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Prediction_, context, request, response, std::move(f));
+  ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Prediction_, context, request, response, std::move(f));
 }
 
 void InferenceLR::Stub::experimental_async::Prediction(::grpc::ClientContext* context, const ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest* request, ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Prediction_, context, request, response, reactor);
+  ::grpc::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Prediction_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse>* InferenceLR::Stub::PrepareAsyncPredictionRaw(::grpc::ClientContext* context, const ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse, ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_Prediction_, context, request);
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse>::Create(channel_.get(), cq, rpcmethod_Prediction_, context, request, false);
 }
 
 ::grpc::ClientAsyncResponseReader< ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse>* InferenceLR::Stub::AsyncPredictionRaw(::grpc::ClientContext* context, const ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest& request, ::grpc::CompletionQueue* cq) {
@@ -67,7 +67,7 @@ InferenceLR::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       InferenceLR_method_names[0],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< InferenceLR::Service, ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest, ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< InferenceLR::Service, ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest, ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse>(
           [](InferenceLR::Service* service,
              ::grpc::ServerContext* ctx,
              const ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest* req,
