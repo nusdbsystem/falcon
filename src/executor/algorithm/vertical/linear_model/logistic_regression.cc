@@ -519,7 +519,10 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
       if (eval_type == falcon::TEST){
         ClfMetrics.compute_metrics(pred_classes, testing_labels);
       }
-      LOG(INFO) << "The evaluation accuracy on " << dataset_str << " is: " << ClfMetrics.FP;
+      LOG(INFO) << "Classification Confusion Matrix on " << dataset_str << " is:";
+      ClfMetrics.pretty_print_cm();
+      LOG(INFO) << "Classification Report on " << dataset_str << " is:";
+      ClfMetrics.classification_report();
     } else {
       LOG(ERROR) << "The " << metric << " metric is not supported";
       return;

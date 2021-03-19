@@ -105,4 +105,49 @@ True Class1    5        3
   std::cout << "               Class1    Class0\n";
   std::cout << "True Class1" << "    " << TP << "        " << FN << std::endl;
   std::cout << "     Class0" << "    " << FP << "        " << TN << std::endl;
+
+  // save a version for gLog
+  LOG(INFO) << "Confusion Matrix";
+  LOG(INFO) << "               Pred";
+  LOG(INFO) << "               Class1    Class0";
+  LOG(INFO) << "True Class1" << "    " << TP << "        " << FN;
+  LOG(INFO) << "     Class0" << "    " << FP << "        " << TN;
+}
+
+// pretty print classification performance report
+void ClassificationMetrics::classification_report() {
+  std::cout << "=== Classification Report ===" << std::endl;
+
+  std::cout << "False negative (FN) = " << FN << std::endl;
+  std::cout << "False positive (FP) = " << FP << std::endl;
+  std::cout << "True positive (TP) = " << TP << std::endl;
+  std::cout << "True negative (TN) = " << TN << std::endl;
+
+  std::cout << "regular_accuracy = " << regular_accuracy << std::endl;
+  std::cout << "balanced_accuracy = " << balanced_accuracy << std::endl;
+
+  std::cout << "sensitivity = " << sensitivity << std::endl;
+  std::cout << "specificity = " << specificity << std::endl;
+
+  std::cout << "precision (PPV) = " << precision << std::endl;
+  std::cout << "NPV = " << NPV << std::endl;
+  std::cout << "F1 score = " << F1 << std::endl;
+
+  // save a version for gLog
+  LOG(INFO) << "=== Classification Report ===";
+
+  LOG(INFO) << "False negative (FN) = " << FN;
+  LOG(INFO) << "False positive (FP) = " << FP;
+  LOG(INFO) << "True positive (TP) = " << TP;
+  LOG(INFO) << "True negative (TN) = " << TN;
+
+  LOG(INFO) << "regular_accuracy = " << regular_accuracy;
+  LOG(INFO) << "balanced_accuracy = " << balanced_accuracy;
+
+  LOG(INFO) << "sensitivity = " << sensitivity;
+  LOG(INFO) << "specificity = " << specificity;
+
+  LOG(INFO) << "precision (PPV) = " << precision;
+  LOG(INFO) << "NPV = " << NPV;
+  LOG(INFO) << "F1 score = " << F1;
 }

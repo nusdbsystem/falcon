@@ -60,6 +60,9 @@ class ClassificationMetrics{
 
     // pretty print confusion matrix
     void pretty_print_cm();
+
+    // print the classifier performance report
+    void classification_report();
 };
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_
