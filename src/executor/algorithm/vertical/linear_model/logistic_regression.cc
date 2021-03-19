@@ -488,6 +488,8 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
       dataset_size,
       ACTIVE_PARTY_ID);
 
+  // std::cout << "Print predicted class" << std::endl;
+
   // step 4: active party computes the logistic function and compare the accuracy
   if (party.party_type == falcon::ACTIVE_PARTY) {
     if (metric == "acc") {
@@ -512,6 +514,7 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
         // Logistic Regresison Model make its prediction
         pred_class = (est_prob >= LOGREG_THRES) ? positive_class : negative_class;
         pred_classes.push_back(pred_class);
+        // std::cout << "sample " << i << "'s predicted class = " << pred_class << std::endl;
       }
       if (eval_type == falcon::TRAIN) {
         ClfMetrics.compute_metrics(pred_classes, training_labels);
