@@ -69,6 +69,52 @@ TEST(Classification_metrics, test_regular_acc) {
     EXPECT_EQ(ClfMetrics.regular_accuracy, (double) 8/13);
 }
 
-TEST(Classification_metrics, test_confusion_matrix) {
-    EXPECT_EQ(1, 1);
+TEST(Classification_metrics, test_sensitivity) {
+    // Given a sample of 13 pictures, 8 of cats and 5 of dogs
+    // classifier makes 8 accurate predictions and misses 5
+    // 3 cats wrongly predicted as dogs (first 3 predictions)
+    // and 2 dogs wrongly predicted as cats (last 2 predictions). 
+    std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
+    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+
+    ClassificationMetrics ClfMetrics;
+    ClfMetrics.compute_metrics(predictions, labels);
+
+    EXPECT_EQ(ClfMetrics.sensitivity, (double) 5/8);
 }
+
+TEST(Classification_metrics, test_specificity) {
+    // Given a sample of 13 pictures, 8 of cats and 5 of dogs
+    // classifier makes 8 accurate predictions and misses 5
+    // 3 cats wrongly predicted as dogs (first 3 predictions)
+    // and 2 dogs wrongly predicted as cats (last 2 predictions). 
+    std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
+    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+
+    ClassificationMetrics ClfMetrics;
+    ClfMetrics.compute_metrics(predictions, labels);
+
+    EXPECT_EQ(ClfMetrics.specificity, (double) 3/5);
+}
+
+TEST(Classification_metrics, test_balanced_acc) {
+    // Given a sample of 13 pictures, 8 of cats and 5 of dogs
+    // classifier makes 8 accurate predictions and misses 5
+    // 3 cats wrongly predicted as dogs (first 3 predictions)
+    // and 2 dogs wrongly predicted as cats (last 2 predictions). 
+    std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
+    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+
+    ClassificationMetrics ClfMetrics;
+    ClfMetrics.compute_metrics(predictions, labels);
+
+    EXPECT_EQ(
+        ClfMetrics.balanced_accuracy,
+        (ClfMetrics.sensitivity+ClfMetrics.specificity)/2
+    );
+
+    EXPECT_FLOAT_EQ(ClfMetrics.balanced_accuracy, 0.6125);
+}
+
+  // F1 = 2TP / (2TP + FP + FN)
+  // F1 = 2 * (precision * recall) / (precision + recall)

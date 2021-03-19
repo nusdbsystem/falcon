@@ -18,7 +18,7 @@ ClassificationMetrics::ClassificationMetrics()
 // Compute the Metrics
 void ClassificationMetrics::compute_metrics(std::vector<int> predictions, std::vector<float> labels)
    {
-  std::cout << "ClassificationMetrics constructor called" << std::endl;
+  // std::cout << "ClassificationMetrics constructor called" << std::endl;
   // LOG(INFO) << "--- ClassificationMetrics constructor called ---";
   // LOG(INFO) << "predictions vector size = " << predictions.size();
   // LOG(INFO) << "labels vector size = " << labels.size();
@@ -56,30 +56,53 @@ void ClassificationMetrics::compute_metrics(std::vector<int> predictions, std::v
   // regular accuracy = fraction of correct predictions over all samples
   regular_accuracy = (TP + TN) / (TP + FP + FN + TN);
 
-  // In the binary case, balanced accuracy =
-  // average of sensitivity (true positive rate) and specificity (true negative rate)
-  // balanced_accuracy = (TPR + TNR) / 2
-  double balanced_accuracy;
-
   // Sensitivity = TP/(TP+FN)
+  sensitivity = TP / (TP + FN);
+  // NOTE: sensitivity = recall = true positive rate (TPR)
+  double TPR = sensitivity;
   // NOTE: recall = sensitivity
   // Recall = TP / all relevant elements
   // Recall = TP/(TP + FN) = Sensitivity
-  double sensitivity;
-  // NOTE: sensitivity = recall = true positive rate (TPR)
+  double recall = sensitivity;
 
   // Specificity = TN/(TN+FP)
+  specificity = TN / (TN + FP);
   // NOTE: specificity = true negative rate (TNR)
-  double specificity;
+  double TNR = specificity;
+
+  // In the binary case, balanced accuracy =
+  // average of sensitivity (true positive rate) and specificity (true negative rate)
+  balanced_accuracy = (TPR + TNR) / 2;
 
   // Precision or Positive Predictive Value (PPV)
   // Positive Predictive Value (Precision) = TP / (TP + FP)
-  double precision;
-  double NPV;  // Negative Predictive Value = TN / (TN + FN)
+  precision = TP / (TP + FP);
+  // Negative Predictive Value = TN / (TN + FN)
+  NPV = TN / (TN + FN);  
 
   // F1 score
-  // The F1 score can be interpreted as a weighted average of the precision and recall, where an F1 score reaches its best value at 1 and worst score at 0. The relative contribution of precision and recall to the F1 score are equal. The formula for the F1 score is:
+  // The F1 score can be interpreted as a weighted average of the precision and recall,
+  // where an F1 score reaches its best value at 1 and worst score at 0.
+  // The relative contribution of precision and recall to the F1 score are equal.
+  // The formula for the F1 score is:
   // F1 = 2TP / (2TP + FP + FN)
   // F1 = 2 * (precision * recall) / (precision + recall)
-  double F1;
+  F1 = 2*TP / (2*TP + FP + FN);
+}
+
+
+// pretty print confusion matrix
+void ClassificationMetrics::pretty_print_cm() {
+  /* example output:
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    5        3
+     Class0    2        3
+  */
+  std::cout << "Confusion Matrix\n";
+  std::cout << "               Pred\n";
+  std::cout << "               Class1    Class0\n";
+  std::cout << "True Class1" << "    " << TP << "        " << FN << std::endl;
+  std::cout << "     Class0" << "    " << FP << "        " << TN << std::endl;
 }

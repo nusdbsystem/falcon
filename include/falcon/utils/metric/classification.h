@@ -44,7 +44,10 @@ class ClassificationMetrics{
     double NPV;  // Negative Predictive Value = TN / (TN + FN)
 
     // F1 score
-    // The F1 score can be interpreted as a weighted average of the precision and recall, where an F1 score reaches its best value at 1 and worst score at 0. The relative contribution of precision and recall to the F1 score are equal. The formula for the F1 score is:
+    // The F1 score can be interpreted as a weighted average of the precision and recall,
+    // where an F1 score reaches its best value at 1 and worst score at 0.
+    // The relative contribution of precision and recall to the F1 score are equal.
+    // The formula for the F1 score is:
     // F1 = 2TP / (2TP + FP + FN)
     // F1 = 2 * (precision * recall) / (precision + recall)
     double F1;
