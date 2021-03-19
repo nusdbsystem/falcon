@@ -54,6 +54,9 @@ class ClassificationMetrics{
 
     // compute the metrics
     void compute_metrics(std::vector<int> predictions, std::vector<float> labels);
+
+    // pretty print confusion matrix
+    void pretty_print_cm();
 };
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_

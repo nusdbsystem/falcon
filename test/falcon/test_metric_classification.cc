@@ -40,3 +40,7 @@ TEST(Classification_metrics, test_TN) {
     ClfMetrics.compute_metrics(predictions, labels);
     EXPECT_EQ(ClfMetrics.TN, 1);
 }
+
+// TEST(Classification_metrics, test_confusion_matrix) {
+
+// }
