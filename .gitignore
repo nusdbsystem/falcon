@@ -59,3 +59,50 @@ data/dataset/bank_marketing_data/client2/report.txt
 
 # coordinator dependencies
 pkg/*
+
+# data dir python related
+*.pyc
+*.so
+*.pyd
+.cache
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# IPython Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# mypy
+.mypy_cache
+
+# celery beat schedule file
+celerybeat-schedule
+
+# dotenv
+.env
+
+# virtualenv
+venv/
+ENV/
+
+# Spyder project settings
+.spyderproject
+
+# Rope project settings
+.ropeproject
+
+# PyCharm
+.idea/
+
+# For mac
+.DS_Store
