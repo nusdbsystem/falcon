@@ -137,8 +137,8 @@ target_link_libraries(executor
         gtest
         gflags
         ssl
-        #mpirxx
-        #mpir
+        mpirxx
+        mpir
         sodium
         /usr/lib/x86_64-linux-gnu/libglog.so
         /usr/lib/x86_64-linux-gnu/libgmp.so
