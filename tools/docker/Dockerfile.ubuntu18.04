@@ -155,13 +155,13 @@ RUN cd third_party/MP-SPDZ && \
 
 # Install Go 1.14
 RUN wget -q https://golang.org/dl/go1.14.13.linux-amd64.tar.gz -O go114.tar.gz && \
-    tar xzf go114.tar.gz -C /usr/local/
+    tar xzf go114.tar.gz -C /usr/local
 
 # Set environment variables.
-ENV GOROOT /usr/local/
+ENV GOROOT /usr/local/go
 ENV GOPATH /gopath
 ENV PATH $GOROOT/bin:$GOPATH/bin:$PATH
-ENV PATH $HOME/.local/bin:$PATH
+ENV PATH /root/.local/bin:$PATH
 
 # Replace protoc version
 RUN cp ~/.local/bin/protoc /usr/bin/ && \
@@ -176,7 +176,8 @@ RUN SRC_DIR=v0/inference/ && \
     protoc -I=$SRC_DIR --cpp_out=$DST_DIR --grpc_out=$DST_DIR --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin $SRC_DIR/lr_grpc.proto
 
 WORKDIR /opt/falcon
-RUN mkdir build && \
+RUN export PATH="$PATH:$HOME/.local/bin" && \
+    mkdir build && \
     cmake -Bbuild -H. && \
     cd build/ && \
     make
