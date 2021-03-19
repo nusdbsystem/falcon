@@ -41,7 +41,6 @@ COPY --from=intermediate /opt/falcon /opt/falcon
 RUN apt-get update && apt-get upgrade -y && \
         apt-get install -y --no-install-recommends \
         libgmp-dev \
-        cmake \
         libboost-dev \
         libboost-all-dev \
         libboost-system-dev \
@@ -50,6 +49,7 @@ RUN apt-get update && apt-get upgrade -y && \
         build-essential \
         ca-certificates \
         gdb \
+        git \
         libjsoncpp-dev \
         liblog4cpp5-dev \
         libprotobuf-c0-dev \
@@ -70,9 +70,51 @@ RUN apt-get update && apt-get upgrade -y && \
         libcrypto++-dev \
         libcrypto++-doc \
         libcrypto++-utils \
+        autoconf \
+        pkg-config \
+        wget \
         && \
+        pip3 install requests && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/*
+
+# Install
+RUN dpkg-reconfigure dash
+
+# Upgrade cmake version to 3.19.7
+RUN mkdir ~/temp && \
+    cd ~/temp && \
+    wget https://cmake.org/files/v3.19/cmake-3.19.7.tar.gz && \
+    tar -xzvf cmake-3.19.7.tar.gz && \
+    cd cmake-3.19.7/ && \
+    ./bootstrap && \
+    make -j$(nproc) && \
+    make install && \
+    hash -r && \
+    cmake --version
+
+# Install grpc server
+WORKDIR /opt
+RUN git clone --recurse-submodules -b v1.33.1 https://github.com/grpc/grpc && \
+    cd grpc && \
+    mkdir -p cmake/build
+
+# Prepare grpc server dependencies
+WORKDIR /opt/grpc
+RUN export MY_INSTALL_DIR=$HOME/.local && \
+    mkdir -p $MY_INSTALL_DIR && \
+    export PATH="$PATH:$MY_INSTALL_DIR/bin" && \
+    bash -xc "\
+    pushd cmake/build; \
+    cmake -DgRPC_INSTALL=ON \
+          -DgRPC_BUILD_TESTS=OFF \
+          -DCMAKE_INSTALL_PREFIX=$MY_INSTALL_DIR \
+          ../..; \
+    make -j; \
+    make install; \
+    popd; \
+    pwd; \
+    "
 
 # Install glog library
 WORKDIR /opt
@@ -83,23 +125,23 @@ RUN git clone https://github.com/google/glog.git && \
 
 # Ln gtest library
 RUN cd /usr/src/googletest/googletest && \
-    sudo mkdir build && \
+    mkdir build && \
     cd build && \
-    sudo cmake .. && \
-    sudo make && \
-    sudo cp libgtest* /usr/lib/ && \
+    cmake .. && \
+    make && \
+    cp libgtest* /usr/lib/ && \
     cd .. && \
-    sudo rm -rf build && \
-    sudo mkdir /usr/local/lib/googletest && \
-    sudo ln -s /usr/lib/libgtest.a /usr/local/lib/googletest/libgtest.a && \
-    sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/googletest/libgtest_main.a
+    rm -rf build && \
+    mkdir /usr/local/lib/googletest && \
+    ln -s /usr/lib/libgtest.a /usr/local/lib/googletest/libgtest.a && \
+    ln -s /usr/lib/libgtest_main.a /usr/local/lib/googletest/libgtest_main.a
 
 # Install third_party threshold partially homomorphic encryption library
 WORKDIR /opt/falcon
 RUN cd third_party/libhcs && \
     cmake . && \
     make && \
-    sudo make install
+    make install
 
 # Install third_party MP-SPDZ library
 WORKDIR /opt/falcon
@@ -107,28 +149,37 @@ RUN cd third_party/MP-SPDZ && \
     mv Math/Setup.h.prod Math/Setup.h && \
     make -j 8 tldr && \
     bash fast-make.sh && \
+    Scripts/setup-clients.sh 3 && \
     ./compile.py Programs/Source/logistic_regression.mpc && \
-    sudo ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
+    ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
 
-# Build falcon executor
+# Install Go 1.14
+RUN wget -q https://golang.org/dl/go1.14.13.linux-amd64.tar.gz -O go114.tar.gz && \
+    tar xzf go114.tar.gz -C /usr/local/
+
+# Set environment variables.
+ENV GOROOT /usr/local/
+ENV GOPATH /gopath
+ENV PATH $GOROOT/bin:$GOPATH/bin:$PATH
+ENV PATH $HOME/.local/bin:$PATH
+
+# Replace protoc version
+RUN cp ~/.local/bin/protoc /usr/bin/ && \
+    cd /opt/falcon/src/executor/include/proto && \
+    SRC_DIR=v0/ && \
+    DST_DIR=../message && \
+    protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/*.proto
+
+WORKDIR /opt/falcon/src/executor/include/proto
+RUN SRC_DIR=v0/inference/ && \
+    DST_DIR=../message/inference/ && \
+    protoc -I=$SRC_DIR --cpp_out=$DST_DIR --grpc_out=$DST_DIR --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin $SRC_DIR/lr_grpc.proto
+
 WORKDIR /opt/falcon
-RUN mv src/executor/CMakeLists.txt.prod src/executor/CMakeLists.txt && \
-    mv test/CMakeLists.txt.prod test/CMakeLists.txt && \
-    mkdir build && \
+RUN mkdir build && \
     cmake -Bbuild -H. && \
     cd build/ && \
     make
-
-# Install Go 1.14
-RUN \
-  mkdir -p /goroot && \
-  wget -q https://golang.org/dl/go1.14.13.linux-amd64.tar.gz -O go114.tar.gz && \
-  tar xzf go114.tar.gz -C /goroot
-
-# Set environment variables.
-ENV GOROOT /goroot
-ENV GOPATH /gopath
-ENV PATH $GOROOT/bin:$GOPATH/bin:$PATH
 
 # Define working directory.
 WORKDIR /opt
