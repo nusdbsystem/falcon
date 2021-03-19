@@ -41,6 +41,34 @@ TEST(Classification_metrics, test_TN) {
     EXPECT_EQ(ClfMetrics.TN, 1);
 }
 
-// TEST(Classification_metrics, test_confusion_matrix) {
+TEST(Classification_metrics, test_total_num) {
+    std::vector<int> predictions = {1,1,1,1,1,0,0,0,0,0};
+    std::vector<float> labels    = {0,0,0,0,0,1,1,1,1,1};
 
-// }
+    ClassificationMetrics ClfMetrics;
+    ClfMetrics.compute_metrics(predictions, labels);
+
+    double all_4_cells = ClfMetrics.TP +\
+                        ClfMetrics.FP +\
+                        ClfMetrics.FN +\
+                        ClfMetrics.TN;
+    EXPECT_EQ(all_4_cells, predictions.size());
+}
+
+TEST(Classification_metrics, test_regular_acc) {
+    // Given a sample of 13 pictures, 8 of cats and 5 of dogs
+    // classifier makes 8 accurate predictions and misses 5
+    // 3 cats wrongly predicted as dogs (first 3 predictions)
+    // and 2 dogs wrongly predicted as cats (last 2 predictions). 
+    std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
+    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+
+    ClassificationMetrics ClfMetrics;
+    ClfMetrics.compute_metrics(predictions, labels);
+
+    EXPECT_EQ(ClfMetrics.regular_accuracy, (double) 8/13);
+}
+
+TEST(Classification_metrics, test_confusion_matrix) {
+    EXPECT_EQ(1, 1);
+}
