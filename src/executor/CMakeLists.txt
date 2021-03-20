@@ -25,11 +25,11 @@ set(SOURCE_FILES
         utils/pb_converter/common_converter.cc
         ../../include/falcon/utils/pb_converter/lr_params_converter.h
         utils/pb_converter/lr_params_converter.cc
-        ../../include/falcon/utils/metric/accuracy.h
+        ../../include/falcon/utils/metric/classification.h
         ../../include/falcon/utils/math/math_ops.h
         ../../include/falcon/utils/pb_converter/network_converter.h
         utils/pb_converter/network_converter.cc
-        utils/metric/accuracy.cc
+        utils/metric/classification.cc
         utils/math/math_ops.cc
         ../../include/falcon/utils/base64.h
         utils/base64.cc
