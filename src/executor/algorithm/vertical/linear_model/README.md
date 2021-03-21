@@ -99,6 +99,106 @@ The main algorithm includes the following steps (may add a diagram later).
     * store the evaluation report to a specified path
 
 
+## Experiments on UCI Telemarketing Bank Dataset
+
+With the follow settings to train on client 0:
+```
+fl_setting: 1
+use_existing_key: 0
+data_input_file: /opt/falcon/data/dataset/bank_marketing_data/client0/client.txt
+key_file: /opt/falcon/data/dataset/bank_marketing_data/client0/phe_keys
+algorithm_name: logistic_regression
+```
+
+Client 0 (`party type = 0, party id = 0`)'s dataset contains:
+```
+sample_num = 4521
+feature_num = 7
+Split percentage for train-test = 0.8
+training_data_size = 3616
+# using seed 42
+data_indexes[0] = 2189
+data_indexes[1] = 2105
+data_indexes[2] = 1870
+```
+
+### Batch 32, LR 0.1, Weight Init with 0-1
+The parameters for logistic regression model:
+```
+params.batch_size = 32
+params.max_iteration = 50
+params.learning_rate = 0.1
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 0.390207 | 0.425388 | 0.707466 | 0.302098 | 0.148763 | 0.256853 | 0.190513 |
+| 1 | 0.39018 | 0.423562 | 0.705654 | 0.302178 | 0.149343 | 0.257083 | 0.192161 |
+| 2 | 0.390186 | 0.42481 | 0.70465 | 0.302167 | 0.149385 | 0.256717 | 
+0.189223 |
+| 49 | 0.382782 | 0.40973 | 0.660811 | 0.306059 | 0.123733 | 0.247892 | 0.132697 |
+
+
+## Experiments on UCI Breast Cancer Dataset
+
+With the follow settings to train on client 0:
+```
+fl_setting: 1
+use_existing_key: 0
+data_input_file: /opt/falcon/data/dataset/breast_cancer_data/client0/client.txt
+key_file: /opt/falcon/data/dataset/breast_cancer_data/client0/phe_keys
+algorithm_name: logistic_regression
+```
+
+Client 0 (`party type = 0, party id = 0`)'s dataset contains:
+```
+sample_num = 569
+feature_num = 11
+Split percentage for train-test = 0.8
+training_data_size = 455
+# using seed 42
+data_indexes[0] = 63
+data_indexes[1] = 65
+data_indexes[2] = 378
+```
+
+### Batch 32, LR 0.0001, Weight Init with 0-1, Data Un-Normalized
+The parameters for logistic regression model:
+```
+params.batch_size = 32
+params.max_iteration = 500
+params.learning_rate = 0.0001
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 7.03428 | -0.84739 | -0.588216 | -7.29925 | -78.0561 | 0.375225 | 0.946247 | 0.276411 | 0.606979 | 0.528495 | 0.904433 |
+| 1 | 4.47814 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 7.26996e+10 | 1.86415e+11 | 1.86359e+11 | 6.00479e+10 | 2.04935e+11 | 2.68281e+10 |
+| 2 | 7.03428 | -5.49756e+11 | -5.49756e+11 | -5.49756e+11 | -5.49756e+11 | -9.27175e+10 | -2.139e+11 | -3.09327e+11 | -1.07213e+11 | -2.75432e+11 | -3.12711e+09 |
+| 3 | 7.03428 | -5.49756e+11 | -5.49756e+11 | -5.49756e+11 | -5.49756e+11 | -3.25312e+11 | -5.3642e+11 | -5.49756e+11 | -3.95e+11 | -5.49756e+11 | -5.68732e+10 |
+| 398 | 4.47814 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 |
+| 498 | 4.47814 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 |
+| 499 | 4.47814 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 |
+
+When `DEBUG=1` (calculate training loss for every iteration), for 500 iterations, the `Training time = 2060.51`.
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    278        0
+     Class0    177        0 
+
+# test set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    79        0
+     Class0    35        0
+```
+
+
 ## References
 
 - Aurlien Gron. 2017. Hands-On Machine Learning with Scikit-Learn and TensorFlow: Concepts, Tools, and Techniques to Build Intelligent Systems (1st. ed.). O'Reilly Media, Inc.
