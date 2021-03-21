@@ -122,7 +122,7 @@ data_indexes[1] = 2105
 data_indexes[2] = 1870
 ```
 
-### Batch 32, LR 0.1, Weight Init with 0-1
+### Batch 32, LR 0.1, Weight Init with 0~1
 The parameters for logistic regression model:
 ```
 params.batch_size = 32
@@ -134,9 +134,117 @@ params.learning_rate = 0.1
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0 | 0.390207 | 0.425388 | 0.707466 | 0.302098 | 0.148763 | 0.256853 | 0.190513 |
 | 1 | 0.39018 | 0.423562 | 0.705654 | 0.302178 | 0.149343 | 0.257083 | 0.192161 |
-| 2 | 0.390186 | 0.42481 | 0.70465 | 0.302167 | 0.149385 | 0.256717 | 
-0.189223 |
+| 2 | 0.390186 | 0.42481 | 0.70465 | 0.302167 | 0.149385 | 0.256717 | 0.189223 |
 | 49 | 0.382782 | 0.40973 | 0.660811 | 0.306059 | 0.123733 | 0.247892 | 0.132697 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    3210        0
+     Class0    406        0
+
+# test set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    790        0
+     Class0    115        0
+```
+
+### Batch 4, LR 0.2, Weight Init with 0~1
+
+All positive predictions.
+
+### Batch 1, LR 0.01, Weight Init with 0~1
+
+All positive predictions.
+
+### Batch 1, LR 0.01, Iter 2000, Weight Init with 0~1
+
+Left running for 2000 iterations, traning set confusion matrix all positive predictions, but test set confusion matrix has increased two negative classes predictions:
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    3210        0
+     Class0    406        0
+
+# test set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    789        1
+     Class0    114        1
+```
+
+### Batch 1, LR 0.01, Weight Init with -10~10
+
+**change random init for weights from 0~1 to -10~10**
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 9.21466 | -6.22625 | 2.57578 | 1.51133 | -5.9338 | 8.48535 | -3.77146 |
+| 1 | 9.12357 | -6.16278 | 2.58164 | 1.51328 | -5.9338 | 8.48535 | -3.77146 |
+| 2 | 9.03468 | -6.12664 | 2.58604 | 1.51523 | -5.9338 | 8.48535 | -3.77146 |
+| 7 | 8.59865 | -5.89984 | 2.60386 | 1.52134 | -5.91671 | 8.48925 | -3.70481 |
+
+
+### Batch 1, LR 0.01, Weight Init with -10~10 (with `DEBUG=1`)
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 9.82756 | 2.81664 | -3.70706 | 9.33133 | 4.16822 | 5.97419 | 2.50276 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    1        3209
+     Class0    0        406
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 9.77651 | 2.85278 | -3.70194 | 9.33524 | 4.16822 | 5.97419 | 2.50276 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    2        3208
+     Class0    0        406
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2 | 9.73014 | 2.91627 | -3.6995 | 9.33719 | 4.16822 | 5.97419 | 2.50276 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    3        3207
+     Class0    0        406
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 5 | 9.53107 | 3.03394 | -3.68436 | 9.34915 | 4.16822 | 5.97419 | 2.50276 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    4        3206
+     Class0    0        406
+```
 
 
 ## Experiments on UCI Breast Cancer Dataset
@@ -162,7 +270,7 @@ data_indexes[1] = 65
 data_indexes[2] = 378
 ```
 
-### Batch 32, LR 0.0001, Weight Init with 0-1, Data Un-Normalized
+### Batch 32, LR 0.0001, Weight Init with 0~1, Data Un-Normalized
 The parameters for logistic regression model:
 ```
 params.batch_size = 32
@@ -171,7 +279,7 @@ params.learning_rate = 0.0001
 ```
 
 | Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0 | 7.03428 | -0.84739 | -0.588216 | -7.29925 | -78.0561 | 0.375225 | 0.946247 | 0.276411 | 0.606979 | 0.528495 | 0.904433 |
 | 1 | 4.47814 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 7.26996e+10 | 1.86415e+11 | 1.86359e+11 | 6.00479e+10 | 2.04935e+11 | 2.68281e+10 |
 | 2 | 7.03428 | -5.49756e+11 | -5.49756e+11 | -5.49756e+11 | -5.49756e+11 | -9.27175e+10 | -2.139e+11 | -3.09327e+11 | -1.07213e+11 | -2.75432e+11 | -3.12711e+09 |
@@ -179,6 +287,8 @@ params.learning_rate = 0.0001
 | 398 | 4.47814 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 |
 | 498 | 4.47814 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 |
 | 499 | 4.47814 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 | 5.49756e+11 |
+
+**These e+11 values are due to the data not normalized to 0-1**.
 
 When `DEBUG=1` (calculate training loss for every iteration), for 500 iterations, the `Training time = 2060.51`.
 
@@ -198,6 +308,10 @@ True Class1    79        0
      Class0    35        0
 ```
 
+
+### Batch 32, LR 0.001, Weight Init with 0~1, Data Un-Normalized
+
+Model all predict one class.
 
 ## References
 
