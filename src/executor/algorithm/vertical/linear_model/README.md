@@ -392,7 +392,7 @@ True Class1    79        0
 
 Model all predict one class.
 
-### Batch 8, LR 0.1, Weight Init with -10~10, Data Normalized
+### Batch 8, LR 0.1, Weight Init with -10~10, Data Normalized (1000 iterations)
 
 | Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -439,6 +439,110 @@ Confusion Matrix
 True Class1    53        26
      Class0    8        27
 ```
+
+### Batch 8, LR 0.1, Weight Init with -10~10, Data Normalized (3000 iterations)
+
+**ran 3000 iterations, debug every 500 iterations**
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 3.39229 | 9.29677 | 4.11092 | 6.66367 | 3.11665 | -7.06371 | 2.24842 | 9.35231 | -0.455175 | -8.43499 | 0.819866 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    267        11
+     Class0    177        0
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 499 | 0.707449 | 7.39123 | 2.33091 | 4.75423 | 1.49793 | -6.21278 | 1.14621 | 7.58821 | -2.70513 | -8.51909 | 0.827386 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    171        107
+     Class0    54        123
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 999 | 0.478582 | 7.03439 | 1.56522 | 4.34924 | 1.00095 | -4.9129 | 0.828025 | 6.78155 | -3.26836 | -8.31315 | 1.11674 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    211        67
+     Class0    41        136
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1499 | 0.389878 | 6.93696 | 0.968055 | 4.21786 | 0.755564 | -4.16399 | 0.614732 | 6.27741 | -3.63679 | -8.30875 | 1.24658 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    222        56
+     Class0    34        143
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1999 | 0.340084 | 6.93578 | 0.524623 | 4.17326 | 0.601563 | -3.6682 | 0.415088 | 5.83238 | -3.90582 | -8.28579 | 1.26775 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    235        43
+     Class0    29        148
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2499 | 0.306887 | 6.94466 | 0.136344 | 4.16066 | 0.486568 | -3.28119 | 0.354567 | 5.56056 | -4.08498 | -8.3022 | 1.33811 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    246        32
+     Class0    30        147
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2999 | 0.283205 | 6.99403 | -0.180983 | 4.18847 | 0.402345 | -2.99765 | 0.226676 | 5.29039 | -4.25608 | -8.314 | 1.32681 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    251        27
+     Class0    28        149
+
+# test set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    74        5
+     Class0    3        32
+```
+
+
 
 ## References
 
