@@ -6,7 +6,7 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/lr_params_converter.h>
 #include <falcon/operator/mpc/spdz_connector.h>
-#include <falcon/utils/metric/accuracy.h>
+#include <falcon/utils/metric/classification.h>
 #include <falcon/utils/math/math_ops.h>
 #include <falcon/common.h>
 #include <falcon/model/model_io.h>
@@ -450,6 +450,9 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
 
+  // Classification Metrics object for performance metrics
+  ClassificationMetrics ClfMetrics;
+
   /// the testing workflow is as follows:
   ///     step 1: init test data
   ///     step 2: every party computes partial phe summation and sends to active party
@@ -514,12 +517,15 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
         // std::cout << "sample " << i << "'s predicted class = " << pred_class << std::endl;
       }
       if (eval_type == falcon::TRAIN) {
-        accuracy = accuracy_computation(pred_classes, training_labels);
+        ClfMetrics.compute_metrics(pred_classes, training_labels);
       }
       if (eval_type == falcon::TEST){
-        accuracy = accuracy_computation(pred_classes, testing_labels);
+        ClfMetrics.compute_metrics(pred_classes, testing_labels);
       }
-      LOG(INFO) << "The evaluation accuracy on " << dataset_str << " is: " << accuracy;
+      LOG(INFO) << "Classification Confusion Matrix on " << dataset_str << " is:";
+      ClfMetrics.pretty_print_cm();
+      LOG(INFO) << "Classification Report on " << dataset_str << " is:";
+      ClfMetrics.classification_report();
     } else {
       LOG(ERROR) << "The " << metric << " metric is not supported";
       return;

@@ -6,7 +6,7 @@
 
 // logistic function is a sigmoid function (S-shaped)
 // logistic function outputs an estimated probability between 0 and 1
-TEST(math_ops, LogisticFunction) {
+TEST(Math_ops, LogisticFunction) {
     float abs_error = 0.01;
     float logit, est_prob;
     logit = 10.0;
@@ -34,7 +34,7 @@ TEST(math_ops, LogisticFunction) {
 // if y=0, the closer p is to 0 the better, cost := -log(1-p)
 // The cost function over the whole training set is
 // the average cost over all training instances
-TEST(math_ops, LogisticRegressionLoss) {
+TEST(Math_ops, LogisticRegressionLoss) {
     std::vector<float> pred_probs, labels;
     float cost;
 
