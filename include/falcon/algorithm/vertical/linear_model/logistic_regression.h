@@ -165,9 +165,10 @@ class LogisticRegression : public Model {
    *
    * @param party: initialized party object
    * @param eval_type: falcon::DatasetType, TRAIN for training data and TEST for testing data
-   * @param accuracy: returned model accuracy, default metric "acc"
+   * will output both a pretty_print of confusion matrix
+   * as well as a classification metrics report
    */
-  void eval(Party party, falcon::DatasetType eval_type, float &accuracy);
+  void eval(Party party, falcon::DatasetType eval_type);
 
   /**
    * compute the loss of the dataset in each iteration
