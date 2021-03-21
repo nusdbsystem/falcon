@@ -21,7 +21,7 @@ With the C++ program `tools/data_preparation/data_spliter.cc`:
 ```sh
 g++ -o data_spliter data_spliter.cc
 
-$ ./data_spliter /opt/falcon/data/dataset/breast_cancer_data/breast_cancer.data 3
+$ ./data_spliter /opt/falcon/data/dataset/breast_cancer_data/breast_cancer.data.norm 3
 number of samples: 569
 number of attributes (including label): 31
 threshold index 2 = 10
