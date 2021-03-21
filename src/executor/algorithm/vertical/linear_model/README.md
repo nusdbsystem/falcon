@@ -246,6 +246,86 @@ True Class1    4        3206
      Class0    0        406
 ```
 
+### Batch 8, LR 0.05, Weight Init with -10~10
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 1.01779 | 2.30302 | -6.13074 | 8.95114 | 4.51005 | -9.71927 | 1.05759 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    2655        555
+     Class0    333        73
+```
+
+After 1000 iterations:
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    2919        291
+     Class0    345        61
+
+# test set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    716        74
+     Class0    98        17
+```
+
+### Batch 8, LR 0.1, Weight Init with -10~10
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 0.993073 | -1.41551 | -0.202029 | 5.43804 | -9.86373 | -7.19927 | 5.99492 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    3143        67
+     Class0    391        15
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 499 | 0.82847 | -1.86168 | -0.789742 | 5.40117 | -10.1322 | -7.32813 | 5.22167 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    2900        310
+     Class0    330        76
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 999 | 0.689748 | -1.80772 | -1.33873 | 5.39463 | -10.1818 | -7.36709 | 4.84694 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    2982        228
+     Class0    344        62
+
+# test set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    730        60
+     Class0    93        22
+```
 
 ## Experiments on UCI Breast Cancer Dataset
 
