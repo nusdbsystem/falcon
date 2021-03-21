@@ -388,10 +388,57 @@ True Class1    79        0
      Class0    35        0
 ```
 
-
 ### Batch 32, LR 0.001, Weight Init with 0~1, Data Un-Normalized
 
 Model all predict one class.
+
+### Batch 8, LR 0.1, Weight Init with -10~10, Data Normalized
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 6.2684 | 5.30431 | -5.11779 | 3.38805 | -1.56313 | 2.03624 | -1.48285 | 2.03476 | -8.62319 | 6.8028 | -3.13318 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    0        278
+     Class0    0        177
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 499 | 1.06126 | 5.53269 | -1.67568 | 3.57748 | -2.21367 | 5.40977 | -0.555947 | 2.2034 | -7.79355 | 8.83396 | -1.27898 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    148        130
+     Class0    88        89
+```
+
+| Iteration | Loss | weight 0 | weight 1 | weight 2 | weight 3 | weight 4 | weight 5 | weight 6 | weight 7 | weight 8 | weight 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 999 | 0.672281 |4.68279 | -1.07434 | 2.77152 | -3.15586 | 5.25516 | -0.883009 | 1.48397 | -8.78242 | 8.75854 | -0.9861 |
+
+```
+# training set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    202        76
+     Class0    64        113
+
+# test set
+Confusion Matrix
+               Pred
+               Class1    Class0
+True Class1    53        26
+     Class0    8        27
+```
 
 ## References
 
