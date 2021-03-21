@@ -99,6 +99,45 @@ The main algorithm includes the following steps (may add a diagram later).
     * store the evaluation report to a specified path
 
 
+## Set Batch Size in MPC
+
+**The batch size is hard coded into the MPC server, so to set batch size, change both in the train_job json as well as in the MPC code**.
+
+Go to `/opt/falcon/third_party/MP-SPDZ/Programs/Source/logistic_regression.mpc`, update the batch size in the **`ARRAY_SIZE`**:
+```
+### set necessary parameters
+ARRAY_SIZE = 8
+PORT_NUM = 14000
+MAX_NUM_CLIENTS = 3
+MAX_NBITS = 14
+NULL = -2147483648
+```
+
+Then re-compile the mpc program:
+```sh
+/opt/falcon/third_party/MP-SPDZ$ sudo ./compile.py Programs/Source/logistic_regression.mpc 
+Default bit length: 64
+Default security parameter: 40
+Compiling file Programs/Source/logistic_regression.mpc
+WARNING: Order of memory instructions not preserved, errors possible
+Writing to /opt/falcon/third_party/MP-SPDZ/Programs/Bytecode/logistic_regression-multithread-1.bc
+WARNING: Order of memory instructions not preserved, errors possible
+WARNING: Order of memory instructions not preserved, errors possible
+WARNING: Order of memory instructions not preserved, errors possible
+WARNING: Order of memory instructions not preserved, errors possible
+WARNING: Order of memory instructions not preserved, errors possible
+WARNING: Order of memory instructions not preserved, errors possible
+WARNING: Order of memory instructions not preserved, errors possible
+WARNING: Order of memory instructions not preserved, errors possible
+Going to unknown from         6992 integer triples,        29312 integer bits,          inf virtual machine rounds
+Program requires:
+         inf integer triples
+         inf integer bits
+         inf virtual machine rounds
+Writing to /opt/falcon/third_party/MP-SPDZ/Programs/Schedules/logistic_regression.sch
+Writing to /opt/falcon/third_party/MP-SPDZ/Programs/Bytecode/logistic_regression-0.bc
+```
+
 ## Experiments on UCI Telemarketing Bank Dataset
 
 With the follow settings to train on client 0:
