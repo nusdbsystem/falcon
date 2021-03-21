@@ -38,7 +38,10 @@ src/coordinator/train_jobs/three_parties_train_job.json)
 * submit job to coordinator
 ```shell script
 cd src/coordinator
-python coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job.json
+# UCI tele-marketing bank dataset
+python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_banktele.json
+# UCI breast cancer dataset
+python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_breastcancer.json
 ```
 
 * after training, find the saved model and report under 
