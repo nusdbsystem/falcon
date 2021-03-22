@@ -7,9 +7,11 @@ cd /opt/falcon/third_party/MP-SPDZ/
 OUT_DIR=logs/semi-parties/
 mkdir -p $OUT_DIR
 
-./semi-party.x -F -N 3 -p 0 -I logistic_regression > $OUT_DIR/semi-party0.log &
+# NOTE: need "2>&1" before "&"
+# To redirect both stdout and stderr to the same file
+./semi-party.x -F -N 3 -p 0 -I logistic_regression > $OUT_DIR/semi-party0.log 2>&1 &
 echo $! > $OUT_DIR/semi-party0.pid
-./semi-party.x -F -N 3 -p 1 -I logistic_regression > $OUT_DIR/semi-party1.log &
+./semi-party.x -F -N 3 -p 1 -I logistic_regression > $OUT_DIR/semi-party1.log 2>&1 &
 echo $! > $OUT_DIR/semi-party1.pid
-./semi-party.x -F -N 3 -p 2 -I logistic_regression > $OUT_DIR/semi-party2.log &
+./semi-party.x -F -N 3 -p 2 -I logistic_regression > $OUT_DIR/semi-party2.log 2>&1 &
 echo $! > $OUT_DIR/semi-party2.pid
