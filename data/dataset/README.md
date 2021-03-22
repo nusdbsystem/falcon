@@ -140,6 +140,33 @@ Therefore for seed=1, train acc = 3196/3616 = 0.883849, and test acc = 804/905 =
 **So the logistic model is blinding predicting all No(1)!**
 
 
+## Logistic Regression: UCI Breast Cancer Dataset
+
+From Sklearn's datasets, which is taken from UCI ML dataset for breast cancer binary classification (https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)).
+
+> Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image.
+
+There are 30 real-value features, 10 for each of the 3 types of cell nuclei.
+
+All feature values are recoded with four significant digits.
+
+Missing attribute values: none
+
+Class distribution: 357 benign, 212 malignant
+
+**positive class (`y==1`) is Benign, negative class (`y==0`) is Maglignant**
+
+```py
+# Class Distribution: 212 - Malignant, 357 - Benign
+np.testing.assert_equal(np.count_nonzero(y==1), 357)
+# benign class is 1
+np.testing.assert_equal(np.count_nonzero(y==0), 212)
+# malignant class is 0
+```
+
+Split 10 features into each client 0,1,2, with client 0 carrying the labels.
+
+
 ### Logistic Regression with just Client-0 (Active) Features
 
 ### Logistic Regression with Client-0 + Client-1 data
