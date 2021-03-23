@@ -1,18 +1,18 @@
 ## Algorithms
 
-We mainly focus on two FL settings: vertical FL and horizontal FL. 
+We mainly focus on two FL settings: vertical FL and horizontal FL.
 
 ### Vertical FL
 
 In vertical FL, we support pre-processing and model training algorithms, including:
  * PSI: sample alignment
  * WOE & IV: pre-processing for selecting features
- * LR: linear models
+ * LR: linear models [logistic regression](vertical/linear_model/README.md)
  * DT: tree-based models
  * RF & GBDT: ensemble models
  * NN: neural networks (will be supported in the future)
 
-### Horizontal FL 
+### Horizontal FL
 
 In horizontal FL, we support:
  * LR: linear models
