@@ -65,7 +65,12 @@ void LogisticRegression::init_encrypted_weights(const Party &party, int precisio
 
   std::random_device rd;
   std::mt19937 mt(rd());
-  std::uniform_real_distribution<float> dist(0.0, 1.0);
+  // initialization of weights
+  // random initialization with a uniform range
+  std::uniform_real_distribution<float> dist(
+    WEIGHTS_INIT_MIN,
+    WEIGHTS_INIT_MAX
+  );
   // srand(static_cast<unsigned> (time(nullptr)));
   for (int i = 0; i < weight_size; i++) {
     // generate random float values within (0, 1],
@@ -429,12 +434,19 @@ void LogisticRegression::train(Party party) {
     loss_computation(party, falcon::TRAIN, training_loss);
     LOG(INFO) << "DEBUG INFO: The " << iter << "-th iteration training loss = " << training_loss;
     std::cout << "DEBUG INFO: The " << iter << "-th iteration training loss = " << training_loss << std::endl;
-//    float accuracy = 0.0;
-//    eval(party, falcon::TRAIN, accuracy);
-//    LOG(INFO) << "DEBUG INFO: The " << iter << "-th iteration accuracy = " << accuracy;
-//    std::cout << "DEBUG INFO: The " << iter << "-th iteration accuracy = " << accuracy << std::endl;
+    eval(party, falcon::TRAIN);
     display_weights(party);
 #endif
+    // even not in debug mode, it is good to print out the initial
+    // evaluation report on the 0-th iter, and every 500 iters
+    if (iter == 0 || ((iter + 1) % 500 == 0)) {
+      float training_loss = 0.0;
+      loss_computation(party, falcon::TRAIN, training_loss);
+      LOG(INFO) << "DEBUG INFO: The " << iter << "-th iteration training loss = " << training_loss;
+      std::cout << "DEBUG INFO: The " << iter << "-th iteration training loss = " << training_loss << std::endl;
+      eval(party, falcon::TRAIN);
+      display_weights(party);
+    }
     google::FlushLogFiles(google::INFO);
   }
 
@@ -445,7 +457,7 @@ void LogisticRegression::train(Party party) {
   google::FlushLogFiles(google::INFO);
 }
 
-void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float &accuracy) {
+void LogisticRegression::eval(Party party, falcon::DatasetType eval_type) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
@@ -457,7 +469,7 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
   ///     step 1: init test data
   ///     step 2: every party computes partial phe summation and sends to active party
   ///     step 3: active party aggregates and call collaborative decryption
-  ///     step 4: active party computes the logistic function and compare the accuracy
+  ///     step 4: active party computes the logistic function and compare the clf metrics
 
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
@@ -490,7 +502,7 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type, float 
 
   // std::cout << "Print predicted class" << std::endl;
 
-  // step 4: active party computes the logistic function and compare the accuracy
+  // step 4: active party computes the logistic function and compare the clf metrics
   if (party.party_type == falcon::ACTIVE_PARTY) {
     if (metric == "acc") {
       // the output is a vector of integers (predicted classes)

@@ -25,13 +25,16 @@ namespace falcon{
   #define ACTIVE_PARTY_ID 0
   // default threshold for LR is 50%
   #define LOGREG_THRES 0.5
+  // initialization of weights
+  #define WEIGHTS_INIT_MIN -10.0
+  #define WEIGHTS_INIT_MAX 10.0
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"
   #define IS_INFERENCE 0
 
   // for DEBUG
-  #define DEBUG 1
+  #define DEBUG 0
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};
