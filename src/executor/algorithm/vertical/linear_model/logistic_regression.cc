@@ -774,8 +774,8 @@ void train_logistic_regression(Party party, std::string params_str,
   std::cout << "Init logistic regression model success" << std::endl;
 
   log_reg_model.train(party);
-  log_reg_model.eval(party, falcon::TRAIN, training_accuracy);
-  log_reg_model.eval(party, falcon::TEST, testing_accuracy);
+  log_reg_model.eval(party, falcon::TRAIN);
+  log_reg_model.eval(party, falcon::TEST);
 
   // save model and report
   EncodedNumber* model_weights = new EncodedNumber[log_reg_model.getter_weight_size()];
