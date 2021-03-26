@@ -45,6 +45,9 @@ cmake-build-debug/
 third_party/MP-SPDZ/
 third_party/libhcs/
 
+##############
+# data folder
+##############
 data/dataset/bank_marketing_data/client0/phe_keys
 data/dataset/bank_marketing_data/client1/phe_keys
 data/dataset/bank_marketing_data/client2/phe_keys
@@ -72,7 +75,9 @@ data/dataset/breast_cancer_data/client2/report.txt
 # coordinator dependencies
 pkg/*
 
-# data dir python related
+##################
+# python related
+##################
 *.pyc
 *.so
 *.pyd

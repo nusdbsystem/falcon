@@ -20,7 +20,7 @@ TEST(IO_Util, ReadWriteData) {
     write_data.push_back(row);
   }
   // write data to file
-  std::string file_name = "test_data.txt";
+  std::string file_name = "test_io_util_data.txt";
   write_dataset_to_file(write_data, file_name);
 
   // read data and compare
