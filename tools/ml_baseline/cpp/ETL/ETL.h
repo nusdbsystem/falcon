@@ -53,7 +53,6 @@ public:
     // return the mean for each of the column
     // the mean of each of the features x
     auto Mean(Eigen::MatrixXd dataMat) -> decltype(dataMat.colwise().mean());
-    // Eigen::MatrixXd Mean(Eigen::MatrixXd dataMat);
 
     // helper 2: calculate the standard deviation
     // return the standard deviation for each of the column
@@ -64,7 +63,6 @@ public:
             /
             (dataMat.rows() - 1)
         ).sqrt());
-    // Eigen::MatrixXd Std(Eigen::MatrixXd dataMat);
 };
 
 #endif

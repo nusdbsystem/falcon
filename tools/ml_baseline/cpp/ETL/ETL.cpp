@@ -44,15 +44,25 @@ Eigen::MatrixXd ETL::CSVtoEigen(
         vector<vector<string>> dataString, int rows, int cols) {
     // if first row is header
     if (header == true) {
+        cout << "header is true\n";
+        cout << "rows before = " << rows << endl;
         rows--;
+        cout << "rows after = " << rows << endl;
     }
 
+    cout << "rows after = " << rows << endl;
+    cout << "cols = " << cols << endl;
     // create the eigen matrix based on the rows and cols
     // variable of type MatrixXd (double) and specifies that it is a matrix
     Eigen::MatrixXd mat(cols, rows);
 
+    cout << "mat created\n";
+
     for (int i=0; i<rows; i++) {
+        cout << "i = " << i << endl;
         for (int j=0; j<cols; j++) {
+            cout << "j = " << j << endl;
+            cout << "dataString[i][j] = " << dataString[i][j] << endl;
             // Convert a string to a floating-point number
             mat(j,i) = atof(dataString[i][j].c_str());
         }
@@ -65,15 +75,28 @@ Eigen::MatrixXd ETL::CSVtoEigen(
 // using z-score normalization
 // after obtaining the mean, std
 Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat) {
+    cout << "ETL NormalizeZscore called\n";
+    cout << "dataMat is:\n" << dataMat << endl;
     // calculate the mean
-    auto mean = Mean(dataMat);
+    auto mean = dataMat.colwise().mean();
+    // auto mean = Mean(dataMat);
+    cout << "mean = " << mean << endl;
+    cout << "mean.rows(), mean.cols() = " << mean.rows() << " " << mean.cols() << "\n";
+    cout << "dataMat.rows(), dataMat.cols() = " << dataMat.rows() << " " << dataMat.cols() << "\n";
     // calculate the x-mean
     Eigen::MatrixXd scaled_data = dataMat.rowwise() - mean;
+    cout << "scaled_data =\n" << scaled_data << endl;
     // calculate the std
-    auto std = Std(scaled_data);
+    auto std = (
+        (dataMat.array().square().colwise().sum())
+        /
+        (dataMat.rows() - 1)
+    ).sqrt();
+    // auto std = Std(scaled_data);
+    cout << "std =\n" << std << endl;
     // apply the z-score normalization
     Eigen::MatrixXd norm_z = scaled_data.array().rowwise() / std;
-
+    cout << "norm_z\n" << norm_z << endl;
     return norm_z;
 }
 
@@ -83,6 +106,10 @@ Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat) {
 // return the mean for each of the column
 // the mean of each of the features x
 auto ETL::Mean(Eigen::MatrixXd dataMat) -> decltype(dataMat.colwise().mean()) {
+    cout << "Mean called\n";
+    cout << "dataMat is:\n" << dataMat << endl;
+    cout << "dataMat colwise sum:\n" << dataMat.colwise().sum() << endl;
+    cout << "dataMat colwise mean:\n" << dataMat.colwise().mean() << endl;
     return dataMat.colwise().mean();
 }
 

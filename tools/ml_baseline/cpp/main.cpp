@@ -43,7 +43,13 @@ int main(int argc, char* argv[]) {
                                 rows,
                                 cols);
 
-    cout << dataMat << endl;
+    cout << "dataMat is\n" << dataMat << endl;
+
+    Eigen::MatrixXd norm_z = etl.NormalizeZscore(
+        dataMat
+    );
+
+    cout << "norm_z is\n" << norm_z << endl;
 
     return EXIT_SUCCESS;
 }
