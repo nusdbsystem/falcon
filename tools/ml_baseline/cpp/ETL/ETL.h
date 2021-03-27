@@ -37,6 +37,12 @@ public:
     // method to read CSV file
     vector<vector<string>> readCSV();
 
+    // method to build the data matrix
+    Eigen::MatrixXd CSVtoEigen(
+        vector<vector<string>> dataString,
+        int rows,
+        int cols
+    );
 };
 
 #endif

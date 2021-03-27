@@ -37,3 +37,26 @@ vector<vector<string>> ETL::readCSV() {
     // return the dataString
     return dataString;
 }
+
+// store the parsed csv string as Eigen matrix
+// build the matrix based on the input data
+Eigen::MatrixXd ETL::CSVtoEigen(vector<vector<string>> dataString, int rows, int cols) {
+    // if first row is header
+    if (header == true) {
+        rows--;
+    }
+
+    // create the eigen matrix based on the rows and cols
+    // variable of type MatrixXd (double) and specifies that it is a matrix
+    Eigen::MatrixXd mat(cols, rows);
+
+    for (int i=0; i<rows; i++) {
+        for (int j=0; j<cols; j++) {
+            // Convert a string to a floating-point number
+            mat(j,i) = atof(dataString[i][j].c_str());
+        }
+    }
+
+    // transpose the eigen mat, so we get rows x cols
+    return mat.transpose();
+}

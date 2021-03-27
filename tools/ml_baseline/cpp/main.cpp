@@ -29,10 +29,21 @@ int main(int argc, char* argv[]) {
     cout << "use_header = " << argv[3] << endl;
 
     // create ETL instance
-    ETL etl(argv[1], argv[2], argv[3]);
+    ETL etl(dataset, delimiter, argv[3]);
 
     // read the csv
     vector<vector<string>> dataString = etl.readCSV();
+
+    // build the eigen matrix from csv
+    int rows = dataString.size();
+    int cols = dataString[0].size();
+
+    Eigen::MatrixXd dataMat = etl.CSVtoEigen(
+                                dataString,
+                                rows,
+                                cols);
+
+    cout << dataMat << endl;
 
     return EXIT_SUCCESS;
 }
