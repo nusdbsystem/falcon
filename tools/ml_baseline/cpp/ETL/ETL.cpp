@@ -42,27 +42,12 @@ vector<vector<string>> ETL::readCSV() {
 // build the matrix based on the input data
 Eigen::MatrixXd ETL::CSVtoEigen(
         vector<vector<string>> dataString, int rows, int cols) {
-    // if first row is header
-    if (header == true) {
-        cout << "header is true\n";
-        cout << "rows before = " << rows << endl;
-        rows--;
-        cout << "rows after = " << rows << endl;
-    }
-
-    cout << "rows after = " << rows << endl;
-    cout << "cols = " << cols << endl;
     // create the eigen matrix based on the rows and cols
     // variable of type MatrixXd (double) and specifies that it is a matrix
     Eigen::MatrixXd mat(cols, rows);
 
-    cout << "mat created\n";
-
     for (int i=0; i<rows; i++) {
-        cout << "i = " << i << endl;
         for (int j=0; j<cols; j++) {
-            cout << "j = " << j << endl;
-            cout << "dataString[i][j] = " << dataString[i][j] << endl;
             // Convert a string to a floating-point number
             mat(j,i) = atof(dataString[i][j].c_str());
         }
@@ -76,7 +61,7 @@ Eigen::MatrixXd ETL::CSVtoEigen(
 // after obtaining the mean, std
 Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat) {
     cout << "ETL NormalizeZscore called\n";
-    cout << "dataMat is:\n" << dataMat << endl;
+    // cout << "dataMat is:\n" << dataMat << endl;
     // calculate the mean
     auto mean = dataMat.colwise().mean();
     // auto mean = Mean(dataMat);
@@ -88,15 +73,15 @@ Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat) {
     cout << "scaled_data =\n" << scaled_data << endl;
     // calculate the std
     auto std = (
-        (dataMat.array().square().colwise().sum())
+        (scaled_data.array().square().colwise().sum())
         /
-        (dataMat.rows() - 1)
+        (scaled_data.rows() - 1)
     ).sqrt();
     // auto std = Std(scaled_data);
     cout << "std =\n" << std << endl;
     // apply the z-score normalization
     Eigen::MatrixXd norm_z = scaled_data.array().rowwise() / std;
-    cout << "norm_z\n" << norm_z << endl;
+    // cout << "norm_z\n" << norm_z << endl;
     return norm_z;
 }
 

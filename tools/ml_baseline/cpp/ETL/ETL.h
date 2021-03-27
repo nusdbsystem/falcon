@@ -19,19 +19,16 @@ class ETL
     // accept input with string
     string dataset;
     string delimiter;
-    // whether have header or not
-    bool header;
+    // make sure the csv file does NOT have header
 
 public:
 
     // constructor
     ETL(
         string dataset,
-        string delimiter,
-        bool header
+        string delimiter
     ) : dataset(dataset),
-        delimiter(delimiter),
-        header(header)
+        delimiter(delimiter)
     {}
 
     // method to read CSV file

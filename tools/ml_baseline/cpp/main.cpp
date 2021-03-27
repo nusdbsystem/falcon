@@ -17,19 +17,17 @@ using namespace std;
 // main program reading cmd arguments
 int main(int argc, char* argv[]) {
     cout << "ETL program called\n";
-    if (argc != 4) {
-        cout << "[Usage] dataset delimiter use_header\n";
+    if (argc != 3) {
+        cout << "[Usage] dataset delimiter\n";
         return EXIT_FAILURE;
     }
     string dataset = argv[1];
     string delimiter = argv[2];
-    // bool header = argv[3];
     cout << "dataset = " << argv[1] << endl;
     cout << "delimiter = " << argv[2] << endl;
-    cout << "use_header = " << argv[3] << endl;
 
     // create ETL instance
-    ETL etl(dataset, delimiter, argv[3]);
+    ETL etl(dataset, delimiter);
 
     // read the csv
     vector<vector<string>> dataString = etl.readCSV();
