@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # -g option gives more information
 # -fno-omit-frame-pointer gets nicer stack traces in error messages
 # -fno-common to make global variables protected by ASAN
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address -g -fno-common -fno-omit-frame-pointer")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fsanitize=address -g -fno-common -fno-omit-frame-pointer")
 
 # using eigen in cmake
 # Eigen is a header only library

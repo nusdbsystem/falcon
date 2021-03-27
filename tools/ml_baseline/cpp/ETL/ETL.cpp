@@ -40,7 +40,8 @@ vector<vector<string>> ETL::readCSV() {
 
 // store the parsed csv string as Eigen matrix
 // build the matrix based on the input data
-Eigen::MatrixXd ETL::CSVtoEigen(vector<vector<string>> dataString, int rows, int cols) {
+Eigen::MatrixXd ETL::CSVtoEigen(
+        vector<vector<string>> dataString, int rows, int cols) {
     // if first row is header
     if (header == true) {
         rows--;
@@ -59,4 +60,48 @@ Eigen::MatrixXd ETL::CSVtoEigen(vector<vector<string>> dataString, int rows, int
 
     // transpose the eigen mat, so we get rows x cols
     return mat.transpose();
+}
+
+// using z-score normalization
+// after obtaining the mean, std
+Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat) {
+    // calculate the mean
+    auto mean = Mean(dataMat);
+    // calculate the x-mean
+    Eigen::MatrixXd scaled_data = dataMat.rowwise() - mean;
+    // calculate the std
+    auto std = Std(scaled_data);
+    // apply the z-score normalization
+    Eigen::MatrixXd norm_z = scaled_data.array().rowwise() / std;
+
+    return norm_z;
+}
+
+
+// two helper functions for NormalizeZscore
+// helper 1: calculate the mean
+// return the mean for each of the column
+// the mean of each of the features x
+auto ETL::Mean(Eigen::MatrixXd dataMat) -> decltype(dataMat.colwise().mean()) {
+    return dataMat.colwise().mean();
+}
+
+// helper 2: calculate the standard deviation
+// return the standard deviation for each of the column
+// the std of each of the features x
+auto ETL::Std(Eigen::MatrixXd dataMat) -> decltype((
+        (dataMat.array().square().colwise().sum())
+        /
+        (dataMat.rows() - 1)
+    ).sqrt()) {
+    // the dataMat is already the difference with the mean
+    // dataMat.array() is xi - mean
+    // dataMat.array().square() is (xi-mean)^2
+    // dataMat.array().square().colwise().sum() is the sum of each
+    // column or each feature's sum diff squared
+    return (
+        (dataMat.array().square().colwise().sum())
+        /
+        (dataMat.rows() - 1)
+    ).sqrt();
 }

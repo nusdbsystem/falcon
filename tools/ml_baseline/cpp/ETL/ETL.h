@@ -43,6 +43,28 @@ public:
         int rows,
         int cols
     );
+
+    // using z-score normalization
+    // after obtaining the mean, std
+    Eigen::MatrixXd NormalizeZscore(Eigen::MatrixXd dataMat);
+
+    // two helper functions for NormalizeZscore
+    // helper 1: calculate the mean
+    // return the mean for each of the column
+    // the mean of each of the features x
+    auto Mean(Eigen::MatrixXd dataMat) -> decltype(dataMat.colwise().mean());
+    // Eigen::MatrixXd Mean(Eigen::MatrixXd dataMat);
+
+    // helper 2: calculate the standard deviation
+    // return the standard deviation for each of the column
+    // the std of each of the features x
+    auto Std(Eigen::MatrixXd dataMat) -> decltype(
+        (
+            (dataMat.array().square().colwise().sum())
+            /
+            (dataMat.rows() - 1)
+        ).sqrt());
+    // Eigen::MatrixXd Std(Eigen::MatrixXd dataMat);
 };
 
 #endif
