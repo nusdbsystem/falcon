@@ -59,7 +59,15 @@ public:
             (dataMat.array().square().colwise().sum())
             /
             (dataMat.rows() - 1)
-        ).sqrt());
+        ).sqrt()
+    );
+
+    // train test split like sklearn
+    tuple<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd> TrainTestSplit(
+        Eigen::MatrixXd data,
+        float split_ratio
+    );
+
 };
 
 #endif

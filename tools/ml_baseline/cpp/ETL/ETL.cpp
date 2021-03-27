@@ -117,3 +117,34 @@ auto ETL::Std(Eigen::MatrixXd dataMat) -> decltype((
         (dataMat.rows() - 1)
     ).sqrt();
 }
+
+// split train test for linear model training
+tuple<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd> ETL::TrainTestSplit(
+        Eigen::MatrixXd data, float split_ratio) {
+    // derive the required train test split
+    int rows = data.rows();
+    int train_rows = round(split_ratio * rows);
+    int test_rows = rows - train_rows;
+
+    // use block operations
+    Eigen::MatrixXd train_set = data.topRows(train_rows);
+    // features X
+    Eigen::MatrixXd X_train = train_set.leftCols(data.cols() - 1);
+    // labels y
+    Eigen::MatrixXd y_train = train_set.rightCols(1);
+
+    Eigen::MatrixXd test_set = data.bottomRows(test_rows);
+    // features X
+    Eigen::MatrixXd X_test = test_set.leftCols(data.cols() - 1);
+    // labels y
+    Eigen::MatrixXd y_test = test_set.rightCols(1);
+
+    // return the tuple
+    return make_tuple(
+        X_train,
+        y_train,
+        X_test,
+        y_test
+    );
+}
+
