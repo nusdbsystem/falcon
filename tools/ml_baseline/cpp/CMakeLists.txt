@@ -22,6 +22,7 @@ include_directories(
 # manually add the sources
 set(SOURCES
     ./ETL/ETL.cpp
+    ./LinearRegression/LinearRegression.cpp
     main.cpp
 )
 

@@ -3,6 +3,7 @@
 // https://www.youtube.com/playlist?list=PLNpKaH98va-FJ1YN8oyMQWnR1pKzPu-GI
 
 #include "ETL/ETL.h"
+#include "LinearRegression/LinearRegression.h"
 
 #include <iostream>
 #include <string>
@@ -71,6 +72,61 @@ int main(int argc, char* argv[]) {
     cout << "y_train rows() cols() =  " << y_train.rows() << " " << y_train.cols() << endl;
     cout << "X_test rows() cols() =  " << X_test.rows() << " " << X_test.cols() << endl;
     cout << "y_test rows() cols() =  " << y_test.rows() << " " << y_test.cols() << endl;
+
+    // try out the linear regression
+    // train test vectors?
+    Eigen::VectorXd vec_train = Eigen::VectorXd::Ones(X_train.rows());
+    Eigen::VectorXd vec_test = Eigen::VectorXd::Ones(X_test.rows());
+
+    // resize the matrices to allocate the vector of ones
+    X_train.conservativeResize(
+        X_train.rows(), X_train.cols()+1
+    );
+    X_train.col(X_train.cols()-1) = vec_train;
+
+    X_test.conservativeResize(
+        X_test.rows(), X_test.cols()+1
+    );
+    X_test.col(X_test.cols()-1) = vec_test;
+
+    cout << "after conservativeResize:\n";
+    cout << "X_train is\n" << X_train << endl;
+    cout << "y_train is\n" << y_train << endl;
+    cout << "X_test is\n" << X_test << endl;
+    cout << "y_test is\n" << y_test << endl;
+    cout << "X_train rows() cols() =  " << X_train.rows() << " " << X_train.cols() << endl;
+    cout << "y_train rows() cols() =  " << y_train.rows() << " " << y_train.cols() << endl;
+    cout << "X_test rows() cols() =  " << X_test.rows() << " " << X_test.cols() << endl;
+    cout << "y_test rows() cols() =  " << y_test.rows() << " " << y_test.cols() << endl;
+
+
+    // init the weights
+    Eigen::VectorXd theta = Eigen::VectorXd::Zero(X_train.cols());
+    // learning rate
+    float learning_rate = 0.01;
+    // number of iterations
+    int iters = 1000;
+
+    // outputs
+    Eigen::VectorXd thetaOut;
+    vector<float> cost_vec;
+
+    LinearRegression linreg;
+
+    tuple<Eigen::VectorXd, vector<float>> gradient_descent_outputs = linreg.GradientDescent(
+        X_train,
+        y_train,
+        theta,
+        learning_rate,
+        iters
+    );
+
+    tie(thetaOut, cost_vec) = gradient_descent_outputs;
+    cout << "thetaOut is\n" << thetaOut << endl;
+    cout << "cost vector is\n";
+    for (float v : cost_vec) {
+        cout << v << endl;
+    }
 
     return EXIT_SUCCESS;
 }
