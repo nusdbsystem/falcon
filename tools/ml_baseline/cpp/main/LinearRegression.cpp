@@ -17,7 +17,7 @@ using namespace std;
 
 // main program reading cmd arguments
 int main(int argc, char* argv[]) {
-    cout << "ETL program called\n";
+    cout << "LinearRegression program called\n";
     if (argc != 3) {
         cout << "[Usage] dataset delimiter\n";
         return EXIT_FAILURE;
