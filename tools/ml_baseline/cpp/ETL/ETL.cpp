@@ -81,7 +81,7 @@ Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat, bool normalizeTarg
     cout << "dataNorm.rows(), dataNorm.cols() = " << dataNorm.rows() << " " << dataNorm.cols() << "\n";
     // calculate the x-mean
     Eigen::MatrixXd scaled_data = dataNorm.rowwise() - mean;
-    cout << "scaled_data =\n" << scaled_data << endl;
+    // cout << "scaled_data =\n" << scaled_data << endl;
     // calculate the std
     auto std = (
         (scaled_data.array().square().colwise().sum())

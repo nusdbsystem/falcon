@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
                                 rows,
                                 cols);
 
-    cout << "dataMat is\n" << dataMat << endl;
+    // cout << "dataMat is\n" << dataMat << endl;
 
     // normalizeTarget is false for classification
     Eigen::MatrixXd norm_z = etl.NormalizeZscore(
@@ -52,32 +52,32 @@ int main(int argc, char* argv[]) {
         false
     );
 
-    cout << "norm_z is\n" << norm_z << endl;
+    // cout << "norm_z is\n" << norm_z << endl;
 
-    // // train and test split
-    // float split_ratio = 0.8;
-    // Eigen::MatrixXd X_train, y_train, X_test, y_test;
-    // tuple<Eigen::MatrixXd,Eigen::MatrixXd,Eigen::MatrixXd,Eigen::MatrixXd> split_data = etl.TrainTestSplit(
-    //     norm_z,
-    //     split_ratio
-    // );
+    // train and test split
+    float split_ratio = 0.8;
+    Eigen::MatrixXd X_train, y_train, X_test, y_test;
+    tuple<Eigen::MatrixXd,Eigen::MatrixXd,Eigen::MatrixXd,Eigen::MatrixXd> split_data = etl.TrainTestSplit(
+        norm_z,
+        split_ratio
+    );
 
-    // // use tie to unpack the tuple
-    // tie(X_train, y_train, X_test, y_test) = split_data;
+    // use tie to unpack the tuple
+    tie(X_train, y_train, X_test, y_test) = split_data;
 
     // cout << "X_train is\n" << X_train << endl;
     // cout << "y_train is\n" << y_train << endl;
     // cout << "X_test is\n" << X_test << endl;
     // cout << "y_test is\n" << y_test << endl;
 
-    // // sanity check the shape of the train test split
-    // cout << "norm_z rows() cols() =  " << norm_z.rows() << " " << norm_z.cols() << endl;
-    // cout << "X_train rows() cols() =  " << X_train.rows() << " " << X_train.cols() << endl;
-    // cout << "y_train rows() cols() =  " << y_train.rows() << " " << y_train.cols() << endl;
-    // cout << "X_test rows() cols() =  " << X_test.rows() << " " << X_test.cols() << endl;
-    // cout << "y_test rows() cols() =  " << y_test.rows() << " " << y_test.cols() << endl;
+    // sanity check the shape of the train test split
+    cout << "norm_z rows() cols() =  " << norm_z.rows() << " " << norm_z.cols() << endl;
+    cout << "X_train rows() cols() =  " << X_train.rows() << " " << X_train.cols() << endl;
+    cout << "y_train rows() cols() =  " << y_train.rows() << " " << y_train.cols() << endl;
+    cout << "X_test rows() cols() =  " << X_test.rows() << " " << X_test.cols() << endl;
+    cout << "y_test rows() cols() =  " << y_test.rows() << " " << y_test.cols() << endl;
 
-    // // try out the linear regression
+    // // try out the logistic regression
     // // train test vectors?
     // Eigen::VectorXd vec_train = Eigen::VectorXd::Ones(X_train.rows());
     // Eigen::VectorXd vec_test = Eigen::VectorXd::Ones(X_test.rows());
