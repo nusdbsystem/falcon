@@ -19,6 +19,15 @@ public:
 
     // Sigmoid
     Eigen::MatrixXd Sigmoid(Eigen::MatrixXd Z);
+
+    // propagate (calculate the cost)
+    std::tuple<Eigen::MatrixXd, double, double> Propagate(
+        Eigen::MatrixXd Weights,
+        double bias,
+        Eigen::MatrixXd X,
+        Eigen::MatrixXd y,
+        double lambda
+    );
 };
 
 
