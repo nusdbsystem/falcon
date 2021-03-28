@@ -59,17 +59,28 @@ Eigen::MatrixXd ETL::CSVtoEigen(
 
 // using z-score normalization
 // after obtaining the mean, std
-Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat) {
+// NOTE: for classification, we do not want to normalize the labels
+// thus for classification, do not apply normalization on last column
+Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat, bool normalizeTarget) {
     cout << "ETL NormalizeZscore called\n";
-    // cout << "dataMat is:\n" << dataMat << endl;
+
+    cout << "dataMat.rows(), dataMat.cols() = " << dataMat.rows() << " " << dataMat.cols() << "\n";
+
+    // whether to normalize the last column (labels)
+    Eigen::MatrixXd dataNorm;
+    if (normalizeTarget==true) {
+        dataNorm = dataMat;
+    } else {
+        dataNorm = dataMat.leftCols(dataMat.cols()-1);
+    }
     // calculate the mean
-    auto mean = dataMat.colwise().mean();
+    auto mean = dataNorm.colwise().mean();
     // auto mean = Mean(dataMat);
     cout << "mean = " << mean << endl;
     cout << "mean.rows(), mean.cols() = " << mean.rows() << " " << mean.cols() << "\n";
-    cout << "dataMat.rows(), dataMat.cols() = " << dataMat.rows() << " " << dataMat.cols() << "\n";
+    cout << "dataNorm.rows(), dataNorm.cols() = " << dataNorm.rows() << " " << dataNorm.cols() << "\n";
     // calculate the x-mean
-    Eigen::MatrixXd scaled_data = dataMat.rowwise() - mean;
+    Eigen::MatrixXd scaled_data = dataNorm.rowwise() - mean;
     cout << "scaled_data =\n" << scaled_data << endl;
     // calculate the std
     auto std = (
@@ -81,6 +92,13 @@ Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat) {
     cout << "std =\n" << std << endl;
     // apply the z-score normalization
     Eigen::MatrixXd norm_z = scaled_data.array().rowwise() / std;
+
+    if (normalizeTarget==false) {
+        // restore the original labels at last column
+        norm_z.conservativeResize(norm_z.rows(), norm_z.cols()+1);
+        norm_z.col(norm_z.cols()-1) = dataMat.rightCols(1);
+    }
+
     // cout << "norm_z\n" << norm_z << endl;
     return norm_z;
 }

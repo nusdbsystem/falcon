@@ -45,7 +45,8 @@ int main(int argc, char* argv[]) {
     cout << "dataMat is\n" << dataMat << endl;
 
     Eigen::MatrixXd norm_z = etl.NormalizeZscore(
-        dataMat
+        dataMat,
+        true
     );
 
     cout << "norm_z is\n" << norm_z << endl;

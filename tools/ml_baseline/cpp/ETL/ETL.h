@@ -43,7 +43,7 @@ public:
 
     // using z-score normalization
     // after obtaining the mean, std
-    Eigen::MatrixXd NormalizeZscore(Eigen::MatrixXd dataMat);
+    Eigen::MatrixXd NormalizeZscore(Eigen::MatrixXd dataMat, bool normalizeTarget);
 
     // two helper functions for NormalizeZscore
     // helper 1: calculate the mean

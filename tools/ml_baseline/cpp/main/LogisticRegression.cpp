@@ -46,11 +46,13 @@ int main(int argc, char* argv[]) {
 
     cout << "dataMat is\n" << dataMat << endl;
 
-    // Eigen::MatrixXd norm_z = etl.NormalizeZscore(
-    //     dataMat
-    // );
+    // normalizeTarget is false for classification
+    Eigen::MatrixXd norm_z = etl.NormalizeZscore(
+        dataMat,
+        false
+    );
 
-    // cout << "norm_z is\n" << norm_z << endl;
+    cout << "norm_z is\n" << norm_z << endl;
 
     // // train and test split
     // float split_ratio = 0.8;
