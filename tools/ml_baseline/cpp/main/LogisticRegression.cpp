@@ -3,7 +3,7 @@
 // https://www.youtube.com/playlist?list=PLNpKaH98va-FJ1YN8oyMQWnR1pKzPu-GI
 
 #include "ETL/ETL.h"
-// #include "LogisticRegression/LogisticRegression.h"
+#include "LogisticRegression/LogisticRegression.h"
 
 #include <iostream>
 #include <string>
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <boost/algorithm/string.hpp>
 #include <vector>
+#include <list>
 
 
 using namespace std;
@@ -77,67 +78,61 @@ int main(int argc, char* argv[]) {
     cout << "X_test rows() cols() =  " << X_test.rows() << " " << X_test.cols() << endl;
     cout << "y_test rows() cols() =  " << y_test.rows() << " " << y_test.cols() << endl;
 
-    // // try out the logistic regression
-    // // train test vectors?
-    // Eigen::VectorXd vec_train = Eigen::VectorXd::Ones(X_train.rows());
-    // Eigen::VectorXd vec_test = Eigen::VectorXd::Ones(X_test.rows());
+    // try out the logistic regression
+    LogisticRegression logreg;
 
-    // // resize the matrices to allocate the vector of ones
-    // X_train.conservativeResize(
-    //     X_train.rows(), X_train.cols()+1
-    // );
-    // X_train.col(X_train.cols()-1) = vec_train;
+    int dims = X_train.cols();
 
-    // X_test.conservativeResize(
-    //     X_test.rows(), X_test.cols()+1
-    // );
-    // X_test.col(X_test.cols()-1) = vec_test;
+    // init the weights
+    Eigen::MatrixXd W = Eigen::VectorXd::Zero(dims);
+    // init the bias
+    double b = 0.0;
+    // init the lambda, what is lambda??
+    double lambda = 0.0;
 
-    // cout << "after conservativeResize:\n";
-    // cout << "X_train is\n" << X_train << endl;
-    // cout << "y_train is\n" << y_train << endl;
-    // cout << "X_test is\n" << X_test << endl;
-    // cout << "y_test is\n" << y_test << endl;
-    // cout << "X_train rows() cols() =  " << X_train.rows() << " " << X_train.cols() << endl;
-    // cout << "y_train rows() cols() =  " << y_train.rows() << " " << y_train.cols() << endl;
-    // cout << "X_test rows() cols() =  " << X_test.rows() << " " << X_test.cols() << endl;
-    // cout << "y_test rows() cols() =  " << y_test.rows() << " " << y_test.cols() << endl;
+    bool log_cost = true;
 
+    // learning rate
+    double learning_rate = 0.01;
+    // number of iterations
+    int num_iter = 1000;
 
-    // // init the weights
-    // Eigen::VectorXd theta = Eigen::VectorXd::Zero(X_train.cols());
-    // // learning rate
-    // float learning_rate = 0.01;
-    // // number of iterations
-    // int iters = 1000;
+    Eigen::MatrixXd dw;
+    double db;
+    std::list<double> costs;
+    std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> optimize = logreg.Optimize(
+                                                                                                    W,
+                                                                                                    b,
+                                                                                                    X_train,
+                                                                                                    y_train,
+                                                                                                    num_iter,
+                                                                                                    learning_rate,
+                                                                                                    lambda,
+                                                                                                    log_cost);
 
-    // // outputs
-    // Eigen::VectorXd thetaOut;
-    // vector<float> cost_vec;
+    std::tie(W,b,dw,db,costs) = optimize;
 
-    // LinearRegression linreg;
+    Eigen::MatrixXd y_pred_train = logreg.Predict(W, b, X_train);
+    Eigen::MatrixXd y_pred_test = logreg.Predict(W, b, X_test);
 
-    // tuple<Eigen::VectorXd, vector<float>> gradient_descent_outputs = linreg.GradientDescent(
-    //     X_train,
-    //     y_train,
-    //     theta,
-    //     learning_rate,
-    //     iters
-    // );
+    // compare the accuracy rate
+    auto train_acc = (100 - (y_pred_train - y_train).cwiseAbs().mean()*100);
+    auto test_acc = (100 - (y_pred_test - y_test).cwiseAbs().mean()*100);
 
-    // tie(thetaOut, cost_vec) = gradient_descent_outputs;
-    // // cout << "thetaOut is\n" << thetaOut << endl;
+    cout << "Train acc = " << train_acc << endl;
+    cout << "Test acc = " << test_acc << endl;
 
-    // // save the thetaOut as file
+    // save the thetaOut as file
     // etl.EigentoFile(thetaOut, "thetaOut.txt");
 
-    // // cout << "cost vector is\n";
-    // // for (float v : cost_vec) {
-    // //     cout << v << endl;
-    // // }
+    // cout << "cost vector is\n";
+    // for (float v : cost_vec) {
+    //     cout << v << endl;
+    // }
 
-    // // save the cost_vec as file
-    // etl.ExportCostVec(cost_vec, "cost_vec.txt");
+    // save the cost_vec as file
+    std::vector<float> cost_vec(costs.begin(), costs.end());
+    etl.ExportCostVec(cost_vec, "log_reg_cost_vec.txt");
 
     return EXIT_SUCCESS;
 }

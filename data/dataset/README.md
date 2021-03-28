@@ -112,7 +112,7 @@ np.testing.assert_equal(np.count_nonzero(y==0), 212)
 Split 10 features into each client 0,1,2, with client 0 carrying the labels.
 
 
-## Logistic Regression: UCI 
+## Logistic Regression: UCI Census Income Dataset
 
 Census income dataset: https://archive.ics.uci.edu/ml/datasets/census+income
 

@@ -43,3 +43,53 @@ std::tuple<Eigen::MatrixXd, double, double> LogisticRegression::Propagate(
     return std::make_tuple(dw,db,cost);
 }
 
+// update the parameters with gradient descend
+std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> LogisticRegression::Optimize(Eigen::MatrixXd W, double b, Eigen::MatrixXd X, Eigen::MatrixXd y, int num_iter, double learning_rate, double lambda, bool log_cost) {
+
+    std::list<double> costsList;
+
+    Eigen::MatrixXd dw;
+    double db, cost;
+
+    for(int i=0; i<num_iter; i++){
+        std::tuple<Eigen::MatrixXd, double, double> propagate = Propagate(W, b, X, y, lambda);
+        std::tie(dw, db, cost) = propagate;
+
+        W = W - (learning_rate*dw).transpose();
+        b = b - (learning_rate*db);
+
+        // print the cost every 100 iterations
+        if(i%100==0) {
+            costsList.push_back(cost);
+        }
+
+        if(log_cost && i%100==0) {
+            std::cout << "Cost after iteration " << i << ": " << cost << std::endl;
+        }
+    }
+
+    return std::make_tuple(W,b,dw,db,costsList);
+}
+
+// predict whether the label is 1 or 0
+Eigen::MatrixXd LogisticRegression::Predict(Eigen::MatrixXd W, double b, Eigen::MatrixXd X) {
+
+    int m = X.rows();
+
+    double threshold = 0.5;
+
+    Eigen::MatrixXd y_pred = Eigen::VectorXd::Zero(m).transpose();
+
+    Eigen::MatrixXd Z = (W.transpose() * X.transpose()).array() + b;
+    Eigen::MatrixXd A = Sigmoid(Z);
+
+    for(int i=0; i<A.cols(); i++) {
+        if(A(0,i) <= threshold) {
+            y_pred(0,i) = 0;
+        } else {
+            y_pred(0,i) = 1;
+        }
+    }
+
+    return y_pred.transpose();
+}
