@@ -68,6 +68,8 @@ public:
         float split_ratio
     );
 
+    void ExportCostVec(vector<float> cost_vec, string filename);
+    void EigentoFile(Eigen::MatrixXd data, string filename);
 };
 
 #endif

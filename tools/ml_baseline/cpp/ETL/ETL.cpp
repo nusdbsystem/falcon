@@ -148,3 +148,17 @@ tuple<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd> ETL::T
     );
 }
 
+// export the cost vector into file
+void ETL::ExportCostVec(vector<float> cost_vec, string filename) {
+    ofstream output_file(filename);
+    ostream_iterator<float> output_iterator(output_file, "\n");
+    copy(cost_vec.begin(), cost_vec.end(), output_iterator);
+}
+
+// export the Eigen matrix to file
+void ETL::EigentoFile(Eigen::MatrixXd data, string filename) {
+    ofstream output_file(filename);
+    if (output_file.is_open()) {
+        output_file << data << "\n";
+    }
+}

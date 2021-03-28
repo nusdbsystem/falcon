@@ -122,11 +122,18 @@ int main(int argc, char* argv[]) {
     );
 
     tie(thetaOut, cost_vec) = gradient_descent_outputs;
-    cout << "thetaOut is\n" << thetaOut << endl;
-    cout << "cost vector is\n";
-    for (float v : cost_vec) {
-        cout << v << endl;
-    }
+    // cout << "thetaOut is\n" << thetaOut << endl;
+
+    // save the thetaOut as file
+    etl.EigentoFile(thetaOut, "thetaOut.txt");
+
+    // cout << "cost vector is\n";
+    // for (float v : cost_vec) {
+    //     cout << v << endl;
+    // }
+
+    // save the cost_vec as file
+    etl.ExportCostVec(cost_vec, "cost_vec.txt");
 
     return EXIT_SUCCESS;
 }
