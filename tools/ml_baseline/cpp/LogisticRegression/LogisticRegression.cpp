@@ -28,13 +28,29 @@ std::tuple<Eigen::MatrixXd, double, double> LogisticRegression::Propagate(
 
     Eigen::MatrixXd logit = Sigmoid(Z);
 
-    auto cross_entropy_total = -(y.transpose() * (Eigen::VectorXd) logit.array().log().transpose() + ((Eigen::VectorXd) (1 - y.array())).transpose() * (Eigen::VectorXd) (1-logit.array()).log().transpose());
-    auto cross_entropy = cross_entropy_total / m;
+    // disabled due to AddressSanitizer: stack-use-after-scope
+    // auto cross_entropy_total = -(y.transpose() * (Eigen::VectorXd) logit.array().log().transpose() + ((Eigen::VectorXd) (1 - y.array())).transpose() * (Eigen::VectorXd) (1-logit.array()).log().transpose());
+    // auto cross_entropy = cross_entropy_total / m;
 
     // optional regularization term to prevent overfitting
     double l2_reg_cost = Weights.array().pow(2).sum() * (lambda/(2*m));
 
-    double cost = static_cast<const double> (cross_entropy.array()[0]) + l2_reg_cost;
+    double cost = static_cast<const double> (
+        (
+            -(
+                y.transpose()
+                *
+                (Eigen::VectorXd) logit.array().log().transpose()
+                +
+                (
+                    (Eigen::VectorXd) (1 - y.array())
+                ).transpose()
+                *
+                (Eigen::VectorXd) (1-logit.array()).log().transpose()
+            )/m
+        ).array()[0] + l2_reg_cost
+    );
+    // std::cout << "cost = " << cost << std::endl;
 
     Eigen::MatrixXd dw = (Eigen::MatrixXd)(((Eigen::MatrixXd)(logit-y.transpose()) * X)/m) + ((Eigen::MatrixXd)(lambda/m*Weights)).transpose();
 
