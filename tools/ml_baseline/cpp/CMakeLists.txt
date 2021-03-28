@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # set the project name
-project(ETL)
+project(coding-ai-linear-model-tutorial)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
