@@ -16,9 +16,10 @@ def _estimate_prob(X, weights, bias, fit_bias=True):
 
     fit_bias or fit_intercept, for whether to plus the
     constant _bias_ or _intercept_ term
+    NOTE: the bias or intercept term can be incorporated into the
+    weights matrix already, thus no need to add bias separately
 
-    Returns 1D array of probabilities
-    that the class label == 1
+    Returns the estimated probabiliy in range [0,1]
     """
     print("_estimate_prob method called")
     print("input X shape = ", X.shape)

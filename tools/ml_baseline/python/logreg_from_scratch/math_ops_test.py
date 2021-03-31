@@ -80,6 +80,29 @@ class TestLogLoss(unittest.TestCase):
             0.0005827873164059617
         )
 
+    def test_loss_slp3_5(self):
+        """
+        test cases from Speech and Language Processing
+        by Dan Jurafsky
+        https://web.stanford.edu/~jurafsky/slp3/5.pdf
+        """
+        y_true = np.array([1])
+        y_pred = np.array([0.69])
+        self.assertAlmostEqual(
+            math_ops.log_loss(
+                y_true, y_pred
+            ),
+            0.37106368139083207
+        )
+        y_true = np.array([0])
+        y_pred = np.array([0.69])
+        self.assertAlmostEqual(
+            math_ops.log_loss(
+                y_true, y_pred
+            ),
+            1.1711829815029449
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

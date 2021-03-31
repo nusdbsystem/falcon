@@ -2,6 +2,11 @@ import numpy as np
 
 
 def sigmoid(logit):
+    """
+    The sigmoid takes a real-valued number and
+    maps it into the range [0,1],
+    which is good as probability
+    """
     return 1.0 / (1 + np.exp(-logit))
 
 
