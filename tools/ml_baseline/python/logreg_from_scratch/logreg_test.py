@@ -43,6 +43,28 @@ class TestEstimateProb(unittest.TestCase):
         )
 
 
+class TestDecisionBoundary(unittest.TestCase):
+    def test_decision_boundary(self):
+        thres = 0.5
+        self.assertEqual(
+            logreg.decision_boundary(0.6, thres),
+            1
+        )
+        self.assertEqual(
+            logreg.decision_boundary(0.5, thres),
+            1
+        )
+        self.assertEqual(
+            logreg.decision_boundary(0.08, thres),
+            0
+        )
+        thres = 0.8  # different threshold
+        self.assertEqual(
+            logreg.decision_boundary(0.6, thres),
+            0
+        )
+
+
 class TestPredict(unittest.TestCase):
     def test_predict(self):
         weights = np.array([2.5,-5.0,-1.2,0.5,2.0,0.7])
@@ -76,4 +98,43 @@ class TestPredictProba(unittest.TestCase):
                 predicted_labels,
                 np.array([0.69698889])
             )
+        )
+
+
+class TestGradientDescent(unittest.TestCase):
+    """
+    test cases from Speech and Language Processing
+    by Dan Jurafsky
+    https://web.stanford.edu/~jurafsky/slp3/5.pdf
+    5.4    Gradient Descent
+    """
+    def test_gradient_descent(self):
+        # a single observation x
+        X = np.array([
+            [3, 2],
+        ])
+        # correct value is y=1
+        y = 1
+        # initial weights and bias
+        weights = np.zeros(2,)
+        bias = 0
+        # initial learnig rate = 0.1
+        lr = 0.1
+
+        new_weights, new_bias = logreg.gradient_descent(
+            X, y, weights, bias, lr
+        )
+
+        """
+        So  after  one  step  of  gradient  descent, 
+        the  weights  have  shifted  to  be:
+        w1=.15, w2=.1, b=.05
+        """
+        np.testing.assert_array_almost_equal(
+            new_weights,
+            np.array([0.15, 0.1])
+        )
+
+        self.assertEqual(
+            new_bias, 0.05
         )
