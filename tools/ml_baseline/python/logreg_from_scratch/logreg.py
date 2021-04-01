@@ -22,26 +22,27 @@ def _estimate_prob(X, weights, bias, fit_bias=True):
     Returns the estimated probabiliy in range [0,1]
     """
     print("_estimate_prob method called")
-    print("input X shape = ", X.shape)
     # first apply the linear transformation
     # wx + b
-    # print(X.shape, self.weights.shape)
-    # print(np.dot(X, self.weights))
-    # print(self.bias)
+    print("X.shape, weights.shape = ", X.shape, weights.shape)
+    print("np.dot(X, weights) = ", np.dot(X, weights))
+    print("bias = ", bias)
     if fit_bias:
         linear_transformation = np.dot(X, weights) + bias
     else:
         linear_transformation = np.dot(X, weights)
+    print("linear_transformation = ", linear_transformation)
     # then apply the logistic/sigmoid function
     # sigmoid function outputs the estimated prob
     est_prob = math_ops.sigmoid(linear_transformation)
+    print("est_prob = ", est_prob)
 
     return est_prob
 
 
 def predict(X, weights, bias, thres=0.5, fit_bias=True):
     """
-    Returns 1D array of predicted labels
+    Returns 1D array of predicted labels 1 or 0
     """
     # computes the estimated prob
     est_prob = _estimate_prob(X, weights, bias, fit_bias=fit_bias)
