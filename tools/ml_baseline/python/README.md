@@ -11,7 +11,7 @@ References:
 to run unit-tests:
 
 ```sh
-$ python3 -m unittest discover -s ./logreg_from_scratch/ -p "*_test.py"
+python3 -m unittest discover -s ./logreg_from_scratch/falcon/ -p "*_test.py"
 ```
 
 
