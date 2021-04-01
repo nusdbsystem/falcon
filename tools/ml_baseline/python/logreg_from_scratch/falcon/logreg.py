@@ -216,3 +216,8 @@ def mini_batch_train(X_train, y_train, batch_size, lr, iters,
         # Log Progress
         if (iteration == 0) or ((iteration+1) % print_every == 0):
             print("iter-{} cost = {}\n".format(iteration, cost))
+
+    # after all the iterations of SGD,
+    # return the weights and bias
+    # also the cost_history
+    return (weights, bias, cost_history)
