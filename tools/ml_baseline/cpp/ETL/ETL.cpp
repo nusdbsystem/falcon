@@ -79,6 +79,8 @@ Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat, bool normalizeTarg
     cout << "mean = " << mean << endl;
     cout << "mean.rows(), mean.cols() = " << mean.rows() << " " << mean.cols() << "\n";
     cout << "dataNorm.rows(), dataNorm.cols() = " << dataNorm.rows() << " " << dataNorm.cols() << "\n";
+    cout << "before NormalizeZscore -- dataNorm.topRows(3)\n" << dataNorm.topRows(3) << endl;
+
     // calculate the x-mean
     Eigen::MatrixXd scaled_data = dataNorm.rowwise() - mean;
     // cout << "scaled_data =\n" << scaled_data << endl;
@@ -99,7 +101,7 @@ Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat, bool normalizeTarg
         norm_z.col(norm_z.cols()-1) = dataMat.rightCols(1);
     }
 
-    // cout << "norm_z\n" << norm_z << endl;
+    cout << "norm_z.topRows(3)\n" << norm_z.topRows(3) << endl;
     return norm_z;
 }
 
@@ -108,33 +110,33 @@ Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat, bool normalizeTarg
 // helper 1: calculate the mean
 // return the mean for each of the column
 // the mean of each of the features x
-auto ETL::Mean(Eigen::MatrixXd dataMat) -> decltype(dataMat.colwise().mean()) {
-    cout << "Mean called\n";
-    cout << "dataMat is:\n" << dataMat << endl;
-    cout << "dataMat colwise sum:\n" << dataMat.colwise().sum() << endl;
-    cout << "dataMat colwise mean:\n" << dataMat.colwise().mean() << endl;
-    return dataMat.colwise().mean();
-}
+// auto ETL::Mean(Eigen::MatrixXd dataMat) -> decltype(dataMat.colwise().mean()) {
+//     cout << "Mean called\n";
+//     cout << "dataMat is:\n" << dataMat << endl;
+//     cout << "dataMat colwise sum:\n" << dataMat.colwise().sum() << endl;
+//     cout << "dataMat colwise mean:\n" << dataMat.colwise().mean() << endl;
+//     return dataMat.colwise().mean();
+// }
 
 // helper 2: calculate the standard deviation
 // return the standard deviation for each of the column
 // the std of each of the features x
-auto ETL::Std(Eigen::MatrixXd dataMat) -> decltype((
-        (dataMat.array().square().colwise().sum())
-        /
-        (dataMat.rows() - 1)
-    ).sqrt()) {
-    // the dataMat is already the difference with the mean
-    // dataMat.array() is xi - mean
-    // dataMat.array().square() is (xi-mean)^2
-    // dataMat.array().square().colwise().sum() is the sum of each
-    // column or each feature's sum diff squared
-    return (
-        (dataMat.array().square().colwise().sum())
-        /
-        (dataMat.rows() - 1)
-    ).sqrt();
-}
+// auto ETL::Std(Eigen::MatrixXd dataMat) -> decltype((
+//         (dataMat.array().square().colwise().sum())
+//         /
+//         (dataMat.rows() - 1)
+//     ).sqrt()) {
+//     // the dataMat is already the difference with the mean
+//     // dataMat.array() is xi - mean
+//     // dataMat.array().square() is (xi-mean)^2
+//     // dataMat.array().square().colwise().sum() is the sum of each
+//     // column or each feature's sum diff squared
+//     return (
+//         (dataMat.array().square().colwise().sum())
+//         /
+//         (dataMat.rows() - 1)
+//     ).sqrt();
+// }
 
 // split train test for linear model training
 tuple<Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd> ETL::TrainTestSplit(
