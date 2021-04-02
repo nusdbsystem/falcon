@@ -3,30 +3,20 @@ blog link: https://beckernick.github.io/logistic-regression-from-scratch/
 """
 
 import numpy as np
-# import matplotlib.pyplot as plt
-# %matplotlib inline
 
 from logreg_from_scratch import logistic_regression
 
+import sys
+sys.path.append("..")  # Adds higher directory to python modules path.
+from utils.etl_beckernick_dataset import etL_beckernick_ds
 
-np.random.seed(12)
-num_observations = 5000
 
-x1 = np.random.multivariate_normal([0, 0], [[1, .75],[.75, 1]], num_observations)
-x2 = np.random.multivariate_normal([1, 4], [[1, .75],[.75, 1]], num_observations)
+X_train, y_train = etL_beckernick_ds()
 
-simulated_separableish_features = np.vstack((x1, x2)).astype(np.float32)
-simulated_labels = np.hstack((np.zeros(num_observations),
-                              np.ones(num_observations)))
-
-print("simulated_separableish_features.shape = ",
-      simulated_separableish_features.shape)
-print("simulated_labels.shape = ", simulated_labels.shape)
-# plt.figure(figsize=(12,8))
-# plt.scatter(simulated_separableish_features[:, 0], simulated_separableish_features[:, 1],
-#             c = simulated_labels, alpha = .4)
-
-# plt.show()
+# features X
+simulated_separableish_features = X_train
+# labels y
+simulated_labels = y_train
 
 weights = logistic_regression(simulated_separableish_features, simulated_labels,
                      num_steps = 5, learning_rate = 5e-5, add_intercept=True)

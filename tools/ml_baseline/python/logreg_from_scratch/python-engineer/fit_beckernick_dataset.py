@@ -1,31 +1,16 @@
-import numpy as np
-from logreg_from_scratch import LogisticRegression
-
 """
 compare with the implementation and dataset of beckernick
 https://beckernick.github.io/logistic-regression-from-scratch/
 """
+import numpy as np
+from logreg_from_scratch import LogisticRegression
 
-np.random.seed(12)
-num_observations = 5000
+import sys
+sys.path.append("..")  # Adds higher directory to python modules path.
+from utils.etl_beckernick_dataset import etL_beckernick_ds
 
-x1 = np.random.multivariate_normal([0, 0], [[1, .75],[.75, 1]], num_observations)
-x2 = np.random.multivariate_normal([1, 4], [[1, .75],[.75, 1]], num_observations)
 
-simulated_separableish_features = np.vstack((x1, x2)).astype(np.float32)
-simulated_labels = np.hstack((np.zeros(num_observations),
-                              np.ones(num_observations)))
-
-print("simulated_separableish_features.shape = ",
-      simulated_separableish_features.shape)
-print("simulated_labels.shape = ", simulated_labels.shape)
-
-# features X
-X_train = simulated_separableish_features
-# labels y
-y_train = simulated_labels
-
-print("X_train.shape, y_train.shape = ", X_train.shape, y_train.shape)
+X_train, y_train = etL_beckernick_ds()
 
 regressor = LogisticRegression(learning_rate=5e-5, n_iters=5)
 regressor.fit(X_train, y_train)
