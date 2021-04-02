@@ -1,6 +1,11 @@
 # Data Preparation
 
-## Data Normalization
+## Data Normalization (Z-score)
+
+
+## Data Normalization (Min-max feature scaling)
+
+_This is using min-max feature scaling_
 
 With the C++ program `tools/data_preparation/data_normalization.cc`:
 
@@ -14,7 +19,9 @@ outfile name: /opt/falcon/data/dataset/breast_cancer_data/breast_cancer.data.nor
 write finished
 ```
 
-## Data Spliter
+## Vertical FL Data Spliter
+
+_This is for vertical FL spliting of features among parites_
 
 With the C++ program `tools/data_preparation/data_spliter.cc`:
 

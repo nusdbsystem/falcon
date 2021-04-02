@@ -1,5 +1,7 @@
 # Linear model
 
+Linear models (such as linear regression and logistic regression) output predictions by multiplying the parameters or weights with the input features `X`, plus the constant _bias_ or _intercept_ term.
+
 ## Logistic Regression
 
 Here we introduce the logistic regression (LogR) model, a regression algorithm that is used for **classification** (the prediction is a discrete value).
@@ -36,10 +38,19 @@ The probability that `y=0` and `y=1`, given a sample with feature `x`, must add 
 
 **Decision boundaries is determined only by the paramaters or weights (theta)**.
 
+`LOGREG_THRES` classifier threshold for decision making. The threshold is used to make a decision.
+
 ### Optimization Objective and Cost Function
 
+The cost function used for logistic regression is called the _`log_loss`_, aka logistic loss or cross-entropy loss. It uses log to smoothen the cost function curve, making it a convex function. The smoothened convex cost function implies that there is a global optimum.
 
-`LOGREG_THRES` classifier threshold for decision making
+- Logistic regression's cost function is convex
+- Convex function has one and only one global optimum
+- Full batch gradient descent is guaranteed to find global optimum
+
+### Mini-batches with Replacement
+
+In vertical FL setting, the mini-batches used for Gradient Descent are **sampled with replacement**.
 
 
 In the vertical FL setting, the features are distributed among parties
@@ -144,3 +155,4 @@ Writing to /opt/falcon/third_party/MP-SPDZ/Programs/Bytecode/logistic_regression
 
 - Aurlien Gron. 2017. Hands-On Machine Learning with Scikit-Learn and TensorFlow: Concepts, Tools, and Techniques to Build Intelligent Systems (1st. ed.). O'Reilly Media, Inc.
 - Coursera Machine Learning Course by Andrew Ng https://www.coursera.org/learn/machine-learning
+- Speech and Language Processing (3rd ed. draft) by  Dan Jurafsky and James H. Martin https://web.stanford.edu/~jurafsky/slp3/5.pdf
