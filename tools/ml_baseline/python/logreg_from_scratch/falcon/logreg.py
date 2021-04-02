@@ -182,7 +182,11 @@ def mini_batch_train(X_train, y_train, batch_size, lr, iters,
     # sanity check with other implementations
     # use full batch GD, otherwise default should be
     # mini-batch GD
-    full_batch_train = True
+    if batch_size < n_samples:
+        full_batch_train = False
+    else:
+        print("^^^using Full Batch GD\n")
+        full_batch_train = True
 
     # iteratively gradient descent
     for iteration in range(iters):
@@ -195,12 +199,12 @@ def mini_batch_train(X_train, y_train, batch_size, lr, iters,
             X_mini_batch = X_train[permutation][:batch_size]
             y_mini_batch = y_train[permutation][:batch_size]
 
-        print("X_mini_batch.shape = ", X_mini_batch.shape)
-        print("y_mini_batch.shape = ", y_mini_batch.shape)
-        print("y_mini_batch # 0 = ",
-              np.count_nonzero(y_mini_batch == 0))
-        print("y_mini_batch # 1 = ",
-              np.count_nonzero(y_mini_batch == 1))
+        # print("X_mini_batch.shape = ", X_mini_batch.shape)
+        # print("y_mini_batch.shape = ", y_mini_batch.shape)
+        # print("y_mini_batch # 0 = ",
+        #       np.count_nonzero(y_mini_batch == 0))
+        # print("y_mini_batch # 1 = ",
+        #       np.count_nonzero(y_mini_batch == 1))
 
         weights, bias = gradient_descent(
             X_mini_batch,

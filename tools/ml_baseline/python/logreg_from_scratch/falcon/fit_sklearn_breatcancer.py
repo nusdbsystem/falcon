@@ -70,25 +70,42 @@ y_test # 0 (malignant) =  43
 print("before normalization, X_train = ", X_train)
 print("before normalization, X_test = ", X_test)
 
-# Data Standardization
-# NOTE: sklearn's transform's fit() just calculates the parameters
-# (e.g. mean and std in case of StandardScaler)
-# and saves them as an internal object's state
-scaler = preprocessing.StandardScaler().fit(X_train)
-print("scaler.mean_ = ", scaler.mean_)
-print("scaler.scale_ = ", scaler.scale_)
+# Whether to normalize the data
+normalize = True
 
-# NOTE: Afterwards, you can call its transform() method
-# to apply the transformation to any particular set of examples
-# from https://datascience.stackexchange.com/questions/12321/whats-the-difference-between-fit-and-fit-transform-in-scikit-learn-models
-X_train = scaler.transform(X_train)
-print("After normalization, X_train = ", X_train)
-X_test = scaler.transform(X_test)
-print("After normalization, X_test = ", X_test)
+if normalize:
+    # if to normalize, choose the normalization scheme
+    # choose from {MinMaxScaler | StandardScaler}
+    normalization_scheme = "MinMaxScaler"
+
+    # Data Standardization
+    # NOTE: sklearn's transform's fit() just calculates the parameters
+    # (e.g. mean and std in case of StandardScaler)
+    # and saves them as an internal object's state
+
+    if normalization_scheme == "StandardScaler":
+        scaler = preprocessing.StandardScaler().fit(X_train)
+        print("scaler.mean_ = ", scaler.mean_)
+        print("scaler.scale_ = ", scaler.scale_)
+    elif normalization_scheme == "MinMaxScaler":
+        scaler = preprocessing.MinMaxScaler().fit(X_train)
+        print("scaler.min_ = ", scaler.min_)
+        print("scaler.data_min_", scaler.data_min_)
+        print("scaler.data_max_", scaler.data_max_)
+        print("scaler.scale_ = ", scaler.scale_)
+
+    # NOTE: Afterwards, you can call its transform() method
+    # to apply the transformation to any particular set of examples
+    # from https://datascience.stackexchange.com/questions/12321/whats-the-difference-between-fit-and-fit-transform-in-scikit-learn-models
+    X_train = scaler.transform(X_train)
+    print("After normalization, X_train = ", X_train)
+    X_test = scaler.transform(X_test)
+    print("After normalization, X_test = ", X_test)
 
 # test falcon custom implemented log reg
 learning_rate = 0.001
 n_iters = 1000
+print_every = 100
 
 # try with full batch
 batch_size = len(y_train)
@@ -99,7 +116,7 @@ trained_weights, trained_bias, cost_history = logreg.mini_batch_train(
     batch_size=batch_size,
     lr=learning_rate,
     iters=n_iters,
-    print_every=1,
+    print_every=print_every,
 )
 
 # get actual predicted class
@@ -176,4 +193,13 @@ cm =
     accuracy                           0.97       114
    macro avg       0.97      0.97      0.97       114
 weighted avg       0.97      0.97      0.97       114
+"""
+
+"""with minmax normalization, learning_rate=0.001, n_iters=1000
+iter-999 cost = 0.6642076761657234
+
+LogReg regular accuracy: 0.7280701754385965
+cm =
+ [[12 31]
+ [ 0 71]]
 """
