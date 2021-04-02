@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import datasets
+from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix, classification_report
 # from sklearn.metrics import plot_confusion_matrix
 # import matplotlib.pyplot as plt
@@ -61,6 +62,25 @@ y_train # 0 (malignant) =  169
 y_test # 1 (benign) =  71
 y_test # 0 (malignant) =  43
 """
+
+print("before normalization, X_train = ", X_train)
+print("before normalization, X_test = ", X_test)
+
+# Data Standardization
+# NOTE: sklearn's transform's fit() just calculates the parameters
+# (e.g. mean and std in case of StandardScaler)
+# and saves them as an internal object's state
+scaler = preprocessing.StandardScaler().fit(X_train)
+print("scaler.mean_ = ", scaler.mean_)
+print("scaler.scale_ = ", scaler.scale_)
+
+# NOTE: Afterwards, you can call its transform() method
+# to apply the transformation to any particular set of examples
+# from https://datascience.stackexchange.com/questions/12321/whats-the-difference-between-fit-and-fit-transform-in-scikit-learn-models
+X_train = scaler.transform(X_train)
+print("After normalization, X_train = ", X_train)
+X_test = scaler.transform(X_test)
+print("After normalization, X_test = ", X_test)
 
 # test beckernick implemented log reg
 learning_rate = 0.001

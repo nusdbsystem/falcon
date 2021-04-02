@@ -27,21 +27,22 @@ def _estimate_prob(X, weights, bias, fit_bias=True):
 
     Returns the estimated probabiliy in range [0,1]
     """
-    print("_estimate_prob method called")
+    # print("~~~ _estimate_prob method called")
     # first apply the linear transformation
     # wx + b
-    print("X.shape, weights.shape = ", X.shape, weights.shape)
-    print("np.dot(X, weights) = ", np.dot(X, weights))
-    print("bias = ", bias)
+    # print("X features = ", X)
+    # print("X.shape, weights.shape = ", X.shape, weights.shape)
+    # print("np.dot(X, weights) = ", np.dot(X, weights))
+    # print("bias = ", bias)
     if fit_bias:
         linear_transformation = np.dot(X, weights) + bias
     else:
         linear_transformation = np.dot(X, weights)
-    print("linear_transformation = ", linear_transformation)
+    # print("linear_transformation = ", linear_transformation)
     # then apply the logistic/sigmoid function
     # sigmoid function outputs the estimated prob
     est_prob = math_ops.sigmoid(linear_transformation)
-    print("est_prob = ", est_prob)
+    # print("est_prob = ", est_prob)
 
     return est_prob
 
@@ -102,13 +103,13 @@ def gradient_descent(X, y, weights, bias, lr, fit_bias=True):
     # number of features n
     n_samples, n_features = X.shape
 
-    print("original weights = ", weights)
+    # print("original weights = ", weights)
 
     # Get Predictions
     y_predicted = predict_proba(X, weights, bias, fit_bias=fit_bias)
-    print("y_predicted = ", y_predicted)
-    print("y_predicted.shape = ", y_predicted.shape)
-    print("y true = ", y)
+    # print("y_predicted = ", y_predicted)
+    # print("y_predicted.shape = ", y_predicted.shape)
+    # print("y true = ", y)
 
     # update the weights with gradients
     # w = w - a dw
@@ -122,16 +123,16 @@ def gradient_descent(X, y, weights, bias, lr, fit_bias=True):
         db = (1/n_samples) * np.sum(y_predicted-y)
     else:
         db = 0
-    print("dw = ", dw)
-    print("db = ", db)
+    # print("dw = ", dw)
+    # print("db = ", db)
 
     # gradient descent
     # Multiply the gradient by our learning rate
     # Subtract from our weights to minimize cost
     new_weights = weights - lr * dw
-    print("new_weights = ", new_weights)
+    # print("new_weights = ", new_weights)
     new_bias = bias - lr * db
-    print("new_bias = ", new_bias)
+    # print("new_bias = ", new_bias)
 
     return (new_weights, new_bias)
 
@@ -178,12 +179,21 @@ def mini_batch_train(X_train, y_train, batch_size, lr, iters,
 
     cost_history = []
 
+    # sanity check with other implementations
+    # use full batch GD, otherwise default should be
+    # mini-batch GD
+    full_batch_train = True
+
     # iteratively gradient descent
     for iteration in range(iters):
-        # NOTE: mini-batches sampled with replacement
-        permutation = np.random.permutation(n_samples)
-        X_mini_batch = X_train[permutation][:batch_size]
-        y_mini_batch = y_train[permutation][:batch_size]
+        if full_batch_train:
+            X_mini_batch = X_train
+            y_mini_batch = y_train
+        else:
+            # NOTE: mini-batches sampled with replacement
+            permutation = np.random.permutation(n_samples)
+            X_mini_batch = X_train[permutation][:batch_size]
+            y_mini_batch = y_train[permutation][:batch_size]
 
         print("X_mini_batch.shape = ", X_mini_batch.shape)
         print("y_mini_batch.shape = ", y_mini_batch.shape)
