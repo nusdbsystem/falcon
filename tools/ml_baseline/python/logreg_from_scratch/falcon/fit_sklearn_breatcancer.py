@@ -160,3 +160,20 @@ cm =
    macro avg       0.94      0.96      0.95       114
 weighted avg       0.95      0.95      0.95       114
 """
+
+"""with X_train standardization, learning_rate=0.001, n_iters=1000:
+iter-999 cost = 0.2548839509475849
+
+LogReg regular accuracy: 0.9736842105263158
+cm =
+ [[42  1]
+ [ 2 69]]
+              precision    recall  f1-score   support
+
+   Malignant       0.95      0.98      0.97        43
+      Benign       0.99      0.97      0.98        71
+
+    accuracy                           0.97       114
+   macro avg       0.97      0.97      0.97       114
+weighted avg       0.97      0.97      0.97       114
+"""

@@ -40,6 +40,8 @@ def logistic_regression(features, target, num_steps, learning_rate, add_intercep
 
     weights = np.zeros(features.shape[1])
 
+    print_every = 10
+
     for step in range(num_steps):
         # print("\nstep ", step)
         # print("original weights = ", weights)
@@ -57,7 +59,7 @@ def logistic_regression(features, target, num_steps, learning_rate, add_intercep
         weights += learning_rate * gradient
 
         # Print log-likelihood every so often
-        if step % 10 == 0:
+        if (step == 0) or ((step+1) % print_every == 0):
             print(log_likelihood(features, target, weights))
 
     return weights
