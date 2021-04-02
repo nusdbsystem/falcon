@@ -87,15 +87,15 @@ int main(int argc, char* argv[]) {
     Eigen::MatrixXd W = Eigen::VectorXd::Zero(dims);
     // init the bias
     double b = 0.0;
-    // init the lambda, what is lambda??
+    // init the lambda, for l2_reg_cost
     double lambda = 0.0;
 
-    bool log_cost = true;
+    bool print_cost = true;
 
     // learning rate
     double learning_rate = 0.01;
     // number of iterations
-    int num_iter = 1000;
+    int num_iter = 10000;
 
     Eigen::MatrixXd dw;
     double db;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
                                                                                                     num_iter,
                                                                                                     learning_rate,
                                                                                                     lambda,
-                                                                                                    log_cost);
+                                                                                                    print_cost);
 
     std::tie(W,b,dw,db,costs) = optimize;
 

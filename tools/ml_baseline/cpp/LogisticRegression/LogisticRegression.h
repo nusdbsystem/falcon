@@ -31,7 +31,7 @@ public:
 
 
     // optimize with SGD
-    std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> Optimize(Eigen::MatrixXd W, double b, Eigen::MatrixXd X, Eigen::MatrixXd y, int num_iter, double learning_rate, double lambda, bool log_cost);
+    std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> Optimize(Eigen::MatrixXd W, double b, Eigen::MatrixXd X, Eigen::MatrixXd y, int num_iter, double learning_rate, double lambda, bool print_cost);
 
 
     // predict the labels

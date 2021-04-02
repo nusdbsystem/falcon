@@ -60,7 +60,7 @@ std::tuple<Eigen::MatrixXd, double, double> LogisticRegression::Propagate(
 }
 
 // update the parameters with gradient descend
-std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> LogisticRegression::Optimize(Eigen::MatrixXd W, double b, Eigen::MatrixXd X, Eigen::MatrixXd y, int num_iter, double learning_rate, double lambda, bool log_cost) {
+std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> LogisticRegression::Optimize(Eigen::MatrixXd W, double b, Eigen::MatrixXd X, Eigen::MatrixXd y, int num_iter, double learning_rate, double lambda, bool print_cost) {
 
     std::list<double> costsList;
 
@@ -79,7 +79,7 @@ std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> 
             costsList.push_back(cost);
         }
 
-        if(log_cost && i%100==0) {
+        if(print_cost && i%100==0) {
             std::cout << "Cost after iteration " << i << ": " << cost << std::endl;
         }
     }

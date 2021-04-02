@@ -19,8 +19,8 @@ This will create two executables `LinReg  LogReg` in `build` folder.
 The command line arguments to the two models are path to the dataset, followed by the delimiter:
 ```sh
 # Linear Regression exe
-$ ./build/LinReg ../../../data/dataset/wine_data/winedata.csv ","
+$ ./build/LinReg /opt/falcon/data/dataset/wine_data/winedata.csv ","
 
 # Logistic Regression exe
-$ ./build/LogReg ../../../data/dataset/census_adult_data/adult_data.csv ","
+$ ./build/LogReg /opt/falcon/data/dataset/census_adult_data/adult_data.csv ","
 ```
