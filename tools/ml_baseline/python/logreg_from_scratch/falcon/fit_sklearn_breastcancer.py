@@ -23,6 +23,7 @@ X_train, X_test, y_train, y_test = etl_sklearn_bc(
 # test falcon custom implemented log reg
 learning_rate = 0.001
 n_iters = 1000
+fit_bias = True
 print_every = 100
 
 # try with full batch
@@ -34,11 +35,18 @@ trained_weights, trained_bias, cost_history = logreg.mini_batch_train(
     batch_size=batch_size,
     lr=learning_rate,
     iters=n_iters,
+    fit_bias=fit_bias,
     print_every=print_every,
 )
 
+print("trained_weights = ", trained_weights)
+
+# predicted probs
+y_pred_probs = logreg.predict_proba(X_test, trained_weights, trained_bias, fit_bias=fit_bias)
+print("y_pred_probs = ", y_pred_probs)
+
 # get actual predicted class
-y_pred = logreg.predict(X_test, trained_weights, trained_bias)
+y_pred = logreg.predict(X_test, trained_weights, trained_bias, fit_bias=fit_bias)
 
 print("LogReg regular accuracy:", accuracy_score(y_test, y_pred))
 
