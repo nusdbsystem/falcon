@@ -2,69 +2,23 @@
 modified from
 https://github.com/python-engineer/MLfromscratch/blob/master/mlfromscratch/logistic_regression_tests.py
 """
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn import datasets
 from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score
 # from sklearn.metrics import plot_confusion_matrix
 # import matplotlib.pyplot as plt
 
 from logreg_from_scratch import LogisticRegression
 
-
-def regular_accuracy(y_true, y_pred):
-    regular_accuracy = np.sum(y_true == y_pred) / len(y_true)
-    return regular_accuracy
-
-
-# Test with sklearn's breast cancer dataset
-bc = datasets.load_breast_cancer()
-print("list of breast_cancer keys() =\n", list(bc.keys()))
-
-# Class Distribution: 212 - Malignant, 357 - Benign
-print("target_names = ", bc["target_names"])
-# target_names =  ['malignant' 'benign']
-
-print("DESCR = ")
-print(bc["DESCR"])
-
-X, y = bc.data, bc.target
-print("X.shape, X.dtype = ", X.shape, X.dtype)
-print("y.shape, y.dtype = ", y.shape, y.dtype)
-
-# Class Distribution: 212 - Malignant, 357 - Benign
-# malignant class is 0
-np.testing.assert_equal(np.count_nonzero(y==0), 212)
-# benign class is 1
-np.testing.assert_equal(np.count_nonzero(y==1), 357)
+import sys
+sys.path.append("..")  # Adds higher directory to python modules path.
+from utils.etl_sklearn_breastcancer import etl_sklearn_bc
 
 
-print("feature_names = ", bc["feature_names"])
-
-# split the train and test set
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=42,
+# load the uci bc dataset from the etl method in utils
+X_train, X_test, y_train, y_test = etl_sklearn_bc(
+    normalize=False,
+    normalization_scheme=None,
 )
-
-print("X_train.shape, X_test.shape = ", X_train.shape, X_test.shape)
-print("y_train.shape, y_test.shape = ", y_train.shape, y_test.shape)
-
-print("y_train # 1 (benign) = ", np.count_nonzero(y_train==1))
-print("y_train # 0 (malignant) = ", np.count_nonzero(y_train==0))
-print("y_test # 1 (benign) = ", np.count_nonzero(y_test==1))
-print("y_test # 0 (malignant) = ", np.count_nonzero(y_test==0))
-
-"""
-X_train.shape, X_test.shape =  (455, 30) (114, 30)
-y_train.shape, y_test.shape =  (455,) (114,)
-y_train # 1 (benign) =  286
-y_train # 0 (malignant) =  169
-y_test # 1 (benign) =  71
-y_test # 0 (malignant) =  43
-"""
 
 # test python-engineer implemented log reg
 clf = LogisticRegression(learning_rate=0.001, n_iters=1000)
@@ -73,7 +27,7 @@ clf.fit(X_train, y_train)
 # get actual predicted class
 y_pred = clf.predict(X_test)
 
-print("LogReg regular accuracy:", regular_accuracy(y_test, y_pred))
+print("LogReg regular accuracy:", accuracy_score(y_test, y_pred))
 
 # show the confusion matrix
 cm = confusion_matrix(y_test, y_pred)

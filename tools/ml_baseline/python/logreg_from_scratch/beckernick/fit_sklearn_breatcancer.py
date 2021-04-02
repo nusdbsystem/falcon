@@ -1,86 +1,21 @@
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn import datasets
-from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score
 # from sklearn.metrics import plot_confusion_matrix
 # import matplotlib.pyplot as plt
 
 from logreg_from_scratch import logistic_regression, sigmoid
 
-
-def regular_accuracy(y_true, y_pred):
-    regular_accuracy = np.sum(y_true == y_pred) / len(y_true)
-    return regular_accuracy
-
-
-# Test with sklearn's breast cancer dataset
-bc = datasets.load_breast_cancer()
-print("list of breast_cancer keys() =\n", list(bc.keys()))
-
-# Class Distribution: 212 - Malignant, 357 - Benign
-print("target_names = ", bc["target_names"])
-# target_names =  ['malignant' 'benign']
-
-print("DESCR = ")
-print(bc["DESCR"])
-
-X, y = bc.data, bc.target
-print("X.shape, X.dtype = ", X.shape, X.dtype)
-print("y.shape, y.dtype = ", y.shape, y.dtype)
-
-# Class Distribution: 212 - Malignant, 357 - Benign
-# malignant class is 0
-np.testing.assert_equal(np.count_nonzero(y==0), 212)
-# benign class is 1
-np.testing.assert_equal(np.count_nonzero(y==1), 357)
+import sys
+sys.path.append("..")  # Adds higher directory to python modules path.
+from utils.etl_sklearn_breastcancer import etl_sklearn_bc
 
 
-print("feature_names = ", bc["feature_names"])
-
-# split the train and test set
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=42,
+# load the uci bc dataset from the etl method in utils
+X_train, X_test, y_train, y_test = etl_sklearn_bc(
+    normalize=True,
+    normalization_scheme="StandardScaler",
 )
-
-print("X_train.shape, X_test.shape = ", X_train.shape, X_test.shape)
-print("y_train.shape, y_test.shape = ", y_train.shape, y_test.shape)
-
-print("y_train # 1 (benign) = ", np.count_nonzero(y_train==1))
-print("y_train # 0 (malignant) = ", np.count_nonzero(y_train==0))
-print("y_test # 1 (benign) = ", np.count_nonzero(y_test==1))
-print("y_test # 0 (malignant) = ", np.count_nonzero(y_test==0))
-
-"""
-X_train.shape, X_test.shape =  (455, 30) (114, 30)
-y_train.shape, y_test.shape =  (455,) (114,)
-y_train # 1 (benign) =  286
-y_train # 0 (malignant) =  169
-y_test # 1 (benign) =  71
-y_test # 0 (malignant) =  43
-"""
-
-print("before normalization, X_train = ", X_train)
-print("before normalization, X_test = ", X_test)
-
-# Data Standardization
-# NOTE: sklearn's transform's fit() just calculates the parameters
-# (e.g. mean and std in case of StandardScaler)
-# and saves them as an internal object's state
-scaler = preprocessing.StandardScaler().fit(X_train)
-print("scaler.mean_ = ", scaler.mean_)
-print("scaler.scale_ = ", scaler.scale_)
-
-# NOTE: Afterwards, you can call its transform() method
-# to apply the transformation to any particular set of examples
-# from https://datascience.stackexchange.com/questions/12321/whats-the-difference-between-fit-and-fit-transform-in-scikit-learn-models
-X_train = scaler.transform(X_train)
-print("After normalization, X_train = ", X_train)
-X_test = scaler.transform(X_test)
-print("After normalization, X_test = ", X_test)
 
 # test beckernick implemented log reg
 learning_rate = 0.001
@@ -101,7 +36,7 @@ predictions = sigmoid(scores)
 # get actual predicted class
 y_pred = [1 if i > 0.5 else 0 for i in predictions]
 
-print("LogReg regular accuracy:", regular_accuracy(y_test, y_pred))
+print("LogReg regular accuracy:", accuracy_score(y_test, y_pred))
 
 # show the confusion matrix
 cm = confusion_matrix(y_test, y_pred)
