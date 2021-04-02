@@ -217,9 +217,10 @@ def mini_batch_train(X_train, y_train, batch_size, lr, iters,
 
         # Calculate error for auditing purposes
         cost = math_ops.log_loss(
-            y_mini_batch,
+            # calculate the loss on the training set
+            y_train,
             predict_proba(
-                X_mini_batch,
+                X_train,
                 weights,
                 bias,
                 fit_bias=fit_bias

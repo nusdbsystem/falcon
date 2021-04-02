@@ -5,6 +5,7 @@ Pytest expects tests to be located in files whose names begin with test_ or end 
 import unittest
 import numpy as np
 import logreg
+import math_ops
 
 
 class TestEstimateProb(unittest.TestCase):
@@ -137,4 +138,76 @@ class TestGradientDescent(unittest.TestCase):
 
         self.assertEqual(
             new_bias, 0.05
+        )
+
+
+class TestTrainingLoss(unittest.TestCase):
+    """
+    calculate the loss on a training set
+
+    using example from https://web.stanford.edu/~jurafsky/slp3/5.pdf
+    5.1.1    Example: sentiment classification
+
+    NOTE: the textbook rounded the prob to 2 dp,
+    so the probs are .69 and .31, and loss is not very accurate
+    in this test-case, we calculate the exact loss
+    """
+    def test_training_loss(self):
+        # 6 features for this one instance are
+        # X shape is (1, 6)
+        X_train = np.array([
+            [3,2,1,3,0,4.19],
+        ])
+        # 6 weights corresponding to the 6 features are
+        weights = np.array([2.5,-5.0,-1.2,0.5,2.0,0.7])
+        bias = 0.1
+
+        fit_bias = True
+
+        # suppose the correct gold label for the sentiment example
+        # is positive, i.e.,y=1
+        y_train = np.array([
+            [1],
+        ])
+
+        y_pred = logreg.predict_proba(
+            X_train,
+            weights,
+            bias,
+            fit_bias=fit_bias
+        )
+
+        print("y_pred = ", y_pred)
+        # example a higher probability of being positive (.69)
+        # than negative (.31)
+
+        # loss for the first classifier should be (.37)
+        cost = math_ops.log_loss(
+            # calculate the loss on the training set
+            y_train,
+            y_pred
+        )
+
+        self.assertAlmostEqual(
+            cost, 0.360985807
+        )
+
+        # suppose the correct gold label for the sentiment example
+        # is negative, i.e.,y=0
+        y_train = np.array([
+            [0],
+        ])
+
+        # a higher probability of being positive (.69)
+        # than negative (.31)
+
+        # loss for the first classifier should be (.37)
+        cost = math_ops.log_loss(
+            # calculate the loss on the training set
+            y_train,
+            y_pred
+        )
+
+        self.assertAlmostEqual(
+            cost, 1.19398580
         )
