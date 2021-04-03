@@ -33,8 +33,9 @@ init_weights = np.zeros(n_features)
 print("init_weights = ", init_weights)
 
 # hyper-params
-learning_rate = 0.001
-n_iters = 1000
+learning_rate = 0.1
+n_iters = 100
+print_every = 1
 
 print("lr = ", learning_rate)
 print("n_iters = ", n_iters)
@@ -45,6 +46,7 @@ weights, cost_history = train(
     init_weights,
     lr=learning_rate,
     iters=n_iters,
+    print_every=print_every,
 )
 
 print("trained weights = ", weights)
