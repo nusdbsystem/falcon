@@ -16,15 +16,17 @@ from utils.etl_sklearn_breastcancer import etl_sklearn_bc
 
 # load the uci bc dataset from the etl method in utils
 X_train, X_test, y_train, y_test = etl_sklearn_bc(
-    normalize=True,
+    normalize=False,
     normalization_scheme="MinMaxScaler",
+    # normalization_scheme="StandardScaler",
+    use_falcon_bc=True,
 )
 
 # test falcon custom implemented log reg
-learning_rate = 0.001
-n_iters = 1000
+learning_rate = 0.1
+n_iters = 100
 fit_bias = True
-print_every = 100
+print_every = 1
 
 # try with full batch
 batch_size = len(y_train)

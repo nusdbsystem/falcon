@@ -93,9 +93,12 @@ int main(int argc, char* argv[]) {
     bool print_cost = true;
 
     // learning rate
-    double learning_rate = 0.01;
+    double learning_rate = 0.1;
     // number of iterations
-    int num_iter = 10000;
+    int num_iter = 100;
+
+    // print the hyper-parameters
+    std::cout << "learning rate = " << learning_rate << ", num_iter = " << num_iter << std::endl;
 
     Eigen::MatrixXd dw;
     double db;

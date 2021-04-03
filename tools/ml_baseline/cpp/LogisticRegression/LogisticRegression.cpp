@@ -67,6 +67,8 @@ std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> 
     Eigen::MatrixXd dw;
     double db, cost;
 
+    int print_every = 100;
+
     for(int i=0; i<num_iter; i++){
         std::tuple<Eigen::MatrixXd, double, double> propagate = Propagate(W, b, X, y, lambda);
         std::tie(dw, db, cost) = propagate;
@@ -75,11 +77,11 @@ std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> 
         b = b - (learning_rate*db);
 
         // print the cost every 100 iterations
-        if(i%100==0) {
+        if(i%print_every==0) {
             costsList.push_back(cost);
         }
 
-        if(print_cost && i%100==0) {
+        if(print_cost && i%print_every==0) {
             std::cout << "Cost after iteration " << i << ": " << cost << std::endl;
         }
     }

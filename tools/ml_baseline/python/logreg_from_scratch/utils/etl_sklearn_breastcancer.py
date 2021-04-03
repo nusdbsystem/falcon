@@ -9,39 +9,66 @@ from sklearn import preprocessing
 
 
 def etl_sklearn_bc(normalize=True,
-                   normalization_scheme="MinMaxScaler"):
+                   normalization_scheme="MinMaxScaler",
+                   use_falcon_bc=False):
     """
     Parameters:
     # Whether to normalize the data
     normalize = True
         # if to normalize, choose the normalization scheme
         # choose from {MinMaxScaler | StandardScaler}
+    # whether to use falcon's breast cancer data
 
     return the preprocessed train test split
     of UCI breastcancer dataset
     """
-    # Test with sklearn's breast cancer dataset
-    bc = datasets.load_breast_cancer()
-    print("list of breast_cancer keys() =\n", list(bc.keys()))
+    if use_falcon_bc:
+        """
+        load the normalized UCI breast cancer data
+        original data from sklearn load_creast_cancer()
+        preprocessed with falcon's cpp minmax-scaler
+        """
+        with open('/opt/falcon/data/dataset/breast_cancer_data/breast_cancer.data.norm') as csv_file:
+            bc_data_norm = np.loadtxt(csv_file, delimiter=",")
 
-    # Class Distribution: 212 - Malignant, 357 - Benign
-    print("target_names = ", bc["target_names"])
-    # target_names =  ['malignant' 'benign']
+        print("bc_data_norm shape, dtype = ",
+              bc_data_norm.shape,
+              bc_data_norm.dtype)
 
-    print("DESCR = ")
-    print(bc["DESCR"])
+        # extract the first 30 columns as features X
+        X = bc_data_norm[:, :-1]
+        print("X.shape, X.dtype = ", X.shape, X.dtype)
+        print("X[0] = ", X[0])
 
-    X, y = bc.data, bc.target
-    print("X.shape, X.dtype = ", X.shape, X.dtype)
-    print("y.shape, y.dtype = ", y.shape, y.dtype)
+        # extract the last column as label y
+        y = bc_data_norm[:, -1:].astype(np.int)
+        # a 1d array was expected. Please change the shape of y to (n_samples, )
+        y = y.ravel()
+        print("y.shape, y[:5], y.dtype = ", y.shape, y[:5], y.dtype)
+        print("=== X and y extraction done ===")
+    else:
+        # Test with sklearn's breast cancer dataset
+        bc = datasets.load_breast_cancer()
+        print("list of breast_cancer keys() =\n", list(bc.keys()))
+
+        # Class Distribution: 212 - Malignant, 357 - Benign
+        print("target_names = ", bc["target_names"])
+        # target_names =  ['malignant' 'benign']
+
+        print("DESCR = ")
+        print(bc["DESCR"])
+
+        print("feature_names = ", bc["feature_names"])
+
+        X, y = bc.data, bc.target
+        print("X.shape, X.dtype = ", X.shape, X.dtype)
+        print("y.shape, y.dtype = ", y.shape, y.dtype)
 
     # Class Distribution: 212 - Malignant, 357 - Benign
     # malignant class is 0
     np.testing.assert_equal(np.count_nonzero(y==0), 212)
     # benign class is 1
     np.testing.assert_equal(np.count_nonzero(y==1), 357)
-
-    print("feature_names = ", bc["feature_names"])
 
     # split the train and test set
     X_train, X_test, y_train, y_test = train_test_split(
