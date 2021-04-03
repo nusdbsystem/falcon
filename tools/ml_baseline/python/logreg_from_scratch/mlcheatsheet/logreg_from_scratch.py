@@ -117,7 +117,7 @@ def classify(predictions):
     return decision_boundary(predictions).flatten()
 
 
-def train(features, labels, weights, lr, iters):
+def train(features, labels, weights, lr, iters, print_every=10):
     """
     If our model is working, we should see our cost decrease after every iteration
     iter: 0 cost: 0.635
@@ -135,7 +135,7 @@ def train(features, labels, weights, lr, iters):
         cost_history.append(cost)
 
         # Log Progress
-        if i % 100 == 0:
+        if i % print_every == 0:
             print("iter: "+str(i) + " cost: "+str(cost))
 
     return weights, cost_history
