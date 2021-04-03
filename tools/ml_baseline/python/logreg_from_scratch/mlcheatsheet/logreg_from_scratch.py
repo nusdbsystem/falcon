@@ -5,8 +5,10 @@ import matplotlib.pyplot as plt
 
 
 """
-NOTE: mlcheatsheet implementation does not consider
-bias or intercept term
+NOTE: mlcheatsheet implementation by default
+does not consider bias or intercept term,
+unless you reshape the features
+and weights manually
 """
 
 
