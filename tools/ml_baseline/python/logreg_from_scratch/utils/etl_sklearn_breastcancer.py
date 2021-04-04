@@ -28,6 +28,8 @@ def etl_sklearn_bc(normalize=True,
         original data from sklearn load_creast_cancer()
         preprocessed with falcon's cpp minmax-scaler
         """
+        # NOTE: to test on partial features, use client0's data
+        # @ '/opt/falcon/data/dataset/breast_cancer_data/client0/client.txt'
         with open('/opt/falcon/data/dataset/breast_cancer_data/breast_cancer.data.norm') as csv_file:
             bc_data_norm = np.loadtxt(csv_file, delimiter=",")
 
@@ -36,6 +38,8 @@ def etl_sklearn_bc(normalize=True,
               bc_data_norm.dtype)
 
         # extract the first 30 columns as features X
+        # NOTE: to test on partial features, can also simply
+        # only use partial features bc_data_norm[:, ?:-1]
         X = bc_data_norm[:, :-1]
         print("X.shape, X.dtype = ", X.shape, X.dtype)
         print("X[0] = ", X[0])

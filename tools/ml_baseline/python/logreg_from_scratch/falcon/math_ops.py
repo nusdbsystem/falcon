@@ -39,7 +39,7 @@ def log_loss(y_true, y_pred, eps=1e-15):
     The logarithm used is the natural logarithm (base-e).
     Examples
     --------
-    # log_loss([1, 0, 0, 1],[0.9, 0.1, 0.2, 0.65])
+    # log_loss(np.array([1, 0, 0, 1]),np.array([0.9, 0.1, 0.2, 0.65]))
     # = 0.21616187468057912
     """
     m = len(y_true)

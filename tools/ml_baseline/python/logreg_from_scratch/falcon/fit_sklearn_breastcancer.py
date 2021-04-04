@@ -29,7 +29,8 @@ fit_bias = True
 print_every = 1
 
 # try with full batch
-batch_size = len(y_train)
+# batch_size = len(y_train)
+batch_size = 8
 
 trained_weights, trained_bias, cost_history = logreg.mini_batch_train(
     X_train,
@@ -42,6 +43,7 @@ trained_weights, trained_bias, cost_history = logreg.mini_batch_train(
 )
 
 print("trained_weights = ", trained_weights)
+print("trained_bias = ", trained_bias)
 
 # predicted probs
 y_pred_probs = logreg.predict_proba(X_test, trained_weights, trained_bias, fit_bias=fit_bias)
@@ -132,3 +134,20 @@ cm =
  [[12 31]
  [ 0 71]]
 """
+
+"""
+plot the coss history
+"""
+import matplotlib.pyplot as plt
+import numpy as np
+plt.figure()
+plt.plot(
+    np.arange(len(cost_history)),
+    cost_history,
+    label='Logistic Regression (lr = %0.2f)' % learning_rate)
+plt.ylabel('Logistic Loss')
+plt.xlabel('Iterations')
+plt.title('Cost change over iterations')
+plt.legend(loc="upper right")
+# plt.savefig('Logreg_scilab_tutorial.png')
+plt.show()
