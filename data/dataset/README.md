@@ -1,4 +1,4 @@
-# Sample Dataset Used in Falcon Platform
+# Sample Datasets Used in Falcon Platform
 
 ## How Falcon Uses the Dataset
 
@@ -110,3 +110,16 @@ np.testing.assert_equal(np.count_nonzero(y==0), 212)
 ```
 
 Split 10 features into each client 0,1,2, with client 0 carrying the labels.
+
+
+## Logistic Regression: UCI Census Income Dataset
+
+Census income dataset: https://archive.ics.uci.edu/ml/datasets/census+income
+
+Abstract: Predict whether income exceeds $50K/yr based on census data. Also known as "Adult" dataset.
+
+### Data Set Information:
+
+Extraction was done by Barry Becker from the 1994 Census database. A set of reasonably clean records was extracted using the following conditions: ((AAGE>16) && (AGI>100) && (AFNLWGT>1)&& (HRSWK>0))
+
+Prediction task is to determine whether a person makes over 50K a year.

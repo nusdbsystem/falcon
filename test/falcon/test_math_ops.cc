@@ -85,4 +85,19 @@ TEST(Math_ops, LogisticRegressionLoss) {
     // EXPECT_FLOAT_EQ(cost, 0);
     // NOTE: anything more precise than 0.00001 will fail...
     EXPECT_NEAR(cost, 0.0134, 0.0001);
+
+    // test cases from Speech and Language Processing
+    // by Dan Jurafsky
+    // https://web.stanford.edu/~jurafsky/slp3/5.pdf
+    pred_probs.resize(1);
+    labels.resize(1);
+    pred_probs[0] = 0.69;
+    // y is 1
+    labels[0] = 1;
+    cost = logistic_regression_loss(pred_probs, labels);
+    EXPECT_FLOAT_EQ(cost, 0.37106368);
+    // y is 0
+    labels[0] = 0;
+    cost = logistic_regression_loss(pred_probs, labels);
+    EXPECT_FLOAT_EQ(cost, 1.171183);
 }
