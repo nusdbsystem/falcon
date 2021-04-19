@@ -78,9 +78,6 @@ const (
 	JobFailed     = 3
 	JobKilled     = 4
 
-	DevEnv  = "dev"
-	ProdEnv = "prod"
-
 	WorkerYamlCreatePath = "./scripts/_create_runtime_worker.sh"
 	MasterYamlCreatePath = "./scripts/_create_runtime_master.sh"
 
@@ -98,6 +95,10 @@ const (
 var (
 	// For user defined variables, define them in userdefined.properties first,
 	// and then, add to here
+
+	// meta env vars
+	Env         = ""
+	ServiceName = ""
 
 	// JobDB and Database Configs
 	JobDatabase       = ""
@@ -131,12 +132,7 @@ var (
 	PartyServerPort = ""
 	PartyID         = ""
 
-	// envs
-	Env = GetEnv("Env", DevEnv)
-
-	// those are init by user
-	ServiceName = GetEnv("SERVICE_NAME", "coord")
-	LocalPath   = ""
+	LocalPath = ""
 
 	PartyServerBasePath = ""
 
@@ -171,9 +167,9 @@ var (
 func GetEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		logger.Do.Printf("Read envs, Set to default, key: %s, default: %s\n", key, defaultValue)
+		logger.Do.Printf("Set env var to default {%s: %s}\n", key, defaultValue)
 		return defaultValue
 	}
-	logger.Do.Printf("Read envs, User defined,   key: %s, value: %s\n", key, value)
+	logger.Do.Printf("Read user defined env var {%s: %s}\n", key, value)
 	return value
 }

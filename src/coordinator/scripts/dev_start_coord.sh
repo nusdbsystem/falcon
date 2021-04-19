@@ -45,8 +45,8 @@ mkdir -p $DEV_TEST_OUTDIR
 # the config_.properties files, such as paths IP and Ports
 source config_coord.properties
 
-export Env=dev
-export SERVICE_NAME=coord
+export ENV="dev"
+export SERVICE_NAME="coord"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export BASE_PATH=$DEV_TEST_OUTDIR

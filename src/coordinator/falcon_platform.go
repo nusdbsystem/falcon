@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strconv"
 	"time"
 )
 
@@ -21,18 +22,18 @@ func init() {
 	// prority: env >  user provided > default value
 	runtime.GOMAXPROCS(4)
 	initLogger()
+	// before init the envs, load the meta envs
+	common.Env = common.GetEnv("ENV", "dev")
+	common.ServiceName = common.GetEnv("SERVICE_NAME", "")
 	InitEnvs(common.ServiceName)
 
 }
 
 func initLogger() {
 	var runtimeLogPath string
-	if common.Env == common.DevEnv {
-		common.LocalPath = os.Getenv("BASE_PATH")
-		runtimeLogPath = path.Join(common.LocalPath, common.RuntimeLogs)
-	} else {
-		runtimeLogPath = "./logs"
-	}
+
+	common.LocalPath = os.Getenv("BASE_PATH")
+	runtimeLogPath = path.Join(common.LocalPath, common.RuntimeLogs)
 
 	fmt.Println("common.RuntimeLogs at: ", runtimeLogPath)
 
@@ -46,12 +47,6 @@ func initLogger() {
 	logFileName = runtimeLogPath + "/" + common.ServiceName + rawTime.Format(layout) + ".logs"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
-}
-
-func getCoordAddr(addr string) string {
-	// using service name+ port to connect to coord
-	logger.Do.Printf("Read envs, User defined,   key: CoordAddr, value: %s\n", addr)
-	return addr
 }
 
 func InitEnvs(svcName string) {
@@ -81,7 +76,7 @@ func InitEnvs(svcName string) {
 
 		common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 
-		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
+		common.CoordAddr = (common.CoordIP + ":" + common.CoordPort)
 
 		// coord http server number of consumers
 		common.NbConsumers = common.GetEnv("N_CONSUMER", "3")
@@ -100,7 +95,7 @@ func InitEnvs(svcName string) {
 		common.PartyServerBasePath = common.GetEnv("BASE_PATH", "")
 
 		// partyserver communicate coord with IP+port
-		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
+		common.CoordAddr = (common.CoordIP + ":" + common.CoordPort)
 
 		// run partyserver requires to get a new partyserver port
 		common.PartyServerPort = common.GetEnv("PARTY_SERVER_NODE_PORT", "")
@@ -139,17 +134,17 @@ func InitEnvs(svcName string) {
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 
 		// master communicate coord with IP+port in dev, with name+port in prod
-		if common.Env == common.DevEnv {
+		if common.Env == "dev" {
 
 			logger.Do.Println("CoordIP: ", common.CoordIP+":"+common.CoordPort)
 
-			common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
+			common.CoordAddr = (common.CoordIP + ":" + common.CoordPort)
 
-		} else if common.Env == common.ProdEnv {
+		} else if common.Env == "prod" {
 
 			logger.Do.Println("CoordK8sSvcName: ", common.CoordK8sSvcName+":"+common.CoordPort)
 
-			common.CoordAddr = getCoordAddr(common.CoordK8sSvcName + ":" + common.CoordPort)
+			common.CoordAddr = (common.CoordK8sSvcName + ":" + common.CoordPort)
 		}
 
 		if common.CoordAddr == "" {
@@ -205,7 +200,8 @@ func main() {
 	if common.ServiceName == "coord" {
 		logger.Do.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
 
-		coordserver.SetupHttp(common.NbConsumers)
+		nConsumer, _ := strconv.Atoi(common.NbConsumers)
+		coordserver.SetupHttp(nConsumer)
 	}
 
 	// start work in remote machine automatically

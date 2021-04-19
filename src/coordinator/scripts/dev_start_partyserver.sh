@@ -51,8 +51,8 @@ mkdir $DEV_TEST_OUTDIR/trained_models
 # the config_.properties files, such as paths IP and Ports
 source config_partyserver.properties
 
-export Env=dev
-export SERVICE_NAME=partyserver
+export ENV="dev"
+export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export PARTY_SERVER_IP=$PARTY_SERVER_IP

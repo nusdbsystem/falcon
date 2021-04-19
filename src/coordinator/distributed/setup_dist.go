@@ -20,9 +20,9 @@ func initSvcName() string {
 func SetupDist(qItem *cache.QItem, workerType string) {
 	// run master to call partyserver to set up worker
 
-	if common.Env == common.DevEnv {
+	if common.Env == "dev" {
 		SetupDistDev(qItem, workerType)
-	} else if common.Env == common.ProdEnv {
+	} else if common.Env == "prod" {
 		SetupDistProd(qItem, workerType)
 	}
 }
@@ -31,10 +31,10 @@ func SetupWorkerHelper(masterAddr, workerType, jobId, dataPath, modelPath, dataO
 	// this func is only called by partyserver
 
 	// in dev, use thread
-	if common.Env == common.DevEnv {
+	if common.Env == "dev" {
 		SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput)
 		// in prod, use k8s to run train/predict server as a isolate process
-	} else if common.Env == common.ProdEnv {
+	} else if common.Env == "prod" {
 		SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput)
 	}
 }
