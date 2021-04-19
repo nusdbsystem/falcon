@@ -2,19 +2,8 @@ package common
 
 import (
 	"coordinator/logger"
-	"fmt"
 	"os"
 )
-
-/**
- * @Author
- * @Description This file is only used inside the project,
-				for any common required to modify according to env,
-				use userdefined.properties or bash_env.sh
- * @Date 4:42 下午 1/12/20
- * @Param
- * @return
- **/
 
 const (
 	// TODO: are these the names assigned for master and workers?
@@ -107,10 +96,8 @@ const (
 )
 
 var (
-	//////////////////////////////////////////////////////////////////////////
-	// This is user defined variables, define them in userdefined.properties first, //
-	// and then, add to here												//
-	//////////////////////////////////////////////////////////////////////////
+	// For user defined variables, define them in userdefined.properties first,
+	// and then, add to here
 
 	// JobDB and Database Configs
 	JobDatabase       = ""
@@ -137,15 +124,18 @@ var (
 	CoordIP   = ""
 	CoordPort = ""
 
+	// number of consumers used in coord http server
+	NbConsumers = ""
+
 	PartyServerIP   = ""
 	PartyServerPort = ""
 	PartyID         = ""
 
 	// envs
-	Env = getEnv("Env", DevEnv)
+	Env = GetEnv("Env", DevEnv)
 
 	// those are init by user
-	ServiceName = getEnv("SERVICE_NAME", "coord")
+	ServiceName = GetEnv("SERVICE_NAME", "coord")
 	LocalPath   = ""
 
 	PartyServerBasePath = ""
@@ -179,35 +169,11 @@ var (
 
 // GetEnv get key environment variable if exist otherwise return defalutValue
 func GetEnv(key, defaultValue string) string {
-	/**
-	 * @Author
-	 * @Description init the runtime env,
-	 * @Date 1:33 下午 9/12/20
-	 * @Param
-	 * @return
-	 **/
 	value := os.Getenv(key)
 	if len(value) == 0 {
 		logger.Do.Printf("Read envs, Set to default, key: %s, default: %s\n", key, defaultValue)
 		return defaultValue
 	}
 	logger.Do.Printf("Read envs, User defined,   key: %s, value: %s\n", key, value)
-	return value
-}
-
-func getEnv(key, defaultValue string) string {
-	/**
-	 * @Author
-	 * @Description init the base env, for env and serviceName
-	 * @Date 1:32 下午 9/12/20
-	 * @Param
-	 * @return
-	 **/
-	value := os.Getenv(key)
-	if len(value) == 0 {
-		fmt.Printf("Read envs, Set to default, key: %s, default: %s\n", key, defaultValue)
-		return defaultValue
-	}
-	fmt.Printf("Read envs, User defined,   key: %s, value: %s\n", key, value)
 	return value
 }
