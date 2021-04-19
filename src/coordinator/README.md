@@ -87,7 +87,7 @@ The console outputs are captured in `src/coordinator/dev_test/` folder:
 
 0. docker image is upload, if u wanna build yourself, try with:
 
-   ```
+   ```bash
    bash scripts/img_build.sh
    ```
 
@@ -95,8 +95,8 @@ The console outputs are captured in `src/coordinator/dev_test/` folder:
     Update config_coord.properties
     choose the JOB_DATABASE, BASE_PATH, COORD_SERVER_IP
     finally run script with following
-    
-    ```
+
+    ```bash
     bash scripts/start_coord.sh
     ```
 
@@ -105,37 +105,36 @@ The console outputs are captured in `src/coordinator/dev_test/` folder:
     choose the PARTY_SERVER_IP, COORD_SERVER_IP, PARTY_SERVER_NODE_PORT
     finally run script with following
 
-    ```
+    ```bash
     bash scripts/start_partyserver.sh
     ```
-      
+
 ## Interact with the platform (submit jobs, monitor jobs etc)
 
-1. define your job.json, similar to the example provided in ./train_jobs/job.json
+1. define your job.json, similar to the example provided in `./train_jobs/job.json`
 
 2. submit job:
-    
-    python coordinator_client.py -url <ip url of coordinator>:6573 -method submit -path ./train_jobs/job.json
-    
-    ```
-    python3 coordinator_client.py -url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job.json
-    ```
 
+    ```bash
+    # python3 coordinator_client.py -url <ip url of coordinator>:30004 -method submit -path ./train_jobs/job.json
+    # UCI tele-marketing bank dataset
+    python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_banktele.json
+    # UCI breast cancer dataset
+    python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_breastcancer.json
+    ```
 
 3. kill job:
-    
-    python coordinator_client.py -url <ip url of coordinator>:6573 -method kill -job <job_id>
-    
-    ```
-    python coordinator_client.py -url 172.25.123.254:30004 -method kill -job 60
+
+    ```bash
+    # python3 coordinator_client.py -url <ip url of coordinator>:30004 -method kill -job <job_id>
+    python3 coordinator_client.py -url 127.0.0.1:30004 -method kill -job 60
     ```
 
 4. query job status:
-    
-    python coordinator_client.py -url <ip url of coordinator>:6573 -method query_status -job <job_id>
-    
-    ```
-    python coordinator_client.py -url 172.25.123.254:30004 -method query_status -job 60
+
+    ```bash
+    # python3 coordinator_client.py -url <ip url of coordinator>:30004 -method query_status -job <job_id>
+    python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 60
     ```
 
 ## check the log

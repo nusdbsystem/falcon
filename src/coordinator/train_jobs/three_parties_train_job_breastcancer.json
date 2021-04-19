@@ -47,7 +47,7 @@
         },
         "algorithm_config": {
           "batch_size": 8,
-          "max_iteration": 3000,
+          "max_iteration": 2,
           "convergence_threshold": 0.0001,
           "with_regularization": 0,
           "alpha": 0.1,
