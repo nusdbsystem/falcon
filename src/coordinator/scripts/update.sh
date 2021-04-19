@@ -4,13 +4,13 @@
 kubectl delete all --all
 
 . config_coord.properties
-rm -rf $BASE_PATH/database
-rm -rf $BASE_PATH/runtime_logs/*
-rm -rf $BASE_PATH/logs/*
+rm -rf $LOG_PATH/database
+rm -rf $LOG_PATH/runtime_logs/*
+rm -rf $LOG_PATH/logs/*
 
 . config_partyserver.properties
-rm -rf $BASE_PATH/runtime_logs/*
-rm -rf $BASE_PATH/logs/*
+rm -rf $LOG_PATH/runtime_logs/*
+rm -rf $LOG_PATH/logs/*
 
 bash scripts/status.sh user
 

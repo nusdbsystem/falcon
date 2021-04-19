@@ -4,10 +4,10 @@
 
 
 # load env variables
-if [ $BASE_PATH ];then
-	echo "BASE_PATH is exist, and echo to = $BASE_PATH"
+if [ $LOG_PATH ];then
+	echo "LOG_PATH is exist, and echo to = $LOG_PATH"
 else
-	export BASE_PATH=$PWD
+	export LOG_PATH=$PWD
 fi
 
 # if using this scripts, assume running in production
@@ -38,9 +38,9 @@ start_db()
 {
   title "Starting falcon DB..."
 
-  bash ./scripts/_create_mysql.sh $BASE_PATH || exit 1
+  bash ./scripts/_create_mysql.sh $LOG_PATH || exit 1
 
-  title "Starting falcon DB Done, Db are mounted at folder $BASE_PATH"
+  title "Starting falcon DB Done, Db are mounted at folder $LOG_PATH"
 
 }
 
@@ -48,9 +48,9 @@ start_redis()
 {
   title "Starting falcon cache..."
 
-  bash ./scripts/_create_redis.sh $BASE_PATH || exit 1
+  bash ./scripts/_create_redis.sh $LOG_PATH || exit 1
 
-  title "Starting falcon redis Done, redis are mounted at folder $BASE_PATH"
+  title "Starting falcon redis Done, redis are mounted at folder $LOG_PATH"
 
 }
 
@@ -58,7 +58,7 @@ start_coordinator()
 {
   title "Starting falcon coord..."
 
-  bash ./scripts/_create_coord.sh $BASE_PATH $env|| exit 1
+  bash ./scripts/_create_coord.sh $LOG_PATH $env|| exit 1
 
   title "falcon coord started"
 
@@ -67,9 +67,9 @@ start_coordinator()
 create_folders()
 {
       title "Creating folders"
-      mkdir $BASE_PATH
-      mkdir $BASE_PATH/logs
-      mkdir $BASE_PATH/runtime_logs
+      mkdir $LOG_PATH
+      mkdir $LOG_PATH/logs
+      mkdir $LOG_PATH/runtime_logs
 
 }
 

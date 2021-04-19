@@ -56,9 +56,7 @@ export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export PARTY_SERVER_IP=$PARTY_SERVER_IP
-# export BASE_PATH=$BASE_PATH
-# export PARTY_SERVER_NODE_PORT=$PARTY_SERVER_NODE_PORT
-export BASE_PATH=$DEV_TEST_OUTDIR/logs
+export LOG_PATH=$DEV_TEST_OUTDIR/logs
 # increment coordinator server port by partyserver ID
 # party ID can be 0, so needs to add extra 1
 let port=$PARTY_ID+$COORD_SERVER_PORT+1

@@ -61,7 +61,7 @@ Update the executor path in `src/coordinator/config_partyserver.properties`: `FL
 
 ## Platform setup DEV (development without k8)
 
-Update configurations in `src/coordinator/config_coord.properties`, choose the `JOB_DATABASE, BASE_PATH, COORD_SERVER_IP`
+Update configurations in `src/coordinator/config_coord.properties`, choose the `JOB_DATABASE, LOG_PATH, COORD_SERVER_IP`
 
 Update `src/coordinator/config_partyserver.properties`
 
@@ -93,7 +93,7 @@ The console outputs are captured in `src/coordinator/dev_test/` folder:
 
 1. Setup coordinator:
     Update config_coord.properties
-    choose the JOB_DATABASE, BASE_PATH, COORD_SERVER_IP
+    choose the JOB_DATABASE, LOG_PATH, COORD_SERVER_IP
     finally run script with following
     
     ```
@@ -140,8 +140,8 @@ The console outputs are captured in `src/coordinator/dev_test/` folder:
 
 ## check the log
 
-1.  log is at folder `$BASE_PATH/runtime_logs/` , 
-    platform setup log is at `$BASE_PATH/logs/` ,
+1.  log is at folder `$LOG_PATH/runtime_logs/` , 
+    platform setup log is at `$LOG_PATH/logs/` ,
     db is at     `dev_test/coord/falcon.db` 
 
 ```bash

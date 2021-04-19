@@ -9,7 +9,7 @@ EXECUTOR_TYPE_PLACEHOLDER=$4
 WORKER_ADDR_PLACEHOLDER=$5
 SERVICE_NAME_PLACEHOLDER=$6
 Env_PLACEHOLDER=$7
-BASE_PATH=$8 # used to store logs
+LOG_PATH=$8 # used to store logs
 
 HOST_DATA_PATH=$9 # used to store train data
 HOST_MODEL_PATH=${10}
@@ -17,7 +17,7 @@ HOST_DATA_OUTPUT=${11}
 
 echo "$WORKER_ADDR_PLACEHOLDER"
 
-BASE_PATH=$(echo "$BASE_PATH" | sed 's_/_\\/_g')
+LOG_PATH=$(echo "$LOG_PATH" | sed 's_/_\\/_g')
 
 DATA_INPUT_PATH=$(echo "$HOST_DATA_PATH" | sed 's_/_\\/_g')
 MODEL_PATH=$(echo "$HOST_MODEL_PATH" | sed 's_/_\\/_g')
@@ -39,7 +39,7 @@ sed -i -e "s/MASTER_ADDR_PLACEHOLDER/$MASTER_ADDR_PLACEHOLDER/g" $WORKER_YAML ||
 sed -i -e "s/SERVICE_NAME_PLACEHOLDER/$SERVICE_NAME_PLACEHOLDER/g" $WORKER_YAML || exit 1
 sed -i -e "s/EXECUTOR_TYPE_PLACEHOLDER/$EXECUTOR_TYPE_PLACEHOLDER/g" $WORKER_YAML || exit 1
 sed -i -e "s/WORKER_ADDR_PLACEHOLDER/$WORKER_ADDR_PLACEHOLDER/g" $WORKER_YAML || exit 1
-sed -i -e "s/HOST_PATH/$BASE_PATH/g" $WORKER_YAML || exit 1
+sed -i -e "s/HOST_PATH/$LOG_PATH/g" $WORKER_YAML || exit 1
 sed -i -e "s/Env_PLACEHOLDER/$Env_PLACEHOLDER/g" $WORKER_YAML || exit 1
 sed -i -e "s/HOST_DATA_PATH/$DATA_INPUT_PATH/g" $WORKER_YAML || exit 1
 sed -i -e "s/HOST_MODEL_PATH/$MODEL_PATH/g" $WORKER_YAML || exit 1
