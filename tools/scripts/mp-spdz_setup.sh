@@ -7,6 +7,10 @@ set -e
 # Install third_party MP-SPDZ library
 cd /opt/falcon
 cd third_party/MP-SPDZ
+# restore MP-SPDZ dir with git
+git checkout Math/Setup.h.prod Math/Setup.h
+git checkout CONFIG.mine
+
 mv Math/Setup.h.prod Math/Setup.h
 make -j 8 tldr
 
