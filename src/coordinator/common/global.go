@@ -132,9 +132,7 @@ var (
 	PartyServerPort = ""
 	PartyID         = ""
 
-	LocalPath = ""
-
-	PartyServerBasePath = ""
+	LogPath = ""
 
 	// those are init by coordinator
 	WorkerType = ""

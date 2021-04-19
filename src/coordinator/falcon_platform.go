@@ -32,8 +32,8 @@ func init() {
 func initLogger() {
 	var runtimeLogPath string
 
-	common.LocalPath = os.Getenv("BASE_PATH")
-	runtimeLogPath = path.Join(common.LocalPath, common.RuntimeLogs)
+	common.LogPath = os.Getenv("LOG_PATH")
+	runtimeLogPath = path.Join(common.LogPath, common.RuntimeLogs)
 
 	fmt.Println("common.RuntimeLogs at: ", runtimeLogPath)
 
@@ -92,7 +92,6 @@ func InitEnvs(svcName string) {
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
-		common.PartyServerBasePath = common.GetEnv("BASE_PATH", "")
 
 		// partyserver communicate coord with IP+port
 		common.CoordAddr = (common.CoordIP + ":" + common.CoordPort)
