@@ -51,6 +51,7 @@ export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export BASE_PATH=$DEV_TEST_OUTDIR
 export JOB_DATABASE=$JOB_DATABASE
+export N_CONSUMER=$N_CONSUMER
 
 # launch coordinator
 # detect the OS type with uname

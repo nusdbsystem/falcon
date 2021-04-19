@@ -83,6 +83,9 @@ func InitEnvs(svcName string) {
 
 		common.CoordAddr = getCoordAddr(common.CoordIP + ":" + common.CoordPort)
 
+		// coord http server number of consumers
+		common.NbConsumers = common.GetEnv("N_CONSUMER", "3")
+
 		if len(common.ServiceName) == 0 {
 			logger.Do.Println("Error: Input Error, ServiceName not provided, is either 'coord' or 'partyserver' ")
 			os.Exit(1)
@@ -202,7 +205,7 @@ func main() {
 	if common.ServiceName == "coord" {
 		logger.Do.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
 
-		coordserver.SetupHttp(3)
+		coordserver.SetupHttp(common.NbConsumers)
 	}
 
 	// start work in remote machine automatically
