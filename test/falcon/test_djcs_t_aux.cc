@@ -21,7 +21,6 @@ TEST(PHE, ThresholdPaillierScheme) {
 
   // generate key pair
   djcs_t_generate_key_pair(pk, vk, hr, 1, 1024, client_num, client_num);
-  hr = hcs_init_random();
   mpz_t *coeff = djcs_t_init_polynomial(vk, hr);
   for (int i = 0; i < client_num; i++) {
     mpz_init(si[i]);
