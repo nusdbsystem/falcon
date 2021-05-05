@@ -295,6 +295,6 @@ void djcs_t_auth_server_copy(djcs_t_auth_server* src, djcs_t_auth_server* dest) 
 }
 
 void djcs_t_hcs_random_copy(hcs_random* src, hcs_random* dest) {
-  // probably this function caused memory leak?
+  // TODO: probably this function causes memory leak, can examine in the future
   gmp_randinit_set(dest->rstate, src->rstate);
 }

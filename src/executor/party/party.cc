@@ -192,7 +192,6 @@ Party::Party(const Party &party) {
   phe_random = hcs_init_random();
   phe_pub_key = djcs_t_init_public_key();
   phe_auth_server = djcs_t_init_auth_server();
-  //phe_random = party.phe_random;
   djcs_t_public_key* tmp_pub_key = djcs_t_init_public_key();
   djcs_t_auth_server* tmp_auth_server = djcs_t_init_auth_server();
   party.getter_phe_pub_key(tmp_pub_key);
