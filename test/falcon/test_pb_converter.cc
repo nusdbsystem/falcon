@@ -214,6 +214,8 @@ TEST(PB_Converter, EncodedNumberArray) {
   }
   mpz_clear(v_n);
   mpz_clear(v_value);
+  delete [] encoded_number_array;
+  delete [] deserialized_number_array;
 }
 
 TEST(PB_Converter, LogisticRegressionParams) {

@@ -71,9 +71,7 @@ class LRInferenceServiceImpl final : public InferenceLR::Service {
     // local compute aggregation and receive from passive parties
     // retrieve phe pub key and phe random
     djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-    hcs_random* phe_random = hcs_init_random();
     party_.getter_phe_pub_key(phe_pub_key);
-    party_.getter_phe_random(phe_random);
 
     // retrieve batch samples and encode (notice to use cur_batch_size
     // instead of default batch size to avoid unexpected batch)
@@ -95,7 +93,7 @@ class LRInferenceServiceImpl final : public InferenceLR::Service {
 
     // compute local homomorphic aggregation
     EncodedNumber* local_batch_phe_aggregation = new EncodedNumber[sample_num];
-    djcs_t_aux_matrix_mult(phe_pub_key, phe_random, local_batch_phe_aggregation,
+    djcs_t_aux_matrix_mult(phe_pub_key, party_.phe_random, local_batch_phe_aggregation,
         local_weights_, encoded_batch_samples, sample_num, weight_size_);
 
     // every party sends the local aggregation to the active party
@@ -184,7 +182,6 @@ class LRInferenceServiceImpl final : public InferenceLR::Service {
     }
 
     djcs_t_free_public_key(phe_pub_key);
-    hcs_free_random(phe_random);
     for (int i = 0; i < sample_num; i++) {
       delete [] encoded_batch_samples[i];
     }
@@ -244,9 +241,7 @@ void RunPassiveServerLR(std::string saved_model_file, Party party) {
 
     // retrieve phe pub key and phe random
     djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-    hcs_random* phe_random = hcs_init_random();
     party.getter_phe_pub_key(phe_pub_key);
-    party.getter_phe_random(phe_random);
 
     // retrieve batch samples and encode (notice to use cur_batch_size
     // instead of default batch size to avoid unexpected batch)
@@ -269,7 +264,7 @@ void RunPassiveServerLR(std::string saved_model_file, Party party) {
 
     // compute local homomorphic aggregation
     EncodedNumber* local_batch_phe_aggregation = new EncodedNumber[cur_batch_size];
-    djcs_t_aux_matrix_mult(phe_pub_key, phe_random, local_batch_phe_aggregation,
+    djcs_t_aux_matrix_mult(phe_pub_key, party.phe_random, local_batch_phe_aggregation,
                            local_weights, encoded_batch_samples, cur_batch_size, weight_size);
 
     std::cout << "Local phe aggregation finished" << std::endl;
@@ -304,7 +299,6 @@ void RunPassiveServerLR(std::string saved_model_file, Party party) {
     LOG(INFO) << "Collaboratively decryption finished";
 
     djcs_t_free_public_key(phe_pub_key);
-    hcs_free_random(phe_random);
     for (int i = 0; i < cur_batch_size; i++) {
       delete [] encoded_batch_samples[i];
     }
