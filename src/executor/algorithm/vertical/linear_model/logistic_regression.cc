@@ -58,10 +58,7 @@ LogisticRegression::~LogisticRegression() {
 void LogisticRegression::init_encrypted_weights(const Party &party, int precision) {
   LOG(INFO) << "Init encrypted local weights.";
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  hcs_random* phe_random = hcs_init_random();
-
   party.getter_phe_pub_key(phe_pub_key);
-  party.getter_phe_random(phe_random);
 
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -80,11 +77,10 @@ void LogisticRegression::init_encrypted_weights(const Party &party, int precisio
     // float v = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
     EncodedNumber t;
     t.set_float(phe_pub_key->n[0], v, precision);
-    djcs_t_aux_encrypt(phe_pub_key, phe_random, local_weights[i], t);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, local_weights[i], t);
   }
 
   djcs_t_free_public_key(phe_pub_key);
-  hcs_free_random(phe_random);
 }
 
 std::vector<int> LogisticRegression::select_batch_idx(const Party &party,
@@ -122,9 +118,7 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
     EncodedNumber *batch_phe_aggregation) {
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  hcs_random* phe_random = hcs_init_random();
   party.getter_phe_pub_key(phe_pub_key);
-  party.getter_phe_random(phe_random);
 
   // retrieve batch samples and encode (notice to use cur_batch_size
   // instead of default batch size to avoid unexpected batch)
@@ -154,7 +148,7 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
 
   // compute local homomorphic aggregation
   EncodedNumber* local_batch_phe_aggregation = new EncodedNumber[cur_batch_size];
-  djcs_t_aux_matrix_mult(phe_pub_key, phe_random, local_batch_phe_aggregation,
+  djcs_t_aux_matrix_mult(phe_pub_key, party.phe_random, local_batch_phe_aggregation,
       local_weights, encoded_batch_samples, cur_batch_size, weight_size);
 
   // every party sends the local aggregation to the active party
@@ -206,7 +200,6 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
   }
 
   djcs_t_free_public_key(phe_pub_key);
-  hcs_free_random(phe_random);
   for (int i = 0; i < cur_batch_size; i++) {
     delete [] encoded_batch_samples[i];
   }
@@ -221,9 +214,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
     int precision) {
   // retrieve phe pub key and phe random
   djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
-  hcs_random *phe_random = hcs_init_random();
   party.getter_phe_pub_key(phe_pub_key);
-  party.getter_phe_random(phe_random);
 
   // convert batch loss shares back to encrypted losses
   int cur_batch_size = batch_indexes.size();
@@ -246,7 +237,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
       encrypted_ground_truth_labels[i].set_float(phe_pub_key->n[0],
           0 - batch_labels[i], precision);
       // encrypt [0-y_t]
-      djcs_t_aux_encrypt(phe_pub_key, phe_random,
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
                          encrypted_ground_truth_labels[i], encrypted_ground_truth_labels[i]);
       // compute phe addition [f_t - y_t]
       djcs_t_aux_ee_add(phe_pub_key, encrypted_batch_losses[i],
@@ -302,7 +293,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
         batch_feature_j[i] = encoded_batch_samples[i][j];
       }
       djcs_t_aux_inner_product(phe_pub_key,
-          phe_random,
+          party.phe_random,
           inner_product,
           encrypted_batch_losses,
           batch_feature_j,
@@ -316,7 +307,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
   }
 
   djcs_t_free_public_key(phe_pub_key);
-  hcs_free_random(phe_random);
+  //hcs_free_random(phe_random);
   delete [] encrypted_batch_losses;
   for (int i = 0; i < cur_batch_size; i++) {
     delete [] encoded_batch_samples[i];
@@ -717,7 +708,7 @@ void train_logistic_regression(Party party, std::string params_str,
   LogisticRegressionParams params;
 //  // currently for testing
 //  params.batch_size = 32;
-//  params.max_iteration = 100;
+//  params.max_iteration = 1;
 //  params.converge_threshold = 1e-3;
 //  params.with_regularization = false;
 //  params.alpha = 0.1;

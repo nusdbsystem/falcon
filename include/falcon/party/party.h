@@ -31,6 +31,8 @@ class Party {
   boost::asio::io_service io_service;
   // host names of other parties
   std::vector<std::string> host_names;
+  // random generator of PHE
+  hcs_random* phe_random;
 
  private:
   // sample number in the local dataset
@@ -45,8 +47,6 @@ class Party {
   djcs_t_public_key* phe_pub_key;
   // private key share (auth server) of PHE
   djcs_t_auth_server* phe_auth_server;
-  // random generator of PHE
-  hcs_random* phe_random;
 
  public:
   /**
