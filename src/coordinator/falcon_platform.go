@@ -21,18 +21,20 @@ func init() {
 
 	// prority: env >  user provided > default value
 	runtime.GOMAXPROCS(4)
-	initLogger()
 	// before init the envs, load the meta envs
-	common.Env = common.GetEnv("ENV", "dev")
-	common.ServiceName = common.GetEnv("SERVICE_NAME", "")
-	InitEnvs(common.ServiceName)
+	// use os to get the env, since initLogger is before initEnv
+	common.Env = os.Getenv("ENV")
+	common.ServiceName = os.Getenv("SERVICE_NAME")
+	common.LogPath = os.Getenv("LOG_PATH")
+
+	initLogger()
+	initEnv(common.ServiceName)
 
 }
 
 func initLogger() {
 	var runtimeLogPath string
 
-	common.LogPath = os.Getenv("LOG_PATH")
 	runtimeLogPath = path.Join(common.LogPath, common.RuntimeLogs)
 
 	fmt.Println("common.RuntimeLogs at: ", runtimeLogPath)
@@ -44,12 +46,12 @@ func initLogger() {
 	rawTime := time.Now()
 
 	var logFileName string
-	logFileName = runtimeLogPath + "/" + common.ServiceName + rawTime.Format(layout) + ".logs"
+	logFileName = runtimeLogPath + "/" + common.ServiceName + "-" + rawTime.Format(layout) + ".logs"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }
 
-func InitEnvs(svcName string) {
+func initEnv(svcName string) {
 
 	if svcName == "coord" {
 		// coord needs db information
