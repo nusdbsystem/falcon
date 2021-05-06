@@ -105,16 +105,16 @@ void send_private_values(std::vector<gfp> values, vector<ssl_socket*>& sockets, 
 /**
  * send private inputs to the spdz parties with secret sharing
  *
- * @param inputs: the plaintext inputs, int or float
+ * @param inputs: the plaintext inputs, int or double
  * @param sockets: the ssl socket connections to spdz engines
  * @param n_parties: number of spdz parties
  */
 template <class T>
 void send_private_inputs(const std::vector<T>& inputs, vector<ssl_socket*>& sockets, int n_parties)
 {
-  // now only support float type
-  if (!std::is_same<T, float >::value) {
-    LOG(ERROR) << "Private inputs other than float type are not supported, aborting.";
+  // now only support double type
+  if (!std::is_same<T, double >::value) {
+    LOG(ERROR) << "Private inputs other than double type are not supported, aborting.";
     // cerr << "Private inputs other than int type are not supported, aborting.\n";
     exit(1);
   }
@@ -145,7 +145,7 @@ void send_private_inputs(const std::vector<T>& inputs, vector<ssl_socket*>& sock
  * @param nparties: the number of parties
  * @param size: size of recieved results
  */
-std::vector<float> receive_result(vector<ssl_socket*>& sockets, int n_parties, int size);
+std::vector<double> receive_result(vector<ssl_socket*>& sockets, int n_parties, int size);
 
 
 #endif //FALCON_INCLUDE_FALCON_OPERATOR_MPC_SPDZ_CONNECTOR_H_

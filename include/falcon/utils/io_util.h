@@ -18,7 +18,7 @@
  * @param data_file
  * @return
  */
-std::vector< std::vector<float> > read_dataset(const std::string& data_file);
+std::vector< std::vector<double> > read_dataset(const std::string& data_file);
 
 /**
  * write dataset to file
@@ -26,7 +26,7 @@ std::vector< std::vector<float> > read_dataset(const std::string& data_file);
  * @param data: data to write
  * @param data_file: file to write
  */
-void write_dataset_to_file(std::vector< std::vector<float> > data, const std::string& data_file);
+void write_dataset_to_file(std::vector< std::vector<double> > data, const std::string& data_file);
 
 /**
  * read pb serialized phe keys

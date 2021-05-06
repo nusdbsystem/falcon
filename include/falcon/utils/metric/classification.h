@@ -56,7 +56,7 @@ class ClassificationMetrics{
     ClassificationMetrics();
 
     // compute the metrics
-    void compute_metrics(std::vector<int> predictions, std::vector<float> labels);
+    void compute_metrics(std::vector<int> predictions, std::vector<double> labels);
 
     // pretty print confusion matrix
     void pretty_print_cm();

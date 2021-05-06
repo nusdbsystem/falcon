@@ -143,7 +143,7 @@ void send_private_values(std::vector<gfp> values, vector<ssl_socket*>& sockets, 
     os.Send(sockets[j]);
 }
 
-std::vector<float> receive_result(vector<ssl_socket*>& sockets, int n_parties, int size)
+std::vector<double> receive_result(vector<ssl_socket*>& sockets, int n_parties, int size)
 {
   LOG(INFO) << "Receive mpc computation result from the SPDZ engine";
   std::vector<gfp> output_values(size);
@@ -160,15 +160,15 @@ std::vector<float> receive_result(vector<ssl_socket*>& sockets, int n_parties, i
     }
   }
 
-  std::vector<float> res_shares(size);
+  std::vector<double> res_shares(size);
 
   for (int i = 0; i < size; i++) {
     gfp val = output_values[i];
     bigint aa;
     to_signed_bigint(aa, val);
-    long t = aa.get_si();
+    long long t = aa.get_si();
     // cout<< "i = " << i << ", t = " << t <<endl;
-    res_shares[i] = static_cast<float>(t * pow(2, 0 - SPDZ_FIXED_POINT_PRECISION));
+    res_shares[i] = static_cast<double>(t * pow(2, 0 - SPDZ_FIXED_POINT_PRECISION));
   }
 
   return res_shares;

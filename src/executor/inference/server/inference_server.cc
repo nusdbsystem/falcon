@@ -76,7 +76,7 @@ class LRInferenceServiceImpl final : public InferenceLR::Service {
     // retrieve batch samples and encode (notice to use cur_batch_size
     // instead of default batch size to avoid unexpected batch)
     EncodedNumber* batch_phe_aggregation = new EncodedNumber[sample_num];
-    std::vector< std::vector<float> > batch_samples;
+    std::vector< std::vector<double> > batch_samples;
     for (int i = 0; i < sample_num; i++) {
       batch_samples.push_back(party_.getter_local_data()[batch_indexes[i]]);
     }
@@ -86,7 +86,7 @@ class LRInferenceServiceImpl final : public InferenceLR::Service {
     }
     for (int i = 0; i < sample_num; i++) {
       for (int j = 0; j < weight_size_; j++) {
-        encoded_batch_samples[i][j].set_float(phe_pub_key->n[0],
+        encoded_batch_samples[i][j].set_double(phe_pub_key->n[0],
             batch_samples[i][j], PHE_FIXED_POINT_PRECISION);
       }
     }
@@ -150,15 +150,15 @@ class LRInferenceServiceImpl final : public InferenceLR::Service {
     LOG(INFO) << "Collaboratively decryption finished";
 
     // step 4: active party computes the logistic function and compare the accuracy
-    std::vector<float> labels;
-    std::vector< std::vector<float> > probabilities;
+    std::vector<double> labels;
+    std::vector< std::vector<double> > probabilities;
     for (int i = 0; i < sample_num; i++) {
-      float t;
+      double t;
       decrypted_aggregation[i].decode(t);
       // std::cout << "t before logistic = " << t << std::endl;
       t = 1.0 / (1 + exp(0 - t));
       // std::cout << "t after logistic = " << t << std::endl;
-      std::vector<float> prob;
+      std::vector<double> prob;
       prob.push_back(t);
       prob.push_back(1 - t);
       t = t >= 0.5 ? 1 : 0;
@@ -247,7 +247,7 @@ void RunPassiveServerLR(std::string saved_model_file, Party party) {
     // instead of default batch size to avoid unexpected batch)
     int cur_batch_size = batch_indexes.size();
     EncodedNumber* batch_phe_aggregation = new EncodedNumber[cur_batch_size];
-    std::vector< std::vector<float> > batch_samples;
+    std::vector< std::vector<double> > batch_samples;
     for (int i = 0; i < cur_batch_size; i++) {
       batch_samples.push_back(party.getter_local_data()[batch_indexes[i]]);
     }
@@ -257,7 +257,7 @@ void RunPassiveServerLR(std::string saved_model_file, Party party) {
     }
     for (int i = 0; i < cur_batch_size; i++) {
       for (int j = 0; j < weight_size; j++) {
-        encoded_batch_samples[i][j].set_float(phe_pub_key->n[0],
+        encoded_batch_samples[i][j].set_double(phe_pub_key->n[0],
             batch_samples[i][j], PHE_FIXED_POINT_PRECISION);
       }
     }
