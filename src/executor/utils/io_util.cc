@@ -6,17 +6,17 @@
 
 #include <iterator>
 
-std::vector< std::vector<float> > read_dataset(const std::string& data_file) {
+std::vector< std::vector<double> > read_dataset(const std::string& data_file) {
   std::ifstream data_infile(data_file);
   if (!data_infile) {
     LOG(INFO) << "Open " << data_file.c_str() << " file error.";
     exit(EXIT_FAILURE);
   }
 
-  std::vector< std::vector<float> > data;
+  std::vector< std::vector<double> > data;
   std::string line;
   while (std::getline(data_infile, line)) {
-    std::vector<float> items;
+    std::vector<double> items;
     std::istringstream ss(line);
     std::string item;
     // split line with delimiter, default ','
@@ -31,7 +31,7 @@ std::vector< std::vector<float> > read_dataset(const std::string& data_file) {
   return data;
 }
 
-void write_dataset_to_file(std::vector< std::vector<float> > data, const std::string& data_file) {
+void write_dataset_to_file(std::vector< std::vector<double> > data, const std::string& data_file) {
   std::ofstream write_outfile(data_file);
   if (!write_outfile) {
     LOG(INFO) << "Open " << data_file.c_str() << " file error.";

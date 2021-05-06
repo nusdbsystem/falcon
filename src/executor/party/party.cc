@@ -324,11 +324,11 @@ void Party::recv_long_message(int id, std::string &message) const {
   message = recv_message_str;
 }
 
-void Party::split_train_test_data(float split_percentage,
-                          std::vector<std::vector<float> > &training_data,
-                          std::vector<std::vector<float> > &testing_data,
-                          std::vector<float> &training_labels,
-                          std::vector<float> &testing_labels) const {
+void Party::split_train_test_data(double split_percentage,
+                          std::vector<std::vector<double> > &training_data,
+                          std::vector<std::vector<double> > &testing_data,
+                          std::vector<double> &training_labels,
+                          std::vector<double> &testing_labels) const {
   LOG(INFO) << "Split local data and labels into training and testing dataset.";
   int training_data_size = sample_num * split_percentage;
   LOG(INFO) << "Split percentage for train-test = " << split_percentage;
@@ -474,7 +474,7 @@ void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
 }
 
 void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
-    std::vector<float>& secret_shares,
+    std::vector<double>& secret_shares,
     int size,
     int req_party_id,
     int phe_precision) {
@@ -484,8 +484,8 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
   for (int i = 0; i < size; i++) {
     // TODO: check how to replace with spdz random values
     if (phe_precision != 0) {
-      float s = static_cast<float> (rand() % MAXIMUM_RAND_VALUE);
-      encrypted_shares[i].set_float(phe_pub_key->n[0], s, phe_precision);
+      double s = static_cast<double> (rand() % MAXIMUM_RAND_VALUE);
+      encrypted_shares[i].set_double(phe_pub_key->n[0], s, phe_precision);
       djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i], encrypted_shares[i]);
       secret_shares.push_back(0 - s);
     } else {
@@ -542,13 +542,13 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
   if (party_id == req_party_id) {
     for (int i = 0; i < size; i++) {
       if (phe_precision != 0) {
-        float decoded_sum_i;
+        double decoded_sum_i;
         decrypted_sum[i].decode(decoded_sum_i);
         secret_shares[i] += decoded_sum_i;
       } else {
         long decoded_sum_i;
         decrypted_sum[i].decode(decoded_sum_i);
-        secret_shares[i] += (float) decoded_sum_i;
+        secret_shares[i] += (double) decoded_sum_i;
       }
     }
   }
@@ -559,7 +559,7 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
 }
 
 void Party::secret_shares_to_ciphers(EncodedNumber *dest_ciphers,
-    std::vector<float> secret_shares,
+    std::vector<double> secret_shares,
     int size,
     int req_party_id,
     int phe_precision) {
@@ -568,7 +568,7 @@ void Party::secret_shares_to_ciphers(EncodedNumber *dest_ciphers,
   // and send back to the other parties
   EncodedNumber* encrypted_shares = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {
-    encrypted_shares[i].set_float(phe_pub_key->n[0], secret_shares[i], phe_precision);
+    encrypted_shares[i].set_double(phe_pub_key->n[0], secret_shares[i], phe_precision);
     djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i], encrypted_shares[i]);
   }
 

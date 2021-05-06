@@ -32,9 +32,9 @@ TEST(PHE, ThresholdPaillierScheme) {
   //////////////////////////////////////
   /// Test encryption and decryption ///
   //////////////////////////////////////
-  float original_number = -0.666;
+  double original_number = -0.666;
   EncodedNumber number;
-  number.set_float(pk->n[0], original_number, 16);
+  number.set_double(pk->n[0], original_number, 16);
 
   EncodedNumber encrypted_number, decrypted_number;
   djcs_t_aux_encrypt(pk, hr, encrypted_number, number);
@@ -45,18 +45,18 @@ TEST(PHE, ThresholdPaillierScheme) {
   }
   djcs_t_aux_share_combine(pk, decrypted_number, partially_decryption, client_num);
 
-  float decrypted_decoded_number;
+  double decrypted_decoded_number;
   decrypted_number.decode(decrypted_decoded_number);
   EXPECT_NEAR(original_number, decrypted_decoded_number, 1e-3);
 
   //////////////////////////////////////
   ///// Test homomorphic addition //////
   //////////////////////////////////////
-  float a1 = 5.25;
-  float a2 = -0.38;
+  double a1 = 5.25;
+  double a2 = -0.38;
   EncodedNumber number_a1, number_a2;
-  number_a1.set_float(pk->n[0], a1, 16);
-  number_a2.set_float(pk->n[0], a2, 16);
+  number_a1.set_double(pk->n[0], a1, 16);
+  number_a2.set_double(pk->n[0], a2, 16);
 
   EncodedNumber encrypted_number_a1, encrypted_number_a2;
   djcs_t_aux_encrypt(pk, hr, encrypted_number_a1, number_a1);
@@ -71,18 +71,18 @@ TEST(PHE, ThresholdPaillierScheme) {
   }
   djcs_t_aux_share_combine(pk, decrypted_sum, partially_sum_decryption, client_num);
 
-  float decrypted_decoded_sum;
+  double decrypted_decoded_sum;
   decrypted_sum.decode(decrypted_decoded_sum);
   EXPECT_NEAR(a1 + a2, decrypted_decoded_sum, 1e-3);
 
   //////////////////////////////////////
   /// Test homomorphic multiplication //
   //////////////////////////////////////
-  float b1 = 5.55;
-  float b2 = -0.58;
+  double b1 = 5.55;
+  double b2 = -0.58;
   EncodedNumber number_b1, number_b2;
-  number_b1.set_float(pk->n[0], b1, 16);
-  number_b2.set_float(pk->n[0], b2, 16);
+  number_b1.set_double(pk->n[0], b1, 16);
+  number_b2.set_double(pk->n[0], b2, 16);
 
   EncodedNumber encrypted_number_b1;
   djcs_t_aux_encrypt(pk, hr, encrypted_number_b1, number_b1);
@@ -96,20 +96,20 @@ TEST(PHE, ThresholdPaillierScheme) {
   }
   djcs_t_aux_share_combine(pk, decrypted_product, partially_product_decryption, client_num);
 
-  float decrypted_decoded_product;
+  double decrypted_decoded_product;
   decrypted_product.decode(decrypted_decoded_product);
   EXPECT_NEAR(b1 * b2, decrypted_decoded_product, 1e-3);
 
   //////////////////////////////////////
   /// Test homomorphic inner product ///
   //////////////////////////////////////
-  float c1[5] = {0.1, -0.2, 0.3, -0.4, 0.5};
-  float c2[5] = {0.9, 0.8, -0.7, 0.6, 0.5};
+  double c1[5] = {0.1, -0.2, 0.3, -0.4, 0.5};
+  double c2[5] = {0.9, 0.8, -0.7, 0.6, 0.5};
   EncodedNumber* number_c1 = new EncodedNumber[5];
   EncodedNumber* number_c2 = new EncodedNumber[5];
   for (int i = 0; i < 5; i++) {
-    number_c1[i].set_float(pk->n[0], c1[i], 16);
-    number_c2[i].set_float(pk->n[0], c2[i], 16);
+    number_c1[i].set_double(pk->n[0], c1[i], 16);
+    number_c2[i].set_double(pk->n[0], c2[i], 16);
   }
   EncodedNumber* encrypted_number_c1 = new EncodedNumber[5];
   for (int i = 0; i < 5; i++) {
@@ -125,9 +125,9 @@ TEST(PHE, ThresholdPaillierScheme) {
   }
   djcs_t_aux_share_combine(pk, decrypted_inner_product, partially_inner_prod_decryption, client_num);
 
-  float decrypted_decoded_inner_product;
+  double decrypted_decoded_inner_product;
   decrypted_inner_product.decode(decrypted_decoded_inner_product);
-  float inner_product = 0.0;
+  double inner_product = 0.0;
   for (int i = 0; i < 5; i++) {
     inner_product = inner_product + c1[i] * c2[i];
   }
@@ -138,8 +138,8 @@ TEST(PHE, ThresholdPaillierScheme) {
   //////////////////////////////////////////////
   /// Test homomorphic matrix multiplication ///
   //////////////////////////////////////////////
-  float d1[5] = {0.1, -0.2, 0.3, -0.4, 0.5};
-  float d2[3][5] = {
+  double d1[5] = {0.1, -0.2, 0.3, -0.4, 0.5};
+  double d2[3][5] = {
       {0.9, 0.8, -0.7, 0.6, 0.5},
       {-0.8, 0.7, -0.6, 0.5, -0.4},
       {0.7, -0.6, 0.5, -0.4, 0.3}
@@ -151,11 +151,11 @@ TEST(PHE, ThresholdPaillierScheme) {
     number_d2[i] = new EncodedNumber[5];
   }
   for (int i = 0; i < 5; i++) {
-    number_d1[i].set_float(pk->n[0], d1[i], 16);
+    number_d1[i].set_double(pk->n[0], d1[i], 16);
   }
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 5; j++) {
-      number_d2[i][j].set_float(pk->n[0], d2[i][j], 16);
+      number_d2[i][j].set_double(pk->n[0], d2[i][j], 16);
     }
   }
 
@@ -175,7 +175,7 @@ TEST(PHE, ThresholdPaillierScheme) {
     }
     djcs_t_aux_share_combine(pk, decrypted_mat_result[j], partially_decryption_mat_res_j, client_num);
 
-    float decrypted_decoded_mat_res_j;
+    double decrypted_decoded_mat_res_j;
     decrypted_mat_result[j].decode(decrypted_decoded_mat_res_j);
     float mat_mult_j = 0.0;
     for (int i = 0; i < 5; i++) {

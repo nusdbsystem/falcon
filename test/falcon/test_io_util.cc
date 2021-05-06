@@ -11,9 +11,9 @@
 
 TEST(IO_Util, ReadWriteData) {
   // create dummy data
-  std::vector< std::vector<float> > write_data;
+  std::vector< std::vector<double> > write_data;
   for (int i = 0; i < 2; i++) {
-    std::vector<float> row;
+    std::vector<double> row;
     for (int j = 0; j < 3; j++) {
       row.push_back(i*100 + j*10 + 0.5);
     }
@@ -24,7 +24,7 @@ TEST(IO_Util, ReadWriteData) {
   write_dataset_to_file(write_data, file_name);
 
   // read data and compare
-  std::vector< std::vector<float> > read_data = read_dataset(file_name);
+  std::vector< std::vector<double> > read_data = read_dataset(file_name);
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 3; j++) {
       EXPECT_EQ(write_data[i][j], read_data[i][j]);
