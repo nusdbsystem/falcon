@@ -1,6 +1,3 @@
-
-
-
 kubectl delete all --all
 
 . config_coord.properties
