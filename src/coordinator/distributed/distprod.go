@@ -103,7 +103,7 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 		workerAddr,                 // 5. worker addr
 		workerType,                 // 6. serviceName train or predict
 		common.Env,                 // 7. env or prod
-		common.PartyServerBasePath, // 8. folder to store logs, same as partyserver folder currently,
+		common.PartyServerBasePath, // 8. folder to store logs, the same as partyserver folder currently,
 		dataPath,                   // 9. folder to read train data
 		modelPath,                  // 10. folder to store models
 		dataOutput,                 // 11. folder to store processed data
