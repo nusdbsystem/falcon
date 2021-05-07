@@ -62,7 +62,10 @@ func SetupHttp(nConsumer int) {
 
 	logger.Do.Println("HTTP: Updating table...")
 	controller.CreateTables()
-	controller.CreateSysPorts()
+	if common.Env == common.ProdEnv {
+		// initialize the mysql db
+		controller.CreateSysPorts()
+	}
 
 	logger.Do.Println("HTTP: Creating admin user...")
 	controller.CreateUser()

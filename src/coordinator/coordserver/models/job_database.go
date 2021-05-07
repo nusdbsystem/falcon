@@ -26,12 +26,12 @@ type JobDB struct {
 func InitJobDB() *JobDB {
 	jobDB := new(JobDB)
 	jobDB.engine = common.JobDatabase
-	jobDB.host = common.JobDbHost
-	jobDB.user = common.JobDbMysqlUser
-	jobDB.password = common.JobDbMysqlPwd
-	jobDB.database = common.JobDbMysqlDb
 
 	if jobDB.engine == "mysql" {
+		jobDB.host = common.JobDbHost
+		jobDB.user = common.JobDbMysqlUser
+		jobDB.password = common.JobDbMysqlPwd
+		jobDB.database = common.JobDbMysqlDb
 
 		mysqlUrl := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s%s",

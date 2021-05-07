@@ -62,34 +62,40 @@ func initLogger() {
 func initEnv(svcName string) {
 
 	if svcName == "coord" {
-		// coord needs db information
-		common.JobDatabase = common.GetEnv("JOB_DATABASE", "sqlite3")
-		common.JobDbSqliteDb = common.GetEnv("JOB_DB_SQLITE_DB", "falcon.db")
-		common.JobDbHost = common.GetEnv("JOB_DB_HOST", "localhost")
-		common.JobDbMysqlUser = common.GetEnv("JOB_DB_MYSQL_USER", "falcon")
-		common.JobDbMysqlPwd = common.GetEnv("JOB_DB_MYSQL_PWD", "falcon")
-		common.JobDbMysqlDb = common.GetEnv("JOB_DB_MYSQL_DB", "falcon")
-		common.JobDbMysqlOptions = common.GetEnv("JOB_DB_MYSQL_OPTIONS", "?parseTime=true")
-		common.JobDbMysqlPort = common.GetEnv("MYSQL_CLUSTER_PORT", "30000")
-
-		common.RedisHost = common.GetEnv("REDIS_HOST", "localhost")
-		common.RedisPwd = common.GetEnv("REDIS_PWD", "falcon")
-		// coord needs redis information
-		common.RedisPort = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
-		// find the cluster port, call internally
-		common.JobDbMysqlNodePort = common.GetEnv("MYSQL_NODE_PORT", "30001")
-		common.RedisNodePort = common.GetEnv("REDIS_NODE_PORT", "30003")
-
 		// find the cluster port, call internally
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
-
-		common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 
 		common.CoordAddr = (common.CoordIP + ":" + common.CoordPort)
 
 		// coord http server number of consumers
 		common.NbConsumers = common.GetEnv("N_CONSUMER", "3")
+
+		if common.Env == common.DevEnv {
+
+			// coord needs db information
+			common.JobDatabase = common.GetEnv("JOB_DATABASE", "sqlite3")
+			common.JobDbSqliteDb = common.GetEnv("JOB_DB_SQLITE_DB", "falcon.db")
+
+		} else if common.Env == common.ProdEnv {
+
+			common.JobDbHost = common.GetEnv("JOB_DB_HOST", "localhost")
+			common.JobDbMysqlUser = common.GetEnv("JOB_DB_MYSQL_USER", "falcon")
+			common.JobDbMysqlPwd = common.GetEnv("JOB_DB_MYSQL_PWD", "falcon")
+			common.JobDbMysqlDb = common.GetEnv("JOB_DB_MYSQL_DB", "falcon")
+			common.JobDbMysqlOptions = common.GetEnv("JOB_DB_MYSQL_OPTIONS", "?parseTime=true")
+			common.JobDbMysqlPort = common.GetEnv("MYSQL_CLUSTER_PORT", "30000")
+
+			common.RedisHost = common.GetEnv("REDIS_HOST", "localhost")
+			common.RedisPwd = common.GetEnv("REDIS_PWD", "falcon")
+			// coord needs redis information
+			common.RedisPort = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
+			// find the cluster port, call internally
+			common.JobDbMysqlNodePort = common.GetEnv("MYSQL_NODE_PORT", "30001")
+			common.RedisNodePort = common.GetEnv("REDIS_NODE_PORT", "30003")
+
+			common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
+		}
 
 		if len(common.ServiceName) == 0 {
 			logger.Do.Println("Error: Input Error, ServiceName not provided, is either 'coord' or 'partyserver' ")
@@ -126,11 +132,6 @@ func initEnv(svcName string) {
 
 	} else if svcName == common.Master {
 
-		// master needs redis information
-		common.RedisHost = common.GetEnv("REDIS_HOST", "localhost")
-		common.RedisPwd = common.GetEnv("REDIS_PWD", "falcon")
-		common.RedisPort = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
-		common.RedisNodePort = common.GetEnv("REDIS_NODE_PORT", "30003")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 
 		// master needs queue item, task type
@@ -138,19 +139,26 @@ func initEnv(svcName string) {
 		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 
-		common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
-
-		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
-
-		// master communicate coord with IP+port in dev, with name+port in prod
 		if common.Env == common.DevEnv {
 
+			// master communicate coord with IP+port in dev
 			logger.Do.Println("CoordIP: ", common.CoordIP+":"+common.CoordPort)
 
 			common.CoordAddr = (common.CoordIP + ":" + common.CoordPort)
 
 		} else if common.Env == common.ProdEnv {
 
+			// master needs redis information
+			common.RedisHost = common.GetEnv("REDIS_HOST", "localhost")
+			common.RedisPwd = common.GetEnv("REDIS_PWD", "falcon")
+			common.RedisPort = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
+			common.RedisNodePort = common.GetEnv("REDIS_NODE_PORT", "30003")
+
+			// prod using k8
+			common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
+			common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
+
+			// master communicate coord with IP+port in dev, with name+port in prod
 			logger.Do.Println("CoordK8sSvcName: ", common.CoordK8sSvcName+":"+common.CoordPort)
 
 			common.CoordAddr = (common.CoordK8sSvcName + ":" + common.CoordPort)
