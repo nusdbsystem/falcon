@@ -40,21 +40,21 @@ source config_partyserver.properties
 if [ $PARTY_SERVER_BASEPATH ];then
 	echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"
 else
-   echo "PARTY_SERVER_BASEPATH NOT provided, default to dev_test dir"
-	export PARTY_SERVER_BASEPATH="./dev_test/"
+   # create new group of sub-folders with each run
+   TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
+   DEV_TEST_OUTDIR=./dev_test/Party-${PARTY_ID}_${TIMESTAMP}
+
+	export PARTY_SERVER_BASEPATH=$DEV_TEST_OUTDIR
+   echo "PARTY_SERVER_BASEPATH NOT provided, will use ${PARTY_SERVER_BASEPATH}"
 fi
+
+# setup party X folders
+echo "creating folders for party-$PARTY_ID"
 
 # set up the folder/sub-folders inside PARTY_SERVER_BASEPATH
 # first create PARTY_SERVER_BASEPATH/ if not already exists
 mkdir -p $PARTY_SERVER_BASEPATH
 
-# create new group of sub-folders with each run
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-DEV_TEST_OUTDIR=${PARTY_SERVER_BASEPATH}/Party-${PARTY_ID}_${TIMESTAMP}
-
-# setup party X folders
-echo "creating folders for party-$PARTY_ID"
-mkdir $DEV_TEST_OUTDIR
 # TODO: later find a way to populate these subdirs
 # based on {Coord, PartyServer}BasePath
 # mkdir $DEV_TEST_OUTDIR/logs
@@ -67,7 +67,7 @@ export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export PARTY_SERVER_IP=$PARTY_SERVER_IP
-export LOG_PATH=$DEV_TEST_OUTDIR
+export LOG_PATH=$PARTY_SERVER_BASEPATH
 
 # increment coordinator server port by partyserver ID
 # party ID can be 0, so needs to add extra 1
@@ -94,10 +94,10 @@ make $makeOS
 
 # NOTE: need "2>&1" before "&"
 # To redirect both stdout and stderr to the same file
-./bin/falcon_platform > $DEV_TEST_OUTDIR/Party-${PARTY_ID}-console.log 2>&1 &
+./bin/falcon_platform > $PARTY_SERVER_BASEPATH/Party-${PARTY_ID}-console.log 2>&1 &
 
 # store the process id in basepath
-echo $! > ${PARTY_SERVER_BASEPATH}/Party-${PARTY_ID}.pid
+echo $! > ./dev_test/Party-${PARTY_ID}.pid
 
 echo "===== Done with Party-${PARTY_ID} ====="
 echo

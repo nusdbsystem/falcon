@@ -40,25 +40,23 @@ source config_coord.properties
 if [ $COORD_SERVER_BASEPATH ];then
 	echo "COORD_SERVER_BASEPATH provided: $COORD_SERVER_BASEPATH"
 else
-   echo "COORD_SERVER_BASEPATH NOT provided, default to dev_test dir"
-	export COORD_SERVER_BASEPATH="./dev_test"
+   # create new group of sub-folders with each run
+   TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
+   DEV_TEST_OUTDIR=./dev_test/Coord_${TIMESTAMP}
+
+	export COORD_SERVER_BASEPATH=$DEV_TEST_OUTDIR
+   echo "COORD_SERVER_BASEPATH NOT provided, will use ${COORD_SERVER_BASEPATH}"
 fi
 
 # set up the folder/sub-folders inside COORD_SERVER_BASEPATH
 # first create COORD_SERVER_BASEPATH/ if not already exists
 mkdir -p $COORD_SERVER_BASEPATH
 
-# create new group of sub-folders with each run
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-DEV_TEST_OUTDIR=${COORD_SERVER_BASEPATH}/Coord_${TIMESTAMP}
-# setup coord folder
-mkdir -p $DEV_TEST_OUTDIR
-
 export ENV="dev"
 export SERVICE_NAME="coord"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
-export LOG_PATH=$DEV_TEST_OUTDIR
+export LOG_PATH=$COORD_SERVER_BASEPATH
 export JOB_DATABASE=$JOB_DATABASE
 export N_CONSUMER=$N_CONSUMER
 
@@ -77,10 +75,10 @@ make $makeOS
 
 # NOTE: need "2>&1" before "&"
 # To redirect both stdout and stderr to the same file
-./bin/falcon_platform > $DEV_TEST_OUTDIR/Coord-console.log 2>&1 &
+./bin/falcon_platform > $COORD_SERVER_BASEPATH/Coord-console.log 2>&1 &
 
 # store the process id in basepath
-echo $! > ${COORD_SERVER_BASEPATH}/Coord.pid
+echo $! > ./dev_test/Coord.pid
 
 echo "===== Done with Coordinator ====="
 echo

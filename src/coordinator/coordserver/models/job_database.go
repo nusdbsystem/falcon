@@ -44,6 +44,8 @@ func InitJobDB() *JobDB {
 		)
 		jobDB.addr = mysqlUrl
 	} else if jobDB.engine == common.DBsqlite3 {
+		// for quick dev test, save the sqlite3 db in timestamped dev_test
+		// if use outside of dev_test, make sure to reset the db file
 		jobDB.addr = path.Join(common.CoordBasePath, common.JobDbSqliteDb)
 	}
 	return jobDB
