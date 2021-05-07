@@ -61,9 +61,17 @@ Update the executor path in `src/coordinator/config_partyserver.properties`: `FL
 
 ## Platform setup DEV (development without k8)
 
-Update configurations in `src/coordinator/config_coord.properties`, choose the `JOB_DATABASE, LOG_PATH, COORD_SERVER_IP`
+Update configurations in
+- `src/coordinator/config_coord.properties` for Coordinator server configs
+- `src/coordinator/config_partyserver.properties` for Party server configs
 
-Update `src/coordinator/config_partyserver.properties`
+Supply your configurations in those `.properties` files such as
+- `JOB_DATABASE`
+- `LOG_PATH`
+- `COORD_SERVER_IP`
+- `PARTY_SERVER_IP`
+- ...
+
 
 **Simply call the `dev_start_all.sh` script**:
 ```bash

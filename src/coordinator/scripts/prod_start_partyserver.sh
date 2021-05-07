@@ -3,10 +3,10 @@
 . config_partyserver.properties
 
 # load env variables
-if [ $LOG_PATH ];then
-	echo "PARTYSERVER_LOG_PATH is exist, and echo to = $PARTYSERVER_LOG_PATH"
+if [ $PARTY_SERVER_BASEPATH ];then
+	echo "PARTY_SERVER_BASEPATH is exist, and echo to = $PARTY_SERVER_BASEPATH"
 else
-	export LOG_PATH=$PWD
+	export PARTY_SERVER_BASEPATH=$PWD
 fi
 
 # if using this scripts, assume running in production
@@ -35,16 +35,16 @@ EOF
 start_partyserver()
 {
   title "Starting falcon partyserver..."
-  bash ./scripts/_create_partyserver.sh $LOG_PATH $env|| exit 1
+  bash ./scripts/_create_partyserver.sh $PARTY_SERVER_BASEPATH $env|| exit 1
   title "falcon coord partyserver"
 }
 
 create_folders()
 {
       title "Creating folders"
-      mkdir $LOG_PATH
-      mkdir $LOG_PATH/logs
-      mkdir $LOG_PATH/runtime_logs
+      mkdir $PARTY_SERVER_BASEPATH
+      mkdir $PARTY_SERVER_BASEPATH/logs
+      mkdir $PARTY_SERVER_BASEPATH/runtime_logs
 
 }
 

@@ -56,7 +56,16 @@ export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export PARTY_SERVER_IP=$PARTY_SERVER_IP
-export LOG_PATH=$DEV_TEST_OUTDIR/logs
+export LOG_PATH=$DEV_TEST_OUTDIR
+
+# if Party server base path is not supplied in the config.properties
+# then use LOG_PATH
+if [ $PARTY_SERVER_BASEPATH ];then
+	echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"
+else
+	export PARTY_SERVER_BASEPATH=$LOG_PATH
+fi
+
 # increment coordinator server port by partyserver ID
 # party ID can be 0, so needs to add extra 1
 let port=$PARTY_ID+$COORD_SERVER_PORT+1

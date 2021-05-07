@@ -53,6 +53,14 @@ export LOG_PATH=$DEV_TEST_OUTDIR
 export JOB_DATABASE=$JOB_DATABASE
 export N_CONSUMER=$N_CONSUMER
 
+# if Coordinator server base path is not supplied in the config.properties
+# then use LOG_PATH
+if [ $COORD_SERVER_BASEPATH ];then
+	echo "COORD_SERVER_BASEPATH provided: $COORD_SERVER_BASEPATH"
+else
+	export COORD_SERVER_BASEPATH=$LOG_PATH
+fi
+
 # launch coordinator
 # detect the OS type with uname
 makeOS=''
