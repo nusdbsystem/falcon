@@ -78,6 +78,10 @@ const (
 	JobFailed     = 3
 	JobKilled     = 4
 
+	// for common.Env
+	DevEnv  = "dev"
+	ProdEnv = "prod"
+
 	WorkerYamlCreatePath = "./scripts/_create_runtime_worker.sh"
 	MasterYamlCreatePath = "./scripts/_create_runtime_master.sh"
 

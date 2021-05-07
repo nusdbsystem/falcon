@@ -135,13 +135,13 @@ func initEnv(svcName string) {
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 
 		// master communicate coord with IP+port in dev, with name+port in prod
-		if common.Env == "dev" {
+		if common.Env == common.DevEnv {
 
 			logger.Do.Println("CoordIP: ", common.CoordIP+":"+common.CoordPort)
 
 			common.CoordAddr = (common.CoordIP + ":" + common.CoordPort)
 
-		} else if common.Env == "prod" {
+		} else if common.Env == common.ProdEnv {
 
 			logger.Do.Println("CoordK8sSvcName: ", common.CoordK8sSvcName+":"+common.CoordPort)
 
