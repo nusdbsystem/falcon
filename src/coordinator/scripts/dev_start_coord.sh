@@ -31,6 +31,10 @@ fi
 
 # echo "partyNumber = ${partyNumber}"
 
+# populate the environmental variables from
+# the config_.properties files, such as paths IP and Ports
+source config_coord.properties
+
 # if Coordinator server base path is not supplied in the config.properties
 # then use "./dev_test"
 if [ $COORD_SERVER_BASEPATH ];then
@@ -49,10 +53,6 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
 DEV_TEST_OUTDIR=${COORD_SERVER_BASEPATH}/Coord_${TIMESTAMP}
 # setup coord folder
 mkdir -p $DEV_TEST_OUTDIR
-
-# populate the environmental variables from
-# the config_.properties files, such as paths IP and Ports
-source config_coord.properties
 
 export ENV="dev"
 export SERVICE_NAME="coord"
@@ -81,3 +81,6 @@ make $makeOS
 
 # store the process id in basepath
 echo $! > ${COORD_SERVER_BASEPATH}/Coord.pid
+
+echo "===== Done with Coordinator ====="
+echo

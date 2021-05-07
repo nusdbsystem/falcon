@@ -31,6 +31,10 @@ done
 
 echo "PARTY_ID = ${PARTY_ID}"
 
+# populate the environmental variables from
+# the config_.properties files, such as paths IP and Ports
+source config_partyserver.properties
+
 # if Party server base path is not supplied in the config.properties
 # then use dev_test/
 if [ $PARTY_SERVER_BASEPATH ];then
@@ -57,10 +61,6 @@ mkdir $DEV_TEST_OUTDIR
 # mkdir $DEV_TEST_OUTDIR/data_input
 # mkdir $DEV_TEST_OUTDIR/data_output
 # mkdir $DEV_TEST_OUTDIR/trained_models
-
-# populate the environmental variables from
-# the config_.properties files, such as paths IP and Ports
-source config_partyserver.properties
 
 export ENV="dev"
 export SERVICE_NAME="partyserver"
@@ -98,3 +98,6 @@ make $makeOS
 
 # store the process id in basepath
 echo $! > ${PARTY_SERVER_BASEPATH}/Party-${PARTY_ID}.pid
+
+echo "===== Done with Party-${PARTY_ID} ====="
+echo
