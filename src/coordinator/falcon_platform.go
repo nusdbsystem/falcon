@@ -35,7 +35,15 @@ func init() {
 func initLogger() {
 	var runtimeLogPath string
 
-	runtimeLogPath = path.Join(common.LogPath, common.RuntimeLogs)
+	// in dev, we have a logPath to store everything,
+	// but in production, the coordinator and part server are
+	// separated at different machines or clusters, we use docker,
+	if common.Env == common.DevEnv {
+		runtimeLogPath = path.Join(common.LogPath, common.RuntimeLogs)
+	} else if common.Env == common.ProdEnv {
+		// the log is fixed to ./log, which is the path inside the docker
+		runtimeLogPath = "./logs"
+	}
 
 	fmt.Println("common.RuntimeLogs at: ", runtimeLogPath)
 
