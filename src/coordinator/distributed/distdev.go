@@ -51,7 +51,7 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 	if workerType == common.TrainWorker {
 
 		serviceName = "worker-job" + jobId + "-train-" + common.PartyID
-		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
+		common.TaskRuntimeLogs = common.PartyServerBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
 		logger.Do.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
 
@@ -63,7 +63,7 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 	} else if workerType == common.InferenceWorker {
 
 		serviceName = "worker-job" + jobId + "-inference-" + common.PartyID
-		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
+		common.TaskRuntimeLogs = common.PartyServerBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.Mkdir(common.TaskRuntimeLogs, os.ModePerm)
 		if ee != nil {
 			logger.Do.Fatalln("Error in creating runtimelogsfolder", ee)

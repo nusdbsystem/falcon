@@ -54,7 +54,7 @@ func initLogger() {
 	rawTime := time.Now()
 
 	var logFileName string
-	logFileName = runtimeLogPath + "/" + common.ServiceName + "-" + rawTime.Format(layout) + ".logs"
+	logFileName = runtimeLogPath + "/" + common.ServiceName + "-" + rawTime.Format(layout) + ".log"
 
 	logger.Do, logger.F = logger.GetLogger(logFileName)
 }
@@ -67,6 +67,8 @@ func initEnv(svcName string) {
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 
 		common.CoordAddr = (common.CoordIP + ":" + common.CoordPort)
+
+		common.CoordBasePath = common.GetEnv("COORD_SERVER_BASEPATH", "./dev_test")
 
 		// coord http server number of consumers
 		common.NbConsumers = common.GetEnv("N_CONSUMER", "3")
@@ -116,6 +118,8 @@ func initEnv(svcName string) {
 		common.PartyServerPort = common.GetEnv("PARTY_SERVER_NODE_PORT", "")
 
 		common.PartyID = common.GetEnv("PARTY_ID", "")
+
+		common.PartyServerBasePath = common.GetEnv("PARTY_SERVER_BASEPATH", "./dev_test")
 
 		// get the MPC exe path
 		common.MpcExePath = common.GetEnv(
