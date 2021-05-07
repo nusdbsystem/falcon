@@ -103,40 +103,46 @@ var (
 	// meta env vars
 	Env         = ""
 	ServiceName = ""
+	LogPath     = ""
+
+	// Coord user-defined variables
+	CoordIP       = ""
+	CoordPort     = ""
+	CoordBasePath = ""
+	// later concatenated by falcon_platform.go
+	CoordAddr = ""
+	// number of consumers used in coord http server
+	NbConsumers = ""
+	// enable other service access master with clusterIP+clusterPort, from inside the cluster
+	CoordK8sSvcName = ""
+
+	// PartyServer user-define variables
+	PartyServerIP       = ""
+	PartyServerPort     = ""
+	PartyID             = ""
+	PartyServerBasePath = ""
 
 	// JobDB and Database Configs
-	JobDatabase       = ""
-	JobDbSqliteDb     = ""
+	// for dev use of sqlite3
+	JobDatabase   = ""
+	JobDbSqliteDb = ""
+	// for prod use of mysql
 	JobDbHost         = ""
 	JobDbMysqlUser    = ""
 	JobDbMysqlPwd     = ""
 	JobDbMysqlDb      = ""
 	JobDbMysqlOptions = ""
-
 	// find the cluster port, call internally
 	JobDbMysqlPort = ""
+	// TODO: what is this?
+	JobDbMysqlNodePort = ""
 
 	// redis
 	RedisHost = ""
 	RedisPwd  = ""
-
 	// find the cluster port, call internally
-	RedisPort          = ""
-	JobDbMysqlNodePort = ""
-	RedisNodePort      = ""
-
-	// sys port, here COORD_TARGET_PORT must equal to
-	CoordIP   = ""
-	CoordPort = ""
-
-	// number of consumers used in coord http server
-	NbConsumers = ""
-
-	PartyServerIP   = ""
-	PartyServerPort = ""
-	PartyID         = ""
-
-	LogPath = ""
+	RedisPort     = ""
+	RedisNodePort = ""
 
 	// those are init by coordinator
 	WorkerType = ""
@@ -145,12 +151,6 @@ var (
 
 	// this is the worker's k8s service name, only used in production
 	WorkerK8sSvcName = ""
-	// enable other service access master with clusterIP+clusterPort, from inside the cluster
-	CoordK8sSvcName = ""
-
-	// for coord, node port is the same as cluster port, so all use coorport
-	// this is service name + port
-	CoordAddr = ""
 
 	MasterQItem = ""
 
