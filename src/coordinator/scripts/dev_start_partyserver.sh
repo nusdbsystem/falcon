@@ -31,21 +31,32 @@ done
 
 echo "PARTY_ID = ${PARTY_ID}"
 
-# set up the folder/sub-folders inside dev_test
-# first create dev_test/ if not already exists
-mkdir -p dev_test/
+# if Party server base path is not supplied in the config.properties
+# then use dev_test/
+if [ $PARTY_SERVER_BASEPATH ];then
+	echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"
+else
+   echo "PARTY_SERVER_BASEPATH NOT provided, default to dev_test dir"
+	export PARTY_SERVER_BASEPATH="./dev_test/"
+fi
+
+# set up the folder/sub-folders inside PARTY_SERVER_BASEPATH
+# first create PARTY_SERVER_BASEPATH/ if not already exists
+mkdir -p $PARTY_SERVER_BASEPATH
 
 # create new group of sub-folders with each run
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-DEV_TEST_OUTDIR=dev_test/Party-${PARTY_ID}_${TIMESTAMP}
+DEV_TEST_OUTDIR=${PARTY_SERVER_BASEPATH}/Party-${PARTY_ID}_${TIMESTAMP}
 
 # setup party X folders
 echo "creating folders for party-$PARTY_ID"
 mkdir $DEV_TEST_OUTDIR
-mkdir $DEV_TEST_OUTDIR/logs
-mkdir $DEV_TEST_OUTDIR/data_input
-mkdir $DEV_TEST_OUTDIR/data_output
-mkdir $DEV_TEST_OUTDIR/trained_models
+# TODO: later find a way to populate these subdirs
+# based on {Coord, PartyServer}BasePath
+# mkdir $DEV_TEST_OUTDIR/logs
+# mkdir $DEV_TEST_OUTDIR/data_input
+# mkdir $DEV_TEST_OUTDIR/data_output
+# mkdir $DEV_TEST_OUTDIR/trained_models
 
 # populate the environmental variables from
 # the config_.properties files, such as paths IP and Ports
@@ -57,14 +68,6 @@ export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export PARTY_SERVER_IP=$PARTY_SERVER_IP
 export LOG_PATH=$DEV_TEST_OUTDIR
-
-# if Party server base path is not supplied in the config.properties
-# then use LOG_PATH
-if [ $PARTY_SERVER_BASEPATH ];then
-	echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"
-else
-	export PARTY_SERVER_BASEPATH=$LOG_PATH
-fi
 
 # increment coordinator server port by partyserver ID
 # party ID can be 0, so needs to add extra 1
@@ -92,4 +95,6 @@ make $makeOS
 # NOTE: need "2>&1" before "&"
 # To redirect both stdout and stderr to the same file
 ./bin/falcon_platform > $DEV_TEST_OUTDIR/Party-${PARTY_ID}-console.log 2>&1 &
-echo $! > dev_test/Party-${PARTY_ID}.pid
+
+# store the process id in basepath
+echo $! > ${PARTY_SERVER_BASEPATH}/Party-${PARTY_ID}.pid

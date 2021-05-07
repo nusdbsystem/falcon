@@ -31,13 +31,22 @@ fi
 
 # echo "partyNumber = ${partyNumber}"
 
-# set up the folder/sub-folders inside dev_test
-# first create dev_test/ if not already exists
-mkdir -p dev_test/
+# if Coordinator server base path is not supplied in the config.properties
+# then use "./dev_test"
+if [ $COORD_SERVER_BASEPATH ];then
+	echo "COORD_SERVER_BASEPATH provided: $COORD_SERVER_BASEPATH"
+else
+   echo "COORD_SERVER_BASEPATH NOT provided, default to dev_test dir"
+	export COORD_SERVER_BASEPATH="./dev_test"
+fi
+
+# set up the folder/sub-folders inside COORD_SERVER_BASEPATH
+# first create COORD_SERVER_BASEPATH/ if not already exists
+mkdir -p $COORD_SERVER_BASEPATH
 
 # create new group of sub-folders with each run
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-DEV_TEST_OUTDIR=dev_test/Coord_${TIMESTAMP}
+DEV_TEST_OUTDIR=${COORD_SERVER_BASEPATH}/Coord_${TIMESTAMP}
 # setup coord folder
 mkdir -p $DEV_TEST_OUTDIR
 
@@ -52,14 +61,6 @@ export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export LOG_PATH=$DEV_TEST_OUTDIR
 export JOB_DATABASE=$JOB_DATABASE
 export N_CONSUMER=$N_CONSUMER
-
-# if Coordinator server base path is not supplied in the config.properties
-# then use LOG_PATH
-if [ $COORD_SERVER_BASEPATH ];then
-	echo "COORD_SERVER_BASEPATH provided: $COORD_SERVER_BASEPATH"
-else
-	export COORD_SERVER_BASEPATH=$LOG_PATH
-fi
 
 # launch coordinator
 # detect the OS type with uname
@@ -77,4 +78,6 @@ make $makeOS
 # NOTE: need "2>&1" before "&"
 # To redirect both stdout and stderr to the same file
 ./bin/falcon_platform > $DEV_TEST_OUTDIR/Coord-console.log 2>&1 &
-echo $! > dev_test/Coord.pid
+
+# store the process id in basepath
+echo $! > ${COORD_SERVER_BASEPATH}/Coord.pid
