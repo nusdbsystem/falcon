@@ -10,8 +10,8 @@ import (
 	"coordinator/logger"
 	"coordinator/partyserver"
 	"fmt"
+	"log"
 	"os"
-	"path"
 	"runtime"
 	"strconv"
 	"time"
@@ -39,15 +39,20 @@ func initLogger() {
 	// but in production, the coordinator and part server are
 	// separated at different machines or clusters, we use docker,
 	if common.Env == common.DevEnv {
-		runtimeLogPath = path.Join(common.LogPath, common.RuntimeLogs)
+		runtimeLogPath = common.LogPath
 	} else if common.Env == common.ProdEnv {
 		// the log is fixed to ./log, which is the path inside the docker
 		runtimeLogPath = "./logs"
 	}
 
-	fmt.Println("common.RuntimeLogs at: ", runtimeLogPath)
+	fmt.Println("[initLogger] runtimeLogPath: ", runtimeLogPath)
 
-	_ = os.Mkdir(runtimeLogPath, os.ModePerm)
+	// create nested dirs if necessary
+	err := os.MkdirAll(runtimeLogPath, os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Use layout string for time format.
 	const layout = "2006-01-02T15:04:05"
 	// Place now in the string.

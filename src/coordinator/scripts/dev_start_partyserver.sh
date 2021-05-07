@@ -67,7 +67,7 @@ export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export PARTY_SERVER_IP=$PARTY_SERVER_IP
-export LOG_PATH=$PARTY_SERVER_BASEPATH
+export LOG_PATH=$PARTY_SERVER_BASEPATH/falcon-log
 
 # increment coordinator server port by partyserver ID
 # party ID can be 0, so needs to add extra 1
