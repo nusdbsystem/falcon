@@ -62,7 +62,7 @@ func SetupHttp(nConsumer int) {
 
 	logger.Do.Println("HTTP: Updating table...")
 	controller.CreateTables()
-	if common.Env == common.ProdEnv {
+	if common.JobDatabase == common.DBMySQL {
 		// initialize the mysql db
 		controller.CreateSysPorts()
 	}

@@ -82,6 +82,10 @@ const (
 	DevEnv  = "dev"
 	ProdEnv = "prod"
 
+	// for DB engine names
+	DBsqlite3 = "sqlite3"
+	DBMySQL   = "mysql"
+
 	WorkerYamlCreatePath = "./scripts/_create_runtime_worker.sh"
 	MasterYamlCreatePath = "./scripts/_create_runtime_master.sh"
 

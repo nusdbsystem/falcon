@@ -73,20 +73,23 @@ func initEnv(svcName string) {
 		// coord http server number of consumers
 		common.NbConsumers = common.GetEnv("N_CONSUMER", "3")
 
-		if common.Env == common.DevEnv {
+		// get the env for Job DB in Coord server
+		common.JobDatabase = common.GetEnv("JOB_DATABASE", "sqlite3")
 
-			// coord needs db information
-			common.JobDatabase = common.GetEnv("JOB_DATABASE", "sqlite3")
+		// get the env needed for different db type
+		if common.JobDatabase == common.DBsqlite3 {
 			common.JobDbSqliteDb = common.GetEnv("JOB_DB_SQLITE_DB", "falcon.db")
-
-		} else if common.Env == common.ProdEnv {
-
+		} else if common.JobDatabase == common.DBMySQL {
 			common.JobDbHost = common.GetEnv("JOB_DB_HOST", "localhost")
 			common.JobDbMysqlUser = common.GetEnv("JOB_DB_MYSQL_USER", "falcon")
 			common.JobDbMysqlPwd = common.GetEnv("JOB_DB_MYSQL_PWD", "falcon")
 			common.JobDbMysqlDb = common.GetEnv("JOB_DB_MYSQL_DB", "falcon")
 			common.JobDbMysqlOptions = common.GetEnv("JOB_DB_MYSQL_OPTIONS", "?parseTime=true")
 			common.JobDbMysqlPort = common.GetEnv("MYSQL_CLUSTER_PORT", "30000")
+		}
+
+		// env for prod
+		if common.Env == common.ProdEnv {
 
 			common.RedisHost = common.GetEnv("REDIS_HOST", "localhost")
 			common.RedisPwd = common.GetEnv("REDIS_PWD", "falcon")

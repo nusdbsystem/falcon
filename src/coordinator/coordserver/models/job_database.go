@@ -27,7 +27,7 @@ func InitJobDB() *JobDB {
 	jobDB := new(JobDB)
 	jobDB.engine = common.JobDatabase
 
-	if jobDB.engine == "mysql" {
+	if jobDB.engine == common.DBMySQL {
 		jobDB.host = common.JobDbHost
 		jobDB.user = common.JobDbMysqlUser
 		jobDB.password = common.JobDbMysqlPwd
@@ -43,7 +43,7 @@ func InitJobDB() *JobDB {
 			common.JobDbMysqlOptions,
 		)
 		jobDB.addr = mysqlUrl
-	} else if jobDB.engine == "sqlite3" {
+	} else if jobDB.engine == common.DBsqlite3 {
 		jobDB.addr = path.Join(common.CoordBasePath, common.JobDbSqliteDb)
 	}
 	return jobDB
