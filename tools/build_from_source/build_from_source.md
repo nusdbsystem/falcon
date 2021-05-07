@@ -277,7 +277,7 @@ drwxr-xr-x 4 root root 4.0K Jan  5 14:30 CMakeFiles
   
   **NOTE:** this is not related to whether to use "existing_key" in the train_job config. **this is key related to MPC, not the Falcon engine.**
 
-  Solution to this problem: rebuild from `tools/build_from_source/mp-spdz_setup.sh`
+  **Solution to this problem:** rebuild from `/tools/scripts/mp-spdz_setup.sh`
 
   **NOTE: `mv Math/Setup.h.prod Math/Setup.h` is critical! `*.prod` specifies `/opt/falcon` as base path**
 
