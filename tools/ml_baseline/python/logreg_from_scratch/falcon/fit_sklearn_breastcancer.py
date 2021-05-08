@@ -24,9 +24,9 @@ X_train, X_test, y_train, y_test = etl_sklearn_bc(
 
 # test falcon custom implemented log reg
 learning_rate = 0.1
-n_iters = 100
+n_iters = 3000
 fit_bias = True
-print_every = 1
+print_every = 500
 
 # try with full batch
 # batch_size = len(y_train)
