@@ -82,6 +82,3 @@ elif [[ $1 = "system" ]];then
 else
     title "Un-support arguments, please see the help doc"
 fi
-
-
-

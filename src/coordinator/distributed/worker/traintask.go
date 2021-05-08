@@ -122,7 +122,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	if doTaskArgs.TaskInfo.PreProcessing.AlgorithmName != "" {
 		logger.Do.Println("Worker: task pre processing start")
 		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.PreProcessing.AlgorithmName
-		_ = os.Mkdir(logFile, os.ModePerm)
+		_ = os.MkdirAll(logFile, os.ModePerm)
 		KeyFile = common.TaskDataPath + "/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
 
 		algParams = doTaskArgs.TaskInfo.PreProcessing.InputConfigs.SerializedAlgorithmConfig
@@ -145,7 +145,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 		// execute task 2: train
 		logger.Do.Println("Worker: task model training start")
 		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.ModelTraining.AlgorithmName
-		_ = os.Mkdir(logFile, os.ModePerm)
+		_ = os.MkdirAll(logFile, os.ModePerm)
 		KeyFile = common.TaskDataPath + "/" + doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
 
 		algParams = doTaskArgs.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig

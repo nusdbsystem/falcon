@@ -31,26 +31,34 @@ fi
 
 # echo "partyNumber = ${partyNumber}"
 
-# set up the folder/sub-folders inside dev_test
-# first create dev_test/ if not already exists
-mkdir -p dev_test/
-
-# create new group of sub-folders with each run
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-DEV_TEST_OUTDIR=dev_test/Coord_${TIMESTAMP}
-# setup coord folder
-mkdir -p $DEV_TEST_OUTDIR
-
 # populate the environmental variables from
 # the config_.properties files, such as paths IP and Ports
 source config_coord.properties
 
-export Env=dev
-export SERVICE_NAME=coord
+# if Coordinator server base path is not supplied in the config.properties
+# then use "./dev_test"
+if [ $COORD_SERVER_BASEPATH ];then
+	echo "COORD_SERVER_BASEPATH provided: $COORD_SERVER_BASEPATH"
+else
+   # create new group of sub-folders with each run
+   TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
+   DEV_TEST_OUTDIR=./dev_test/Coord_${TIMESTAMP}
+
+	export COORD_SERVER_BASEPATH=$DEV_TEST_OUTDIR
+   echo "COORD_SERVER_BASEPATH NOT provided, will use ${COORD_SERVER_BASEPATH}"
+fi
+
+# set up the folder/sub-folders inside COORD_SERVER_BASEPATH
+# first create COORD_SERVER_BASEPATH/ if not already exists
+mkdir -p $COORD_SERVER_BASEPATH
+
+export ENV="dev"
+export SERVICE_NAME="coord"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
-export BASE_PATH=$DEV_TEST_OUTDIR
+export LOG_PATH=$COORD_SERVER_BASEPATH/falcon-log
 export JOB_DATABASE=$JOB_DATABASE
+export N_CONSUMER=$N_CONSUMER
 
 # launch coordinator
 # detect the OS type with uname
@@ -67,5 +75,10 @@ make $makeOS
 
 # NOTE: need "2>&1" before "&"
 # To redirect both stdout and stderr to the same file
-./bin/falcon_platform > $DEV_TEST_OUTDIR/Coord-console.log 2>&1 &
-echo $! > dev_test/Coord.pid
+./bin/falcon_platform > $COORD_SERVER_BASEPATH/Coord-console.log 2>&1 &
+
+# store the process id in basepath
+echo $! > ./dev_test/Coord.pid
+
+echo "===== Done with Coordinator ====="
+echo

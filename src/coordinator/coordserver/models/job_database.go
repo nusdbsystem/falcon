@@ -26,12 +26,12 @@ type JobDB struct {
 func InitJobDB() *JobDB {
 	jobDB := new(JobDB)
 	jobDB.engine = common.JobDatabase
-	jobDB.host = common.JobDbHost
-	jobDB.user = common.JobDbMysqlUser
-	jobDB.password = common.JobDbMysqlPwd
-	jobDB.database = common.JobDbMysqlDb
 
-	if jobDB.engine == "mysql" {
+	if jobDB.engine == common.DBMySQL {
+		jobDB.host = common.JobDbHost
+		jobDB.user = common.JobDbMysqlUser
+		jobDB.password = common.JobDbMysqlPwd
+		jobDB.database = common.JobDbMysqlDb
 
 		mysqlUrl := fmt.Sprintf(
 			"%s:%s@tcp(%s:%s)/%s%s",
@@ -43,8 +43,10 @@ func InitJobDB() *JobDB {
 			common.JobDbMysqlOptions,
 		)
 		jobDB.addr = mysqlUrl
-	} else if jobDB.engine == "sqlite3" {
-		jobDB.addr = path.Join(common.LocalPath, common.JobDbSqliteDb)
+	} else if jobDB.engine == common.DBsqlite3 {
+		// for quick dev test, save the sqlite3 db in timestamped dev_test
+		// if use outside of dev_test, make sure to reset the db file
+		jobDB.addr = path.Join(common.CoordBasePath, common.JobDbSqliteDb)
 	}
 	return jobDB
 }
