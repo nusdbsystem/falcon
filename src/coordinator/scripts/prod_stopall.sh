@@ -21,13 +21,15 @@ kubectl delete configmap partyserver-config-1
 kubectl delete configmap partyserver-config-2
 
 . config_coord.properties
-rm -rf $BASE_PATH/database
-rm -rf $BASE_PATH/runtime_logs/*
-rm -rf $BASE_PATH/logs/*
+rm -rf $COORD_SERVER_BASEPATH/database
+rm -rf $COORD_SERVER_BASEPATH/runtime_logs/*
+rm -rf $COORD_SERVER_BASEPATH/logs/*
 
 . config_partyserver.properties
+rm -rf $PARTY_SERVER_BASEPATH/runtime_logs/*
+rm -rf $PARTY_SERVER_BASEPATH/logs/*
 
-rm -rf /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_partyserver_1/*
-rm -rf /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_partyserver_2/*
+# rm -rf /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_partyserver_1/*
+# rm -rf /Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/.falcon_partyserver_2/*
 
 bash scripts/status.sh user

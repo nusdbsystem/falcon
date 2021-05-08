@@ -2,19 +2,8 @@ package common
 
 import (
 	"coordinator/logger"
-	"fmt"
 	"os"
 )
-
-/**
- * @Author
- * @Description This file is only used inside the project,
-				for any common required to modify according to env,
-				use userdefined.properties or bash_env.sh
- * @Date 4:42 下午 1/12/20
- * @Param
- * @return
- **/
 
 const (
 	// TODO: are these the names assigned for master and workers?
@@ -89,8 +78,13 @@ const (
 	JobFailed     = 3
 	JobKilled     = 4
 
+	// for common.Env
 	DevEnv  = "dev"
 	ProdEnv = "prod"
+
+	// for DB engine names
+	DBsqlite3 = "sqlite3"
+	DBMySQL   = "mysql"
 
 	WorkerYamlCreatePath = "./scripts/_create_runtime_worker.sh"
 	MasterYamlCreatePath = "./scripts/_create_runtime_master.sh"
@@ -107,48 +101,52 @@ const (
 )
 
 var (
-	//////////////////////////////////////////////////////////////////////////
-	// This is user defined variables, define them in userdefined.properties first, //
-	// and then, add to here												//
-	//////////////////////////////////////////////////////////////////////////
+	// For user defined variables, define them in userdefined.properties first,
+	// and then, add to here
+
+	// meta env vars
+	Env         = ""
+	ServiceName = ""
+	LogPath     = ""
+
+	// Coord user-defined variables
+	CoordIP       = ""
+	CoordPort     = ""
+	CoordBasePath = ""
+	// later concatenated by falcon_platform.go
+	CoordAddr = ""
+	// number of consumers used in coord http server
+	NbConsumers = ""
+	// enable other service access master with clusterIP+clusterPort, from inside the cluster
+	CoordK8sSvcName = ""
+
+	// PartyServer user-define variables
+	PartyServerIP       = ""
+	PartyServerPort     = ""
+	PartyID             = ""
+	PartyServerBasePath = ""
 
 	// JobDB and Database Configs
-	JobDatabase       = ""
-	JobDbSqliteDb     = ""
+	// for dev use of sqlite3
+	JobDatabase   = ""
+	JobDbSqliteDb = ""
+	// for prod use of mysql
 	JobDbHost         = ""
 	JobDbMysqlUser    = ""
 	JobDbMysqlPwd     = ""
 	JobDbMysqlDb      = ""
 	JobDbMysqlOptions = ""
-
 	// find the cluster port, call internally
 	JobDbMysqlPort = ""
+	// TODO: what is this?
+	JobDbMysqlNodePort = ""
 
 	// redis
 	RedisHost = ""
 	RedisPwd  = ""
-
 	// find the cluster port, call internally
-	RedisPort          = ""
-	JobDbMysqlNodePort = ""
-	RedisNodePort      = ""
-
-	// sys port, here COORD_TARGET_PORT must equal to
-	CoordIP   = ""
-	CoordPort = ""
-
-	PartyServerIP   = ""
-	PartyServerPort = ""
-	PartyID         = ""
-
-	// envs
-	Env = getEnv("Env", DevEnv)
-
-	// those are init by user
-	ServiceName = getEnv("SERVICE_NAME", "coord")
-	LocalPath   = ""
-
-	PartyServerBasePath = ""
+	RedisPort     = ""
+	RedisNodePort = ""
 
 	// those are init by coordinator
 	WorkerType = ""
@@ -157,12 +155,6 @@ var (
 
 	// this is the worker's k8s service name, only used in production
 	WorkerK8sSvcName = ""
-	// enable other service access master with clusterIP+clusterPort, from inside the cluster
-	CoordK8sSvcName = ""
-
-	// for coord, node port is the same as cluster port, so all use coorport
-	// this is service name + port
-	CoordAddr = ""
 
 	MasterQItem = ""
 
@@ -179,35 +171,11 @@ var (
 
 // GetEnv get key environment variable if exist otherwise return defalutValue
 func GetEnv(key, defaultValue string) string {
-	/**
-	 * @Author
-	 * @Description init the runtime env,
-	 * @Date 1:33 下午 9/12/20
-	 * @Param
-	 * @return
-	 **/
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		logger.Do.Printf("Read envs, Set to default, key: %s, default: %s\n", key, defaultValue)
+		logger.Do.Printf("Set env var to default {%s: %s}\n", key, defaultValue)
 		return defaultValue
 	}
-	logger.Do.Printf("Read envs, User defined,   key: %s, value: %s\n", key, value)
-	return value
-}
-
-func getEnv(key, defaultValue string) string {
-	/**
-	 * @Author
-	 * @Description init the base env, for env and serviceName
-	 * @Date 1:32 下午 9/12/20
-	 * @Param
-	 * @return
-	 **/
-	value := os.Getenv(key)
-	if len(value) == 0 {
-		fmt.Printf("Read envs, Set to default, key: %s, default: %s\n", key, defaultValue)
-		return defaultValue
-	}
-	fmt.Printf("Read envs, User defined,   key: %s, value: %s\n", key, value)
+	logger.Do.Printf("Read user defined env var {%s: %s}\n", key, value)
 	return value
 }
