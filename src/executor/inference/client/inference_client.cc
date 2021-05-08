@@ -51,7 +51,7 @@ class LRInferenceClient {
         return "Prediction failed";
       } else {
         for (int i = 0; i < received_sample_num; i++) {
-          float label = response.outputs(i).label();
+          double label = response.outputs(i).label();
           std::cout << "Sample " << sample_ids[i] << " predicted label = " << label << ", ";
           std::cout << "Probabilities = [ ";
           for (int j = 0; j < response.outputs(0).probabilities_size(); j++) {

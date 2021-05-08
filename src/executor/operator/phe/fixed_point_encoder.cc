@@ -70,7 +70,7 @@ void EncodedNumber::set_integer(mpz_t pn, int v) {
   fixed_pointed_encode(v, value, exponent);
 }
 
-void EncodedNumber::set_float(mpz_t pn, float v, int precision) {
+void EncodedNumber::set_double(mpz_t pn, double v, int precision) {
   mpz_set(n, pn);
   fixed_pointed_encode(v, precision, value, exponent);
 }
@@ -121,7 +121,7 @@ void EncodedNumber::decode(long &v)
 {
   if (exponent != 0) {
     // not integer, should not call this decode function
-    LOG(ERROR) << "Exponent is not zero, failed, should call decode with float.";
+    LOG(ERROR) << "Exponent is not zero, failed, should call decode with double.";
     return;
   }
 
@@ -142,7 +142,7 @@ void EncodedNumber::decode(long &v)
   }
 }
 
-void EncodedNumber::decode(float &v)
+void EncodedNumber::decode(double &v)
 {
   switch (check_encoded_number()) {
     case Positive:
@@ -161,7 +161,7 @@ void EncodedNumber::decode(float &v)
   }
 }
 
-void EncodedNumber::decode_with_truncation(float &v, int truncated_exponent)
+void EncodedNumber::decode_with_truncation(double &v, int truncated_exponent)
 {
   switch (check_encoded_number()) {
     case Positive:
@@ -253,7 +253,7 @@ EncodedNumberType EncodedNumber::getter_type() const {
 }
 
 // helper functions bellow
-long long fixed_pointed_integer_representation(float value, int precision){
+long long fixed_pointed_integer_representation(double value, int precision){
   long long ex = (long long) pow(PHE_FIXED_POINT_BASE, precision);
   std::stringstream ss;
   ss << std::fixed << std::setprecision(precision) << value;
@@ -267,7 +267,7 @@ void fixed_pointed_encode(long value, mpz_t res, int & exponent) {
   exponent = 0;
 }
 
-void fixed_pointed_encode(float value, int precision, mpz_t res, int & exponent) {
+void fixed_pointed_encode(double value, int precision, mpz_t res, int & exponent) {
   long long r = fixed_pointed_integer_representation(value, precision);
   mpz_set_si(res, r);
   exponent = 0 - precision;
@@ -277,46 +277,46 @@ void fixed_pointed_decode(long & value, mpz_t res) {
   value = mpz_get_si(res);
 }
 
-void fixed_pointed_decode(float & value, mpz_t res, int exponent) {
+void fixed_pointed_decode(double & value, mpz_t res, int exponent) {
   if (exponent >= 0) {
-    LOG(ERROR) << "Decode mpz_t for float value failed.";
+    LOG(ERROR) << "Decode mpz_t for double value failed.";
     return;
   }
   if (exponent < 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION) {
     fixed_pointed_decode_truncated(value, res, exponent, 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
   } else {
     char *t = mpz_get_str(NULL, 10, res);
-    long v = ::atol(t);
+    long long v = ::atol(t);
 
     if (v == 0) {
       value = 0;
     } else {
-      value = (float) (v * pow(PHE_FIXED_POINT_BASE, exponent));
+      value = (double) (v * pow(PHE_FIXED_POINT_BASE, exponent));
     }
     free(t);
   }
 }
 
-void fixed_pointed_decode_truncated(float & value, mpz_t res, int exponent, int truncated_exponent) {
+void fixed_pointed_decode_truncated(double & value, mpz_t res, int exponent, int truncated_exponent) {
   if (exponent >= 0 || truncated_exponent >= 0) {
-    LOG(ERROR) << "Decode mpz_t for float value failed.";
+    LOG(ERROR) << "Decode mpz_t for double value failed.";
     return;
   }
 
   if (exponent >= truncated_exponent) {
     char *t = mpz_get_str(NULL, 10, res);
-    long v = ::atol(t);
+    long long v = ::atol(t);
 
     if (v == 0) {
       value = 0;
     } else {
-      value = (float) (v * pow(PHE_FIXED_POINT_BASE, exponent));
+      value = (double) (v * pow(PHE_FIXED_POINT_BASE, exponent));
       // printf("decoded value = %f\n", value);
     }
     free(t);
   } else {
     // convert res to truncated_exponent
-    unsigned long int exp_diff = truncated_exponent - exponent;
+    unsigned long long int exp_diff = truncated_exponent - exponent;
     // printf("exp_diff = %ld\n", exp_diff);
     mpz_t tmp, new_value;
     mpz_init(tmp);
@@ -328,14 +328,14 @@ void fixed_pointed_decode_truncated(float & value, mpz_t res, int exponent, int 
 
     // decode with new_value
     char *t_new = mpz_get_str(NULL, 10, new_value);
-    long v_new = ::atol(t_new);
+    long long v_new = ::atol(t_new);
 
     // printf("v_new = %ld\n", v_new);
 
     if (v_new == 0) {
       value = 0;
     } else {
-      value = (float) (v_new * pow(PHE_FIXED_POINT_BASE, truncated_exponent));
+      value = (double) (v_new * pow(PHE_FIXED_POINT_BASE, truncated_exponent));
     }
     free(t_new);
     mpz_clear(tmp);

@@ -7,7 +7,7 @@
 
 TEST(Classification_metrics, test_TP) {
     std::vector<int> predictions = {1,0,1,0,1};
-    std::vector<float> labels    = {1,1,1,1,1};
+    std::vector<double> labels    = {1,1,1,1,1};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -16,7 +16,7 @@ TEST(Classification_metrics, test_TP) {
 
 TEST(Classification_metrics, test_FP) {
     std::vector<int> predictions = {1,0,1,0,1};
-    std::vector<float> labels    = {1,1,1,1,1};
+    std::vector<double> labels    = {1,1,1,1,1};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -25,7 +25,7 @@ TEST(Classification_metrics, test_FP) {
 
 TEST(Classification_metrics, test_FN) {
     std::vector<int> predictions = {1, 1, 1, 0};
-    std::vector<float> labels    = {0, 1, 0, 1};
+    std::vector<double> labels    = {0, 1, 0, 1};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -34,7 +34,7 @@ TEST(Classification_metrics, test_FN) {
 
 TEST(Classification_metrics, test_TN) {
     std::vector<int> predictions = {1, 1, 0, 0};
-    std::vector<float> labels    = {0, 1, 0, 1};
+    std::vector<double> labels    = {0, 1, 0, 1};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -43,7 +43,7 @@ TEST(Classification_metrics, test_TN) {
 
 TEST(Classification_metrics, test_total_num) {
     std::vector<int> predictions = {1,1,1,1,1,0,0,0,0,0};
-    std::vector<float> labels    = {0,0,0,0,0,1,1,1,1,1};
+    std::vector<double> labels    = {0,0,0,0,0,1,1,1,1,1};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -61,7 +61,7 @@ TEST(Classification_metrics, test_regular_acc) {
     // 3 cats wrongly predicted as dogs (first 3 predictions)
     // and 2 dogs wrongly predicted as cats (last 2 predictions). 
     std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
-    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+    std::vector<double> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -75,7 +75,7 @@ TEST(Classification_metrics, test_sensitivity) {
     // 3 cats wrongly predicted as dogs (first 3 predictions)
     // and 2 dogs wrongly predicted as cats (last 2 predictions). 
     std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
-    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+    std::vector<double> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -89,7 +89,7 @@ TEST(Classification_metrics, test_specificity) {
     // 3 cats wrongly predicted as dogs (first 3 predictions)
     // and 2 dogs wrongly predicted as cats (last 2 predictions). 
     std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
-    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+    std::vector<double> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -103,7 +103,7 @@ TEST(Classification_metrics, test_balanced_acc) {
     // 3 cats wrongly predicted as dogs (first 3 predictions)
     // and 2 dogs wrongly predicted as cats (last 2 predictions). 
     std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
-    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+    std::vector<double> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -122,7 +122,7 @@ TEST(Classification_metrics, test_predictive_values) {
     // 3 cats wrongly predicted as dogs (first 3 predictions)
     // and 2 dogs wrongly predicted as cats (last 2 predictions). 
     std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
-    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+    std::vector<double> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);
@@ -137,7 +137,7 @@ TEST(Classification_metrics, test_f1) {
     // 3 cats wrongly predicted as dogs (first 3 predictions)
     // and 2 dogs wrongly predicted as cats (last 2 predictions). 
     std::vector<int> predictions = {0,0,0,1,1,1,1,1,0,0,0,1,1};
-    std::vector<float> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
+    std::vector<double> labels    = {1,1,1,1,1,1,1,1,0,0,0,0,0};
 
     ClassificationMetrics ClfMetrics;
     ClfMetrics.compute_metrics(predictions, labels);

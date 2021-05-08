@@ -34,7 +34,7 @@ class EncodedNumber {
   mpz_t n;
   // the value in mpz_t form
   mpz_t value;
-  // 0 for integer, negative for float
+  // 0 for integer, negative for double
   int exponent;
   // the encoded number type
   EncodedNumberType type;
@@ -71,12 +71,12 @@ class EncodedNumber {
   void set_integer(mpz_t pn, int v);
 
   /**
-   * set for float value
+   * set for double value
    * @param pn
    * @param v
    * @param precision
    */
-  void set_float(mpz_t pn, float v, int precision = PHE_FIXED_POINT_PRECISION);
+  void set_double(mpz_t pn, double v, int precision = PHE_FIXED_POINT_PRECISION);
 
   /**
      * make two EncodedNumber exponent the same for computation
@@ -101,10 +101,10 @@ class EncodedNumber {
   void decode(long & v);
 
   /**
-   * decode to float value
+   * decode to double value
    * @param v
    */
-  void decode(float & v);
+  void decode(double & v);
 
   /**
    * when exponent is large, decode with truncation
@@ -114,7 +114,7 @@ class EncodedNumber {
    * @param v
    * @param truncated_exponent
    */
-  void decode_with_truncation(float & v, int truncated_exponent);
+  void decode_with_truncation(double & v, int truncated_exponent);
 
   /**
    * check encoded number
@@ -164,12 +164,12 @@ class EncodedNumber {
 };
 
 /**
- * represent a float with fixed pointed integer
+ * represent a double with fixed pointed integer
  * @param value
  * @param precision : exponent with precision
  * @return
  */
-long long fixed_pointed_integer_representation(float value, int precision);
+long long fixed_pointed_integer_representation(double value, int precision);
 
 /**
  * encode an integer with mpz_t
@@ -181,14 +181,14 @@ long long fixed_pointed_integer_representation(float value, int precision);
 void fixed_pointed_encode(long value, mpz_t res, int & exponent);
 
 /**
- * encode a float with mpz_t
+ * encode a double with mpz_t
  * must ensure that abs(value * PHE_FIXED_POINT_BASE ** precision) <= n / 3
  * @param value
  * @param precision
  * @param res
  * @param exponent
  */
-void fixed_pointed_encode(float value, int precision, mpz_t res, int & exponent);
+void fixed_pointed_encode(double value, int precision, mpz_t res, int & exponent);
 
 /**
  * decode a mpz_t to a long value when exponent is 0
@@ -198,22 +198,22 @@ void fixed_pointed_encode(float value, int precision, mpz_t res, int & exponent)
 void fixed_pointed_decode(long & value, mpz_t res);
 
 /**
- * decode a mpz_t to a float value when exponent is not 0
+ * decode a mpz_t to a double value when exponent is not 0
  * @param value
  * @param res
  * @param exponent
  */
-void fixed_pointed_decode(float & value, mpz_t res, int exponent);
+void fixed_pointed_decode(double & value, mpz_t res, int exponent);
 
 /**
- * decode a mpz_t to a float value when exponent is not 0 with precision truncation
+ * decode a mpz_t to a double value when exponent is not 0 with precision truncation
  * NOTE: the truncation can only be applied on plaintexts
  * @param value
  * @param res
  * @param exponent
  * @param truncated_exponent : truncate the res to desired precision to avoid overflow
  */
-void fixed_pointed_decode_truncated(float & value, mpz_t res, int exponent, int truncated_exponent);
+void fixed_pointed_decode_truncated(double & value, mpz_t res, int exponent, int truncated_exponent);
 
 
 #endif //FALCON_SRC_EXECUTOR_OPERATOR_PHE_FIXED_POINT_ENCODER_H_

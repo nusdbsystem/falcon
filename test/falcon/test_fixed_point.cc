@@ -128,9 +128,9 @@ TEST(FixedPoint, FloatEncodeDecode){
   mpz_set_str(v_n, "100000000000000", 10);
   mpz_set_str(v_value, "8090", 10);
 
-  float positive = 0.123456;
+  double positive = 0.123456;
   EncodedNumber positive_number;
-  positive_number.set_float(v_n, positive, 16);
+  positive_number.set_double(v_n, positive, 16);
   mpz_t g_n;
   mpz_t g_value;
   mpz_init(g_n);
@@ -147,19 +147,19 @@ TEST(FixedPoint, FloatEncodeDecode){
   EXPECT_EQ(-16, positive_number.getter_exponent());
   EXPECT_EQ(Plaintext, positive_number.getter_type());
 
-  float decoded_positive;
+  double decoded_positive;
   positive_number.decode(decoded_positive);
   // printf("decoded_positive = %ld\n", decoded_positive);
   EXPECT_NEAR(positive, decoded_positive, 1e-3);
 
   // negative float
-  float negative = -0.666666;
+  double negative = -0.666666;
   mpz_clear(v_value);
   mpz_init(v_value);
   mpz_set_str(v_value, "-43690", 10);
 
   EncodedNumber negative_number;
-  negative_number.set_float(v_n, negative, 16);
+  negative_number.set_double(v_n, negative, 16);
   mpz_clear(g_n);
   mpz_clear(g_value);
   mpz_init(g_n);
@@ -175,7 +175,7 @@ TEST(FixedPoint, FloatEncodeDecode){
   EXPECT_EQ(-16, negative_number.getter_exponent());
   EXPECT_EQ(Plaintext, negative_number.getter_type());
 
-  float decoded_negative;
+  double decoded_negative;
   negative_number.decode(decoded_negative);
   // printf("decoded_negative = %ld\n", decoded_negative);
   EXPECT_NEAR(negative, decoded_negative, 1e-3);
@@ -297,8 +297,8 @@ TEST(FixedPoint, DecodeTruncation){
   mpz_set_str(v_n, "100000000000000", 10);
 
   EncodedNumber number;
-  number.set_float(v_n, -0.00105, 32);
-  float x_decoded, x_decoded_truncation;
+  number.set_double(v_n, -0.00105, 32);
+  double x_decoded, x_decoded_truncation;
   number.decode(x_decoded);
   number.decode_with_truncation(x_decoded_truncation, -16);
   EXPECT_NEAR(x_decoded, x_decoded_truncation, 1e-3);

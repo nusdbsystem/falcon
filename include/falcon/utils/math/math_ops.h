@@ -10,26 +10,26 @@
  * @param b
  * @return
  */
-float mean_squared_error(std::vector<float> a, std::vector<float> b);
+double mean_squared_error(std::vector<double> a, std::vector<double> b);
 
 /**
  * given two values, compare whether they are same within some accuracy
- * TO compensate the accuracy loss of float values from SPDZ
+ * TO compensate the accuracy loss of double values from SPDZ
  *
  * @param a
  * @param b
  * @return
  */
-bool rounded_comparison(float a, float b);
+bool rounded_comparison(double a, double b);
 
 /**
- * given an input float vector, compute the softmax probability distribution
+ * given an input double vector, compute the softmax probability distribution
  * FOR classification in GBDT
  *
  * @param inputs
  * @return
  */
-std::vector<float> softmax(std::vector<float> inputs);
+std::vector<double> softmax(std::vector<double> inputs);
 
 
 /**
@@ -38,7 +38,7 @@ std::vector<float> softmax(std::vector<float> inputs);
  * @param inputs
  * @return
  */
-float argmax(std::vector<float> inputs);
+double argmax(std::vector<double> inputs);
 
 
 /**
@@ -48,7 +48,7 @@ float argmax(std::vector<float> inputs);
  * @param logit: logit score
  * @return
  */
-float logistic_function(float logit);
+double logistic_function(double logit);
 
 /**
  * compute the loss function of the binary logistic regression model
@@ -57,6 +57,6 @@ float logistic_function(float logit);
  * @param labels: ground truth labels
  * @return
  */
-float logistic_regression_loss(std::vector<float> pred_probs, std::vector<float> labels);
+double logistic_regression_loss(std::vector<double> pred_probs, std::vector<double> labels);
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

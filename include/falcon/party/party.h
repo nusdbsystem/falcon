@@ -40,9 +40,9 @@ class Party {
   // feature number in the local dataset
   int feature_num;
   // 2-dimensional dataset (currently only support relational data)
-  std::vector< std::vector <float> > local_data;
+  std::vector< std::vector <double> > local_data;
   // 1-dimensional label if the party has
-  std::vector<float> labels;
+  std::vector<double> labels;
   // public key of PHE
   djcs_t_public_key* phe_pub_key;
   // private key share (auth server) of PHE
@@ -151,11 +151,11 @@ class Party {
    * @param training_labels: split training labels for active party
    * @param testing_labels: split testing labels for active party
    */
-  void split_train_test_data(float split_percentage,
-      std::vector< std::vector<float> >& training_data,
-      std::vector< std::vector<float> >& testing_data,
-      std::vector<float>& training_labels,
-      std::vector<float>& testing_labels) const;
+  void split_train_test_data(double split_percentage,
+      std::vector< std::vector<double> >& training_data,
+      std::vector< std::vector<double> >& testing_data,
+      std::vector<double>& training_labels,
+      std::vector<double>& testing_labels) const;
 
   /**
    * parties jointly decrypt a ciphertext vector,
@@ -182,7 +182,7 @@ class Party {
    * @param phe_precision: fixed point precision when encoding
    */
   void ciphers_to_secret_shares(EncodedNumber* src_ciphers,
-      std::vector<float>& secret_shares,
+      std::vector<double>& secret_shares,
       int size, int req_party_id,
       int phe_precision);
 
@@ -196,7 +196,7 @@ class Party {
    * @param phe_precision: ciphertext vector precision, need careful design
    */
   void secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
-      std::vector<float> secret_shares,
+      std::vector<double> secret_shares,
       int size, int req_party_id,
       int phe_precision);
 
@@ -207,12 +207,12 @@ class Party {
   void setter_feature_num(int s_feature_num) { feature_num = s_feature_num; }
 
   /** set party's local dataset (support only relational data) */
-  void setter_local_data(std::vector< std::vector<float> > s_local_data) {
+  void setter_local_data(std::vector< std::vector<double> > s_local_data) {
     local_data = std::move(s_local_data);
   }
 
   /** set party's local labels if the party is an active party */
-  void setter_labels(std::vector<float> s_labels) { labels = std::move(s_labels); }
+  void setter_labels(std::vector<double> s_labels) { labels = std::move(s_labels); }
 
   /** set party's phe public key */
   void setter_phe_pub_key(djcs_t_public_key* s_phe_pub_key) {
@@ -236,10 +236,10 @@ class Party {
   int getter_feature_num() const { return feature_num; }
 
   /** get party's local dataset (support only relational data) */
-  std::vector< std::vector<float> > getter_local_data() const { return local_data; }
+  std::vector< std::vector<double> > getter_local_data() const { return local_data; }
 
   /** get party's local labels if the party is an active party */
-  std::vector<float> getter_labels() const { return labels; }
+  std::vector<double> getter_labels() const { return labels; }
 
   /** get party's phe public key */
   void getter_phe_pub_key(djcs_t_public_key* g_phe_pub_key) const {

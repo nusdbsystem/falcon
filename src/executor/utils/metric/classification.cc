@@ -16,7 +16,7 @@ ClassificationMetrics::ClassificationMetrics()
   : TP(0), FP(0), FN(0), TN(0) {}
 
 // Compute the Metrics
-void ClassificationMetrics::compute_metrics(std::vector<int> predictions, std::vector<float> labels)
+void ClassificationMetrics::compute_metrics(std::vector<int> predictions, std::vector<double> labels)
    {
   // std::cout << "ClassificationMetrics constructor called" << std::endl;
   // LOG(INFO) << "--- ClassificationMetrics constructor called ---";

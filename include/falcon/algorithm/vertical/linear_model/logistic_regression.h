@@ -15,6 +15,7 @@
 #include <thread>
 #include <future>
 
+// TODO: convert float to double for the proto message
 struct LogisticRegressionParams {
   // size of mini-batch in each iteration
   int batch_size;
@@ -50,15 +51,15 @@ class LogisticRegression : public Model {
   // maximum number of iterations for training
   int max_iteration;
   // tolerance of convergence
-  float converge_threshold;
+  double converge_threshold;
   // whether use regularization or not
   bool with_regularization;
   // regularization parameter
-  float alpha;
+  double alpha;
   // learning rate for parameter updating
-  float learning_rate;
+  double learning_rate;
   // decay rate for learning rate, following lr = lr0 / (1 + decay*t), t is #iteration
-  float decay;
+  double decay;
   // penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
   std::string penalty;
   // optimization method, default 'sgd', currently support 'sgd'
@@ -69,7 +70,7 @@ class LogisticRegression : public Model {
   // evaluation metric for training and testing, 'acc', 'auc', or 'ks', currently support 'acc'
   std::string metric;
   // differential privacy budget
-  float dp_budget;
+  double dp_budget;
 
  private:
   // number of weights in the model
@@ -95,12 +96,12 @@ class LogisticRegression : public Model {
    */
   LogisticRegression(LogisticRegressionParams lr_params,
       int m_weight_size,
-      std::vector< std::vector<float> > m_training_data,
-      std::vector< std::vector<float> > m_testing_data,
-      std::vector<float> m_training_labels,
-      std::vector<float> m_testing_labels,
-      float m_training_accuracy = 0.0,
-      float m_testing_accuracy = 0.0);
+      std::vector< std::vector<double> > m_training_data,
+      std::vector< std::vector<double> > m_testing_data,
+      std::vector<double> m_training_labels,
+      std::vector<double> m_testing_labels,
+      double m_training_accuracy = 0.0,
+      double m_testing_accuracy = 0.0);
 
   /** destructor */
   ~LogisticRegression();
@@ -148,8 +149,8 @@ class LogisticRegression : public Model {
    * @param precision: precision for the batch samples and shares
    */
   void update_encrypted_weights(Party& party,
-      std::vector<float> batch_logistic_shares,
-      std::vector<float> truncated_weight_shares,
+      std::vector<double> batch_logistic_shares,
+      std::vector<double> truncated_weight_shares,
       std::vector<int> batch_indexes,
       int precision);
 
@@ -177,7 +178,7 @@ class LogisticRegression : public Model {
    * @param dataset_type: falcon::DatasetType, TRAIN for training data and TEST for testing data
    * @param loss: returned loss
    */
-  void loss_computation(Party party, falcon::DatasetType dataset_type, float &loss);
+  void loss_computation(Party party, falcon::DatasetType dataset_type, double &loss);
 
   /**
    * print weights during training to view changes
@@ -228,9 +229,9 @@ void spdz_logistic_function_computation(int party_num,
     int mpc_port_base,
     std::string mpc_player_path,
     std::vector<std::string> party_host_names,
-    std::vector<float> batch_aggregation_shares,
+    std::vector<double> batch_aggregation_shares,
     int cur_batch_size,
-    std::promise<std::vector<float>> *batch_loss_shares);
+    std::promise<std::vector<double>> *batch_loss_shares);
 
 /**
  * train a logistic regression model
