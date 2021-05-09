@@ -6,7 +6,8 @@
 #include "falcon/utils/metric/classification.h"
 
 #include <glog/logging.h>
-#include <iostream>
+#include <iostream>     // std::cout
+#include <iomanip>      // std::setprecision
 
 
 // a metrics class for classification performance
@@ -100,14 +101,14 @@ Confusion Matrix
 True Class1    5        3
      Class0    2        3
   */
-  std::cout << "Confusion Matrix\n";
+  std::cout << "Confusion Matrix (Class 1 is Positive Class)\n";
   std::cout << "               Pred\n";
   std::cout << "               Class1    Class0\n";
   std::cout << "True Class1" << "    " << TP << "        " << FN << std::endl;
   std::cout << "     Class0" << "    " << FP << "        " << TN << std::endl;
 
   // save a version for gLog
-  LOG(INFO) << "Confusion Matrix";
+  LOG(INFO) << "Confusion Matrix (Class 1 is Positive Class)";
   LOG(INFO) << "               Pred";
   LOG(INFO) << "               Class1    Class0";
   LOG(INFO) << "True Class1" << "    " << TP << "        " << FN;
@@ -123,15 +124,15 @@ void ClassificationMetrics::classification_report() {
   std::cout << "True positive (TP) = " << TP << std::endl;
   std::cout << "True negative (TN) = " << TN << std::endl;
 
-  std::cout << "regular_accuracy = " << regular_accuracy << std::endl;
-  std::cout << "balanced_accuracy = " << balanced_accuracy << std::endl;
+  std::cout << "regular_accuracy = " << std::setprecision(17) << regular_accuracy << std::endl;
+  std::cout << "balanced_accuracy = " << std::setprecision(17) << balanced_accuracy << std::endl;
 
-  std::cout << "sensitivity = " << sensitivity << std::endl;
-  std::cout << "specificity = " << specificity << std::endl;
+  std::cout << "sensitivity = " << std::setprecision(17) << sensitivity << std::endl;
+  std::cout << "specificity = " << std::setprecision(17) << specificity << std::endl;
 
-  std::cout << "precision (PPV) = " << precision << std::endl;
-  std::cout << "NPV = " << NPV << std::endl;
-  std::cout << "F1 score = " << F1 << std::endl;
+  std::cout << "precision (PPV) = " << std::setprecision(17) << precision << std::endl;
+  std::cout << "NPV = " << std::setprecision(17) << NPV << std::endl;
+  std::cout << "F1 score = " << std::setprecision(17) << F1 << std::endl;
 
   // save a version for gLog
   LOG(INFO) << "=== Classification Report ===";
@@ -141,13 +142,13 @@ void ClassificationMetrics::classification_report() {
   LOG(INFO) << "True positive (TP) = " << TP;
   LOG(INFO) << "True negative (TN) = " << TN;
 
-  LOG(INFO) << "regular_accuracy = " << regular_accuracy;
-  LOG(INFO) << "balanced_accuracy = " << balanced_accuracy;
+  LOG(INFO) << "regular_accuracy = " << std::setprecision(17) << regular_accuracy;
+  LOG(INFO) << "balanced_accuracy = " << std::setprecision(17) << balanced_accuracy;
 
-  LOG(INFO) << "sensitivity = " << sensitivity;
-  LOG(INFO) << "specificity = " << specificity;
+  LOG(INFO) << "sensitivity = " << std::setprecision(17) << sensitivity;
+  LOG(INFO) << "specificity = " << std::setprecision(17) << specificity;
 
-  LOG(INFO) << "precision (PPV) = " << precision;
-  LOG(INFO) << "NPV = " << NPV;
-  LOG(INFO) << "F1 score = " << F1;
+  LOG(INFO) << "precision (PPV) = " << std::setprecision(17) << precision;
+  LOG(INFO) << "NPV = " << std::setprecision(17) << NPV;
+  LOG(INFO) << "F1 score = " << std::setprecision(17) << F1;
 }

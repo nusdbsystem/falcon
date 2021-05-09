@@ -80,25 +80,31 @@ double logistic_regression_loss(std::vector<double> pred_probs, std::vector<doub
   for (int i = 0; i < n; i++) {
     double loss_i = 0.0;
     // NOTE: log(0) will produce -inf, causing loss_sum to be nan
+    // from sklearn's metrics/_classification.py:
+    // "Log loss is undefined for p=0 or p=1, so probabilities are
+    // clipped to max(eps, min(1 - eps, p))"
+    // sklearn use eps=1e-15
     // fix by setting bounds of pred_probs between 0~1
-    double UPPER = 0.99999;
-    double LOWER = 0.00001;
-    double est_prob;
-    if (pred_probs[i] > UPPER) {
+    double eps = 1e-15;
+    double UPPER = (1-eps);
+    double LOWER = eps;
+    double est_prob = pred_probs[i];
+
+    // Clipping
+    if (est_prob > UPPER) {
       est_prob = UPPER;
-    } else if (pred_probs[i] < LOWER) {
-      est_prob = LOWER;
-    } else {
-      est_prob = pred_probs[i];
     }
-    // std::cout << "est_prob = " << std::setprecision(5) << est_prob << "\n";
+    if (est_prob < LOWER) {
+      est_prob = LOWER;
+    }
+    // std::cout << "est_prob = " << std::setprecision(17) << est_prob << "\n";
 
     loss_i += (double) (labels[i] * log(est_prob));
     loss_i += (double) ((1.0 - labels[i]) * log(1.0 - est_prob));
     loss_sum += loss_i;
     // if (i < 5) {
-    //   std::cout << "predicted probability = " << est_prob <<
-    //     ", ground truth label = " << labels[i] << ", loss_sum = " << loss_sum << std::endl;
+    //   std::cout << "predicted probability = " << std::setprecision(17) << est_prob <<
+    //     ", ground truth label = " << labels[i] << ", loss_sum = " << std::setprecision(17) << loss_sum << std::endl;
     // }
   }
   double loss = (0 - loss_sum) / n;

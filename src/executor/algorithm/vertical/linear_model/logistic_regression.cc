@@ -15,6 +15,7 @@
 #include <random>
 #include <thread>
 #include <future>
+#include <iomanip>      // std::setprecision
 
 #include <glog/logging.h>
 #include <Networking/ssl_sockets.h>
@@ -40,6 +41,8 @@ LogisticRegression::LogisticRegression(LogisticRegressionParams lr_params,
   converge_threshold = (double) lr_params.converge_threshold;
   with_regularization = lr_params.with_regularization;
   alpha = (double) lr_params.alpha;
+  // NOTE: with double-precision, learning_rate can be 0.005
+  // previously with float-precision, learning_rate is default 0.1
   learning_rate = (double) lr_params.alpha;
   decay = (double) lr_params.decay;
   weight_size = m_weight_size;
@@ -420,24 +423,37 @@ void LogisticRegression::train(Party party) {
     double iter_consumed_time = double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
     LOG(INFO) << "-------- The " << iter << "-th iteration consumed time = " << iter_consumed_time << " --------";
     std::cout << "-------- The " << iter << "-th iteration consumed time = " << iter_consumed_time << " --------" << std::endl;
-#if DEBUG == 1
+
+#if DEBUG
+  // intermediate information display
+  // (including the training loss and weights)
+  // whether to print loss+weights and/or evaluation report
+  // based on iter, DEBUG, and PRINT_EVERY
+  bool display_info = false;
+  if (iter == 0) {
+    // display info on the 0-th iter
+    display_info = true;
+  } else if ((iter + 1) % PRINT_EVERY == 0) {
+    // in debug mode print every PRINT_EVERY (default 500) iters
+    display_info = true;
+    // in DEBUG mode, set PRINT_EVERY to 1 to
+    // print out evaluation report for every iteration
+  }
+
+  if (display_info) {
     double training_loss = 0.0;
     loss_computation(party, falcon::TRAIN, training_loss);
-    LOG(INFO) << "DEBUG INFO: The " << iter << "-th iteration training loss = " << training_loss;
-    std::cout << "DEBUG INFO: The " << iter << "-th iteration training loss = " << training_loss << std::endl;
-    eval(party, falcon::TRAIN);
+    LOG(INFO) << "DEBUG INFO: The " << iter << "-th iteration training loss = " << std::setprecision(17) << training_loss;
+    std::cout << "DEBUG INFO: The " << iter << "-th iteration training loss = " << std::setprecision(17) << training_loss << std::endl;
     display_weights(party);
-#endif
-    // even not in debug mode, it is good to print out the initial
-    // evaluation report on the 0-th iter, and every 500 iters
-    if (iter == 0 || ((iter + 1) % 500 == 0)) {
-      double training_loss = 0.0;
-      loss_computation(party, falcon::TRAIN, training_loss);
-      LOG(INFO) << "DEBUG INFO: The " << iter << "-th iteration training loss = " << training_loss;
-      std::cout << "DEBUG INFO: The " << iter << "-th iteration training loss = " << training_loss << std::endl;
+    // print evaluation report
+    if (iter != (max_iteration - 1)) {
+      // but do not duplicate print for last iter
       eval(party, falcon::TRAIN);
-      display_weights(party);
     }
+  }
+#endif
+
     google::FlushLogFiles(google::INFO);
   }
 
@@ -603,7 +619,7 @@ void LogisticRegression::loss_computation(Party party, falcon::DatasetType datas
     if (dataset_type == falcon::TEST){
       loss = logistic_regression_loss(pred_probs, testing_labels);
     }
-    LOG(INFO) << "The loss on " << dataset_str << " is: " << loss;
+    LOG(INFO) << "The loss on " << dataset_str << " is: " << std::setprecision(17) << loss;
   }
 
   // free memory
@@ -613,7 +629,7 @@ void LogisticRegression::loss_computation(Party party, falcon::DatasetType datas
 
   const clock_t testing_finish_time = clock();
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  LOG(INFO) << "Loss computation on" << dataset_str << " time = " << testing_consumed_time;
+  LOG(INFO) << "Time for loss computation on " << dataset_str << " = " << testing_consumed_time;
   google::FlushLogFiles(google::INFO);
 }
 
@@ -777,6 +793,7 @@ void train_logistic_regression(Party party, std::string params_str,
   delete [] model_weights;
 }
 
+// for DEBUG
 void LogisticRegression::display_weights(Party party) {
   std::cout << "display local weights" << std::endl;
   LOG(INFO) << "display local weights";
@@ -798,8 +815,8 @@ void LogisticRegression::display_weights(Party party) {
     for (int i = 0; i < weight_size; i++) {
       double weight;
       decrypted_local_weights[i].decode(weight);
-      std::cout << "local weight[" << i << "] = " << weight << std::endl;
-      LOG(INFO) << "local weight[" << i << "] = " << weight;
+      std::cout << "local weight[" << i << "] = " << std::setprecision(17) << weight << std::endl;
+      LOG(INFO) << "local weight[" << i << "] = " << std::setprecision(17) << weight;
     }
     delete [] decrypted_local_weights;
   } else {
@@ -819,6 +836,8 @@ void LogisticRegression::display_weights(Party party) {
   }
 }
 
+// TODO: this is not used currently
+// print one ciphertext for debug
 void LogisticRegression::display_one_ciphertext(Party party, EncodedNumber *number) {
   if (party.party_type == falcon::ACTIVE_PARTY) {
     EncodedNumber* decrypted_number = new EncodedNumber[1];
@@ -835,8 +854,8 @@ void LogisticRegression::display_one_ciphertext(Party party, EncodedNumber *numb
                                 ACTIVE_PARTY_ID);
     double v;
     decrypted_number[0].decode(v);
-    std::cout << "plaintext " << v << std::endl;
-    LOG(INFO) << "plaintext " << v;
+    std::cout << "plaintext " << std::setprecision(17) << v << std::endl;
+    LOG(INFO) << "plaintext " << std::setprecision(17) << v;
     delete [] decrypted_number;
   } else {
     std::string recv_ciphertext_str;

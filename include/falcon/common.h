@@ -6,6 +6,10 @@
 #define FALCON_INCLUDE_COMMON_H_
 
 namespace falcon{
+  // Precision for transforming a floating-point value
+  // encode a floating-point value into a big integer
+  // the higher the precision, the more accurate
+  // NOTE: cannot be too high (encoded <= long long)
   #define PHE_FIXED_POINT_PRECISION 12
   #define PHE_MAXIMUM_FIXED_POINT_PRECISION 32
   #define PHE_FIXED_POINT_BASE 2
@@ -26,15 +30,20 @@ namespace falcon{
   // default threshold for LR is 50%
   #define LOGREG_THRES 0.5
   // initialization of weights
-  #define WEIGHTS_INIT_MIN -10.0
-  #define WEIGHTS_INIT_MAX 10.0
+  // commonly zero-initialized
+  // sklearn default one-initialized
+  #define WEIGHTS_INIT_MIN 0.0
+  #define WEIGHTS_INIT_MAX 0.0
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"
   #define IS_INFERENCE 0
 
   // for DEBUG
-  #define DEBUG 0
+  // to display intermediate information
+  // turn DEBUG off in the real application
+  #define DEBUG true  
+  #define PRINT_EVERY 500  // if debug, display info at this frequency
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};
