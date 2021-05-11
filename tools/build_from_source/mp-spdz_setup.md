@@ -136,6 +136,9 @@ Need to set the following parameters before running:
 Note each client connects in a single thread and so is potentially blocked.
 Each round / game will reset and so this runs indefinitiely.
 
+**Change batch size by changing the `ARRAY_SIZE` value**, and then **recompile the mpc file** (see the README in `src/executor/algorithm/vertical/linear_model/README.md`)
+
+**NOTE: `fast-make.sh` already carries out the compilation for `logistic_regression.mpc` file, so recompiling the entire MP-SPDZ with `mp-spdz_setup.sh` does this step already**
 
 ### Run `semi-party.x` on one machine
 

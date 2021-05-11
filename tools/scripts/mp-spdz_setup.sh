@@ -10,10 +10,11 @@ cd third_party/MP-SPDZ
 # restore MP-SPDZ dir with git
 git checkout Math/Setup.h.prod Math/Setup.h
 git checkout CONFIG.mine
+# (Optional) update the MP-SPDZ submodule
+# git pull origin master
 
 mv Math/Setup.h.prod Math/Setup.h
-make -j 8 tldr
-
+# make -j 8 tldr  # no need to build this part after May 11th 2021
 # set up online phase
 # Scripts/setup-ssl.sh 3 (included in fast-make.sh)
 bash fast-make.sh
