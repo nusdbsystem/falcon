@@ -708,6 +708,10 @@ void spdz_logistic_function_computation(int party_num,
   std::vector<double> return_values = receive_result(mpc_sockets, party_num, cur_batch_size);
   batch_loss_shares->set_value(return_values);
 
+  for (int i = 0; i < party_num; i++) {
+    close_client_socket(plain_sockets[i]);
+  }
+
   // free memory and close mpc_sockets
   for (int i = 0; i < party_num; i++) {
     delete mpc_sockets[i];

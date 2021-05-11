@@ -42,7 +42,7 @@ namespace falcon{
   // for DEBUG
   // to display intermediate information
   // turn DEBUG off in the real application
-  #define DEBUG true  
+  #define DEBUG true
   #define PRINT_EVERY 500  // if debug, display info at this frequency
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
