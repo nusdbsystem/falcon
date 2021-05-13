@@ -64,7 +64,9 @@ set(SOURCE_FILES
         ../../include/falcon/inference/server/inference_server.h
         inference/server/inference_server.cc
         ../../include/falcon/algorithm/vertical/tree/node.h
-        algorithm/vertical/tree/node.cc)
+        algorithm/vertical/tree/node.cc
+        ../../include/falcon/algorithm/vertical/tree/feature.h
+        algorithm/vertical/tree/feature.cc)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
