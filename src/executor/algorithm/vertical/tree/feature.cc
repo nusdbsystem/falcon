@@ -20,7 +20,7 @@ Feature::Feature(const Feature &feature) {
   num_splits = feature.num_splits;
   max_bins = feature.max_bins;
   is_used = feature.is_used;
-  is_categorical = feature.is_categorical;
+  feature_type = feature.feature_type;
   split_values = feature.split_values;
   origin_feature_values = feature.origin_feature_values;
   maximum_value = feature.maximum_value;
@@ -35,7 +35,7 @@ Feature& Feature::operator=(Feature *feature) {
   num_splits = feature->num_splits;
   max_bins = feature->max_bins;
   is_used = feature->is_used;
-  is_categorical = feature->is_categorical;
+  feature_type = feature->feature_type;
   split_values = feature->split_values;
   origin_feature_values = feature->origin_feature_values;
   maximum_value = feature->maximum_value;

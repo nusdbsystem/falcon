@@ -7,11 +7,12 @@
 
 #include <vector>
 #include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/common.h>
 
 class Node {
  public:
-  // if the node is a leaf node, 0: not leaf, 1: leaf node, -1: not decided
-  int is_leaf;
+  // node type, default is internal node
+  falcon::TreeNodeType node_type;
   // the depth of the current node, root node is 0, -1: not decided
   int depth;
   // if the node belongs to the party itself, 0: no, 1: yes, -1: not decided

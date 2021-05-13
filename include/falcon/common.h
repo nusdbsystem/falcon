@@ -23,7 +23,7 @@ namespace falcon{
   #define ROUNDED_PRECISION 1e-3
   #define NETWORK_CONFIG_PROTO 1
 
-  // for Logistic Regression
+  /** for Logistic Regression */
   #define RANDOM_SEED 42
   #define SPLIT_TRAIN_TEST_RATIO 0.8
   #define ACTIVE_PARTY_ID 0
@@ -34,6 +34,10 @@ namespace falcon{
   // sklearn default one-initialized
   #define WEIGHTS_INIT_MIN 0.0
   #define WEIGHTS_INIT_MAX 0.0
+
+  /** for Decision Tree */
+  enum TreeNodeType{INTERNAL, LEAF};
+  enum TreeFeatureType{CONTINUOUS, CATEGORICAL};
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"

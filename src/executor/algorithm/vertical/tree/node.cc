@@ -7,7 +7,7 @@
 #include <glog/logging.h>
 
 Node::Node() {
-  is_leaf = -1;
+  node_type = falcon::INTERNAL;
   depth = -1;
   is_self_feature = -1;
   best_party_id = -1;
@@ -23,7 +23,7 @@ Node::Node(int m_depth,
     int m_class_num,
     EncodedNumber *m_sample_iv,
     EncodedNumber *m_encrypted_labels) {
-  is_leaf = -1;
+  node_type = falcon::INTERNAL;
   depth = m_depth;
   is_self_feature = -1;
   best_party_id = -1;
@@ -46,7 +46,7 @@ Node::Node(int m_depth,
 
 
 Node::Node(const Node &node) {
-  is_leaf = node.is_leaf;
+  node_type = node.node_type;
   depth = node.depth;
   is_self_feature = node.is_self_feature;
   best_party_id = node.best_party_id;
@@ -74,7 +74,7 @@ Node::Node(const Node &node) {
 }
 
 Node& Node::operator=(Node *node) {
-  is_leaf = node->is_leaf;
+  node_type = node->node_type;
   depth = node->depth;
   is_self_feature = node->is_self_feature;
   best_party_id = node->best_party_id;
@@ -140,7 +140,7 @@ void Node::get_label(EncodedNumber &g_label) const {
 
 void Node::print_node() {
   LOG(INFO) << "Node depth: " << depth;
-  LOG(INFO) << "Node is leaf: " << is_leaf;
+  LOG(INFO) << "Node type: " << node_type;
   LOG(INFO) << "Node is self feature: " << is_self_feature;
   LOG(INFO) << "Node best party id: " << best_party_id;
   LOG(INFO) << "Node best feature id: " << best_feature_id;
@@ -150,7 +150,7 @@ void Node::print_node() {
   double decoded_impurity, decoded_label;
   impurity.decode(decoded_impurity);
   LOG(INFO) << "Node impurity: " << decoded_impurity;
-  if (is_leaf) {
+  if (node_type == falcon::LEAF) {
     label.decode(decoded_label);
     LOG(INFO) << "Node label: " << decoded_label;
   }

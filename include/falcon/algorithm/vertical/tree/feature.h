@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <iostream>
+#include <falcon/common.h>
 
 class Feature {
   // index of party's local feature
@@ -17,8 +18,8 @@ class Feature {
   int max_bins;
   // 0: not used, 1: used, -1: not decided
   int is_used;
-  // 0: not categorical, 1: categorical, -1: not decided
-  int is_categorical;
+  // feature type, default continuous
+  falcon::TreeFeatureType feature_type;
   // the split threshold values of the features
   std::vector<double> split_values;
   // the original data of this feature in the training dataset
