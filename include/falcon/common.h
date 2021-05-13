@@ -38,6 +38,7 @@ namespace falcon{
   /** for Decision Tree */
   enum TreeNodeType{INTERNAL, LEAF};
   enum TreeFeatureType{CONTINUOUS, CATEGORICAL};
+  enum TreeType{Classification, Regression};
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"

@@ -39,7 +39,6 @@ class FeatureHelper {
   std::vector< std::vector<int> > split_ivs_right;
 
  public:
- public:
   /**
    * default constructor
    */
