@@ -23,24 +23,8 @@ class Node {
   int best_feature_id;
   // the split of the feature on this node, -1: not decided
   int best_split_id;
-  // the available local feature ids on the current node
-  std::vector<int> available_feature_ids;
-  // the number of global features globally
-  int available_global_feature_num;
-  // encrypted indicator vector of which samples are available on this node
-  EncodedNumber *sample_iv;
-  // the number of samples of sample_iv on the node
-  int sample_iv_size;
-  // the number of classes on the node (classification: classes_num, regression: 2)
-  int class_num;
-  // encrypted labels, classification: classes_num*sample_num, regression: 2*sample_num
-  EncodedNumber *encrypted_labels;
-  // left branch id of the current node, if not a leaf node, -1: not decided
-  int left_child;
-  // right branch id of the current node, if not a leaf node, -1: not decided
-  int right_child;
-
- private:
+  // the split threshold if it is its own feature
+  double split_threshold;
   // the number of samples where the element in sample_iv is [1]
   int node_sample_num;
   // the number of samples for each class on the node
@@ -49,14 +33,13 @@ class Node {
   EncodedNumber impurity;
   // if is_leaf is true, a label is assigned
   EncodedNumber label;
+  // left branch id of the current node, if not a leaf node, -1: not decided
+  int left_child;
+  // right branch id of the current node, if not a leaf node, -1: not decided
+  int right_child;
 
  public:
   Node();
-  Node(int m_depth,
-       int m_sample_iv_size,
-       int m_class_num,
-       EncodedNumber *m_sample_iv,
-       EncodedNumber *m_encrypted_labels);
   ~Node();
 
   /**
@@ -73,54 +56,6 @@ class Node {
    * @return
    */
   Node &operator=(Node *node);
-
-  /**
-   * set for node sample num
-   * @param s_node_sample_num
-   */
-  void set_node_sample_num(int s_node_sample_num);
-
-  /**
-   * set for node sample distribution
-   * @param s_node_sample_distribution
-   */
-  void set_node_sample_distribution(std::vector<int> s_node_sample_distribution);
-
-  /**
-   * set for node impurity
-   * @param s_impurity
-   */
-  void set_impurity(EncodedNumber s_impurity);
-
-  /**
-   * set for node label
-   * @param s_label
-   */
-  void set_label(EncodedNumber s_label);
-
-  /**
-   * get node sample num
-   * @return
-   */
-  int get_node_sample_num() const;
-
-  /**
-   * get node sample distribution
-   * @return
-   */
-  std::vector<int> get_node_sample_distribution() const;
-
-  /**
-   * get node impurity
-   * @param g_impurity
-   */
-  void get_impurity(EncodedNumber & g_impurity) const;
-
-  /**
-   * get node label
-   * @param g_label
-   */
-  void get_label(EncodedNumber & g_label) const;
 
   /**
    * print node information

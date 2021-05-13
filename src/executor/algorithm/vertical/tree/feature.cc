@@ -7,45 +7,45 @@
 #include <algorithm>    // std::sort
 #include <glog/logging.h>
 
-Feature::Feature() {
+FeatureHelper::FeatureHelper() {
   // empty constructor
 }
 
-Feature::~Feature() {
+FeatureHelper::~FeatureHelper() {
   // empty destructor
 }
 
-Feature::Feature(const Feature &feature) {
-  id = feature.id;
-  num_splits = feature.num_splits;
-  max_bins = feature.max_bins;
-  is_used = feature.is_used;
-  feature_type = feature.feature_type;
-  split_values = feature.split_values;
-  origin_feature_values = feature.origin_feature_values;
-  maximum_value = feature.maximum_value;
-  minimum_value = feature.minimum_value;
-  sorted_indexes = feature.sorted_indexes;
-  split_ivs_left = feature.split_ivs_left;
-  split_ivs_right = feature.split_ivs_right;
+FeatureHelper::FeatureHelper(const FeatureHelper &feature_helper) {
+  id = feature_helper.id;
+  num_splits = feature_helper.num_splits;
+  max_bins = feature_helper.max_bins;
+  is_used = feature_helper.is_used;
+  feature_type = feature_helper.feature_type;
+  split_values = feature_helper.split_values;
+  origin_feature_values = feature_helper.origin_feature_values;
+  maximum_value = feature_helper.maximum_value;
+  minimum_value = feature_helper.minimum_value;
+  sorted_indexes = feature_helper.sorted_indexes;
+  split_ivs_left = feature_helper.split_ivs_left;
+  split_ivs_right = feature_helper.split_ivs_right;
 }
 
-Feature& Feature::operator=(Feature *feature) {
-  id = feature->id;
-  num_splits = feature->num_splits;
-  max_bins = feature->max_bins;
-  is_used = feature->is_used;
-  feature_type = feature->feature_type;
-  split_values = feature->split_values;
-  origin_feature_values = feature->origin_feature_values;
-  maximum_value = feature->maximum_value;
-  minimum_value = feature->minimum_value;
-  sorted_indexes = feature->sorted_indexes;
-  split_ivs_left = feature->split_ivs_left;
-  split_ivs_right = feature->split_ivs_right;
+FeatureHelper& FeatureHelper::operator=(FeatureHelper *feature_helper) {
+  id = feature_helper->id;
+  num_splits = feature_helper->num_splits;
+  max_bins = feature_helper->max_bins;
+  is_used = feature_helper->is_used;
+  feature_type = feature_helper->feature_type;
+  split_values = feature_helper->split_values;
+  origin_feature_values = feature_helper->origin_feature_values;
+  maximum_value = feature_helper->maximum_value;
+  minimum_value = feature_helper->minimum_value;
+  sorted_indexes = feature_helper->sorted_indexes;
+  split_ivs_left = feature_helper->split_ivs_left;
+  split_ivs_right = feature_helper->split_ivs_right;
 }
 
-void Feature::set_feature_data(std::vector<double> values, int size) {
+void FeatureHelper::set_feature_data(std::vector<double> values, int size) {
   double max = std::numeric_limits<double>::max();
   double min = std::numeric_limits<double>::min();
   origin_feature_values.reserve(size);
@@ -62,7 +62,7 @@ void Feature::set_feature_data(std::vector<double> values, int size) {
   minimum_value = min;
 }
 
-std::vector<double> Feature::compute_distinct_values() {
+std::vector<double> FeatureHelper::compute_distinct_values() {
   // now the feature values are sorted, the sorted indexes are stored in sorted_indexes
   int sample_num = origin_feature_values.size();
   int distinct_value_num = 0;
@@ -84,7 +84,7 @@ std::vector<double> Feature::compute_distinct_values() {
   return distinct_values;
 }
 
-void Feature::sort_feature() {
+void FeatureHelper::sort_feature() {
   std::vector<double> v = origin_feature_values;
   // initialize original index locations
   std::vector<int> idx(v.size());
@@ -96,7 +96,7 @@ void Feature::sort_feature() {
   sorted_indexes = idx;
 }
 
-void Feature::find_splits() {
+void FeatureHelper::find_splits() {
   /// use quantile sketch method, that computes k split values such that
   /// there are k + 1 bins, and each bin has almost same number samples
 
@@ -138,7 +138,7 @@ void Feature::find_splits() {
   }
 }
 
-void Feature::compute_split_ivs() {
+void FeatureHelper::compute_split_ivs() {
   split_ivs_left.reserve(num_splits);
   split_ivs_right.reserve(num_splits);
   for (int i = 0; i < num_splits; i++) {

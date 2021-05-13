@@ -9,7 +9,10 @@
 #include <iostream>
 #include <falcon/common.h>
 
-class Feature {
+/**
+ * This class is constructed to help build decision tree model
+ */
+class FeatureHelper {
   // index of party's local feature
   int id;
   // the number of splits of the current feature, should <= max_bins - 1
@@ -40,25 +43,25 @@ class Feature {
   /**
    * default constructor
    */
-  Feature();
+  FeatureHelper();
 
   /**
    * default destructor
    */
-  ~Feature();
+  ~FeatureHelper();
 
   /**
    * copy constructor
    * @param feature
    */
-  Feature(const Feature & feature);
+  FeatureHelper(const FeatureHelper & feature);
 
   /**
    * copy assignment constructor
    * @param feature
    * @return
    */
-  Feature &operator = (Feature *feature);
+  FeatureHelper &operator = (FeatureHelper *feature);
 
   /**
    * set the feature data given a column in the training dataset
