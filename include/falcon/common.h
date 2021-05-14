@@ -39,8 +39,10 @@ namespace falcon{
   enum TreeNodeType{INTERNAL, LEAF};
   enum TreeFeatureType{CONTINUOUS, CATEGORICAL};
   enum TreeType{CLASSIFICATION, REGRESSION};
+  enum SpdzTreeCompType{PRUNING_CHECK, MAJORITY_LABEL, FIND_BEST_SPLIT};
   #define REGRESSION_TREE_CLASS_NUM 2
   #define SPDZ_PORT_TREE 18000
+
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"

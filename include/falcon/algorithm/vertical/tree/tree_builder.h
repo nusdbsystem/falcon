@@ -149,6 +149,43 @@ class DecisionTreeBuilder : public Model {
       std::vector<int> available_feature_ids,
       EncodedNumber *sample_mask_iv,
       EncodedNumber * encrypted_labels);
-};
+
+  /**
+   * check if this node satisfies the pruning conditions
+   * some of the conditions are forwarded to spdz for checking
+   * @param party
+   * @param node_index
+   * @param sample_mask_iv
+   * @return
+   */
+  bool check_pruning_conditions(Party &party,
+      int node_index,
+      EncodedNumber *sample_mask_iv);
+  };
+
+/**
+    * compute spdz function for tree builder
+    * @param party_num
+    * @param party_id
+    * @param mpc_tree_port_base
+    * @param party_host_names
+    * @param public_value_size
+    * @param public_values
+    * @param private_value_size
+    * @param private_values
+    * @param values
+    * @param tree_comp_type
+    * @param res
+    */
+void spdz_tree_computation(int party_num,
+    int party_id,
+    int mpc_tree_port_base,
+    std::vector<std::string> party_host_names,
+    int public_value_size,
+    const std::vector<int>& public_values,
+    int private_value_size,
+    const std::vector<double>& private_values,
+    falcon::SpdzTreeCompType tree_comp_type,
+    std::promise<std::vector<double>> *res);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_CART_BUILDER_H_
