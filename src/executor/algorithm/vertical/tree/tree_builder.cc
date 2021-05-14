@@ -7,6 +7,7 @@
 #include <falcon/model/model_io.h>
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/tree_converter.h>
 
 #include <ctime>
 #include <random>
@@ -349,11 +350,11 @@ void DecisionTreeBuilder::build_node(Party &party,
         EncodedNumber **recv_encrypted_statistics;
         EncodedNumber *recv_left_sample_nums;
         EncodedNumber *recv_right_sample_nums;
-//        deserialize_encrypted_statistics(recv_party_id, recv_node_index,
-//            recv_split_num, recv_classes_num,
-//            recv_left_sample_nums, recv_right_sample_nums,
-//            recv_encrypted_statistics,
-//            recv_encrypted_statistics_str);
+        deserialize_encrypted_statistics(recv_party_id, recv_node_index,
+            recv_split_num, recv_classes_num,
+            recv_left_sample_nums, recv_right_sample_nums,
+            recv_encrypted_statistics,
+            recv_encrypted_statistics_str);
 
         // pack the encrypted statistics
         if (recv_split_num == 0) {
@@ -383,7 +384,7 @@ void DecisionTreeBuilder::build_node(Party &party,
     // send the total number of splits for the other clients to generate secret shares
     //logger(logger_out, "Send global split num to the other clients\n");
     std::string split_info_str;
-//    serialize_split_info(global_split_num, client_split_nums, split_info_str);
+    serialize_split_info(global_split_num, client_split_nums, split_info_str);
     for (int i = 0; i < party.party_num; i++) {
       if (i != party.party_id) {
         party.send_long_message(i, split_info_str);
@@ -393,11 +394,11 @@ void DecisionTreeBuilder::build_node(Party &party,
     if (local_splits_num == 0) {
       LOG(INFO) << "Local feature used up";
       std::string s;
-//      serialize_encrypted_statistics(party.party_id, node_index,
-//          local_splits_num, class_num,
-//          encrypted_left_branch_sample_nums,
-//          encrypted_right_branch_sample_nums,
-//          encrypted_statistics, s);
+      serialize_encrypted_statistics(party.party_id, node_index,
+          local_splits_num, class_num,
+          encrypted_left_branch_sample_nums,
+          encrypted_right_branch_sample_nums,
+          encrypted_statistics, s);
       party.send_long_message(0, s);
     } else {
       encrypted_statistics = new EncodedNumber*[local_splits_num];
@@ -418,11 +419,11 @@ void DecisionTreeBuilder::build_node(Party &party,
 
       // send encrypted statistics to the super client
       std::string s;
-//      serialize_encrypted_statistics(party.party_id, node_index,
-//          local_splits_num, class_num,
-//          encrypted_left_branch_sample_nums,
-//          encrypted_right_branch_sample_nums,
-//          encrypted_statistics, s);
+      serialize_encrypted_statistics(party.party_id, node_index,
+          local_splits_num, class_num,
+          encrypted_left_branch_sample_nums,
+          encrypted_right_branch_sample_nums,
+          encrypted_statistics, s);
       party.send_long_message(0, s);
     }
 

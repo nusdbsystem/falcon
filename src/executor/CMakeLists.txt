@@ -29,6 +29,8 @@ set(SOURCE_FILES
         ../../include/falcon/utils/math/math_ops.h
         ../../include/falcon/utils/pb_converter/network_converter.h
         utils/pb_converter/network_converter.cc
+        ../../include/falcon/utils/pb_converter/tree_converter.h
+        utils/pb_converter/tree_converter.cc
         utils/metric/classification.cc
         utils/math/math_ops.cc
         ../../include/falcon/utils/base64.h

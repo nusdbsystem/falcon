@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package com.nus.dbsytem.falcon.v0;
+
+import public "common.proto";
+
+message EncryptedStatPerSplit {
+    repeated FixedPointEncodedNumber encrypted_stat = 1;  // encrypted stat for each branch of each class
+}
+
+message EncryptedStatistics {
+    int32 client_id = 1;               // client id
+    int32 node_index = 2;              // node index
+    int32 local_split_num = 3;    // total split num on a client
+    int32 classes_num = 4;   // classes_num * 2 (if regression, classes_num = 2)
+    repeated FixedPointEncodedNumber left_sample_nums_of_splits = 5;  // sample_nums of left branch of total splits
+    repeated FixedPointEncodedNumber right_sample_nums_of_splits = 6;  // sample_nums of right branch of total splits
+    repeated EncryptedStatPerSplit encrypted_stats_of_splits = 7; // two-dimensional encrypted statistics
+}
+
+message NodeUpdateInfo {
+    int32 source_client_id = 1;              // client who sends the message
+    int32 best_client_id = 2;                // client owns the best split in the current node, should be same as first parameter
+    int32 best_feature_id = 3;               // best feature id on the best_client_id
+    int32 best_split_id = 4;                 // best split id for the best_feature_id
+    FixedPointEncodedNumber left_branch_impurity  = 5;   // impurity of the left child node
+    FixedPointEncodedNumber right_branch_impurity= 6;  // impurity of the right child node
+    repeated FixedPointEncodedNumber left_branch_sample_ivs = 7;   // sample iv of the left child node
+    repeated FixedPointEncodedNumber right_branch_sample_ivs = 8;  // sample iv of the right child node
+}
+
+message SplitInfo {
+    int32 global_split_num = 1;                // total split num of all clients
+    repeated int32 split_num_vec = 2;          // split_num of each client
+}
