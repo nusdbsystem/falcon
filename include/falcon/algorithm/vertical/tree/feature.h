@@ -13,6 +13,7 @@
  * This class is constructed to help build decision tree model
  */
 class FeatureHelper {
+ public:
   // index of party's local feature
   int id;
   // the number of splits of the current feature, should <= max_bins - 1

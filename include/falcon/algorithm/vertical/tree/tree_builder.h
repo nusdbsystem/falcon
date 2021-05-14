@@ -11,6 +11,7 @@
 #include <falcon/common.h>
 #include <falcon/algorithm/vertical/tree/tree.h>
 #include <falcon/algorithm/vertical/tree/node.h>
+#include <falcon/algorithm/vertical/tree/feature.h>
 
 #include <vector>
 #include <string>
@@ -76,6 +77,8 @@ class DecisionTreeBuilder : public Model {
   int local_feature_num;
   // stores the feature types, 0: continuous, 1: categorical
   std::vector<falcon::TreeFeatureType> feature_types;
+  // feature helper that assists for training
+  FeatureHelper* feature_helpers;
   // binary vectors of classes, if classification
   std::vector< std::vector<int> > indicator_class_vecs;
   // variance vectors of labels, y and y^2, if regression
@@ -86,6 +89,11 @@ class DecisionTreeBuilder : public Model {
  public:
   /** default constructor */
   DecisionTreeBuilder();
+
+  /**
+ * destructor
+ */
+  ~DecisionTreeBuilder();
 
   /**
    * DecisionTreeBuilder constructor
@@ -110,9 +118,17 @@ class DecisionTreeBuilder : public Model {
       double m_testing_accuracy = 0.0);
 
   /**
-   * destructor
+   * pre-compute label information to assist tree training
+   * (only the active party does the real computation)
+   * @param party_type
    */
-  ~DecisionTreeBuilder();
+  void precompute_label_helper(falcon::PartyType party_type);
+
+  /**
+   * pre-compute feature helpers to assist tree training
+   * (both the active party and passive party do the computation)
+   */
+  void precompute_feature_helpers();
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_CART_BUILDER_H_
