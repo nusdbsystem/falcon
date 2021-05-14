@@ -251,14 +251,185 @@ void DecisionTreeBuilder::build_node(Party &party,
     exit(1);
   }
 
-  /// step 1: check pruning condition
+  /// step 1: check pruning condition via spdz computation
   bool is_satisfied = check_pruning_conditions(party, node_index, sample_mask_iv);
 
-  /// step 2: if satisfied, compute label
+  /// step 2: if satisfied, compute label via spdz computation
   if (is_satisfied) {
+    compute_leaf_statistics(party, node_index, sample_mask_iv, encrypted_labels);
+    return;
+  }
 
+  /// step 3: active party computes some encrypted label
+  /// information and broadcast to the other clients
+
+  /// step 4: every party locally computes necessary encrypted statistics,
+  /// i.e., #samples per class for classification or variance info
+  ///     specifically, for each feature, for each split, for each class,
+  ///     compute necessary encrypted statistics,
+  ///     store the encrypted statistics,
+  ///     convert to secret shares,
+  ///     and send to spdz parties for mpc computation
+  ///     finally, receive the (i_*, j_*, s_*) and encrypted impurity
+  /// for the left child and right child, update tree_nodes
+  /// step 4.1: party inits a two-dimensional encrypted vector
+  ///     with size \sum_{i=0}^{node[available_feature_ids.size()]} features[i].num_splits
+  /// step 4.2: party computes encrypted statistics
+  /// step 4.3: party sends encrypted statistics
+  /// step 4.4: active party computes a large encrypted
+  ///     statistics matrix, and broadcasts total splits num
+  /// step 4.5: party converts the encrypted statistics matrix into secret shares
+  /// step 4.6: parties jointly send shares to spdz parties
+
+  int local_splits_num = 0, global_split_num = 0;
+  int available_local_feature_num = available_feature_ids.size();
+  for (int i = 0; i < available_local_feature_num; i++) {
+    int feature_id = available_feature_ids[i];
+    local_splits_num = local_splits_num + feature_helpers[feature_id].num_splits;
+  }
+
+  // the global encrypted statistics for all possible splits
+  EncodedNumber **global_encrypted_statistics;
+  EncodedNumber *global_left_branch_sample_nums, *global_right_branch_sample_nums;
+  EncodedNumber **encrypted_statistics;
+  EncodedNumber *encrypted_left_branch_sample_nums, *encrypted_right_branch_sample_nums;
+
+  std::vector< std::vector<double> > stats_shares;
+  std::vector<int> left_sample_nums_shares;
+  std::vector<int> right_sample_nums_shares;
+  std::vector<int> client_split_nums;
+
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // compute local encrypted statistics
+    if (local_splits_num != 0) {
+      encrypted_statistics = new EncodedNumber*[local_splits_num];
+      for (int i = 0; i < local_splits_num; i++) {
+        // here 2 * class_num refers to left branch and right branch
+        encrypted_statistics[i] = new EncodedNumber[2 * class_num];
+      }
+      encrypted_left_branch_sample_nums = new EncodedNumber[local_splits_num];
+      encrypted_right_branch_sample_nums = new EncodedNumber[local_splits_num];
+      // call compute function
+      compute_encrypted_statistics(party, node_index,
+          available_feature_ids,
+          sample_mask_iv,
+          encrypted_statistics,
+          encrypted_labels,
+          encrypted_left_branch_sample_nums,
+          encrypted_right_branch_sample_nums);
+    }
+    global_encrypted_statistics = new EncodedNumber*[MAX_GLOBAL_SPLIT_NUM];
+    for (int i = 0; i < MAX_GLOBAL_SPLIT_NUM; i++) {
+      global_encrypted_statistics[i] = new EncodedNumber[2 * class_num];
+    }
+    global_left_branch_sample_nums = new EncodedNumber[MAX_GLOBAL_SPLIT_NUM];
+    global_right_branch_sample_nums = new EncodedNumber[MAX_GLOBAL_SPLIT_NUM];
+
+    // pack self
+    if (local_splits_num == 0) {
+      client_split_nums.push_back(0);
+    } else {
+      client_split_nums.push_back(local_splits_num);
+      for (int i = 0; i < local_splits_num; i++) {
+        global_left_branch_sample_nums[i] = encrypted_left_branch_sample_nums[i];
+        global_right_branch_sample_nums[i] = encrypted_right_branch_sample_nums[i];
+        for (int j = 0; j < 2 * class_num; j++) {
+          global_encrypted_statistics[i][j] = encrypted_statistics[i][j];
+        }
+      }
+    }
+    global_split_num += local_splits_num;
+
+    // receive from the other clients of the encrypted statistics
+    for (int i = 0; i < party.party_num; i++) {
+      std::string recv_encrypted_statistics_str;
+      if (i != party.party_id) {
+        party.recv_long_message(i, recv_encrypted_statistics_str);
+        int recv_party_id, recv_node_index, recv_split_num, recv_classes_num;
+        EncodedNumber **recv_encrypted_statistics;
+        EncodedNumber *recv_left_sample_nums;
+        EncodedNumber *recv_right_sample_nums;
+//        deserialize_encrypted_statistics(recv_party_id, recv_node_index,
+//            recv_split_num, recv_classes_num,
+//            recv_left_sample_nums, recv_right_sample_nums,
+//            recv_encrypted_statistics,
+//            recv_encrypted_statistics_str);
+
+        // pack the encrypted statistics
+        if (recv_split_num == 0) {
+          client_split_nums.push_back(0);
+          continue;
+        } else {
+          client_split_nums.push_back(recv_split_num);
+          for (int j = 0; j < recv_split_num; j++) {
+            global_left_branch_sample_nums[global_split_num + j] = recv_left_sample_nums[j];
+            global_right_branch_sample_nums[global_split_num + j] = recv_right_sample_nums[j];
+            for (int k = 0; k < 2 * class_num; k++) {
+              global_encrypted_statistics[global_split_num + j][k] = recv_encrypted_statistics[j][k];
+            }
+          }
+          global_split_num += recv_split_num;
+        }
+
+        delete [] recv_left_sample_nums;
+        delete [] recv_right_sample_nums;
+        for (int xx = 0; xx < recv_split_num; xx++) {
+          delete [] recv_encrypted_statistics[xx];
+        }
+        delete [] recv_encrypted_statistics;
+      }
+    }
+    LOG(INFO) << "The global_split_num = " << global_split_num;
+    // send the total number of splits for the other clients to generate secret shares
+    //logger(logger_out, "Send global split num to the other clients\n");
+    std::string split_info_str;
+//    serialize_split_info(global_split_num, client_split_nums, split_info_str);
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        party.send_long_message(i, split_info_str);
+      }
+    }
   } else {
-    /// step 3: start to find the best split and update
+    if (local_splits_num == 0) {
+      LOG(INFO) << "Local feature used up";
+      std::string s;
+//      serialize_encrypted_statistics(party.party_id, node_index,
+//          local_splits_num, class_num,
+//          encrypted_left_branch_sample_nums,
+//          encrypted_right_branch_sample_nums,
+//          encrypted_statistics, s);
+      party.send_long_message(0, s);
+    } else {
+      encrypted_statistics = new EncodedNumber*[local_splits_num];
+      for (int i = 0; i < local_splits_num; i++) {
+        encrypted_statistics[i] = new EncodedNumber[2 * class_num];
+      }
+      encrypted_left_branch_sample_nums = new EncodedNumber[local_splits_num];
+      encrypted_right_branch_sample_nums = new EncodedNumber[local_splits_num];
+
+      // call compute function
+      compute_encrypted_statistics(party, node_index,
+          available_feature_ids,
+          sample_mask_iv,
+          encrypted_statistics,
+          encrypted_labels,
+          encrypted_left_branch_sample_nums,
+          encrypted_right_branch_sample_nums);
+
+      // send encrypted statistics to the super client
+      std::string s;
+//      serialize_encrypted_statistics(party.party_id, node_index,
+//          local_splits_num, class_num,
+//          encrypted_left_branch_sample_nums,
+//          encrypted_right_branch_sample_nums,
+//          encrypted_statistics, s);
+      party.send_long_message(0, s);
+    }
+
+    std::string recv_split_info_str;
+    party.recv_long_message(0, recv_split_info_str);
+//    deserialize_split_info(global_split_num, client_split_nums, recv_split_info_str);
+    LOG(INFO) << "The global_split_num = " << global_split_num;
   }
 
   const clock_t node_finish_time = clock();
@@ -442,6 +613,187 @@ bool DecisionTreeBuilder::compute_leaf_statistics(Party &party,
   // the other node attributes should be updated in another place
 
   djcs_t_free_public_key(phe_pub_key);
+}
+
+void DecisionTreeBuilder::compute_encrypted_statistics(Party &party,
+    int node_index,
+    std::vector<int> available_feature_ids,
+    EncodedNumber *sample_mask_iv,
+    EncodedNumber **encrypted_statistics,
+    EncodedNumber *encrypted_labels,
+    EncodedNumber *encrypted_left_sample_nums,
+    EncodedNumber *encrypted_right_sample_nums) {
+  std::cout << " Compute encrypted statistics for node " << node_index << std::endl;
+  LOG(INFO) << " Compute encrypted statistics for node " << node_index;
+  const clock_t start_time = clock();
+
+  int split_index = 0;
+  int available_feature_num = available_feature_ids.size();
+  int sample_num = training_data.size();
+  // retrieve phe pub key
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  /// splits of features are flatted, classes_num * 2 are for left and right
+  /// in this method, the feature values are sorted,
+  /// use the sorted indexes to re-organize the encrypted mask vector,
+  /// and compute num_splits + 1 bucket statistics by one traverse
+  /// then the encrypted statistics for the num_splits
+  /// can be aggregated by num_splits homomorphic additions
+  // TODO: this function is a little difficult to read, should add more explanations
+  for (int j = 0; j < available_feature_num; j++) {
+    int feature_id = available_feature_ids[j];
+    int split_num = feature_helpers[feature_id].num_splits;
+    std::vector<int> sorted_indices = feature_helpers[feature_id].sorted_indexes;
+    EncodedNumber *sorted_sample_iv = new EncodedNumber[sample_num];
+
+    // copy the sample_iv
+    for (int idx = 0; idx < sample_num; idx++) {
+      sorted_sample_iv[idx] = sample_mask_iv[sorted_indices[idx]];
+    }
+
+    // compute the encrypted aggregation of split_num + 1 buckets
+    EncodedNumber *left_sums = new EncodedNumber[split_num];
+    EncodedNumber *right_sums = new EncodedNumber[split_num];
+    EncodedNumber total_sum;
+    total_sum.set_integer(phe_pub_key->n[0], 0);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, total_sum, total_sum);
+    for (int idx = 0; idx < split_num; idx++) {
+      left_sums[idx].set_integer(phe_pub_key->n[0], 0);
+      right_sums[idx].set_integer(phe_pub_key->n[0], 0);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random, left_sums[idx], left_sums[idx]);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random, right_sums[idx], right_sums[idx]);
+    }
+
+    // compute sample iv statistics by one traverse
+    int split_iterator = 0;
+    for (int sample_idx = 0; sample_idx < sample_num; sample_idx++) {
+      djcs_t_aux_ee_add(phe_pub_key, total_sum,
+          total_sum, sorted_sample_iv[sample_idx]);
+      if (split_iterator == split_num) {
+        continue;
+      }
+      int sorted_idx = sorted_indices[sample_idx];
+      float sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
+
+      // find the first split value that larger than the current feature value, usually only step by 1
+      if (sorted_feature_value > feature_helpers[feature_id].split_values[split_iterator]) {
+        split_iterator += 1;
+        if (split_iterator == split_num) continue;
+      }
+      djcs_t_aux_ee_add(phe_pub_key, left_sums[split_iterator],
+          left_sums[split_iterator], sorted_sample_iv[sample_idx]);
+    }
+
+    // compute the encrypted statistics for each class
+    EncodedNumber **left_stats = new EncodedNumber*[split_num];
+    EncodedNumber **right_stats = new EncodedNumber*[split_num];
+    EncodedNumber *sums_stats = new EncodedNumber[class_num];
+    for (int k = 0; k < split_num; k++) {
+      left_stats[k] = new EncodedNumber[class_num];
+      right_stats[k] = new EncodedNumber[class_num];
+    }
+    for (int k = 0; k < split_num; k++) {
+      for (int c = 0; c < class_num; c++) {
+        left_stats[k][c].set_double(phe_pub_key->n[0], 0);
+        right_stats[k][c].set_double(phe_pub_key->n[0], 0);
+        djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+            left_stats[k][c], left_stats[k][c]);
+        djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+            right_stats[k][c], right_stats[k][c]);
+      }
+    }
+    for (int c = 0; c < class_num; c++) {
+      sums_stats[c].set_double(phe_pub_key->n[0], 0);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+          sums_stats[c], sums_stats[c]);
+    }
+    split_iterator = 0;
+    for (int sample_idx = 0; sample_idx < sample_num; sample_idx++) {
+      int sorted_idx = sorted_indices[sample_idx];
+      for (int c = 0; c < class_num; c++) {
+        djcs_t_aux_ee_add(phe_pub_key, sums_stats[c], sums_stats[c],
+            encrypted_labels[c * sample_num + sorted_idx]);
+      }
+      if (split_iterator == split_num) {
+        continue;
+      }
+      double sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
+
+      // find the first split value that larger than
+      // the current feature value, usually only step by 1
+      if (sorted_feature_value > feature_helpers[feature_id].split_values[split_iterator]) {
+        split_iterator += 1;
+        if (split_iterator == split_num) continue;
+      }
+      for (int c = 0; c < class_num; c++) {
+        djcs_t_aux_ee_add(phe_pub_key,
+            left_stats[split_iterator][c],
+            left_stats[split_iterator][c],
+            encrypted_labels[c * sample_num + sorted_idx]);
+      }
+    }
+
+    // write the left sums to encrypted_left_sample_nums and update the right sums
+    EncodedNumber left_num_help, right_num_help, plain_constant_help;
+    left_num_help.set_integer(phe_pub_key->n[0], 0);
+    right_num_help.set_integer(phe_pub_key->n[0], 0);
+    plain_constant_help.set_integer(phe_pub_key->n[0], -1);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+        left_num_help, left_num_help);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+        right_num_help, right_num_help);
+
+    EncodedNumber *left_stat_help = new EncodedNumber[class_num];
+    EncodedNumber *right_stat_help = new EncodedNumber[class_num];
+    for (int c = 0; c < class_num; c++) {
+      left_stat_help[c].set_double(phe_pub_key->n[0], 0);
+      right_stat_help[c].set_double(phe_pub_key->n[0], 0);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+          left_stat_help[c], left_stat_help[c]);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+          right_stat_help[c], right_stat_help[c]);
+    }
+
+    // compute right sample num of the current split by total_sum + (-1) * left_sum_help
+    for (int k = 0; k < split_num; k++) {
+      djcs_t_aux_ee_add(phe_pub_key,left_num_help, left_num_help, left_sums[k]);
+      encrypted_left_sample_nums[split_index] = left_num_help;
+      djcs_t_aux_ep_mul(phe_pub_key,right_num_help, left_num_help, plain_constant_help);
+      djcs_t_aux_ee_add(phe_pub_key,
+          encrypted_right_sample_nums[split_index], total_sum, right_num_help);
+      for (int c = 0; c < class_num; c++) {
+        djcs_t_aux_ee_add(phe_pub_key,left_stat_help[c], left_stat_help[c], left_stats[k][c]);
+        djcs_t_aux_ep_mul(phe_pub_key,right_stat_help[c], left_stat_help[c], plain_constant_help);
+        djcs_t_aux_ee_add(phe_pub_key,right_stat_help[c], right_stat_help[c], sums_stats[c]);
+        encrypted_statistics[split_index][2 * c] = left_stat_help[c];
+        encrypted_statistics[split_index][2 * c + 1] = right_stat_help[c];
+      }
+      // update the global split index
+      split_index += 1;
+    }
+
+    delete [] sorted_sample_iv;
+    delete [] left_sums;
+    delete [] right_sums;
+    for (int k = 0; k < split_num; k++) {
+      delete [] left_stats[k];
+      delete [] right_stats[k];
+    }
+    delete [] left_stats;
+    delete [] right_stats;
+    delete [] sums_stats;
+    delete [] left_stat_help;
+    delete [] right_stat_help;
+  }
+
+  djcs_t_free_public_key(phe_pub_key);
+
+  const clock_t finish_time = clock();
+  double consumed_time = double(finish_time - start_time) / CLOCKS_PER_SEC;
+  std::cout << "Node encrypted statistics computation time = " << consumed_time << std::endl;
+  LOG(INFO) << "Node encrypted statistics computation time = " << consumed_time;
+  google::FlushLogFiles(google::INFO);
 }
 
 void spdz_tree_computation(int party_num,

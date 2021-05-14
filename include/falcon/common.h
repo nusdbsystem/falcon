@@ -43,6 +43,8 @@ namespace falcon{
   #define REGRESSION_TREE_CLASS_NUM 2
   #define SPDZ_PORT_TREE 18000
   #define MAX_IMPURITY 100000.0
+  // refers the maximum number of splits considered in a tree
+  #define MAX_GLOBAL_SPLIT_NUM 6000
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"

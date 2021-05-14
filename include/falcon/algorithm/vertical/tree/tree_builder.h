@@ -175,6 +175,23 @@ class DecisionTreeBuilder : public Model {
       int node_index,
       EncodedNumber *sample_mask_iv,
       EncodedNumber *encrypted_labels);
+
+  /**
+     * compute encrypted impurity gain for each feature and each split
+     * @param party
+     * @param node_index
+     * @param encrypted_statistics
+     * @param encrypted_labels
+     * @param encrypted_left_sample_nums
+     * @param encrypted_right_sample_nums
+     */
+  void compute_encrypted_statistics(Party &party, int node_index,
+      std::vector<int> available_feature_ids,
+      EncodedNumber *sample_mask_iv,
+      EncodedNumber ** encrypted_statistics,
+      EncodedNumber * encrypted_labels,
+      EncodedNumber * encrypted_left_sample_nums,
+      EncodedNumber * encrypted_right_sample_nums);
 };
 
 /**
