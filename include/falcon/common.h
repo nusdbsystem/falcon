@@ -16,7 +16,6 @@ namespace falcon{
   #define PHE_EPSILON 1
   #define PHE_KEY_SIZE 1024
   #define SPDZ_FIXED_POINT_PRECISION 16
-  #define SPDZ_PORT_BASE 14000
   #define SPDZ_PLAYER_PATH "Player-Data/" // deprecated
   #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024
   #define MAXIMUM_RAND_VALUE 32767
@@ -24,6 +23,7 @@ namespace falcon{
   #define NETWORK_CONFIG_PROTO 1
 
   /** for Logistic Regression */
+  #define SPDZ_PORT_BASE 14000
   #define RANDOM_SEED 42
   #define SPLIT_TRAIN_TEST_RATIO 0.8
   #define ACTIVE_PARTY_ID 0
@@ -40,6 +40,7 @@ namespace falcon{
   enum TreeFeatureType{CONTINUOUS, CATEGORICAL};
   enum TreeType{CLASSIFICATION, REGRESSION};
   #define REGRESSION_TREE_CLASS_NUM 2
+  #define SPDZ_PORT_TREE 18000
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"
