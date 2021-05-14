@@ -129,6 +129,26 @@ class DecisionTreeBuilder : public Model {
    * (both the active party and passive party do the computation)
    */
   void precompute_feature_helpers();
+
+  /**
+   * build the decision tree model
+   * @param party
+   */
+  void train(Party party);
+
+  /**
+   * iteratively build tree node
+   * @param party
+   * @param node_index
+   * @param available_feature_ids
+   * @param sample_mask_iv
+   * @param encrypted_labels
+   */
+  void build_node(Party &party,
+      int node_index,
+      std::vector<int> available_feature_ids,
+      EncodedNumber *sample_mask_iv,
+      EncodedNumber * encrypted_labels);
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_CART_BUILDER_H_

@@ -15,8 +15,8 @@ Tree::Tree(falcon::TreeType m_type, int m_class_num, int m_max_depth) {
   internal_node_num = 0;
   total_node_num = 0;
   // the maximum nodes, complete binary tree
-  int maximum_nodes = (int) pow(2, max_depth + 1) - 1;
-  nodes = new Node[maximum_nodes];
+  capacity = (int) pow(2, max_depth + 1) - 1;
+  nodes = new Node[capacity];
 }
 
 Tree::~Tree() {

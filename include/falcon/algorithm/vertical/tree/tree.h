@@ -22,6 +22,8 @@ class Tree {
   int internal_node_num;
   // total node count
   int total_node_num;
+  // tree capacity
+  int capacity;
 
  public:
   Tree();

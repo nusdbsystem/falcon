@@ -125,3 +125,127 @@ void DecisionTreeBuilder::precompute_feature_helpers() {
     feature_helpers[i].compute_split_ivs();
   }
 }
+
+void DecisionTreeBuilder::train(Party party) {
+  /// To avoid each tree node disclose which samples are on available,
+  /// we use an encrypted mask vector to protect the information
+  /// while ensure that the training can still be processed.
+  /// Note that for the root node, all the samples are available and every
+  /// party can initialize an encrypted mask vector with [1], but for the
+  /// labels, only the active party has the info, then it initializes
+  /// and sends the encrypted label info to other parties.
+
+  std::cout << "************* Training Start *************" << std::endl;
+  LOG(INFO) << "************* Training Start *************";
+  const clock_t training_start_time = clock();
+
+  int sample_num = training_data.size();
+  int label_size = class_num * sample_num;
+  std::vector<int> available_feature_ids;
+  for (int i = 0; i < local_feature_num; i++) {
+    available_feature_ids.push_back(i);
+  }
+  EncodedNumber * sample_mask_iv = new EncodedNumber[sample_num];
+  EncodedNumber * encrypted_labels = new EncodedNumber[class_num * sample_num];
+
+  // retrieve phe pub key
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  // as the samples are available at the beginning of the training, init with 1
+  EncodedNumber tmp;
+  tmp.set_integer(phe_pub_key->n[0], 1);
+  // init encrypted mask vector on the root node
+  for (int i = 0; i < sample_num; i++) {
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sample_mask_iv[i], tmp);
+  }
+
+  // if active party, compute the encrypted label info and broadcast
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::string encrypted_labels_str;
+    for (int i = 0; i < class_num; i++) {
+      for (int j = 0; j < sample_num; j++) {
+        EncodedNumber tmp_label;
+        // classification use indicator_class_vecs, regression use variance_stat_vecs
+        if (tree_type == falcon::CLASSIFICATION) {
+          tmp_label.set_double(phe_pub_key->n[0], indicator_class_vecs[i][j]);
+        } else {
+          tmp_label.set_double(phe_pub_key->n[0], variance_stat_vecs[i][j]);
+        }
+        // encrypt the label
+        djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+            encrypted_labels[i * sample_num + j], tmp_label);
+      }
+    }
+
+    // serialize and send to the other client
+    serialize_encoded_number_array(encrypted_labels, label_size, encrypted_labels_str);
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        party.send_long_message(i, encrypted_labels_str);
+      }
+    }
+  } else {
+    // if not active party, receive the encrypted label info
+    std::string recv_result_str;
+    party.recv_long_message(0, recv_result_str);
+    deserialize_encoded_number_array(encrypted_labels, label_size, recv_result_str);
+  }
+  LOG(INFO) << "Finish broadcasting the encrypted label info";
+
+  // init the root node info
+  tree.nodes[0].depth = 0;
+  EncodedNumber max_impurity;
+  max_impurity.set_double(phe_pub_key->n[0], std::numeric_limits<double>::max());
+  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, max_impurity);
+
+  // recursively build the tree
+  build_node(party, 0, available_feature_ids, sample_mask_iv, encrypted_labels);
+
+  delete [] sample_mask_iv;
+  delete [] encrypted_labels;
+
+  const clock_t training_finish_time = clock();
+  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  LOG(INFO) << "Training time = " << training_consumed_time;
+  LOG(INFO) << "************* Training Finished *************";
+  google::FlushLogFiles(google::INFO);
+}
+
+void DecisionTreeBuilder::build_node(Party &party,
+    int node_index,
+    std::vector<int> available_feature_ids,
+    EncodedNumber *sample_mask_iv,
+    EncodedNumber *encrypted_labels) {
+  std::cout << "****** Build tree node " << node_index
+            << "depth = " << tree.nodes[node_index].depth << "******" << std::endl;
+  LOG(INFO) << "****** Build tree node " << node_index
+            << "depth = " << tree.nodes[node_index].depth << "******";
+  const clock_t node_start_time = clock();
+
+  /// 1. check if some pruning conditions are satisfied
+  ///      1.1 feature set is empty;
+  ///      1.2 the number of samples are less than a pre-defined threshold
+  ///      1.3 if classification, labels are same; if regression, label variance is less than a threshold
+  /// 2. if satisfied, return a leaf node with majority class or mean label;
+  ///      else, continue to step 3
+  /// 3. super client computes some encrypted label information and broadcast to the other clients
+  /// 4. every client locally compute necessary encrypted statistics, i.e., #samples per class for classification or variance info
+  /// 5. the clients convert the encrypted statistics to shares and send to SPDZ parties
+  /// 6. wait for SPDZ parties return (i_*, j_*, s_*), where i_* is client id, j_* is feature id, and s_* is split id
+  /// 7. client who owns the best split feature do the splits and update mask vector, and broadcast to the other clients
+  /// 8. every client updates mask vector and local tree model
+  /// 9. recursively build the next two tree nodes
+
+  if (node_index >= tree.capacity - 1) {
+    LOG(ERROR) << "Node index exceeds the maximum tree depth";
+    exit(1);
+  }
+
+
+
+  const clock_t node_finish_time = clock();
+  double node_consumed_time = double(node_finish_time - node_start_time) / CLOCKS_PER_SEC;
+  std::cout << "Node build time = " << node_consumed_time << std::endl;
+  LOG(INFO) << "Node build time = " << node_consumed_time;
+  google::FlushLogFiles(google::INFO);
+}
