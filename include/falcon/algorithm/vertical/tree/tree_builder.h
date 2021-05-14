@@ -161,7 +161,21 @@ class DecisionTreeBuilder : public Model {
   bool check_pruning_conditions(Party &party,
       int node_index,
       EncodedNumber *sample_mask_iv);
-  };
+
+  /**
+ * check if this node satisfies the pruning conditions
+ * some of the conditions are forwarded to spdz for checking
+ * @param party
+ * @param node_index
+ * @param sample_mask_iv
+ * @param encrypted_labels
+ * @return
+ */
+  bool compute_leaf_statistics(Party &party,
+      int node_index,
+      EncodedNumber *sample_mask_iv,
+      EncodedNumber *encrypted_labels);
+};
 
 /**
     * compute spdz function for tree builder
