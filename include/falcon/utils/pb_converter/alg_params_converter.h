@@ -7,6 +7,7 @@
 
 #include <string>
 #include <falcon/algorithm/vertical/linear_model/logistic_regression.h>
+#include <falcon/algorithm/vertical/tree/tree_builder.h>
 
 /**
  * serialize the logistic regression param struct to string
@@ -23,5 +24,21 @@ void serialize_lr_params(LogisticRegressionParams lr_params, std::string& output
  * @param input_message: serialized string
  */
 void deserialize_lr_params(LogisticRegressionParams& lr_params, const std::string& input_message);
+
+/**
+ * serialize the decision tree param struct to string
+ *
+ * @param dt_params: DecisionTreeParams to be serialized
+ * @param output_message: serialized string
+ */
+void serialize_dt_params(DecisionTreeParams dt_params, std::string& output_message);
+
+/**
+ * deserialize decision tree param struct from an input string
+ *
+ * @param dt_params: deserialized DecisionTreeParams
+ * @param input_message: serialized string
+ */
+void deserialize_dt_params(DecisionTreeParams& dt_params, const std::string& input_message);
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_LR_PARAMS_CONVERTER_H_

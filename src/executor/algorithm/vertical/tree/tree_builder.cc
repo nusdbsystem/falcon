@@ -868,6 +868,7 @@ bool DecisionTreeBuilder::compute_leaf_statistics(Party &party,
   std::cout << "Node " << node_index << " label = " << res[0] << std::endl;
   EncodedNumber label;
   label.set_double(phe_pub_key->n[0], res[0], 2 * PHE_FIXED_POINT_PRECISION);
+  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, label, label);
   // now assume that it is only an encoded number, instead of a ciphertext
   // djcs_t_aux_encrypt(phe_pub_key, party.phe_random, label, label);
   tree.nodes[node_index].label = label;
@@ -1459,7 +1460,7 @@ void train_decision_tree(Party party, std::string params_str,
   params.min_impurity_decrease = 0.01;
   params.min_impurity_split = 0.001;
   params.dp_budget = 0.1;
-//  deserialize_lr_params(params, params_str);
+//  deserialize_dt_params(params, params_str);
   int weight_size = party.getter_feature_num();
   double training_accuracy = 0.0;
   double testing_accuracy = 0.0;

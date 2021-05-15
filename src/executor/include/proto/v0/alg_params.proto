@@ -30,4 +30,32 @@ message LogisticRegressionParams {
     float differential_privacy_budget = 12;
 }
 
+// This message denotes the decision tree builder parameters
+message DecisionTreeParams {
+    // type of the tree, 'classification' or 'regression'
+    string tree_type = 1;
+    // the function to measure the quality of a split 'gini' or 'entropy'
+    string criterion = 2;
+    // the strategy used to choose a split at each node, 'best' or 'random'
+    string split_strategy = 3;
+    // the number of classes in the dataset, if regression, set to 1
+    int32 class_num = 4;
+    // the maximum depth of the tree
+    int32 max_depth = 5;
+    // the maximum number of bins to split a feature
+    int32 max_bins = 6;
+    // the minimum number of samples required to split an internal node
+    int32 min_samples_split = 7;
+    // the minimum number of samples required to be at a leaf node
+    int32 min_samples_leaf = 8;
+    // the maximum number of leaf nodes
+    int32 max_leaf_nodes = 9;
+    // a node will be split if this split induces a decrease of impurity >= this value
+    double min_impurity_decrease = 10;
+    // threshold for early stopping in tree growth
+    double min_impurity_split = 11;
+    // differential privacy (DP) budget, 0 denotes not use DP
+    double dp_budget = 12;
+}
+
 

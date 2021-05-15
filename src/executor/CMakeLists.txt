@@ -23,8 +23,8 @@ set(SOURCE_FILES
         utils/pb_converter/phe_keys_converter.cc
         ../../include/falcon/utils/pb_converter/common_converter.h
         utils/pb_converter/common_converter.cc
-        ../../include/falcon/utils/pb_converter/lr_params_converter.h
-        utils/pb_converter/lr_params_converter.cc
+        ../../include/falcon/utils/pb_converter/alg_params_converter.h
+        utils/pb_converter/alg_params_converter.cc
         ../../include/falcon/utils/metric/classification.h
         ../../include/falcon/utils/math/math_ops.h
         ../../include/falcon/utils/pb_converter/network_converter.h
@@ -41,8 +41,8 @@ set(SOURCE_FILES
         include/message/model.pb.cc
         include/message/phe_keys.pb.h
         include/message/phe_keys.pb.cc
-        include/message/lr_params.pb.h
-        include/message/lr_params.pb.cc
+        include/message/alg_params.pb.h
+        include/message/alg_params.pb.cc
         include/message/network.pb.h
         include/message/network.pb.cc
         include/message/inference/lr_grpc.pb.h

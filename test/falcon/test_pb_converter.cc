@@ -9,7 +9,7 @@
 #include <falcon/utils/pb_converter/model_converter.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <falcon/utils/pb_converter/common_converter.h>
-#include <falcon/utils/pb_converter/lr_params_converter.h>
+#include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/pb_converter/network_converter.h>
 
 TEST(PB_Converter, ModelPublishRequest) {
