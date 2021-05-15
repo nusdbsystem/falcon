@@ -184,8 +184,8 @@ void deserialize_encrypted_statistics(int & client_id,
   }
 }
 
-void serialize_update_info(int source_client_id,
-    int best_client_id,
+void serialize_update_info(int source_party_id,
+    int best_party_id,
     int best_feature_id,
     int best_split_id,
     EncodedNumber left_branch_impurity,
@@ -195,8 +195,8 @@ void serialize_update_info(int source_client_id,
     int sample_size,
     std::string & output_str) {
   com::nus::dbsytem::falcon::v0::NodeUpdateInfo pb_update_info;
-  pb_update_info.set_source_client_id(source_client_id);
-  pb_update_info.set_best_client_id(best_client_id);
+  pb_update_info.set_source_client_id(source_party_id);
+  pb_update_info.set_best_client_id(best_party_id);
   pb_update_info.set_best_feature_id(best_feature_id);
   pb_update_info.set_best_split_id(best_split_id);
 
