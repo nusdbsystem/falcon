@@ -294,10 +294,6 @@ void DecisionTreeBuilder::build_node(Party &party,
   EncodedNumber *global_left_branch_sample_nums, *global_right_branch_sample_nums;
   EncodedNumber **encrypted_statistics;
   EncodedNumber *encrypted_left_branch_sample_nums, *encrypted_right_branch_sample_nums;
-
-  std::vector< std::vector<double> > stats_shares;
-  std::vector<int> left_sample_nums_shares;
-  std::vector<int> right_sample_nums_shares;
   std::vector<int> client_split_nums;
 
   if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -390,7 +386,9 @@ void DecisionTreeBuilder::build_node(Party &party,
         party.send_long_message(i, split_info_str);
       }
     }
-  } else {
+  }
+
+  if (party.party_type == falcon::PASSIVE_PARTY) {
     if (local_splits_num == 0) {
       LOG(INFO) << "Local feature used up";
       std::string s;
@@ -399,7 +397,7 @@ void DecisionTreeBuilder::build_node(Party &party,
           encrypted_left_branch_sample_nums,
           encrypted_right_branch_sample_nums,
           encrypted_statistics, s);
-      party.send_long_message(0, s);
+      party.send_long_message(ACTIVE_PARTY_ID, s);
     } else {
       encrypted_statistics = new EncodedNumber*[local_splits_num];
       for (int i = 0; i < local_splits_num; i++) {
@@ -424,17 +422,85 @@ void DecisionTreeBuilder::build_node(Party &party,
           encrypted_left_branch_sample_nums,
           encrypted_right_branch_sample_nums,
           encrypted_statistics, s);
-      party.send_long_message(0, s);
+      party.send_long_message(ACTIVE_PARTY_ID, s);
     }
 
     std::string recv_split_info_str;
     party.recv_long_message(0, recv_split_info_str);
-//    deserialize_split_info(global_split_num, client_split_nums, recv_split_info_str);
+    deserialize_split_info(global_split_num, client_split_nums, recv_split_info_str);
     LOG(INFO) << "The global_split_num = " << global_split_num;
   }
 
+  /// step 5: encrypted statistics computed finished, convert to secret shares
+  std::vector< std::vector<double> > stats_shares;
+  std::vector<double> left_sample_nums_shares;
+  std::vector<double> right_sample_nums_shares;
+  std::vector<int> public_values;
+  std::vector<double> private_values;
+  party.ciphers_to_secret_shares(global_left_branch_sample_nums,
+      left_sample_nums_shares, global_split_num,
+      ACTIVE_PARTY_ID, 0);
+  party.ciphers_to_secret_shares(global_right_branch_sample_nums,
+      right_sample_nums_shares, global_split_num,
+      ACTIVE_PARTY_ID, 0);
+  for (int i = 0; i < global_split_num; i++) {
+    std::vector<double> tmp;
+    party.ciphers_to_secret_shares(global_encrypted_statistics[i],
+        tmp, 2 * class_num,
+        ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+    stats_shares.push_back(tmp);
+  }
+
+  /// step 6: secret shares conversion finished, talk to spdz for computation
+  // communicate with spdz parties and receive results to compute labels
+  // first send computation type, tree type, class num
+  // then send private values
+
+  // arrange public values and private values
+  public_values.push_back(tree_type);
+  public_values.push_back(global_split_num);
+  public_values.push_back(class_num);
+  public_values.push_back(class_num);
+
+  // according to the spdz program,
+  // first send the encrypted_statistics: global_split_num * (2 * class_num)
+  // then send the left shares, and finally the right shares: global_split_num
+  for (int i = 0; i < global_split_num; i++) {
+    for (int j = 0; j < 2 * class_num; j++) {
+      private_values.push_back(stats_shares[i][j]);
+    }
+  }
+  for (int i = 0; i < global_split_num; i++) {
+    private_values.push_back(left_sample_nums_shares[i]);
+  }
+  for (int i = 0; i < global_split_num; i++) {
+    private_values.push_back(right_sample_nums_shares[i]);
+  }
+  falcon::SpdzTreeCompType comp_type = falcon::FIND_BEST_SPLIT;
+  std::promise<std::vector<double>> promise_values;
+  std::future<std::vector<double>> future_values = promise_values.get_future();
+  std::thread spdz_pruning_check_thread(spdz_tree_computation,
+      party.party_num,
+      party.party_id,
+      SPDZ_PORT_TREE,
+      party.host_names,
+      public_values.size(),
+      public_values,
+      private_values.size(),
+      private_values,
+      comp_type,
+      &promise_values);
+  std::vector<double> res = future_values.get();
+  spdz_pruning_check_thread.join();
+
+  // the result values are as follows (assume public in this version):
+  // best_split_index (global), best_left_impurity, and best_right_impurity
+  int best_split_index = (int) res[0];
+  double left_impurity = res[1];
+  double right_impurity = res[2];
+
   const clock_t node_finish_time = clock();
-  double node_consumed_time = double(node_finish_time - node_start_time) / CLOCKS_PER_SEC;
+  double node_consumed_time = (node_finish_time - node_start_time) / CLOCKS_PER_SEC;
   std::cout << "Node build time = " << node_consumed_time << std::endl;
   LOG(INFO) << "Node build time = " << node_consumed_time;
   google::FlushLogFiles(google::INFO);
@@ -574,9 +640,9 @@ bool DecisionTreeBuilder::compute_leaf_statistics(Party &party,
       EncodedNumber *label_info = new EncodedNumber[1];
       EncodedNumber *encrypted_sample_num_aux = new EncodedNumber[1];
       party.ciphers_to_secret_shares(label_info, shares1, 1,
-                                     ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+          ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
       party.ciphers_to_secret_shares(encrypted_sample_num_aux, shares2, 1,
-                                     ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+          ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
       private_values.push_back(shares1[0]);
       private_values.push_back(shares2[0]);
       delete [] label_info;
@@ -761,8 +827,7 @@ void DecisionTreeBuilder::compute_encrypted_statistics(Party &party,
       djcs_t_aux_ee_add(phe_pub_key,left_num_help, left_num_help, left_sums[k]);
       encrypted_left_sample_nums[split_index] = left_num_help;
       djcs_t_aux_ep_mul(phe_pub_key,right_num_help, left_num_help, plain_constant_help);
-      djcs_t_aux_ee_add(phe_pub_key,
-          encrypted_right_sample_nums[split_index], total_sum, right_num_help);
+      djcs_t_aux_ee_add(phe_pub_key,encrypted_right_sample_nums[split_index], total_sum, right_num_help);
       for (int c = 0; c < class_num; c++) {
         djcs_t_aux_ee_add(phe_pub_key,left_stat_help[c], left_stat_help[c], left_stats[k][c]);
         djcs_t_aux_ep_mul(phe_pub_key,right_stat_help[c], left_stat_help[c], plain_constant_help);
@@ -858,56 +923,44 @@ void spdz_tree_computation(int party_num,
   // std::cout << "batch aggregation size = " << batch_aggregation_shares.size() << std::endl;
   google::FlushLogFiles(google::INFO);
 
-  // send data to spdz parties according to the computation type
+  // send data to spdz parties
+  if (party_id == ACTIVE_PARTY_ID) {
+    // the active party sends computation id for spdz computation
+    std::vector<int> computation_id;
+    computation_id.push_back(tree_comp_type);
+    send_public_values(computation_id, mpc_sockets, party_num);
+    // the active party sends tree type and class num to spdz parties
+    for (int i = 0; i < public_value_size; i++) {
+      std::vector<int> x;
+      x.push_back(public_values[i]);
+      send_public_values(x, mpc_sockets, party_num);
+    }
+  }
+  // all the parties send private shares
+  for (int i = 0; i < private_value_size; i++) {
+    vector<double> x;
+    x.push_back(private_values[i]);
+    send_private_inputs(x, mpc_sockets, party_num);
+  }
+
+  // receive result from spdz parties according to the computation type
   switch (tree_comp_type) {
     case falcon::PRUNING_CHECK: {
-      LOG(INFO) << "SPDZ tree computation type is pruning check";
-      if (party_id == ACTIVE_PARTY_ID) {
-        // the active party sends computation id for spdz computation
-        std::vector<int> computation_id;
-        computation_id.push_back(tree_comp_type);
-        send_public_values(computation_id, mpc_sockets, party_num);
-        // the active party sends tree type to spdz parties
-        std::vector<int> tree_type;
-        tree_type.push_back(public_values[0]);
-        send_public_values(tree_type, mpc_sockets, party_num);
-      }
-      // all the parties send private shares
-      for (int i = 0; i < private_value_size; i++) {
-        vector<double> x;
-        x.push_back(private_values[i]);
-        send_private_inputs(x, mpc_sockets, party_num);
-      }
+      LOG(INFO) << "SPDZ tree computation pruning check returned";
       std::vector<double> return_values = receive_result(mpc_sockets, party_num, 1);
       res->set_value(return_values);
       break;
     }
     case falcon::COMPUTE_LABEL: {
-      LOG(INFO) << "SPDZ tree computation type is calculate the leaf label";
-      if (party_id == ACTIVE_PARTY_ID) {
-        // the active party sends computation id for spdz computation
-        std::vector<int> computation_id;
-        computation_id.push_back(tree_comp_type);
-        send_public_values(computation_id, mpc_sockets, party_num);
-        // the active party sends tree type and class num to spdz parties
-        for (int i = 0; i < public_value_size; i++) {
-          std::vector<int> x;
-          x.push_back(public_values[i]);
-          send_public_values(x, mpc_sockets, party_num);
-        }
-      }
-      // all the parties send private shares
-      for (int i = 0; i < private_value_size; i++) {
-        vector<double> x;
-        x.push_back(private_values[i]);
-        send_private_inputs(x, mpc_sockets, party_num);
-      }
+      LOG(INFO) << "SPDZ tree computation calculate leaf label returned";
       std::vector<double> return_values = receive_result(mpc_sockets, party_num, 1);
       res->set_value(return_values);
       break;
     }
     case falcon::FIND_BEST_SPLIT: {
-      LOG(INFO) << "SPDZ tree computation type is find best split";
+      LOG(INFO) << "SPDZ tree computation type find best split returned";
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, 3);
+      res->set_value(return_values);
       break;
     }
     default:
