@@ -192,6 +192,21 @@ class DecisionTreeBuilder : public Model {
       EncodedNumber * encrypted_labels,
       EncodedNumber * encrypted_left_sample_nums,
       EncodedNumber * encrypted_right_sample_nums);
+
+  /**
+     * predict a result given a sample id
+     * @param sample_id
+     * @param node_index_2_leaf_index
+     */
+  std::vector<int> compute_binary_vector(int sample_id,
+      std::map<int,int> node_index_2_leaf_index);
+
+  /**
+ * evaluate the accuracy on the dataset
+ * @param party
+ * @param eval_type
+ */
+  void eval(Party party, falcon::DatasetType eval_type);
 };
 
 /**
