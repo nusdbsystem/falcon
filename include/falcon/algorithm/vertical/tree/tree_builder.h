@@ -234,4 +234,14 @@ void spdz_tree_computation(int party_num,
     falcon::SpdzTreeCompType tree_comp_type,
     std::promise<std::vector<double>> *res);
 
+/**
+ * train a decision tree model
+ * @param party: initialized party object
+ * @param params: DecisionTreeBuilderParam serialized string
+ * @param model_save_file: saved model file
+ * @param model_report_file: saved report file
+ */
+void train_decision_tree(Party party, std::string params_str,
+    std::string model_save_file, std::string model_report_file);
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_CART_BUILDER_H_

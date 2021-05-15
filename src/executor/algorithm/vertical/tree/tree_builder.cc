@@ -1438,3 +1438,80 @@ void spdz_tree_computation(int party_num,
     mpc_sockets[i] = nullptr;
   }
 }
+
+void train_decision_tree(Party party, std::string params_str,
+    std::string model_save_file, std::string model_report_file) {
+
+  LOG(INFO) << "Run the example decision tree train";
+  std::cout << "Run the example decision tree train" << std::endl;
+
+  DecisionTreeParams params;
+  // currently for testing
+  params.tree_type = "classification";
+  params.criterion = "gini";
+  params.split_strategy = "best";
+  params.class_num = 2;
+  params.max_depth = 5;
+  params.max_bins = 8;
+  params.min_samples_split = 5;
+  params.min_samples_leaf = 5;
+  params.max_leaf_nodes = 16;
+  params.min_impurity_decrease = 0.01;
+  params.min_impurity_split = 0.001;
+  params.dp_budget = 0.1;
+//  deserialize_lr_params(params, params_str);
+  int weight_size = party.getter_feature_num();
+  double training_accuracy = 0.0;
+  double testing_accuracy = 0.0;
+
+  std::vector< std::vector<double> > training_data;
+  std::vector< std::vector<double> > testing_data;
+  std::vector<double> training_labels;
+  std::vector<double> testing_labels;
+  double split_percentage = SPLIT_TRAIN_TEST_RATIO;
+  party.split_train_test_data(split_percentage,
+                              training_data,
+                              testing_data,
+                              training_labels,
+                              testing_labels);
+
+  LOG(INFO) << "Init decision tree model builder";
+  LOG(INFO) << "params.tree_type = " << params.tree_type;
+  LOG(INFO) << "params.criterion = " << params.criterion;
+  LOG(INFO) << "params.split_strategy = " << params.split_strategy;
+  LOG(INFO) << "params.class_num = " << params.class_num;
+  LOG(INFO) << "params.max_depth = " << params.max_depth;
+  LOG(INFO) << "params.max_bins = " << params.max_bins;
+  LOG(INFO) << "params.min_samples_split = " << params.min_samples_split;
+  LOG(INFO) << "params.min_samples_leaf = " << params.min_samples_leaf;
+  LOG(INFO) << "params.max_leaf_nodes = " << params.max_leaf_nodes;
+  LOG(INFO) << "params.min_impurity_decrease = " << params.min_impurity_decrease;
+  LOG(INFO) << "params.min_impurity_split = " << params.min_impurity_split;
+  LOG(INFO) << "params.dp_budget = " << params.dp_budget;
+
+  std::cout << "Init decision tree model" << std::endl;
+  LOG(INFO) << "Init decision tree model";
+
+  DecisionTreeBuilder decision_tree_builder(params,
+      training_data,
+      testing_data,
+      training_labels,
+      testing_labels,
+      training_accuracy,
+      testing_accuracy);
+
+  LOG(INFO) << "Init decision tree model success";
+  std::cout << "Init decision tree model success" << std::endl;
+
+  decision_tree_builder.train(party);
+  decision_tree_builder.eval(party, falcon::TRAIN);
+  decision_tree_builder.eval(party, falcon::TEST);
+
+  // TODO: save model and report
+//  EncodedNumber* model_weights = new EncodedNumber[log_reg_model.getter_weight_size()];
+//  log_reg_model.getter_encoded_weights(model_weights);
+//  save_lr_model(model_weights, log_reg_model.getter_weight_size(), model_save_file);
+//  save_lr_report(training_accuracy, testing_accuracy, model_report_file);
+//
+//  delete [] model_weights;
+}

@@ -49,6 +49,8 @@ set(SOURCE_FILES
         include/message/inference/lr_grpc.pb.cc
         include/message/inference/lr_grpc.grpc.pb.h
         include/message/inference/lr_grpc.grpc.pb.cc
+        include/message/tree.pb.h
+        include/message/tree.pb.cc
         ../../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
         ../../include/falcon/operator/phe/djcs_t_aux.h
