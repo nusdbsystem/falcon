@@ -6,6 +6,8 @@
 #include <falcon/algorithm/vertical/tree/tree.h>
 #include <cmath>
 
+#include <glog/logging.h>
+
 Tree::Tree() {}
 
 Tree::Tree(falcon::TreeType m_type, int m_class_num, int m_max_depth) {
@@ -34,6 +36,7 @@ Tree::Tree(const Tree &tree) {
   for (int i = 0; i < maximum_nodes; i++) {
     nodes[i] = tree.nodes[i];
   }
+  capacity = tree.capacity;
 }
 
 Tree& Tree::operator=(Tree *tree) {
@@ -47,4 +50,5 @@ Tree& Tree::operator=(Tree *tree) {
   for (int i = 0; i < maximum_nodes; i++) {
     nodes[i] = tree->nodes[i];
   }
+  capacity = tree->capacity;
 }

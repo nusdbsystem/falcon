@@ -36,20 +36,20 @@ Node::Node(const Node &node) {
   right_child = node.right_child;
 }
 
-Node& Node::operator=(Node *node) {
-  node_type = node->node_type;
-  depth = node->depth;
-  is_self_feature = node->is_self_feature;
-  best_party_id = node->best_party_id;
-  best_feature_id = node->best_feature_id;
-  best_split_id = node->best_split_id;
-  split_threshold = node->split_threshold;
-  node_sample_num = node->node_sample_num;
-  node_sample_distribution = node->node_sample_distribution;
-  impurity = node->impurity;
-  label = node->label;
-  left_child = node->left_child;
-  right_child = node->right_child;
+Node& Node::operator=(const Node &node) {
+  node_type = node.node_type;
+  depth = node.depth;
+  is_self_feature = node.is_self_feature;
+  best_party_id = node.best_party_id;
+  best_feature_id = node.best_feature_id;
+  best_split_id = node.best_split_id;
+  split_threshold = node.split_threshold;
+  node_sample_num = node.node_sample_num;
+  node_sample_distribution = node.node_sample_distribution;
+  impurity = node.impurity;
+  label = node.label;
+  left_child = node.left_child;
+  right_child = node.right_child;
 }
 
 Node::~Node() {}

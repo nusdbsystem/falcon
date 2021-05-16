@@ -197,9 +197,10 @@ class DecisionTreeBuilder : public Model {
      * predict a result given a sample id
      * @param sample_id
      * @param node_index_2_leaf_index
+     * @param eval_type
      */
   std::vector<int> compute_binary_vector(int sample_id,
-      std::map<int,int> node_index_2_leaf_index);
+      std::map<int,int> node_index_2_leaf_index, falcon::DatasetType eval_type);
 
   /**
  * evaluate the accuracy on the dataset

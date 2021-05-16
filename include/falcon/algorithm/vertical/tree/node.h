@@ -55,7 +55,7 @@ class Node {
    * @param node
    * @return
    */
-  Node &operator=(Node *node);
+  Node &operator=(const Node &node);
 
   /**
    * print node information
