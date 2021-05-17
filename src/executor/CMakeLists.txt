@@ -23,12 +23,14 @@ set(SOURCE_FILES
         utils/pb_converter/phe_keys_converter.cc
         ../../include/falcon/utils/pb_converter/common_converter.h
         utils/pb_converter/common_converter.cc
-        ../../include/falcon/utils/pb_converter/lr_params_converter.h
-        utils/pb_converter/lr_params_converter.cc
+        ../../include/falcon/utils/pb_converter/alg_params_converter.h
+        utils/pb_converter/alg_params_converter.cc
         ../../include/falcon/utils/metric/classification.h
         ../../include/falcon/utils/math/math_ops.h
         ../../include/falcon/utils/pb_converter/network_converter.h
         utils/pb_converter/network_converter.cc
+        ../../include/falcon/utils/pb_converter/tree_converter.h
+        utils/pb_converter/tree_converter.cc
         utils/metric/classification.cc
         utils/math/math_ops.cc
         ../../include/falcon/utils/base64.h
@@ -39,14 +41,16 @@ set(SOURCE_FILES
         include/message/model.pb.cc
         include/message/phe_keys.pb.h
         include/message/phe_keys.pb.cc
-        include/message/lr_params.pb.h
-        include/message/lr_params.pb.cc
+        include/message/alg_params.pb.h
+        include/message/alg_params.pb.cc
         include/message/network.pb.h
         include/message/network.pb.cc
         include/message/inference/lr_grpc.pb.h
         include/message/inference/lr_grpc.pb.cc
         include/message/inference/lr_grpc.grpc.pb.h
         include/message/inference/lr_grpc.grpc.pb.cc
+        include/message/tree.pb.h
+        include/message/tree.pb.cc
         ../../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
         ../../include/falcon/operator/phe/djcs_t_aux.h
@@ -62,7 +66,15 @@ set(SOURCE_FILES
         ../../include/falcon/model/model_io.h
         model/model_io.cc
         ../../include/falcon/inference/server/inference_server.h
-        inference/server/inference_server.cc)
+        inference/server/inference_server.cc
+        ../../include/falcon/algorithm/vertical/tree/node.h
+        algorithm/vertical/tree/node.cc
+        ../../include/falcon/algorithm/vertical/tree/feature.h
+        algorithm/vertical/tree/feature.cc
+        ../../include/falcon/algorithm/vertical/tree/tree.h
+        algorithm/vertical/tree/tree.cc
+        ../../include/falcon/algorithm/vertical/tree/tree_builder.h
+        algorithm/vertical/tree/tree_builder.cc)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")

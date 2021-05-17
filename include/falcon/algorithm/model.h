@@ -5,6 +5,7 @@
 #ifndef FALCON_SRC_EXECUTOR_ALGORITHM_MODEL_H_
 #define FALCON_SRC_EXECUTOR_ALGORITHM_MODEL_H_
 
+#include <utility>
 #include <vector>
 
 class Model {
@@ -52,22 +53,22 @@ class Model {
 
   /** set training data */
   void setter_training_data(std::vector< std::vector<double> > s_training_data) {
-    training_data = s_training_data;
+    training_data = std::move(s_training_data);
   }
 
   /** set testing data */
   void setter_testing_data(std::vector< std::vector<double> > s_testing_data) {
-    testing_data = s_testing_data;
+    testing_data = std::move(s_testing_data);
   }
 
   /** set training labels */
   void setter_training_labels(std::vector<double> s_training_labels) {
-    training_labels = s_training_labels;
+    training_labels = std::move(s_training_labels);
   }
 
   /** set testing labels */
   void setter_testing_labels(std::vector<double> s_testing_labels) {
-    testing_labels = s_testing_labels;
+    testing_labels = std::move(s_testing_labels);
   }
 
   /** set training accuracy */

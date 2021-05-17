@@ -11,6 +11,7 @@
 #include "falcon/party/party.h"
 #include "falcon/operator/mpc/spdz_connector.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression.h"
+#include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include "falcon/inference/server/inference_server.h"
 
 #include <glog/logging.h>
@@ -131,7 +132,7 @@ int main(int argc, char *argv[]) {
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
         break;
       case falcon::DT:
-        LOG(INFO) << "Decision Tree algorithm is not supported now.";
+        train_decision_tree(party, algorithm_params, model_save_file, model_report_file);
         break;
       default:
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);

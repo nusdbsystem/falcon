@@ -16,14 +16,14 @@ namespace falcon{
   #define PHE_EPSILON 1
   #define PHE_KEY_SIZE 1024
   #define SPDZ_FIXED_POINT_PRECISION 16
-  #define SPDZ_PORT_BASE 14000
   #define SPDZ_PLAYER_PATH "Player-Data/" // deprecated
   #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024
   #define MAXIMUM_RAND_VALUE 32767
   #define ROUNDED_PRECISION 1e-3
   #define NETWORK_CONFIG_PROTO 1
 
-  // for Logistic Regression
+  /** for Logistic Regression */
+  #define SPDZ_PORT_BASE 14000
   #define RANDOM_SEED 42
   #define SPLIT_TRAIN_TEST_RATIO 0.8
   #define ACTIVE_PARTY_ID 0
@@ -34,6 +34,17 @@ namespace falcon{
   // sklearn default one-initialized
   #define WEIGHTS_INIT_MIN 0.0
   #define WEIGHTS_INIT_MAX 0.0
+
+  /** for Decision Tree */
+  enum TreeNodeType{INTERNAL, LEAF};
+  enum TreeFeatureType{CONTINUOUS, CATEGORICAL};
+  enum TreeType{CLASSIFICATION, REGRESSION};
+  enum SpdzTreeCompType{PRUNING_CHECK, COMPUTE_LABEL, FIND_BEST_SPLIT};
+  #define REGRESSION_TREE_CLASS_NUM 2
+  #define SPDZ_PORT_TREE 18000
+  #define MAX_IMPURITY 100000.0
+  // refers the maximum number of splits considered in a tree
+  #define MAX_GLOBAL_SPLIT_NUM 6000
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"

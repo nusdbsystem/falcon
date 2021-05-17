@@ -99,7 +99,7 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
     EncodedNumber cipher2) {
   if (cipher1.getter_type() != Ciphertext || cipher2.getter_type() != Ciphertext){
     LOG(ERROR) << "The two inputs need be ciphertexts for homomorphic addition.";
-    return;
+    exit(1);
   }
 
   mpz_t t1, t2;
@@ -110,12 +110,12 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
 
   if (mpz_cmp(t1, t2) != 0) {
     LOG(ERROR) << "Two ciphertexts are not with the same public key.";
-    return;
+    exit(1);
   }
 
   if (cipher1.getter_exponent() != cipher2.getter_exponent()) {
     LOG(ERROR) << "Two ciphertexts do not have the same exponents.";
-    return;
+    exit(1);
   }
 
   mpz_t t3, t4, sum;
@@ -144,7 +144,7 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
     EncodedNumber plain) {
   if (cipher.getter_type() != Ciphertext || plain.getter_type() != Plaintext) {
     LOG(ERROR) << "The input types do not match ciphertext or plaintext.";
-    return;
+    exit(1);
   }
 
   mpz_t t1, t2;
@@ -155,7 +155,7 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
 
   if (mpz_cmp(t1, t2) != 0) {
     LOG(ERROR) << "The two inputs are not with the same public key.";
-    return;
+    exit(1);
   }
 
   mpz_t t3, t4, mult;
@@ -197,7 +197,7 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
 
   if (mpz_cmp(t1, t2) != 0) {
     LOG(ERROR) << "The two vectors are not with the same public key.";
-    return;
+    exit(1);
   }
 
   // assume the elements in the plains have the same exponent, so does ciphers
@@ -266,7 +266,7 @@ void djcs_t_aux_matrix_mult(djcs_t_public_key* pk,
 
   if (mpz_cmp(t1, t2) != 0) {
     LOG(ERROR) << "The vector and the matrix are not with the same public key.";
-    return;
+    exit(1);
   }
 
   for (int i = 0; i < row_size; i++) {
