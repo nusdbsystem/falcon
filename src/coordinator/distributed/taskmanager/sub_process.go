@@ -43,12 +43,12 @@ loop:
 			if err == nil {
 				err = syscall.Kill(pid, syscall.SIGQUIT)
 				if err != nil {
-					logger.Do.Println("[SubProcessManager]: Manually Killed PID=cmd.Process.Pid Error", err)
+					logger.Log.Println("[SubProcessManager]: Manually Killed PID=cmd.Process.Pid Error", err)
 				} else {
-					logger.Do.Println("[SubProcessManager]: Manually Killed PID=cmd.Process.Pid", pid)
+					logger.Log.Println("[SubProcessManager]: Manually Killed PID=cmd.Process.Pid", pid)
 				}
 			} else {
-				logger.Do.Printf("[SubProcessManager]: PID %d is not running\n", pid)
+				logger.Log.Printf("[SubProcessManager]: PID %d is not running\n", pid)
 			}
 			break loop
 		default:
@@ -84,11 +84,11 @@ func (pm *SubProcessManager) CreateResources(
 	   * @return
 	   **/
 	defer func() {
-		logger.Do.Println("[SubProcessManager]: lock")
+		logger.Log.Println("[SubProcessManager]: lock")
 		pm.Lock()
 		pm.NumProc -= 1
 		pm.Unlock()
-		logger.Do.Println("[SubProcessManager]: Unlock ")
+		logger.Log.Println("[SubProcessManager]: Unlock ")
 	}()
 
 	if len(envs) > 0 {
@@ -97,7 +97,7 @@ func (pm *SubProcessManager) CreateResources(
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		logger.Do.Println(err)
+		logger.Log.Println(err)
 		return err.Error(), ""
 	}
 	var out outStream
@@ -105,14 +105,14 @@ func (pm *SubProcessManager) CreateResources(
 
 	// start with a short statement to execute before the condition
 	if err := cmd.Start(); err != nil {
-		logger.Do.Println("cmd.Start() Error:")
-		logger.Do.Println(err)
+		logger.Log.Println("cmd.Start() Error:")
+		logger.Log.Println(err)
 		return err.Error(), ""
 	}
 
 	// if start successfully
 	if cmd.Process != nil {
-		logger.Do.Println("[SubProcessManager]: open subProcess, PID=", cmd.Process.Pid)
+		logger.Log.Println("[SubProcessManager]: open subProcess, PID=", cmd.Process.Pid)
 
 		go pm.SubProcessMonitor(cmd.Process.Pid)
 		// if there is a running SubProc, nTasks add 1
@@ -131,8 +131,8 @@ func (pm *SubProcessManager) CreateResources(
 			exitStr = common.SubProcessNormal
 		}
 
-		logger.Do.Printf("[SubProcessManager]: subprocess exit status: << %s >> \n", exitStr)
-		logger.Do.Printf("[SubProcessManager]: subprocess error logs: \n"+
+		logger.Log.Printf("[SubProcessManager]: subprocess exit status: << %s >> \n", exitStr)
+		logger.Log.Printf("[SubProcessManager]: subprocess error logs: \n"+
 			"<<<<<\n "+
 			"%s \n"+
 			"<<<<<\n",
@@ -154,7 +154,7 @@ func (out outStream) Write(p []byte) (int, error) {
 
 func ExecuteBash(command string) error {
 	// 返回一个 cmd 对象
-	logger.Do.Println("[SubProcessManager]: execute bash ::", command)
+	logger.Log.Println("[SubProcessManager]: execute bash ::", command)
 
 	cmd := exec.Command("bash", "-c", command)
 
@@ -162,14 +162,14 @@ func ExecuteBash(command string) error {
 	stdout, _ := cmd.StdoutPipe()
 
 	if err := cmd.Start(); err != nil {
-		logger.Do.Println("[SubProcessManager]: executeBash: Start error ", err)
+		logger.Log.Println("[SubProcessManager]: executeBash: Start error ", err)
 		return err
 	}
 	errLog, _ := ioutil.ReadAll(stderr)
 	outLog, _ := ioutil.ReadAll(stdout)
 
-	logger.Do.Println("[SubProcessManager]: executeBash: error log is ", string(errLog))
-	logger.Do.Println("[SubProcessManager]: executeBash: out put is ", string(outLog))
+	logger.Log.Println("[SubProcessManager]: executeBash: error log is ", string(errLog))
+	logger.Log.Println("[SubProcessManager]: executeBash: out put is ", string(outLog))
 	outErr := cmd.Wait()
 	return outErr
 
@@ -178,7 +178,7 @@ func ExecuteBash(command string) error {
 func ExecuteOthers(command string) error {
 	// 返回一个 cmd 对象
 
-	logger.Do.Println("[SubProcessManager]: execute bash,", command)
+	logger.Log.Println("[SubProcessManager]: execute bash,", command)
 
 	cmd := exec.Command(command)
 
@@ -186,14 +186,14 @@ func ExecuteOthers(command string) error {
 	stdout, _ := cmd.StdoutPipe()
 
 	if err := cmd.Start(); err != nil {
-		logger.Do.Println("ExecuteBash: Start error ", err)
+		logger.Log.Println("ExecuteBash: Start error ", err)
 		return err
 	}
 	errLog, _ := ioutil.ReadAll(stderr)
 	outLog, _ := ioutil.ReadAll(stdout)
 
-	logger.Do.Println("ExecuteBash: ErrorLog is ", string(errLog))
-	logger.Do.Println("ExecuteBash: OutPut is ", string(outLog))
+	logger.Log.Println("ExecuteBash: ErrorLog is ", string(errLog))
+	logger.Log.Println("ExecuteBash: OutPut is ", string(outLog))
 	outErr := cmd.Wait()
 
 	return outErr

@@ -18,7 +18,7 @@ func GetFreePort() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer logger.Do.Println(l.Close())
+	defer logger.Log.Println(l.Close())
 	return l.Addr().(*net.TCPAddr).Port, nil
 }
 
@@ -36,43 +36,40 @@ func GetFreePorts(count int) ([]int, error) {
 			return nil, err
 		}
 		ports = append(ports, l.Addr().(*net.TCPAddr).Port)
-		logger.Do.Println(l.Close())
+		logger.Log.Println(l.Close())
 	}
 	return ports, nil
 }
-
 
 // get one port
 func GetFreePort4K8s() (int, error) {
 	min := 30000
 	max := 32767
-	p := rand.Intn(max - min) + min
+	p := rand.Intn(max-min) + min
 
 	var addr *net.TCPAddr
 	var l *net.TCPListener
 	var err error
 
 	for {
-		addr, err = net.ResolveTCPAddr("tcp", "localhost:"+fmt.Sprintf("%d",p))
+		addr, err = net.ResolveTCPAddr("tcp", "localhost:"+fmt.Sprintf("%d", p))
 		if err != nil {
 			return 0, err
 		}
 
-		l, err = net.ListenTCP("tcp",addr)
+		l, err = net.ListenTCP("tcp", addr)
 		if err != nil {
 			p++
-		}else{
-			logger.Do.Println(l.Close())
+		} else {
+			logger.Log.Println(l.Close())
 			return p, nil
 		}
 	}
 }
 
-
-
 func Contains(str string, l []string) bool {
-	for _, ls :=  range l{
-		if ls == str{
+	for _, ls := range l {
+		if ls == str {
 			return true
 		}
 	}

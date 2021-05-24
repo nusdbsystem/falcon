@@ -21,25 +21,25 @@ func Call(address string, network string, rpcname string, args interface{}, repl
 	NTimes := 3
 	for {
 		if NTimes < 0 {
-			logger.Do.Printf("RpcCall: Connection error, max retry reached!")
+			logger.Log.Printf("RpcCall: Connection error, max retry reached!")
 			return false
 		}
 		res := doCall(address, network, rpcname, args, reply)
 		if res != nil {
 
 			if res.Error() == exceptions.ConnectionErr {
-				logger.Do.Printf("RpcCall: Connection error, retry.......")
+				logger.Log.Printf("RpcCall: Connection error, retry.......")
 				time.Sleep(time.Second * 3)
 				NTimes--
 			}
 
 			if res.Error() == exceptions.CallingErr {
-				logger.Do.Printf("RpcCall: Call method error, return")
+				logger.Log.Printf("RpcCall: Call method error, return")
 				return false
 			}
 
 		} else {
-			logger.Do.Printf("RpcCall: Calling successfully")
+			logger.Log.Printf("RpcCall: Calling successfully")
 			return true
 		}
 	}
@@ -47,10 +47,10 @@ func Call(address string, network string, rpcname string, args interface{}, repl
 
 func doCall(address string, network string, rpcname string, args interface{}, reply interface{}) error {
 
-	logger.Do.Printf("----in Calling----, Calling network: %s, addr: %s, methodName: %s \n", network, address, rpcname)
+	logger.Log.Printf("----in Calling----, Calling network: %s, addr: %s, methodName: %s \n", network, address, rpcname)
 	client, err := rpc.Dial(network, address)
 	if err != nil {
-		logger.Do.Printf("----in Calling----, Connection error, <<%s>>\n", err)
+		logger.Log.Printf("----in Calling----, Connection error, <<%s>>\n", err)
 		return exceptions.ConnectionError()
 	}
 	defer client.Close()
@@ -59,7 +59,7 @@ func doCall(address string, network string, rpcname string, args interface{}, re
 	if cerr == nil {
 		return nil
 	} else {
-		logger.Do.Printf("----in Calling----, Call method error, <<%s>>\n", cerr)
+		logger.Log.Printf("----in Calling----, Call method error, <<%s>>\n", cerr)
 		return exceptions.CallingError()
 	}
 }

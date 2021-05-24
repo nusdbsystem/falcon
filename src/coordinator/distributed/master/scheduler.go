@@ -22,7 +22,7 @@ func (master *Master) schedule(qItem *cache.QItem) string {
 	master.allWorkerReady.Wait()
 	master.Unlock()
 
-	logger.Do.Println("Scheduler: All RegisteredWorker found: ", master.workers, " required: ", qItem.AddrList)
+	logger.Log.Println("Scheduler: All RegisteredWorker found: ", master.workers, " required: ", qItem.AddrList)
 
 	jsonString := master.schedulerHelper(qItem)
 	return jsonString
@@ -30,8 +30,8 @@ func (master *Master) schedule(qItem *cache.QItem) string {
 
 func (master *Master) schedulerHelper(qItem *cache.QItem) string {
 
-	logger.Do.Println("master ===> ", master)
-	logger.Do.Println("qItem  ---> ", qItem)
+	logger.Log.Println("master ===> ", master)
+	logger.Log.Println("qItem  ---> ", qItem)
 
 	wg := sync.WaitGroup{}
 
@@ -72,71 +72,71 @@ func (master *Master) schedulerHelper(qItem *cache.QItem) string {
 		}
 	}
 
-	logger.Do.Println("complete qItem.PartyInfo = ", qItem.PartyInfo)
+	logger.Log.Println("complete qItem.PartyInfo = ", qItem.PartyInfo)
 	for i, addr := range qItem.AddrList {
-		logger.Do.Println("---iterating the qItem AddrList to dispatch job to Workers")
-		logger.Do.Println("for i = ", i, " addr = ", addr)
+		logger.Log.Println("---iterating the qItem AddrList to dispatch job to Workers")
+		logger.Log.Println("for i = ", i, " addr = ", addr)
 		itemIP := strings.Split(addr, ":")[0]
 
 		args := new(entity.DoTaskArgs)
 
 		args.IP = itemIP
-		logger.Do.Println("args.IP = ", args.IP)
+		logger.Log.Println("args.IP = ", args.IP)
 
 		args.MpcIP = MpcIP
-		logger.Do.Println("args.MpcIP = ", args.MpcIP)
+		logger.Log.Println("args.MpcIP = ", args.MpcIP)
 
 		args.MpcPort = uint(mpcPint)
-		logger.Do.Println("args.MpcPort = ", args.MpcPort)
+		logger.Log.Println("args.MpcPort = ", args.MpcPort)
 
 		args.PartyInfo = qItem.PartyInfo[i]
-		logger.Do.Println("args.PartyInfo = ", args.PartyInfo)
+		logger.Log.Println("args.PartyInfo = ", args.PartyInfo)
 		// NOTE: PartyInfo contains ParyType which is parsed later in traintask.go:
 		// traintask.go: partyTypeStr := doTaskArgs.PartyInfo.PartyType
 
 		args.PartyID = qItem.PartyInfo[i].ID
-		logger.Do.Println("args.PartyID = ", args.PartyID)
+		logger.Log.Println("args.PartyID = ", args.PartyID)
 
 		args.PartyNums = qItem.PartyNums
-		logger.Do.Println("args.PartyNums = ", args.PartyNums)
+		logger.Log.Println("args.PartyNums = ", args.PartyNums)
 
 		args.JobFlType = qItem.JobFlType
-		logger.Do.Println("args.JobFlType = ", args.JobFlType)
+		logger.Log.Println("args.JobFlType = ", args.JobFlType)
 
 		args.ExistingKey = qItem.ExistingKey
-		logger.Do.Println("args.ExistingKey = ", args.ExistingKey)
+		logger.Log.Println("args.ExistingKey = ", args.ExistingKey)
 
 		args.TaskInfo = qItem.Tasks
-		logger.Do.Println("args.TaskInfo = ", args.TaskInfo)
+		logger.Log.Println("args.TaskInfo = ", args.TaskInfo)
 
 		args.NetWorkFile = netCfg
-		logger.Do.Println("args.NetWorkFile = ", args.NetWorkFile)
+		logger.Log.Println("args.NetWorkFile = ", args.NetWorkFile)
 
 		// a list of master.workers:
 		// eg: [127.0.0.1:30009:0 127.0.0.1:30010:1 127.0.0.1:30011:2]
 		for i, RegisteredWorker := range master.workers {
-			logger.Do.Println("iterating the master.wokers i=", i)
+			logger.Log.Println("iterating the master.wokers i=", i)
 			// RegisteredWorker is IP:Port:PartyID
-			logger.Do.Println("RegisteredWorker = ", RegisteredWorker)
+			logger.Log.Println("RegisteredWorker = ", RegisteredWorker)
 			// Addr = IP:Port
 			RegisteredWorkerAddr := strings.Join(strings.Split(RegisteredWorker, ":")[:2], ":")
-			logger.Do.Println("RegisteredWorkerAddr = ", RegisteredWorkerAddr)
+			logger.Log.Println("RegisteredWorkerAddr = ", RegisteredWorkerAddr)
 
 			RegisteredWorkerIP := strings.Split(RegisteredWorker, ":")[0]
-			logger.Do.Println("RegisteredWorkerIP = ", RegisteredWorkerIP)
+			logger.Log.Println("RegisteredWorkerIP = ", RegisteredWorkerIP)
 			RegisteredWorkerPort := strings.Split(RegisteredWorker, ":")[1]
-			logger.Do.Println("RegisteredWorkerPort = ", RegisteredWorkerPort)
+			logger.Log.Println("RegisteredWorkerPort = ", RegisteredWorkerPort)
 			RegisteredWorkerPartyID := strings.Split(RegisteredWorker, ":")[2]
-			logger.Do.Println("RegisteredWorkerPartyID = ", RegisteredWorkerPartyID)
+			logger.Log.Println("RegisteredWorkerPartyID = ", RegisteredWorkerPartyID)
 
 			// match using IP (if the IPs are from different devices)
 			// practically for single-machine and multiple terminals, the IP will be the same
 			// thus, needs to match the registered worker with the PartyServer info
 			// check for registeredworker's partyID == args.partyID
 			if RegisteredWorkerIP == args.IP && RegisteredWorkerPartyID == fmt.Sprintf("%d", args.PartyID) {
-				logger.Do.Println("...RegisteredWorkerIP = ", RegisteredWorkerIP, " == ", args.IP, " = args.IP")
-				logger.Do.Println("...PartyID matches RegisteredWorkerPartyID match args PartyID")
-				logger.Do.Println(
+				logger.Log.Println("...RegisteredWorkerIP = ", RegisteredWorkerIP, " == ", args.IP, " = args.IP")
+				logger.Log.Println("...PartyID matches RegisteredWorkerPartyID match args PartyID")
+				logger.Log.Println(
 					"...Dispatch the Job with args.PartyInfo = ",
 					args.PartyInfo,
 					" to RegisteredWorker @ ", RegisteredWorker)
@@ -148,7 +148,7 @@ func (master *Master) schedulerHelper(qItem *cache.QItem) string {
 				go master.TaskHandler(RegisteredWorkerAddr, args, &wg, &trainStatuses)
 				break
 			} else {
-				logger.Do.Println("Register Worker IP does not match args.IP, or the PartyID has no match")
+				logger.Log.Println("Register Worker IP does not match args.IP, or the PartyID has no match")
 			}
 		}
 	}
@@ -159,7 +159,7 @@ func (master *Master) schedulerHelper(qItem *cache.QItem) string {
 	cancel()
 	jsonString, e := json.Marshal(trainStatuses)
 	if e != nil {
-		logger.Do.Fatalln(e)
+		logger.Log.Fatalln(e)
 	}
 	return string(jsonString)
 }
@@ -176,16 +176,16 @@ func (master *Master) TaskHandler(
 	argAddr := entity.EncodeDoTaskArgs(args)
 	var rep entity.DoTaskReply
 
-	logger.Do.Printf("Scheduler: begin to call %s.DoTask of the RegisteredWorker: %s \n", master.workerType, RegisteredWorkerAddr)
+	logger.Log.Printf("Scheduler: begin to call %s.DoTask of the RegisteredWorker: %s \n", master.workerType, RegisteredWorkerAddr)
 	ok := client.Call(RegisteredWorkerAddr, master.Network, master.workerType+".DoTask", argAddr, &rep)
 
 	if !ok {
-		logger.Do.Printf("Scheduler: Master calling %s, DoTask error\n", RegisteredWorkerAddr)
+		logger.Log.Printf("Scheduler: Master calling %s, DoTask error\n", RegisteredWorkerAddr)
 		rep.TaskMsg.RpcCallMsg = ""
 		rep.RpcCallError = true
 
 	} else {
-		logger.Do.Printf("Scheduler: calling %s.DoTask of the RegisteredWorker: %s successful \n", master.workerType, RegisteredWorkerAddr)
+		logger.Log.Printf("Scheduler: calling %s.DoTask of the RegisteredWorker: %s successful \n", master.workerType, RegisteredWorkerAddr)
 		rep.RpcCallError = false
 	}
 	*trainStatuses = append(*trainStatuses, rep)

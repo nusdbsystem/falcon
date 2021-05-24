@@ -12,12 +12,12 @@ import (
 
 func Get(url string) string {
 
-	logger.Do.Println("send get requests to ", url)
+	logger.Log.Println("send get requests to ", url)
 
 	resp, err := http.Get(url)
 
 	if err != nil {
-		logger.Do.Println(err)
+		logger.Log.Println(err)
 		panic(err)
 	}
 
@@ -26,12 +26,12 @@ func Get(url string) string {
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		logger.Do.Println(err)
+		logger.Log.Println(err)
 		panic(err)
 	}
 
-	if resp.StatusCode > 200 && resp.StatusCode <= 299{
-		logger.Do.Println("Get request Error ", resp.StatusCode, string(body))
+	if resp.StatusCode > 200 && resp.StatusCode <= 299 {
+		logger.Log.Println("Get request Error ", resp.StatusCode, string(body))
 		panic(err)
 	}
 
@@ -50,7 +50,7 @@ func PostForm(addr string, data map[string][]string) error {
 	*/
 	url := "http://" + strings.TrimSpace(addr)
 
-	logger.Do.Printf("Sending post request to url: %q", url)
+	logger.Log.Printf("Sending post request to url: %q", url)
 
 	NTimes := 20
 
@@ -58,17 +58,17 @@ func PostForm(addr string, data map[string][]string) error {
 	var resp *http.Response
 
 	for {
-		if NTimes<0{
+		if NTimes < 0 {
 			return err
 		}
 
 		resp, err = http.PostForm(url, data)
 
-		if err != nil{
-			logger.Do.Println("Post Requests Error happens retry ..... ,", err)
-			time.Sleep(time.Second*4)
+		if err != nil {
+			logger.Log.Println("Post Requests Error happens retry ..... ,", err)
+			time.Sleep(time.Second * 4)
 			NTimes--
-		}else{
+		} else {
 			break
 		}
 	}
@@ -101,8 +101,8 @@ func PostJson(url string, js string) {
 	}
 	defer resp.Body.Close()
 
-	logger.Do.Println("response Status:", resp.Status)
-	logger.Do.Println("response Headers:", resp.Header)
+	logger.Log.Println("response Status:", resp.Status)
+	logger.Log.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	logger.Do.Println("response Body:", string(body))
+	logger.Log.Println("response Body:", string(body))
 }

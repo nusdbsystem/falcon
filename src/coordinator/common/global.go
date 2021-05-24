@@ -173,9 +173,9 @@ var (
 func GetEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
-		logger.Do.Printf("Set env var to default {%s: %s}\n", key, defaultValue)
+		logger.Log.Printf("Set env var to default {%s: %s}\n", key, defaultValue)
 		return defaultValue
 	}
-	logger.Do.Printf("Read user defined env var {%s: %s}\n", key, value)
+	logger.Log.Printf("Read user defined env var {%s: %s}\n", key, value)
 	return value
 }

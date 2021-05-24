@@ -15,7 +15,7 @@ loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
-			logger.Do.Printf("Master: %s quit eventLoop \n", master.Port)
+			logger.Log.Printf("Master: %s quit eventLoop \n", master.Port)
 			break loop
 
 		default:
@@ -49,20 +49,20 @@ loop:
 
 // boardcast heartbeat to current workers in worker list
 func (master *Master) broadcastHeartbeat() {
-	logger.Do.Println("[broadcastHeartbeat]...")
+	logger.Log.Println("[broadcastHeartbeat]...")
 	// update lastSendTime
 	master.reset()
 
 	for _, RegisteredWorker := range master.workers {
 		// RegisteredWorker is IP:Port:PartyID
-		logger.Do.Println("RegisteredWorker = ", RegisteredWorker)
+		logger.Log.Println("RegisteredWorker = ", RegisteredWorker)
 		// Addr = IP:Port
 		RegisteredWorkerAddr := strings.Join(strings.Split(RegisteredWorker, ":")[:2], ":")
-		logger.Do.Println("RegisteredWorkerAddr = ", RegisteredWorkerAddr)
+		logger.Log.Println("RegisteredWorkerAddr = ", RegisteredWorkerAddr)
 
 		ok := client.Call(RegisteredWorkerAddr, master.Network, master.workerType+".ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
-			logger.Do.Printf("Master: RPC %s send heartbeat error\n", RegisteredWorkerAddr)
+			logger.Log.Printf("Master: RPC %s send heartbeat error\n", RegisteredWorkerAddr)
 		}
 	}
 }

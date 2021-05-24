@@ -53,7 +53,7 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 // RegisterWorker is an RPC method that is called by workers after they have started
 // up to report that they are ready to receive tasks.
 func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) error {
-	logger.Do.Println("[master/RegisterWorker] register with master, called by worker")
+	logger.Log.Println("[master/RegisterWorker] register with master, called by worker")
 	// Pass WorkerList (addr:partyID) into tmpWorkers for pre-processing
 	master.tmpWorkers <- args.WorkerList
 	return nil
@@ -62,7 +62,7 @@ func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) err
 // sends information of worker to ch. which is used by scheduler
 func (master *Master) forwardRegistrations(qItem *cache.QItem) {
 
-	logger.Do.Printf("Master: start forwardRegistrations... ")
+	logger.Log.Printf("Master: start forwardRegistrations... ")
 	var requiredIP []string
 
 	for i := 0; i < len(qItem.AddrList); i++ {
@@ -74,7 +74,7 @@ loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
-			logger.Do.Printf("Master: %s quit forwardRegistrations \n", master.Port)
+			logger.Log.Printf("Master: %s quit forwardRegistrations \n", master.Port)
 			break loop
 
 		// a list of master.workers:
@@ -82,7 +82,7 @@ loop:
 		case tmpWorker := <-master.tmpWorkers:
 			// 1. check if this work already exist
 			if utils.Contains(tmpWorker, master.workers) {
-				logger.Do.Printf("Master: the worker %s already registered, skip \n", tmpWorker)
+				logger.Log.Printf("Master: the worker %s already registered, skip \n", tmpWorker)
 			}
 
 			// 2. check if this worker is needed
@@ -90,7 +90,7 @@ loop:
 
 			for i, IP := range requiredIP {
 				if tmpIP == IP {
-					logger.Do.Println("Master: Found one worker", tmpWorker)
+					logger.Log.Println("Master: Found one worker", tmpWorker)
 
 					master.Lock()
 					master.workers = append(master.workers, tmpWorker)
@@ -120,13 +120,13 @@ func (master *Master) run(
 ) {
 
 	jsonString := schedule()
-	logger.Do.Println("Master: finish job, begin to update to coord")
+	logger.Log.Println("Master: finish job, begin to update to coord")
 
 	updateStatus(jsonString)
-	logger.Do.Println("Master: finish job, begin to close all")
+	logger.Log.Println("Master: finish job, begin to close all")
 
 	finish()
-	logger.Do.Printf("Master %s: job completed\n", master.Addr)
+	logger.Log.Printf("Master %s: job completed\n", master.Addr)
 
 	master.doneChannel <- true
 }
@@ -137,7 +137,7 @@ loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
-			logger.Do.Printf("WorkerBase: server %s quit Waitting \n", master.Addr)
+			logger.Log.Printf("WorkerBase: server %s quit Waitting \n", master.Addr)
 			break loop
 		case <-master.doneChannel:
 			break loop
@@ -148,7 +148,7 @@ loop:
 // Shutdown is an RPC method that shuts down the Master's RPC server.
 // for rpc method, must be public method, only 2 params, second one must be pointer,return err type
 func (master *Master) Shutdown(_, _ *struct{}) error {
-	logger.Do.Println("Master: Shutdown server")
+	logger.Log.Println("Master: Shutdown server")
 	_ = master.Listener.Close() // causes the Accept to fail, then break out the accetp loop
 	return nil
 }

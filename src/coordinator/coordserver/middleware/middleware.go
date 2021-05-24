@@ -18,7 +18,7 @@ func timeUsage() Middleware {
 		return func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			defer func() {
-				logger.Do.Printf("HTTP: [url] %s [time_usage] %s \n", r.Host+r.URL.Path, time.Since(start))
+				logger.Log.Printf("HTTP: [url] %s [time_usage] %s \n", r.Host+r.URL.Path, time.Since(start))
 			}()
 			f(w, r)
 		}
@@ -34,7 +34,7 @@ func methodVerify(method string) Middleware {
 				http.Error(w, "HTTP: Method not correct", http.StatusBadRequest)
 				return
 			}
-			//logger.Do.Println("HTTP: Checking method")
+			//logger.Log.Println("HTTP: Checking method")
 			f(w, r)
 		}
 	}

@@ -30,10 +30,10 @@ func (wk *InferenceWorker) Run() {
 
 	err := rpcSvc.Register(&wk)
 	if err != nil {
-		logger.Do.Fatalf("%s: start Error \n", wk.Name)
+		logger.Log.Fatalf("%s: start Error \n", wk.Name)
 	}
 
-	logger.Do.Printf("%s from PartyID %s: register to masterAddr = %s \n", wk.Name, wk.PartyID, wk.MasterAddr)
+	logger.Log.Printf("%s from PartyID %s: register to masterAddr = %s \n", wk.Name, wk.PartyID, wk.MasterAddr)
 	wk.Register(wk.MasterAddr, wk.PartyID)
 
 	// start rpc server blocking...

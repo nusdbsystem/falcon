@@ -7,8 +7,8 @@ import (
 	"runtime"
 )
 
-var Do *log.Logger
-var F *os.File
+var Log *log.Logger
+var LogFile *os.File
 
 func GetLogger(fileName string) (*log.Logger, *os.File) {
 
@@ -26,7 +26,7 @@ func GetLogger(fileName string) (*log.Logger, *os.File) {
 
 	// use log.Llongfile to display full path
 	// logger := log.New(fileAndStdoutWriter, "", log.Ldate|log.Ltime|log.Lshortfile)
-	logger := log.New(fileAndStdoutWriter, "[log]\t", log.Llongfile)
+	logger := log.New(fileAndStdoutWriter, "[log] ", log.LstdFlags|log.Llongfile)
 
 	return logger, f
 
@@ -36,13 +36,13 @@ func HandleErrors() {
 	// cache global unexpected error
 	err := recover()
 	if err != nil {
-		Do.Printf("[Error]\t")
-		Do.Println("HandleErrors: Catching error ...")
+		Log.Printf("[Error] ")
+		Log.Println("HandleErrors: Catching error ...")
 		var buf [4096]byte
 		n := runtime.Stack(buf[:], false)
-		Do.Println(err)
-		Do.Printf("==> %s\n", string(buf[:n]))
+		Log.Println(err)
+		Log.Printf("==> %s\n", string(buf[:n]))
 		//os.Exit(1)
 	}
-	Do.Println("HandleErrors: exit current thread")
+	Log.Println("HandleErrors: exit current thread")
 }

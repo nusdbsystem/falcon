@@ -14,12 +14,12 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 	// run master to call partyserver to set up worker
 
 	masterPort := client.GetFreePort(common.CoordAddr)
-	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
+	logger.Log.Println("SetupDist: Launch master Get port", masterPort)
 
 	masterIP := common.CoordIP
 	masterAddr := masterIP + ":" + masterPort
 
-	logger.Do.Println("SetupDist: Launch master ProdEnv")
+	logger.Log.Println("SetupDist: Launch master ProdEnv")
 
 	// in prod, use k8s to run train/predict server as a isolate process
 	itemKey := "job" + fmt.Sprintf("%d", qItem.JobId)
@@ -27,11 +27,11 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 	serviceName := "master-" + itemKey + "-" + strings.ToLower(workerType)
 
 	// put to the queue, assign key to env
-	logger.Do.Println("SetupDist: Writing item to redis")
+	logger.Log.Println("SetupDist: Writing item to redis")
 
 	cache.InitRedisClient().Set(itemKey, cache.Serialize(qItem))
 
-	logger.Do.Printf("SetupDist: Get key, %s InitK8sManager\n", itemKey)
+	logger.Log.Printf("SetupDist: Get key, %s InitK8sManager\n", itemKey)
 
 	km := taskmanager.InitK8sManager(true, "")
 
@@ -51,14 +51,14 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 	//_=taskmanager.ExecuteOthers("pwd")
 	km.UpdateYaml(strings.Join(command, " "))
 
-	logger.Do.Println("SetupDist: Creating yaml done")
+	logger.Log.Println("SetupDist: Creating yaml done")
 
 	filename := common.YamlBasePath + serviceName + ".yaml"
 
-	logger.Do.Println("SetupDist: Creating Resources based on file, ", filename)
+	logger.Log.Println("SetupDist: Creating Resources based on file, ", filename)
 
 	km.CreateResources(filename)
-	logger.Do.Println("SetupDist: setup master done")
+	logger.Log.Println("SetupDist: setup master done")
 }
 
 func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string) {
@@ -72,7 +72,7 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 		masterAddr： IP of the master addr
 		masterAddr： train or predictor
 	 **/
-	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddr, workerType)
+	logger.Log.Println("SetupWorkerHelper: Creating parameters:", masterAddr, workerType)
 
 	workerPort := client.GetFreePort(common.CoordAddr)
 
@@ -85,12 +85,12 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 
 		serviceName = "worker-job" + jobId + "-train-" + common.PartyID
 
-		logger.Do.Println("SetupWorkerHelper: Current in Prod, TrainWorker, svcName", serviceName)
+		logger.Log.Println("SetupWorkerHelper: Current in Prod, TrainWorker, svcName", serviceName)
 	} else if workerType == common.InferenceWorker {
 
 		serviceName = "worker-job" + jobId + "-predict-" + common.PartyID
 
-		logger.Do.Println("SetupWorkerHelper: Current in Prod, InferenceWorker, svcName", serviceName)
+		logger.Log.Println("SetupWorkerHelper: Current in Prod, InferenceWorker, svcName", serviceName)
 	}
 
 	km := taskmanager.InitK8sManager(true, "")
@@ -115,10 +115,10 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 
 	filename := common.YamlBasePath + serviceName + ".yaml"
 
-	logger.Do.Println("SetupDist: Creating yaml done", filename)
+	logger.Log.Println("SetupDist: Creating yaml done", filename)
 
 	km.CreateResources(filename)
 
-	logger.Do.Println("SetupDist: worker is running")
+	logger.Log.Println("SetupDist: worker is running")
 
 }

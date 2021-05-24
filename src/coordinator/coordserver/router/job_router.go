@@ -40,7 +40,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	err, contents := client.ReceiveFile(r, buf, common.JobFile)
 	if err != nil {
-		logger.Do.Println("ReceiveFile Error", err)
+		logger.Log.Println("ReceiveFile Error", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -51,7 +51,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	e := common.ParseTrainJob(contents, &job)
 
 	if e != nil {
-		logger.Do.Println("ParseJob Error", e)
+		logger.Log.Println("ParseJob Error", e)
 		http.Error(w, e.Error(), http.StatusBadRequest)
 		return
 	}
@@ -74,7 +74,7 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	js, err := json.Marshal(resIns)
 
 	if err != nil {
-		logger.Do.Println("json Marshal Error", err)
+		logger.Log.Println("json Marshal Error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

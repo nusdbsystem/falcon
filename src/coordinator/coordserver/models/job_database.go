@@ -64,8 +64,8 @@ func (jobDB *JobDB) Connect() {
 		}
 		db, err = gorm.Open(jobDB.engine, jobDB.addr)
 		if err != nil {
-			logger.Do.Println(err)
-			logger.Do.Println("JobDB: connecting Db...retry")
+			logger.Log.Println(err)
+			logger.Log.Println("JobDB: connecting Db...retry")
 			time.Sleep(time.Second * 5)
 			NTimes--
 		} else {
@@ -81,7 +81,7 @@ func (jobDB *JobDB) Disconnect() {
 
 	e := jobDB.Db.Close()
 	if e != nil {
-		logger.Do.Println("closeDb error")
+		logger.Log.Println("closeDb error")
 	}
 }
 
@@ -173,7 +173,7 @@ func (jobDB *JobDB) Commit(tx *gorm.DB, el interface{}) {
 		res, _ := el.([]error)
 		for _, ev := range res {
 			if ev != nil {
-				logger.Do.Println("Sql error", ev)
+				logger.Log.Println("Sql error", ev)
 				tx.Rollback()
 				panic(ev)
 			}
@@ -182,7 +182,7 @@ func (jobDB *JobDB) Commit(tx *gorm.DB, el interface{}) {
 	case error:
 		res, _ := el.(error)
 		if res != nil {
-			logger.Do.Println("Sql error", res)
+			logger.Log.Println("Sql error", res)
 			tx.Rollback()
 			panic(res)
 		}

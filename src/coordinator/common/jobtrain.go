@@ -80,21 +80,21 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 	// if the field is not filled, still pass, default to 0
 	marshalErr := json.Unmarshal([]byte(contents), jobInfo)
 	if marshalErr != nil {
-		logger.Do.Println("Json unmarshal error", marshalErr)
+		logger.Log.Println("Json unmarshal error", marshalErr)
 		panic("Json unmarshal error")
 	}
 
-	logger.Do.Println("Searching Algorithms...")
+	logger.Log.Println("Searching Algorithms...")
 
 	// if there is PreProcessing, serialize it
 	if jobInfo.Tasks.PreProcessing.AlgorithmName != "" {
-		logger.Do.Println("ParseTrainJob: PreProcessing AlgorithmName match <-->", jobInfo.Tasks.PreProcessing.AlgorithmName)
+		logger.Log.Println("ParseTrainJob: PreProcessing AlgorithmName match <-->", jobInfo.Tasks.PreProcessing.AlgorithmName)
 		jobInfo.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig =
 			GeneratePreProcessparams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 	// if there is ModelTraining, serialize it
 	if jobInfo.Tasks.ModelTraining.AlgorithmName != "" {
-		logger.Do.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
 			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
@@ -102,11 +102,11 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 	verifyErr := trainJobVerify(jobInfo)
 	if verifyErr != nil {
-		logger.Do.Println("train job verify error", verifyErr)
+		logger.Log.Println("train job verify error", verifyErr)
 		return errors.New("train job verify error")
 	}
 
-	logger.Do.Println("Parsed jobInfo: ", jobInfo)
+	logger.Log.Println("Parsed jobInfo: ", jobInfo)
 
 	return nil
 }
@@ -191,8 +191,8 @@ func GeneratePreProcessparams(cfg map[string]interface{}) string {
 }
 
 func GenerateNetworkConfig(addrs []string, portArray [][]int32) string {
-	logger.Do.Println("Scheduler: Generating NetworkCfg ...")
-	logger.Do.Println("Scheduler: Assigned IP and ports are: ", addrs, portArray)
+	logger.Log.Println("Scheduler: Generating NetworkCfg ...")
+	logger.Log.Println("Scheduler: Assigned IP and ports are: ", addrs, portArray)
 
 	partyNums := len(addrs)
 	var IPs []string
@@ -213,7 +213,7 @@ func GenerateNetworkConfig(addrs []string, portArray [][]int32) string {
 
 	out, err := proto.Marshal(&cfg)
 	if err != nil {
-		logger.Do.Println("Generate NetworkCfg failed ", err)
+		logger.Log.Println("Generate NetworkCfg failed ", err)
 		panic(err)
 	}
 

@@ -84,8 +84,8 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 		}
 	}
 
-	logger.Do.Printf("CreateInference: JobType: %s, parsed partInfo : ", JobInfo.FlSetting)
-	logger.Do.Println(inferencePartyInfo)
+	logger.Log.Printf("CreateInference: JobType: %s, parsed partInfo : ", JobInfo.FlSetting)
+	logger.Log.Println(inferencePartyInfo)
 
 	addresses := common.ParseAddress(inferencePartyInfo)
 
@@ -138,7 +138,7 @@ func UpdateInference(newInfId uint, InferenceIds []uint, ctx *entity.Context) {
 loop:
 	for {
 		if MaxCheck < 0 {
-			logger.Do.Println("[UpdateInference]: Update Failed, latest job is nor running")
+			logger.Log.Println("[UpdateInference]: Update Failed, latest job is nor running")
 			break
 		}
 
@@ -162,7 +162,7 @@ loop:
 				e, _ = ctx.JobDB.InferenceUpdateStatus(tx, infId, common.JobKilled)
 				ctx.JobDB.Commit(tx, e)
 			}
-			logger.Do.Println("[UpdateInference]: Update successfully")
+			logger.Log.Println("[UpdateInference]: Update successfully")
 			break loop
 		} else {
 			MaxCheck--

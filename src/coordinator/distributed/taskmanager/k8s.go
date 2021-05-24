@@ -6,6 +6,7 @@ import (
 	"coordinator/logger"
 	"io"
 	"io/ioutil"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -23,18 +24,18 @@ type K8sManager struct {
 	k8sConfig *rest.Config
 }
 
-func InitK8sManager(inCluster bool, kubeconfig string) *K8sManager{
+func InitK8sManager(inCluster bool, kubeconfig string) *K8sManager {
 
 	km := K8sManager{}
 
 	var err error
-	if !inCluster{
+	if !inCluster {
 
 		km.k8sConfig, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
-			logger.Do.Fatal(err)
+			logger.Log.Fatal(err)
 		}
-	}else{
+	} else {
 		// load in-cluster configuration,
 		// KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT must be defined
 		// define them in env variable later
@@ -54,20 +55,20 @@ func (km *K8sManager) CreateResources(filename string) {
 	// 1. read file as bytes
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		logger.Do.Fatal(err)
+		logger.Log.Fatal(err)
 	}
 	// print the yaml file to watch
-	//logger.Do.Println(string(b))
+	//logger.Log.Println(string(b))
 
 	// 2. create k8s clients instance
 	c, err := kubernetes.NewForConfig(km.k8sConfig)
 	if err != nil {
-		logger.Do.Fatal(err)
+		logger.Log.Fatal(err)
 	}
 
 	dd, err := dynamic.NewForConfig(km.k8sConfig)
 	if err != nil {
-		logger.Do.Fatal(err)
+		logger.Log.Fatal(err)
 	}
 
 	// 3. decode the file, get multi objs,
@@ -84,24 +85,24 @@ func (km *K8sManager) CreateResources(filename string) {
 		obj, gvk, err := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(rawObj.Raw, nil, nil)
 		unstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 		if err != nil {
-			logger.Do.Fatal(err)
+			logger.Log.Fatal(err)
 		}
 
 		unstructuredObj := &unstructured.Unstructured{Object: unstructuredMap}
 
-		logger.Do.Printf("K8sManager: Creating resources, Name: %s, Kind: %s ...\n",
+		logger.Log.Printf("K8sManager: Creating resources, Name: %s, Kind: %s ...\n",
 			unstructuredObj.GetName(),
-			unstructuredObj.GetKind() )
+			unstructuredObj.GetKind())
 
 		gr, err := restmapper.GetAPIGroupResources(c.Discovery())
 		if err != nil {
-			logger.Do.Fatal(err)
+			logger.Log.Fatal(err)
 		}
 
 		mapper := restmapper.NewDiscoveryRESTMapper(gr)
 		mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 		if err != nil {
-			logger.Do.Fatal(err)
+			logger.Log.Fatal(err)
 		}
 
 		var dri dynamic.ResourceInterface
@@ -116,32 +117,31 @@ func (km *K8sManager) CreateResources(filename string) {
 		}
 
 		if _, err := dri.Create(context.Background(), unstructuredObj, metav1.CreateOptions{}); err != nil {
-			//logger.Do.Fatal(err)
-			logger.Do.Println("K8sManager: Creating resource Error",err)
+			//logger.Log.Fatal(err)
+			logger.Log.Println("K8sManager: Creating resource Error", err)
 		}
 	}
 	if err != io.EOF {
-		logger.Do.Println("K8sManager: eof ", err)
+		logger.Log.Println("K8sManager: eof ", err)
 	}
 }
 
-func (km *K8sManager) UpdateYaml(command string){
+func (km *K8sManager) UpdateYaml(command string) {
 	e := ExecuteBash(command)
-	if e!=nil{
-		panic("K8sManager: MasterError " +e.Error())
+	if e != nil {
+		panic("K8sManager: MasterError " + e.Error())
 	}
 }
 
-
-func (km *K8sManager) DeleteService(svcName string){
-	logger.Do.Printf("K8sManager: deleting svc %s...\n", svcName)
+func (km *K8sManager) DeleteService(svcName string) {
+	logger.Log.Printf("K8sManager: deleting svc %s...\n", svcName)
 
 	client, _ := kubernetes.NewForConfig(km.k8sConfig)
 
 	err := client.CoreV1().Services("default").Delete(context.TODO(), svcName, metav1.DeleteOptions{})
 
 	if err != nil {
-		logger.Do.Printf("K8sManager: delete svc %s error %s \n", svcName, err)
+		logger.Log.Printf("K8sManager: delete svc %s error %s \n", svcName, err)
 
 	}
 }

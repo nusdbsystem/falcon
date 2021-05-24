@@ -21,9 +21,9 @@ func (wk *TrainWorker) TrainTask(doTaskArgs *entity.DoTaskArgs, rep *entity.DoTa
 	wg.Add(1)
 
 	// no need to wait for mpc, once train task done, shutdown the mpc
-	logger.Do.Println("[TrainTask] spawn thread for mpcTaskCallee")
+	logger.Log.Println("[TrainTask] spawn thread for mpcTaskCallee")
 	go wk.mpcTaskCallee(doTaskArgs, "algName")
-	logger.Do.Println("[TrainTask] spawn thread for mlTaskCallee")
+	logger.Log.Println("[TrainTask] spawn thread for mlTaskCallee")
 	go wk.mlTaskCallee(doTaskArgs, rep, &wg)
 
 	// wait until all the task done
@@ -61,10 +61,10 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 			("algorithm-name", po::value<std::string>(&algorithm_name), "algorithm to be run")
 			("algorithm-params", po::value<std::string>(&algorithm_params), "parameters for the algorithm");
 	 **/
-	logger.Do.Println("mlTaskCallee called")
+	logger.Log.Println("mlTaskCallee called")
 	defer wg.Done()
 
-	logger.Do.Printf("Worker: %s task started\n", wk.Addr)
+	logger.Log.Printf("Worker: %s task started\n", wk.Addr)
 
 	partyId := doTaskArgs.PartyID
 	partyNum := doTaskArgs.PartyNums
@@ -99,11 +99,11 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	var algParams string
 	var KeyFile string
 
-	logger.Do.Println("[mlTaskCallee] call doMlTask with partyId = ", partyId)
-	logger.Do.Println("[mlTaskCallee] call doMlTask with partyNum = ", partyNum)
-	logger.Do.Println("[mlTaskCallee] call doMlTask with partyType = ", partyType)
-	logger.Do.Println("[mlTaskCallee] call doMlTask with flSetting = ", flSetting)
-	logger.Do.Println("[mlTaskCallee] call doMlTask with existingKey = ", existingKey)
+	logger.Log.Println("[mlTaskCallee] call doMlTask with partyId = ", partyId)
+	logger.Log.Println("[mlTaskCallee] call doMlTask with partyNum = ", partyNum)
+	logger.Log.Println("[mlTaskCallee] call doMlTask with partyType = ", partyType)
+	logger.Log.Println("[mlTaskCallee] call doMlTask with flSetting = ", flSetting)
+	logger.Log.Println("[mlTaskCallee] call doMlTask with existingKey = ", existingKey)
 	run := doMlTask(
 		wk.Pm,
 		fmt.Sprintf("%d", partyId),
@@ -117,10 +117,10 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	var exitStr string
 	var res map[string]string
 	var logFile string
-	logger.Do.Println("res from doMlTask is = ", res)
+	logger.Log.Println("res from doMlTask is = ", res)
 
 	if doTaskArgs.TaskInfo.PreProcessing.AlgorithmName != "" {
-		logger.Do.Println("Worker: task pre processing start")
+		logger.Log.Println("Worker: task pre processing start")
 		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.PreProcessing.AlgorithmName
 		_ = os.MkdirAll(logFile, os.ModePerm)
 		KeyFile = common.TaskDataPath + "/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
@@ -138,18 +138,18 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 		if exit := wk.execResHandler(exitStr, res, rep); exit == true {
 			return
 		}
-		logger.Do.Println("Worker: task pre processing done", rep)
+		logger.Log.Println("Worker: task pre processing done", rep)
 	}
 
 	if doTaskArgs.TaskInfo.ModelTraining.AlgorithmName != "" {
 		// execute task 2: train
-		logger.Do.Println("Worker: task model training start")
+		logger.Log.Println("Worker: task model training start")
 		logFile = common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.ModelTraining.AlgorithmName
 		_ = os.MkdirAll(logFile, os.ModePerm)
 		KeyFile = common.TaskDataPath + "/" + doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Key
 
 		algParams = doTaskArgs.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
-		logger.Do.Println("Worker: SerializedAlgorithmConfig = ", algParams)
+		logger.Log.Println("Worker: SerializedAlgorithmConfig = ", algParams)
 
 		exitStr, res = run(
 			doTaskArgs.TaskInfo.ModelTraining.AlgorithmName,
@@ -165,7 +165,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 		if exit := wk.execResHandler(exitStr, res, rep); exit == true {
 			return
 		}
-		logger.Do.Println("Worker:task model training", rep)
+		logger.Log.Println("Worker:task model training", rep)
 	}
 
 	// 2 thread will ready from isStop channel, only one is running at the any time
@@ -189,7 +189,7 @@ func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName stri
 		-h 每个mpc进程的启动输入都是party_0的IP
 	 * @return
 	 **/
-	logger.Do.Println("mpcTaskCallee called with algName ", algName)
+	logger.Log.Println("mpcTaskCallee called with algName ", algName)
 	partyId := doTaskArgs.PartyID // TODO: make PartyID all the same type, currently it is sometimes uint sometimes string!
 	partyNum := doTaskArgs.PartyNums
 
@@ -206,12 +206,12 @@ func (wk *TrainWorker) mpcTaskCallee(doTaskArgs *entity.DoTaskArgs, algName stri
 		" "+algName,
 	)
 
-	logger.Do.Printf("-----------------------------------------------------------------\n")
-	logger.Do.Println("envs", envs)
-	logger.Do.Println(cmd.String())
-	logger.Do.Printf("-----------------------------------------------------------------\n")
+	logger.Log.Printf("-----------------------------------------------------------------\n")
+	logger.Log.Println("envs", envs)
+	logger.Log.Println(cmd.String())
+	logger.Log.Printf("-----------------------------------------------------------------\n")
 
-	logger.Do.Println("mpcTaskCallee done")
+	logger.Log.Println("mpcTaskCallee done")
 
 	// 	wk.Pm.CreateResources(cmd, envs)
 	return
@@ -232,7 +232,7 @@ func (wk *TrainWorker) execResHandler(
 	 **/
 	js, err := json.Marshal(RuntimeErrorMsg)
 	if err != nil {
-		logger.Do.Println("Worker: Serialize job status error", err)
+		logger.Log.Println("Worker: Serialize job status error", err)
 		return true
 	}
 	rep.TaskMsg.RuntimeMsg = string(js)
@@ -271,16 +271,16 @@ func TestTaskProcess(doTaskArgs *entity.DoTaskArgs) {
 	//dataInputFile := common.TaskDataPath +"/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
 	modelFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
 	algParams := doTaskArgs.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
-	logger.Do.Println("Worker: SerializedAlgorithmConfig is", algParams)
+	logger.Log.Println("Worker: SerializedAlgorithmConfig is", algParams)
 
 	modelReportFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
 	logFile := common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.PreProcessing.AlgorithmName
 	KeyFile := doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
 	modelInputFile := common.TaskDataOutput + "/" + doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
 
-	logger.Do.Printf("--------------------------------------------------\n")
-	logger.Do.Printf("\n")
-	logger.Do.Println("executed path is: ", strings.Join([]string{
+	logger.Log.Printf("--------------------------------------------------\n")
+	logger.Log.Printf("\n")
+	logger.Log.Println("executed path is: ", strings.Join([]string{
 		common.FLEnginePath,
 		" --party-id " + fmt.Sprintf("%d", partyId),
 		" --party-num " + fmt.Sprintf("%d", partyNum),
@@ -298,8 +298,8 @@ func TestTaskProcess(doTaskArgs *entity.DoTaskArgs) {
 		" --model-save-file " + modelFile,
 		" --model-report-file " + modelReportFile,
 	}, " "))
-	logger.Do.Printf("\n")
-	logger.Do.Printf("--------------------------------------------------\n")
+	logger.Log.Printf("\n")
+	logger.Log.Printf("--------------------------------------------------\n")
 	time.Sleep(time.Minute)
 }
 
@@ -360,10 +360,10 @@ func doMlTask(
 			"--model-report-file", modelReport,
 		)
 
-		logger.Do.Printf("-----------------------------------------------------------------\n")
-		logger.Do.Println("envs", envs)
-		logger.Do.Println(cmd.String())
-		logger.Do.Printf("-----------------------------------------------------------------\n")
+		logger.Log.Printf("-----------------------------------------------------------------\n")
+		logger.Log.Println("envs", envs)
+		logger.Log.Println(cmd.String())
+		logger.Log.Printf("-----------------------------------------------------------------\n")
 
 		exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)
 		res[algName] = runTimeErrorLog

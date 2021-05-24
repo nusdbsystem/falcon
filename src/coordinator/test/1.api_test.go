@@ -24,7 +24,7 @@ func TestSql(t *testing.T) {
 
 	jobDB.Disconnect()
 
-	logger.Do.Println(u)
+	logger.Log.Println(u)
 
 }
 
@@ -39,14 +39,14 @@ func TestJson(t *testing.T) {
 	var bird Bird
 
 	_ = json.Unmarshal([]byte(birdJson), &bird)
-	logger.Do.Printf(
+	logger.Log.Printf(
 		"Species: %s, Description: %s",
 		bird.Species, bird.Description)
 }
 
 func TestParseJson(t *testing.T) {
 	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/train_jobs/job.json")
-	logger.Do.Println(err)
+	logger.Log.Println(err)
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
@@ -54,10 +54,10 @@ func TestParseJson(t *testing.T) {
 	var job common.TrainJob
 
 	e2 := json.Unmarshal(byteValue, &job)
-	logger.Do.Println(e2)
+	logger.Log.Println(e2)
 
 	b, err := json.Marshal(job.PartyInfo)
-	logger.Do.Println(string(b), err)
+	logger.Log.Println(string(b), err)
 
 	jb, _ := json.Marshal(job.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	res := common.LogisticRegression{}

@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-func init(){
+func init() {
 	fmt.Println("Init logger")
-	logger.Do, logger.F = logger.GetLogger("./TestSubProc")
+	logger.Log, logger.LogFile = logger.GetLogger("./TestSubProc")
 
 }

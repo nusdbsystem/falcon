@@ -10,7 +10,7 @@ import (
 func (wk *InferenceWorker) CreateInference(doTaskArgs *entity.DoTaskArgs) {
 	// todo gobuild.sh sub process to run prediction job
 
-	logger.Do.Println("InferenceWorker: CreateService")
+	logger.Log.Println("InferenceWorker: CreateService")
 
 	cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
 
@@ -20,7 +20,7 @@ func (wk *InferenceWorker) CreateInference(doTaskArgs *entity.DoTaskArgs) {
 
 	el, e := wk.Pm.CreateResources(cmd, envs)
 
-	logger.Do.Println("Worker:task 1 pre processing done", el)
+	logger.Log.Println("Worker:task 1 pre processing done", el)
 
 	if e != common.SubProcessNormal {
 		// return res is used to control the rpc call status, always return nil, but

@@ -39,7 +39,7 @@ func (w *WorkerBase) RunWorker(worker Worker) {
 
 	worker.Run()
 
-	logger.Do.Printf("%s: runWorker exit", w.Name)
+	logger.Log.Printf("%s: runWorker exit", w.Name)
 
 }
 
@@ -65,18 +65,18 @@ func (w *WorkerBase) Register(MasterAddr string, PartyID string) {
 	args.PartyID = PartyID
 	args.WorkerList = w.Addr + ":" + PartyID // IP:Port:PartyID
 
-	logger.Do.Printf("WorkerBase: begin to call Master.RegisterWorker to register WorkerAddr: %s \n", args.WorkerAddr)
+	logger.Log.Printf("WorkerBase: begin to call Master.RegisterWorker to register WorkerAddr: %s \n", args.WorkerAddr)
 	ok := client.Call(MasterAddr, w.Network, "Master.RegisterWorker", args, new(struct{}))
 	// if not register successfully, close
 	if ok == false {
-		logger.Do.Fatalf("WorkerBase: Register RPC %s, register error\n", MasterAddr)
+		logger.Log.Fatalf("WorkerBase: Register RPC %s, register error\n", MasterAddr)
 	}
 }
 
 // Shutdown is called by the master when all work has been completed.
 // We should respond with the number of tasks we have processed.
 func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
-	logger.Do.Printf("%s: Shutdown %s\n", w.Name, w.Addr)
+	logger.Log.Printf("%s: Shutdown %s\n", w.Name, w.Addr)
 
 	// shutdown other related thread
 	w.Cancel()
@@ -91,7 +91,7 @@ func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
 		// do the kill
 		w.Pm.Cancel()
 
-		logger.Do.Printf("%s: Waiting to finish the killing %d process of DoTask...\n", w.Name, w.Pm.NumProc)
+		logger.Log.Printf("%s: Waiting to finish the killing %d process of DoTask...\n", w.Name, w.Pm.NumProc)
 
 		// wait until kill successfully
 		<-w.TaskFinish
@@ -100,11 +100,11 @@ func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
 		w.Pm.Unlock()
 	}
 
-	logger.Do.Printf("%s: DoTask returned, Close the party server...\n", w.Name)
+	logger.Log.Printf("%s: DoTask returned, Close the party server...\n", w.Name)
 
 	err := w.Listener.Close() // close the connection, cause error, and then ,break the WorkerBase
 	if err != nil {
-		logger.Do.Printf("%s: close error, %s \n", w.Name, err)
+		logger.Log.Printf("%s: close error, %s \n", w.Name, err)
 	}
 	// this is used to define shut down the WorkerBase servers
 
@@ -120,20 +120,20 @@ loop:
 	for {
 		select {
 		case <-w.Ctx.Done():
-			logger.Do.Printf("%s: server %s quit eventLoop \n", w.Name, w.Addr)
+			logger.Log.Printf("%s: server %s quit eventLoop \n", w.Name, w.Addr)
 			break loop
 		default:
 			elapseTime := time.Now().UnixNano() - w.latestHeardTime
 			if int(elapseTime/int64(time.Millisecond)) >= w.SuicideTimeout {
 
-				logger.Do.Printf("%s: Timeout, server %s begin to suicide \n", w.Name, w.Addr)
+				logger.Log.Printf("%s: Timeout, server %s begin to suicide \n", w.Name, w.Addr)
 
 				var reply entity.ShutdownReply
 				ok := client.Call(w.Addr, w.Network, w.Name+".Shutdown", new(struct{}), &reply)
 				if ok == false {
-					logger.Do.Printf("%s: RPC %s shutdown error\n", w.Name, w.Addr)
+					logger.Log.Printf("%s: RPC %s shutdown error\n", w.Name, w.Addr)
 				} else {
-					logger.Do.Printf("%s: WorkerBase timeout, RPC %s shutdown successfully\n", w.Name, w.Addr)
+					logger.Log.Printf("%s: WorkerBase timeout, RPC %s shutdown successfully\n", w.Name, w.Addr)
 				}
 				// quit event loop no matter ok or not
 				break

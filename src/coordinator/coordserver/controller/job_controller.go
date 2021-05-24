@@ -11,7 +11,7 @@ import (
 
 func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
 
-	logger.Do.Println("HTTP server: in SubmitJob, put to the JobQueue")
+	logger.Log.Println("HTTP server: in SubmitJob, put to the JobQueue")
 
 	// generate.sh item pushed to the queue
 

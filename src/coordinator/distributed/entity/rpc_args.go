@@ -100,7 +100,7 @@ func EncodeDoTaskArgsGeneral(args interface{}) []byte {
 
 	switch t := args.(type) {
 	default:
-		logger.Do.Println(t)
+		logger.Log.Println(t)
 	case *ShutdownReply:
 		args = args.(*ShutdownReply)
 	case *DoTaskArgs:
@@ -130,7 +130,7 @@ func DecodeDoTaskArgsGeneral(by []byte, reply interface{}) {
 
 		switch t := reply.(type) {
 		default:
-			logger.Do.Println(t)
+			logger.Log.Println(t)
 		case *ShutdownReply:
 
 			var d ShutdownReply

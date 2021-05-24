@@ -45,7 +45,7 @@ func initLogger() {
 		runtimeLogPath = "./logs"
 	}
 
-	fmt.Println("[initLogger] runtimeLogPath: ", runtimeLogPath)
+	fmt.Println("[initLogger] runtimeLogPath:", runtimeLogPath)
 
 	// create nested dirs if necessary
 	err := os.MkdirAll(runtimeLogPath, os.ModePerm)
@@ -61,7 +61,7 @@ func initLogger() {
 	var logFileName string
 	logFileName = runtimeLogPath + "/" + common.ServiceName + "-" + rawTime.Format(layout) + ".log"
 
-	logger.Do, logger.F = logger.GetLogger(logFileName)
+	logger.Log, logger.LogFile = logger.GetLogger(logFileName)
 }
 
 func initEnv(svcName string) {
@@ -108,7 +108,7 @@ func initEnv(svcName string) {
 		}
 
 		if len(common.ServiceName) == 0 {
-			logger.Do.Println("Error: Input Error, ServiceName not provided, is either 'coord' or 'partyserver' ")
+			logger.Log.Println("Error: Input Error, ServiceName not provided, is either 'coord' or 'partyserver' ")
 			os.Exit(1)
 		}
 
@@ -138,7 +138,7 @@ func initEnv(svcName string) {
 			"FL_ENGINE_PATH",
 			"/opt/falcon/build/src/executor/falcon")
 		if common.CoordIP == "" || common.PartyServerIP == "" || common.PartyServerPort == "" {
-			logger.Do.Println("Error: Input Error, either CoordIP or PartyServerIP or PartyServerPort not provided")
+			logger.Log.Println("Error: Input Error, either CoordIP or PartyServerIP or PartyServerPort not provided")
 			os.Exit(1)
 		}
 
@@ -154,7 +154,7 @@ func initEnv(svcName string) {
 		if common.Env == common.DevEnv {
 
 			// master communicate coord with IP+port in dev
-			logger.Do.Println("CoordIP: ", common.CoordIP+":"+common.CoordPort)
+			logger.Log.Println("CoordIP: ", common.CoordIP+":"+common.CoordPort)
 
 			common.CoordAddr = (common.CoordIP + ":" + common.CoordPort)
 
@@ -171,13 +171,13 @@ func initEnv(svcName string) {
 			common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 
 			// master communicate coord with IP+port in dev, with name+port in prod
-			logger.Do.Println("CoordK8sSvcName: ", common.CoordK8sSvcName+":"+common.CoordPort)
+			logger.Log.Println("CoordK8sSvcName: ", common.CoordK8sSvcName+":"+common.CoordPort)
 
 			common.CoordAddr = (common.CoordK8sSvcName + ":" + common.CoordPort)
 		}
 
 		if common.CoordAddr == "" {
-			logger.Do.Println("Error: Input Error, CoordAddr not provided")
+			logger.Log.Println("Error: Input Error, CoordAddr not provided")
 			os.Exit(1)
 		}
 
@@ -194,7 +194,7 @@ func initEnv(svcName string) {
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 		if common.MasterAddr == "" || common.WorkerAddr == "" {
-			logger.Do.Println("Error: Input Error, either MasterAddr or WorkerAddr  not provided")
+			logger.Log.Println("Error: Input Error, either MasterAddr or WorkerAddr  not provided")
 			os.Exit(1)
 		}
 
@@ -212,7 +212,7 @@ func initEnv(svcName string) {
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 		if common.MasterAddr == "" || common.WorkerAddr == "" {
-			logger.Do.Println("Error: Input Error, either MasterAddr or WorkerAddr not provided")
+			logger.Log.Println("Error: Input Error, either MasterAddr or WorkerAddr not provided")
 			os.Exit(1)
 		}
 	}
@@ -223,11 +223,11 @@ func main() {
 	defer logger.HandleErrors()
 
 	defer func() {
-		_ = logger.F.Close()
+		_ = logger.LogFile.Close()
 	}()
 
 	if common.ServiceName == "coord" {
-		logger.Do.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
+		logger.Log.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
 
 		nConsumer, _ := strconv.Atoi(common.NbConsumers)
 		coordserver.SetupHttp(nConsumer)
@@ -236,7 +236,7 @@ func main() {
 	// start work in remote machine automatically
 	if common.ServiceName == "partyserver" {
 
-		logger.Do.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
+		logger.Log.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
 
 		partyserver.SetupPartyServer()
 	}
@@ -250,7 +250,7 @@ func main() {
 
 	if common.ServiceName == common.Master {
 
-		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
+		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
 		// this should be the service name, defined at runtime,
 		masterAddr := common.MasterAddr
@@ -267,7 +267,7 @@ func main() {
 
 	if common.ServiceName == common.TrainWorker {
 
-		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
+		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
 		// init the train worker with addresses of master and worker, also the partyID
 		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr, common.PartyID)
@@ -281,7 +281,7 @@ func main() {
 
 	if common.ServiceName == common.InferenceWorker {
 
-		logger.Do.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
+		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 
 		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr, common.PartyID)
 		wk.RunWorker(wk)

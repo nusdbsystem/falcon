@@ -13,12 +13,12 @@ func SetupDistDev(qItem *cache.QItem, workerType string) {
 	// run master to call partyserver to set up worker
 
 	masterPort := client.GetFreePort(common.CoordAddr)
-	logger.Do.Println("SetupDist: Launch master Get port", masterPort)
+	logger.Log.Println("SetupDist: Launch master Get port", masterPort)
 
 	masterIP := common.CoordIP
 	masterAddr := masterIP + ":" + masterPort
 
-	logger.Do.Println("SetupDist: Launch master for Dev Env")
+	logger.Log.Println("SetupDist: Launch master for Dev Env")
 
 	// use a thread
 	SetupMaster(masterAddr, qItem, workerType)
@@ -35,7 +35,7 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 		masterAddr： IP of the master addr
 		masterAddr： train or predictor
 	 **/
-	logger.Do.Println("SetupWorkerHelper: Creating parameters:", masterAddr, workerType)
+	logger.Log.Println("SetupWorkerHelper: Creating parameters:", masterAddr, workerType)
 
 	workerPort := client.GetFreePort(common.CoordAddr)
 
@@ -53,9 +53,9 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 		serviceName = "worker-job" + jobId + "-train-" + common.PartyID
 		common.TaskRuntimeLogs = common.PartyServerBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.MkdirAll(common.TaskRuntimeLogs, os.ModePerm)
-		logger.Do.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
+		logger.Log.Println("SetupWorkerHelper: Creating runtimelogsfolder error", ee)
 
-		logger.Do.Println("SetupWorkerHelper: Current in Dev, TrainWorker")
+		logger.Log.Println("SetupWorkerHelper: Current in Dev, TrainWorker")
 
 		wk := worker.InitTrainWorker(masterAddr, workerAddr, common.PartyID)
 		wk.RunWorker(wk)
@@ -66,11 +66,11 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 		common.TaskRuntimeLogs = common.PartyServerBasePath + "/" + common.RuntimeLogs + "/" + serviceName
 		ee := os.MkdirAll(common.TaskRuntimeLogs, os.ModePerm)
 		if ee != nil {
-			logger.Do.Fatalln("Error in creating runtimelogsfolder", ee)
+			logger.Log.Fatalln("Error in creating runtimelogsfolder", ee)
 		}
-		logger.Do.Println("SetupWorkerHelper: Created runtimelogsfolder")
+		logger.Log.Println("SetupWorkerHelper: Created runtimelogsfolder")
 
-		logger.Do.Println("SetupWorkerHelper:  will init InferenceWorker")
+		logger.Log.Println("SetupWorkerHelper:  will init InferenceWorker")
 		wk := worker.InitInferenceWorker(masterAddr, workerAddr, common.PartyID)
 		wk.RunWorker(wk)
 
@@ -78,6 +78,6 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 
 	// in prod, use k8s to run train/predict server as a isolate process
 
-	logger.Do.Println("SetupDist: worker is running")
+	logger.Log.Println("SetupDist: worker is running")
 
 }

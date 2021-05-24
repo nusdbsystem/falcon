@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"coordinator/coordserver/models"
 	"coordinator/cache"
 	"coordinator/common"
+	"coordinator/coordserver/models"
 	dist "coordinator/distributed"
 	"coordinator/logger"
 	"fmt"
@@ -37,7 +37,7 @@ func Init(nConsumer int) *JobScheduler {
 func (ds *JobScheduler) Consume(consumerId int) {
 	defer func() {
 		err := recover()
-		logger.Do.Println("Consume: Error of this thread, ", consumerId, err)
+		logger.Log.Println("Consume: Error of this thread, ", consumerId, err)
 		ds.Lock()
 		ds.curConsumers -= 1
 		ds.Unlock()
@@ -48,23 +48,23 @@ loop:
 	for {
 		select {
 		case stop := <-ds.isStop:
-			logger.Do.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Get from isStop")
+			logger.Log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Get from isStop")
 			if stop == true {
-				logger.Do.Println("Consume: Stop consuming")
+				logger.Log.Println("Consume: Stop consuming")
 				break loop
 			}
 		default:
 
-			//logger.Do.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the queue...")
+			//logger.Log.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the queue...")
 
 			if qItem, ok := cache.JobQueue.Pop(); ok {
 
-				logger.Do.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
+				logger.Log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
 
 				models.JobUpdateStatus(qItem.JobId, common.JobRunning)
 
 				// Launching the master
-				go func(){
+				go func() {
 					defer logger.HandleErrors()
 					dist.SetupDist(qItem, common.TrainWorker)
 				}()
@@ -73,7 +73,7 @@ loop:
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	logger.Do.Println("Consumer stopped")
+	logger.Log.Println("Consumer stopped")
 }
 
 func (ds *JobScheduler) StopConsumer() {
@@ -87,7 +87,7 @@ loop:
 		select {
 		case stop := <-ds.isStopMonitor:
 			if stop == true {
-				logger.Do.Println("Consume: Stopping monitor")
+				logger.Log.Println("Consume: Stopping monitor")
 				break loop
 			}
 		default:
@@ -100,7 +100,7 @@ loop:
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	logger.Do.Println("Consumer Monitor stopped")
+	logger.Log.Println("Consumer Monitor stopped")
 
 }
 

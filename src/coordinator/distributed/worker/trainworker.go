@@ -32,10 +32,10 @@ func (wk *TrainWorker) Run() {
 
 	err := rpcSvc.Register(wk)
 	if err != nil {
-		logger.Do.Fatalf("%s: start Error \n", wk.Name)
+		logger.Log.Fatalf("%s: start Error \n", wk.Name)
 	}
 
-	logger.Do.Printf("%s from PartyID %s to register with masterAddr(%s)\n", wk.Name, wk.PartyID, wk.MasterAddr)
+	logger.Log.Printf("%s from PartyID %s to register with masterAddr(%s)\n", wk.Name, wk.PartyID, wk.MasterAddr)
 	wk.Register(wk.MasterAddr, wk.PartyID)
 
 	// start rpc server blocking...
@@ -51,9 +51,9 @@ func (wk *TrainWorker) DoTask(arg []byte, rep *entity.DoTaskReply) error {
 	wk.TrainTask(doTaskArgs, rep)
 
 	for i := 10; i > 0; i-- {
-		logger.Do.Println("Worker: Counting down before job done... ", i)
+		logger.Log.Println("Worker: Counting down before job done... ", i)
 		time.Sleep(time.Second)
 	}
-	logger.Do.Printf("Worker: %s: task done\n", wk.Addr)
+	logger.Log.Printf("Worker: %s: task done\n", wk.Addr)
 	return nil
 }

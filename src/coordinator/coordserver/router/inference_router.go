@@ -12,9 +12,8 @@ import (
 	"strconv"
 )
 
-
 type InferenceRes struct {
-	InferenceStatus   	string   `json:"inference_status"`
+	InferenceStatus string `json:"inference_status"`
 }
 
 func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
@@ -25,7 +24,7 @@ func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 	err, contents := client.ReceiveFile(r, buf, common.JobFile)
 	if err != nil {
-		logger.Do.Println(err)
+		logger.Log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -40,17 +39,17 @@ func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 		return
 	}
 
-	status,_ := controller.CreateInference(InferenceJob, ctx)
+	status, _ := controller.CreateInference(InferenceJob, ctx)
 
 	w.Header().Set("Content-Type", "application/json")
 
 	resIns := InferenceRes{}
 
-	if status == false{
-		resIns.InferenceStatus="Training process not finished"
+	if status == false {
+		resIns.InferenceStatus = "Training process not finished"
 
-	}else{
-		resIns.InferenceStatus="Inference job Submitted"
+	} else {
+		resIns.InferenceStatus = "Inference job Submitted"
 	}
 
 	js, err := json.Marshal(resIns)
@@ -64,18 +63,17 @@ func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 }
 
-
 func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	// 1. parse the dsl info,
-	logger.Do.Println("[UpdateInference]: parse the dsl info,")
+	logger.Log.Println("[UpdateInference]: parse the dsl info,")
 	_ = r.ParseMultipartForm(32 << 20)
 
 	var buf bytes.Buffer
 
 	err, contents := client.ReceiveFile(r, buf, common.JobFile)
 	if err != nil {
-		logger.Do.Println("client.ReceiveFile file error",err)
+		logger.Log.Println("client.ReceiveFile file error", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -88,19 +86,19 @@ func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 	}
 
 	// 2. get current running inference jobs under user_id and job_name
-	logger.Do.Printf("[UpdateInference]: get current running inference jobs under user_id:%d and job_name:%s \n",ctx.UsrId,InferenceJob.JobName)
-	InferenceIds := controller.QueryRunningInferenceJobs(InferenceJob.JobName,ctx)
+	logger.Log.Printf("[UpdateInference]: get current running inference jobs under user_id:%d and job_name:%s \n", ctx.UsrId, InferenceJob.JobName)
+	InferenceIds := controller.QueryRunningInferenceJobs(InferenceJob.JobName, ctx)
 
 	// 3. create new inference job
-	logger.Do.Println("[UpdateInference]: create new inference job InferenceJob:", InferenceJob)
+	logger.Log.Println("[UpdateInference]: create new inference job InferenceJob:", InferenceJob)
 	status, newInfId := controller.CreateInference(InferenceJob, ctx)
 
 	// 4. if true, delete previous running job once it is running
-	if status == true{
-		logger.Do.Println("[UpdateInference]: CreateInference return true, now begin to delete previous running jobs, inferenceIds", InferenceIds)
+	if status == true {
+		logger.Log.Println("[UpdateInference]: CreateInference return true, now begin to delete previous running jobs, inferenceIds", InferenceIds)
 		go controller.UpdateInference(newInfId, InferenceIds, ctx)
-	}else{
-		logger.Do.Println("[UpdateInference]: CreateInference return false")
+	} else {
+		logger.Log.Println("[UpdateInference]: CreateInference return false")
 		panic("Unable to update")
 	}
 

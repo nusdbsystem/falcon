@@ -20,17 +20,17 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 	go master.eventLoop()
 
 	rpcServer := rpc.NewServer()
-	logger.Do.Println("[master_rpc/RunMaster] rpcServer ready, now register with master")
+	logger.Log.Println("[master_rpc/RunMaster] rpcServer ready, now register with master")
 	err := rpcServer.Register(master)
 	// NOTE TODO: the rpc native Register() method will produce warning in console:
 	// rpc.Register: method ...; needs exactly three
 	// reply type of method ... is not a pointer: "bool"
 	if err != nil {
-		logger.Do.Println("rpcServer Register master Error", err)
+		logger.Log.Println("rpcServer Register master Error", err)
 		return
 	}
 
-	logger.Do.Println("[master_rpc/RunMaster] rpcServer registered with master")
+	logger.Log.Println("[master_rpc/RunMaster] rpcServer registered with master")
 
 	// thread 1
 	go master.forwardRegistrations(qItem)
@@ -84,7 +84,7 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 	time.AfterFunc(1*time.Minute, func() {
 		if len(master.workers) < master.workerNum {
 
-			logger.Do.Printf("Master: Wait for 1 Min, No enough worker come, stop, required %d, got %d ",
+			logger.Log.Printf("Master: Wait for 1 Min, No enough worker come, stop, required %d, got %d ",
 				master.workerNum,
 				len(master.workers),
 			)

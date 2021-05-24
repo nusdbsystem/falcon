@@ -42,21 +42,21 @@ func SetupWorkerHelper(masterAddr, workerType, jobId, dataPath, modelPath, dataO
 func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) string {
 	// run train rpc server in a thread
 
-	logger.Do.Printf("[SetupMaster] masterAddr=%s workerType=%s\n", masterAddr, workerType)
+	logger.Log.Printf("[SetupMaster] masterAddr=%s workerType=%s\n", masterAddr, workerType)
 
-	logger.Do.Println("[SetupMaster] call master.RunMaster with qItem:")
-	logger.Do.Println("qItem = ", qItem)
+	logger.Log.Println("[SetupMaster] call master.RunMaster with qItem:")
+	logger.Log.Println("qItem = ", qItem)
 	ms := master.RunMaster(masterAddr, qItem, workerType)
 
 	// update job's master addr
 	if workerType == common.TrainWorker {
-		logger.Do.Printf(
+		logger.Log.Printf(
 			"[SetupMaster] TrainWorker => call client.JobUpdateMaster at CoordArrd=%s, masterAddr=%s, JobId=%d\n",
 			common.CoordAddr, masterAddr, qItem.JobId)
 		client.JobUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
 
 	} else if workerType == common.InferenceWorker {
-		logger.Do.Printf(
+		logger.Log.Printf(
 			"[SetupMaster] InferenceWorker => call client.InferenceUpdateMaster at CoordArrd=%s, masterAddr=%s, JobId=%d\n",
 			common.CoordAddr, masterAddr, qItem.JobId)
 		client.InferenceUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
@@ -78,18 +78,18 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 		dataOutput := qItem.PartyInfo[index].PartyPaths.DataOutput
 		modelPath := qItem.PartyInfo[index].PartyPaths.ModelPath
 
-		logger.Do.Printf("[SetupMaster] master register/dispatch job to partyserver: %s ...\n", partyAddr)
-		logger.Do.Printf("[SetupMaster] JobId=%d\n", qItem.JobId)
-		logger.Do.Printf("[SetupMaster] dataPath=%s\n", dataPath)
-		logger.Do.Printf("[SetupMaster] modelPath=%s\n", modelPath)
-		logger.Do.Printf("[SetupMaster] dataOutput=%s\n", dataOutput)
+		logger.Log.Printf("[SetupMaster] master register/dispatch job to partyserver: %s ...\n", partyAddr)
+		logger.Log.Printf("[SetupMaster] JobId=%d\n", qItem.JobId)
+		logger.Log.Printf("[SetupMaster] dataPath=%s\n", dataPath)
+		logger.Log.Printf("[SetupMaster] modelPath=%s\n", modelPath)
+		logger.Log.Printf("[SetupMaster] dataOutput=%s\n", dataOutput)
 
 		client.SetupWorker(partyAddr, masterAddr, workerType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
 	}
 
 	ms.Wait()
 
-	logger.Do.Println("[SetupMaster] master finish all jobs")
+	logger.Log.Println("[SetupMaster] master finish all jobs")
 
 	return masterAddr
 }
@@ -97,9 +97,9 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 func KillJob(masterAddr, network string) {
 	ok := client.Call(masterAddr, network, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {
-		logger.Do.Println("Master: KillJob error")
+		logger.Log.Println("Master: KillJob error")
 		panic("Master: KillJob error")
 	} else {
-		logger.Do.Println("Master: KillJob Done")
+		logger.Log.Println("Master: KillJob Done")
 	}
 }
