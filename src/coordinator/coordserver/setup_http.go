@@ -4,8 +4,8 @@ import (
 	"context"
 	"coordinator/common"
 	"coordinator/coordserver/controller"
-	md "coordinator/coordserver/middleware"
-	rt "coordinator/coordserver/router"
+	"coordinator/coordserver/middleware"
+	"coordinator/coordserver/router"
 	"coordinator/logger"
 	"log"
 	"net/http"
@@ -18,38 +18,38 @@ func SetupHttp(nConsumer int) {
 	defer logger.HandleErrors()
 	mux := http.NewServeMux()
 
-	md.SysLvPath = []string{common.Register, common.PartyServerAdd}
+	middleware.SysLvPath = []string{common.Register, common.PartyServerAdd}
 
 	// sanity check
 	mux.HandleFunc("/", common.HelloCoordinator)
 
 	//job
-	mux.HandleFunc("/"+common.SubmitJob, md.AddRouter(rt.JobSubmit, http.MethodPost))
-	mux.HandleFunc("/"+common.StopJob, md.AddRouter(rt.JobKill, http.MethodPost))
-	mux.HandleFunc("/"+common.UpdateTrainJobMaster, md.AddRouter(rt.JobUpdateMaster, http.MethodPost))
-	mux.HandleFunc("/"+common.UpdateJobStatus, md.AddRouter(rt.JobUpdateStatus, http.MethodPost))
-	mux.HandleFunc("/"+common.UpdateJobResInfo, md.AddRouter(rt.JobUpdateResInfo, http.MethodPost))
+	mux.HandleFunc("/"+common.SubmitJob, middleware.AddRouter(router.JobSubmit, http.MethodPost))
+	mux.HandleFunc("/"+common.StopJob, middleware.AddRouter(router.JobKill, http.MethodPost))
+	mux.HandleFunc("/"+common.UpdateTrainJobMaster, middleware.AddRouter(router.JobUpdateMaster, http.MethodPost))
+	mux.HandleFunc("/"+common.UpdateJobStatus, middleware.AddRouter(router.JobUpdateStatus, http.MethodPost))
+	mux.HandleFunc("/"+common.UpdateJobResInfo, middleware.AddRouter(router.JobUpdateResInfo, http.MethodPost))
 
-	mux.HandleFunc("/"+common.QueryJobStatus, md.AddRouter(rt.JobStatusQuery, http.MethodGet))
+	mux.HandleFunc("/"+common.QueryJobStatus, middleware.AddRouter(router.JobStatusQuery, http.MethodGet))
 
 	//party server
-	mux.HandleFunc("/"+common.Register, md.AddRouter(rt.UserRegister, http.MethodPost))
-	mux.HandleFunc("/"+common.PartyServerAdd, md.AddRouter(rt.PartyServerAdd, http.MethodPost))
-	mux.HandleFunc("/"+common.PartyServerDelete, md.AddRouter(rt.PartyServerDelete, http.MethodPost))
-	mux.HandleFunc("/"+common.GetPartyServerPort, md.AddRouter(rt.GetPartyServerPort, http.MethodGet))
+	mux.HandleFunc("/"+common.Register, middleware.AddRouter(router.UserRegister, http.MethodPost))
+	mux.HandleFunc("/"+common.PartyServerAdd, middleware.AddRouter(router.PartyServerAdd, http.MethodPost))
+	mux.HandleFunc("/"+common.PartyServerDelete, middleware.AddRouter(router.PartyServerDelete, http.MethodPost))
+	mux.HandleFunc("/"+common.GetPartyServerPort, middleware.AddRouter(router.GetPartyServerPort, http.MethodGet))
 
 	// model serving
-	mux.HandleFunc("/"+common.ModelUpdate, md.AddRouter(rt.ModelUpdate, http.MethodPost))
+	mux.HandleFunc("/"+common.ModelUpdate, middleware.AddRouter(router.ModelUpdate, http.MethodPost))
 
 	// prediction service
-	mux.HandleFunc("/"+common.UpdateInferenceJobMaster, md.AddRouter(rt.InferenceUpdateMaster, http.MethodPost))
-	mux.HandleFunc("/"+common.InferenceUpdate, md.AddRouter(rt.UpdateInference, http.MethodPost))
-	mux.HandleFunc("/"+common.InferenceCreate, md.AddRouter(rt.CreateInference, http.MethodPost))
-	mux.HandleFunc("/"+common.InferenceStatusUpdate, md.AddRouter(rt.UpdateInferenceStatus, http.MethodPost))
+	mux.HandleFunc("/"+common.UpdateInferenceJobMaster, middleware.AddRouter(router.InferenceUpdateMaster, http.MethodPost))
+	mux.HandleFunc("/"+common.InferenceUpdate, middleware.AddRouter(router.UpdateInference, http.MethodPost))
+	mux.HandleFunc("/"+common.InferenceCreate, middleware.AddRouter(router.CreateInference, http.MethodPost))
+	mux.HandleFunc("/"+common.InferenceStatusUpdate, middleware.AddRouter(router.UpdateInferenceStatus, http.MethodPost))
 
 	// resource
-	mux.HandleFunc("/"+common.AssignPort, md.AddRouter(rt.AssignPort, http.MethodGet))
-	mux.HandleFunc("/"+common.AddPort, md.AddRouter(rt.AddPort, http.MethodPost))
+	mux.HandleFunc("/"+common.AssignPort, middleware.AddRouter(router.AssignPort, http.MethodGet))
+	mux.HandleFunc("/"+common.AddPort, middleware.AddRouter(router.AddPort, http.MethodPost))
 
 	// for logging and tracing
 	http_logger := log.New(os.Stdout, "http: ", log.LstdFlags)

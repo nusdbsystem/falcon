@@ -11,7 +11,7 @@ type Middleware func(handler http.HandlerFunc) http.HandlerFunc
 
 var SysLvPath []string
 
-// middleware used to measure time
+// middleware to measure time
 func timeUsage() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 
@@ -25,7 +25,7 @@ func timeUsage() Middleware {
 	}
 }
 
-// middleware used to verify the methods
+// middleware to verify the methods
 func methodVerify(method string) Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 
@@ -40,8 +40,8 @@ func methodVerify(method string) Middleware {
 	}
 }
 
-// middleware used to verify the methods
-func handPanic() Middleware {
+// middleware call panic handler
+func callPanic() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -65,9 +65,9 @@ func AddRouter(
 
 	newF := InitContext(f, SysLvPath)
 
-	// defaultMiddleWare := []Middleware{handPanic(), methodVerify(Method), timeUsage()}
+	// defaultMiddleWare := []Middleware{callPanic(), methodVerify(Method), timeUsage()}
 	// disable timeUsage
-	defaultMiddleWare := []Middleware{handPanic(), methodVerify(Method)}
+	defaultMiddleWare := []Middleware{callPanic(), methodVerify(Method)}
 
 	//defaultMiddleWare = append(defaultMiddleWare, middleWares...)
 

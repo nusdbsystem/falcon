@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// middle ware used to verify the methods
+// middleware to initiate context
 func InitContext(f func(w http.ResponseWriter, r *http.Request, c *entity.Context),
 	SysLvPath []string) http.HandlerFunc {
 
