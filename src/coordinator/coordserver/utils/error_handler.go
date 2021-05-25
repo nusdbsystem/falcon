@@ -1,4 +1,4 @@
-package middleware
+package utils
 
 import (
 	"coordinator/logger"
@@ -6,12 +6,13 @@ import (
 	"net/http"
 )
 
-func handlePanic(w http.ResponseWriter, r *http.Request) {
+func HandlePanic(w http.ResponseWriter, r *http.Request) {
 	err := recover()
 	if err != nil {
 		logger.Log.Printf("HTTP Error Handler: Processing %s Error: %s \n", r.RequestURI, err)
 		errstr := fmt.Sprintf("%s", err)
-		_, _ = w.Write([]byte(errstr))
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(errstr))
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }

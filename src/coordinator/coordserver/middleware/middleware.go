@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"coordinator/coordserver/entity"
+	"coordinator/coordserver/utils"
 	"coordinator/logger"
 	"net/http"
 	"time"
@@ -25,8 +26,8 @@ func timeUsage() Middleware {
 	}
 }
 
-// middleware to verify the methods
-func methodVerify(method string) Middleware {
+// middleware to verify the HTTP methods
+func verifyHTTPmethod(method string) Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +46,7 @@ func callPanic() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 
 		return func(w http.ResponseWriter, r *http.Request) {
-			defer handlePanic(w, r)
+			defer utils.HandlePanic(w, r)
 			f(w, r)
 		}
 	}
@@ -61,18 +62,16 @@ func AddRouter(
 	Method string,
 ) http.HandlerFunc {
 
-	// change f to newF,
+	middlewareHandler := InitContext(f, SysLvPath)
 
-	newF := InitContext(f, SysLvPath)
-
-	// defaultMiddleWare := []Middleware{callPanic(), methodVerify(Method), timeUsage()}
+	// defaultMiddleWare := []Middleware{callPanic(), verifyHTTPmethod(Method), timeUsage()}
 	// disable timeUsage
-	defaultMiddleWare := []Middleware{callPanic(), methodVerify(Method)}
+	defaultMiddleWare := []Middleware{callPanic(), verifyHTTPmethod(Method)}
 
 	//defaultMiddleWare = append(defaultMiddleWare, middleWares...)
 
 	for _, middleWare := range defaultMiddleWare {
-		newF = middleWare(newF)
+		middlewareHandler = middleWare(middlewareHandler)
 	}
-	return newF
+	return middlewareHandler
 }
