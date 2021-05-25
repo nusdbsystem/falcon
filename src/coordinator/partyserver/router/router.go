@@ -3,14 +3,16 @@ package router
 import (
 	"coordinator/client"
 	"coordinator/common"
-	"coordinator/partyserver/controller"
 	"coordinator/logger"
+	"coordinator/partyserver/controller"
+	"fmt"
 	"net/http"
 )
 
 func SetupWorker() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		// TODO: why is this via Form, and not via JSON?
 		client.ReceiveForm(r)
 
 		// this is sent from main http server
@@ -21,10 +23,16 @@ func SetupWorker() func(w http.ResponseWriter, r *http.Request) {
 		modelPath := r.FormValue(common.ModelPath)
 		dataOutput := r.FormValue(common.TrainDataOutput)
 
-		go func(){
+		go func() {
 			defer logger.HandleErrors()
-			controller.SetupWorker(masterAddr, workerTypeKey, jobId, dataPath,modelPath, dataOutput)
+			controller.SetupWorker(masterAddr, workerTypeKey, jobId, dataPath, modelPath, dataOutput)
 		}()
 
 	}
+}
+
+// sanity check
+func HelloPartyServer(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "hello from falcon party server~\n")
 }

@@ -19,7 +19,7 @@ func SetupPartyServer() {
 	mux := http.NewServeMux()
 
 	// sanity check
-	mux.HandleFunc("/", common.HelloPartyServer)
+	mux.HandleFunc("/", router.HelloPartyServer)
 
 	mux.HandleFunc("/"+common.SetupWorker, router.SetupWorker())
 	logger.Log.Println("SetupPartyServer: registering partyserverPort to coord", common.PartyServerPort)

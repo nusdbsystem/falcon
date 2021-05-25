@@ -26,9 +26,10 @@ func SetupCoordServer(nConsumer int) {
 
 	middleware.SysLvPath = []string{common.Register, common.PartyServerAdd}
 
-	// sanity check
-	mux.HandleFunc("/", common.HelloCoordinator)
+	// match html views to routes
+	mux.HandleFunc("/submit-train-job", middleware.AddRouter(router.HtmlSubmitTrainJob, http.MethodGet))
 
+	// REST APIs
 	//job
 	mux.HandleFunc("/"+common.SubmitJob, middleware.AddRouter(router.JobSubmit, http.MethodPost))
 	mux.HandleFunc("/"+common.StopJob, middleware.AddRouter(router.JobKill, http.MethodPost))
