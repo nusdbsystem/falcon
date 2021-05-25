@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"falcon_platform/coordserver/entity"
-	"falcon_platform/coordserver/utils"
+	"falcon_platform/exceptions"
 	"falcon_platform/logger"
 	"net/http"
 	"time"
@@ -32,7 +32,7 @@ func verifyHTTPmethod(method string) Middleware {
 
 		return func(w http.ResponseWriter, r *http.Request) {
 			if method != r.Method {
-				http.Error(w, "HTTP: Method not correct", http.StatusBadRequest)
+				exceptions.HandleHttpError(w, r, http.StatusMethodNotAllowed, "HTTP Method Not Allowed")
 				return
 			}
 			//logger.Log.Println("HTTP: Checking method")
@@ -46,7 +46,7 @@ func callPanic() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 
 		return func(w http.ResponseWriter, r *http.Request) {
-			defer utils.HandlePanic(w, r)
+			defer exceptions.HandlePanic(w, r)
 			f(w, r)
 		}
 	}

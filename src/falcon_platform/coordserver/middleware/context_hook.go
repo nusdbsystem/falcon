@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"falcon_platform/coordserver/entity"
+	"falcon_platform/exceptions"
 	"fmt"
 	"net/http"
 )
@@ -48,11 +49,12 @@ func UserVerify(w http.ResponseWriter, r *http.Request, ctx *entity.Context) err
 
 	//token := r.Header.Get("token")
 	userId := 1
+	userName := "admin"
 	e, u := ctx.JobDB.GetUserByUserID(uint(userId))
 
 	if e != nil {
-		errMsg := fmt.Sprintf("User Id %d name %s not exist", userId, "admin")
-		http.Error(w, errMsg, http.StatusBadRequest)
+		errMsg := fmt.Sprintf("User Id %d name %s not exist", userId, userName)
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest, errMsg)
 		return e
 	}
 

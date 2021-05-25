@@ -59,7 +59,7 @@ func SetupCoordServer(nConsumer int) {
 	mux.HandleFunc("/"+common.AddPort, middleware.AddRouter(router.AddPort, http.MethodPost))
 
 	// for logging and tracing
-	http_logger := log.New(os.Stdout, "http_logger: ", log.LstdFlags)
+	http_logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
 
 	// run
 	server := &http.Server{
@@ -118,6 +118,8 @@ func SetupCoordServer(nConsumer int) {
 		common.CoordIP,
 		common.CoordPort)
 
+	// ErrServerClosed is returned by the Server's Serve, ServeTLS, ListenAndServe, and ListenAndServeTLS methods
+	// after a call to Shutdown or Close
 	err := server.ListenAndServe()
 
 	if err != nil {

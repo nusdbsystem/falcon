@@ -25,7 +25,7 @@ func SetupPartyServer() {
 	logger.Log.Println("SetupPartyServer: registering partyserverPort to coord", common.PartyServerPort)
 
 	// for logging and tracing
-	http_logger := log.New(os.Stdout, "http_logger: ", log.LstdFlags)
+	http_logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
 
 	server := &http.Server{
 		Addr:    common.PartyServerIP + ":" + common.PartyServerPort,
@@ -66,13 +66,16 @@ func SetupPartyServer() {
 		common.PartyID,
 		common.PartyServerIP,
 		common.PartyServerPort)
+
+	// ErrServerClosed is returned by the Server's Serve, ServeTLS, ListenAndServe, and ListenAndServeTLS methods
+	// after a call to Shutdown or Close
 	err = server.ListenAndServe()
 
 	if err != nil {
 		if err == http.ErrServerClosed {
-			logger.Log.Print("Server closed under request ", err)
+			logger.Log.Print("SetupPartyServer closed under request ", err)
 		} else {
-			logger.Log.Fatal("Server closed unexpected ", err)
+			logger.Log.Fatal("SetupPartyServer closed unexpected ", err)
 		}
 	}
 }

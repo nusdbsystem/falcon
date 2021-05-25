@@ -7,7 +7,9 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/coordserver/controller"
 	"falcon_platform/coordserver/entity"
+	"falcon_platform/exceptions"
 	"falcon_platform/logger"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -24,18 +26,16 @@ func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 	err, contents := client.ReceiveFile(r, buf, common.JobFile)
 	if err != nil {
-		logger.Log.Println(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// parse it
 	var InferenceJob common.InferenceJob
 
 	e := common.ParseInferenceJob(contents, &InferenceJob)
 
 	if e != nil {
-		http.Error(w, e.Error(), http.StatusBadRequest)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, e.Error())
 		return
 	}
 
@@ -55,7 +55,7 @@ func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 	js, err := json.Marshal(resIns)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 	//json.NewEncoder(w).Encode(js)
@@ -73,15 +73,15 @@ func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 	err, contents := client.ReceiveFile(r, buf, common.JobFile)
 	if err != nil {
-		logger.Log.Println("client.ReceiveFile file error", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		errMsg := fmt.Sprintf("client.ReceiveFile file error %s", err)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
 		return
 	}
 
 	var InferenceJob common.InferenceJob
 	e := common.ParseInferenceJob(contents, &InferenceJob)
 	if e != nil {
-		http.Error(w, e.Error(), http.StatusBadRequest)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, e.Error())
 		return
 	}
 

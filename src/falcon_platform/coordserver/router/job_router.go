@@ -7,7 +7,8 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/coordserver/controller"
 	"falcon_platform/coordserver/entity"
-	"falcon_platform/logger"
+	"falcon_platform/exceptions"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -40,8 +41,8 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	err, contents := client.ReceiveFile(r, buf, common.JobFile)
 	if err != nil {
-		logger.Log.Println("ReceiveFile Error", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		errMsg := fmt.Sprintf("ReceiveFile Error %s", err)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
 		return
 	}
 
@@ -51,8 +52,8 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	e := common.ParseTrainJob(contents, &job)
 
 	if e != nil {
-		logger.Log.Println("ParseJob Error", e)
-		http.Error(w, e.Error(), http.StatusBadRequest)
+		errMsg := fmt.Sprintf("ParseJob Error %s", err)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
 		return
 	}
 
@@ -74,8 +75,8 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	js, err := json.Marshal(resIns)
 
 	if err != nil {
-		logger.Log.Println("json Marshal Error", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errMsg := fmt.Sprintf("JSON Marshal Error %s", err)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
 		return
 	}
 	//json.NewEncoder(w).Encode(js)
@@ -102,7 +103,7 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	js, err := json.Marshal(jr)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 	_, _ = w.Write(js)
@@ -182,7 +183,7 @@ func JobStatusQuery(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 	js, err := json.Marshal(jr)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 	_, _ = w.Write(js)
