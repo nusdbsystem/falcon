@@ -1,10 +1,10 @@
 package worker
 
 import (
-	"coordinator/common"
-	"coordinator/distributed/base"
-	"coordinator/distributed/entity"
-	"coordinator/logger"
+	"falcon_platform/common"
+	"falcon_platform/distributed/base"
+	"falcon_platform/distributed/entity"
+	"falcon_platform/logger"
 	"net/rpc"
 	"time"
 )

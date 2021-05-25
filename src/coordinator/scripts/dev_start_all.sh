@@ -31,10 +31,10 @@ done
 
 echo "PARTY_COUNT = ${PARTY_COUNT}"
 
-# Setup coordinator:
+# Setup falcon_platform
+
 # Launch coordinator first:
 bash scripts/dev_start_coord.sh
-
 
 # Setup partyserver 0~(PARTY_COUNT-1)
 # Party ID must start with 0

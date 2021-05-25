@@ -1,12 +1,12 @@
 package master
 
 import (
-	"coordinator/cache"
-	"coordinator/common"
-	"coordinator/distributed/base"
-	"coordinator/distributed/entity"
-	"coordinator/distributed/utils"
-	"coordinator/logger"
+	"falcon_platform/cache"
+	"falcon_platform/common"
+	"falcon_platform/distributed/base"
+	"falcon_platform/distributed/entity"
+	"falcon_platform/distributed/utils"
+	"falcon_platform/logger"
 	"strings"
 	"sync"
 )

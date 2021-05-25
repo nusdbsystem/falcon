@@ -1,10 +1,10 @@
 package router
 
 import (
-	"coordinator/coordserver/controller"
-	"coordinator/coordserver/entity"
-	"coordinator/client"
-	"coordinator/common"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/controller"
+	"falcon_platform/coordserver/entity"
 	"net/http"
 )
 
@@ -29,11 +29,10 @@ func PartyServerDelete(w http.ResponseWriter, r *http.Request, ctx *entity.Conte
 
 }
 
+func GetPartyServerPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
-func GetPartyServerPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context)  {
-
-	defer func(){
-		_=r.Body.Close()
+	defer func() {
+		_ = r.Body.Close()
 	}()
 
 	params := r.URL.Query()

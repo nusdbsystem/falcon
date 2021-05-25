@@ -2,9 +2,9 @@ package entity
 
 import (
 	"bytes"
-	"coordinator/common"
-	"coordinator/logger"
 	"encoding/gob"
+	"falcon_platform/common"
+	"falcon_platform/logger"
 	"reflect"
 )
 

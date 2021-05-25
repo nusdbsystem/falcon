@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"coordinator/coordserver/entity"
-	"coordinator/coordserver/utils"
-	"coordinator/logger"
+	"falcon_platform/coordserver/entity"
+	"falcon_platform/coordserver/utils"
+	"falcon_platform/logger"
 	"net/http"
 	"time"
 )

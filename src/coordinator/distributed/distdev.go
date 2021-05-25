@@ -1,11 +1,11 @@
 package distributed
 
 import (
-	"coordinator/cache"
-	"coordinator/client"
-	"coordinator/common"
-	"coordinator/distributed/worker"
-	"coordinator/logger"
+	"falcon_platform/cache"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/distributed/worker"
+	"falcon_platform/logger"
 	"os"
 )
 

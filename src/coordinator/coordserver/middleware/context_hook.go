@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"coordinator/coordserver/entity"
+	"falcon_platform/coordserver/entity"
 	"fmt"
 	"net/http"
 )

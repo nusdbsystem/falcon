@@ -1,4 +1,4 @@
-module coordinator
+module falcon_platform
 
 go 1.14
 

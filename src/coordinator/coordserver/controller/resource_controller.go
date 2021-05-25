@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"coordinator/coordserver/entity"
-	"coordinator/coordserver/models"
-	"coordinator/logger"
+	"falcon_platform/coordserver/entity"
+	"falcon_platform/coordserver/models"
+	"falcon_platform/logger"
 )
 
 func AssignPort(ctx *entity.Context) uint {

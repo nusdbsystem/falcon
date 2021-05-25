@@ -2,12 +2,12 @@ package router
 
 import (
 	"bytes"
-	"coordinator/client"
-	"coordinator/common"
-	"coordinator/coordserver/controller"
-	"coordinator/coordserver/entity"
-	"coordinator/logger"
 	"encoding/json"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/controller"
+	"falcon_platform/coordserver/entity"
+	"falcon_platform/logger"
 	"net/http"
 	"strconv"
 )

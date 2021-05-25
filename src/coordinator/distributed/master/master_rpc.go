@@ -1,10 +1,10 @@
 package master
 
 import (
-	"coordinator/cache"
-	"coordinator/client"
-	"coordinator/common"
-	"coordinator/logger"
+	"falcon_platform/cache"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/logger"
 	"net/rpc"
 	"time"
 )

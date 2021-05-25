@@ -1,16 +1,16 @@
 package common
 
 import (
-	"coordinator/logger"
 	"encoding/json"
 	"errors"
+	"falcon_platform/logger"
 	"log"
 	"strings"
 
 	"google.golang.org/protobuf/proto"
 )
 
-// protoc -I=/Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/ --go_out=/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/common /Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/job.proto
+// protoc -I=/Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/ --go_out=/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/common /Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/job.proto
 // TODO: make the train job field consistent with wyc executor flags!
 // TODO: jobFLtype wyc side expects int
 // TODO: partyType wyc side expects int

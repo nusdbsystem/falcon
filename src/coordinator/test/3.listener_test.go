@@ -1,12 +1,11 @@
 package test
 
 import (
-	"coordinator/partyserver"
+	"falcon_platform/partyserver"
 	"testing"
 )
 
 func TestWorker(t *testing.T) {
-
 
 	partyserver.SetupPartyServer()
 }

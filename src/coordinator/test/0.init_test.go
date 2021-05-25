@@ -1,7 +1,7 @@
 package test
 
 import (
-	"coordinator/logger"
+	"falcon_platform/logger"
 	"fmt"
 )
 

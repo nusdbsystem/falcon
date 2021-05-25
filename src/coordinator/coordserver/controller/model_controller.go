@@ -1,8 +1,6 @@
 package controller
 
-import "coordinator/coordserver/entity"
-
-
+import "falcon_platform/coordserver/entity"
 
 func ModelUpdate(jobId, isTrained uint, ctx *entity.Context) uint {
 	tx := ctx.JobDB.Db.Begin()

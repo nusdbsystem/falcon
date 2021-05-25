@@ -2,12 +2,12 @@ package base
 
 import (
 	"context"
-	"coordinator/client"
-	"coordinator/common"
-	_ "coordinator/common"
-	"coordinator/distributed/entity"
-	"coordinator/distributed/taskmanager"
-	"coordinator/logger"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	_ "falcon_platform/common"
+	"falcon_platform/distributed/entity"
+	"falcon_platform/distributed/taskmanager"
+	"falcon_platform/logger"
 	"fmt"
 	"time"
 )

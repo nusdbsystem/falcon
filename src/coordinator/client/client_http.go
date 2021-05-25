@@ -1,7 +1,7 @@
 package client
 
 import (
-	"coordinator/common"
+	"falcon_platform/common"
 	"fmt"
 	"net/url"
 	"strings"

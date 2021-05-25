@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"coordinator/cache"
-	"coordinator/common"
-	"coordinator/coordserver/models"
-	dist "coordinator/distributed"
-	"coordinator/logger"
+	"falcon_platform/cache"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/models"
+	dist "falcon_platform/distributed"
+	"falcon_platform/logger"
 	"fmt"
 	"sync"
 	"time"

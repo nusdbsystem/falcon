@@ -1,11 +1,11 @@
 package worker
 
 import (
-	"coordinator/common"
-	"coordinator/distributed/entity"
-	"coordinator/distributed/taskmanager"
-	"coordinator/logger"
 	"encoding/json"
+	"falcon_platform/common"
+	"falcon_platform/distributed/entity"
+	"falcon_platform/distributed/taskmanager"
+	"falcon_platform/logger"
 	"fmt"
 	"os"
 	"os/exec"

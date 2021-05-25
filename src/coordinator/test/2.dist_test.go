@@ -1,7 +1,7 @@
 package test
 
 import (
-	"coordinator/distributed/utils"
+	"falcon_platform/distributed/utils"
 	"fmt"
 	"testing"
 )
@@ -10,8 +10,6 @@ func TestDist(t *testing.T) {
 
 	res, _ := utils.GetFreePort4K8s()
 	res2, _ := utils.GetFreePorts(3)
-	fmt.Println(res,res2)
-
-
+	fmt.Println(res, res2)
 
 }

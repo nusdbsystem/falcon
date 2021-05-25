@@ -2,12 +2,12 @@ package master
 
 import (
 	"context"
-	"coordinator/cache"
-	"coordinator/client"
-	"coordinator/common"
-	"coordinator/distributed/entity"
-	"coordinator/logger"
 	"encoding/json"
+	"falcon_platform/cache"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/distributed/entity"
+	"falcon_platform/logger"
 	"fmt"
 	"strconv"
 	"strings"

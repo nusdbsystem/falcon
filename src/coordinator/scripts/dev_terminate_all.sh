@@ -33,7 +33,7 @@ done
 
 echo "PARTY_COUNT = ${PARTY_COUNT}"
 
-# terminate the coordinator
+# terminate the falcon_platform
 echo "Terminate Coordinator..."
 kill -9 $(cat dev_test/Coord.pid)
 

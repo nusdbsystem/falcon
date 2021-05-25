@@ -3,17 +3,18 @@ package test
 import (
 	"context"
 	"fmt"
+	"log"
+	"testing"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"log"
-	"testing"
 )
 
 func Test3(t *testing.T) {
 
 	//kubeconfig :=  "/Users/nailixing/.kube/config"
-	//filename := "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/deploy/template/test.yaml"
+	//filename := "/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/deploy/template/test.yaml"
 	//
 	//km := taskmanager.InitK8sManager(false, kubeconfig)
 	//km.CreateResources(filename)
@@ -35,9 +36,8 @@ func Test3(t *testing.T) {
 
 }
 
-
-func TestDelete(t *testing.T){
-	kubeconfig :=  "/Users/nailixing/.kube/config"
+func TestDelete(t *testing.T) {
+	kubeconfig := "/Users/nailixing/.kube/config"
 
 	//km.CreateResources(filename)
 	k8sConfig, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
@@ -46,7 +46,7 @@ func TestDelete(t *testing.T){
 
 	err2 := client.CoreV1().Services("default").Delete(context.TODO(), "my-nginx", metav1.DeleteOptions{})
 	if err2 != nil {
-		fmt.Println("Errors:  ",err2)
+		fmt.Println("Errors:  ", err2)
 		log.Fatal(err)
 	}
 }

@@ -1,10 +1,10 @@
 package router
 
 import (
-	"coordinator/coordserver/controller"
-	"coordinator/coordserver/entity"
-	"coordinator/client"
-	"coordinator/common"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/controller"
+	"falcon_platform/coordserver/entity"
 	"net/http"
 	"strconv"
 )
@@ -24,5 +24,5 @@ func ModelUpdate(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 		panic(e)
 	}
 
-	controller.ModelUpdate(uint(jobId), uint(isTrained),  ctx)
+	controller.ModelUpdate(uint(jobId), uint(isTrained), ctx)
 }

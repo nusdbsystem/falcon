@@ -1,10 +1,10 @@
 package test
 
 import (
-	"coordinator/common"
-	"coordinator/coordserver/models"
-	"coordinator/logger"
 	"encoding/json"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/models"
+	"falcon_platform/logger"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -45,7 +45,7 @@ func TestJson(t *testing.T) {
 }
 
 func TestParseJson(t *testing.T) {
-	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/train_jobs/job.json")
+	jsonFile, err := os.Open("/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/train_jobs/job.json")
 	logger.Log.Println(err)
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)

@@ -1,9 +1,9 @@
 package test
 
 import (
-	"coordinator/common"
-	"coordinator/coordserver/models"
-	"coordinator/logger"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/models"
+	"falcon_platform/logger"
 	"fmt"
 	"testing"
 	"time"

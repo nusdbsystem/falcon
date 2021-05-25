@@ -1,7 +1,7 @@
 package router
 
 import (
-	"coordinator/coordserver/entity"
+	"falcon_platform/coordserver/entity"
 	"net/http"
 )
 

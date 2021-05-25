@@ -1,14 +1,14 @@
 package main
 
 import (
-	"coordinator/cache"
-	"coordinator/common"
-	"coordinator/coordserver"
-	"coordinator/distributed"
-	"coordinator/distributed/taskmanager"
-	"coordinator/distributed/worker"
-	"coordinator/logger"
-	"coordinator/partyserver"
+	"falcon_platform/cache"
+	"falcon_platform/common"
+	"falcon_platform/coordserver"
+	"falcon_platform/distributed"
+	"falcon_platform/distributed/taskmanager"
+	"falcon_platform/distributed/worker"
+	"falcon_platform/logger"
+	"falcon_platform/partyserver"
 	"fmt"
 	"log"
 	"os"
@@ -36,7 +36,7 @@ func initLogger() {
 	var runtimeLogPath string
 
 	// in dev, we have a logPath to store everything,
-	// but in production, the coordinator and part server are
+	// but in production, the coordinator and party server are
 	// separated at different machines or clusters, we use docker,
 	if common.Env == common.DevEnv {
 		runtimeLogPath = common.LogPath

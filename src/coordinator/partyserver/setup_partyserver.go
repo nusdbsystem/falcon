@@ -2,10 +2,10 @@ package partyserver
 
 import (
 	"context"
-	"coordinator/client"
-	"coordinator/common"
-	"coordinator/logger"
-	"coordinator/partyserver/router"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/logger"
+	"falcon_platform/partyserver/router"
 	"log"
 	"net/http"
 	"os"

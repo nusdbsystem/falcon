@@ -1,10 +1,10 @@
 package router
 
 import (
-	"coordinator/coordserver/controller"
-	"coordinator/coordserver/entity"
-	"coordinator/client"
-	"coordinator/common"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/controller"
+	"falcon_platform/coordserver/entity"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -25,8 +25,8 @@ func AddPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	port := r.FormValue(common.AddPort)
 
-	Port, _:= strconv.Atoi(port)
+	Port, _ := strconv.Atoi(port)
 
-	controller.AddPort(uint(Port),ctx)
+	controller.AddPort(uint(Port), ctx)
 
 }

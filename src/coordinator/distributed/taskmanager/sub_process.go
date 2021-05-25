@@ -2,9 +2,9 @@ package taskmanager
 
 import (
 	"context"
-	"coordinator/common"
-	"coordinator/logger"
 	"errors"
+	"falcon_platform/common"
+	"falcon_platform/logger"
 	"fmt"
 	"io/ioutil"
 	"os"

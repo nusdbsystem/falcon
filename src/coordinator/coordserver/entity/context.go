@@ -1,12 +1,12 @@
 package entity
 
 import (
-	"coordinator/coordserver/models"
-	"coordinator/common"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/models"
 )
 
 type Context struct {
-	JobDB       *models.JobDB
+	JobDB    *models.JobDB
 	HttpHost string
 	HttpPort string
 	UsrId    uint

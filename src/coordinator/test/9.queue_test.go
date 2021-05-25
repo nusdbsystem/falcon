@@ -1,7 +1,7 @@
 package test
 
 import (
-	"coordinator/cache"
+	"falcon_platform/cache"
 	"fmt"
 	"testing"
 )

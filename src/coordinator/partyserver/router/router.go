@@ -1,10 +1,10 @@
 package router
 
 import (
-	"coordinator/client"
-	"coordinator/common"
-	"coordinator/logger"
-	"coordinator/partyserver/controller"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/logger"
+	"falcon_platform/partyserver/controller"
 	"fmt"
 	"net/http"
 )

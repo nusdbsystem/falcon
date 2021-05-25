@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"coordinator/logger"
+	"falcon_platform/logger"
 	"fmt"
 	"net/http"
 )

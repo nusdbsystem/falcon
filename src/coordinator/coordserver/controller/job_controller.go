@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"coordinator/cache"
-	"coordinator/common"
-	"coordinator/coordserver/entity"
-	"coordinator/distributed"
-	"coordinator/logger"
 	"encoding/json"
+	"falcon_platform/cache"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/entity"
+	"falcon_platform/distributed"
+	"falcon_platform/logger"
 )
 
 func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, string, uint, uint) {

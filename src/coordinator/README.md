@@ -1,4 +1,4 @@
-<!-- ![Alt text](https://github.com/lemonviv/falcon/blob/dev/src/coordinator/photos/db.png) -->
+<!-- ![Alt text](https://github.com/lemonviv/falcon/blob/dev/src/falcon_platform/photos/db.png) -->
 ![Falcon Platform Architecture](./imgs/Falcon_Sys_Archi_Dec21version.jpg)
 
 # Falcon Platform (Coordinator+PartyServers)
@@ -36,7 +36,7 @@ go build <go-program>.go
 
 ### Run `semi-party.x` from compiled MP-SPDZ in falcon/third_party
 
-from `src/coordinator`, launch the script:
+from `src/falcon_platform`, launch the script:
 
 ```sh
 # start the 3 semi-party.x simulating 3 parties
@@ -45,7 +45,7 @@ bash scripts/start_semi-party012.sh
 
 To view the MPC server outputs, go the path of where you put the MPC exe. In our example, the MPC server exes are in `MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x`. From that path, the console logs of the semi-party.x are captured in `third_party/MP-SPDZ/logs/semi-parties/` folder.
 
-To terminate the MPC, from `src/coordinator`run:
+To terminate the MPC, from `src/falcon_platform`run:
 ```sh
 bash scripts/terminate_semi-party012.sh
 ```
@@ -56,14 +56,14 @@ _NOTE: in the future, MPC and FL Engine will be launched internally by the platf
 
 ## Supply the FL Engine path
 
-Update the executor path in `src/coordinator/config_partyserver.properties`: `FL_ENGINE_PATH="/opt/falcon/build/src/executor/falcon"`
+Update the executor path in `src/falcon_platform/config_partyserver.properties`: `FL_ENGINE_PATH="/opt/falcon/build/src/executor/falcon"`
 
 
 ## Platform setup DEV (development without k8)
 
 Update configurations in
-- `src/coordinator/config_coord.properties` for Coordinator server configs
-- `src/coordinator/config_partyserver.properties` for Party server configs
+- `src/falcon_platform/config_coord.properties` for Coordinator server configs
+- `src/falcon_platform/config_partyserver.properties` for Party server configs
 
 Supply your configurations in those `.properties` files such as
 - `JOB_DATABASE`
@@ -84,7 +84,7 @@ To terminate the platform, call:
 bash scripts/dev_terminate_all.sh --partyCount <PARTY_COUNT>
 ```
 
-The console outputs are captured in `src/coordinator/dev_test/` folder:
+The console outputs are captured in `src/falcon_platform/dev_test/` folder:
 - `Coord_TIMESTAMP/Coord-console.log`
 - `Party-0_TIMESTAMP/Party-0-console.log`
 - `Party-1_TIMESTAMP/Party-1-console.log`

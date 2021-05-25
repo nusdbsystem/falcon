@@ -1,8 +1,8 @@
 package models
 
 import (
-	"coordinator/common"
-	"coordinator/logger"
+	"falcon_platform/common"
+	"falcon_platform/logger"
 	"fmt"
 	"path"
 	"time"

@@ -1,11 +1,11 @@
 package test
 
 import (
-	"coordinator/common"
-	"coordinator/distributed/entity"
-	"coordinator/exceptions"
-	"coordinator/logger"
 	"encoding/json"
+	"falcon_platform/common"
+	"falcon_platform/distributed/entity"
+	"falcon_platform/exceptions"
+	"falcon_platform/logger"
 	"fmt"
 	"log"
 	"testing"

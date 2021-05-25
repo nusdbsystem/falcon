@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"coordinator/coordserver/models"
+	"falcon_platform/coordserver/models"
 )
 
 func CreateUser() {

@@ -1,9 +1,9 @@
 package master
 
 import (
-	"coordinator/client"
-	"coordinator/common"
-	"coordinator/logger"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/logger"
 	"fmt"
 	"strings"
 	"time"

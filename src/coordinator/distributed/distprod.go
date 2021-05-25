@@ -1,11 +1,11 @@
 package distributed
 
 import (
-	"coordinator/cache"
-	"coordinator/client"
-	"coordinator/common"
-	"coordinator/distributed/taskmanager"
-	"coordinator/logger"
+	"falcon_platform/cache"
+	"falcon_platform/client"
+	"falcon_platform/common"
+	"falcon_platform/distributed/taskmanager"
+	"falcon_platform/logger"
 	"fmt"
 	"strings"
 )

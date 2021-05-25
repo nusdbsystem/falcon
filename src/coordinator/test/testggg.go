@@ -201,7 +201,7 @@ func main() {
 	dir := ""
 	stdIn := "input from keyboard"
 	commend := "python"
-	args := []string{"/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml/preprocessing.py"}
+	args := []string{"/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/falcon_ml/preprocessing.py"}
 	envs := []string{}
 
 	pm := InitSubProcessManager()

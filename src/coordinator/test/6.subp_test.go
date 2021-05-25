@@ -2,8 +2,8 @@ package test
 
 import (
 	"context"
-	"coordinator/distributed/taskmanager"
-	"coordinator/logger"
+	"falcon_platform/distributed/taskmanager"
+	"falcon_platform/logger"
 	"fmt"
 	"os/exec"
 	"testing"
@@ -18,7 +18,7 @@ func TestSubProc(t *testing.T) {
 
 	cmd := exec.Command(
 		"python3",
-		"-u", "/Users/nailixing/GOProj/src/github.com/falcon/src/coordinator/falcon_ml/preprocessing.py",
+		"-u", "/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/falcon_ml/preprocessing.py",
 		"-a=1", "-b=2", "-c=123")
 	var envs []string
 

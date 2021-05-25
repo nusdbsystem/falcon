@@ -2,9 +2,9 @@ package base
 
 import (
 	"context"
-	"coordinator/client"
-	"coordinator/distributed/entity"
-	"coordinator/logger"
+	"falcon_platform/client"
+	"falcon_platform/distributed/entity"
+	"falcon_platform/logger"
 	"net"
 	"net/rpc"
 	"strings"

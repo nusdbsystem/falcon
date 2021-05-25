@@ -1,10 +1,11 @@
 package models
 
 import (
-	"coordinator/common"
+	"falcon_platform/common"
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 func (jobDB *JobDB) CreateInference(
@@ -44,8 +45,7 @@ func (jobDB *JobDB) InferenceUpdateStatus(
 
 }
 
-
-func (jobDB *JobDB) InferenceUpdateMaster(tx *gorm.DB,Id uint, masterAddr string) (error, *InferenceJobRecord) {
+func (jobDB *JobDB) InferenceUpdateMaster(tx *gorm.DB, Id uint, masterAddr string) (error, *InferenceJobRecord) {
 
 	u := &InferenceJobRecord{}
 	err := tx.Model(u).
@@ -62,30 +62,28 @@ func (jobDB *JobDB) InferenceGetByID(jobId uint) (error, *InferenceJobRecord) {
 	return err, u
 }
 
-
-
 func (jobDB *JobDB) InferenceGetCurrentRunningOneWithJobName(
 	jobName string,
 	userId uint,
-	) ([]uint, error) {
+) ([]uint, error) {
 
 	type Result struct {
-		inferenceId  uint
+		inferenceId uint
 	}
 	var result []*Result
 
-	sql := fmt.Sprintf("select c.id from %s.job_info_records as a " +
-		"inner join %s.train_job_records as b on a.id = b.job_info_id " +
-		"inner join %s.inference_job_records as c on b.job_id = c.job_id " +
+	sql := fmt.Sprintf("select c.id from %s.job_info_records as a "+
+		"inner join %s.train_job_records as b on a.id = b.job_info_id "+
+		"inner join %s.inference_job_records as c on b.job_id = c.job_id "+
 		"where a.user_id = %d and a.job_name = '%s' and c.status = %d;",
-		jobDB.database,jobDB.database,jobDB.database, userId, jobName, common.JobRunning)
+		jobDB.database, jobDB.database, jobDB.database, userId, jobName, common.JobRunning)
 
 	// Raw SQL
-	e:= jobDB.Db.Raw(sql).Scan(&result).Error
+	e := jobDB.Db.Raw(sql).Scan(&result).Error
 
 	var res []uint
 
-	for _, v := range result{
+	for _, v := range result {
 		res = append(res, v.inferenceId)
 	}
 

@@ -1,7 +1,7 @@
 package common
 
 import (
-	"coordinator/logger"
+	"falcon_platform/logger"
 	"os"
 )
 
@@ -148,7 +148,7 @@ var (
 	RedisPort     = ""
 	RedisNodePort = ""
 
-	// those are init by coordinator
+	// those are init by falcon_platform
 	WorkerType = ""
 	WorkerAddr = ""
 	MasterAddr = ""

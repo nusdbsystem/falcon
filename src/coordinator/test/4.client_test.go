@@ -1,10 +1,10 @@
 package test
 
 import (
-	"coordinator/cache"
-	"coordinator/common"
-	"coordinator/distributed"
-	"coordinator/logger"
+	"falcon_platform/cache"
+	"falcon_platform/common"
+	"falcon_platform/distributed"
+	"falcon_platform/logger"
 	"testing"
 )
 

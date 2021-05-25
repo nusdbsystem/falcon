@@ -1,8 +1,8 @@
 package client
 
 import (
-	"coordinator/exceptions"
-	"coordinator/logger"
+	"falcon_platform/exceptions"
+	"falcon_platform/logger"
 	"net/rpc"
 	"time"
 )

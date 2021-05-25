@@ -2,8 +2,8 @@ package client
 
 import (
 	"bytes"
-	"coordinator/logger"
 	"encoding/json"
+	"falcon_platform/logger"
 	"io/ioutil"
 	"net/http"
 	"strings"

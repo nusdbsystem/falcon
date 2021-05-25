@@ -1,9 +1,9 @@
 package worker
 
 import (
-	"coordinator/common"
-	"coordinator/distributed/entity"
-	"coordinator/logger"
+	"falcon_platform/common"
+	"falcon_platform/distributed/entity"
+	"falcon_platform/logger"
 	"os/exec"
 )
 

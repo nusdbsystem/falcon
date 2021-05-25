@@ -2,7 +2,7 @@ package client
 
 import (
 	"bytes"
-	"coordinator/logger"
+	"falcon_platform/logger"
 	"io"
 	"net/http"
 	"strings"

@@ -2,12 +2,12 @@ package coordserver
 
 import (
 	"context"
-	"coordinator/common"
-	"coordinator/coordserver/controller"
-	"coordinator/coordserver/middleware"
-	"coordinator/coordserver/router"
-	"coordinator/coordserver/view"
-	"coordinator/logger"
+	"falcon_platform/common"
+	"falcon_platform/coordserver/controller"
+	"falcon_platform/coordserver/middleware"
+	"falcon_platform/coordserver/router"
+	"falcon_platform/coordserver/view"
+	"falcon_platform/logger"
 	"log"
 	"net/http"
 	"os"
