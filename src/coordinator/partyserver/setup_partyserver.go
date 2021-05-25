@@ -5,7 +5,7 @@ import (
 	"coordinator/client"
 	"coordinator/common"
 	"coordinator/logger"
-	rt "coordinator/partyserver/router"
+	"coordinator/partyserver/router"
 	"log"
 	"net/http"
 	"os"
@@ -21,15 +21,15 @@ func SetupPartyServer() {
 	// sanity check
 	mux.HandleFunc("/", common.HelloPartyServer)
 
-	mux.HandleFunc("/"+common.SetupWorker, rt.SetupWorker())
+	mux.HandleFunc("/"+common.SetupWorker, router.SetupWorker())
 	logger.Log.Println("SetupPartyServer: registering partyserverPort to coord", common.PartyServerPort)
 
 	// for logging and tracing
-	http_logger := log.New(os.Stdout, "http: ", log.LstdFlags)
+	http_logger := log.New(os.Stdout, "http_logger: ", log.LstdFlags)
 
 	server := &http.Server{
 		Addr:    common.PartyServerIP + ":" + common.PartyServerPort,
-		Handler: common.Tracing(common.NextRequestID)(common.Logging(http_logger)(mux)),
+		Handler: logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(mux)),
 	}
 
 	// report addr to flow htp server

@@ -230,7 +230,7 @@ func main() {
 		logger.Log.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
 
 		nConsumer, _ := strconv.Atoi(common.NbConsumers)
-		coordserver.SetupHttp(nConsumer)
+		coordserver.SetupCoordServer(nConsumer)
 	}
 
 	// start work in remote machine automatically

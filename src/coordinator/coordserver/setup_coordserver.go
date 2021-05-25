@@ -6,6 +6,7 @@ import (
 	"coordinator/coordserver/controller"
 	"coordinator/coordserver/middleware"
 	"coordinator/coordserver/router"
+	"coordinator/coordserver/view"
 	"coordinator/logger"
 	"log"
 	"net/http"
@@ -14,8 +15,13 @@ import (
 	"syscall"
 )
 
-func SetupHttp(nConsumer int) {
+func SetupCoordServer(nConsumer int) {
 	defer logger.HandleErrors()
+
+	// set up views
+	view.LoadTemplates("./coordserver/view/templates/*.html")
+
+	// set up HTTP server routes
 	mux := http.NewServeMux()
 
 	middleware.SysLvPath = []string{common.Register, common.PartyServerAdd}
@@ -57,17 +63,17 @@ func SetupHttp(nConsumer int) {
 	// run
 	server := &http.Server{
 		Addr:    common.CoordAddr,
-		Handler: common.Tracing(common.NextRequestID)(common.Logging(http_logger)(mux)),
+		Handler: logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(mux)),
 	}
 
-	logger.Log.Println("HTTP: Updating table...")
+	logger.Log.Println("[coordinator server]: Init DataBase...")
 	controller.CreateTables()
 	if common.JobDatabase == common.DBMySQL {
 		// initialize the mysql db
 		controller.CreateSysPorts()
 	}
 
-	logger.Log.Println("HTTP: Creating admin user...")
+	logger.Log.Println("[coordinator server]: Create admin user...")
 	controller.CreateUser()
 
 	jobScheduler := controller.Init(nConsumer)
@@ -78,10 +84,10 @@ func SetupHttp(nConsumer int) {
 	go func() {
 		<-done
 
-		logger.Log.Println("HTTP: Stop multi consumers")
+		logger.Log.Println("[coordinator server]: Stop multi consumers")
 
 		jobScheduler.StopMonitor()
-		logger.Log.Println("HTTP: Monitor Stopped")
+		logger.Log.Println("[coordinator server]: Monitor Stopped")
 
 		for i := 0; i < nConsumer; i++ {
 			jobScheduler.StopConsumer()
@@ -90,13 +96,13 @@ func SetupHttp(nConsumer int) {
 		//todo, this will shutdown the master thread at the same time
 		// but the worker need to be stopped also??, add later ???
 
-		logger.Log.Println("HTTP: Consumer Stopped")
+		logger.Log.Println("[coordinator server]: Consumer Stopped")
 		if err := server.Shutdown(context.Background()); err != nil {
-			logger.Log.Fatal("HTTP: ShutDown the server", err)
+			logger.Log.Fatal("[coordinator server]: ShutDown the server", err)
 		}
 	}()
 
-	logger.Log.Println("HTTP: Starting multi consumers...")
+	logger.Log.Println("[coordinator server]: Starting multi consumers...")
 
 	// multi-thread consumer
 
@@ -115,9 +121,9 @@ func SetupHttp(nConsumer int) {
 
 	if err != nil {
 		if err == http.ErrServerClosed {
-			logger.Log.Print("HTTP: Server closed under request\n", err)
+			logger.Log.Print("[coordinator server]: Server closed under request\n", err)
 		} else {
-			logger.Log.Fatal("HTTP: Server closed unexpected\n", err)
+			logger.Log.Fatal("[coordinator server]: Server closed unexpected\n", err)
 		}
 	}
 }
