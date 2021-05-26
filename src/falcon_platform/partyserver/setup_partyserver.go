@@ -9,12 +9,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func SetupPartyServer() {
-	// host: partyserverAddr
-	// ServerAddr: the addr for main http server
-	// host port:  for partyserver,
 	defer logger.HandleErrors()
 	mux := http.NewServeMux()
 
@@ -26,41 +26,63 @@ func SetupPartyServer() {
 
 	// for logging and tracing
 	http_logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
+	http_logger.Println("HTTP Server is starting...")
 
+	// set up the HTTP server
+	// modified from https://github.com/enricofoltran/simple-go-server/blob/master/main.go
 	server := &http.Server{
-		Addr:    common.PartyServerIP + ":" + common.PartyServerPort,
-		Handler: logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(mux)),
+		Addr:     common.PartyServerIP + ":" + common.PartyServerPort,
+		Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(mux)),
+		ErrorLog: http_logger,
+		// Good practice: enforce timeouts for servers
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  15 * time.Second,
 	}
 
-	// report addr to flow htp server
-	done := make(chan os.Signal)
+	// use a buffered channel for signal
+	done := make(chan bool)
+	// Set up channel on which to send signal notifications.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 
 	go func() {
-		<-done
+		<-quit
 
-		if err := server.Shutdown(context.Background()); err != nil {
-			logger.Log.Fatal("ShutDown the server", err)
+		http_logger.Println("HTTP Server is shutting down...")
+
+		logger.Log.Println("SetupPartyServer: call client.PartyServerDelete")
+		if err := client.PartyServerDelete(common.CoordAddr, common.PartyServerIP); err != nil {
+			http_logger.Printf("Cannot Delete PartyServer for Coordinator: %v\n", err)
 		}
 
-		client.PartyServerDelete(common.CoordAddr, common.PartyServerIP)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		server.SetKeepAlivesEnabled(false)
+		if err := server.Shutdown(ctx); err != nil {
+			http_logger.Fatalf("Could not gracefully shutdown the server: %v\n", err)
+			logger.Log.Fatal("SetupPartyServer: Could not gracefully shutDown the server: ", err)
+		}
+		close(done)
 	}()
 
-	logger.Log.Printf("SetupPartyServer: connecting to coord  %s to AddPort\n", common.CoordAddr)
-
+	logger.Log.Printf("SetupPartyServer: connecting to Coordinator %s to AddPort\n", common.CoordAddr)
 	err := client.AddPort(common.CoordAddr, common.PartyServerPort)
-
 	if err != nil {
-		panic("SetupPartyServer: Server closed under request, " + err.Error())
+		panic("SetupPartyServer: failed to AddPort on Coordinator, " + err.Error())
 	}
 
-	logger.Log.Printf("SetupPartyServer: PartyServerAdd %s ...retry \n", common.PartyServerIP)
-
+	logger.Log.Println("SetupPartyServer: PartyServerAdd ", common.PartyServerIP)
 	err = client.PartyServerAdd(common.CoordAddr, common.PartyServerIP, common.PartyServerPort)
-
 	if err != nil {
 		panic("SetupPartyServer: PartyServerAdd error, " + err.Error())
 	}
 
+	http_logger.Printf("[party server %v] is ready to handle requests at IP: %v, Port: %v\n",
+		common.PartyID,
+		common.PartyServerIP,
+		common.PartyServerPort)
 	logger.Log.Printf(
 		"[party server %v] listening on IP: %v, Port: %v\n",
 		common.PartyID,
@@ -69,13 +91,16 @@ func SetupPartyServer() {
 
 	// ErrServerClosed is returned by the Server's Serve, ServeTLS, ListenAndServe, and ListenAndServeTLS methods
 	// after a call to Shutdown or Close
-	err = server.ListenAndServe()
-
-	if err != nil {
-		if err == http.ErrServerClosed {
-			logger.Log.Print("SetupPartyServer closed under request ", err)
-		} else {
-			logger.Log.Fatal("SetupPartyServer closed unexpected ", err)
-		}
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		http_logger.Fatalf("Could not listen on %s:%s: %v\n",
+			common.PartyServerIP,
+			common.PartyServerPort,
+			err)
+		logger.Log.Fatal("[party server]: Could not listen on ", common.PartyServerIP,
+			common.PartyServerPort, " err: ", err, "\n")
 	}
+
+	<-done
+	http_logger.Println("HTTP Server stopped")
+	logger.Log.Println("[party server]: Server Stopped")
 }

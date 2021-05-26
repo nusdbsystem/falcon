@@ -20,12 +20,14 @@ func PartyServerAdd(ServerAddr, partyserverAddr, partyserverPort string) error {
 
 }
 
-func PartyServerDelete(ServerAddr, partyserverAddr string) {
+func PartyServerDelete(ServerAddr, partyserverAddr string) error {
 	data := url.Values{common.PartyServerAddrKey: {partyserverAddr}}
 
 	reqUrl := ServerAddr + "/" + common.PartyServerDelete
 
-	_ = PostForm(reqUrl, data)
+	err := PostForm(reqUrl, data)
+
+	return err
 }
 
 func SetupWorker(ServerAddr string, masterAddr string, workerType string, jobId, dataPath, modelPath, dataOutput string) {

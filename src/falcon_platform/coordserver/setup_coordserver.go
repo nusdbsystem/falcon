@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func SetupCoordServer(nConsumer int) {
@@ -58,15 +59,7 @@ func SetupCoordServer(nConsumer int) {
 	mux.HandleFunc("/"+common.AssignPort, middleware.AddRouter(router.AssignPort, http.MethodGet))
 	mux.HandleFunc("/"+common.AddPort, middleware.AddRouter(router.AddPort, http.MethodPost))
 
-	// for logging and tracing
-	http_logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
-
-	// run
-	server := &http.Server{
-		Addr:    common.CoordAddr,
-		Handler: logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(mux)),
-	}
-
+	// Set up Database
 	logger.Log.Println("[coordinator server]: Init DataBase...")
 	controller.CreateTables()
 	if common.JobDatabase == common.DBMySQL {
@@ -77,13 +70,40 @@ func SetupCoordServer(nConsumer int) {
 	logger.Log.Println("[coordinator server]: Create admin user...")
 	controller.CreateUser()
 
+	// Set up Job Scheduler
+	logger.Log.Println("[coordinator server]: Starting multi consumers...")
 	jobScheduler := controller.Init(nConsumer)
+	// multi-thread consumer
+	for i := 0; i < nConsumer; i++ {
 
-	done := make(chan os.Signal)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+		go jobScheduler.Consume(i)
+	}
+	go jobScheduler.MonitorConsumers()
+
+	// for logging and tracing
+	http_logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
+	http_logger.Println("HTTP Server is starting...")
+
+	// set up the HTTP server
+	// modified from https://github.com/enricofoltran/simple-go-server/blob/master/main.go
+	server := &http.Server{
+		Addr:     common.CoordAddr,
+		Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(mux)),
+		ErrorLog: http_logger,
+		// Good practice: enforce timeouts for servers
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  15 * time.Second,
+	}
+
+	// use a buffered channel for signal
+	done := make(chan bool)
+	// Set up channel on which to send signal notifications.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 
 	go func() {
-		<-done
+		<-quit
 
 		logger.Log.Println("[coordinator server]: Stop multi consumers")
 
@@ -94,25 +114,22 @@ func SetupCoordServer(nConsumer int) {
 			jobScheduler.StopConsumer()
 		}
 
-		//todo, this will shutdown the master thread at the same time
-		// but the worker need to be stopped also??, add later ???
-
 		logger.Log.Println("[coordinator server]: Consumer Stopped")
-		if err := server.Shutdown(context.Background()); err != nil {
-			logger.Log.Fatal("[coordinator server]: ShutDown the server", err)
+
+		http_logger.Println("HTTP Server is shutting down...")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		server.SetKeepAlivesEnabled(false)
+		if err := server.Shutdown(ctx); err != nil {
+			http_logger.Fatalf("Could not gracefully shutdown the server: %v\n", err)
+			logger.Log.Fatal("[coordinator server]: Could not gracefully shutDown the server: ", err)
 		}
+		close(done)
 	}()
 
-	logger.Log.Println("[coordinator server]: Starting multi consumers...")
-
-	// multi-thread consumer
-
-	for i := 0; i < nConsumer; i++ {
-
-		go jobScheduler.Consume(i)
-	}
-	go jobScheduler.MonitorConsumers()
-
+	http_logger.Println("HTTP Server is ready to handle requests at", common.CoordAddr)
 	logger.Log.Printf(
 		"[coordinator server] listening on IP: %v, Port: %v\n",
 		common.CoordIP,
@@ -120,13 +137,12 @@ func SetupCoordServer(nConsumer int) {
 
 	// ErrServerClosed is returned by the Server's Serve, ServeTLS, ListenAndServe, and ListenAndServeTLS methods
 	// after a call to Shutdown or Close
-	err := server.ListenAndServe()
-
-	if err != nil {
-		if err == http.ErrServerClosed {
-			logger.Log.Print("[coordinator server]: Server closed under request\n", err)
-		} else {
-			logger.Log.Fatal("[coordinator server]: Server closed unexpected\n", err)
-		}
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		http_logger.Fatalf("Could not listen on %s: %v\n", common.CoordAddr, err)
+		logger.Log.Fatal("[coordinator server]: Could not listen on ", common.CoordAddr, " err: ", err, "\n")
 	}
+
+	<-done
+	http_logger.Println("HTTP Server stopped")
+	logger.Log.Println("[coordinator server]: Server Stopped")
 }
