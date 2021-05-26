@@ -1,10 +1,10 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
-)
 
+	"gorm.io/gorm"
+)
 
 func (jobDB *JobDB) ModelCreate(
 	tx *gorm.DB,
@@ -15,24 +15,21 @@ func (jobDB *JobDB) ModelCreate(
 ) (error, *ModelRecord) {
 
 	u := &ModelRecord{
-		JobId:     		 JobId,
-		ModelName:    	ModelName,
-		ModelDecs:    	ModelDecs,
+		JobId:     JobId,
+		ModelName: ModelName,
+		ModelDecs: ModelDecs,
 
-		IsTrained:			 0,
+		IsTrained: 0,
 
-		CreateTime: 		 time.Now(),
-		UpdateTime: 		 time.Now(),
-		DeleteTime:  		 time.Now(),
+		CreateTime: time.Now(),
+		UpdateTime: time.Now(),
+		DeleteTime: time.Now(),
 	}
-
 
 	err := tx.Create(u).Error
 	return err, u
 
 }
-
-
 
 func (jobDB *JobDB) ModelUpdate(
 	tx *gorm.DB,
@@ -52,9 +49,6 @@ func (jobDB *JobDB) ModelUpdate(
 
 }
 
-
-
-
 func (jobDB *JobDB) ModelGetByID(
 	jobId uint,
 
@@ -62,7 +56,7 @@ func (jobDB *JobDB) ModelGetByID(
 
 	u := &ModelRecord{}
 
-	err := jobDB.Db.Where("job_id = ?", jobId).First(u).Error
+	err := jobDB.DB.Where("job_id = ?", jobId).First(u).Error
 
 	return err, u
 

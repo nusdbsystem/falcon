@@ -10,7 +10,7 @@ func AssignPort(ctx *entity.Context) uint {
 
 	ports := ctx.JobDB.GetPorts()
 
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 
 	maxPort := findMax(ports)
 
@@ -36,7 +36,7 @@ func AssignPort(ctx *entity.Context) uint {
 
 func AddPort(newPort uint, ctx *entity.Context) uint {
 
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 
 	e, _ := ctx.JobDB.AddPort(tx, newPort)
 

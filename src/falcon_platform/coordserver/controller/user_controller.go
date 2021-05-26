@@ -5,15 +5,12 @@ import (
 )
 
 func CreateUser() {
-
 	jobDB := models.InitJobDB()
 
 	jobDB.Connect()
-	tx := jobDB.Db.Begin()
+	tx := jobDB.DB.Begin()
 
 	e := jobDB.CreateAdminUser(tx)
 
 	jobDB.Commit(tx, e)
-	jobDB.Disconnect()
-
 }

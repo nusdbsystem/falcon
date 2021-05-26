@@ -8,41 +8,29 @@ import (
 )
 
 func CreateTables() {
-
 	jobDB := models.InitJobDB()
-
 	jobDB.Connect()
-	tx := jobDB.Db.Begin()
-
 	jobDB.DefineTables()
-
-	jobDB.Commit(tx, nil)
-	jobDB.Disconnect()
-
 }
 
-func CreateSpecificSysPorts(port string) {
+// func CreateSpecificSysPorts(port string) {
+// 	jobDB := models.InitJobDB()
 
-	jobDB := models.InitJobDB()
-
-	jobDB.Connect()
-	tx := jobDB.Db.Begin()
-	var e1 error
-	portInt, _ := strconv.Atoi(port)
-	if !jobDB.CheckPort(uint(portInt)) {
-		e1, _ = jobDB.AddPort(tx, uint(portInt))
-	}
-	jobDB.Commit(tx, e1)
-	jobDB.Disconnect()
-
-}
+// 	jobDB.Connect()
+// 	tx := jobDB.DB.Begin()
+// 	var e1 error
+// 	portInt, _ := strconv.Atoi(port)
+// 	if !jobDB.CheckPort(uint(portInt)) {
+// 		e1, _ = jobDB.AddPort(tx, uint(portInt))
+// 	}
+// 	jobDB.Commit(tx, e1)
+// }
 
 func CreateSysPorts() {
-
 	jobDB := models.InitJobDB()
 
 	jobDB.Connect()
-	tx := jobDB.Db.Begin()
+	tx := jobDB.DB.Begin()
 
 	var e1 error
 	var e2 error
@@ -66,20 +54,16 @@ func CreateSysPorts() {
 	}
 
 	jobDB.Commit(tx, []error{e1, e2, e3})
-	jobDB.Disconnect()
-
 }
 
 func PartyServerAdd(ctx *entity.Context, partyserverAddr, Port string) {
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	e, _ := ctx.JobDB.PartyServerAdd(tx, partyserverAddr, Port)
 	ctx.JobDB.Commit(tx, e)
-
 }
 
 func PartyServerDelete(ctx *entity.Context, partyserverAddr string) {
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	e := ctx.JobDB.PartyServerDelete(tx, partyserverAddr)
 	ctx.JobDB.Commit(tx, e)
-
 }

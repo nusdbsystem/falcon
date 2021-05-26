@@ -1,6 +1,6 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import "gorm.io/gorm"
 
 func (jobDB *JobDB) GetPorts() []uint {
 	/**
@@ -12,24 +12,24 @@ func (jobDB *JobDB) GetPorts() []uint {
 	 **/
 	var u []*PortRecord
 	var res []uint
-	err := jobDB.Db.Find(&u).Error
+	err := jobDB.DB.Find(&u).Error
 
-	if err==nil{
-		for _, item := range u{
+	if err == nil {
+		for _, item := range u {
 			res = append(res, item.Port)
 		}
 	}
 	//  this func only called internally, the process logic is the same
 	//  so define error hand logic here for convience
-	if err!=nil{
+	if err != nil {
 		panic(err)
 	}
 	return res
 }
 
-func (jobDB *JobDB) AddPort(tx *gorm.DB,port uint) (error, *PortRecord) {
+func (jobDB *JobDB) AddPort(tx *gorm.DB, port uint) (error, *PortRecord) {
 	u := &PortRecord{
-		Port: port,
+		Port:     port,
 		IsDelete: 0,
 	}
 
@@ -38,8 +38,7 @@ func (jobDB *JobDB) AddPort(tx *gorm.DB,port uint) (error, *PortRecord) {
 	return err, u
 }
 
-
-func (jobDB *JobDB) DeletePort(tx *gorm.DB ,port uint) (error, *PortRecord) {
+func (jobDB *JobDB) DeletePort(tx *gorm.DB, port uint) (error, *PortRecord) {
 	u := &PortRecord{}
 
 	err := tx.Model(u).
@@ -51,14 +50,14 @@ func (jobDB *JobDB) DeletePort(tx *gorm.DB ,port uint) (error, *PortRecord) {
 func (jobDB *JobDB) CheckPort(port uint) bool {
 
 	u := &PortRecord{}
-	err := jobDB.Db.First(u, "port = ?", port ).Error
-	if err == nil{
-		if u.Port==0{
+	err := jobDB.DB.First(u, "port = ?", port).Error
+	if err == nil {
+		if u.Port == 0 {
 			return false
-		}else{
+		} else {
 			return true
 		}
-	}else{
+	} else {
 		return false
 	}
 }

@@ -5,12 +5,9 @@ import (
 	"falcon_platform/logger"
 	"fmt"
 	"path"
-	"time"
 
-	"github.com/jinzhu/gorm"
-
-	_ "gorm.io/driver/mysql"
-	_ "gorm.io/driver/sqlite"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type JobDB struct {
@@ -20,8 +17,21 @@ type JobDB struct {
 	password string
 	database string
 	addr     string
-	Db       *gorm.DB
+	DB       *gorm.DB
 }
+
+// NOTE: Jinzhu decided to eliminate the Close() method on version 1.20
+// because GORM supports connection pooling
+// Jinzhu reply: http://disq.us/p/2ayeg92:
+// "GORM support database pool, your application should share one database instance.
+// `db.Close` is rarely necessary so I decided to remove the `Close` method in V2 to reduce the misuse,
+// check out the `Generic database interface` if it is necessary for you."
+
+// NOTE: By default, all GORM write operations run inside a transaction to ensure data consistency
+// The returned DB is safe for concurrent use by multiple goroutines and maintains its own pool of idle connections.
+// Thus, the Open function should be called just once. It is rarely necessary to close a DB.
+// ref1: https://stackoverflow.com/a/61823123
+// ref2: https://stackoverflow.com/a/56192146
 
 func InitJobDB() *JobDB {
 	jobDB := new(JobDB)
@@ -48,6 +58,7 @@ func InitJobDB() *JobDB {
 		// if use outside of dev_test, make sure to reset the db file
 		jobDB.addr = path.Join(common.CoordBasePath, common.JobDbSqliteDb)
 	}
+
 	return jobDB
 }
 
@@ -56,109 +67,51 @@ func (jobDB *JobDB) Connect() {
 
 	var db *gorm.DB
 	var err error
-	NTimes := 20
 
-	for {
-		if NTimes < 0 {
-			break
-		}
-		db, err = gorm.Open(jobDB.engine, jobDB.addr)
-		if err != nil {
-			logger.Log.Println(err)
-			logger.Log.Println("JobDB: connecting Db...retry")
-			time.Sleep(time.Second * 5)
-			NTimes--
-		} else {
-			jobDB.Db = db
-			return
-		}
+	if jobDB.engine == common.DBsqlite3 {
+		// github.com/mattn/go-sqlite3
+		db, err = gorm.Open(sqlite.Open(jobDB.addr), &gorm.Config{})
+		// NOTE: You can also use file::memory:?cache=shared instead of a path to a file.
+		// This will tell SQLite to use a temporary database in system memory.
 	}
-	return
-}
 
-// disconnect , should call after jobDB.Commit
-func (jobDB *JobDB) Disconnect() {
-
-	e := jobDB.Db.Close()
-	if e != nil {
-		logger.Log.Println("closeDb error")
+	if err != nil {
+		panic("failed to connect database")
 	}
+
+	jobDB.DB = db
 }
 
 func (jobDB *JobDB) DefineTables() {
 
-	if jobDB.Db.HasTable(&TrainJobRecord{}) {
-		jobDB.Db.AutoMigrate(&TrainJobRecord{})
-	} else {
-		jobDB.Db.CreateTable(&TrainJobRecord{})
-	}
+	// NOTE: AutoMigrate will
+	// create tables, missing foreign keys, constraints, columns and indexes
+	// It WON’T delete unused columns to protect your data.
+	// reference: https://gorm.io/docs/migration.html
 
-	if jobDB.Db.HasTable(&JobInfoRecord{}) {
-		jobDB.Db.AutoMigrate(&JobInfoRecord{})
-	} else {
-		jobDB.Db.CreateTable(&JobInfoRecord{})
-	}
+	jobDB.DB.AutoMigrate(
+		// System Usage
+		&PortRecord{},
 
-	if jobDB.Db.HasTable(&TaskRecord{}) {
-		jobDB.Db.AutoMigrate(&TaskRecord{})
-	} else {
-		jobDB.Db.CreateTable(&TaskRecord{})
-	}
+		// Train Jobs
+		&TrainJobRecord{},
+		&JobInfoRecord{},
+		&TaskRecord{},
 
-	if jobDB.Db.HasTable(&ExecutionRecord{}) {
-		jobDB.Db.AutoMigrate(&ExecutionRecord{})
-	} else {
-		jobDB.Db.CreateTable(&ExecutionRecord{})
-	}
+		// Inference and Model Serving
+		&ModelRecord{},
+		&InferenceJobRecord{},
 
-	if jobDB.Db.HasTable(&ModelRecord{}) {
-		jobDB.Db.AutoMigrate(&ModelRecord{})
-	} else {
-		jobDB.Db.CreateTable(&ModelRecord{})
-	}
+		// Party Server
+		&PartyServer{},
 
-	if jobDB.Db.HasTable(&ServiceRecord{}) {
-		jobDB.Db.AutoMigrate(&ServiceRecord{})
-	} else {
-		jobDB.Db.CreateTable(&ServiceRecord{})
-	}
+		// Executor
+		&ExecutionRecord{},
+		&ServiceRecord{},
 
-	if jobDB.Db.HasTable(&ModelRecord{}) {
-		jobDB.Db.AutoMigrate(&ModelRecord{})
-	} else {
-		jobDB.Db.CreateTable(&ModelRecord{})
-	}
-
-	if jobDB.Db.HasTable(&User{}) {
-		jobDB.Db.AutoMigrate(&User{})
-	} else {
-		jobDB.Db.CreateTable(&User{})
-	}
-
-	if jobDB.Db.HasTable(&PartyServer{}) {
-		jobDB.Db.AutoMigrate(&PartyServer{})
-	} else {
-		jobDB.Db.CreateTable(&PartyServer{})
-	}
-
-	if jobDB.Db.HasTable(&InferenceJobRecord{}) {
-		jobDB.Db.AutoMigrate(&InferenceJobRecord{})
-	} else {
-		jobDB.Db.CreateTable(&InferenceJobRecord{})
-	}
-
-	if jobDB.Db.HasTable(&TestTable{}) {
-		jobDB.Db.AutoMigrate(&TestTable{})
-	} else {
-		jobDB.Db.CreateTable(&TestTable{})
-	}
-
-	if jobDB.Db.HasTable(&PortRecord{}) {
-		jobDB.Db.AutoMigrate(&PortRecord{})
-	} else {
-		jobDB.Db.CreateTable(&PortRecord{})
-	}
-
+		// User
+		&User{},
+	)
 }
 
 func (jobDB *JobDB) Commit(tx *gorm.DB, el interface{}) {
@@ -191,7 +144,3 @@ func (jobDB *JobDB) Commit(tx *gorm.DB, el interface{}) {
 		panic("Commit Not supported type")
 	}
 }
-
-////////////////////////////////////
-/////////// Test falcon_sql ////////////
-////////////////////////////////////

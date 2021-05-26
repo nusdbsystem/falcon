@@ -1,6 +1,6 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import "gorm.io/gorm"
 
 ////////////////////////////////////
 /////////// JobInfo  ////////////
@@ -20,15 +20,15 @@ func (jobDB *JobDB) JobInfoCreate(
 ) (error, *JobInfoRecord) {
 
 	u := &JobInfoRecord{
-		UserID:     UserID,
-		JobName:    JobName,
-		JobDecs:    JobDecs,
-		FlSetting:    FlSetting,
+		UserID:      UserID,
+		JobName:     JobName,
+		JobDecs:     JobDecs,
+		FlSetting:   FlSetting,
 		ExistingKey: ExistingKey,
-		PartyNum: 	PartyNum,
-		PartyIds:   PartyIds,
-		TaskNum:    TaskNum,
-		TaskInfo:  TaskInfo,
+		PartyNum:    PartyNum,
+		PartyIds:    PartyIds,
+		TaskNum:     TaskNum,
+		TaskInfo:    TaskInfo,
 	}
 
 	err := tx.Create(u).Error
@@ -36,24 +36,22 @@ func (jobDB *JobDB) JobInfoCreate(
 
 }
 
-
 func (jobDB *JobDB) JobInfoGetByUserID(userId uint) (error, *JobInfoRecord) {
 
 	u := &JobInfoRecord{}
-	err := jobDB.Db.Where("user_id = ?", userId).First(u).Error
+	err := jobDB.DB.Where("user_id = ?", userId).First(u).Error
 	return err, u
 }
-
 
 func (jobDB *JobDB) JobInfoIdGetByUserIDAndJobName(UserId uint, jobName string) (error, []uint) {
 
 	var u []*JobInfoRecord
 	var res []uint
 
-	err := jobDB.Db.Where("user_id = ? AND job_name = ?", UserId, jobName).Find(&u).Error
+	err := jobDB.DB.Where("user_id = ? AND job_name = ?", UserId, jobName).Find(&u).Error
 
-	if err==nil{
-		for _, item := range u{
+	if err == nil {
+		for _, item := range u {
 			res = append(res, item.Id)
 		}
 	}
@@ -64,6 +62,6 @@ func (jobDB *JobDB) JobInfoIdGetByUserIDAndJobName(UserId uint, jobName string) 
 func (jobDB *JobDB) JobInfoGetById(Id uint) (error, *JobInfoRecord) {
 
 	u := &JobInfoRecord{}
-	err := jobDB.Db.Where("id = ?", Id).First(u).Error
+	err := jobDB.DB.Where("id = ?", Id).First(u).Error
 	return err, u
 }

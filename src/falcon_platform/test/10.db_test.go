@@ -23,7 +23,7 @@ func TestDb(t *testing.T) {
 
 	jobDB := models.InitJobDB()
 	jobDB.Connect()
-	tx := jobDB.Db.Begin()
+	tx := jobDB.DB.Begin()
 	jobDB.DefineTables()
 	jobDB.Commit(tx, nil)
 
@@ -34,7 +34,7 @@ func TestDb(t *testing.T) {
 	//jobDB.Commit(eee)
 
 	a := []uint{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	tx = jobDB.Db.Begin()
+	tx = jobDB.DB.Begin()
 	var elist []error
 	for _, v := range a {
 
@@ -49,8 +49,6 @@ func TestDb(t *testing.T) {
 		elist = append(elist, err4)
 	}
 	jobDB.Commit(tx, elist)
-
-	jobDB.Disconnect()
 
 	var err error
 	var u *models.PortRecord

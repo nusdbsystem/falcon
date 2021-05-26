@@ -32,7 +32,7 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 	}
 
 	// if train is not finished, else create a inference job
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	e4, inference := ctx.JobDB.CreateInference(tx, model.ID, inferenceJob.JobId)
 	ctx.JobDB.Commit(tx, e4)
 
@@ -120,14 +120,14 @@ func QueryRunningInferenceJobs(jobName string, ctx *entity.Context) []uint {
 }
 
 func InferenceUpdateStatus(jobId uint, status uint, ctx *entity.Context) {
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	e, _ := ctx.JobDB.InferenceUpdateStatus(tx, jobId, status)
 	ctx.JobDB.Commit(tx, e)
 
 }
 
 func InferenceUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	e, _ := ctx.JobDB.InferenceUpdateMaster(tx, jobId, masterAddr)
 	ctx.JobDB.Commit(tx, []error{e})
 }
@@ -158,7 +158,7 @@ loop:
 
 				dist.KillJob(u.MasterAddr, common.Network)
 
-				tx := ctx.JobDB.Db.Begin()
+				tx := ctx.JobDB.DB.Begin()
 				e, _ = ctx.JobDB.InferenceUpdateStatus(tx, infId, common.JobKilled)
 				ctx.JobDB.Commit(tx, e)
 			}

@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 ////////////////////////////////////
@@ -22,7 +23,7 @@ func (jobDB *JobDB) JobSubmit(
 		JobInfoID:  JobInfoID,
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
-		DeleteTime: time.Now(),
+		DeleteTime: time.Now(), // deletetime is also now??
 	}
 
 	err := tx.Create(u).Error
@@ -33,18 +34,18 @@ func (jobDB *JobDB) JobSubmit(
 func (jobDB *JobDB) JobGetByJobID(jobId uint) (error, *TrainJobRecord) {
 
 	u := &TrainJobRecord{}
-	err := jobDB.Db.Where("job_id = ?", jobId).First(u).Error
+	err := jobDB.DB.Where("job_id = ?", jobId).First(u).Error
 	return err, u
 }
 
 func (jobDB *JobDB) JobGetByJobInfoID(jobInfoId uint) (error, *TrainJobRecord) {
 
 	u := &TrainJobRecord{}
-	err := jobDB.Db.Where("job_info_id = ?", jobInfoId).First(u).Error
+	err := jobDB.DB.Where("job_info_id = ?", jobInfoId).First(u).Error
 	return err, u
 }
 
-func (jobDB *JobDB) JobUpdateMaster(tx *gorm.DB,jobId uint, masterAddr string) (error, *TrainJobRecord) {
+func (jobDB *JobDB) JobUpdateMaster(tx *gorm.DB, jobId uint, masterAddr string) (error, *TrainJobRecord) {
 
 	u := &TrainJobRecord{}
 	err := tx.Model(u).
@@ -54,7 +55,7 @@ func (jobDB *JobDB) JobUpdateMaster(tx *gorm.DB,jobId uint, masterAddr string) (
 
 }
 
-func (jobDB *JobDB) JobUpdateStatus(tx *gorm.DB,jobId uint, status uint) (error, *TrainJobRecord) {
+func (jobDB *JobDB) JobUpdateStatus(tx *gorm.DB, jobId uint, status uint) (error, *TrainJobRecord) {
 
 	u := &TrainJobRecord{}
 	err := tx.Model(u).
@@ -64,7 +65,7 @@ func (jobDB *JobDB) JobUpdateStatus(tx *gorm.DB,jobId uint, status uint) (error,
 
 }
 
-func (jobDB *JobDB) JobUpdateResInfo(tx *gorm.DB,jobId uint, jobErrMsg, jobResult, jobExtInfo string) (error, *TrainJobRecord) {
+func (jobDB *JobDB) JobUpdateResInfo(tx *gorm.DB, jobId uint, jobErrMsg, jobResult, jobExtInfo string) (error, *TrainJobRecord) {
 
 	u := &TrainJobRecord{}
 	err := tx.Model(u).
@@ -80,14 +81,14 @@ func (jobDB *JobDB) JobUpdateResInfo(tx *gorm.DB,jobId uint, jobErrMsg, jobResul
 /////////// JobInfo,  call by other internal thread ////////////
 ////////////////////////////////////////////////////////////////
 
+// TODO: is this needed as gorm is multi-thread safe?
 func JobUpdateStatus(jobId uint, status uint) {
 	jobDB := InitJobDB()
 
 	jobDB.Connect()
-	tx := jobDB.Db.Begin()
+	tx := jobDB.DB.Begin()
 
 	e2, _ := jobDB.JobUpdateStatus(tx, jobId, status)
 
 	jobDB.Commit(tx, e2)
-	jobDB.Disconnect()
 }

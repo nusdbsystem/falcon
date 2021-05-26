@@ -29,7 +29,7 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 	PartyNumber := uint(len(job.PartyInfo))
 
 	// write to db
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	err1, u1 := ctx.JobDB.JobInfoCreate(
 		tx,
 		job.JobName,
@@ -75,26 +75,26 @@ func JobKill(jobId uint, ctx *entity.Context) {
 
 	distributed.KillJob(u.MasterAddr, common.Network)
 
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	e2, _ := ctx.JobDB.JobUpdateStatus(tx, jobId, common.JobKilled)
 	ctx.JobDB.Commit(tx, e2)
 }
 
 func JobUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	e, _ := ctx.JobDB.SvcUpdateMaster(tx, jobId, masterAddr)
 	e2, _ := ctx.JobDB.JobUpdateMaster(tx, jobId, masterAddr)
 	ctx.JobDB.Commit(tx, []error{e, e2})
 }
 
 func JobUpdateResInfo(jobId uint, jobErrMsg, jobResult, jobExtInfo string, ctx *entity.Context) {
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	e, _ := ctx.JobDB.JobUpdateResInfo(tx, jobId, jobErrMsg, jobResult, jobExtInfo)
 	ctx.JobDB.Commit(tx, e)
 }
 
 func JobUpdateStatus(jobId uint, status uint, ctx *entity.Context) {
-	tx := ctx.JobDB.Db.Begin()
+	tx := ctx.JobDB.DB.Begin()
 	e, _ := ctx.JobDB.JobUpdateStatus(tx, jobId, status)
 	ctx.JobDB.Commit(tx, e)
 }

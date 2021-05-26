@@ -22,8 +22,6 @@ func TestSql(t *testing.T) {
 		panic(e)
 	}
 
-	jobDB.Disconnect()
-
 	logger.Log.Println(u)
 
 }

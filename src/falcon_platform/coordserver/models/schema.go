@@ -4,12 +4,15 @@ import (
 	"time"
 )
 
+// NOTE: GORM pluralize struct name to snake_cases as table name
+
 type TrainJobRecord struct {
-	JobId     uint `gorm:"primary_key;auto_increment"`
+	JobId     uint `gorm:"primaryKey;autoIncrement"`
 	UserID    uint
 	JobInfoID uint // id of the dsl table(jobInfotable)
 
 	// 0: init, 1: running, 2:successful, 3: failed, 4: killed
+	// TODO: change to text
 	Status uint
 
 	ErrorMsg   string `gorm:"type:varchar(256)"`
@@ -23,7 +26,7 @@ type TrainJobRecord struct {
 }
 
 type JobInfoRecord struct {
-	Id     uint `gorm:"primary_key;auto_increment"`
+	Id     uint `gorm:"primaryKey;autoIncrement"`
 	UserID uint
 
 	JobName     string `gorm:"type:varchar(256)"`
@@ -37,8 +40,8 @@ type JobInfoRecord struct {
 }
 
 type TaskRecord struct {
-	ID    uint `gorm:"primary_key;AUTO_INCREMENT"`
-	JobID uint `gorm:"unique_index"`
+	ID    uint `gorm:"primaryKey;autoIncrement"`
+	JobID uint `gorm:"uniqueIndex"`
 	//TaskId     uint
 	TaskName   string `gorm:"type:varchar(256)"`
 	PartyIds   string `gorm:"type:varchar(256)"`
@@ -54,41 +57,37 @@ type TaskRecord struct {
 }
 
 type ServiceRecord struct {
-	ID         uint   `gorm:"primary_key;AUTO_INCREMENT"`
-	JobID      uint   `gorm:"unique_index"`
+	ID         uint   `gorm:"primaryKey;autoIncrement"`
+	JobID      uint   `gorm:"uniqueIndex"`
 	MasterAddr string `gorm:"type:varchar(256)"`
 	WorkerAddr string `gorm:"type:varchar(256)"`
 }
 
 type PortRecord struct {
-	ID       uint `gorm:"primary_key;AUTO_INCREMENT"`
+	ID       uint `gorm:"primaryKey;autoIncrement"`
 	NodeId   uint
-	Port     uint `gorm:"unique_index"`
+	Port     uint `gorm:"uniqueIndex"`
 	IsDelete uint
 }
 
 type User struct {
-	UserID uint   `gorm:"primary_key;AUTO_INCREMENT"`
+	UserID uint   `gorm:"primaryKey;autoIncrement"`
 	Name   string `gorm:"type:varchar(256)"`
 }
 
 type PartyServer struct {
-	ID              uint   `gorm:"primary_key;AUTO_INCREMENT"`
+	ID              uint   `gorm:"primaryKey;autoIncrement"`
 	PartyServerAddr string `gorm:"type:varchar(256)"`
 	Port            string `gorm:"type:varchar(256)"`
-}
-
-type TestTable struct {
-	ID   uint   `gorm:"primary_key;AUTO_INCREMENT"`
-	Name string `gorm:"type:varchar(256)"`
 }
 
 //////////////////////////////////////////////////////////////////
 ///////////////////// PartyServerDatabase  //////////////////////////
 //////////////////////////////////////////////////////////////////
 
+// TODO: what is TapeId? TapeDecs?
 type ExecutionRecord struct {
-	ID         uint `gorm:"primary_key;AUTO_INCREMENT"`
+	ID         uint `gorm:"primaryKey;autoIncrement"`
 	TapeId     uint
 	TapeName   string `gorm:"type:varchar(256)"`
 	Status     uint
@@ -102,7 +101,7 @@ type ExecutionRecord struct {
 }
 
 type ModelRecord struct {
-	ID    uint `gorm:"primary_key;AUTO_INCREMENT"`
+	ID    uint `gorm:"primaryKey;autoIncrement"`
 	JobId uint // 外键job id
 
 	ModelName string `gorm:"type:varchar(256)"` // model名称，LR etc.
@@ -116,13 +115,13 @@ type ModelRecord struct {
 }
 
 type InferenceJobRecord struct {
-	ID uint `gorm:"primary_key;AUTO_INCREMENT"`
+	ID uint `gorm:"primaryKey;autoIncrement"`
 
 	ModelId uint //外键模型id，标明哪个模型执⾏
 	JobId   uint //外键模型id，标明哪个训练job
 
 	// 0: init, 1: running, 2:successful, 3: failed, 4: killed
-	Status uint
+	Status     uint
 	MasterAddr string `gorm:"type:varchar(256)"`
 
 	CreateTime time.Time

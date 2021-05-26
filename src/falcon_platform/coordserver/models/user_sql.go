@@ -1,11 +1,11 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import "gorm.io/gorm"
 
-func (jobDB *JobDB) GetUserByUserID(userId uint)  (error, *User) {
+func (jobDB *JobDB) GetUserByUserID(userId uint) (error, *User) {
 	u := &User{}
 
-	err := jobDB.Db.First(u, userId).Error
+	err := jobDB.DB.First(u, userId).Error
 
 	return err, u
 }

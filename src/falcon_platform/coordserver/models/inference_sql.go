@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func (jobDB *JobDB) CreateInference(
@@ -58,7 +58,7 @@ func (jobDB *JobDB) InferenceUpdateMaster(tx *gorm.DB, Id uint, masterAddr strin
 func (jobDB *JobDB) InferenceGetByID(jobId uint) (error, *InferenceJobRecord) {
 
 	u := &InferenceJobRecord{}
-	err := jobDB.Db.Where("id = ?", jobId).First(u).Error
+	err := jobDB.DB.Where("id = ?", jobId).First(u).Error
 	return err, u
 }
 
@@ -79,7 +79,7 @@ func (jobDB *JobDB) InferenceGetCurrentRunningOneWithJobName(
 		jobDB.database, jobDB.database, jobDB.database, userId, jobName, common.JobRunning)
 
 	// Raw SQL
-	e := jobDB.Db.Raw(sql).Scan(&result).Error
+	e := jobDB.DB.Raw(sql).Scan(&result).Error
 
 	var res []uint
 
