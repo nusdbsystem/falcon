@@ -16,13 +16,9 @@ import (
 
 func SetupPartyServer() {
 	defer logger.HandleErrors()
-	mux := http.NewServeMux()
 
-	// sanity check
-	mux.HandleFunc("/", router.HelloPartyServer)
-
-	mux.HandleFunc("/"+common.SetupWorker, router.SetupWorker())
-	logger.Log.Println("SetupPartyServer: registering partyserverPort to coord", common.PartyServerPort)
+	// set up HTTP server routes
+	r := router.NewRouter()
 
 	// for logging and tracing
 	http_logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
@@ -32,7 +28,7 @@ func SetupPartyServer() {
 	// modified from https://github.com/enricofoltran/simple-go-server/blob/master/main.go
 	server := &http.Server{
 		Addr:     common.PartyServerIP + ":" + common.PartyServerPort,
-		Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(mux)),
+		Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(r)),
 		ErrorLog: http_logger,
 		// Good practice: enforce timeouts for servers
 		ReadTimeout:  5 * time.Second,
@@ -103,4 +99,5 @@ func SetupPartyServer() {
 	<-done
 	http_logger.Println("HTTP Server stopped")
 	logger.Log.Println("[party server]: Server Stopped")
+	os.Exit(0)
 }

@@ -49,9 +49,9 @@ func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// parse it
 	var job common.TrainJob
 
-	e := common.ParseTrainJob(contents, &job)
+	err = common.ParseTrainJob(contents, &job)
 
-	if e != nil {
+	if err != nil {
 		errMsg := fmt.Sprintf("ParseJob Error %s", err)
 		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
 		return

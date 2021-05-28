@@ -7,10 +7,25 @@ import (
 	"falcon_platform/partyserver/controller"
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
+
+func NewRouter() *mux.Router {
+	r := mux.NewRouter()
+
+	// sanity check
+	r.HandleFunc("/", HelloPartyServer).Methods("GET")
+
+	r.HandleFunc("/"+common.SetupWorker, SetupWorker()).Methods("POST")
+
+	return r
+}
 
 func SetupWorker() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		logger.Log.Println("SetupWorker: registering partyserverPort to coord", common.PartyServerPort)
 
 		// TODO: why is this via Form, and not via JSON?
 		client.ReceiveForm(r)
