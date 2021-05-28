@@ -12,6 +12,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gorilla/handlers"
 )
 
 func SetupPartyServer() {
@@ -27,8 +29,9 @@ func SetupPartyServer() {
 	// set up the HTTP server
 	// modified from https://github.com/enricofoltran/simple-go-server/blob/master/main.go
 	server := &http.Server{
-		Addr:     common.PartyServerIP + ":" + common.PartyServerPort,
-		Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(r)),
+		Addr:    common.PartyServerIP + ":" + common.PartyServerPort,
+		Handler: handlers.CombinedLoggingHandler(os.Stdout, r),
+		// Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(r)),
 		ErrorLog: http_logger,
 		// Good practice: enforce timeouts for servers
 		ReadTimeout:  5 * time.Second,

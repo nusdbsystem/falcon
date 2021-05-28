@@ -13,6 +13,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gorilla/handlers"
 )
 
 func SetupCoordServer(nConsumer int) {
@@ -54,7 +56,8 @@ func SetupCoordServer(nConsumer int) {
 	server := &http.Server{
 		Addr: common.CoordAddr,
 		// Pass instance of gorilla/mux in
-		Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(r)),
+		Handler: handlers.CombinedLoggingHandler(os.Stdout, r),
+		// Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(r)),
 		ErrorLog: http_logger,
 		// Good practice: enforce timeouts for servers to avoid Slowloris attacks
 		ReadTimeout:  5 * time.Second,
