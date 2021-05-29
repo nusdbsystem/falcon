@@ -9,12 +9,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
-	"time"
 )
 
 func (wk *TrainWorker) TrainTask(doTaskArgs *entity.DoTaskArgs, rep *entity.DoTaskReply) {
+	logger.Log.Println("[TrainTask] called")
 
 	wg := sync.WaitGroup{}
 
@@ -133,7 +132,8 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 			logFile,
 			dataInputFile,
 			dataOutFile,
-			"", "",
+			"",
+			"",
 		)
 		if exit := wk.execResHandler(exitStr, res, rep); exit == true {
 			return
@@ -248,61 +248,6 @@ func (wk *TrainWorker) execResHandler(
 	return false
 }
 
-func TestTaskProcess(doTaskArgs *entity.DoTaskArgs) {
-
-	partyId := doTaskArgs.PartyID
-	partyNum := doTaskArgs.PartyNums
-	partyType := 1
-	partyTypeStr := doTaskArgs.PartyInfo.PartyType
-	// TODO: check with wyc if partyType 0 = active?
-	if partyTypeStr == "active" {
-		partyType = 0
-	} else if partyTypeStr == "passive" {
-		partyType = 1
-	}
-	flSetting := 1
-	flSettingStr := doTaskArgs.JobFlType
-	if flSettingStr == "vertical" {
-		flSetting = 1
-	} else if flSettingStr == "horizontal" {
-		flSetting = 0
-	}
-	existingKey := doTaskArgs.ExistingKey
-	//dataInputFile := common.TaskDataPath +"/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
-	modelFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
-	algParams := doTaskArgs.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
-	logger.Log.Println("Worker: SerializedAlgorithmConfig is", algParams)
-
-	modelReportFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
-	logFile := common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.PreProcessing.AlgorithmName
-	KeyFile := doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
-	modelInputFile := common.TaskDataOutput + "/" + doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
-
-	logger.Log.Printf("--------------------------------------------------\n")
-	logger.Log.Printf("\n")
-	logger.Log.Println("executed path is: ", strings.Join([]string{
-		common.FLEnginePath,
-		" --party-id " + fmt.Sprintf("%d", partyId),
-		" --party-num " + fmt.Sprintf("%d", partyNum),
-		" --party-type " + fmt.Sprintf("%d", partyType),
-		" --fl-setting " + fmt.Sprintf("%d", flSetting),
-		" --existing-key " + fmt.Sprintf("%d", existingKey),
-		" --key-file " + KeyFile,
-		" --network-file " + doTaskArgs.NetWorkFile,
-
-		" --algorithm-name " + doTaskArgs.TaskInfo.ModelTraining.AlgorithmName,
-		" --algorithm-params " + algParams,
-		" --log-file " + logFile,
-		" --data-input-file " + modelInputFile,
-		" --data-output-file ",
-		" --model-save-file " + modelFile,
-		" --model-report-file " + modelReportFile,
-	}, " "))
-	logger.Log.Printf("\n")
-	logger.Log.Printf("--------------------------------------------------\n")
-	time.Sleep(time.Minute)
-}
-
 func doMlTask(
 	pm *taskmanager.SubProcessManager,
 
@@ -314,8 +259,16 @@ func doMlTask(
 
 	netFile string,
 
-) func(string, string, string, string, string, string, string, string) (string, map[string]string) {
-	// WTF was that??! WTF were all those strings???!
+) func(
+	string, // doTaskArgs.TaskInfo.PreProcessing.AlgorithmName,
+	string, // algParams,
+	string, // KeyFile,
+	string, // logFile,
+	string, // dataInputFile,
+	string, // dataOutFile,
+	string, // ?
+	string, // ?
+) (string, map[string]string) {
 	/**
 	 * @Author
 	 * @Description  record if the task is fail or not

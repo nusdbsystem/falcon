@@ -36,6 +36,7 @@ type WorkerBase struct {
 }
 
 func (w *WorkerBase) RunWorker(worker Worker) {
+	logger.Log.Println("[WorkerBase]: RunWorker called")
 
 	worker.Run()
 
@@ -44,6 +45,7 @@ func (w *WorkerBase) RunWorker(worker Worker) {
 }
 
 func (w *WorkerBase) InitWorkerBase(workerAddr, name string) {
+	logger.Log.Println("[WorkerBase]: InitWorkerBase called")
 
 	w.InitRpcBase(workerAddr)
 	w.Name = name
@@ -60,22 +62,24 @@ func (w *WorkerBase) InitWorkerBase(workerAddr, name string) {
 
 // call the master's register method,
 func (w *WorkerBase) Register(MasterAddr string, PartyID string) {
+	logger.Log.Println("[WorkerBase]: Register called")
 	args := new(entity.RegisterArgs)
 	args.WorkerAddr = w.Addr
 	args.PartyID = PartyID
 	args.WorkerList = w.Addr + ":" + PartyID // IP:Port:PartyID
 
-	logger.Log.Printf("WorkerBase: begin to call Master.RegisterWorker to register WorkerAddr: %s \n", args.WorkerAddr)
+	logger.Log.Printf("[WorkerBase]: begin to call Master.RegisterWorker to register WorkerAddr: %s \n", args.WorkerAddr)
 	ok := client.Call(MasterAddr, w.Network, "Master.RegisterWorker", args, new(struct{}))
 	// if not register successfully, close
 	if ok == false {
-		logger.Log.Fatalf("WorkerBase: Register RPC %s, register error\n", MasterAddr)
+		logger.Log.Fatalf("[WorkerBase]: Register RPC %s, register error\n", MasterAddr)
 	}
 }
 
 // Shutdown is called by the master when all work has been completed.
 // We should respond with the number of tasks we have processed.
 func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
+	logger.Log.Println("[WorkerBase]: Shutdown called")
 	logger.Log.Printf("%s: Shutdown %s\n", w.Name, w.Addr)
 
 	// shutdown other related thread
@@ -111,8 +115,9 @@ func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
 	return nil
 }
 
-// TODO: rename EventLoop to HeartBeat
-func (w *WorkerBase) EventLoop() {
+func (w *WorkerBase) HeartBeat() {
+	logger.Log.Println("[WorkerBase]: " + w.Name + " Shutdown called")
+
 	time.Sleep(time.Second * 5)
 
 	//define a label and break to that label
@@ -120,7 +125,7 @@ loop:
 	for {
 		select {
 		case <-w.Ctx.Done():
-			logger.Log.Printf("%s: server %s quit eventLoop \n", w.Name, w.Addr)
+			logger.Log.Printf("%s: server %s quit HeartBeat eventLoop \n", w.Name, w.Addr)
 			break loop
 		default:
 			elapseTime := time.Now().UnixNano() - w.latestHeardTime
@@ -140,12 +145,13 @@ loop:
 			}
 
 			time.Sleep(time.Millisecond * common.WorkerTimeout / 5)
-			fmt.Printf("%s: CountDown:....... %d \n", w.Name, int(elapseTime/int64(time.Millisecond)))
+			// fmt.Printf("%s: CountDown:....... %d \n", w.Name, int(elapseTime/int64(time.Millisecond)))
 		}
 	}
 }
 
 func (w *WorkerBase) ResetTime(_ *struct{}, _ *struct{}) error {
+	logger.Log.Println("[WorkerBase]: ResetTime called")
 	// called by master to reset workerbase time
 	fmt.Printf("%s: reset the countdown\n", w.Name)
 	w.reset()
@@ -153,6 +159,7 @@ func (w *WorkerBase) ResetTime(_ *struct{}, _ *struct{}) error {
 }
 
 func (w *WorkerBase) reset() {
+	logger.Log.Println("[WorkerBase]: reset called")
 	w.Lock()
 	w.latestHeardTime = time.Now().UnixNano()
 	w.Unlock()

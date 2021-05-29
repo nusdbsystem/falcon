@@ -137,7 +137,7 @@ loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
-			logger.Log.Printf("WorkerBase: server %s quit Waitting \n", master.Addr)
+			logger.Log.Printf("Master: server %s quit Waitting \n", master.Addr)
 			break loop
 		case <-master.doneChannel:
 			break loop

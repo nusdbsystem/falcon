@@ -36,6 +36,7 @@ func (rb *RpcBaseClass) InitRpcBase(Addr string) {
 }
 
 func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
+	logger.Log.Println("[rpcbase] StartRPCServer called")
 
 	logger.Log.Printf("%s: listening on %s, %s \n", rb.Name, rb.Network, "0.0.0.0:"+rb.Port)
 	listener, e := net.Listen(rb.Network, "0.0.0.0:"+rb.Port)
@@ -60,8 +61,7 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
 						_ = conn.Close()
 					}()
 				} else {
-
-					logger.Log.Printf("%s: RegistrationServer: Accept errored, %v \n", rb.Name, err)
+					logger.Log.Printf("%s: Listener.Accept Error: %v \n", rb.Name, err)
 					break
 				}
 			}
@@ -69,19 +69,18 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
 		}()
 
 	} else {
-
 		for {
 			// create a connection
 			conn, err := rb.Listener.Accept()
 			if err == nil {
-				logger.Log.Println("Worker: got new conn")
+				logger.Log.Printf("%s: got new conn", rb.Name)
 				go func() {
 					rpcSvc.ServeConn(conn)
 					// close a connection
 					_ = conn.Close()
 				}()
 			} else {
-				logger.Log.Println("Worker: got conn error", err)
+				logger.Log.Printf("%s: Listener.Accept Error: %v \n", rb.Name, err)
 				break
 			}
 		}

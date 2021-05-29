@@ -17,7 +17,7 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 	master.reset()
 
 	// thread 0, heartBeat
-	go master.eventLoop()
+	go master.heartBeat()
 
 	rpcServer := rpc.NewServer()
 	logger.Log.Println("[master_rpc/RunMaster] rpcServer ready, now register with master")
@@ -59,7 +59,7 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 			// stop worker after finishing the job
 			master.killWorkers()
 			// stop other related threads
-			// close eventLoop and forwardRegistrations
+			// close heartBeat and forwardRegistrations
 			master.Cancel()
 			// stop both master after finishing the job
 			master.StopRPCServer(master.Addr, "Master.Shutdown")
@@ -73,7 +73,7 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 
 		finish = func() {
 			// stop other related threads
-			// close eventLoop and forwardRegistrations
+			// close heartBeat and forwardRegistrations
 			master.Cancel()
 			// stop both master after finishing the job
 			master.StopRPCServer(master.Addr, "Master.Shutdown")

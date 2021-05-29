@@ -24,9 +24,9 @@ func InitTrainWorker(masterAddr, workerAddr string, PartyID string) *TrainWorker
 }
 
 func (wk *TrainWorker) Run() {
-
-	// 0 thread: start event Loop
-	go wk.EventLoop()
+	logger.Log.Println("TrainWorker Run() called")
+	// 0 thread: start heartbeat
+	go wk.HeartBeat()
 
 	rpcSvc := rpc.NewServer()
 
@@ -44,16 +44,16 @@ func (wk *TrainWorker) Run() {
 }
 
 func (wk *TrainWorker) DoTask(arg []byte, rep *entity.DoTaskReply) error {
+	logger.Log.Println("TrainWorker DoTask() called")
 
 	var doTaskArgs *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
 
-	//TestTaskProcess(doTaskArgs)
 	wk.TrainTask(doTaskArgs, rep)
 
 	for i := 10; i > 0; i-- {
-		logger.Log.Println("Worker: Counting down before job done... ", i)
+		logger.Log.Println("Worker: Counting down before DoTask done... ", i)
 		time.Sleep(time.Second)
 	}
-	logger.Log.Printf("Worker: %s: task done\n", wk.Addr)
+	logger.Log.Printf("Worker: %s: DoTask done\n", wk.Addr)
 	return nil
 }

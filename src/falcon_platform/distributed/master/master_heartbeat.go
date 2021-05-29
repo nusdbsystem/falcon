@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-func (master *Master) eventLoop() {
+func (master *Master) heartBeat() {
 
 loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
-			logger.Log.Printf("Master: %s quit eventLoop \n", master.Port)
+			logger.Log.Printf("Master: %s quit heartBeat eventLoop \n", master.Port)
 			break loop
 
 		default:
@@ -30,7 +30,7 @@ loop:
 
 				master.Lock()
 				elapseTime := time.Now().UnixNano() - master.lastSendTime
-				fmt.Printf("Master: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
+				// fmt.Printf("Master: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
 
 				if int(elapseTime/int64(time.Millisecond)) >= master.heartbeatTimeout {
 
