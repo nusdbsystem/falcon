@@ -20,9 +20,9 @@ def kill_job(url, jobId):
 
 
 def query_job_status(url, jobId):
-    url = "http://"+url+"/query-job-status"
+    url = "http://"+url+"/api/query-job-status/"+jobId
     print("requesting to ", url)
-    res = requests.get(url, json={'job_id': jobId})
+    res = requests.get(url)
     print(res.status_code)
     print(res.content)
 

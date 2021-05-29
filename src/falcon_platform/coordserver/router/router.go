@@ -20,12 +20,12 @@ func NewRouter() *mux.Router {
 
 	// REST APIs
 	//job
-	r.HandleFunc("/api/"+common.UploadTrainJobFile, middleware.AddRouter(SubmitTrainJobFile)).Methods("POST")
+	r.HandleFunc("/api/"+common.UploadTrainJobFile, middleware.AddRouter(SubmitTrainJobFile)).Methods("GET", "POST")
 	r.HandleFunc("/"+common.StopJob, middleware.AddRouter(JobKill)).Methods("POST")
 	r.HandleFunc("/"+common.UpdateTrainJobMaster, middleware.AddRouter(JobUpdateMaster)).Methods("POST")
 	r.HandleFunc("/"+common.UpdateJobStatus, middleware.AddRouter(JobUpdateStatus)).Methods("POST")
 	r.HandleFunc("/"+common.UpdateJobResInfo, middleware.AddRouter(JobUpdateResInfo)).Methods("POST")
-	r.HandleFunc("/"+common.QueryJobStatus, middleware.AddRouter(JobStatusQuery)).Methods("GET")
+	r.HandleFunc("/api/"+common.QueryJobStatus+"/{jobId}", middleware.AddRouter(JobStatusQuery)).Methods("GET")
 
 	//party server
 	r.HandleFunc("/"+common.Register, middleware.AddRouter(UserRegister)).Methods("POST")

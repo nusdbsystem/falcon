@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type JobSubmitRes struct {
@@ -34,7 +36,6 @@ type JobIdGet struct {
 
 // receive a job info file, parse it, put in queue
 func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
-
 	// Parse multipart form, 32 << 20 specifies a maximum
 	// upload of 32 MB files.
 	r.ParseMultipartForm(32 << 20)
@@ -75,6 +76,7 @@ func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 		TaskNum,
 		Status}
 
+	// TODO: fix json Marshal add /" '/" to the partyIds
 	js, err := json.Marshal(resIns)
 
 	if err != nil {
@@ -84,7 +86,6 @@ func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 	}
 	//json.NewEncoder(w).Encode(js)
 	_, _ = w.Write(js)
-
 }
 
 func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
@@ -163,18 +164,9 @@ func JobUpdateResInfo(w http.ResponseWriter, r *http.Request, ctx *entity.Contex
 
 func JobStatusQuery(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
-	var getBody JobIdGet
-
-	err := json.NewDecoder(r.Body).Decode(&getBody)
-
-	if err != nil {
-		panic(err)
-	}
-
-	jobId, e := strconv.Atoi(getBody.JobId)
-	if e != nil {
-		panic(e)
-	}
+	// read the query parameters with gorilla mux
+	params := mux.Vars(r)
+	jobId, _ := strconv.Atoi(params["jobId"])
 
 	status := controller.JobStatusQuery(uint(jobId), ctx)
 
