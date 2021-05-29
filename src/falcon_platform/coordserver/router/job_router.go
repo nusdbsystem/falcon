@@ -8,6 +8,7 @@ import (
 	"falcon_platform/coordserver/controller"
 	"falcon_platform/coordserver/entity"
 	"falcon_platform/exceptions"
+	"falcon_platform/logger"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -31,31 +32,33 @@ type JobIdGet struct {
 	JobId string `json:"job_id"`
 }
 
-// receive a job info file,parse it, put ti queue
-func JobSubmit(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
+// receive a job info file, parse it, put in queue
+func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
-	// limit the max input length!
-	_ = r.ParseMultipartForm(32 << 20)
+	// Parse multipart form, 32 << 20 specifies a maximum
+	// upload of 32 MB files.
+	r.ParseMultipartForm(32 << 20)
 
 	var buf bytes.Buffer
 
-	err, contents := client.ReceiveFile(r, buf, common.JobFile)
+	err, contents := client.ReceiveFile(r, buf, common.TrainJobFileKey)
 	if err != nil {
-		errMsg := fmt.Sprintf("ReceiveFile Error %s", err)
-		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
+		errMsg := fmt.Sprintf("client.ReceiveFile Error %s", err)
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest, errMsg)
 		return
 	}
+	logger.Log.Println("client.ReceiveFile success")
 
 	// parse it
 	var job common.TrainJob
 
 	err = common.ParseTrainJob(contents, &job)
-
 	if err != nil {
-		errMsg := fmt.Sprintf("ParseJob Error %s", err)
-		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
+		errMsg := fmt.Sprintf("common.ParseJob Error %s", err)
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest, errMsg)
 		return
 	}
+	logger.Log.Println("common.ParseJob success")
 
 	// submit it
 	JobId, JobName, UserId, PartyIds, TaskNum, Status := controller.JobSubmit(&job, ctx)

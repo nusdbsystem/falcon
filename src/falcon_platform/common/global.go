@@ -18,7 +18,7 @@ const (
 
 	// router path for coordServer
 	Register                 = "register"
-	SubmitJob                = "submit"
+	UploadTrainJobFile       = "upload-train-job-file"
 	StopJob                  = "stop"
 	UpdateTrainJobMaster     = "update-train-master"
 	UpdateInferenceJobMaster = "update-inference-master"
@@ -51,7 +51,7 @@ const (
 	JobStatus        = "status"
 	SubProcessNormal = "ok"
 
-	JobFile = "job"
+	TrainJobFileKey = "upload-train-job-file"
 
 	TaskTypeKey = "task-type"
 

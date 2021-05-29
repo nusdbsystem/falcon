@@ -2,11 +2,11 @@ import argparse
 import requests
 
 
-def submit_job(url, path):
-    url = "http://"+url+"/submit"
+def upload_train_job_file(url, path):
+    url = "http://"+url+"/api/upload-train-job-file"
     with open(path, 'rb') as f:
         print("requesting to ", url)
-        res = requests.post(url, files={'job': f})
+        res = requests.post(url, files={'upload-train-job-file': f})
         print(res.status_code)
         print(res.content)
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     print(args.url, args.path, args.path)
 
     if args.method == "submit":
-        submit_job(args.url, args.path)
+        upload_train_job_file(args.url, args.path)
 
     if args.method == "kill":
         kill_job(args.url, args.job)

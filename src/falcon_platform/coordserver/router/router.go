@@ -14,11 +14,13 @@ func NewRouter() *mux.Router {
 	middleware.SysLvPath = []string{common.Register, common.PartyServerAdd}
 
 	// match html views to routes
-	r.HandleFunc("/submit-train-job", middleware.AddRouter(HtmlSubmitTrainJob)).Methods("GET")
+	r.HandleFunc("/", HtmlIndex).Methods("GET")
+	r.HandleFunc("/submit-train-job", HtmlSubmitTrainJob).Methods("GET")
+	r.HandleFunc("/"+common.UploadTrainJobFile, HtmlUploadTrainJobFile).Methods("GET")
 
 	// REST APIs
 	//job
-	r.HandleFunc("/"+common.SubmitJob, middleware.AddRouter(JobSubmit)).Methods("POST")
+	r.HandleFunc("/api/"+common.UploadTrainJobFile, middleware.AddRouter(SubmitTrainJobFile)).Methods("POST")
 	r.HandleFunc("/"+common.StopJob, middleware.AddRouter(JobKill)).Methods("POST")
 	r.HandleFunc("/"+common.UpdateTrainJobMaster, middleware.AddRouter(JobUpdateMaster)).Methods("POST")
 	r.HandleFunc("/"+common.UpdateJobStatus, middleware.AddRouter(JobUpdateStatus)).Methods("POST")

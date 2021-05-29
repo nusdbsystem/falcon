@@ -24,9 +24,10 @@ func CreateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 	var buf bytes.Buffer
 
-	err, contents := client.ReceiveFile(r, buf, common.JobFile)
+	err, contents := client.ReceiveFile(r, buf, common.TrainJobFileKey)
 	if err != nil {
-		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
+		errMsg := fmt.Sprintf("client.ReceiveFile Error %s", err)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
 		return
 	}
 
@@ -71,7 +72,7 @@ func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 	var buf bytes.Buffer
 
-	err, contents := client.ReceiveFile(r, buf, common.JobFile)
+	err, contents := client.ReceiveFile(r, buf, common.TrainJobFileKey)
 	if err != nil {
 		errMsg := fmt.Sprintf("client.ReceiveFile file error %s", err)
 		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)

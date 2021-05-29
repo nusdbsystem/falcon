@@ -81,7 +81,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 	marshalErr := json.Unmarshal([]byte(contents), jobInfo)
 	if marshalErr != nil {
 		logger.Log.Println("Json unmarshal error", marshalErr)
-		panic("Json unmarshal error")
+		return marshalErr
 	}
 
 	logger.Log.Println("Searching Algorithms...")

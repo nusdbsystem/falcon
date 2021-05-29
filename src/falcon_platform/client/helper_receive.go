@@ -5,26 +5,31 @@ import (
 	"falcon_platform/logger"
 	"io"
 	"net/http"
-	"strings"
 )
 
 // send by file=
 func ReceiveFile(r *http.Request, buf bytes.Buffer, key string) (error, string) {
-	// in your case file would be file upload
-	file, header, err := r.FormFile(key)
+	// FormFile returns the first file for the given key
+	// it also returns the FileHeader so we can get the Filename,
+	// the Header and the size of the file
+	file, handler, err := r.FormFile(key)
 	if err != nil {
-		panic(err)
+		logger.Log.Println("Error Retrieving the File")
+		logger.Log.Println(err)
+		return err, ""
 	}
 	defer file.Close()
 
-	name := strings.Split(header.Filename, ".")
-	logger.Log.Printf("File name = %s\n", name)
+	logger.Log.Printf("Uploaded File: %+v\n", handler.Filename)
+	logger.Log.Printf("File Size: %+v\n", handler.Size)
+	logger.Log.Printf("MIME Header: %+v\n", handler.Header)
+
 	_, e := io.Copy(&buf, file)
 	if e != nil {
 		logger.Log.Println("copy error", e)
 	}
-	contents := buf.String()
-	return nil, contents
+
+	return nil, buf.String()
 }
 
 // send by data=
@@ -36,9 +41,4 @@ func ReceiveForm(r *http.Request) {
 
 	//name := r.FormValue("name")
 	//addr := r.FormValue("addr")
-}
-
-func Tests() {
-	panic("math: square root of negative number")
-	//return errors.New("math: square root of negative number")
 }

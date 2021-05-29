@@ -1,0 +1,20 @@
+<html>
+	<head>
+		<title>{{ .Title }}</title>
+	</head>
+	<body>
+		<main>
+			<h1>{{ .Title }}</h1>
+			{{ if .DisplayForm }}
+			<div id="update-form">
+				<form action="/" method="POST">
+					<textarea name="update"></textarea>
+					<div>
+						<button type="submit">Submit</button>
+					</div>
+				</form>
+			</div>
+			{{ end }}
+		</main>
+	</body>
+</html>
