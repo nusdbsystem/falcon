@@ -11,16 +11,16 @@ def upload_train_job_file(url, path):
         print(res.content)
 
 
-def kill_job(url, jobId):
-    url = "http://"+url+"/stop"
+def stop_train_job(url, jobId):
+    url = "http://"+url+"/api/stop-train-job/"+jobId
     print("requesting to ", url)
-    res = requests.post(url, data={'job_id': jobId})
+    res = requests.get(url)
     print(res.status_code)
     print(res.content)
 
 
-def query_job_status(url, jobId):
-    url = "http://"+url+"/api/query-job-status/"+jobId
+def query_train_job_status(url, jobId):
+    url = "http://"+url+"/api/query-train-job-status/"+jobId
     print("requesting to ", url)
     res = requests.get(url)
     print(res.status_code)
@@ -41,7 +41,7 @@ if __name__ == '__main__':
         upload_train_job_file(args.url, args.path)
 
     if args.method == "kill":
-        kill_job(args.url, args.job)
+        stop_train_job(args.url, args.job)
 
     if args.method == "query_status":
-        query_job_status(args.url, args.job)
+        query_train_job_status(args.url, args.job)

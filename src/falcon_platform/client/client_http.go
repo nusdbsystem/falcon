@@ -13,7 +13,7 @@ func PartyServerAdd(ServerAddr, partyserverAddr, partyserverPort string) error {
 		common.PartyServerPortKey: {partyserverPort},
 	}
 
-	reqUrl := ServerAddr + "/" + common.PartyServerAdd
+	reqUrl := ServerAddr + common.PartyServerAdd
 
 	e := PostForm(reqUrl, data)
 	return e
@@ -23,7 +23,7 @@ func PartyServerAdd(ServerAddr, partyserverAddr, partyserverPort string) error {
 func PartyServerDelete(ServerAddr, partyserverAddr string) error {
 	data := url.Values{common.PartyServerAddrKey: {partyserverAddr}}
 
-	reqUrl := ServerAddr + "/" + common.PartyServerDelete
+	reqUrl := ServerAddr + common.PartyServerDelete
 
 	err := PostForm(reqUrl, data)
 
@@ -40,7 +40,7 @@ func SetupWorker(ServerAddr string, masterAddr string, workerType string, jobId,
 		common.TrainDataOutput: {dataOutput},
 	}
 
-	reqUrl := ServerAddr + "/" + common.SetupWorker
+	reqUrl := ServerAddr + common.SetupWorker
 
 	_ = PostForm(reqUrl, data)
 }
@@ -51,7 +51,7 @@ func JobUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 		common.MasterAddrKey: {masterAddr},
 		common.JobId:         {fmt.Sprintf("%d", jobId)}}
 
-	reqUrl := ServerAddr + "/" + common.UpdateTrainJobMaster
+	reqUrl := ServerAddr + common.UpdateTrainJobMaster
 
 	_ = PostForm(reqUrl, data)
 }
@@ -62,7 +62,7 @@ func InferenceUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 		common.MasterAddrKey: {masterAddr},
 		common.JobId:         {fmt.Sprintf("%d", jobId)}}
 
-	reqUrl := ServerAddr + "/" + common.UpdateInferenceJobMaster
+	reqUrl := ServerAddr + common.UpdateInferenceJobMaster
 
 	_ = PostForm(reqUrl, data)
 }
@@ -75,7 +75,7 @@ func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jo
 		common.JobExtInfo: {extInfo},
 	}
 
-	reqUrl := ServerAddr + "/" + common.UpdateJobResInfo
+	reqUrl := ServerAddr + common.UpdateJobResInfo
 
 	_ = PostForm(reqUrl, data)
 }
@@ -86,7 +86,7 @@ func JobUpdateStatus(ServerAddr string, status uint, jobId uint) {
 		common.JobId:     {fmt.Sprintf("%d", jobId)},
 		common.JobStatus: {fmt.Sprintf("%d", status)}}
 
-	reqUrl := ServerAddr + "/" + common.UpdateJobStatus
+	reqUrl := ServerAddr + common.UpdateJobStatus
 
 	_ = PostForm(reqUrl, data)
 }
@@ -97,7 +97,7 @@ func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 		common.JobId:     {fmt.Sprintf("%d", jobId)},
 		common.IsTrained: {fmt.Sprintf("%d", isTrained)}}
 
-	reqUrl := ServerAddr + "/" + common.ModelUpdate
+	reqUrl := ServerAddr + common.ModelUpdate
 
 	_ = PostForm(reqUrl, data)
 }
@@ -108,7 +108,7 @@ func InferenceUpdateStatus(ServerAddr string, jobId, status uint) {
 		common.JobId:     {fmt.Sprintf("%d", jobId)},
 		common.JobStatus: {fmt.Sprintf("%d", status)}}
 
-	reqUrl := ServerAddr + "/" + common.InferenceStatusUpdate
+	reqUrl := ServerAddr + common.InferenceStatusUpdate
 
 	_ = PostForm(reqUrl, data)
 }
@@ -121,7 +121,7 @@ func JobGetStatus(ServerAddr string, jobId uint) uint {
 	data := url.Values{
 		common.JobId: {fmt.Sprintf("%d", jobId)}}
 
-	reqUrl := ServerAddr + "/" + common.UpdateJobStatus
+	reqUrl := ServerAddr + common.UpdateJobStatus
 
 	_ = PostForm(reqUrl, data)
 	return 1
@@ -129,7 +129,7 @@ func JobGetStatus(ServerAddr string, jobId uint) uint {
 
 func GetFreePort(ServerAddr string) string {
 
-	reqUrl := "http://" + strings.TrimSpace(ServerAddr+"/"+common.AssignPort)
+	reqUrl := "http://" + strings.TrimSpace(ServerAddr+common.AssignPort)
 	port := Get(reqUrl)
 
 	return port
@@ -139,7 +139,7 @@ func GetExistPort(ServerAddr, PartyServerIP string) string {
 	params := url.Values{}
 	params.Set(common.PartyServerAddrKey, PartyServerIP)
 
-	rawUrl := "http://" + strings.TrimSpace(ServerAddr) + "/" + common.GetPartyServerPort
+	rawUrl := "http://" + strings.TrimSpace(ServerAddr) + common.GetPartyServerPort
 
 	reqURL, err := url.ParseRequestURI(rawUrl)
 	if err != nil {
@@ -163,7 +163,7 @@ func AddPort(ServerAddr, port string) error {
 
 	data := url.Values{common.AddPort: {port}}
 
-	reqUrl := ServerAddr + "/" + common.AddPort
+	reqUrl := ServerAddr + common.AddPort
 
 	e := PostForm(reqUrl, data)
 	return e

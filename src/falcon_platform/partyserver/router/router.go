@@ -17,7 +17,7 @@ func NewRouter() *mux.Router {
 	// sanity check
 	r.HandleFunc("/", HelloPartyServer).Methods("GET")
 
-	r.HandleFunc("/"+common.SetupWorker, SetupWorker()).Methods("POST")
+	r.HandleFunc(common.SetupWorker, SetupWorker()).Methods("POST")
 
 	return r
 }

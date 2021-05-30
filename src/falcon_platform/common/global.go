@@ -17,26 +17,28 @@ const (
 	WorkerTimeout = 20000 //  receive heartbeat within every 20 second
 
 	// router path for coordServer
-	Register                 = "register"
-	UploadTrainJobFile       = "upload-train-job-file"
-	StopJob                  = "stop"
-	UpdateTrainJobMaster     = "update-train-master"
-	UpdateInferenceJobMaster = "update-inference-master"
-	UpdateJobResInfo         = "update-job-res"
-	UpdateJobStatus          = "update-job-status"
-	QueryJobStatus           = "query-job-status"
+	UploadTrainJobFile   = "/api/upload-train-job-file"
+	StopTrainJob         = "/api/stop-train-job"
+	UpdateTrainJobMaster = "/api/update-train-master"
+	UpdateJobResInfo     = "/api/update-job-res"
+	UpdateJobStatus      = "/api/update-job-status"
+	QueryTrainJobStatus  = "/api/query-train-job-status"
 
-	InferenceStatusUpdate = "update-prediction-service-status"
+	UpdateInferenceJobMaster = "/api/update-inference-master"
+	InferenceStatusUpdate    = "/api/update-prediction-service-status"
+	InferenceUpdate          = "/api/prediction-service-update"
+	InferenceCreate          = "/api/prediction-service-create"
+	ModelUpdate              = "/api/model-update"
 
-	AssignPort         = "port-assign"
-	AddPort            = "portadd"
-	GetPartyServerPort = "port-get"
+	AssignPort         = "/api/port-assign"
+	AddPort            = "/api/portadd"
+	GetPartyServerPort = "/api/port-get"
 
-	PartyServerAdd    = "party-server-add"
-	PartyServerDelete = "party-server-del"
+	PartyServerAdd    = "/api/party-server-add"
+	PartyServerDelete = "/api/party-server-del"
 
 	// router path for partyserver
-	SetupWorker = "setup-worker" // RFC 5789
+	SetupWorker = "/api/setup-worker"
 
 	// shared key of map
 	PartyServerAddrKey = "psAddr"
@@ -58,12 +60,7 @@ const (
 	TrainDataPath   = "train-data-path"
 	TrainDataOutput = "train-data-output"
 	ModelPath       = "model-path"
-
-	// model endpoint
-	ModelUpdate     = "model-update"
 	IsTrained       = "is_trained"
-	InferenceUpdate = "prediction-service-update"
-	InferenceCreate = "prediction-service-create"
 
 	JobName = "job_name"
 	ExtInfo = "ext_info"

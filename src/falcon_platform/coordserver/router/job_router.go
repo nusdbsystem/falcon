@@ -30,10 +30,6 @@ type JobStatusRes struct {
 	Status uint `json:"status"`
 }
 
-type JobIdGet struct {
-	JobId string `json:"job_id"`
-}
-
 // receive a job info file, parse it, put in queue
 func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// Parse multipart form, 32 << 20 specifies a maximum
@@ -89,14 +85,10 @@ func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 }
 
 func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
+	// read the query parameters with gorilla mux
+	params := mux.Vars(r)
+	jobId, _ := strconv.Atoi(params["jobId"])
 
-	client.ReceiveForm(r)
-
-	JobId := r.FormValue(common.JobId)
-	jobId, e := strconv.Atoi(JobId)
-	if e != nil {
-		panic(e)
-	}
 	controller.JobKill(uint(jobId), ctx)
 
 	jr := JobStatusRes{
@@ -107,7 +99,7 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	js, err := json.Marshal(jr)
 
 	if err != nil {
-		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 	_, _ = w.Write(js)
@@ -178,7 +170,7 @@ func JobStatusQuery(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 	js, err := json.Marshal(jr)
 
 	if err != nil {
-		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 	_, _ = w.Write(js)
