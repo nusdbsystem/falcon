@@ -6,16 +6,16 @@ import (
 )
 
 const (
-	// TODO: are these the names assigned for master and workers?
 	Master          = "Master"
 	TrainWorker     = "TrainWorker"
 	InferenceWorker = "InferenceWorker"
 
 	// master& worker heartbeat
-
 	MasterTimeout = 10000 //  send heartbeat every 10 second
 	WorkerTimeout = 20000 //  receive heartbeat within every 20 second
+)
 
+const (
 	// router path for coordServer
 	UploadTrainJobFile   = "/api/upload-train-job-file"
 	StopTrainJob         = "/api/stop-train-job"
@@ -39,7 +39,9 @@ const (
 
 	// router path for partyserver
 	SetupWorker = "/api/setup-worker"
+)
 
+const (
 	// shared key of map
 	PartyServerAddrKey = "psAddr"
 	MasterAddrKey      = "masterAddr"
@@ -66,15 +68,18 @@ const (
 	ExtInfo = "ext_info"
 
 	Network = "tcp"
+)
 
+const (
 	// job status
-	// TODO: replace int with msgs
-	JobInit       = 0
-	JobRunning    = 1
-	JobSuccessful = 2
-	JobFailed     = 3
-	JobKilled     = 4
+	JobInit       = "initializing"
+	JobRunning    = "running"
+	JobSuccessful = "finished"
+	JobFailed     = "failed"
+	JobKilled     = "killed"
+)
 
+const (
 	// for common.Env
 	DevEnv  = "dev"
 	ProdEnv = "prod"
@@ -92,7 +97,6 @@ const (
 	VerticalFl   = "vertical"
 
 	// algorithms
-
 	LogisticRegressionKey = "logistic_regression"
 	RuntimeLogs           = "runtime_logs"
 )

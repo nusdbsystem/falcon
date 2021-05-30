@@ -110,16 +110,9 @@ func UpdateInferenceStatus(w http.ResponseWriter, r *http.Request, ctx *entity.C
 	JobId := r.FormValue(common.JobId)
 	JobStatus := r.FormValue(common.JobStatus)
 
-	jobId, e := strconv.Atoi(JobId)
-	if e != nil {
-		panic(e)
-	}
-	jobStatus, e2 := strconv.Atoi(JobStatus)
-	if e2 != nil {
-		panic(e2)
-	}
+	jobId, _ := strconv.Atoi(JobId)
 
-	controller.InferenceUpdateStatus(uint(jobId), uint(jobStatus), ctx)
+	controller.InferenceUpdateStatus(uint(jobId), JobStatus, ctx)
 
 }
 
@@ -130,10 +123,7 @@ func InferenceUpdateMaster(w http.ResponseWriter, r *http.Request, ctx *entity.C
 	InferenceId := r.FormValue(common.JobId)
 	MasterAddr := r.FormValue(common.MasterAddrKey)
 
-	infId, e := strconv.Atoi(InferenceId)
-	if e != nil {
-		panic(e)
-	}
+	infId, _ := strconv.Atoi(InferenceId)
 
 	controller.InferenceUpdateMaster(uint(infId), MasterAddr, ctx)
 

@@ -31,8 +31,8 @@ func (jobDB *JobDB) CreateInference(
 
 func (jobDB *JobDB) InferenceUpdateStatus(
 	tx *gorm.DB,
-	jobId, status uint,
-
+	jobId uint,
+	status string,
 ) (error, *InferenceJobRecord) {
 
 	//todo Should we use job id to update moder_serve？add index to it if we use later

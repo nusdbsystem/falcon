@@ -9,7 +9,14 @@ import (
 	"falcon_platform/logger"
 )
 
-func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, string, uint, uint) {
+func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
+	uint, // JobId
+	string, // JobName
+	uint, // UserID
+	string, // PartyIds
+	uint, // TaskNum
+	string, // Status
+) {
 
 	logger.Log.Println("HTTP server: in SubmitJob, put to the JobQueue")
 
@@ -66,18 +73,19 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 	return u2.JobId, u1.JobName, u2.UserID, u1.PartyIds, u1.TaskNum, u2.Status
 }
 
-func JobKill(jobId uint, ctx *entity.Context) {
+func JobKill(jobId uint, ctx *entity.Context) error {
 
 	e, u := ctx.JobDB.JobGetByJobID(jobId)
 	if e != nil {
-		panic(e)
+		return e
 	}
 
 	distributed.KillJob(u.MasterAddr, common.Network)
 
 	tx := ctx.JobDB.DB.Begin()
-	e2, _ := ctx.JobDB.JobUpdateStatus(tx, jobId, common.JobKilled)
-	ctx.JobDB.Commit(tx, e2)
+	err, _ := ctx.JobDB.JobUpdateStatus(tx, jobId, common.JobKilled)
+	ctx.JobDB.Commit(tx, err)
+	return err
 }
 
 func JobUpdateMaster(jobId uint, masterAddr string, ctx *entity.Context) {
@@ -93,18 +101,14 @@ func JobUpdateResInfo(jobId uint, jobErrMsg, jobResult, jobExtInfo string, ctx *
 	ctx.JobDB.Commit(tx, e)
 }
 
-func JobUpdateStatus(jobId uint, status uint, ctx *entity.Context) {
+func JobUpdateStatus(jobId uint, status string, ctx *entity.Context) {
 	tx := ctx.JobDB.DB.Begin()
 	e, _ := ctx.JobDB.JobUpdateStatus(tx, jobId, status)
 	ctx.JobDB.Commit(tx, e)
 }
 
-func JobStatusQuery(jobId uint, ctx *entity.Context) uint {
+func JobStatusQuery(jobId uint, ctx *entity.Context) (string, error) {
 	e, u := ctx.JobDB.JobGetByJobID(jobId)
-	if e != nil {
-		panic(e)
-	}
 
-	return u.Status
-
+	return u.Status, e
 }

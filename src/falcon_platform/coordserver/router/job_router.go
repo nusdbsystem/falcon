@@ -22,12 +22,12 @@ type JobSubmitRes struct {
 	UserId   uint   `json:"user_id"`
 	PartyIds string `json:"party_ids"`
 	TaskNum  uint   `json:"task_num,uint"`
-	Status   uint   `json:"status"`
+	Status   string `json:"status"`
 }
 
 type JobStatusRes struct {
-	JobId  uint `json:"job_id"`
-	Status uint `json:"status"`
+	JobId  uint   `json:"job_id"`
+	Status string `json:"status"`
 }
 
 // receive a job info file, parse it, put in queue
@@ -89,7 +89,12 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	params := mux.Vars(r)
 	jobId, _ := strconv.Atoi(params["jobId"])
 
-	controller.JobKill(uint(jobId), ctx)
+	err := controller.JobKill(uint(jobId), ctx)
+
+	if err != nil {
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	jr := JobStatusRes{
 		JobId:  uint(jobId),
@@ -99,7 +104,7 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	js, err := json.Marshal(jr)
 
 	if err != nil {
-		exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 	_, _ = w.Write(js)
@@ -113,10 +118,7 @@ func JobUpdateMaster(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 	JobId := r.FormValue(common.JobId)
 	MasterAddr := r.FormValue(common.MasterAddrKey)
 
-	jobId, e := strconv.Atoi(JobId)
-	if e != nil {
-		panic(e)
-	}
+	jobId, _ := strconv.Atoi(JobId)
 
 	controller.JobUpdateMaster(uint(jobId), MasterAddr, ctx)
 
@@ -127,16 +129,9 @@ func JobUpdateStatus(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 	JobId := r.FormValue(common.JobId)
 	JobStatus := r.FormValue(common.JobStatus)
 
-	jobId, e := strconv.Atoi(JobId)
-	if e != nil {
-		panic(e)
-	}
-	jobStatus, e2 := strconv.Atoi(JobStatus)
-	if e2 != nil {
-		panic(e2)
-	}
+	jobId, _ := strconv.Atoi(JobId)
 
-	controller.JobUpdateStatus(uint(jobId), uint(jobStatus), ctx)
+	controller.JobUpdateStatus(uint(jobId), JobStatus, ctx)
 }
 
 func JobUpdateResInfo(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
@@ -146,10 +141,7 @@ func JobUpdateResInfo(w http.ResponseWriter, r *http.Request, ctx *entity.Contex
 	JobResult := r.FormValue(common.JobResult)
 	JobExtInfo := r.FormValue(common.JobExtInfo)
 
-	jobId, e := strconv.Atoi(JobId)
-	if e != nil {
-		panic(e)
-	}
+	jobId, _ := strconv.Atoi(JobId)
 
 	controller.JobUpdateResInfo(uint(jobId), JobErrMsg, JobResult, JobExtInfo, ctx)
 }
@@ -160,7 +152,12 @@ func JobStatusQuery(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 	params := mux.Vars(r)
 	jobId, _ := strconv.Atoi(params["jobId"])
 
-	status := controller.JobStatusQuery(uint(jobId), ctx)
+	status, err := controller.JobStatusQuery(uint(jobId), ctx)
+
+	if err != nil {
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	jr := JobStatusRes{
 		JobId:  uint(jobId),
@@ -170,7 +167,7 @@ func JobStatusQuery(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 	js, err := json.Marshal(jr)
 
 	if err != nil {
-		exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 	_, _ = w.Write(js)

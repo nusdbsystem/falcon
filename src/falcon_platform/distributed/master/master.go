@@ -25,7 +25,7 @@ type Master struct {
 	workers   []string
 	workerNum int
 
-	jobStatus uint
+	jobStatus string
 
 	lastSendTime     int64
 	heartbeatTimeout int

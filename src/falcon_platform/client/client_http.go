@@ -80,11 +80,11 @@ func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jo
 	_ = PostForm(reqUrl, data)
 }
 
-func JobUpdateStatus(ServerAddr string, status uint, jobId uint) {
+func JobUpdateStatus(ServerAddr string, status string, jobId uint) {
 
 	data := url.Values{
 		common.JobId:     {fmt.Sprintf("%d", jobId)},
-		common.JobStatus: {fmt.Sprintf("%d", status)}}
+		common.JobStatus: {status}}
 
 	reqUrl := ServerAddr + common.UpdateJobStatus
 
@@ -102,11 +102,11 @@ func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 	_ = PostForm(reqUrl, data)
 }
 
-func InferenceUpdateStatus(ServerAddr string, jobId, status uint) {
+func InferenceUpdateStatus(ServerAddr string, status string, jobId uint) {
 
 	data := url.Values{
 		common.JobId:     {fmt.Sprintf("%d", jobId)},
-		common.JobStatus: {fmt.Sprintf("%d", status)}}
+		common.JobStatus: {status}}
 
 	reqUrl := ServerAddr + common.InferenceStatusUpdate
 

@@ -119,7 +119,7 @@ func QueryRunningInferenceJobs(jobName string, ctx *entity.Context) []uint {
 	return InferenceIds
 }
 
-func InferenceUpdateStatus(jobId uint, status uint, ctx *entity.Context) {
+func InferenceUpdateStatus(jobId uint, status string, ctx *entity.Context) {
 	tx := ctx.JobDB.DB.Begin()
 	e, _ := ctx.JobDB.InferenceUpdateStatus(tx, jobId, status)
 	ctx.JobDB.Commit(tx, e)
@@ -138,7 +138,7 @@ func UpdateInference(newInfId uint, InferenceIds []uint, ctx *entity.Context) {
 loop:
 	for {
 		if MaxCheck < 0 {
-			logger.Log.Println("[UpdateInference]: Update Failed, latest job is nor running")
+			logger.Log.Println("[UpdateInference]: Update Failed, latest job is not running")
 			break
 		}
 

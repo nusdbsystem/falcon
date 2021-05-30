@@ -5,21 +5,26 @@ import (
 )
 
 // NOTE: GORM pluralize struct name to snake_cases as table name
+// NOTE: follow the GORM conventions for automatic configuration
+// https://gorm.io/docs/conventions.html
+// ID as Primary Key
+// GORM pluralizes struct name to snake_cases as table name
+// For models having CreatedAt field, the field will be
+// set to the current time when the record is first created if its value is zero
 
 type TrainJobRecord struct {
 	JobId     uint `gorm:"primaryKey;autoIncrement"`
 	UserID    uint
 	JobInfoID uint // id of the dsl table(jobInfotable)
 
-	// 0: init, 1: running, 2:successful, 3: failed, 4: killed
-	// TODO: change to text
-	Status uint
+	Status string
 
 	ErrorMsg   string `gorm:"type:varchar(256)"`
 	JobResult  string `gorm:"type:varchar(4096)"`
 	ExtInfo    string `gorm:"type:varchar(1024)"`
 	MasterAddr string `gorm:"type:varchar(256)"`
 
+	// TODO: change to GORM convention CreatedAt and UpdatedAt
 	CreateTime time.Time `gorm:"type:datetime"`
 	UpdateTime time.Time `gorm:"type:datetime"`
 	DeleteTime time.Time `gorm:"type:datetime"`
@@ -43,9 +48,11 @@ type TaskRecord struct {
 	ID    uint `gorm:"primaryKey;autoIncrement"`
 	JobID uint `gorm:"uniqueIndex"`
 	//TaskId     uint
-	TaskName   string `gorm:"type:varchar(256)"`
-	PartyIds   string `gorm:"type:varchar(256)"`
-	Status     uint
+	TaskName string `gorm:"type:varchar(256)"`
+	PartyIds string `gorm:"type:varchar(256)"`
+
+	Status string
+
 	ErrorMsg   string `gorm:"type:varchar(1024)"`
 	TaskInfo   string `gorm:"type:varchar(1024)"`
 	TaskResult string `gorm:"type:varchar(1024)"`
@@ -90,7 +97,7 @@ type ExecutionRecord struct {
 	ID         uint `gorm:"primaryKey;autoIncrement"`
 	TapeId     uint
 	TapeName   string `gorm:"type:varchar(256)"`
-	Status     uint
+	Status     string
 	ErrorMsg   string `gorm:"type:varchar(4096)"`
 	TapeDecs   string `gorm:"type:varchar(4096)"`
 	IsDelete   uint
@@ -120,8 +127,8 @@ type InferenceJobRecord struct {
 	ModelId uint //外键模型id，标明哪个模型执⾏
 	JobId   uint //外键模型id，标明哪个训练job
 
-	// 0: init, 1: running, 2:successful, 3: failed, 4: killed
-	Status     uint
+	Status string
+
 	MasterAddr string `gorm:"type:varchar(256)"`
 
 	CreateTime time.Time

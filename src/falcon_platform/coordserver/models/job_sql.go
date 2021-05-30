@@ -13,7 +13,7 @@ import (
 func (jobDB *JobDB) JobSubmit(
 	tx *gorm.DB,
 	UserID uint,
-	Status uint,
+	Status string,
 	JobInfoID uint,
 ) (error, *TrainJobRecord) {
 
@@ -55,7 +55,7 @@ func (jobDB *JobDB) JobUpdateMaster(tx *gorm.DB, jobId uint, masterAddr string) 
 
 }
 
-func (jobDB *JobDB) JobUpdateStatus(tx *gorm.DB, jobId uint, status uint) (error, *TrainJobRecord) {
+func (jobDB *JobDB) JobUpdateStatus(tx *gorm.DB, jobId uint, status string) (error, *TrainJobRecord) {
 
 	u := &TrainJobRecord{}
 	err := tx.Model(u).
@@ -82,7 +82,7 @@ func (jobDB *JobDB) JobUpdateResInfo(tx *gorm.DB, jobId uint, jobErrMsg, jobResu
 ////////////////////////////////////////////////////////////////
 
 // TODO: is this needed as gorm is multi-thread safe?
-func JobUpdateStatus(jobId uint, status uint) {
+func JobUpdateStatus(jobId uint, status string) {
 	jobDB := InitJobDB()
 
 	jobDB.Connect()
