@@ -30,7 +30,7 @@ type JobInfoRecord struct {
 	UserID uint
 
 	JobName     string `gorm:"type:varchar(256)"`
-	JobDecs     string `gorm:"type:varchar(4096)"`
+	JobInfo     string `gorm:"type:varchar(4096)"`
 	FlSetting   string
 	ExistingKey uint
 	PartyNum    uint
@@ -47,7 +47,7 @@ type TaskRecord struct {
 	PartyIds   string `gorm:"type:varchar(256)"`
 	Status     uint
 	ErrorMsg   string `gorm:"type:varchar(1024)"`
-	TaskDecs   string `gorm:"type:varchar(1024)"`
+	TaskInfo   string `gorm:"type:varchar(1024)"`
 	TaskResult string `gorm:"type:varchar(1024)"`
 	IsDelete   uint
 	CreateTime time.Time
@@ -104,8 +104,8 @@ type ModelRecord struct {
 	ID    uint `gorm:"primaryKey;autoIncrement"`
 	JobId uint // 外键job id
 
-	ModelName string `gorm:"type:varchar(256)"` // model名称，LR etc.
-	ModelDecs string `gorm:"type:varchar(256)"` //model描述，
+	ModelName string `gorm:"type:varchar(256)"`
+	ModelInfo string `gorm:"type:varchar(256)"`
 
 	IsTrained uint
 

@@ -16,7 +16,7 @@ import (
 // TODO: partyType wyc side expects int
 type TrainJob struct {
 	JobName     string      `json:"job_name"`
-	JobDecs     string      `json:"job_decs"`
+	JobInfo     string      `json:"job_info"`
 	JobFlType   string      `json:"job_fl_type"`
 	ExistingKey uint        `json:"existing_key"`
 	PartyNums   uint        `json:"party_nums,uint"`

@@ -10,14 +10,14 @@ func (jobDB *JobDB) ModelCreate(
 	tx *gorm.DB,
 	JobId uint,
 	ModelName string,
-	ModelDecs string,
+	ModelInfo string,
 
 ) (error, *ModelRecord) {
 
 	u := &ModelRecord{
 		JobId:     JobId,
 		ModelName: ModelName,
-		ModelDecs: ModelDecs,
+		ModelInfo: ModelInfo,
 
 		IsTrained: 0,
 

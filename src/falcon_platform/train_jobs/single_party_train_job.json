@@ -1,6 +1,6 @@
 {
   "job_name": "credit_card_training",
-  "job_decs": "this is the job_decs",
+  "job_info": "this is the job_info",
   "job_fl_type": "vertical",
   "existing_key": 0,
   "party_nums": 1,

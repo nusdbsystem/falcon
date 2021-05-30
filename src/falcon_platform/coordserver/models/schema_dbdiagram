@@ -2,7 +2,7 @@ Table JobInfoRecord {
   id int [primary key]
   UserID int
   JobName varchar
-  JobDecs varchar
+  JobInfo varchar
   FlSetting int
   ExistingKey int
   PartyNum int
@@ -45,7 +45,7 @@ Table ModelRecord {
   ID int [primary key]
   JobId int
   ModelName varchar
-  ModelDecs varchar
+  ModelInfo varchar
   IsTrained int
   CreateTime timestamp
   UpdateTime timestamp

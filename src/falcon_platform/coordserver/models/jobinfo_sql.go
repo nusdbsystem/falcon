@@ -12,7 +12,7 @@ func (jobDB *JobDB) JobInfoCreate(
 	UserID uint,
 	PartyIds string,
 	TaskInfo string,
-	JobDecs string,
+	JobInfo string,
 	PartyNum uint,
 	FlSetting string,
 	ExistingKey uint,
@@ -22,7 +22,7 @@ func (jobDB *JobDB) JobInfoCreate(
 	u := &JobInfoRecord{
 		UserID:      UserID,
 		JobName:     JobName,
-		JobDecs:     JobDecs,
+		JobInfo:     JobInfo,
 		FlSetting:   FlSetting,
 		ExistingKey: ExistingKey,
 		PartyNum:    PartyNum,

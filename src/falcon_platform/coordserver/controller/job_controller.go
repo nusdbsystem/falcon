@@ -25,7 +25,7 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 	}
 
 	ModelName := job.Tasks.ModelTraining.AlgorithmName
-	ModelDecs := job.Tasks.ModelTraining.AlgorithmName
+	ModelInfo := job.Tasks.ModelTraining.AlgorithmName
 	PartyNumber := uint(len(job.PartyInfo))
 
 	// write to db
@@ -36,7 +36,7 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 		ctx.UsrId,
 		string(partyIds),
 		string(TaskInfo),
-		job.JobDecs,
+		job.JobInfo,
 		PartyNumber,
 		job.JobFlType,
 		job.ExistingKey,
@@ -45,7 +45,7 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (uint, string, uint, s
 	err2, u2 := ctx.JobDB.JobSubmit(tx, ctx.UsrId, common.JobInit, u1.Id)
 	err3, _ := ctx.JobDB.SvcCreate(tx, u2.JobId)
 
-	err4, _ := ctx.JobDB.ModelCreate(tx, u2.JobId, ModelName, ModelDecs)
+	err4, _ := ctx.JobDB.ModelCreate(tx, u2.JobId, ModelName, ModelInfo)
 
 	ctx.JobDB.Commit(tx, []error{err1, err2, err3, err4})
 
