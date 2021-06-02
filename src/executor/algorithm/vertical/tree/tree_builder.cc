@@ -67,7 +67,7 @@ DecisionTreeBuilder::DecisionTreeBuilder(DecisionTreeParams params,
   }
   feature_helpers = new FeatureHelper[local_feature_num];
   // init tree object
-  tree = new Tree(tree_type, class_num, max_depth);
+  tree = Tree(tree_type, class_num, max_depth);
 }
 
 void DecisionTreeBuilder::precompute_label_helper(falcon::PartyType party_type) {
@@ -1338,8 +1338,10 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type) {
     }
   }
 
+  delete [] label_vector;
   delete [] encrypted_aggregation;
   delete [] decrypted_aggregation;
+  djcs_t_free_public_key(phe_pub_key);
 
   const clock_t testing_finish_time = clock();
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;

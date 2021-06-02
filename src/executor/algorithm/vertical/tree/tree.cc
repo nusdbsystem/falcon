@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include <glog/logging.h>
+#include <iostream>
 
 Tree::Tree() {}
 
@@ -22,7 +23,7 @@ Tree::Tree(falcon::TreeType m_type, int m_class_num, int m_max_depth) {
 }
 
 Tree::~Tree() {
-  delete nodes;
+  delete [] nodes;
 }
 
 Tree::Tree(const Tree &tree) {
@@ -39,16 +40,16 @@ Tree::Tree(const Tree &tree) {
   capacity = tree.capacity;
 }
 
-Tree& Tree::operator=(Tree *tree) {
-  type = tree->type;
-  class_num = tree->class_num;
-  max_depth = tree->max_depth;
-  internal_node_num = tree->internal_node_num;
-  total_node_num = tree->total_node_num;
+Tree& Tree::operator=(const Tree &tree) {
+  type = tree.type;
+  class_num = tree.class_num;
+  max_depth = tree.max_depth;
+  internal_node_num = tree.internal_node_num;
+  total_node_num = tree.total_node_num;
   int maximum_nodes = (int) pow(2, max_depth + 1) - 1;
   nodes = new Node[maximum_nodes];
   for (int i = 0; i < maximum_nodes; i++) {
-    nodes[i] = tree->nodes[i];
+    nodes[i] = tree.nodes[i];
   }
-  capacity = tree->capacity;
+  capacity = tree.capacity;
 }

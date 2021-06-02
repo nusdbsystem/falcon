@@ -41,7 +41,7 @@ class Tree {
    * @param tree
    * @return
    */
-  Tree &operator=(Tree *tree);
+  Tree &operator=(const Tree &tree);
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_TREE_H_
