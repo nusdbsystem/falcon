@@ -1,0 +1,49 @@
+{
+  "job_name": "credit_card_training",
+  "job_info": "this is the job_info",
+  "job_fl_type": "vertical",
+  "existing_key": 0,
+  "party_nums": 1,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 1,
+      "addr": "127.0.0.1:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
+        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data",
+        "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
+      }
+    }
+  ],
+  "tasks": {
+    "model_training": {
+      "algorithm_name": "logistic_regression",
+      "input_configs": {
+        "data_input": {
+          "data": "client.txt",
+          "key": "keyasdfasdf"
+        },
+        "algorithm_config": {
+          "batch_size": 128,
+          "max_iteration": 500,
+          "convergence_threshold": 0.0001,
+          "with_regularization": 0,
+          "alpha": 0.1,
+          "learning_rate": 0.1,
+          "decay": 0.1,
+          "penalty": "l1",
+          "optimizer": "sgd",
+          "multi_class": "ovr",
+          "metric": "acc",
+          "differential_privacy_budget": 0.1
+        }
+      },
+      "output_configs": {
+        "trained_model": "model",
+        "evaluation_report": "model.txt"
+      }
+    }
+  }
+}

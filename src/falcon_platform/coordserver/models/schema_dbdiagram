@@ -1,0 +1,88 @@
+Table JobInfoRecord {
+  id int [primary key]
+  UserID int
+  JobName varchar
+  JobInfo varchar
+  FlSetting int
+  ExistingKey int
+  PartyNum int
+  PartyIds varchar
+  TaskNum int
+  TaskInfo varchar
+}
+
+Table TrainJobRecord {
+  JobId int [primary key]
+  UserID int
+  JobInfoID int
+  Status int
+  ErrorMsg varchar
+  JobResult varchar
+  ExtInfo varchar
+  MasterAddr varchar
+  CreateTime timestamp
+  UpdateTime timestamp
+  DeleteTime timestamp
+}
+
+Table ServiceRecord {
+  id int [primary key]
+  JobId int
+  MasterAddr varchar
+  WorkerAddr varchar
+
+}
+
+Table PortRecord {
+	id int [primary key]
+	NodeId int
+	Port       int
+	IsDelete   int
+}
+
+
+Table ModelRecord {
+  ID int [primary key]
+  JobId int
+  ModelName varchar
+  ModelInfo varchar
+  IsTrained int
+  CreateTime timestamp
+  UpdateTime timestamp
+  DeleteTime timestamp
+}
+
+Table InferenceJobRecord {
+  ID int [primary key]
+  ModelId int
+  JobId int
+  Status int
+  MasterAddr varchar
+  CreateTime timestamp
+  UpdateTime timestamp
+  DeleteTime timestamp
+}
+
+Table User {
+	UserID int [primary key]
+	Name   varchar
+}
+
+Table PartyServer {
+	ID int
+	PartyServerAddr varchar
+	Port varchar
+}
+
+// Creating references
+// You can also define relaionship separately
+// > many-to-one; < one-to-many; - one-to-one
+Ref: User.UserID - TrainJobRecord.UserID
+Ref: User.UserID - JobInfoRecord.UserID
+Ref: JobInfoRecord.id - TrainJobRecord.JobInfoID
+Ref: TrainJobRecord.JobId - ModelRecord.JobId
+Ref: TrainJobRecord.JobId - InferenceJobRecord.JobId
+
+Ref: TrainJobRecord.JobId - ServiceRecord.JobId
+
+
