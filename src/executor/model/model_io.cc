@@ -81,8 +81,8 @@ void load_lr_model(const std::string& model_save_path, int& weight_size, Encoded
   model_infile.close();
 }
 
-void save_lr_report(float lr_training_accuracy,
-    float lr_testing_accuracy,
+void save_lr_report(double lr_training_accuracy,
+    double lr_testing_accuracy,
     const std::string& report_save_path) {
   std::ofstream write_outfile(report_save_path);
   if (!write_outfile) {
