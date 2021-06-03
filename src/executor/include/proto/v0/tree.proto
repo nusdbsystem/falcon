@@ -33,3 +33,30 @@ message SplitInfo {
     int32 global_split_num = 1;                // total split num of all clients
     repeated int32 split_num_vec = 2;          // split_num of each client
 }
+
+// store the tree model on disk
+message Node {
+    int32 node_type = 1;        // node type, default is internal node
+    int32 depth = 2;            // the depth of the current node, root node is 0, -1: not decided
+    int32 is_self_feature = 3;  // if the node belongs to the party itself, 0: no, 1: yes, -1: not decided
+    int32 best_party_id = 4;    // the party that owns the selected feature on this node, -1: not decided
+    int32 best_feature_id = 5;  // the feature on this node, -1: not self feature, 0 -- d_i: self feature id
+    int32 best_split_id = 6;    // the split of the feature on this node, -1: not decided
+    double split_threshold = 7; // the split threshold if it is its own feature
+    int32 node_sample_num = 8;  // the number of samples where the element in sample_iv is [1]
+    repeated int32 node_sample_distribution = 9;    // the number of samples for each class on the node
+    FixedPointEncodedNumber impurity = 10;          // node impurity, Gini index for classification, variance for regression
+    FixedPointEncodedNumber label = 11;             // if is_leaf is true, a label is assigned
+    int32 left_child = 12;      // left branch id of the current node, if not a leaf node, -1: not decided
+    int32 right_child = 13;     // right branch id of the current node, if not a leaf node, -1: not decided
+}
+
+message Tree {
+    int32 tree_type = 1;            // classification or regression
+    int32 class_num = 2;            // number of classes if classification
+    int32 max_depth = 3;            // maximum tree depth
+    repeated Node nodes = 4;        // array of Node
+    int32 internal_node_num = 5;    // internal node count
+    int32 total_node_num = 6;       // total node count
+    int32 capacity = 7;             // tree capacity
+}
