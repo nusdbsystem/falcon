@@ -9,6 +9,8 @@
 #include <google/protobuf/message_lite.h>
 #include "../../include/message/tree.pb.h"
 
+#include <iostream>
+
 void serialize_encrypted_statistics(int client_id,
     int node_index,
     int split_num,
@@ -542,5 +544,10 @@ void deserialize_tree_model(Tree & tree, std::string input_str) {
     tree.nodes[i].label.setter_exponent(pb_label.exponent());
     EncodedNumberType type_label = (EncodedNumberType) pb_label.type();
     tree.nodes[i].label.setter_type(type_label);
+
+    mpz_clear(g_n_impurity);
+    mpz_clear(g_value_impurity);
+    mpz_clear(g_n_label);
+    mpz_clear(g_value_label);
   }
 }

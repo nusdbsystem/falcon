@@ -550,6 +550,118 @@ TEST(PB_Converter, TreeSplitInfo) {
   }
 }
 
+TEST(PB_Converter, TreeModel) {
+  Tree tree;
+  tree.type = falcon::CLASSIFICATION;
+  tree.class_num = 2;
+  tree.max_depth = 2;
+  tree.internal_node_num = 3;
+  tree.total_node_num = 7;
+  tree.capacity = 7;
+  tree.nodes = new Node[tree.capacity];
+  mpz_t v_n;
+  mpz_t v_value;
+  mpz_init(v_n);
+  mpz_init(v_value);
+  mpz_set_str(v_n, "100000000000000", 10);
+  mpz_set_str(v_value, "100", 10);
+  int v_exponent = -8;
+  EncodedNumberType v_type = Ciphertext;
+  for (int i = 0; i < tree.capacity; i++) {
+    if (i < 7) {
+      tree.nodes[i].node_type = falcon::INTERNAL;
+    } else {
+      tree.nodes[i].node_type = falcon::LEAF;
+    }
+    tree.nodes[i].depth = 1;
+    tree.nodes[i].is_self_feature = 1;
+    tree.nodes[i].best_party_id = 0;
+    tree.nodes[i].best_feature_id = 1;
+    tree.nodes[i].best_split_id = 2;
+    tree.nodes[i].split_threshold = 0.25;
+    tree.nodes[i].node_sample_num = 1000;
+    tree.nodes[i].node_sample_distribution.push_back(200);
+    tree.nodes[i].node_sample_distribution.push_back(300);
+    tree.nodes[i].node_sample_distribution.push_back(500);
+    tree.nodes[i].left_child = 2 * i + 1;
+    tree.nodes[i].right_child = 2 * i + 2;
+    EncodedNumber impurity, label;
+    impurity.setter_n(v_n);
+    impurity.setter_value(v_value);
+    impurity.setter_exponent(v_exponent);
+    impurity.setter_type(v_type);
+    label.setter_n(v_n);
+    label.setter_value(v_value);
+    label.setter_exponent(v_exponent);
+    label.setter_type(v_type);
+    tree.nodes[i].impurity = impurity;
+    tree.nodes[i].label = label;
+  }
+
+  std::string out_message;
+  serialize_tree_model(tree, out_message);
+
+  Tree deserialized_tree;
+  deserialize_tree_model(deserialized_tree, out_message);
+
+  EXPECT_EQ(deserialized_tree.type, tree.type);
+  EXPECT_EQ(deserialized_tree.class_num, tree.class_num);
+  EXPECT_EQ(deserialized_tree.max_depth, tree.max_depth);
+  EXPECT_EQ(deserialized_tree.internal_node_num, tree.internal_node_num);
+  EXPECT_EQ(deserialized_tree.total_node_num, tree.total_node_num);
+  EXPECT_EQ(deserialized_tree.capacity, tree.capacity);
+  for (int i = 0; i < tree.capacity; i++) {
+    EXPECT_EQ(deserialized_tree.nodes[i].node_type, tree.nodes[i].node_type);
+    EXPECT_EQ(deserialized_tree.nodes[i].depth, tree.nodes[i].depth);
+    EXPECT_EQ(deserialized_tree.nodes[i].is_self_feature, tree.nodes[i].is_self_feature);
+    EXPECT_EQ(deserialized_tree.nodes[i].best_party_id, tree.nodes[i].best_party_id);
+    EXPECT_EQ(deserialized_tree.nodes[i].best_feature_id, tree.nodes[i].best_feature_id);
+    EXPECT_EQ(deserialized_tree.nodes[i].best_split_id, tree.nodes[i].best_split_id);
+    EXPECT_EQ(deserialized_tree.nodes[i].split_threshold, tree.nodes[i].split_threshold);
+    EXPECT_EQ(deserialized_tree.nodes[i].node_sample_num, tree.nodes[i].node_sample_num);
+    EXPECT_EQ(deserialized_tree.nodes[i].left_child, tree.nodes[i].left_child);
+    EXPECT_EQ(deserialized_tree.nodes[i].right_child, tree.nodes[i].right_child);
+    for (int j = 0; j < tree.nodes[i].node_sample_distribution.size(); j++) {
+      EXPECT_EQ(deserialized_tree.nodes[i].node_sample_distribution[j], tree.nodes[i].node_sample_distribution[j]);
+    }
+
+    EncodedNumber deserialized_impurity = deserialized_tree.nodes[i].impurity;
+    EncodedNumber deserialized_label = deserialized_tree.nodes[i].label;
+    mpz_t deserialized_impurity_n, deserialized_impurity_value;
+    mpz_t deserialized_label_n, deserialized_label_value;
+    mpz_init(deserialized_impurity_n);
+    mpz_init(deserialized_impurity_value);
+    mpz_init(deserialized_label_n);
+    mpz_init(deserialized_label_value);
+
+    deserialized_impurity.getter_n(deserialized_impurity_n);
+    deserialized_impurity.getter_value(deserialized_impurity_value);
+    int n_cmp = mpz_cmp(v_n, deserialized_impurity_n);
+    int value_cmp = mpz_cmp(v_value, deserialized_impurity_value);
+    EXPECT_EQ(0, n_cmp);
+    EXPECT_EQ(0, value_cmp);
+    EXPECT_EQ(v_exponent, deserialized_impurity.getter_exponent());
+    EXPECT_EQ(v_type, deserialized_impurity.getter_type());
+
+    deserialized_label.getter_n(deserialized_label_n);
+    deserialized_label.getter_value(deserialized_label_value);
+    n_cmp = mpz_cmp(v_n, deserialized_label_n);
+    value_cmp = mpz_cmp(v_value, deserialized_label_value);
+    EXPECT_EQ(0, n_cmp);
+    EXPECT_EQ(0, value_cmp);
+    EXPECT_EQ(v_exponent, deserialized_label.getter_exponent());
+    EXPECT_EQ(v_type, deserialized_label.getter_type());
+
+    mpz_clear(deserialized_impurity_n);
+    mpz_clear(deserialized_impurity_value);
+    mpz_clear(deserialized_label_n);
+    mpz_clear(deserialized_label_value);
+  }
+
+  mpz_clear(v_n);
+  mpz_clear(v_value);
+}
+
 TEST(PB_Converter, NetworkConfig) {
   // serialization
   std::vector<std::string> ip_addresses, deserialized_ip_addresses;
