@@ -1555,11 +1555,6 @@ void train_decision_tree(Party party, std::string params_str,
   decision_tree_builder.eval(party, falcon::TRAIN);
   decision_tree_builder.eval(party, falcon::TEST);
 
-  // TODO: save model and report
-//  EncodedNumber* model_weights = new EncodedNumber[log_reg_model.getter_weight_size()];
-//  log_reg_model.getter_encoded_weights(model_weights);
-//  save_lr_model(model_weights, log_reg_model.getter_weight_size(), model_save_file);
-//  save_lr_report(training_accuracy, testing_accuracy, model_report_file);
-//
-//  delete [] model_weights;
+  save_dt_model(decision_tree_builder.tree, model_save_file);
+  save_training_report(training_accuracy, testing_accuracy, model_report_file);
 }

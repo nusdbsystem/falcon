@@ -10,6 +10,7 @@
 
 #include <falcon/model/model_io.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/base64.h>
 
 void save_lr_model(EncodedNumber* model_weights, int weight_size, const std::string& model_save_path){
@@ -81,15 +82,46 @@ void load_lr_model(const std::string& model_save_path, int& weight_size, Encoded
   model_infile.close();
 }
 
-void save_lr_report(double lr_training_accuracy,
-    double lr_testing_accuracy,
+void save_dt_model(Tree tree, const std::string& model_save_path) {
+  std::ofstream write_outfile(model_save_path);
+  if (!write_outfile) {
+    LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";
+    exit(EXIT_FAILURE);
+  }
+  std::string local_model_str;
+  serialize_tree_model(tree, local_model_str);
+  std::string b64_local_model_str = base64_encode(reinterpret_cast<const BYTE *>(local_model_str.c_str()), local_model_str.size());
+  write_outfile << b64_local_model_str << "\n";
+  write_outfile.close();
+}
+
+void load_dt_model(const std::string& model_save_path, Tree& saved_tree) {
+  std::ifstream model_infile(model_save_path);
+  if (!model_infile) {
+    LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";
+    exit(EXIT_FAILURE);
+  }
+
+  std::string line;
+  while (std::getline(model_infile, line)) {
+    // read weights string
+    vector<BYTE> saved_model_vec = base64_decode(line.c_str());
+    std::string s(saved_model_vec.begin(), saved_model_vec.end());
+    deserialize_tree_model(saved_tree, s);
+  }
+
+  model_infile.close();
+}
+
+void save_training_report(double training_accuracy,
+    double testing_accuracy,
     const std::string& report_save_path) {
   std::ofstream write_outfile(report_save_path);
   if (!write_outfile) {
     LOG(INFO) << "Open " << report_save_path.c_str() << " file error.";
     exit(EXIT_FAILURE);
   }
-  write_outfile << "The training accuracy of this model is: " << lr_training_accuracy << "\n";
-  write_outfile << "The testing accuracy of this model is: " << lr_testing_accuracy << "\n";
+  write_outfile << "The training accuracy of this model is: " << training_accuracy << "\n";
+  write_outfile << "The testing accuracy of this model is: " << testing_accuracy << "\n";
   write_outfile.close();
 }
