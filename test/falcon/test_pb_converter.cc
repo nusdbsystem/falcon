@@ -448,8 +448,8 @@ TEST(PB_Converter, TreeUpdateInfo) {
   int deserialized_source_party_id, deserialized_best_party_id;
   int deserialized_best_feature_id, deserialized_best_split_id;
   EncodedNumber deserialized_left_impurity, deserialized_right_impurity;
-  EncodedNumber* deserialized_left_sample_iv;
-  EncodedNumber* deserialized_right_sample_iv;
+  EncodedNumber* deserialized_left_sample_iv = new EncodedNumber[3];
+  EncodedNumber* deserialized_right_sample_iv = new EncodedNumber[3];
   deserialize_update_info(deserialized_source_party_id,
       deserialized_best_party_id, deserialized_best_feature_id,
       deserialized_best_split_id, deserialized_left_impurity,

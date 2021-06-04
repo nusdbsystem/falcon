@@ -344,8 +344,8 @@ void deserialize_update_info(int & source_client_id,
   right_branch_impurity.setter_type(type_r);
 
   int sample_size = deserialized_update_info.left_branch_sample_ivs_size();
-  left_branch_sample_iv = new EncodedNumber[sample_size];
-  right_branch_sample_iv = new EncodedNumber[sample_size];
+  // left_branch_sample_iv = new EncodedNumber[sample_size];
+  // right_branch_sample_iv = new EncodedNumber[sample_size];
 
   for (int i = 0; i < sample_size; i++) {
     com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber pb_number_left_iv =

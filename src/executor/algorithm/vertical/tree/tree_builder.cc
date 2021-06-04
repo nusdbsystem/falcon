@@ -535,7 +535,7 @@ void DecisionTreeBuilder::build_node(Party &party,
   int left_child_index = 2 * node_index + 1;
   int right_child_index = 2 * node_index + 2;
 
-  LOG(INFO) << "Create sample iv for " << left_child_index << " and " << right_child_index;
+  // LOG(INFO) << "Create sample iv for " << left_child_index << " and " << right_child_index;
 
   // convert the index_in_global_split_num to (i_*, index_*)
   int i_star = -1;
@@ -716,7 +716,7 @@ void DecisionTreeBuilder::build_node(Party &party,
   delete [] sample_mask_iv_right;
   delete [] encrypted_labels_left;
   delete [] encrypted_labels_right;
-  LOG(INFO) << "Freed sample iv " << left_child_index << " and " << right_child_index;
+  // LOG(INFO) << "Freed sample iv " << left_child_index << " and " << right_child_index;
   LOG(INFO) << "End build tree node: " << node_index;
 }
 
