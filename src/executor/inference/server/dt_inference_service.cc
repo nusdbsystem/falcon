@@ -30,15 +30,13 @@ using com::nus::dbsytem::falcon::v0::inference::PredictionResponse;
 using com::nus::dbsytem::falcon::v0::inference::InferenceService;
 
 // Logic and data behind the server's behavior.
-class LRInferenceServiceImpl final : public InferenceService::Service {
+class DTInferenceServiceImpl final : public InferenceService::Service {
  public:
-  explicit LRInferenceServiceImpl(
+  explicit DTInferenceServiceImpl(
       const std::string& saved_model_file,
       const Party& party) {
     party_ = party;
-    weight_size_ = party.getter_feature_num();
-    local_weights_ = new EncodedNumber[weight_size_];
-    load_lr_model(saved_model_file, weight_size_, local_weights_);
+    load_dt_model(saved_model_file, saved_tree_model_);
   }
 
   Status Prediction(ServerContext* context, const PredictionRequest* request,
@@ -76,73 +74,65 @@ class LRInferenceServiceImpl final : public InferenceService::Service {
 
     // retrieve batch samples and encode (notice to use cur_batch_size
     // instead of default batch size to avoid unexpected batch)
-    EncodedNumber* batch_phe_aggregation = new EncodedNumber[sample_num];
     std::vector< std::vector<double> > batch_samples;
     for (int i = 0; i < sample_num; i++) {
       batch_samples.push_back(party_.getter_local_data()[batch_indexes[i]]);
     }
-    EncodedNumber** encoded_batch_samples = new EncodedNumber*[sample_num];
-    for (int i = 0; i < sample_num; i++) {
-      encoded_batch_samples[i] = new EncodedNumber[weight_size_];
-    }
-    for (int i = 0; i < sample_num; i++) {
-      for (int j = 0; j < weight_size_; j++) {
-        encoded_batch_samples[i][j].set_double(phe_pub_key->n[0],
-                                               batch_samples[i][j], PHE_FIXED_POINT_PRECISION);
+
+    // step 1: organize the leaf label vector, compute the map
+    LOG(INFO) << "Tree internal node num = " << saved_tree_model_.internal_node_num;
+    EncodedNumber *label_vector = new EncodedNumber[saved_tree_model_.internal_node_num + 1];
+    std::map<int, int> node_index_2_leaf_index_map;
+    int leaf_cur_index = 0;
+    for (int i = 0; i < pow(2, saved_tree_model_.max_depth + 1) - 1; i++) {
+      if (saved_tree_model_.nodes[i].node_type == falcon::LEAF) {
+        node_index_2_leaf_index_map.insert(std::make_pair(i, leaf_cur_index));
+        label_vector[leaf_cur_index] = saved_tree_model_.nodes[i].label;  // record leaf label vector
+        leaf_cur_index ++;
       }
     }
 
-    // compute local homomorphic aggregation
-    EncodedNumber* local_batch_phe_aggregation = new EncodedNumber[sample_num];
-    djcs_t_aux_matrix_mult(phe_pub_key, party_.phe_random, local_batch_phe_aggregation,
-                           local_weights_, encoded_batch_samples, sample_num, weight_size_);
-
-    // every party sends the local aggregation to the active party
-    // copy self local aggregation results
+    // record the ciphertext of the label
+    EncodedNumber *encrypted_aggregation = new EncodedNumber[sample_num];
+    // for each sample
     for (int i = 0; i < sample_num; i++) {
-      batch_phe_aggregation[i] = local_batch_phe_aggregation[i];
+      // compute binary vector for the current sample
+      std::vector<int> binary_vector = saved_tree_model_.comp_predict_vector(batch_samples[i], node_index_2_leaf_index_map);
+      EncodedNumber *encoded_binary_vector = new EncodedNumber[binary_vector.size()];
+      EncodedNumber *updated_label_vector = new EncodedNumber[binary_vector.size()];
+
+      // the super client update the last, and aggregate before calling share decryption
+      std::string final_recv_s;
+      party_.recv_long_message(party_.party_id + 1, final_recv_s);
+      deserialize_encoded_number_array(updated_label_vector, binary_vector.size(), final_recv_s);
+      for (int j = 0; j < binary_vector.size(); j++) {
+        encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
+        djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j], updated_label_vector[j], encoded_binary_vector[j]);
+      }
+
+      encrypted_aggregation[i].set_double(phe_pub_key->n[0], 0, PHE_FIXED_POINT_PRECISION);
+      djcs_t_aux_encrypt(phe_pub_key, party_.phe_random,
+                         encrypted_aggregation[i], encrypted_aggregation[i]);
+      for (int j = 0; j < binary_vector.size(); j++) {
+        djcs_t_aux_ee_add(phe_pub_key, encrypted_aggregation[i],
+                          encrypted_aggregation[i], updated_label_vector[j]);
+      }
+
+      delete [] encoded_binary_vector;
+      delete [] updated_label_vector;
     }
 
-    std::cout << "Local phe aggregation finished" << std::endl;
-    LOG(INFO) << "Local phe aggregation finished";
-
-    // receive serialized string from other parties
-    // deserialize and sum to batch_phe_aggregation
-    for (int id = 0; id < party_.party_num; id++) {
-      if (id != party_.party_id) {
-        EncodedNumber* recv_batch_phe_aggregation = new EncodedNumber[sample_num];
-        std::string recv_local_aggregation_str;
-        party_.recv_long_message(id, recv_local_aggregation_str);
-        deserialize_encoded_number_array(recv_batch_phe_aggregation,
-                                         sample_num, recv_local_aggregation_str);
-        // homomorphic addition of the received aggregations
-        for (int i = 0; i < sample_num; i++) {
-          djcs_t_aux_ee_add(phe_pub_key,batch_phe_aggregation[i],
-                            batch_phe_aggregation[i], recv_batch_phe_aggregation[i]);
-        }
-        delete [] recv_batch_phe_aggregation;
+    std::string s;
+    serialize_encoded_number_array(encrypted_aggregation, sample_num, s);
+    for (int x = 0; x < party_.party_num; x++) {
+      if (x != party_.party_id) {
+        party_.send_long_message(x, s);
       }
     }
-
-    std::cout << "Global phe aggregation finished" << std::endl;
-    LOG(INFO) << "Global phe aggregation finished";
-
-    // serialize and send the batch_phe_aggregation to other parties
-    std::string global_aggregation_str;
-    serialize_encoded_number_array(batch_phe_aggregation,
-                                   sample_num, global_aggregation_str);
-    for (int id = 0; id < party_.party_num; id++) {
-      if (id != party_.party_id) {
-        party_.send_long_message(id, global_aggregation_str);
-      }
-    }
-
-    std::cout << "Broad global phe aggregation result" << std::endl;
-    LOG(INFO) << "Broad global phe aggregation result";
 
     // step 3: active party aggregates and call collaborative decryption
     EncodedNumber* decrypted_aggregation = new EncodedNumber[sample_num];
-    party_.collaborative_decrypt(batch_phe_aggregation,
+    party_.collaborative_decrypt(encrypted_aggregation,
                                  decrypted_aggregation,
                                  sample_num,
                                  ACTIVE_PARTY_ID);
@@ -156,14 +146,15 @@ class LRInferenceServiceImpl final : public InferenceService::Service {
     for (int i = 0; i < sample_num; i++) {
       double t;
       decrypted_aggregation[i].decode(t);
-      // std::cout << "t before logistic = " << t << std::endl;
-      t = 1.0 / (1 + exp(0 - t));
-      // std::cout << "t after logistic = " << t << std::endl;
       std::vector<double> prob;
-      prob.push_back(t);
-      prob.push_back(1 - t);
-      t = t >= 0.5 ? 1 : 0;
-      // std::cout << "label = " << t << std::endl;
+      // TODO: record the detailed probability, here assume 1.0
+      for (int k = 0; k < saved_tree_model_.class_num; k++) {
+        if (t == k) {
+          prob.push_back(1.0);
+        } else {
+          prob.push_back(0.0);
+        }
+      }
       labels.push_back(t);
       probabilities.push_back(prob);
     }
@@ -183,12 +174,7 @@ class LRInferenceServiceImpl final : public InferenceService::Service {
     }
 
     djcs_t_free_public_key(phe_pub_key);
-    for (int i = 0; i < sample_num; i++) {
-      delete [] encoded_batch_samples[i];
-    }
-    delete [] encoded_batch_samples;
-    delete [] local_batch_phe_aggregation;
-    delete [] batch_phe_aggregation;
+    delete [] encrypted_aggregation;
     delete [] decrypted_aggregation;
 
     google::FlushLogFiles(google::INFO);
@@ -197,14 +183,13 @@ class LRInferenceServiceImpl final : public InferenceService::Service {
 
  private:
   Party party_;
-  int weight_size_;
-  EncodedNumber* local_weights_;
+  Tree saved_tree_model_;
 };
 
 void run_active_server_dt(const std::string& endpoint,
                           const std::string& saved_model_file,
                           const Party& party) {
-  LRInferenceServiceImpl service(saved_model_file, party);
+  DTInferenceServiceImpl service(saved_model_file, party);
 
   grpc::EnableDefaultHealthCheckService(true);
   grpc::reflection::InitProtoReflectionServerBuilderPlugin();
@@ -225,9 +210,8 @@ void run_active_server_dt(const std::string& endpoint,
 
 void run_passive_server_dt(const std::string& saved_model_file,
                            const Party& party) {
-  int weight_size = party.getter_feature_num();
-  EncodedNumber* local_weights = new EncodedNumber[weight_size];
-  load_lr_model(saved_model_file, weight_size, local_weights);
+  Tree saved_tree_model;
+  load_dt_model(saved_model_file, saved_tree_model);
 
   // keep listening requests from the active party
   while (true) {
@@ -253,46 +237,75 @@ void run_passive_server_dt(const std::string& saved_model_file,
     for (int i = 0; i < cur_batch_size; i++) {
       batch_samples.push_back(party.getter_local_data()[batch_indexes[i]]);
     }
-    EncodedNumber** encoded_batch_samples = new EncodedNumber*[cur_batch_size];
-    for (int i = 0; i < cur_batch_size; i++) {
-      encoded_batch_samples[i] = new EncodedNumber[weight_size];
-    }
-    for (int i = 0; i < cur_batch_size; i++) {
-      for (int j = 0; j < weight_size; j++) {
-        encoded_batch_samples[i][j].set_double(phe_pub_key->n[0],
-                                               batch_samples[i][j], PHE_FIXED_POINT_PRECISION);
+
+    // step 1: organize the leaf label vector, compute the map
+    LOG(INFO) << "Tree internal node num = " << saved_tree_model.internal_node_num;
+    EncodedNumber *label_vector = new EncodedNumber[saved_tree_model.internal_node_num + 1];
+    std::map<int, int> node_index_2_leaf_index_map;
+    int leaf_cur_index = 0;
+    for (int i = 0; i < pow(2, saved_tree_model.max_depth + 1) - 1; i++) {
+      if (saved_tree_model.nodes[i].node_type == falcon::LEAF) {
+        node_index_2_leaf_index_map.insert(std::make_pair(i, leaf_cur_index));
+        label_vector[leaf_cur_index] = saved_tree_model.nodes[i].label;  // record leaf label vector
+        leaf_cur_index ++;
       }
     }
 
-    // compute local homomorphic aggregation
-    EncodedNumber* local_batch_phe_aggregation = new EncodedNumber[cur_batch_size];
-    djcs_t_aux_matrix_mult(phe_pub_key, party.phe_random, local_batch_phe_aggregation,
-                           local_weights, encoded_batch_samples, cur_batch_size, weight_size);
+    // record the ciphertext of the label
+    EncodedNumber *encrypted_aggregation = new EncodedNumber[cur_batch_size];
+    // for each sample
+    for (int i = 0; i < cur_batch_size; i++) {
+      // compute binary vector for the current sample
+      std::vector<int> binary_vector = saved_tree_model.comp_predict_vector(batch_samples[i], node_index_2_leaf_index_map);
+      EncodedNumber *encoded_binary_vector = new EncodedNumber[binary_vector.size()];
+      EncodedNumber *updated_label_vector = new EncodedNumber[binary_vector.size()];
 
-    std::cout << "Local phe aggregation finished" << std::endl;
-    LOG(INFO) << "Local phe aggregation finished";
+      // update in Robin cycle, from the last client to client 0
+      if (party.party_id == party.party_num - 1) {
+        // updated_label_vector = new EncodedNumber[binary_vector.size()];
+        for (int j = 0; j < binary_vector.size(); j++) {
+          encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
+          djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
+                            label_vector[j], encoded_binary_vector[j]);
+        }
+        // send to the next client
+        std::string send_s;
+        serialize_encoded_number_array(updated_label_vector, binary_vector.size(), send_s);
+        party.send_long_message(party.party_id - 1, send_s);
+      } else if (party.party_id > 0) {
+        std::string recv_s;
+        party.recv_long_message(party.party_id + 1, recv_s);
+        deserialize_encoded_number_array(updated_label_vector, binary_vector.size(), recv_s);
+        for (int j = 0; j < binary_vector.size(); j++) {
+          encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
+          djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
+                            updated_label_vector[j], encoded_binary_vector[j]);
+        }
+        std::string resend_s;
+        serialize_encoded_number_array(updated_label_vector, binary_vector.size(), resend_s);
+        party.send_long_message(party.party_id - 1, resend_s);
+      } else {
+        // the super client update the last, and aggregate before calling share decryption
+        std::string final_recv_s;
+        party.recv_long_message(party.party_id + 1, final_recv_s);
+        deserialize_encoded_number_array(updated_label_vector, binary_vector.size(), final_recv_s);
+        for (int j = 0; j < binary_vector.size(); j++) {
+          encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
+          djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j], updated_label_vector[j], encoded_binary_vector[j]);
+        }
+      }
 
-    // serialize local batch aggregation and send to active party
-    std::string local_aggregation_str;
-    serialize_encoded_number_array(local_batch_phe_aggregation,
-                                   cur_batch_size, local_aggregation_str);
-    party.send_long_message(ACTIVE_PARTY_ID, local_aggregation_str);
+      delete [] encoded_binary_vector;
+      delete [] updated_label_vector;
+    }
 
-    std::cout << "Send local phe aggregation string to active party" << std::endl;
-    LOG(INFO) << "Send local phe aggregation string to active party";
-
-    // receive the global batch aggregation from the active party
-    std::string recv_global_aggregation_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_global_aggregation_str);
-    deserialize_encoded_number_array(batch_phe_aggregation,
-                                     cur_batch_size, recv_global_aggregation_str);
-
-    std::cout << "Received global phe aggregation from active party" << std::endl;
-    LOG(INFO) << "Received global phe aggregation from active party";
+    std::string recv_s;
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_s);
+    deserialize_encoded_number_array(encrypted_aggregation, cur_batch_size, recv_s);
 
     // step 3: active party aggregates and call collaborative decryption
     EncodedNumber* decrypted_aggregation = new EncodedNumber[cur_batch_size];
-    party.collaborative_decrypt(batch_phe_aggregation,
+    party.collaborative_decrypt(encrypted_aggregation,
                                 decrypted_aggregation,
                                 cur_batch_size,
                                 ACTIVE_PARTY_ID);
@@ -301,11 +314,7 @@ void run_passive_server_dt(const std::string& saved_model_file,
     LOG(INFO) << "Collaboratively decryption finished";
 
     djcs_t_free_public_key(phe_pub_key);
-    for (int i = 0; i < cur_batch_size; i++) {
-      delete [] encoded_batch_samples[i];
-    }
-    delete [] encoded_batch_samples;
-    delete [] local_batch_phe_aggregation;
+    delete [] label_vector;
     delete [] batch_phe_aggregation;
     delete [] decrypted_aggregation;
 
