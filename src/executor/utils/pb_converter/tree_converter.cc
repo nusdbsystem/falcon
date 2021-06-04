@@ -40,8 +40,8 @@ void serialize_encrypted_statistics(int client_id,
       mpz_init(g_value_l);
       left_sample_nums[i].getter_n(g_n_l);
       left_sample_nums[i].getter_value(g_value_l);
-      n_str_left_c = mpz_get_str(NULL, 10, g_n_l);
-      value_str_left_c = mpz_get_str(NULL, 10, g_value_l);
+      n_str_left_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_l);
+      value_str_left_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_l);
       std::string n_str_left(n_str_left_c), value_str_left(value_str_left_c);
       pb_number_left->set_n(n_str_left);
       pb_number_left->set_value(value_str_left);
@@ -53,8 +53,8 @@ void serialize_encrypted_statistics(int client_id,
       mpz_init(g_value_r);
       right_sample_nums[i].getter_n(g_n_r);
       right_sample_nums[i].getter_value(g_value_r);
-      n_str_right_c = mpz_get_str(NULL, 10, g_n_r);
-      value_str_right_c = mpz_get_str(NULL, 10, g_value_r);
+      n_str_right_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_r);
+      value_str_right_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_r);
       std::string n_str_right(n_str_right_c), value_str_right(value_str_right_c);
       pb_number_right->set_n(n_str_right);
       pb_number_right->set_value(value_str_right);
@@ -73,8 +73,8 @@ void serialize_encrypted_statistics(int client_id,
         mpz_init(g_value);
         encrypted_statistics[i][j].getter_n(g_n);
         encrypted_statistics[i][j].getter_value(g_value);
-        n_str_c = mpz_get_str(NULL, 10, g_n);
-        value_str_c = mpz_get_str(NULL, 10, g_value);
+        n_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_n);
+        value_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_value);
         std::string n_str(n_str_c), value_str(value_str_c);
         pb_number->set_n(n_str);
         pb_number->set_value(value_str);
@@ -136,8 +136,8 @@ void deserialize_encrypted_statistics(int & client_id,
       mpz_t g_n, g_value;
       mpz_init(g_n);
       mpz_init(g_value);
-      mpz_set_str(g_n, pb_number.n().c_str(), 10);
-      mpz_set_str(g_value, pb_number.value().c_str(), 10);
+      mpz_set_str(g_n, pb_number.n().c_str(), PHE_STR_BASE);
+      mpz_set_str(g_value, pb_number.value().c_str(), PHE_STR_BASE);
       left_sample_nums[i].setter_n(g_n);
       left_sample_nums[i].setter_value(g_value);
       left_sample_nums[i].setter_exponent(pb_number.exponent());
@@ -153,8 +153,8 @@ void deserialize_encrypted_statistics(int & client_id,
       mpz_t g_n, g_value;
       mpz_init(g_n);
       mpz_init(g_value);
-      mpz_set_str(g_n, pb_number.n().c_str(), 10);
-      mpz_set_str(g_value, pb_number.value().c_str(), 10);
+      mpz_set_str(g_n, pb_number.n().c_str(), PHE_STR_BASE);
+      mpz_set_str(g_value, pb_number.value().c_str(), PHE_STR_BASE);
       right_sample_nums[i].setter_n(g_n);
       right_sample_nums[i].setter_value(g_value);
       right_sample_nums[i].setter_exponent(pb_number.exponent());
@@ -172,8 +172,8 @@ void deserialize_encrypted_statistics(int & client_id,
         mpz_t g_n, g_value;
         mpz_init(g_n);
         mpz_init(g_value);
-        mpz_set_str(g_n, pb_number.n().c_str(), 10);
-        mpz_set_str(g_value, pb_number.value().c_str(), 10);
+        mpz_set_str(g_n, pb_number.n().c_str(), PHE_STR_BASE);
+        mpz_set_str(g_value, pb_number.value().c_str(), PHE_STR_BASE);
         encrypted_statistics[i][j].setter_n(g_n);
         encrypted_statistics[i][j].setter_value(g_value);
         encrypted_statistics[i][j].setter_exponent(pb_number.exponent());
@@ -213,8 +213,8 @@ void serialize_update_info(int source_party_id,
   mpz_init(g_value_l);
   left_branch_impurity.getter_n(g_n_l);
   left_branch_impurity.getter_value(g_value_l);
-  n_str_left_c = mpz_get_str(NULL, 10, g_n_l);
-  value_str_left_c = mpz_get_str(NULL, 10, g_value_l);
+  n_str_left_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_l);
+  value_str_left_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_l);
   std::string n_str_left(n_str_left_c), value_str_left(value_str_left_c);
   pb_left_impurity->set_n(n_str_left);
   pb_left_impurity->set_value(value_str_left);
@@ -226,8 +226,8 @@ void serialize_update_info(int source_party_id,
   mpz_init(g_value_r);
   right_branch_impurity.getter_n(g_n_r);
   right_branch_impurity.getter_value(g_value_r);
-  n_str_right_c = mpz_get_str(NULL, 10, g_n_r);
-  value_str_right_c = mpz_get_str(NULL, 10, g_value_r);
+  n_str_right_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_r);
+  value_str_right_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_r);
   std::string n_str_right(n_str_right_c), value_str_right(value_str_right_c);
   pb_right_impurity->set_n(n_str_right);
   pb_right_impurity->set_value(value_str_right);
@@ -249,8 +249,8 @@ void serialize_update_info(int source_party_id,
     mpz_init(g_value_ll);
     left_branch_sample_iv[i].getter_n(g_n_ll);
     left_branch_sample_iv[i].getter_value(g_value_ll);
-    n_str_left_sample_c = mpz_get_str(NULL, 10, g_n_ll);
-    value_str_left_sample_c = mpz_get_str(NULL, 10, g_value_ll);
+    n_str_left_sample_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_ll);
+    value_str_left_sample_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_ll);
     std::string n_str_left_sample(n_str_left_sample_c), value_str_left_sample(value_str_left_sample_c);
     pb_left_sample_iv->set_n(n_str_left_sample);
     pb_left_sample_iv->set_value(value_str_left_sample);
@@ -262,8 +262,8 @@ void serialize_update_info(int source_party_id,
     mpz_init(g_value_rr);
     right_branch_sample_iv[i].getter_n(g_n_rr);
     right_branch_sample_iv[i].getter_value(g_value_rr);
-    n_str_right_sample_c = mpz_get_str(NULL, 10, g_n_rr);
-    value_str_right_sample_c = mpz_get_str(NULL, 10, g_value_rr);
+    n_str_right_sample_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_rr);
+    value_str_right_sample_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_rr);
     std::string n_str_right_sample(n_str_right_sample_c), value_str_right_sample(value_str_right_sample_c);
     pb_right_sample_iv->set_n(n_str_right_sample);
     pb_right_sample_iv->set_value(value_str_right_sample);
@@ -324,8 +324,8 @@ void deserialize_update_info(int & source_client_id,
   mpz_t g_n_l, g_value_l;
   mpz_init(g_n_l);
   mpz_init(g_value_l);
-  mpz_set_str(g_n_l, pb_number_left.n().c_str(), 10);
-  mpz_set_str(g_value_l, pb_number_left.value().c_str(), 10);
+  mpz_set_str(g_n_l, pb_number_left.n().c_str(), PHE_STR_BASE);
+  mpz_set_str(g_value_l, pb_number_left.value().c_str(), PHE_STR_BASE);
   left_branch_impurity.setter_n(g_n_l);
   left_branch_impurity.setter_value(g_value_l);
   left_branch_impurity.setter_exponent(pb_number_left.exponent());
@@ -335,8 +335,8 @@ void deserialize_update_info(int & source_client_id,
   mpz_t g_n_r, g_value_r;
   mpz_init(g_n_r);
   mpz_init(g_value_r);
-  mpz_set_str(g_n_r, pb_number_right.n().c_str(), 10);
-  mpz_set_str(g_value_r, pb_number_right.value().c_str(), 10);
+  mpz_set_str(g_n_r, pb_number_right.n().c_str(), PHE_STR_BASE);
+  mpz_set_str(g_value_r, pb_number_right.value().c_str(), PHE_STR_BASE);
   right_branch_impurity.setter_n(g_n_r);
   right_branch_impurity.setter_value(g_value_r);
   right_branch_impurity.setter_exponent(pb_number_right.exponent());
@@ -356,8 +356,8 @@ void deserialize_update_info(int & source_client_id,
     mpz_t g_n_ll, g_value_ll;
     mpz_init(g_n_ll);
     mpz_init(g_value_ll);
-    mpz_set_str(g_n_ll, pb_number_left_iv.n().c_str(), 10);
-    mpz_set_str(g_value_ll, pb_number_left_iv.value().c_str(), 10);
+    mpz_set_str(g_n_ll, pb_number_left_iv.n().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_value_ll, pb_number_left_iv.value().c_str(), PHE_STR_BASE);
     left_branch_sample_iv[i].setter_n(g_n_ll);
     left_branch_sample_iv[i].setter_value(g_value_ll);
     left_branch_sample_iv[i].setter_exponent(pb_number_left_iv.exponent());
@@ -367,8 +367,8 @@ void deserialize_update_info(int & source_client_id,
     mpz_t g_n_rr, g_value_rr;
     mpz_init(g_n_rr);
     mpz_init(g_value_rr);
-    mpz_set_str(g_n_rr, pb_number_right_iv.n().c_str(), 10);
-    mpz_set_str(g_value_rr, pb_number_right_iv.value().c_str(), 10);
+    mpz_set_str(g_n_rr, pb_number_right_iv.n().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_value_rr, pb_number_right_iv.value().c_str(), PHE_STR_BASE);
     right_branch_sample_iv[i].setter_n(g_n_rr);
     right_branch_sample_iv[i].setter_value(g_value_rr);
     right_branch_sample_iv[i].setter_exponent(pb_number_right_iv.exponent());
@@ -454,10 +454,10 @@ void serialize_tree_model(Tree tree, std::string & output_str) {
     tree.nodes[i].label.getter_n(g_n_label);
     tree.nodes[i].label.getter_value(g_value_label);
 
-    n_str_impurity_c = mpz_get_str(NULL, 10, g_n_impurity);
-    value_str_impurity_c = mpz_get_str(NULL, 10, g_value_impurity);
-    n_str_label_c = mpz_get_str(NULL, 10, g_n_label);
-    value_str_label_c = mpz_get_str(NULL, 10, g_value_label);
+    n_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_impurity);
+    value_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_impurity);
+    n_str_label_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_label);
+    value_str_label_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_label);
 
     std::string n_str_impurity(n_str_impurity_c), value_str_impurity(value_str_impurity_c);
     pb_impurity->set_n(n_str_impurity);
@@ -529,10 +529,10 @@ void deserialize_tree_model(Tree & tree, std::string input_str) {
     mpz_init(g_value_impurity);
     mpz_init(g_n_label);
     mpz_init(g_value_label);
-    mpz_set_str(g_n_impurity, pb_impurity.n().c_str(), 10);
-    mpz_set_str(g_value_impurity, pb_impurity.value().c_str(), 10);
-    mpz_set_str(g_n_label, pb_label.n().c_str(), 10);
-    mpz_set_str(g_value_label, pb_label.value().c_str(), 10);
+    mpz_set_str(g_n_impurity, pb_impurity.n().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_value_impurity, pb_impurity.value().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_n_label, pb_label.n().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_value_label, pb_label.value().c_str(), PHE_STR_BASE);
     tree.nodes[i].impurity.setter_n(g_n_impurity);
     tree.nodes[i].impurity.setter_value(g_value_impurity);
     tree.nodes[i].impurity.setter_exponent(pb_impurity.exponent());

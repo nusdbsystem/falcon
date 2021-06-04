@@ -36,8 +36,8 @@ void serialize_encoded_number(EncodedNumber number, std::string& output_message)
   number.getter_n(g_n);
   number.getter_value(g_value);
   char *n_str_c, *value_str_c;
-  n_str_c = mpz_get_str(NULL, 10, g_n);
-  value_str_c = mpz_get_str(NULL, 10, g_value);
+  n_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_n);
+  value_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_value);
   std::string n_str(n_str_c), value_str(value_str_c);
   encoded_number.set_n(n_str);
   encoded_number.set_value(value_str);
@@ -61,8 +61,8 @@ void deserialize_encoded_number(EncodedNumber& number, const std::string& input_
   mpz_t s_n, s_value;
   mpz_init(s_n);
   mpz_init(s_value);
-  mpz_set_str(s_n, deserialized_encoded_number.n().c_str(), 10);
-  mpz_set_str(s_value, deserialized_encoded_number.value().c_str(), 10);
+  mpz_set_str(s_n, deserialized_encoded_number.n().c_str(), PHE_STR_BASE);
+  mpz_set_str(s_value, deserialized_encoded_number.value().c_str(), PHE_STR_BASE);
 
   number.setter_n(s_n);
   number.setter_value(s_value);
@@ -83,8 +83,8 @@ void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::
     number_array[i].getter_n(g_n);
     number_array[i].getter_value(g_value);
     char *n_str_c, *value_str_c;
-    n_str_c = mpz_get_str(NULL, 10, g_n);
-    value_str_c = mpz_get_str(NULL, 10, g_value);
+    n_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_n);
+    value_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_value);
     std::string n_str(n_str_c), value_str(value_str_c);
 
     encoded_number->set_n(n_str);
@@ -119,8 +119,8 @@ void deserialize_encoded_number_array(EncodedNumber* number_array, int size, con
     mpz_t s_n, s_value;
     mpz_init(s_n);
     mpz_init(s_value);
-    mpz_set_str(s_n, encoded_number.n().c_str(), 10);
-    mpz_set_str(s_value, encoded_number.value().c_str(), 10);
+    mpz_set_str(s_n, encoded_number.n().c_str(), PHE_STR_BASE);
+    mpz_set_str(s_value, encoded_number.value().c_str(), PHE_STR_BASE);
 
     number_array[i].setter_n(s_n);
     number_array[i].setter_value(s_value);

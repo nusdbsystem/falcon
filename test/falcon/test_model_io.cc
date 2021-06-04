@@ -15,8 +15,8 @@ TEST(Model_IO, SaveLRModel) {
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "100", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
   for (int i = 0; i < weight_size; i++) {
@@ -70,8 +70,8 @@ TEST(Model_IO, SaveDTModel) {
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "100", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
   for (int i = 0; i < tree.capacity; i++) {

@@ -141,8 +141,8 @@ TEST(PB_Converter, FixedPointEncodedNumber) {
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "100", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
 
@@ -182,8 +182,8 @@ TEST(PB_Converter, EncodedNumberArray) {
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "100", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
   for (int i = 0; i < 3; i++) {
@@ -300,8 +300,8 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "100", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
   for (int i = 0; i < 3; i++) {
@@ -418,8 +418,8 @@ TEST(PB_Converter, TreeUpdateInfo) {
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "100", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
   left_impurity.setter_n(v_n);
@@ -563,8 +563,8 @@ TEST(PB_Converter, TreeModel) {
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "100", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
   for (int i = 0; i < tree.capacity; i++) {

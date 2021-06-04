@@ -285,7 +285,7 @@ void fixed_pointed_decode(double & value, mpz_t res, int exponent) {
   if (exponent < 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION) {
     fixed_pointed_decode_truncated(value, res, exponent, 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
   } else {
-    char *t = mpz_get_str(NULL, 10, res);
+    char *t = mpz_get_str(NULL, PHE_STR_BASE, res);
     long long v = ::atol(t);
 
     if (v == 0) {
@@ -304,7 +304,7 @@ void fixed_pointed_decode_truncated(double & value, mpz_t res, int exponent, int
   }
 
   if (exponent >= truncated_exponent) {
-    char *t = mpz_get_str(NULL, 10, res);
+    char *t = mpz_get_str(NULL, PHE_STR_BASE, res);
     long long v = ::atol(t);
 
     if (v == 0) {
@@ -327,7 +327,7 @@ void fixed_pointed_decode_truncated(double & value, mpz_t res, int exponent, int
     // gmp_printf("new_value = %Zd\n", new_value);
 
     // decode with new_value
-    char *t_new = mpz_get_str(NULL, 10, new_value);
+    char *t_new = mpz_get_str(NULL, PHE_STR_BASE, new_value);
     long long v_new = ::atol(t_new);
 
     // printf("v_new = %ld\n", v_new);

@@ -60,8 +60,8 @@ std::vector<int> Tree::comp_predict_vector(std::vector<double> sample,
   std::vector<int> binary_vector(internal_node_num + 1);
   // traverse the whole tree iteratively, and compute binary_vector
   std::stack<PredictHelper> traverse_prediction_objs;
-  PredictHelper prediction_obj(nodes[0].node_type,
-                               nodes[0].is_self_feature,
+  PredictHelper prediction_obj((bool) nodes[0].node_type,
+                               (bool) nodes[0].is_self_feature,
                                nodes[0].best_party_id,
                                nodes[0].best_feature_id,
                                nodes[0].best_split_id,
@@ -81,15 +81,15 @@ std::vector<int> Tree::comp_predict_vector(std::vector<double> sample,
       int left_node_index = pred_obj.index * 2 + 1;
       int right_node_index = pred_obj.index * 2 + 2;
 
-      PredictHelper left(nodes[left_node_index].node_type,
-                         nodes[left_node_index].is_self_feature,
+      PredictHelper left((bool) nodes[left_node_index].node_type,
+                         (bool) nodes[left_node_index].is_self_feature,
                          nodes[left_node_index].best_party_id,
                          nodes[left_node_index].best_feature_id,
                          nodes[left_node_index].best_split_id,
                          pred_obj.mark,
                          left_node_index);
-      PredictHelper right(nodes[right_node_index].node_type,
-                          nodes[right_node_index].is_self_feature,
+      PredictHelper right((bool) nodes[right_node_index].node_type,
+                          (bool) nodes[right_node_index].is_self_feature,
                           nodes[right_node_index].best_party_id,
                           nodes[right_node_index].best_feature_id,
                           nodes[right_node_index].best_split_id,
@@ -115,15 +115,15 @@ std::vector<int> Tree::comp_predict_vector(std::vector<double> sample,
 
       int left_node_index = pred_obj.index * 2 + 1;
       int right_node_index = pred_obj.index * 2 + 2;
-      PredictHelper left(nodes[left_node_index].node_type,
-                         nodes[left_node_index].is_self_feature,
+      PredictHelper left((bool) nodes[left_node_index].node_type,
+                         (bool) nodes[left_node_index].is_self_feature,
                          nodes[left_node_index].best_party_id,
                          nodes[left_node_index].best_feature_id,
                          nodes[left_node_index].best_split_id,
                          left_mark,
                          left_node_index);
-      PredictHelper right(nodes[right_node_index].node_type,
-                          nodes[right_node_index].is_self_feature,
+      PredictHelper right((bool) nodes[right_node_index].node_type,
+                          (bool) nodes[right_node_index].is_self_feature,
                           nodes[right_node_index].best_party_id,
                           nodes[right_node_index].best_feature_id,
                           nodes[right_node_index].best_split_id,

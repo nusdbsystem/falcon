@@ -15,8 +15,8 @@ TEST(FixedPoint, SetterGetter) {
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "100", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Plaintext;
 
@@ -59,8 +59,8 @@ TEST(FixedPoint, IntegerEncodeDecode){
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "5", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "5", PHE_STR_BASE);
 
   int positive = 5;
   EncodedNumber positive_number;
@@ -89,7 +89,7 @@ TEST(FixedPoint, IntegerEncodeDecode){
   int negative = -8000;
   mpz_clear(v_value);
   mpz_init(v_value);
-  mpz_set_str(v_value, "-8000", 10);
+  mpz_set_str(v_value, "-8000", PHE_STR_BASE);
 
   EncodedNumber negative_number;
   negative_number.set_integer(v_n, negative);
@@ -125,8 +125,8 @@ TEST(FixedPoint, FloatEncodeDecode){
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "8090", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "8090", PHE_STR_BASE);
 
   double positive = 0.123456;
   EncodedNumber positive_number;
@@ -156,7 +156,7 @@ TEST(FixedPoint, FloatEncodeDecode){
   double negative = -0.666666;
   mpz_clear(v_value);
   mpz_init(v_value);
-  mpz_set_str(v_value, "-43690", 10);
+  mpz_set_str(v_value, "-43690", PHE_STR_BASE);
 
   EncodedNumber negative_number;
   negative_number.set_double(v_n, negative, 16);
@@ -194,11 +194,11 @@ TEST(FixedPoint, EncodedState){
   mpz_init(v_value_positive);
   mpz_init(v_value_negative);
   mpz_init(v_value_overflow);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value_invalid, "100000000000000", 10);
-  mpz_set_str(v_value_positive, "33333333333332", 10);
-  mpz_set_str(v_value_negative, "66666666666668", 10);
-  mpz_set_str(v_value_overflow, "66666666666667", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value_invalid, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value_positive, "33333333333332", PHE_STR_BASE);
+  mpz_set_str(v_value_negative, "66666666666668", PHE_STR_BASE);
+  mpz_set_str(v_value_overflow, "66666666666667", PHE_STR_BASE);
   int v_exponent = 0;
   EncodedNumberType v_type = Plaintext;
 
@@ -249,8 +249,8 @@ TEST(FixedPoint, ExponentChange){
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
-  mpz_set_str(v_n, "100000000000000", 10);
-  mpz_set_str(v_value, "100", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
   //int v_exponent = 0 - PHE_FIXED_POINT_PRECISION;
   int v_exponent = -8;
   EncodedNumberType v_type = Plaintext;
@@ -266,7 +266,7 @@ TEST(FixedPoint, ExponentChange){
   mpz_t v_value_change, g_value;
   mpz_init(v_value_change);
   mpz_init(g_value);
-  mpz_set_str(v_value_change, "25600", 10);
+  mpz_set_str(v_value_change, "25600", PHE_STR_BASE);
   number.getter_value(g_value);
   // gmp_printf("g_value = %Zd\n", g_value);
   int cmp = mpz_cmp(v_value_change, g_value);
@@ -294,7 +294,7 @@ TEST(FixedPoint, ExponentChange){
 TEST(FixedPoint, DecodeTruncation){
   mpz_t v_n;
   mpz_init(v_n);
-  mpz_set_str(v_n, "100000000000000", 10);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
 
   EncodedNumber number;
   number.set_double(v_n, -0.00105, 32);

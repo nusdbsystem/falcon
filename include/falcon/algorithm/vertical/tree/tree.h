@@ -53,8 +53,8 @@ class Tree {
 
 
 struct PredictHelper {
-  int is_leaf;
-  int is_self_feature;
+  bool is_leaf;
+  bool is_self_feature;
   int best_client_id;
   int best_feature_id;
   int best_split_id;
@@ -62,8 +62,8 @@ struct PredictHelper {
   int index;
 
   PredictHelper() {
-    is_leaf = -1;
-    is_self_feature = -1;
+    is_leaf = false;
+    is_self_feature = false;
     best_client_id = -1;
     best_feature_id = -1;
     best_split_id = -1;
@@ -71,7 +71,7 @@ struct PredictHelper {
     index = -1;
   }
 
-  PredictHelper(int m_is_leaf, int m_is_self_feature, int m_best_client_id,
+  PredictHelper(bool m_is_leaf, bool m_is_self_feature, int m_best_client_id,
                 int m_best_feature_id, int m_best_split_id, int m_mark, int m_index) {
     is_leaf = m_is_leaf;
     is_self_feature = m_is_self_feature;
@@ -82,7 +82,7 @@ struct PredictHelper {
     index = m_index;
   }
 
-  ~PredictHelper() {}
+  ~PredictHelper() = default;
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_TREE_H_
