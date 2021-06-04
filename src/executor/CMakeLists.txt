@@ -67,6 +67,10 @@ set(SOURCE_FILES
         model/model_io.cc
         ../../include/falcon/inference/server/inference_server.h
         inference/server/inference_server.cc
+        ../../include/falcon/inference/server/lr_inference_service.h
+        inference/server/lr_inference_service.cc
+        ../../include/falcon/inference/server/dt_inference_service.h
+        inference/server/dt_inference_service.cc
         ../../include/falcon/algorithm/vertical/tree/node.h
         algorithm/vertical/tree/node.cc
         ../../include/falcon/algorithm/vertical/tree/feature.h

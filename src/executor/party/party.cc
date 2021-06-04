@@ -415,7 +415,7 @@ void Party::split_train_test_data(double split_percentage,
 void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
     EncodedNumber *dest_plains,
     int size,
-    int req_party_id) {
+    int req_party_id) const {
   // partially decrypt the ciphertext vector
   EncodedNumber* partial_decryption = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {

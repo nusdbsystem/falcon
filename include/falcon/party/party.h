@@ -170,7 +170,7 @@ class Party {
    */
   void collaborative_decrypt(EncodedNumber* src_ciphers,
       EncodedNumber* dest_plains,
-      int size, int req_party_id);
+      int size, int req_party_id) const;
 
   /**
    * convert ciphertext vector to secret shares securely

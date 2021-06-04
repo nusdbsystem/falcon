@@ -16,12 +16,12 @@ using grpc::ClientContext;
 using grpc::Status;
 using com::nus::dbsytem::falcon::v0::inference::PredictionRequest;
 using com::nus::dbsytem::falcon::v0::inference::PredictionResponse;
-using com::nus::dbsytem::falcon::v0::inference::InferenceLR;
+using com::nus::dbsytem::falcon::v0::inference::InferenceService;
 
-class LRInferenceClient {
+class InferenceClient {
  public:
-  LRInferenceClient(std::shared_ptr<Channel> channel)
-      : stub_(InferenceLR::NewStub(channel)) {}
+  InferenceClient(std::shared_ptr<Channel> channel)
+      : stub_(InferenceService::NewStub(channel)) {}
 
   // Assembles the client's payload, sends it and presents the response back
   // from the server.
@@ -68,7 +68,7 @@ class LRInferenceClient {
   }
 
  private:
-  std::unique_ptr<InferenceLR::Stub> stub_;
+  std::unique_ptr<InferenceService::Stub> stub_;
 };
 
 int main(int argc, char** argv) {
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
 
   std::cout << "endpoint = " << endpoint << std::endl;
 
-  LRInferenceClient client(grpc::CreateChannel(
+  InferenceClient client(grpc::CreateChannel(
       endpoint, grpc::InsecureChannelCredentials()));
   std::string response_status = client.Prediction(sample_num, sample_ids);
   std::cout << "Response received: " << response_status << std::endl;

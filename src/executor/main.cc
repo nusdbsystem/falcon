@@ -144,9 +144,9 @@ int main(int argc, char *argv[]) {
   // TODO: there is a problem when using grpc server with spdz_logistic_function_computation
   // TODO: now alleviate the problem by not including during training (need to check later)
   if (party_type == falcon::ACTIVE_PARTY) {
-    RunActiveServerLR(inference_endpoint, model_save_file, party);
+    run_active_server(inference_endpoint, model_save_file, party, name);
   } else {
-    RunPassiveServerLR(model_save_file, party);
+    run_passive_server(model_save_file, party, name);
   }
 #endif
   return 0;
