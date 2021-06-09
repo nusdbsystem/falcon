@@ -9,6 +9,8 @@
 
 #include <iostream>     // std::cout
 #include <iomanip>      // std::setprecision
+#include <numeric>
+#include <map>
 
 
 double mean_squared_error(std::vector<double> a, std::vector<double> b) {
@@ -109,4 +111,31 @@ double logistic_regression_loss(std::vector<double> pred_probs, std::vector<doub
   }
   double loss = (0 - loss_sum) / n;
   return loss;
+}
+
+double mode(std::vector<double> inputs) {
+  // compute the frequency of the values
+  std::map<double, int> m;
+  for (auto v : inputs) {
+    if (m.find(v) == m.end()) {
+      m[v] = 1;
+    } else {
+      ++m[v];
+    }
+  }
+  // compute mode
+  double mode_value = 0.0;
+  int maximum_votes = 0;
+  // find the mode in result map
+  for (auto it = m.begin(); it != m.end(); ++it) {
+    if (it->second > maximum_votes) {
+      maximum_votes = it->second;
+      mode_value = it->first;
+    }
+  }
+  return mode_value;
+}
+
+double average(std::vector<double> inputs) {
+  return std::accumulate(inputs.begin(), inputs.end(), 0.0) / inputs.size();
 }

@@ -4,6 +4,7 @@
 
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/math/math_ops.h>
 
 #include <glog/logging.h>
 
@@ -123,6 +124,101 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
 
+  // init test data
+  int dataset_size = (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
+  std::vector< std::vector<double> > cur_test_dataset =
+      (eval_type == falcon::TRAIN) ? training_data : testing_data;
+  std::vector<double> cur_test_dataset_labels =
+      (eval_type == falcon::TRAIN) ? training_labels : testing_labels;
+
+  // init predicted forest labels to record the predictions, the first dimension
+  // is the number of trees in the forest, and the second dimension is the number
+  // of the samples in the predicted dataset
+  EncodedNumber** predicted_forest_labels = new EncodedNumber*[n_estimator];
+  EncodedNumber** decrypted_predicted_forest_labels = new EncodedNumber*[n_estimator];
+  for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
+    predicted_forest_labels[tree_id] = new EncodedNumber[dataset_size];
+    decrypted_predicted_forest_labels[tree_id] = new EncodedNumber[dataset_size];
+  }
+
+  // compute predictions
+  for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
+    // compute predictions for each tree in the forest
+    tree_builders[tree_id].tree.predict(party,
+        cur_test_dataset,
+        dataset_size,
+        predicted_forest_labels[tree_id]);
+    // decrypt the predicted labels and compute the accuracy
+    party.collaborative_decrypt(predicted_forest_labels[tree_id],
+        decrypted_predicted_forest_labels[tree_id],
+        dataset_size, ACTIVE_PARTY_ID);
+  }
+
+  // decode decrypted predicted labels
+  std::vector< std::vector<double> > decoded_predicted_forest_labels;
+  decoded_predicted_forest_labels.reserve(n_estimator);
+  for (auto & row : decoded_predicted_forest_labels) {
+    row.reserve(dataset_size);
+  }
+  for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
+    for (int i = 0; i < dataset_size; i++) {
+      decrypted_predicted_forest_labels[tree_id][i].decode(decoded_predicted_forest_labels[tree_id][i]);
+    }
+  }
+
+  // calculate accuracy by the super client
+  std::vector<double> predictions;
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    for (int i = 0; i < dataset_size; i++) {
+      std::vector<double> forest_labels_i;
+      for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
+        forest_labels_i.push_back(decoded_predicted_forest_labels[tree_id][i]);
+      }
+      // compute mode or average, depending on the tree type
+      if (tree_builders[0].tree_type == falcon::CLASSIFICATION) {
+        predictions.push_back(mode(forest_labels_i));
+      } else {
+        predictions.push_back(average(forest_labels_i));
+      }
+    }
+
+    // compute accuracy
+    if (tree_builders[0].tree_type == falcon::CLASSIFICATION) {
+      int correct_num = 0;
+      for (int i = 0; i < dataset_size; i++) {
+        if (predictions[i] == cur_test_dataset_labels[i]) {
+          correct_num += 1;
+        }
+      }
+      if (eval_type == falcon::TRAIN) {
+        training_accuracy = (double) correct_num / dataset_size;
+        LOG(INFO) << "Dataset size = " << dataset_size << ", correct predicted num = "
+                  << correct_num << ", training accuracy = " << training_accuracy;
+      }
+      if (eval_type == falcon::TEST) {
+        testing_accuracy = (double) correct_num / dataset_size;
+        LOG(INFO) << "Dataset size = " << dataset_size << ", correct predicted num = "
+                  << correct_num << ", testing accuracy = " << testing_accuracy;
+      }
+    } else {
+      if (eval_type == falcon::TRAIN) {
+        training_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
+        LOG(INFO) << "Training accuracy = " << training_accuracy;
+      }
+      if (eval_type == falcon::TEST) {
+        testing_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
+        LOG(INFO) << "Testing accuracy = " << testing_accuracy;
+      }
+    }
+  }
+
+  // free memory
+  for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
+    delete [] predicted_forest_labels[tree_id];
+    delete [] decrypted_predicted_forest_labels[tree_id];
+  }
+  delete [] predicted_forest_labels;
+  delete [] decrypted_predicted_forest_labels;
 
   const clock_t testing_finish_time = clock();
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
