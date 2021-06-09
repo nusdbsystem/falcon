@@ -71,6 +71,8 @@ set(SOURCE_FILES
         inference/server/lr_inference_service.cc
         ../../include/falcon/inference/server/dt_inference_service.h
         inference/server/dt_inference_service.cc
+        ../../include/falcon/inference/server/rf_inference_service.h
+        inference/server/rf_inference_service.cc
         ../../include/falcon/algorithm/vertical/tree/node.h
         algorithm/vertical/tree/node.cc
         ../../include/falcon/algorithm/vertical/tree/feature.h

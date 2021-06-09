@@ -140,23 +140,27 @@ class DTInferenceServiceImpl final : public InferenceService::Service {
     std::cout << "Collaboratively decryption finished" << std::endl;
     LOG(INFO) << "Collaboratively decryption finished";
 
-    // step 4: active party computes the logistic function and compare the accuracy
+    // step 4: active party computes the label
     std::vector<double> labels;
     std::vector< std::vector<double> > probabilities;
     for (int i = 0; i < sample_num; i++) {
       double t;
       decrypted_aggregation[i].decode(t);
-      std::vector<double> prob;
-      // TODO: record the detailed probability, here assume 1.0
-      for (int k = 0; k < saved_tree_model_.class_num; k++) {
-        if (t == k) {
-          prob.push_back(1.0);
-        } else {
-          prob.push_back(0.0);
-        }
-      }
       labels.push_back(t);
-      probabilities.push_back(prob);
+      std::vector<double> prob;
+      if (saved_tree_model_.type == falcon::CLASSIFICATION) {
+        // TODO: record the detailed probability, here assume 1.0
+        for (int k = 0; k < saved_tree_model_.class_num; k++) {
+          if (t == k) {
+            prob.push_back(POSITIVE_PROBABILITY);
+          } else {
+            prob.push_back(ZERO_PROBABILITY);
+          }
+        }
+        probabilities.push_back(prob);
+      } else {
+        prob.push_back(POSITIVE_PROBABILITY);
+      }
     }
 
     std::cout << "Compute prediction finished" << std::endl;

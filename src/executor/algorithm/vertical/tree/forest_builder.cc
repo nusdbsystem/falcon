@@ -156,18 +156,18 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
         dataset_size, ACTIVE_PARTY_ID);
   }
 
-  // decode decrypted predicted labels
-  std::vector< std::vector<double> > decoded_predicted_forest_labels (
-      n_estimator, std::vector<double>(dataset_size));
-  for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
-    for (int i = 0; i < dataset_size; i++) {
-      decrypted_predicted_forest_labels[tree_id][i].decode(decoded_predicted_forest_labels[tree_id][i]);
-    }
-  }
-
   // calculate accuracy by the super client
   std::vector<double> predictions;
   if (party.party_type == falcon::ACTIVE_PARTY) {
+    // decode decrypted predicted labels
+    std::vector< std::vector<double> > decoded_predicted_forest_labels (
+        n_estimator, std::vector<double>(dataset_size));
+    for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
+      for (int i = 0; i < dataset_size; i++) {
+        decrypted_predicted_forest_labels[tree_id][i].decode(decoded_predicted_forest_labels[tree_id][i]);
+      }
+    }
+    // compute predicted label
     for (int i = 0; i < dataset_size; i++) {
       std::vector<double> forest_labels_i;
       for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
@@ -234,7 +234,7 @@ void train_random_forest(Party party, const std::string& params_str,
 
   RandomForestParams params;
   // currently for testing
-  params.n_estimator = 4;
+  params.n_estimator = 8;
   params.sample_rate = 0.8;
   params.dt_param.tree_type = "classification";
   params.dt_param.criterion = "gini";
