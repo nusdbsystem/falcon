@@ -18,6 +18,7 @@
 #include <sys/inotify.h>
 #include <map>
 #include <stack>
+#include <falcon/model/model_io.h>
 
 RandomForestBuilder::RandomForestBuilder() {}
 
@@ -41,6 +42,7 @@ RandomForestBuilder::RandomForestBuilder(RandomForestParams params,
   sample_rate = params.sample_rate;
   dt_param = params.dt_param;
   tree_builders.reserve(n_estimator);
+  local_feature_num = training_data[0].size();
 }
 
 void RandomForestBuilder::init_forest_builder(Party &party) {
@@ -57,8 +59,6 @@ void RandomForestBuilder::init_forest_builder(Party &party) {
         sampled_training_labels, testing_labels,
         training_accuracy, testing_accuracy);
   }
-  LOG(INFO) << "Init " << n_estimator << " trees in the random forest";
-  std::cout << "Init " << n_estimator << " trees in the random forest" << std::endl;
 }
 
 void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
@@ -105,4 +105,107 @@ void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
     }
   }
   LOG(INFO) << "Shuffle training data and init dataset for tree " << tree_id << " finished";
+}
+
+void RandomForestBuilder::train(Party &party) {
+  LOG(INFO) << "************ Begin to train the random forest model ************";
+  init_forest_builder(party);
+  LOG(INFO) << "Init " << n_estimator << " tree builders in the random forest";
+  for (int tree_id = 0; tree_id < n_estimator; ++tree_id) {
+    LOG(INFO) << "------------- build the " << tree_id << "-th tree -------------";
+    tree_builders[tree_id].train(party);
+  }
+  LOG(INFO) << "End train the random forest";
+}
+
+void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
+  const clock_t testing_start_time = clock();
+
+
+  const clock_t testing_finish_time = clock();
+  double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
+  LOG(INFO) << "Evaluation time = " << testing_consumed_time;
+  LOG(INFO) << "************* Evaluation on " << dataset_str << " Finished *************";
+  google::FlushLogFiles(google::INFO);
+}
+
+void train_random_forest(Party party, const std::string& params_str,
+    const std::string& model_save_file, const std::string& model_report_file) {
+
+  LOG(INFO) << "Run the example random forest train";
+  std::cout << "Run the example random forest train" << std::endl;
+
+  RandomForestParams params;
+  // currently for testing
+  params.n_estimator = 8;
+  params.sample_rate = 0.8;
+  params.dt_param.tree_type = "classification";
+  params.dt_param.criterion = "gini";
+  params.dt_param.split_strategy = "best";
+  params.dt_param.class_num = 2;
+  params.dt_param.max_depth = 5;
+  params.dt_param.max_bins = 8;
+  params.dt_param.min_samples_split = 5;
+  params.dt_param.min_samples_leaf = 5;
+  params.dt_param.max_leaf_nodes = 16;
+  params.dt_param.min_impurity_decrease = 0.01;
+  params.dt_param.min_impurity_split = 0.001;
+  params.dt_param.dp_budget = 0.1;
+//  deserialize_rf_params(params, params_str);
+  int weight_size = party.getter_feature_num();
+  double training_accuracy = 0.0;
+  double testing_accuracy = 0.0;
+
+  std::vector< std::vector<double> > training_data;
+  std::vector< std::vector<double> > testing_data;
+  std::vector<double> training_labels;
+  std::vector<double> testing_labels;
+  double split_percentage = SPLIT_TRAIN_TEST_RATIO;
+  party.split_train_test_data(split_percentage,
+      training_data,
+      testing_data,
+      training_labels,
+      testing_labels);
+
+  LOG(INFO) << "Init random forest model builder";
+  LOG(INFO) << "params.n_estimator = " << params.n_estimator;
+  LOG(INFO) << "params.sample_rate = " << params.sample_rate;
+  LOG(INFO) << "params.dt_param.tree_type = " << params.dt_param.tree_type;
+  LOG(INFO) << "params.dt_param.criterion = " << params.dt_param.criterion;
+  LOG(INFO) << "params.dt_param.split_strategy = " << params.dt_param.split_strategy;
+  LOG(INFO) << "params.dt_param.class_num = " << params.dt_param.class_num;
+  LOG(INFO) << "params.dt_param.max_depth = " << params.dt_param.max_depth;
+  LOG(INFO) << "params.dt_param.max_bins = " << params.dt_param.max_bins;
+  LOG(INFO) << "params.dt_param.min_samples_split = " << params.dt_param.min_samples_split;
+  LOG(INFO) << "params.dt_param.min_samples_leaf = " << params.dt_param.min_samples_leaf;
+  LOG(INFO) << "params.dt_param.max_leaf_nodes = " << params.dt_param.max_leaf_nodes;
+  LOG(INFO) << "params.dt_param.min_impurity_decrease = " << params.dt_param.min_impurity_decrease;
+  LOG(INFO) << "params.dt_param.min_impurity_split = " << params.dt_param.min_impurity_split;
+  LOG(INFO) << "params.dt_param.dp_budget = " << params.dt_param.dp_budget;
+
+  std::cout << "Init decision tree model" << std::endl;
+  LOG(INFO) << "Init decision tree model";
+
+  RandomForestBuilder random_forest_builder(params,
+      training_data,
+      testing_data,
+      training_labels,
+      testing_labels,
+      training_accuracy,
+      testing_accuracy);
+
+  LOG(INFO) << "Init random forest model finished";
+  std::cout << "Init random forest model finished" << std::endl;
+  google::FlushLogFiles(google::INFO);
+
+  random_forest_builder.train(party);
+  random_forest_builder.eval(party, falcon::TRAIN);
+  random_forest_builder.eval(party, falcon::TEST);
+
+//  save_dt_model(random_forest_builder.tree, model_save_file);
+  save_training_report(random_forest_builder.getter_training_accuracy(),
+      random_forest_builder.getter_testing_accuracy(),
+      model_report_file);
 }

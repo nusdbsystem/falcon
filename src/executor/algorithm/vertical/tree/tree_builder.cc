@@ -1401,7 +1401,7 @@ void spdz_tree_computation(int party_num,
 }
 
 void train_decision_tree(Party party, const std::string& params_str,
-    std::string model_save_file, const std::string& model_report_file) {
+    const std::string& model_save_file, const std::string& model_report_file) {
 
   LOG(INFO) << "Run the example decision tree train";
   std::cout << "Run the example decision tree train" << std::endl;
