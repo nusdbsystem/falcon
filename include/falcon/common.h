@@ -59,7 +59,7 @@ namespace falcon{
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};
-  enum AlgorithmName {LR, DT};
+  enum AlgorithmName {LR, DT, RF};
   enum DatasetType {TRAIN, TEST, VALIDATE};
 }
 

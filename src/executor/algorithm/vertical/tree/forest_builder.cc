@@ -115,8 +115,10 @@ void RandomForestBuilder::train(Party &party) {
   for (int tree_id = 0; tree_id < n_estimator; ++tree_id) {
     LOG(INFO) << "------------- build the " << tree_id << "-th tree -------------";
     tree_builders[tree_id].train(party);
+    google::FlushLogFiles(google::INFO);
   }
   LOG(INFO) << "End train the random forest";
+  google::FlushLogFiles(google::INFO);
 }
 
 void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
@@ -155,11 +157,8 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
   }
 
   // decode decrypted predicted labels
-  std::vector< std::vector<double> > decoded_predicted_forest_labels;
-  decoded_predicted_forest_labels.reserve(n_estimator);
-  for (auto & row : decoded_predicted_forest_labels) {
-    row.reserve(dataset_size);
-  }
+  std::vector< std::vector<double> > decoded_predicted_forest_labels (
+      n_estimator, std::vector<double>(dataset_size));
   for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
     for (int i = 0; i < dataset_size; i++) {
       decrypted_predicted_forest_labels[tree_id][i].decode(decoded_predicted_forest_labels[tree_id][i]);
@@ -235,13 +234,13 @@ void train_random_forest(Party party, const std::string& params_str,
 
   RandomForestParams params;
   // currently for testing
-  params.n_estimator = 8;
+  params.n_estimator = 4;
   params.sample_rate = 0.8;
   params.dt_param.tree_type = "classification";
   params.dt_param.criterion = "gini";
   params.dt_param.split_strategy = "best";
   params.dt_param.class_num = 2;
-  params.dt_param.max_depth = 5;
+  params.dt_param.max_depth = 2;
   params.dt_param.max_bins = 8;
   params.dt_param.min_samples_split = 5;
   params.dt_param.min_samples_leaf = 5;

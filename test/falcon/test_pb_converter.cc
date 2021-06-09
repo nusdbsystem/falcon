@@ -285,6 +285,43 @@ TEST(PB_Converter, DecisionTreeParams) {
   EXPECT_TRUE(dt_params.split_strategy == deserialized_dt_params.split_strategy);
 }
 
+TEST(PB_Converter, RandomForestParams) {
+  RandomForestParams rf_params;
+  rf_params.n_estimator = 8;
+  rf_params.sample_rate = 0.8;
+  rf_params.dt_param.class_num = 2;
+  rf_params.dt_param.max_depth = 5;
+  rf_params.dt_param.max_bins = 8;
+  rf_params.dt_param.min_samples_split = 5;
+  rf_params.dt_param.min_samples_leaf = 5;
+  rf_params.dt_param.max_leaf_nodes = 16;
+  rf_params.dt_param.min_impurity_decrease = 0.01;
+  rf_params.dt_param.min_impurity_split = 0.001;
+  rf_params.dt_param.tree_type = "classification";
+  rf_params.dt_param.criterion = "gini";
+  rf_params.dt_param.split_strategy = "best";
+  rf_params.dt_param.dp_budget = 0;
+  std::string output_message;
+  serialize_rf_params(rf_params, output_message);
+
+  RandomForestParams deserialized_rf_params;
+  deserialize_rf_params(deserialized_rf_params, output_message);
+  EXPECT_EQ(rf_params.n_estimator, deserialized_rf_params.n_estimator);
+  EXPECT_EQ(rf_params.sample_rate, deserialized_rf_params.sample_rate);
+  EXPECT_EQ(rf_params.dt_param.class_num, deserialized_rf_params.dt_param.class_num);
+  EXPECT_EQ(rf_params.dt_param.max_depth, deserialized_rf_params.dt_param.max_depth);
+  EXPECT_EQ(rf_params.dt_param.max_bins, deserialized_rf_params.dt_param.max_bins);
+  EXPECT_EQ(rf_params.dt_param.min_samples_split, deserialized_rf_params.dt_param.min_samples_split);
+  EXPECT_EQ(rf_params.dt_param.min_samples_leaf, deserialized_rf_params.dt_param.min_samples_leaf);
+  EXPECT_EQ(rf_params.dt_param.max_leaf_nodes, deserialized_rf_params.dt_param.max_leaf_nodes);
+  EXPECT_EQ(rf_params.dt_param.min_impurity_decrease, deserialized_rf_params.dt_param.min_impurity_decrease);
+  EXPECT_EQ(rf_params.dt_param.min_impurity_split, deserialized_rf_params.dt_param.min_impurity_split);
+  EXPECT_EQ(rf_params.dt_param.dp_budget, deserialized_rf_params.dt_param.dp_budget);
+  EXPECT_TRUE(rf_params.dt_param.tree_type == deserialized_rf_params.dt_param.tree_type);
+  EXPECT_TRUE(rf_params.dt_param.criterion == deserialized_rf_params.dt_param.criterion);
+  EXPECT_TRUE(rf_params.dt_param.split_strategy == deserialized_rf_params.dt_param.split_strategy);
+}
+
 TEST(PB_Converter, TreeEncryptedStatistics) {
   int client_id = 0;
   int node_index = 1;

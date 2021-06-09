@@ -90,6 +90,6 @@ class RandomForestBuilder : public Model {
  * @param model_report_file: saved report file
  */
 void train_random_forest(Party party, const std::string& params_str,
-    std::string model_save_file, const std::string& model_report_file);
+    const std::string& model_save_file, const std::string& model_report_file);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_BUILDER_H_
