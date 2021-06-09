@@ -7,6 +7,7 @@
 
 #include <falcon/common.h>
 #include <falcon/algorithm/vertical/tree/node.h>
+#include <map>
 
 class Tree {
  public:
@@ -42,6 +43,46 @@ class Tree {
    * @return
    */
   Tree &operator=(const Tree &tree);
+
+  /**
+   * compute the binary predict vector for a sample on a party
+   */
+  std::vector<int> comp_predict_vector(std::vector<double> sample,
+      std::map<int, int> node_index_2_leaf_index_map);
+};
+
+
+struct PredictHelper {
+  bool is_leaf;
+  bool is_self_feature;
+  int best_client_id;
+  int best_feature_id;
+  int best_split_id;
+  int mark;
+  int index;
+
+  PredictHelper() {
+    is_leaf = false;
+    is_self_feature = false;
+    best_client_id = -1;
+    best_feature_id = -1;
+    best_split_id = -1;
+    mark = -1;
+    index = -1;
+  }
+
+  PredictHelper(bool m_is_leaf, bool m_is_self_feature, int m_best_client_id,
+                int m_best_feature_id, int m_best_split_id, int m_mark, int m_index) {
+    is_leaf = m_is_leaf;
+    is_self_feature = m_is_self_feature;
+    best_client_id = m_best_client_id;
+    best_feature_id = m_best_feature_id;
+    best_split_id = m_best_split_id;
+    mark = m_mark;
+    index = m_index;
+  }
+
+  ~PredictHelper() = default;
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_TREE_H_

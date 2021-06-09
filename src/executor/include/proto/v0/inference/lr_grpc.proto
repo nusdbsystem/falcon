@@ -3,7 +3,7 @@ syntax = "proto3";
 package com.nus.dbsytem.falcon.v0.inference;
 
 // The logistic regression inference service definition.
-service InferenceLR {
+service InferenceService {
   // Sends a greeting
   rpc Prediction (PredictionRequest) returns (PredictionResponse) {}
 }

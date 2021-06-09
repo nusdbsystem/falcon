@@ -124,10 +124,10 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "Parse algorithm name and run the program";
   std::cout << "Parse algorithm name and run the program" << std::endl;
 
-  falcon::AlgorithmName name = parse_algorithm_name(algorithm_name);
+  falcon::AlgorithmName parsed_algorithm_name = parse_algorithm_name(algorithm_name);
 
 #if IS_INFERENCE == 0
-  switch(name) {
+  switch(parsed_algorithm_name) {
       case falcon::LR:
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
         break;
@@ -144,9 +144,9 @@ int main(int argc, char *argv[]) {
   // TODO: there is a problem when using grpc server with spdz_logistic_function_computation
   // TODO: now alleviate the problem by not including during training (need to check later)
   if (party_type == falcon::ACTIVE_PARTY) {
-    RunActiveServerLR(inference_endpoint, model_save_file, party);
+    run_active_server(inference_endpoint, model_save_file, party, parsed_algorithm_name);
   } else {
-    RunPassiveServerLR(model_save_file, party);
+    run_passive_server(model_save_file, party, parsed_algorithm_name);
   }
 #endif
   return 0;

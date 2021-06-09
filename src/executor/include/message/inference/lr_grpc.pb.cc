@@ -126,10 +126,11 @@ const char descriptor_table_protodef_lr_5fgrpc_2eproto[] PROTOBUF_SECTION_VARIAB
   "ities\030\002 \003(\002\"p\n\022PredictionResponse\022\022\n\nsam"
   "ple_num\030\001 \001(\005\022F\n\007outputs\030\002 \003(\01325.com.nus"
   ".dbsytem.falcon.v0.inference.PredictionO"
-  "utput2\216\001\n\013InferenceLR\022\177\n\nPrediction\0226.co"
-  "m.nus.dbsytem.falcon.v0.inference.Predic"
-  "tionRequest\0327.com.nus.dbsytem.falcon.v0."
-  "inference.PredictionResponse\"\000b\006proto3"
+  "utput2\223\001\n\020InferenceService\022\177\n\nPrediction"
+  "\0226.com.nus.dbsytem.falcon.v0.inference.P"
+  "redictionRequest\0327.com.nus.dbsytem.falco"
+  "n.v0.inference.PredictionResponse\"\000b\006pro"
+  "to3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_lr_5fgrpc_2eproto_deps[1] = {
 };
@@ -140,7 +141,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_lr_
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_lr_5fgrpc_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_lr_5fgrpc_2eproto = {
-  false, false, descriptor_table_protodef_lr_5fgrpc_2eproto, "lr_grpc.proto", 438,
+  false, false, descriptor_table_protodef_lr_5fgrpc_2eproto, "lr_grpc.proto", 443,
   &descriptor_table_lr_5fgrpc_2eproto_once, descriptor_table_lr_5fgrpc_2eproto_sccs, descriptor_table_lr_5fgrpc_2eproto_deps, 3, 0,
   schemas, file_default_instances, TableStruct_lr_5fgrpc_2eproto::offsets,
   file_level_metadata_lr_5fgrpc_2eproto, 3, file_level_enum_descriptors_lr_5fgrpc_2eproto, file_level_service_descriptors_lr_5fgrpc_2eproto,

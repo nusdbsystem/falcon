@@ -15,6 +15,7 @@ namespace falcon{
   #define PHE_FIXED_POINT_BASE 2
   #define PHE_EPSILON 1
   #define PHE_KEY_SIZE 1024
+  #define PHE_STR_BASE 10
   #define SPDZ_FIXED_POINT_PRECISION 16
   #define SPDZ_PLAYER_PATH "Player-Data/" // deprecated
   #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024

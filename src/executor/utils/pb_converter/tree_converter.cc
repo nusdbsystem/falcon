@@ -9,6 +9,8 @@
 #include <google/protobuf/message_lite.h>
 #include "../../include/message/tree.pb.h"
 
+#include <iostream>
+
 void serialize_encrypted_statistics(int client_id,
     int node_index,
     int split_num,
@@ -38,8 +40,8 @@ void serialize_encrypted_statistics(int client_id,
       mpz_init(g_value_l);
       left_sample_nums[i].getter_n(g_n_l);
       left_sample_nums[i].getter_value(g_value_l);
-      n_str_left_c = mpz_get_str(NULL, 10, g_n_l);
-      value_str_left_c = mpz_get_str(NULL, 10, g_value_l);
+      n_str_left_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_l);
+      value_str_left_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_l);
       std::string n_str_left(n_str_left_c), value_str_left(value_str_left_c);
       pb_number_left->set_n(n_str_left);
       pb_number_left->set_value(value_str_left);
@@ -51,8 +53,8 @@ void serialize_encrypted_statistics(int client_id,
       mpz_init(g_value_r);
       right_sample_nums[i].getter_n(g_n_r);
       right_sample_nums[i].getter_value(g_value_r);
-      n_str_right_c = mpz_get_str(NULL, 10, g_n_r);
-      value_str_right_c = mpz_get_str(NULL, 10, g_value_r);
+      n_str_right_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_r);
+      value_str_right_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_r);
       std::string n_str_right(n_str_right_c), value_str_right(value_str_right_c);
       pb_number_right->set_n(n_str_right);
       pb_number_right->set_value(value_str_right);
@@ -71,8 +73,8 @@ void serialize_encrypted_statistics(int client_id,
         mpz_init(g_value);
         encrypted_statistics[i][j].getter_n(g_n);
         encrypted_statistics[i][j].getter_value(g_value);
-        n_str_c = mpz_get_str(NULL, 10, g_n);
-        value_str_c = mpz_get_str(NULL, 10, g_value);
+        n_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_n);
+        value_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_value);
         std::string n_str(n_str_c), value_str(value_str_c);
         pb_number->set_n(n_str);
         pb_number->set_value(value_str);
@@ -134,8 +136,8 @@ void deserialize_encrypted_statistics(int & client_id,
       mpz_t g_n, g_value;
       mpz_init(g_n);
       mpz_init(g_value);
-      mpz_set_str(g_n, pb_number.n().c_str(), 10);
-      mpz_set_str(g_value, pb_number.value().c_str(), 10);
+      mpz_set_str(g_n, pb_number.n().c_str(), PHE_STR_BASE);
+      mpz_set_str(g_value, pb_number.value().c_str(), PHE_STR_BASE);
       left_sample_nums[i].setter_n(g_n);
       left_sample_nums[i].setter_value(g_value);
       left_sample_nums[i].setter_exponent(pb_number.exponent());
@@ -151,8 +153,8 @@ void deserialize_encrypted_statistics(int & client_id,
       mpz_t g_n, g_value;
       mpz_init(g_n);
       mpz_init(g_value);
-      mpz_set_str(g_n, pb_number.n().c_str(), 10);
-      mpz_set_str(g_value, pb_number.value().c_str(), 10);
+      mpz_set_str(g_n, pb_number.n().c_str(), PHE_STR_BASE);
+      mpz_set_str(g_value, pb_number.value().c_str(), PHE_STR_BASE);
       right_sample_nums[i].setter_n(g_n);
       right_sample_nums[i].setter_value(g_value);
       right_sample_nums[i].setter_exponent(pb_number.exponent());
@@ -170,8 +172,8 @@ void deserialize_encrypted_statistics(int & client_id,
         mpz_t g_n, g_value;
         mpz_init(g_n);
         mpz_init(g_value);
-        mpz_set_str(g_n, pb_number.n().c_str(), 10);
-        mpz_set_str(g_value, pb_number.value().c_str(), 10);
+        mpz_set_str(g_n, pb_number.n().c_str(), PHE_STR_BASE);
+        mpz_set_str(g_value, pb_number.value().c_str(), PHE_STR_BASE);
         encrypted_statistics[i][j].setter_n(g_n);
         encrypted_statistics[i][j].setter_value(g_value);
         encrypted_statistics[i][j].setter_exponent(pb_number.exponent());
@@ -211,8 +213,8 @@ void serialize_update_info(int source_party_id,
   mpz_init(g_value_l);
   left_branch_impurity.getter_n(g_n_l);
   left_branch_impurity.getter_value(g_value_l);
-  n_str_left_c = mpz_get_str(NULL, 10, g_n_l);
-  value_str_left_c = mpz_get_str(NULL, 10, g_value_l);
+  n_str_left_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_l);
+  value_str_left_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_l);
   std::string n_str_left(n_str_left_c), value_str_left(value_str_left_c);
   pb_left_impurity->set_n(n_str_left);
   pb_left_impurity->set_value(value_str_left);
@@ -224,8 +226,8 @@ void serialize_update_info(int source_party_id,
   mpz_init(g_value_r);
   right_branch_impurity.getter_n(g_n_r);
   right_branch_impurity.getter_value(g_value_r);
-  n_str_right_c = mpz_get_str(NULL, 10, g_n_r);
-  value_str_right_c = mpz_get_str(NULL, 10, g_value_r);
+  n_str_right_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_r);
+  value_str_right_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_r);
   std::string n_str_right(n_str_right_c), value_str_right(value_str_right_c);
   pb_right_impurity->set_n(n_str_right);
   pb_right_impurity->set_value(value_str_right);
@@ -247,8 +249,8 @@ void serialize_update_info(int source_party_id,
     mpz_init(g_value_ll);
     left_branch_sample_iv[i].getter_n(g_n_ll);
     left_branch_sample_iv[i].getter_value(g_value_ll);
-    n_str_left_sample_c = mpz_get_str(NULL, 10, g_n_ll);
-    value_str_left_sample_c = mpz_get_str(NULL, 10, g_value_ll);
+    n_str_left_sample_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_ll);
+    value_str_left_sample_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_ll);
     std::string n_str_left_sample(n_str_left_sample_c), value_str_left_sample(value_str_left_sample_c);
     pb_left_sample_iv->set_n(n_str_left_sample);
     pb_left_sample_iv->set_value(value_str_left_sample);
@@ -260,8 +262,8 @@ void serialize_update_info(int source_party_id,
     mpz_init(g_value_rr);
     right_branch_sample_iv[i].getter_n(g_n_rr);
     right_branch_sample_iv[i].getter_value(g_value_rr);
-    n_str_right_sample_c = mpz_get_str(NULL, 10, g_n_rr);
-    value_str_right_sample_c = mpz_get_str(NULL, 10, g_value_rr);
+    n_str_right_sample_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_rr);
+    value_str_right_sample_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_rr);
     std::string n_str_right_sample(n_str_right_sample_c), value_str_right_sample(value_str_right_sample_c);
     pb_right_sample_iv->set_n(n_str_right_sample);
     pb_right_sample_iv->set_value(value_str_right_sample);
@@ -322,8 +324,8 @@ void deserialize_update_info(int & source_client_id,
   mpz_t g_n_l, g_value_l;
   mpz_init(g_n_l);
   mpz_init(g_value_l);
-  mpz_set_str(g_n_l, pb_number_left.n().c_str(), 10);
-  mpz_set_str(g_value_l, pb_number_left.value().c_str(), 10);
+  mpz_set_str(g_n_l, pb_number_left.n().c_str(), PHE_STR_BASE);
+  mpz_set_str(g_value_l, pb_number_left.value().c_str(), PHE_STR_BASE);
   left_branch_impurity.setter_n(g_n_l);
   left_branch_impurity.setter_value(g_value_l);
   left_branch_impurity.setter_exponent(pb_number_left.exponent());
@@ -333,8 +335,8 @@ void deserialize_update_info(int & source_client_id,
   mpz_t g_n_r, g_value_r;
   mpz_init(g_n_r);
   mpz_init(g_value_r);
-  mpz_set_str(g_n_r, pb_number_right.n().c_str(), 10);
-  mpz_set_str(g_value_r, pb_number_right.value().c_str(), 10);
+  mpz_set_str(g_n_r, pb_number_right.n().c_str(), PHE_STR_BASE);
+  mpz_set_str(g_value_r, pb_number_right.value().c_str(), PHE_STR_BASE);
   right_branch_impurity.setter_n(g_n_r);
   right_branch_impurity.setter_value(g_value_r);
   right_branch_impurity.setter_exponent(pb_number_right.exponent());
@@ -342,8 +344,8 @@ void deserialize_update_info(int & source_client_id,
   right_branch_impurity.setter_type(type_r);
 
   int sample_size = deserialized_update_info.left_branch_sample_ivs_size();
-  left_branch_sample_iv = new EncodedNumber[sample_size];
-  right_branch_sample_iv = new EncodedNumber[sample_size];
+  // left_branch_sample_iv = new EncodedNumber[sample_size];
+  // right_branch_sample_iv = new EncodedNumber[sample_size];
 
   for (int i = 0; i < sample_size; i++) {
     com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber pb_number_left_iv =
@@ -354,8 +356,8 @@ void deserialize_update_info(int & source_client_id,
     mpz_t g_n_ll, g_value_ll;
     mpz_init(g_n_ll);
     mpz_init(g_value_ll);
-    mpz_set_str(g_n_ll, pb_number_left_iv.n().c_str(), 10);
-    mpz_set_str(g_value_ll, pb_number_left_iv.value().c_str(), 10);
+    mpz_set_str(g_n_ll, pb_number_left_iv.n().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_value_ll, pb_number_left_iv.value().c_str(), PHE_STR_BASE);
     left_branch_sample_iv[i].setter_n(g_n_ll);
     left_branch_sample_iv[i].setter_value(g_value_ll);
     left_branch_sample_iv[i].setter_exponent(pb_number_left_iv.exponent());
@@ -365,8 +367,8 @@ void deserialize_update_info(int & source_client_id,
     mpz_t g_n_rr, g_value_rr;
     mpz_init(g_n_rr);
     mpz_init(g_value_rr);
-    mpz_set_str(g_n_rr, pb_number_right_iv.n().c_str(), 10);
-    mpz_set_str(g_value_rr, pb_number_right_iv.value().c_str(), 10);
+    mpz_set_str(g_n_rr, pb_number_right_iv.n().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_value_rr, pb_number_right_iv.value().c_str(), PHE_STR_BASE);
     right_branch_sample_iv[i].setter_n(g_n_rr);
     right_branch_sample_iv[i].setter_value(g_value_rr);
     right_branch_sample_iv[i].setter_exponent(pb_number_right_iv.exponent());
@@ -409,5 +411,143 @@ void deserialize_split_info(int & global_split_num,
   global_split_num = deserialized_split_info.global_split_num();
   for (int i = 0; i < deserialized_split_info.split_num_vec_size(); i++) {
     client_split_nums.push_back(deserialized_split_info.split_num_vec(i));
+  }
+}
+
+
+void serialize_tree_model(Tree tree, std::string & output_str) {
+  com::nus::dbsytem::falcon::v0::Tree pb_tree;
+  pb_tree.set_tree_type(tree.type);
+  pb_tree.set_class_num(tree.class_num);
+  pb_tree.set_max_depth(tree.max_depth);
+  pb_tree.set_internal_node_num(tree.internal_node_num);
+  pb_tree.set_total_node_num(tree.total_node_num);
+  pb_tree.set_capacity(tree.capacity);
+  for (int i = 0; i < tree.capacity; i++) {
+    com::nus::dbsytem::falcon::v0::Node *pb_node = pb_tree.add_nodes();
+    pb_node->set_node_type(tree.nodes[i].node_type);
+    pb_node->set_depth(tree.nodes[i].depth);
+    pb_node->set_is_self_feature(tree.nodes[i].is_self_feature);
+    pb_node->set_best_party_id(tree.nodes[i].best_party_id);
+    pb_node->set_best_feature_id(tree.nodes[i].best_feature_id);
+    pb_node->set_best_split_id(tree.nodes[i].best_split_id);
+    pb_node->set_split_threshold(tree.nodes[i].split_threshold);
+    pb_node->set_node_sample_num(tree.nodes[i].node_sample_num);
+    pb_node->set_left_child(tree.nodes[i].left_child);
+    pb_node->set_right_child(tree.nodes[i].right_child);
+
+    for (int j : tree.nodes[i].node_sample_distribution) {
+      pb_node->add_node_sample_distribution(j);
+    }
+
+    auto *pb_impurity = new com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber;
+    auto *pb_label = new com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber;
+
+    char * n_str_impurity_c, * value_str_impurity_c, * n_str_label_c, * value_str_label_c;
+    mpz_t g_n_impurity, g_value_impurity, g_n_label, g_value_label;
+    mpz_init(g_n_impurity);
+    mpz_init(g_value_impurity);
+    mpz_init(g_n_label);
+    mpz_init(g_value_label);
+    tree.nodes[i].impurity.getter_n(g_n_impurity);
+    tree.nodes[i].impurity.getter_value(g_value_impurity);
+    tree.nodes[i].label.getter_n(g_n_label);
+    tree.nodes[i].label.getter_value(g_value_label);
+
+    n_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_impurity);
+    value_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_impurity);
+    n_str_label_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_label);
+    value_str_label_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_label);
+
+    std::string n_str_impurity(n_str_impurity_c), value_str_impurity(value_str_impurity_c);
+    pb_impurity->set_n(n_str_impurity);
+    pb_impurity->set_value(value_str_impurity);
+    pb_impurity->set_exponent(tree.nodes[i].impurity.getter_exponent());
+    pb_impurity->set_type(tree.nodes[i].impurity.getter_type());
+
+    std::string n_str_label(n_str_label_c), value_str_label(value_str_label_c);
+    pb_label->set_n(n_str_label);
+    pb_label->set_value(value_str_label);
+    pb_label->set_exponent(tree.nodes[i].label.getter_exponent());
+    pb_label->set_type(tree.nodes[i].label.getter_type());
+
+    pb_node->set_allocated_impurity(pb_impurity);
+    pb_node->set_allocated_label(pb_label);
+
+    mpz_clear(g_n_impurity);
+    mpz_clear(g_value_impurity);
+    mpz_clear(g_n_label);
+    mpz_clear(g_value_label);
+    free(n_str_impurity_c);
+    free(value_str_impurity_c);
+    free(n_str_label_c);
+    free(value_str_label_c);
+  }
+
+  pb_tree.SerializeToString(&output_str);
+}
+
+
+void deserialize_tree_model(Tree & tree, std::string input_str) {
+  com::nus::dbsytem::falcon::v0::Tree deserialized_tree;
+  google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
+  inputStream.SetTotalBytesLimit(1024*1024*1024, 1024*1024*1024);
+  if (!deserialized_tree.ParseFromCodedStream(&inputStream)) {
+    LOG(ERROR) << "Failed to parse PB_Tree from string";
+    return;
+  }
+  tree.type = (falcon::TreeType) deserialized_tree.tree_type();
+  tree.class_num = deserialized_tree.class_num();
+  tree.max_depth = deserialized_tree.max_depth();
+  tree.internal_node_num = deserialized_tree.internal_node_num();
+  tree.total_node_num = deserialized_tree.total_node_num();
+  tree.capacity = deserialized_tree.capacity();
+  tree.nodes = new Node[tree.capacity];
+  for (int i = 0; i < tree.capacity; i++) {
+    const com::nus::dbsytem::falcon::v0::Node& deserialized_node_i = deserialized_tree.nodes(i);
+    tree.nodes[i].node_type = (falcon::TreeNodeType) deserialized_node_i.node_type();
+    tree.nodes[i].depth = deserialized_node_i.depth();
+    tree.nodes[i].is_self_feature = deserialized_node_i.is_self_feature();
+    tree.nodes[i].best_party_id = deserialized_node_i.best_party_id();
+    tree.nodes[i].best_feature_id = deserialized_node_i.best_feature_id();
+    tree.nodes[i].best_split_id = deserialized_node_i.best_split_id();
+    tree.nodes[i].split_threshold = deserialized_node_i.split_threshold();
+    tree.nodes[i].node_sample_num = deserialized_node_i.node_sample_num();
+    tree.nodes[i].left_child = deserialized_node_i.left_child();
+    tree.nodes[i].right_child = deserialized_node_i.right_child();
+    for (int j = 0; j < deserialized_node_i.node_sample_distribution_size(); j++) {
+      tree.nodes[i].node_sample_distribution.push_back(deserialized_node_i.node_sample_distribution(j));
+    }
+
+    const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& pb_impurity =
+        deserialized_node_i.impurity();
+    const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& pb_label =
+        deserialized_node_i.label();
+
+    mpz_t g_n_impurity, g_value_impurity, g_n_label, g_value_label;
+    mpz_init(g_n_impurity);
+    mpz_init(g_value_impurity);
+    mpz_init(g_n_label);
+    mpz_init(g_value_label);
+    mpz_set_str(g_n_impurity, pb_impurity.n().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_value_impurity, pb_impurity.value().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_n_label, pb_label.n().c_str(), PHE_STR_BASE);
+    mpz_set_str(g_value_label, pb_label.value().c_str(), PHE_STR_BASE);
+    tree.nodes[i].impurity.setter_n(g_n_impurity);
+    tree.nodes[i].impurity.setter_value(g_value_impurity);
+    tree.nodes[i].impurity.setter_exponent(pb_impurity.exponent());
+    EncodedNumberType type_impurity = (EncodedNumberType) pb_impurity.type();
+    tree.nodes[i].impurity.setter_type(type_impurity);
+
+    tree.nodes[i].label.setter_n(g_n_label);
+    tree.nodes[i].label.setter_value(g_value_label);
+    tree.nodes[i].label.setter_exponent(pb_label.exponent());
+    EncodedNumberType type_label = (EncodedNumberType) pb_label.type();
+    tree.nodes[i].label.setter_type(type_label);
+
+    mpz_clear(g_n_impurity);
+    mpz_clear(g_value_impurity);
+    mpz_clear(g_n_label);
+    mpz_clear(g_value_label);
   }
 }

@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 #include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/algorithm/vertical/tree/tree.h>
+#include <falcon/algorithm/vertical/tree/node.h>
 
 /**
  * pb serialize encrypted statistics
@@ -119,5 +121,21 @@ void serialize_split_info(int global_split_num,
 void deserialize_split_info(int & global_split_num,
     std::vector<int> & client_split_nums,
     std::string input_str);
+
+/**
+ * serialize a tree model to string
+ *
+ * @param tree
+ * @param output_str
+ */
+void serialize_tree_model(Tree tree, std::string & output_str);
+
+/**
+ * deserialize an input string to a tree model
+ *
+ * @param tree
+ * @param input_str
+ */
+void deserialize_tree_model(Tree & tree, std::string input_str);
 
 #endif //FALCON_INCLUDE_FALCON_UTILS_PB_CONVERTER_TREE_CONVERTER_H_

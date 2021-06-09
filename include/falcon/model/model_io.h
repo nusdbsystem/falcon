@@ -6,6 +6,8 @@
 #define FALCON_INCLUDE_FALCON_MODEL_MODEL_IO_H
 
 #include <falcon/algorithm/vertical/linear_model/logistic_regression.h>
+#include <falcon/algorithm/vertical/tree/tree.h>
+#include <falcon/algorithm/vertical/tree/node.h>
 
 #include <glog/logging.h>
 
@@ -28,14 +30,30 @@ void save_lr_model(EncodedNumber* model_weights, int weight_size, const std::str
 void load_lr_model(const std::string& model_save_path, int& weight_size, EncodedNumber* saved_weights);
 
 /**
- * save the lr training report
+ * save the dt model after training
  *
- * @param lr_training_accuracy: model training accuracy
- * @param lr_testing_accuracy: model testing accuracy
+ * @param tree: trained tree model
+ * @param model_save_path: model file to be saved
+ */
+void save_dt_model(Tree tree, const std::string& model_save_path);
+
+/**
+ * load the saved lr model
+ *
+ * @param model_save_path: model file saved
+ * @param saved_tree: saved tree model
+ */
+void load_dt_model(const std::string& model_save_path, Tree& saved_tree);
+
+/**
+ * save the training report
+ *
+ * @param training_accuracy: model training accuracy
+ * @param testing_accuracy: model testing accuracy
  * @param report_save_path: report file to be saved
  */
-void save_lr_report(float lr_training_accuracy,
-    float lr_testing_accuracy,
+void save_training_report(double training_accuracy,
+    double testing_accuracy,
     const std::string& report_save_path);
 
 

@@ -792,7 +792,9 @@ void train_logistic_regression(Party party, std::string params_str,
   EncodedNumber* model_weights = new EncodedNumber[log_reg_model.getter_weight_size()];
   log_reg_model.getter_encoded_weights(model_weights);
   save_lr_model(model_weights, log_reg_model.getter_weight_size(), model_save_file);
-  save_lr_report(training_accuracy, testing_accuracy, model_report_file);
+  save_training_report(log_reg_model.getter_training_accuracy(),
+      log_reg_model.getter_testing_accuracy(),
+      model_report_file);
 
   delete [] model_weights;
 }

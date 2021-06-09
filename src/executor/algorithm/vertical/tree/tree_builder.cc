@@ -535,6 +535,8 @@ void DecisionTreeBuilder::build_node(Party &party,
   int left_child_index = 2 * node_index + 1;
   int right_child_index = 2 * node_index + 2;
 
+  // LOG(INFO) << "Create sample iv for " << left_child_index << " and " << right_child_index;
+
   // convert the index_in_global_split_num to (i_*, index_*)
   int i_star = -1;
   int index_star = -1;
@@ -714,7 +716,7 @@ void DecisionTreeBuilder::build_node(Party &party,
   delete [] sample_mask_iv_right;
   delete [] encrypted_labels_left;
   delete [] encrypted_labels_right;
-
+  // LOG(INFO) << "Freed sample iv " << left_child_index << " and " << right_child_index;
   LOG(INFO) << "End build tree node: " << node_index;
 }
 
@@ -1088,82 +1090,7 @@ std::vector<int> DecisionTreeBuilder::compute_binary_vector(int sample_id,
       (eval_type == falcon::TRAIN) ? training_data : testing_data;
 
   std::vector<double> sample_values = cur_test_dataset[sample_id];
-  std::vector<int> binary_vector(tree.internal_node_num + 1);
-
-  // traverse the whole tree iteratively, and compute binary_vector
-  std::stack<PredictHelper> traverse_prediction_objs;
-  PredictHelper prediction_obj(tree.nodes[0].node_type,
-      tree.nodes[0].is_self_feature,
-      tree.nodes[0].best_party_id,
-      tree.nodes[0].best_feature_id,
-      tree.nodes[0].best_split_id,
-      1,
-      0);
-  traverse_prediction_objs.push(prediction_obj);
-  while (!traverse_prediction_objs.empty()) {
-    PredictHelper pred_obj = traverse_prediction_objs.top();
-    if (pred_obj.is_leaf == 1) {
-      // find leaf index and record
-      int leaf_index = node_index_2_leaf_index.find(pred_obj.index)->second;
-      binary_vector[leaf_index] = pred_obj.mark;
-      traverse_prediction_objs.pop();
-    } else if (pred_obj.is_self_feature != 1) {
-      // both left and right branches are marked as 1 * current_mark
-      traverse_prediction_objs.pop();
-      int left_node_index = pred_obj.index * 2 + 1;
-      int right_node_index = pred_obj.index * 2 + 2;
-
-      PredictHelper left(tree.nodes[left_node_index].node_type,
-          tree.nodes[left_node_index].is_self_feature,
-          tree.nodes[left_node_index].best_party_id,
-          tree.nodes[left_node_index].best_feature_id,
-          tree.nodes[left_node_index].best_split_id,
-          pred_obj.mark,
-          left_node_index);
-      PredictHelper right(tree.nodes[right_node_index].node_type,
-          tree.nodes[right_node_index].is_self_feature,
-          tree.nodes[right_node_index].best_party_id,
-          tree.nodes[right_node_index].best_feature_id,
-          tree.nodes[right_node_index].best_split_id,
-          pred_obj.mark,
-          right_node_index);
-      traverse_prediction_objs.push(left);
-      traverse_prediction_objs.push(right);
-    } else {
-      // is self feature, retrieve split value and compare
-      traverse_prediction_objs.pop();
-      int feature_id = pred_obj.best_feature_id;
-      int split_id = pred_obj.best_split_id;
-      double split_value = feature_helpers[feature_id].split_values[split_id];
-      int left_mark, right_mark;
-      if (sample_values[feature_id] <= split_value) {
-        left_mark = pred_obj.mark * 1;
-        right_mark = pred_obj.mark * 0;
-      } else {
-        left_mark = pred_obj.mark * 0;
-        right_mark = pred_obj.mark * 1;
-      }
-
-      int left_node_index = pred_obj.index * 2 + 1;
-      int right_node_index = pred_obj.index * 2 + 2;
-      PredictHelper left(tree.nodes[left_node_index].node_type,
-          tree.nodes[left_node_index].is_self_feature,
-          tree.nodes[left_node_index].best_party_id,
-          tree.nodes[left_node_index].best_feature_id,
-          tree.nodes[left_node_index].best_split_id,
-          left_mark,
-          left_node_index);
-      PredictHelper right(tree.nodes[right_node_index].node_type,
-          tree.nodes[right_node_index].is_self_feature,
-          tree.nodes[right_node_index].best_party_id,
-          tree.nodes[right_node_index].best_feature_id,
-          tree.nodes[right_node_index].best_split_id,
-          right_mark,
-          right_node_index);
-      traverse_prediction_objs.push(left);
-      traverse_prediction_objs.push(right);
-    }
-  }
+  std::vector<int> binary_vector = tree.comp_predict_vector(sample_values, node_index_2_leaf_index);
   return binary_vector;
 }
 
@@ -1298,17 +1225,17 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type) {
       dataset_size,
       ACTIVE_PARTY_ID);
 
-  // init predicted_label_vector
-  std::vector<double> predicted_label_vector;
-  for (int i = 0; i < dataset_size; i++) {
-    predicted_label_vector.push_back(0.0);
-  }
-  for (int i = 0; i < dataset_size; i++) {
-    decrypted_aggregation[i].decode(predicted_label_vector[i]);
-  }
-
   // compute accuracy by the super client
   if (party.party_type == falcon::ACTIVE_PARTY) {
+    // init predicted_label_vector
+    std::vector<double> predicted_label_vector;
+    for (int i = 0; i < dataset_size; i++) {
+      predicted_label_vector.push_back(0.0);
+    }
+    for (int i = 0; i < dataset_size; i++) {
+      decrypted_aggregation[i].decode(predicted_label_vector[i]);
+    }
+
     if (tree_type == falcon::CLASSIFICATION) {
       int correct_num = 0;
       for (int i = 0; i < dataset_size; i++) {
@@ -1473,8 +1400,8 @@ void spdz_tree_computation(int party_num,
   }
 }
 
-void train_decision_tree(Party party, std::string params_str,
-    std::string model_save_file, std::string model_report_file) {
+void train_decision_tree(Party party, const std::string& params_str,
+    std::string model_save_file, const std::string& model_report_file) {
 
   LOG(INFO) << "Run the example decision tree train";
   std::cout << "Run the example decision tree train" << std::endl;
@@ -1542,11 +1469,8 @@ void train_decision_tree(Party party, std::string params_str,
   decision_tree_builder.eval(party, falcon::TRAIN);
   decision_tree_builder.eval(party, falcon::TEST);
 
-  // TODO: save model and report
-//  EncodedNumber* model_weights = new EncodedNumber[log_reg_model.getter_weight_size()];
-//  log_reg_model.getter_encoded_weights(model_weights);
-//  save_lr_model(model_weights, log_reg_model.getter_weight_size(), model_save_file);
-//  save_lr_report(training_accuracy, testing_accuracy, model_report_file);
-//
-//  delete [] model_weights;
+  save_dt_model(decision_tree_builder.tree, model_save_file);
+  save_training_report(decision_tree_builder.getter_training_accuracy(),
+      decision_tree_builder.getter_testing_accuracy(),
+      model_report_file);
 }

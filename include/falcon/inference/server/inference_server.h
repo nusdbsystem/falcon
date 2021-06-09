@@ -14,17 +14,22 @@
  * @param endpoint: listened endpoint
  * @param saved_model_file: saved model
  * @param party: initialized party
+ * @param algorithm_name: the model to be served
  */
-void RunActiveServerLR(const std::string& endpoint,
+void run_active_server(const std::string& endpoint,
                const std::string& saved_model_file,
-               const Party& party);
+               const Party& party,
+               falcon::AlgorithmName algorithm_name);
 
 /**
  * run passive server to listen active party's requests
  *
  * @param saved_model_file: saved model
  * @param party: initialized party
+ * @param algorithm_name: the model to be served
  */
-void RunPassiveServerLR(std::string saved_model_file, Party party);
+void run_passive_server(const std::string& saved_model_file,
+                const Party& party,
+                falcon::AlgorithmName algorithm_name);
 
 #endif //FALCON_SRC_EXECUTOR_INFERENCE_SERVER_INFERENCE_SERVER_H_

@@ -47,7 +47,7 @@ struct TableStruct_tree_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[4]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[6]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -65,12 +65,18 @@ extern EncryptedStatPerSplitDefaultTypeInternal _EncryptedStatPerSplit_default_i
 class EncryptedStatistics;
 class EncryptedStatisticsDefaultTypeInternal;
 extern EncryptedStatisticsDefaultTypeInternal _EncryptedStatistics_default_instance_;
+class Node;
+class NodeDefaultTypeInternal;
+extern NodeDefaultTypeInternal _Node_default_instance_;
 class NodeUpdateInfo;
 class NodeUpdateInfoDefaultTypeInternal;
 extern NodeUpdateInfoDefaultTypeInternal _NodeUpdateInfo_default_instance_;
 class SplitInfo;
 class SplitInfoDefaultTypeInternal;
 extern SplitInfoDefaultTypeInternal _SplitInfo_default_instance_;
+class Tree;
+class TreeDefaultTypeInternal;
+extern TreeDefaultTypeInternal _Tree_default_instance_;
 }  // namespace v0
 }  // namespace falcon
 }  // namespace dbsytem
@@ -79,8 +85,10 @@ extern SplitInfoDefaultTypeInternal _SplitInfo_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
 template<> ::com::nus::dbsytem::falcon::v0::EncryptedStatPerSplit* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::EncryptedStatPerSplit>(Arena*);
 template<> ::com::nus::dbsytem::falcon::v0::EncryptedStatistics* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::EncryptedStatistics>(Arena*);
+template<> ::com::nus::dbsytem::falcon::v0::Node* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::Node>(Arena*);
 template<> ::com::nus::dbsytem::falcon::v0::NodeUpdateInfo* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::NodeUpdateInfo>(Arena*);
 template<> ::com::nus::dbsytem::falcon::v0::SplitInfo* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::SplitInfo>(Arena*);
+template<> ::com::nus::dbsytem::falcon::v0::Tree* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::Tree>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace com {
 namespace nus {
@@ -872,6 +880,517 @@ class SplitInfo PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_tree_2eproto;
 };
+// -------------------------------------------------------------------
+
+class Node PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.Node) */ {
+ public:
+  inline Node() : Node(nullptr) {}
+  virtual ~Node();
+
+  Node(const Node& from);
+  Node(Node&& from) noexcept
+    : Node() {
+    *this = ::std::move(from);
+  }
+
+  inline Node& operator=(const Node& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Node& operator=(Node&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const Node& default_instance();
+
+  static inline const Node* internal_default_instance() {
+    return reinterpret_cast<const Node*>(
+               &_Node_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(Node& a, Node& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Node* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Node* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline Node* New() const final {
+    return CreateMaybeMessage<Node>(nullptr);
+  }
+
+  Node* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Node>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const Node& from);
+  void MergeFrom(const Node& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Node* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "com.nus.dbsytem.falcon.v0.Node";
+  }
+  protected:
+  explicit Node(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_tree_2eproto);
+    return ::descriptor_table_tree_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNodeSampleDistributionFieldNumber = 9,
+    kImpurityFieldNumber = 10,
+    kLabelFieldNumber = 11,
+    kNodeTypeFieldNumber = 1,
+    kDepthFieldNumber = 2,
+    kIsSelfFeatureFieldNumber = 3,
+    kBestPartyIdFieldNumber = 4,
+    kBestFeatureIdFieldNumber = 5,
+    kBestSplitIdFieldNumber = 6,
+    kSplitThresholdFieldNumber = 7,
+    kNodeSampleNumFieldNumber = 8,
+    kLeftChildFieldNumber = 12,
+    kRightChildFieldNumber = 13,
+  };
+  // repeated int32 node_sample_distribution = 9;
+  int node_sample_distribution_size() const;
+  private:
+  int _internal_node_sample_distribution_size() const;
+  public:
+  void clear_node_sample_distribution();
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_node_sample_distribution(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >&
+      _internal_node_sample_distribution() const;
+  void _internal_add_node_sample_distribution(::PROTOBUF_NAMESPACE_ID::int32 value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >*
+      _internal_mutable_node_sample_distribution();
+  public:
+  ::PROTOBUF_NAMESPACE_ID::int32 node_sample_distribution(int index) const;
+  void set_node_sample_distribution(int index, ::PROTOBUF_NAMESPACE_ID::int32 value);
+  void add_node_sample_distribution(::PROTOBUF_NAMESPACE_ID::int32 value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >&
+      node_sample_distribution() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >*
+      mutable_node_sample_distribution();
+
+  // .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber impurity = 10;
+  bool has_impurity() const;
+  private:
+  bool _internal_has_impurity() const;
+  public:
+  void clear_impurity();
+  const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& impurity() const;
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* release_impurity();
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* mutable_impurity();
+  void set_allocated_impurity(::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* impurity);
+  private:
+  const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& _internal_impurity() const;
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* _internal_mutable_impurity();
+  public:
+  void unsafe_arena_set_allocated_impurity(
+      ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* impurity);
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* unsafe_arena_release_impurity();
+
+  // .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber label = 11;
+  bool has_label() const;
+  private:
+  bool _internal_has_label() const;
+  public:
+  void clear_label();
+  const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& label() const;
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* release_label();
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* mutable_label();
+  void set_allocated_label(::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* label);
+  private:
+  const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& _internal_label() const;
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* _internal_mutable_label();
+  public:
+  void unsafe_arena_set_allocated_label(
+      ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* label);
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* unsafe_arena_release_label();
+
+  // int32 node_type = 1;
+  void clear_node_type();
+  ::PROTOBUF_NAMESPACE_ID::int32 node_type() const;
+  void set_node_type(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_node_type() const;
+  void _internal_set_node_type(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 depth = 2;
+  void clear_depth();
+  ::PROTOBUF_NAMESPACE_ID::int32 depth() const;
+  void set_depth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_depth() const;
+  void _internal_set_depth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 is_self_feature = 3;
+  void clear_is_self_feature();
+  ::PROTOBUF_NAMESPACE_ID::int32 is_self_feature() const;
+  void set_is_self_feature(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_is_self_feature() const;
+  void _internal_set_is_self_feature(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 best_party_id = 4;
+  void clear_best_party_id();
+  ::PROTOBUF_NAMESPACE_ID::int32 best_party_id() const;
+  void set_best_party_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_best_party_id() const;
+  void _internal_set_best_party_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 best_feature_id = 5;
+  void clear_best_feature_id();
+  ::PROTOBUF_NAMESPACE_ID::int32 best_feature_id() const;
+  void set_best_feature_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_best_feature_id() const;
+  void _internal_set_best_feature_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 best_split_id = 6;
+  void clear_best_split_id();
+  ::PROTOBUF_NAMESPACE_ID::int32 best_split_id() const;
+  void set_best_split_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_best_split_id() const;
+  void _internal_set_best_split_id(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // double split_threshold = 7;
+  void clear_split_threshold();
+  double split_threshold() const;
+  void set_split_threshold(double value);
+  private:
+  double _internal_split_threshold() const;
+  void _internal_set_split_threshold(double value);
+  public:
+
+  // int32 node_sample_num = 8;
+  void clear_node_sample_num();
+  ::PROTOBUF_NAMESPACE_ID::int32 node_sample_num() const;
+  void set_node_sample_num(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_node_sample_num() const;
+  void _internal_set_node_sample_num(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 left_child = 12;
+  void clear_left_child();
+  ::PROTOBUF_NAMESPACE_ID::int32 left_child() const;
+  void set_left_child(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_left_child() const;
+  void _internal_set_left_child(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 right_child = 13;
+  void clear_right_child();
+  ::PROTOBUF_NAMESPACE_ID::int32 right_child() const;
+  void set_right_child(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_right_child() const;
+  void _internal_set_right_child(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.Node)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 > node_sample_distribution_;
+  mutable std::atomic<int> _node_sample_distribution_cached_byte_size_;
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* impurity_;
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* label_;
+  ::PROTOBUF_NAMESPACE_ID::int32 node_type_;
+  ::PROTOBUF_NAMESPACE_ID::int32 depth_;
+  ::PROTOBUF_NAMESPACE_ID::int32 is_self_feature_;
+  ::PROTOBUF_NAMESPACE_ID::int32 best_party_id_;
+  ::PROTOBUF_NAMESPACE_ID::int32 best_feature_id_;
+  ::PROTOBUF_NAMESPACE_ID::int32 best_split_id_;
+  double split_threshold_;
+  ::PROTOBUF_NAMESPACE_ID::int32 node_sample_num_;
+  ::PROTOBUF_NAMESPACE_ID::int32 left_child_;
+  ::PROTOBUF_NAMESPACE_ID::int32 right_child_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_tree_2eproto;
+};
+// -------------------------------------------------------------------
+
+class Tree PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.Tree) */ {
+ public:
+  inline Tree() : Tree(nullptr) {}
+  virtual ~Tree();
+
+  Tree(const Tree& from);
+  Tree(Tree&& from) noexcept
+    : Tree() {
+    *this = ::std::move(from);
+  }
+
+  inline Tree& operator=(const Tree& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Tree& operator=(Tree&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const Tree& default_instance();
+
+  static inline const Tree* internal_default_instance() {
+    return reinterpret_cast<const Tree*>(
+               &_Tree_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(Tree& a, Tree& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Tree* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Tree* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline Tree* New() const final {
+    return CreateMaybeMessage<Tree>(nullptr);
+  }
+
+  Tree* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Tree>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const Tree& from);
+  void MergeFrom(const Tree& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Tree* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "com.nus.dbsytem.falcon.v0.Tree";
+  }
+  protected:
+  explicit Tree(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_tree_2eproto);
+    return ::descriptor_table_tree_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNodesFieldNumber = 4,
+    kTreeTypeFieldNumber = 1,
+    kClassNumFieldNumber = 2,
+    kMaxDepthFieldNumber = 3,
+    kInternalNodeNumFieldNumber = 5,
+    kTotalNodeNumFieldNumber = 6,
+    kCapacityFieldNumber = 7,
+  };
+  // repeated .com.nus.dbsytem.falcon.v0.Node nodes = 4;
+  int nodes_size() const;
+  private:
+  int _internal_nodes_size() const;
+  public:
+  void clear_nodes();
+  ::com::nus::dbsytem::falcon::v0::Node* mutable_nodes(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::Node >*
+      mutable_nodes();
+  private:
+  const ::com::nus::dbsytem::falcon::v0::Node& _internal_nodes(int index) const;
+  ::com::nus::dbsytem::falcon::v0::Node* _internal_add_nodes();
+  public:
+  const ::com::nus::dbsytem::falcon::v0::Node& nodes(int index) const;
+  ::com::nus::dbsytem::falcon::v0::Node* add_nodes();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::Node >&
+      nodes() const;
+
+  // int32 tree_type = 1;
+  void clear_tree_type();
+  ::PROTOBUF_NAMESPACE_ID::int32 tree_type() const;
+  void set_tree_type(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_tree_type() const;
+  void _internal_set_tree_type(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 class_num = 2;
+  void clear_class_num();
+  ::PROTOBUF_NAMESPACE_ID::int32 class_num() const;
+  void set_class_num(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_class_num() const;
+  void _internal_set_class_num(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 max_depth = 3;
+  void clear_max_depth();
+  ::PROTOBUF_NAMESPACE_ID::int32 max_depth() const;
+  void set_max_depth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_max_depth() const;
+  void _internal_set_max_depth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 internal_node_num = 5;
+  void clear_internal_node_num();
+  ::PROTOBUF_NAMESPACE_ID::int32 internal_node_num() const;
+  void set_internal_node_num(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_internal_node_num() const;
+  void _internal_set_internal_node_num(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 total_node_num = 6;
+  void clear_total_node_num();
+  ::PROTOBUF_NAMESPACE_ID::int32 total_node_num() const;
+  void set_total_node_num(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_total_node_num() const;
+  void _internal_set_total_node_num(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 capacity = 7;
+  void clear_capacity();
+  ::PROTOBUF_NAMESPACE_ID::int32 capacity() const;
+  void set_capacity(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_capacity() const;
+  void _internal_set_capacity(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.Tree)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::Node > nodes_;
+  ::PROTOBUF_NAMESPACE_ID::int32 tree_type_;
+  ::PROTOBUF_NAMESPACE_ID::int32 class_num_;
+  ::PROTOBUF_NAMESPACE_ID::int32 max_depth_;
+  ::PROTOBUF_NAMESPACE_ID::int32 internal_node_num_;
+  ::PROTOBUF_NAMESPACE_ID::int32 total_node_num_;
+  ::PROTOBUF_NAMESPACE_ID::int32 capacity_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_tree_2eproto;
+};
 // ===================================================================
 
 
@@ -1495,9 +2014,581 @@ SplitInfo::mutable_split_num_vec() {
   return _internal_mutable_split_num_vec();
 }
 
+// -------------------------------------------------------------------
+
+// Node
+
+// int32 node_type = 1;
+inline void Node::clear_node_type() {
+  node_type_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_node_type() const {
+  return node_type_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::node_type() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.node_type)
+  return _internal_node_type();
+}
+inline void Node::_internal_set_node_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  node_type_ = value;
+}
+inline void Node::set_node_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_node_type(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.node_type)
+}
+
+// int32 depth = 2;
+inline void Node::clear_depth() {
+  depth_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_depth() const {
+  return depth_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::depth() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.depth)
+  return _internal_depth();
+}
+inline void Node::_internal_set_depth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  depth_ = value;
+}
+inline void Node::set_depth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_depth(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.depth)
+}
+
+// int32 is_self_feature = 3;
+inline void Node::clear_is_self_feature() {
+  is_self_feature_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_is_self_feature() const {
+  return is_self_feature_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::is_self_feature() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.is_self_feature)
+  return _internal_is_self_feature();
+}
+inline void Node::_internal_set_is_self_feature(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  is_self_feature_ = value;
+}
+inline void Node::set_is_self_feature(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_is_self_feature(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.is_self_feature)
+}
+
+// int32 best_party_id = 4;
+inline void Node::clear_best_party_id() {
+  best_party_id_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_best_party_id() const {
+  return best_party_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::best_party_id() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.best_party_id)
+  return _internal_best_party_id();
+}
+inline void Node::_internal_set_best_party_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  best_party_id_ = value;
+}
+inline void Node::set_best_party_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_best_party_id(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.best_party_id)
+}
+
+// int32 best_feature_id = 5;
+inline void Node::clear_best_feature_id() {
+  best_feature_id_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_best_feature_id() const {
+  return best_feature_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::best_feature_id() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.best_feature_id)
+  return _internal_best_feature_id();
+}
+inline void Node::_internal_set_best_feature_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  best_feature_id_ = value;
+}
+inline void Node::set_best_feature_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_best_feature_id(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.best_feature_id)
+}
+
+// int32 best_split_id = 6;
+inline void Node::clear_best_split_id() {
+  best_split_id_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_best_split_id() const {
+  return best_split_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::best_split_id() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.best_split_id)
+  return _internal_best_split_id();
+}
+inline void Node::_internal_set_best_split_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  best_split_id_ = value;
+}
+inline void Node::set_best_split_id(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_best_split_id(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.best_split_id)
+}
+
+// double split_threshold = 7;
+inline void Node::clear_split_threshold() {
+  split_threshold_ = 0;
+}
+inline double Node::_internal_split_threshold() const {
+  return split_threshold_;
+}
+inline double Node::split_threshold() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.split_threshold)
+  return _internal_split_threshold();
+}
+inline void Node::_internal_set_split_threshold(double value) {
+  
+  split_threshold_ = value;
+}
+inline void Node::set_split_threshold(double value) {
+  _internal_set_split_threshold(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.split_threshold)
+}
+
+// int32 node_sample_num = 8;
+inline void Node::clear_node_sample_num() {
+  node_sample_num_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_node_sample_num() const {
+  return node_sample_num_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::node_sample_num() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.node_sample_num)
+  return _internal_node_sample_num();
+}
+inline void Node::_internal_set_node_sample_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  node_sample_num_ = value;
+}
+inline void Node::set_node_sample_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_node_sample_num(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.node_sample_num)
+}
+
+// repeated int32 node_sample_distribution = 9;
+inline int Node::_internal_node_sample_distribution_size() const {
+  return node_sample_distribution_.size();
+}
+inline int Node::node_sample_distribution_size() const {
+  return _internal_node_sample_distribution_size();
+}
+inline void Node::clear_node_sample_distribution() {
+  node_sample_distribution_.Clear();
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_node_sample_distribution(int index) const {
+  return node_sample_distribution_.Get(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::node_sample_distribution(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.node_sample_distribution)
+  return _internal_node_sample_distribution(index);
+}
+inline void Node::set_node_sample_distribution(int index, ::PROTOBUF_NAMESPACE_ID::int32 value) {
+  node_sample_distribution_.Set(index, value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.node_sample_distribution)
+}
+inline void Node::_internal_add_node_sample_distribution(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  node_sample_distribution_.Add(value);
+}
+inline void Node::add_node_sample_distribution(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_add_node_sample_distribution(value);
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.Node.node_sample_distribution)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >&
+Node::_internal_node_sample_distribution() const {
+  return node_sample_distribution_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >&
+Node::node_sample_distribution() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.Node.node_sample_distribution)
+  return _internal_node_sample_distribution();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >*
+Node::_internal_mutable_node_sample_distribution() {
+  return &node_sample_distribution_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >*
+Node::mutable_node_sample_distribution() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.Node.node_sample_distribution)
+  return _internal_mutable_node_sample_distribution();
+}
+
+// .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber impurity = 10;
+inline bool Node::_internal_has_impurity() const {
+  return this != internal_default_instance() && impurity_ != nullptr;
+}
+inline bool Node::has_impurity() const {
+  return _internal_has_impurity();
+}
+inline const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& Node::_internal_impurity() const {
+  const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* p = impurity_;
+  return p != nullptr ? *p : reinterpret_cast<const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber&>(
+      ::com::nus::dbsytem::falcon::v0::_FixedPointEncodedNumber_default_instance_);
+}
+inline const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& Node::impurity() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.impurity)
+  return _internal_impurity();
+}
+inline void Node::unsafe_arena_set_allocated_impurity(
+    ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* impurity) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(impurity_);
+  }
+  impurity_ = impurity;
+  if (impurity) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:com.nus.dbsytem.falcon.v0.Node.impurity)
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Node::release_impurity() {
+  
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* temp = impurity_;
+  impurity_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Node::unsafe_arena_release_impurity() {
+  // @@protoc_insertion_point(field_release:com.nus.dbsytem.falcon.v0.Node.impurity)
+  
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* temp = impurity_;
+  impurity_ = nullptr;
+  return temp;
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Node::_internal_mutable_impurity() {
+  
+  if (impurity_ == nullptr) {
+    auto* p = CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber>(GetArena());
+    impurity_ = p;
+  }
+  return impurity_;
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Node::mutable_impurity() {
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.Node.impurity)
+  return _internal_mutable_impurity();
+}
+inline void Node::set_allocated_impurity(::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* impurity) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(impurity_);
+  }
+  if (impurity) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(impurity)->GetArena();
+    if (message_arena != submessage_arena) {
+      impurity = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, impurity, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  impurity_ = impurity;
+  // @@protoc_insertion_point(field_set_allocated:com.nus.dbsytem.falcon.v0.Node.impurity)
+}
+
+// .com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber label = 11;
+inline bool Node::_internal_has_label() const {
+  return this != internal_default_instance() && label_ != nullptr;
+}
+inline bool Node::has_label() const {
+  return _internal_has_label();
+}
+inline const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& Node::_internal_label() const {
+  const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* p = label_;
+  return p != nullptr ? *p : reinterpret_cast<const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber&>(
+      ::com::nus::dbsytem::falcon::v0::_FixedPointEncodedNumber_default_instance_);
+}
+inline const ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& Node::label() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.label)
+  return _internal_label();
+}
+inline void Node::unsafe_arena_set_allocated_label(
+    ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* label) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(label_);
+  }
+  label_ = label;
+  if (label) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:com.nus.dbsytem.falcon.v0.Node.label)
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Node::release_label() {
+  
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* temp = label_;
+  label_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Node::unsafe_arena_release_label() {
+  // @@protoc_insertion_point(field_release:com.nus.dbsytem.falcon.v0.Node.label)
+  
+  ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* temp = label_;
+  label_ = nullptr;
+  return temp;
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Node::_internal_mutable_label() {
+  
+  if (label_ == nullptr) {
+    auto* p = CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber>(GetArena());
+    label_ = p;
+  }
+  return label_;
+}
+inline ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Node::mutable_label() {
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.Node.label)
+  return _internal_mutable_label();
+}
+inline void Node::set_allocated_label(::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* label) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(label_);
+  }
+  if (label) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(label)->GetArena();
+    if (message_arena != submessage_arena) {
+      label = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, label, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  label_ = label;
+  // @@protoc_insertion_point(field_set_allocated:com.nus.dbsytem.falcon.v0.Node.label)
+}
+
+// int32 left_child = 12;
+inline void Node::clear_left_child() {
+  left_child_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_left_child() const {
+  return left_child_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::left_child() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.left_child)
+  return _internal_left_child();
+}
+inline void Node::_internal_set_left_child(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  left_child_ = value;
+}
+inline void Node::set_left_child(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_left_child(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.left_child)
+}
+
+// int32 right_child = 13;
+inline void Node::clear_right_child() {
+  right_child_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::_internal_right_child() const {
+  return right_child_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Node::right_child() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Node.right_child)
+  return _internal_right_child();
+}
+inline void Node::_internal_set_right_child(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  right_child_ = value;
+}
+inline void Node::set_right_child(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_right_child(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Node.right_child)
+}
+
+// -------------------------------------------------------------------
+
+// Tree
+
+// int32 tree_type = 1;
+inline void Tree::clear_tree_type() {
+  tree_type_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::_internal_tree_type() const {
+  return tree_type_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::tree_type() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Tree.tree_type)
+  return _internal_tree_type();
+}
+inline void Tree::_internal_set_tree_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  tree_type_ = value;
+}
+inline void Tree::set_tree_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_tree_type(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Tree.tree_type)
+}
+
+// int32 class_num = 2;
+inline void Tree::clear_class_num() {
+  class_num_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::_internal_class_num() const {
+  return class_num_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::class_num() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Tree.class_num)
+  return _internal_class_num();
+}
+inline void Tree::_internal_set_class_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  class_num_ = value;
+}
+inline void Tree::set_class_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_class_num(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Tree.class_num)
+}
+
+// int32 max_depth = 3;
+inline void Tree::clear_max_depth() {
+  max_depth_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::_internal_max_depth() const {
+  return max_depth_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::max_depth() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Tree.max_depth)
+  return _internal_max_depth();
+}
+inline void Tree::_internal_set_max_depth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  max_depth_ = value;
+}
+inline void Tree::set_max_depth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_max_depth(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Tree.max_depth)
+}
+
+// repeated .com.nus.dbsytem.falcon.v0.Node nodes = 4;
+inline int Tree::_internal_nodes_size() const {
+  return nodes_.size();
+}
+inline int Tree::nodes_size() const {
+  return _internal_nodes_size();
+}
+inline void Tree::clear_nodes() {
+  nodes_.Clear();
+}
+inline ::com::nus::dbsytem::falcon::v0::Node* Tree::mutable_nodes(int index) {
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.Tree.nodes)
+  return nodes_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::Node >*
+Tree::mutable_nodes() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.Tree.nodes)
+  return &nodes_;
+}
+inline const ::com::nus::dbsytem::falcon::v0::Node& Tree::_internal_nodes(int index) const {
+  return nodes_.Get(index);
+}
+inline const ::com::nus::dbsytem::falcon::v0::Node& Tree::nodes(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Tree.nodes)
+  return _internal_nodes(index);
+}
+inline ::com::nus::dbsytem::falcon::v0::Node* Tree::_internal_add_nodes() {
+  return nodes_.Add();
+}
+inline ::com::nus::dbsytem::falcon::v0::Node* Tree::add_nodes() {
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.Tree.nodes)
+  return _internal_add_nodes();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::Node >&
+Tree::nodes() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.Tree.nodes)
+  return nodes_;
+}
+
+// int32 internal_node_num = 5;
+inline void Tree::clear_internal_node_num() {
+  internal_node_num_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::_internal_internal_node_num() const {
+  return internal_node_num_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::internal_node_num() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Tree.internal_node_num)
+  return _internal_internal_node_num();
+}
+inline void Tree::_internal_set_internal_node_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  internal_node_num_ = value;
+}
+inline void Tree::set_internal_node_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_internal_node_num(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Tree.internal_node_num)
+}
+
+// int32 total_node_num = 6;
+inline void Tree::clear_total_node_num() {
+  total_node_num_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::_internal_total_node_num() const {
+  return total_node_num_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::total_node_num() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Tree.total_node_num)
+  return _internal_total_node_num();
+}
+inline void Tree::_internal_set_total_node_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  total_node_num_ = value;
+}
+inline void Tree::set_total_node_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_total_node_num(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Tree.total_node_num)
+}
+
+// int32 capacity = 7;
+inline void Tree::clear_capacity() {
+  capacity_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::_internal_capacity() const {
+  return capacity_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Tree::capacity() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.Tree.capacity)
+  return _internal_capacity();
+}
+inline void Tree::_internal_set_capacity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  capacity_ = value;
+}
+inline void Tree::set_capacity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_capacity(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.Tree.capacity)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
