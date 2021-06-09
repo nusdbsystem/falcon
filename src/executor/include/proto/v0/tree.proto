@@ -51,6 +51,7 @@ message Node {
     int32 right_child = 13;     // right branch id of the current node, if not a leaf node, -1: not decided
 }
 
+// decision tree model
 message Tree {
     int32 tree_type = 1;            // classification or regression
     int32 class_num = 2;            // number of classes if classification
@@ -59,4 +60,10 @@ message Tree {
     int32 internal_node_num = 5;    // internal node count
     int32 total_node_num = 6;       // total node count
     int32 capacity = 7;             // tree capacity
+}
+
+// ensemble tree model
+message RandomForest {
+    int32 n_estimator = 1;          // the number of estimator stored
+    repeated Tree trees = 2;        // the trees
 }
