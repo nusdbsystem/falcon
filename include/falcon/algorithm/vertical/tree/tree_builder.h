@@ -203,9 +203,9 @@ class DecisionTreeBuilder : public Model {
       std::map<int,int> node_index_2_leaf_index, falcon::DatasetType eval_type);
 
   /**
- * evaluate the accuracy on the dataset
- * @param party
- * @param eval_type
+     * evaluate the accuracy on the dataset
+     * @param party
+     * @param eval_type
  */
   void eval(Party party, falcon::DatasetType eval_type);
 };
