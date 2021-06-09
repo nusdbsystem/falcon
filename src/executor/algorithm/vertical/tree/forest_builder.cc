@@ -240,7 +240,7 @@ void train_random_forest(Party party, const std::string& params_str,
   params.dt_param.criterion = "gini";
   params.dt_param.split_strategy = "best";
   params.dt_param.class_num = 2;
-  params.dt_param.max_depth = 2;
+  params.dt_param.max_depth = 3;
   params.dt_param.max_bins = 8;
   params.dt_param.min_samples_split = 5;
   params.dt_param.min_samples_leaf = 5;
@@ -299,7 +299,11 @@ void train_random_forest(Party party, const std::string& params_str,
   random_forest_builder.eval(party, falcon::TRAIN);
   random_forest_builder.eval(party, falcon::TEST);
 
-//  save_dt_model(random_forest_builder.tree, model_save_file);
+  std::vector<Tree> forest_trees;
+  for (int i = 0; i < random_forest_builder.n_estimator; i++) {
+    forest_trees.push_back(random_forest_builder.tree_builders[i].tree);
+  }
+  save_rf_model(forest_trees, random_forest_builder.n_estimator, model_save_file);
   save_training_report(random_forest_builder.getter_training_accuracy(),
       random_forest_builder.getter_testing_accuracy(),
       model_report_file);
