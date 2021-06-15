@@ -29,7 +29,7 @@ func SetupPartyServer() {
 	// set up the HTTP server
 	// modified from https://github.com/enricofoltran/simple-go-server/blob/master/main.go
 	server := &http.Server{
-		Addr:    common.PartyServerIP + ":" + common.PartyServerPort,
+		Addr:    "0.0.0.0:" + common.PartyServerPort,
 		Handler: handlers.CombinedLoggingHandler(os.Stdout, r),
 		// Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(r)),
 		ErrorLog: http_logger,

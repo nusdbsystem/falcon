@@ -53,7 +53,7 @@ func SetupCoordServer(nConsumer int) {
 	// set up the HTTP server
 	// modified from https://github.com/enricofoltran/simple-go-server/blob/master/main.go
 	server := &http.Server{
-		Addr: common.CoordAddr,
+		Addr: "0.0.0.0:" + common.CoordPort,
 		// Pass instance of gorilla/mux in
 		Handler: handlers.CombinedLoggingHandler(os.Stdout, r),
 		// Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(r)),
