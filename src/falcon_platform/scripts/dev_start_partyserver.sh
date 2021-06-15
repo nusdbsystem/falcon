@@ -62,7 +62,7 @@ mkdir -p $PARTY_SERVER_BASEPATH
 # mkdir $DEV_TEST_OUTDIR/data_output
 # mkdir $DEV_TEST_OUTDIR/trained_models
 
-export ENV="dev"
+export ENV="local"
 export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
