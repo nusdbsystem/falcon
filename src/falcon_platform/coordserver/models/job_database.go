@@ -4,10 +4,11 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/logger"
 	"fmt"
-	"path"
-
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"path"
+	"time"
 )
 
 type JobDB struct {
@@ -17,6 +18,7 @@ type JobDB struct {
 	password string
 	database string
 	addr     string
+	dia      gorm.Dialector
 	DB       *gorm.DB
 }
 
@@ -53,12 +55,13 @@ func InitJobDB() *JobDB {
 			common.JobDbMysqlOptions,
 		)
 		jobDB.addr = mysqlUrl
+		jobDB.dia = mysql.Open(jobDB.addr)
 	} else if jobDB.engine == common.DBsqlite3 {
 		// for quick dev test, save the sqlite3 db in timestamped dev_test
 		// if use outside of dev_test, make sure to reset the db file
 		jobDB.addr = path.Join(common.CoordBasePath, common.JobDbSqliteDb)
+		jobDB.dia = sqlite.Open(jobDB.addr)
 	}
-
 	return jobDB
 }
 
@@ -67,19 +70,24 @@ func (jobDB *JobDB) Connect() {
 
 	var db *gorm.DB
 	var err error
+	NTimes := 20
 
-	if jobDB.engine == common.DBsqlite3 {
-		// github.com/mattn/go-sqlite3
-		db, err = gorm.Open(sqlite.Open(jobDB.addr), &gorm.Config{})
-		// NOTE: You can also use file::memory:?cache=shared instead of a path to a file.
-		// This will tell SQLite to use a temporary database in system memory.
+	for {
+		if NTimes < 0 {
+			break
+		}
+		db, err = gorm.Open(jobDB.dia, &gorm.Config{})
+		if err != nil {
+			logger.Log.Println(err)
+			logger.Log.Println("JobDB: connecting Db...retry")
+			time.Sleep(time.Second * 5)
+			NTimes--
+		} else {
+			jobDB.DB = db
+			return
+		}
 	}
-
-	if err != nil {
-		panic("failed to connect database")
-	}
-
-	jobDB.DB = db
+	return
 }
 
 func (jobDB *JobDB) DefineTables() {
@@ -89,7 +97,7 @@ func (jobDB *JobDB) DefineTables() {
 	// It WON’T delete unused columns to protect your data.
 	// reference: https://gorm.io/docs/migration.html
 
-	jobDB.DB.AutoMigrate(
+	e := jobDB.DB.AutoMigrate(
 		// System Usage
 		&PortRecord{},
 
@@ -112,6 +120,10 @@ func (jobDB *JobDB) DefineTables() {
 		// User
 		&User{},
 	)
+	if e != nil {
+		logger.Log.Println("Creating tables error")
+		panic(e)
+	}
 }
 
 func (jobDB *JobDB) Commit(tx *gorm.DB, el interface{}) {
