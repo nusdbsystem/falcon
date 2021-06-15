@@ -3,10 +3,10 @@ package taskmanager
 import (
 	"bytes"
 	"context"
+	"falcon_platform/distributed/utils"
 	"falcon_platform/logger"
 	"io"
 	"io/ioutil"
-
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -29,6 +29,7 @@ func InitK8sManager(inCluster bool, kubeconfig string) *K8sManager {
 	km := K8sManager{}
 
 	var err error
+	// not in-cluster means the km init related code is running not inside the pod
 	if !inCluster {
 
 		km.k8sConfig, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
@@ -36,6 +37,7 @@ func InitK8sManager(inCluster bool, kubeconfig string) *K8sManager {
 			logger.Log.Fatal(err)
 		}
 	} else {
+		// in-cluster means the code is running inside the pod
 		// load in-cluster configuration,
 		// KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT must be defined
 		// define them in env variable later
@@ -77,7 +79,7 @@ func (km *K8sManager) CreateResources(filename string) {
 	// 4. for each object, create
 	for {
 		var rawObj runtime.RawExtension
-		// can not find any resoruce in single yaml file, then break out the loop
+		// can not find any resources in single yaml file, then break out the loop
 		if err = decoder.Decode(&rawObj); err != nil {
 			break
 		}
@@ -127,7 +129,7 @@ func (km *K8sManager) CreateResources(filename string) {
 }
 
 func (km *K8sManager) UpdateYaml(command string) {
-	e := ExecuteBash(command)
+	e := utils.ExecuteBash(command)
 	if e != nil {
 		panic("K8sManager: MasterError " + e.Error())
 	}

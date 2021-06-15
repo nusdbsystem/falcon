@@ -24,7 +24,8 @@ func InitInferenceWorker(masterAddr, workerAddr string, PartyID string) *Inferen
 func (wk *InferenceWorker) Run() {
 
 	// 0 thread: start event Loop
-	go wk.HeartBeat()
+
+	go wk.HeartBeatLoop()
 
 	rpcSvc := rpc.NewServer()
 

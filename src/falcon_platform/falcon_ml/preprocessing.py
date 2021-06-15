@@ -11,7 +11,7 @@ if __name__ == '__main__':
     print("Args is : ", args.a, args.b, args.c)
 
     try:
-        for i in range(188):
+        for i in range(3):
             print("Python PreProcessing Counting down", i)
             time.sleep(2)
     except:

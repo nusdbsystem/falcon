@@ -126,7 +126,7 @@ The console outputs are captured in `src/falcon_platform/dev_test/` folder:
     ```bash
     # python3 coordinator_client.py -url <ip url of coordinator>:30004 -method submit -path ./train_jobs/job.json
     # UCI tele-marketing bank dataset
-    python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_banktele.json
+    python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/two_parties_train_job.json
     # UCI breast cancer dataset
     python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_breastcancer.json
     ```

@@ -18,11 +18,11 @@ func initSvcName() string {
 }
 
 func SetupDist(qItem *cache.QItem, workerType string) {
-	// run master to call partyserver to set up worker
+	// run master to call party server to set up worker
 
 	if common.Env == common.DevEnv {
 		SetupDistDev(qItem, workerType)
-	} else if common.Env == common.ProdEnv {
+	} else if common.Env == common.K8sEnv {
 		SetupDistProd(qItem, workerType)
 	}
 }
@@ -34,7 +34,7 @@ func SetupWorkerHelper(masterAddr, workerType, jobId, dataPath, modelPath, dataO
 	if common.Env == common.DevEnv {
 		SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput)
 		// in prod, use k8s to run train/predict server as a isolate process
-	} else if common.Env == common.ProdEnv {
+	} else if common.Env == common.K8sEnv {
 		SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput)
 	}
 }
@@ -62,7 +62,7 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 		client.InferenceUpdateMaster(common.CoordAddr, masterAddr, qItem.JobId)
 	}
 
-	// master will call partyserver's endpoint to launch worker, to train or predict
+	// master will call party server's endpoint to launch worker, to train or predict
 	for index, partyAddr := range qItem.AddrList {
 
 		// Launch the worker
@@ -71,8 +71,7 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 		// send a request to http
 		//lisPort := client.GetExistPort(common.CoordAddr, IP)
 
-		// todo, manage partyserver port more wisely eg: client.SetupWorker(IP+lisPort, masterAddr, workerType), such that user dont need
-		//  to provide port in job
+		// todo, manage partyserver port more wisely eg: client.SetupWorker(IP+lisPort, masterAddr, workerType), such that user dont need to provide port in job
 
 		dataPath := qItem.PartyInfo[index].PartyPaths.DataInput
 		dataOutput := qItem.PartyInfo[index].PartyPaths.DataOutput
@@ -84,6 +83,7 @@ func SetupMaster(masterAddr string, qItem *cache.QItem, workerType string) strin
 		logger.Log.Printf("[SetupMaster] modelPath=%s\n", modelPath)
 		logger.Log.Printf("[SetupMaster] dataOutput=%s\n", dataOutput)
 
+		// call part server to launch worker to execute the task
 		client.SetupWorker(partyAddr, masterAddr, workerType, fmt.Sprintf("%d", qItem.JobId), dataPath, modelPath, dataOutput)
 	}
 

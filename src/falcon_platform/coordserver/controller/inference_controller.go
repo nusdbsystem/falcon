@@ -53,7 +53,6 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 		for _, info := range DataInfo {
 			for _, v := range pInfo {
 
-				// only deploy inference worker at party 0 (WTF? inference works should be deployed at all parties!)
 				// TODO: should be on Active party, ie party type, not id==0
 				if info.ID == v.ID && info.ID == 0 {
 					tmp := common.PartyInfo{}

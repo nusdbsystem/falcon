@@ -106,7 +106,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 		return errors.New("train job verify error")
 	}
 
-	logger.Log.Println("Parsed jobInfo: ", jobInfo)
+	//logger.Log.Println("Parsed jobInfo: ", jobInfo)
 
 	return nil
 }
@@ -191,8 +191,8 @@ func GeneratePreProcessparams(cfg map[string]interface{}) string {
 }
 
 func GenerateNetworkConfig(addrs []string, portArray [][]int32) string {
-	logger.Log.Println("Scheduler: Generating NetworkCfg ...")
-	logger.Log.Println("Scheduler: Assigned IP and ports are: ", addrs, portArray)
+
+	//logger.Log.Println("Scheduler: Assigned IP and ports are: ", addrs, portArray)
 
 	partyNums := len(addrs)
 	var IPs []string

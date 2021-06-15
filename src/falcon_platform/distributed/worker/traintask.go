@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
+	"time"
 )
 
 func (wk *TrainWorker) TrainTask(doTaskArgs *entity.DoTaskArgs, rep *entity.DoTaskReply) {
@@ -28,16 +30,18 @@ func (wk *TrainWorker) TrainTask(doTaskArgs *entity.DoTaskArgs, rep *entity.DoTa
 	// wait until all the task done
 	wg.Wait()
 
-	// kill all the monitors, which will cause to kill all running sub processes
-	wk.Pm.Cancel()
+	// once all tasks finish,
+	// kill all the monitors, which will cause to kill all running process/ containers
+	wk.Tm.Cancel()
 
-	wk.Pm.Lock()
-	rep.Killed = wk.Pm.IsKilled
-	if wk.Pm.IsKilled == true {
-		wk.Pm.Unlock()
-		wk.TaskFinish <- true
+	wk.Tm.Mux.Lock()
+	rep.Killed = wk.Tm.IsKilled
+	logger.Log.Printf("[Worker]: Report Killed %t: to master\n", rep.Killed)
+	if wk.Tm.IsKilled == true {
+		wk.Tm.Mux.Unlock()
+		wk.Tm.TaskFinish <- true
 	} else {
-		wk.Pm.Unlock()
+		wk.Tm.Mux.Unlock()
 	}
 }
 
@@ -104,7 +108,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	logger.Log.Println("[mlTaskCallee] call doMlTask with flSetting = ", flSetting)
 	logger.Log.Println("[mlTaskCallee] call doMlTask with existingKey = ", existingKey)
 	run := doMlTask(
-		wk.Pm,
+		wk.Tm,
 		fmt.Sprintf("%d", partyId),
 		fmt.Sprintf("%d", partyNum),
 		fmt.Sprintf("%d", partyType),
@@ -116,7 +120,6 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 	var exitStr string
 	var res map[string]string
 	var logFile string
-	logger.Log.Println("res from doMlTask is = ", res)
 
 	if doTaskArgs.TaskInfo.PreProcessing.AlgorithmName != "" {
 		logger.Log.Println("Worker: task pre processing start")
@@ -136,6 +139,8 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 			"",
 		)
 		if exit := wk.execResHandler(exitStr, res, rep); exit == true {
+			logger.Log.Println("Worker: task pre processing errored")
+			// if this stage has some error, return , skip the next stage
 			return
 		}
 		logger.Log.Println("Worker: task pre processing done", rep)
@@ -163,6 +168,7 @@ func (wk *TrainWorker) mlTaskCallee(doTaskArgs *entity.DoTaskArgs, rep *entity.D
 		)
 
 		if exit := wk.execResHandler(exitStr, res, rep); exit == true {
+			logger.Log.Println("Worker: task model training errored")
 			return
 		}
 		logger.Log.Println("Worker:task model training", rep)
@@ -223,7 +229,7 @@ func (wk *TrainWorker) execResHandler(
 	rep *entity.DoTaskReply) bool {
 	/**
 	 * @Author
-	 * @Description
+	 * @Description: collect the runtime message.
 	 * @Date 3:55 下午 14/12/20
 	 * @Param
 			true: has error, exit
@@ -237,7 +243,7 @@ func (wk *TrainWorker) execResHandler(
 	}
 	rep.TaskMsg.RuntimeMsg = string(js)
 
-	if exitStr != common.SubProcessNormal {
+	if exitStr != common.SubProcessNormal && exitStr != common.SubProcessKilled {
 		rep.RuntimeError = true
 		// return is used to control the rpc call status, always return nil, but
 		// keep error at rep.ErrorMsg
@@ -249,7 +255,7 @@ func (wk *TrainWorker) execResHandler(
 }
 
 func doMlTask(
-	pm *taskmanager.SubProcessManager,
+	tm *taskmanager.TaskManager,
 
 	partyId string,
 	partyNum string,
@@ -269,6 +275,7 @@ func doMlTask(
 	string, // ?
 	string, // ?
 ) (string, map[string]string) {
+
 	/**
 	 * @Author
 	 * @Description  record if the task is fail or not
@@ -292,8 +299,6 @@ func doMlTask(
 		modelReport string,
 	) (string, map[string]string) {
 
-		var envs []string
-
 		cmd := exec.Command(
 			common.FLEnginePath,
 			"--party-id", partyId,
@@ -314,13 +319,70 @@ func doMlTask(
 		)
 
 		logger.Log.Printf("-----------------------------------------------------------------\n")
-		logger.Log.Println("envs", envs)
 		logger.Log.Println(cmd.String())
 		logger.Log.Printf("-----------------------------------------------------------------\n")
-
-		exitStr, runTimeErrorLog := pm.CreateResources(cmd, envs)
+		//cmdTest := exec.Command(
+		//	"python3",
+		//	"-u", "./falcon/src/falcon_platform/falcon_ml/preprocessing.py",
+		//	"-a=1", "-b=2", "-c=123")
+		exitStr, runTimeErrorLog := tm.CreateResources(cmd)
 		res[algName] = runTimeErrorLog
 		return exitStr, res
-
 	}
+}
+
+func TestTaskProcess(doTaskArgs *entity.DoTaskArgs) {
+
+	partyId := doTaskArgs.PartyID
+	partyNum := doTaskArgs.PartyNums
+	partyType := 1
+	partyTypeStr := doTaskArgs.PartyInfo.PartyType
+	// TODO: check with wyc if partyType 0 = active?
+	if partyTypeStr == "active" {
+		partyType = 0
+	} else if partyTypeStr == "passive" {
+		partyType = 1
+	}
+	flSetting := 1
+	flSettingStr := doTaskArgs.JobFlType
+	if flSettingStr == "vertical" {
+		flSetting = 1
+	} else if flSettingStr == "horizontal" {
+		flSetting = 0
+	}
+	existingKey := doTaskArgs.ExistingKey
+	//dataInputFile := common.TaskDataPath +"/" + doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Data
+	modelFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.TrainedModel
+	algParams := doTaskArgs.TaskInfo.ModelTraining.InputConfigs.SerializedAlgorithmConfig
+	logger.Log.Println("Worker: SerializedAlgorithmConfig is", algParams)
+
+	modelReportFile := common.TaskModelPath + "/" + doTaskArgs.TaskInfo.ModelTraining.OutputConfigs.EvaluationReport
+	logFile := common.TaskRuntimeLogs + "/" + doTaskArgs.TaskInfo.PreProcessing.AlgorithmName
+	KeyFile := doTaskArgs.TaskInfo.PreProcessing.InputConfigs.DataInput.Key
+	modelInputFile := common.TaskDataOutput + "/" + doTaskArgs.TaskInfo.ModelTraining.InputConfigs.DataInput.Data
+
+	logger.Log.Printf("--------------------------------------------------\n")
+	logger.Log.Printf("\n")
+	logger.Log.Println("executed path is: ", strings.Join([]string{
+		common.FLEnginePath,
+		" --party-id " + fmt.Sprintf("%d", partyId),
+		" --party-num " + fmt.Sprintf("%d", partyNum),
+		" --party-type " + fmt.Sprintf("%d", partyType),
+		" --fl-setting " + fmt.Sprintf("%d", flSetting),
+		" --existing-key " + fmt.Sprintf("%d", existingKey),
+		" --key-file " + KeyFile,
+		" --network-file " + doTaskArgs.NetWorkFile,
+
+		" --algorithm-name " + doTaskArgs.TaskInfo.ModelTraining.AlgorithmName,
+		" --algorithm-params " + algParams,
+		" --log-file " + logFile,
+		" --data-input-file " + modelInputFile,
+		" --data-output-file ",
+		" --model-save-file " + modelFile,
+		" --model-report-file " + modelReportFile,
+	}, " "))
+	logger.Log.Printf("\n")
+	logger.Log.Printf("--------------------------------------------------\n")
+
+	time.Sleep(time.Second * 10)
 }

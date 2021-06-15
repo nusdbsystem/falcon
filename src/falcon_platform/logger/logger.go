@@ -36,7 +36,8 @@ func HandleErrors() {
 	// cache global unexpected error
 	err := recover()
 	if err != nil {
-		Log.Printf("[Error] ")
+
+		Log.Printf("[Error]\t")
 		Log.Println("HandleErrors: Catching error ...")
 		var buf [4096]byte
 		n := runtime.Stack(buf[:], false)
@@ -44,5 +45,6 @@ func HandleErrors() {
 		Log.Printf("==> %s\n", string(buf[:n]))
 		//os.Exit(1)
 	}
-	Log.Println("HandleErrors: exit current thread")
+
+	//Do.Println("HandleErrors: exit current thread")
 }

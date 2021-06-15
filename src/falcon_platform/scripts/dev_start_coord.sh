@@ -9,28 +9,6 @@ if [ "$#" -ne 0 ]; then
     exit 1
 fi
 
-# from https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
-# while [[ $# -gt 0 ]]
-# do
-# key="$1"
-
-# case $key in
-#     --partyNumber)
-#     partyNumber="$2"
-#     shift # past argument
-#     shift # past value
-#     ;;
-#     *)    # unknown option
-#     echo "No party number provided"
-#     echo "Usage: bash dev_start_coord.sh --partyNumber <partyNumber>"
-#     exit 1
-#     shift # past argument
-#     ;;
-# esac
-# done
-
-# echo "partyNumber = ${partyNumber}"
-
 # populate the environmental variables from
 # the config_.properties files, such as paths IP and Ports
 source config_coord.properties
@@ -44,7 +22,7 @@ else
    TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
    DEV_TEST_OUTDIR=./dev_test/Coord_${TIMESTAMP}
 
-	export COORD_SERVER_BASEPATH=$DEV_TEST_OUTDIR
+	 export COORD_SERVER_BASEPATH=$DEV_TEST_OUTDIR
    echo "COORD_SERVER_BASEPATH NOT provided, will use ${COORD_SERVER_BASEPATH}"
 fi
 
@@ -52,7 +30,7 @@ fi
 # first create COORD_SERVER_BASEPATH/ if not already exists
 mkdir -p $COORD_SERVER_BASEPATH
 
-export ENV="dev"
+export ENV="local"
 export SERVICE_NAME="coord"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT

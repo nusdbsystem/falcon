@@ -24,7 +24,7 @@ func AssignPort(ctx *entity.Context) uint {
 			logger.Log.Println("AssignPort: retry...")
 			i++
 		} else {
-			logger.Log.Println("AssignPort: AssignSuccessful port is ", u.Port)
+			//logger.Log.Println("AssignPort: AssignSuccessful port is ", u.Port)
 			break
 		}
 	}

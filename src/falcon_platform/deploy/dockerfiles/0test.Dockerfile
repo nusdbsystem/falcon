@@ -32,4 +32,4 @@ ADD deploy ./deploy
 ADD scripts ./scripts
 RUN chmod -R 777 ./deploy && chmod -R 777 ./scripts
 
-CMD while true; do echo hello; done
+CMD while true; sleep 3; do echo hello; done

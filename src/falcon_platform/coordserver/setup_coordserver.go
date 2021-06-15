@@ -29,8 +29,7 @@ func SetupCoordServer(nConsumer int) {
 	// Set up Database
 	logger.Log.Println("[coordinator server]: Init DataBase...")
 	controller.CreateTables()
-	if common.JobDatabase == common.DBMySQL {
-		// initialize the mysql db
+	if common.Env == common.K8sEnv {
 		controller.CreateSysPorts()
 	}
 

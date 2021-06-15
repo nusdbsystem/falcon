@@ -76,8 +76,4 @@ func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, da
 
 	}
 
-	// in prod, use k8s to run train/predict server as a isolate process
-
-	logger.Log.Println("SetupDist: worker is running")
-
 }

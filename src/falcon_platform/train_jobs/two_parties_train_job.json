@@ -8,7 +8,7 @@
   "party_info": [
     {
       "id": 1,
-      "addr": "127.0.0.1:30005",
+      "addr": "127.0.0.1:30006",
       "party_type": "active",
       "path": {
         "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0",
@@ -18,7 +18,7 @@
     },
     {
       "id": 2,
-      "addr": "127.0.0.1:30006",
+      "addr": "127.0.0.1:30007",
       "party_type": "passive",
       "path": {
         "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1",
