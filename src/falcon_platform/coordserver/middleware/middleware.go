@@ -26,21 +26,6 @@ func timeUsage() Middleware {
 	}
 }
 
-//middleware to verify the HTTP methods
-func verifyHTTPMethod(method string) Middleware {
-	return func(f http.HandlerFunc) http.HandlerFunc {
-
-		return func(w http.ResponseWriter, r *http.Request) {
-			if method != r.Method {
-				exceptions.HandleHttpError(w, r, http.StatusMethodNotAllowed, "HTTP Method Not Allowed")
-				return
-			}
-			//logger.Log.Println("HTTP: Checking method")
-			f(w, r)
-		}
-	}
-}
-
 // middleware call panic handler
 func callPanic() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
