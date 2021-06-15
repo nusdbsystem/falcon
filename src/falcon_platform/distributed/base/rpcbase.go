@@ -54,7 +54,8 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
 			for {
 				conn, err := rb.Listener.Accept()
 				if err == nil {
-					logger.Log.Printf("%s: got new conn", rb.Name)
+
+					//logger.Log.Printf("%s: got new conn", rb.Name)
 					// user thread to process requests
 					go func() {
 						rpcSvc.ServeConn(conn)
@@ -65,7 +66,8 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
 					break
 				}
 			}
-			logger.Log.Printf("%s: masterServer: done\n", rb.Name)
+
+			logger.Log.Printf("%s: RpcServer closed\n", rb.Name)
 		}()
 
 	} else {
@@ -73,7 +75,8 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
 			// create a connection
 			conn, err := rb.Listener.Accept()
 			if err == nil {
-				logger.Log.Printf("%s: got new conn", rb.Name)
+
+				//logger.Log.Println("Worker: got new conn")
 				go func() {
 					rpcSvc.ServeConn(conn)
 					// close a connection
@@ -93,10 +96,11 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
 func (rb *RpcBaseClass) StopRPCServer(addr, targetSvc string) {
 	var reply entity.ShutdownReply
 
-	logger.Log.Printf("%s: begin to call %s\n", rb.Name, targetSvc)
+	logger.Log.Printf("%s: call %s\n", rb.Name, targetSvc)
 	ok := client.Call(addr, rb.Network, targetSvc, new(struct{}), &reply)
 	if ok == false {
 		logger.Log.Printf("%s: Cleanup: RPC %s error\n", rb.Name, addr)
 	}
-	logger.Log.Printf("%s: cleanupRegistration: done\n", rb.Name)
+
+	logger.Log.Printf("%s: StopRPCServer: done\n", rb.Name)
 }
