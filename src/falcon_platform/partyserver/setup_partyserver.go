@@ -34,6 +34,11 @@ func SetupPartyServer() {
 		// Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(r)),
 		ErrorLog: http_logger,
 		// Good practice: enforce timeouts for servers
+		//ReadTimeout covers the time from when the connection is accepted to when the request body is fully read
+		//(if you do read the body, otherwise to the end of the headers). It's implemented in net/http by calling
+		//  SetReadDeadline immediately after Accept.
+		//WriteTimeout normally covers the time from the end of the request header read to the end of the response write
+		//  (a.k.a. the lifetime of the ServeHTTP), by calling SetWriteDeadline at the end of readRequest.
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  15 * time.Second,
