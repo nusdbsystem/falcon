@@ -14,22 +14,25 @@ import (
 type Master struct {
 	base.RpcBaseClass
 
-	doneChannel chan bool
-
+	// cond
 	beginCountDown *sync.Cond
 	allWorkerReady *sync.Cond
 
 	// tmp slice to store registered workers
 	tmpWorkers chan string
+
 	// slice to store valid workers
 	workers   []string
 	workerNum int
 
+	// record the final status of this job
 	jobStatus string
 
+	// master heartbeat setting
 	lastSendTime     int64
 	heartbeatTimeout int
 
+	// check if at least one worker found, decide when to board cast heartbeat
 	foundWorker bool
 
 	// common.TrainWorker or common.InferenceWorker
@@ -43,7 +46,6 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 	ms.beginCountDown = sync.NewCond(ms)
 	ms.allWorkerReady = sync.NewCond(ms)
 
-	ms.doneChannel = make(chan bool)
 	ms.tmpWorkers = make(chan string)
 	ms.workerNum = workerNum
 	ms.heartbeatTimeout = common.MasterTimeout
@@ -53,9 +55,10 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 // RegisterWorker is an RPC method that is called by workers after they have started
 // up to report that they are ready to receive tasks.
 func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) error {
-	logger.Log.Println("[master/RegisterWorker] register with master, called by worker")
-	// Pass WorkerList (addr:partyID) into tmpWorkers for pre-processing
-	master.tmpWorkers <- args.WorkerList
+
+	logger.Log.Println("[master/RegisterWorker] one Worker registered!")
+	// Pass WorkerAddrId (addr:partyID) into tmpWorkers for pre-processing
+	master.tmpWorkers <- args.WorkerAddrId
 	return nil
 }
 
@@ -74,7 +77,8 @@ loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
-			logger.Log.Printf("Master: %s quit forwardRegistrations \n", master.Port)
+
+			logger.Log.Printf("Master: Thread-2 %s quit forwardRegistrations \n", master.Port)
 			break loop
 
 		// a list of master.workers:
@@ -118,28 +122,30 @@ func (master *Master) run(
 	updateStatus func(jsonString string),
 	finish func(),
 ) {
+	// master's main logic,
+	// 1. schedule the job to workers,
+	// 2. collect the job status, call coordinator's endpoints to update status to db
+	// 3. close all resources related to this job
 
 	jsonString := schedule()
-	logger.Log.Println("Master: finish job, begin to update to coord")
+	logger.Log.Println("Master: finish job, update to coord, jobStatus:", master.jobStatus)
 
 	updateStatus(jsonString)
-	logger.Log.Println("Master: finish job, begin to close all")
+	logger.Log.Println("Master: finish job, close all")
 
 	finish()
-	logger.Log.Printf("Master %s: job completed\n", master.Addr)
+	logger.Log.Printf("Master %s: Thread-4 job completed\n", master.Addr)
 
-	master.doneChannel <- true
 }
 
 func (master *Master) Wait() {
+	// master wait until all master's logic finished
 
 loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
-			logger.Log.Printf("Master: server %s quit Waitting \n", master.Addr)
-			break loop
-		case <-master.doneChannel:
+			logger.Log.Printf("Master: All logic finished !, server %s quit Waitting \n", master.Addr)
 			break loop
 		}
 	}
@@ -148,27 +154,26 @@ loop:
 // Shutdown is an RPC method that shuts down the Master's RPC server.
 // for rpc method, must be public method, only 2 params, second one must be pointer,return err type
 func (master *Master) Shutdown(_, _ *struct{}) error {
+
 	logger.Log.Println("Master: Shutdown server")
-	_ = master.Listener.Close() // causes the Accept to fail, then break out the accetp loop
+	// causes the Accept to fail, then break out the accept loop
+	_ = master.Listener.Close()
 	return nil
-}
-
-func (master *Master) killWorkers() {
-
-	master.Lock()
-	defer master.Unlock()
-
-	for _, worker := range master.workers {
-
-		master.StopRPCServer(worker, master.workerType+".Shutdown")
-	}
 }
 
 // called by coordinator, to shutdown the running job
 func (master *Master) KillJob(_, _ *struct{}) error {
 	master.killWorkers()
-
-	master.Cancel()
-	master.StopRPCServer(master.Addr, "Master.Shutdown")
 	return nil
+}
+
+func (master *Master) killWorkers() {
+	// after called killWorker, scheduler in master.run will finish, "jobUpdateStatus" and "finish" will be called
+	master.Lock()
+	defer master.Unlock()
+
+	for _, WorkerAddrId := range master.workers {
+		worker := strings.Join(strings.Split(WorkerAddrId, ":")[:2], ":")
+		master.StopRPCServer(worker, master.workerType+".Shutdown")
+	}
 }
