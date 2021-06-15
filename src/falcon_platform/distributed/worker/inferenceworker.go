@@ -45,6 +45,6 @@ func (wk *InferenceWorker) DoTask(arg []byte, rep *entity.DoTaskReply) error {
 
 	var doTaskArgs *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
 
-	go wk.CreateInference(doTaskArgs)
+	wk.CreateInference(doTaskArgs)
 	return nil
 }
