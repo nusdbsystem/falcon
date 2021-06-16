@@ -27,9 +27,9 @@ type DoTaskArgs struct {
 // the worker's UNIX-domain socket name, i.e. its RPC addr
 type RegisterArgs struct {
 	// this is worker addr
-	WorkerAddr string
-	PartyID    string
-	WorkerList string // = WorkerAddr:PartyID
+	WorkerAddr   string
+	PartyID      string
+	WorkerAddrId string // = WorkerAddr:PartyID
 }
 
 type ShutdownReply struct {

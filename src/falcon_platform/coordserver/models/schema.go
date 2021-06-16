@@ -17,7 +17,7 @@ type TrainJobRecord struct {
 	UserID    uint
 	JobInfoID uint // id of the dsl table(jobInfotable)
 
-	Status string
+	Status string `gorm:"type:varchar(50)"`
 
 	ErrorMsg   string `gorm:"type:varchar(256)"`
 	JobResult  string `gorm:"type:varchar(4096)"`
@@ -127,8 +127,7 @@ type InferenceJobRecord struct {
 	ModelId uint //外键模型id，标明哪个模型执⾏
 	JobId   uint //外键模型id，标明哪个训练job
 
-	Status string
-
+	Status     string `gorm:"type:varchar(50)"`
 	MasterAddr string `gorm:"type:varchar(256)"`
 
 	CreateTime time.Time

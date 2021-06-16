@@ -92,9 +92,8 @@ elif [[ "$unamestr" == 'WindowsNT' ]]; then
 fi
 make $makeOS
 
-# NOTE: need "2>&1" before "&"
-# To redirect both stdout and stderr to the same file
-./bin/falcon_platform > $PARTY_SERVER_BASEPATH/Party-${PARTY_ID}-console.log 2>&1 &
+# not run in background, used when debug
+./bin/falcon_platform
 
 # store the process id in basepath
 echo $! > ./dev_test/Party-${PARTY_ID}.pid

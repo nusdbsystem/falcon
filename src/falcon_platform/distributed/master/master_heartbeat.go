@@ -4,7 +4,6 @@ import (
 	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/logger"
-	"fmt"
 	"strings"
 	"time"
 )
@@ -15,7 +14,8 @@ loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
-			logger.Log.Printf("Master: %s quit heartBeat eventLoop \n", master.Port)
+
+			logger.Log.Printf("Master: Thread-1 %s quit eventLoop \n", master.Port)
 			break loop
 
 		default:
@@ -27,15 +27,16 @@ loop:
 				master.Unlock()
 
 			} else {
-
+				// worker found, send heartbeat
 				master.Lock()
 				elapseTime := time.Now().UnixNano() - master.lastSendTime
-				// fmt.Printf("Master: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
+
+				//fmt.Printf("Master: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
 
 				if int(elapseTime/int64(time.Millisecond)) >= master.heartbeatTimeout {
 
 					master.Unlock()
-					fmt.Println("Master: Timeout, server begin to send heart beat to worker")
+					//fmt.Println("Master: Timeout, server send heart beat to worker")
 					master.broadcastHeartbeat()
 
 				} else {
@@ -49,16 +50,18 @@ loop:
 
 // boardcast heartbeat to current workers in worker list
 func (master *Master) broadcastHeartbeat() {
-	logger.Log.Println("[broadcastHeartbeat]...")
+
+	// logger.Log.Println("[broadcastHeartbeat]...")
 	// update lastSendTime
 	master.reset()
 
 	for _, RegisteredWorker := range master.workers {
 		// RegisteredWorker is IP:Port:PartyID
-		logger.Log.Println("RegisteredWorker = ", RegisteredWorker)
+
+		// logger.Log.Println("RegisteredWorker = ", RegisteredWorker)
 		// Addr = IP:Port
 		RegisteredWorkerAddr := strings.Join(strings.Split(RegisteredWorker, ":")[:2], ":")
-		logger.Log.Println("RegisteredWorkerAddr = ", RegisteredWorkerAddr)
+		// logger.Log.Println("RegisteredWorkerAddr = ", RegisteredWorkerAddr)
 
 		ok := client.Call(RegisteredWorkerAddr, master.Network, master.workerType+".ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
@@ -75,7 +78,8 @@ func (master *Master) reset() {
 }
 
 func (master *Master) checkWorker() bool {
-
+	// if at least one worker found, master send hearbeat,
+	// otherwise, wait until one worker found..
 	master.Lock()
 
 	if len(master.workers) > 0 {

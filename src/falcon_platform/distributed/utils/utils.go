@@ -3,8 +3,10 @@ package utils
 import (
 	"falcon_platform/logger"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net"
+	"os/exec"
 )
 
 // get one port
@@ -74,4 +76,58 @@ func Contains(str string, l []string) bool {
 		}
 	}
 	return false
+}
+
+type OutStream struct{}
+
+func (out OutStream) Write(p []byte) (int, error) {
+	fmt.Printf("[SubProcessManager]: subprocess' output log ----------> %s", string(p))
+	return len(p), nil
+}
+
+func ExecuteBash(command string) error {
+	// 返回一个 cmd 对象
+	logger.Log.Println("[SubProcessManager]: execute bash ::", command)
+
+	cmd := exec.Command("bash", "-c", command)
+
+	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
+
+	if err := cmd.Start(); err != nil {
+		logger.Log.Println("[SubProcessManager]: executeBash: Start error ", err)
+		return err
+	}
+	errLog, _ := ioutil.ReadAll(stderr)
+	outLog, _ := ioutil.ReadAll(stdout)
+
+	logger.Log.Println("[SubProcessManager]: executeBash: error log is ", string(errLog))
+	logger.Log.Println("[SubProcessManager]: executeBash: out put is ", string(outLog))
+	outErr := cmd.Wait()
+	return outErr
+
+}
+
+func ExecuteCmd(command string) error {
+	// 返回一个 cmd 对象
+
+	logger.Log.Println("[SubProcessManager]: execute bash,", command)
+
+	cmd := exec.Command(command)
+
+	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
+
+	if err := cmd.Start(); err != nil {
+		logger.Log.Println("ExecuteBash: Start error ", err)
+		return err
+	}
+	errLog, _ := ioutil.ReadAll(stderr)
+	outLog, _ := ioutil.ReadAll(stdout)
+
+	logger.Log.Println("ExecuteBash: ErrorLog is ", string(errLog))
+	logger.Log.Println("ExecuteBash: OutPut is ", string(outLog))
+	outErr := cmd.Wait()
+
+	return outErr
 }

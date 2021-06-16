@@ -10,21 +10,26 @@ import (
 )
 
 func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master *Master) {
-	// launch 2 thread, one is rpc server, another is scheduler, once got party info, assign work
+	// launch 4 thread,
+	// 1. heartbeat loop, stopped by master.Cancel()
+	// 2. waiting for worker register, stopped by master.Cancel()
+	// 3. rpc server, used to get requests from worker, stopped by master.StopRPCServer
+	// 4. scheduling process, call finish to stop above threads
 
 	master = newMaster(masterAddr, len(qItem.AddrList))
 	master.workerType = workerType
 	master.reset()
 
-	// thread 0, heartBeat
+	// thread 1, heartBeat
 	go master.heartBeat()
 
 	rpcServer := rpc.NewServer()
 	logger.Log.Println("[master_rpc/RunMaster] rpcServer ready, now register with master")
 	err := rpcServer.Register(master)
-	// NOTE TODO: the rpc native Register() method will produce warning in console:
+	// NOTE the rpc native Register() method will produce warning in console:
 	// rpc.Register: method ...; needs exactly three
 	// reply type of method ... is not a pointer: "bool"
+	// all those can be ignored
 	if err != nil {
 		logger.Log.Println("rpcServer Register master Error", err)
 		return
@@ -32,10 +37,10 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 
 	logger.Log.Println("[master_rpc/RunMaster] rpcServer registered with master")
 
-	// thread 1
+	// thread 2
 	go master.forwardRegistrations(qItem)
 
-	// thread 2
+	// thread 3
 	// launch a rpc server thread to process the requests.
 	master.StartRPCServer(rpcServer, false)
 
@@ -50,19 +55,18 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 	if workerType == common.TrainWorker {
 
 		updateStatus = func(jsonString string) {
+			// call coordinator to update status
 			client.JobUpdateResInfo(common.CoordAddr, "", string(jsonString), "", qItem.JobId)
 			client.JobUpdateStatus(common.CoordAddr, master.jobStatus, qItem.JobId)
 			client.ModelUpdate(common.CoordAddr, 1, qItem.JobId)
 		}
 
 		finish = func() {
-			// stop worker after finishing the job
-			master.killWorkers()
+			// stop master after finishing the job
+			master.StopRPCServer(master.Addr, "Master.Shutdown")
 			// stop other related threads
 			// close heartBeat and forwardRegistrations
 			master.Cancel()
-			// stop both master after finishing the job
-			master.StopRPCServer(master.Addr, "Master.Shutdown")
 		}
 
 	} else if workerType == common.InferenceWorker {
@@ -72,11 +76,11 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 		}
 
 		finish = func() {
+			// stop both master after finishing the job
+			master.StopRPCServer(master.Addr, "Master.Shutdown")
 			// stop other related threads
 			// close heartBeat and forwardRegistrations
 			master.Cancel()
-			// stop both master after finishing the job
-			master.StopRPCServer(master.Addr, "Master.Shutdown")
 		}
 	}
 
@@ -93,7 +97,7 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 		}
 	})
 
-	// thread 3
+	// thread 4
 	// launch a thread to process then do the scheduling.
 	go master.run(scheduler, updateStatus, finish)
 

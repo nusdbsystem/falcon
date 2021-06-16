@@ -11,7 +11,7 @@ import (
 )
 
 func SetupDistProd(qItem *cache.QItem, workerType string) {
-	// run master to call partyserver to set up worker
+	// run master to call party server to set up worker
 
 	masterPort := client.GetFreePort(common.CoordAddr)
 	logger.Log.Println("SetupDist: Launch master Get port", masterPort)
@@ -19,7 +19,7 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 	masterIP := common.CoordIP
 	masterAddr := masterIP + ":" + masterPort
 
-	logger.Log.Println("SetupDist: Launch master ProdEnv")
+	logger.Log.Println("SetupDist: Launch master K8sEnv")
 
 	// in prod, use k8s to run train/predict server as a isolate process
 	itemKey := "job" + fmt.Sprintf("%d", qItem.JobId)
@@ -109,8 +109,8 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 		dataOutput,                 // 11. folder to store processed data
 	}
 
-	_ = taskmanager.ExecuteOthers("ls")
-	_ = taskmanager.ExecuteOthers("pwd")
+	//_ = taskmanager.ExecuteCmd("ls")
+	//_ = taskmanager.ExecuteCmd("pwd")
 	km.UpdateYaml(strings.Join(command, " "))
 
 	filename := common.YamlBasePath + serviceName + ".yaml"

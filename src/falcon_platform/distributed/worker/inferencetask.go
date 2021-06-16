@@ -14,11 +14,9 @@ func (wk *InferenceWorker) CreateInference(doTaskArgs *entity.DoTaskArgs) {
 
 	cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
 
-	var envs []string
-
 	// 2 thread will ready from isStop channel, only one is running at the any time
 
-	el, e := wk.Pm.CreateResources(cmd, envs)
+	el, e := wk.Tm.CreateResources(cmd)
 
 	logger.Log.Println("Worker:task 1 pre processing done", el)
 

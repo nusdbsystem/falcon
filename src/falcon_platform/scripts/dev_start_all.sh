@@ -3,6 +3,11 @@
 # exit on error
 set -e
 
+
+#	//////////////////////////////////////////////////////////////////////////
+#	//			checking if params is correct or not                          	//
+#	//////////////////////////////////////////////////////////////////////////
+# if number of parameters is not equal to 2
 if [ "$#" -ne 2 ]; then
     echo "Illegal number of parameters"
     echo "Usage: bash dev_start_all.sh --partyCount <PARTY_COUNT>"
@@ -33,6 +38,10 @@ echo "PARTY_COUNT = ${PARTY_COUNT}"
 
 # Setup falcon_platform
 
+#	//////////////////////////////////////////////////////////////////////////
+#	//			launch the whole platform                                     	//
+#	//////////////////////////////////////////////////////////////////////////
+# Setup coordinator:
 # Launch coordinator first:
 bash scripts/dev_start_coord.sh
 
@@ -45,3 +54,8 @@ do
 done
 
 echo DONE
+
+#	//////////////////////////////////////////////////////////////////////////
+#	//			checking if the process are running                             //
+#	//////////////////////////////////////////////////////////////////////////
+ps aux | grep falcon

@@ -29,7 +29,7 @@ func Call(address string, network string, rpcname string, args interface{}, repl
 
 			if res.Error() == exceptions.ConnectionErr {
 				logger.Log.Printf("RpcCall: Connection error, retry.......")
-				time.Sleep(time.Second * 3)
+				time.Sleep(time.Second * 1)
 				NTimes--
 			}
 
@@ -39,7 +39,7 @@ func Call(address string, network string, rpcname string, args interface{}, repl
 			}
 
 		} else {
-			logger.Log.Printf("RpcCall: Calling successfully")
+			//logger.Log.Printf("RpcCall: Calling successfully")
 			return true
 		}
 	}

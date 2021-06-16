@@ -30,11 +30,15 @@ type JobStatusRes struct {
 	Status string `json:"status"`
 }
 
+type JobIdGet struct {
+	JobId string `json:"job_id"`
+}
+
 // receive a job info file, parse it, put in queue
 func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// Parse multipart form, 32 << 20 specifies a maximum
 	// upload of 32 MB files.
-	r.ParseMultipartForm(32 << 20)
+	_ = r.ParseMultipartForm(32 << 20)
 
 	var buf bytes.Buffer
 
@@ -88,17 +92,27 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// read the query parameters with gorilla mux
 	params := mux.Vars(r)
 	jobId, _ := strconv.Atoi(params["jobId"])
-
-	err := controller.JobKill(uint(jobId), ctx)
-
-	if err != nil {
-		exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
+	var jr JobStatusRes
+	status, e := controller.JobStatusQuery(uint(jobId), ctx)
+	if e != nil {
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest, e.Error())
 		return
 	}
-
-	jr := JobStatusRes{
-		JobId:  uint(jobId),
-		Status: common.JobKilled,
+	if status == common.JobFailed || status == common.JobKilled || status == common.JobSuccessful {
+		jr = JobStatusRes{
+			JobId:  uint(jobId),
+			Status: "Job already stopped with status: " + status,
+		}
+	} else {
+		err := controller.JobKill(uint(jobId), ctx)
+		if err != nil {
+			exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
+			return
+		}
+		jr = JobStatusRes{
+			JobId:  uint(jobId),
+			Status: common.JobKilled,
+		}
 	}
 
 	js, err := json.Marshal(jr)
@@ -129,7 +143,10 @@ func JobUpdateStatus(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 	JobId := r.FormValue(common.JobId)
 	JobStatus := r.FormValue(common.JobStatus)
 
-	jobId, _ := strconv.Atoi(JobId)
+	jobId, e := strconv.Atoi(JobId)
+	if e != nil {
+		panic(e)
+	}
 
 	controller.JobUpdateStatus(uint(jobId), JobStatus, ctx)
 }

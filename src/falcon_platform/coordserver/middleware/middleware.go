@@ -3,41 +3,28 @@ package middleware
 import (
 	"falcon_platform/coordserver/entity"
 	"falcon_platform/exceptions"
+	"falcon_platform/logger"
 	"net/http"
+	"time"
 )
 
 type Middleware func(handler http.HandlerFunc) http.HandlerFunc
 
 var SysLvPath []string
 
-// middleware to measure time
-// func timeUsage() Middleware {
-// 	return func(f http.HandlerFunc) http.HandlerFunc {
+//middleware to measure time
+func timeUsage() Middleware {
+	return func(f http.HandlerFunc) http.HandlerFunc {
 
-// 		return func(w http.ResponseWriter, r *http.Request) {
-// 			start := time.Now()
-// 			defer func() {
-// 				logger.Log.Printf("HTTP: [url] %s [time_usage] %s \n", r.Host+r.URL.Path, time.Since(start))
-// 			}()
-// 			f(w, r)
-// 		}
-// 	}
-// }
-
-// middleware to verify the HTTP methods
-// func verifyHTTPmethod(method string) Middleware {
-// 	return func(f http.HandlerFunc) http.HandlerFunc {
-
-// 		return func(w http.ResponseWriter, r *http.Request) {
-// 			if method != r.Method {
-// 				exceptions.HandleHttpError(w, r, http.StatusMethodNotAllowed, "HTTP Method Not Allowed")
-// 				return
-// 			}
-// 			//logger.Log.Println("HTTP: Checking method")
-// 			f(w, r)
-// 		}
-// 	}
-// }
+		return func(w http.ResponseWriter, r *http.Request) {
+			start := time.Now()
+			defer func() {
+				logger.Log.Printf("HTTP: [url] %s [time_usage] %s \n", r.Host+r.URL.Path, time.Since(start))
+			}()
+			f(w, r)
+		}
+	}
+}
 
 // middleware call panic handler
 func callPanic() Middleware {

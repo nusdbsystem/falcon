@@ -12,7 +12,7 @@ import (
 
 func Get(url string) string {
 
-	logger.Log.Println("send get requests to ", url)
+	//logger.Log.Println("send get requests to ", url)
 
 	resp, err := http.Get(url)
 

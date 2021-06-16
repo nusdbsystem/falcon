@@ -6,7 +6,6 @@ import (
 	"falcon_platform/distributed/entity"
 	"falcon_platform/logger"
 	"net/rpc"
-	"time"
 )
 
 type TrainWorker struct {
@@ -24,9 +23,9 @@ func InitTrainWorker(masterAddr, workerAddr string, PartyID string) *TrainWorker
 }
 
 func (wk *TrainWorker) Run() {
-	logger.Log.Println("TrainWorker Run() called")
-	// 0 thread: start heartbeat
-	go wk.HeartBeat()
+
+	// 0 thread: start event Loop
+	go wk.HeartBeatLoop()
 
 	rpcSvc := rpc.NewServer()
 
@@ -50,10 +49,6 @@ func (wk *TrainWorker) DoTask(arg []byte, rep *entity.DoTaskReply) error {
 
 	wk.TrainTask(doTaskArgs, rep)
 
-	for i := 10; i > 0; i-- {
-		logger.Log.Println("Worker: Counting down before DoTask done... ", i)
-		time.Sleep(time.Second)
-	}
-	logger.Log.Printf("Worker: %s: DoTask done\n", wk.Addr)
+	logger.Log.Printf("Worker: %s: task done\n", wk.Addr)
 	return nil
 }

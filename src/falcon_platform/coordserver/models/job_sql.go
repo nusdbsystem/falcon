@@ -81,7 +81,6 @@ func (jobDB *JobDB) JobUpdateResInfo(tx *gorm.DB, jobId uint, jobErrMsg, jobResu
 /////////// JobInfo,  call by other internal thread ////////////
 ////////////////////////////////////////////////////////////////
 
-// TODO: is this needed as gorm is multi-thread safe?
 func JobUpdateStatus(jobId uint, status string) {
 	jobDB := InitJobDB()
 

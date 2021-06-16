@@ -95,8 +95,9 @@ func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 	status, newInfId := controller.CreateInference(InferenceJob, ctx)
 
 	// 4. if true, delete previous running job once it is running
+
 	if status == true {
-		logger.Log.Println("[UpdateInference]: CreateInference return true, now begin to delete previous running jobs, inferenceIds", InferenceIds)
+		logger.Log.Println("[UpdateInference]: CreateInference return true, now delete previous running jobs, inferenceIds", InferenceIds)
 		go controller.UpdateInference(newInfId, InferenceIds, ctx)
 	} else {
 		logger.Log.Println("[UpdateInference]: CreateInference return false")
@@ -110,7 +111,10 @@ func UpdateInferenceStatus(w http.ResponseWriter, r *http.Request, ctx *entity.C
 	JobId := r.FormValue(common.JobId)
 	JobStatus := r.FormValue(common.JobStatus)
 
-	jobId, _ := strconv.Atoi(JobId)
+	jobId, e := strconv.Atoi(JobId)
+	if e != nil {
+		panic(e)
+	}
 
 	controller.InferenceUpdateStatus(uint(jobId), JobStatus, ctx)
 
