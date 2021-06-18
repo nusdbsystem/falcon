@@ -77,7 +77,7 @@ void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
     }
     // shuffle the training data
     std::random_device rd;
-    std::default_random_engine rng(rd());
+    std::default_random_engine rng(RANDOM_SEED);
     //auto rng = std::default_random_engine();
     std::shuffle(std::begin(sampled_data_indexes), std::end(sampled_data_indexes), rng);
     // sample training data for the decision tree
@@ -156,7 +156,7 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
         dataset_size, ACTIVE_PARTY_ID);
   }
 
-  // calculate accuracy by the super client
+  // calculate accuracy by the active party
   std::vector<double> predictions;
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // decode decrypted predicted labels

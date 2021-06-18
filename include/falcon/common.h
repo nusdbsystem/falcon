@@ -49,7 +49,7 @@ namespace falcon{
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"
-  #define IS_INFERENCE 1
+  #define IS_INFERENCE 0
 
   // for DEBUG
   // to display intermediate information
@@ -57,7 +57,7 @@ namespace falcon{
   #define DEBUG true
   #define PRINT_EVERY 500  // if debug, display info at this frequency
 
-  #define POSITIVE_PROBABILITY 1.0
+  #define CERTAIN_PROBABILITY 1.0
   #define ZERO_PROBABILITY 0.0
 
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};

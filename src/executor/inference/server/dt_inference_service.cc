@@ -39,6 +39,7 @@ class DTInferenceServiceImpl final : public InferenceService::Service {
     load_dt_model(saved_model_file, saved_tree_model_);
   }
 
+  // TODO: reuse predict api in tree model in this function to concise the code
   Status Prediction(ServerContext* context, const PredictionRequest* request,
                     PredictionResponse* response) override {
     std::cout << "Receive client's request" << std::endl;
@@ -152,14 +153,14 @@ class DTInferenceServiceImpl final : public InferenceService::Service {
         // TODO: record the detailed probability, here assume 1.0
         for (int k = 0; k < saved_tree_model_.class_num; k++) {
           if (t == k) {
-            prob.push_back(POSITIVE_PROBABILITY);
+            prob.push_back(CERTAIN_PROBABILITY);
           } else {
             prob.push_back(ZERO_PROBABILITY);
           }
         }
         probabilities.push_back(prob);
       } else {
-        prob.push_back(POSITIVE_PROBABILITY);
+        prob.push_back(CERTAIN_PROBABILITY);
       }
     }
 

@@ -68,6 +68,7 @@ class Tree {
    * @param predicted_labels
    * @return predicted labels (encrypted)
    */
+  // TODO: check for other models, better to implement the same function call
   void predict(Party& party,
       std::vector< std::vector<double> > predicted_samples,
       int predicted_sample_size,

@@ -122,7 +122,7 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
           labels.push_back(pred);
           for (int k = 0; k < saved_rf_model_[0].class_num; k++) {
             if (pred == k) {
-              prob.push_back(POSITIVE_PROBABILITY);
+              prob.push_back(CERTAIN_PROBABILITY);
             } else {
               prob.push_back(ZERO_PROBABILITY);
             }
@@ -130,7 +130,7 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
           probabilities.push_back(prob);
         } else {
           labels.push_back(average(forest_labels_i));
-          prob.push_back(POSITIVE_PROBABILITY);
+          prob.push_back(CERTAIN_PROBABILITY);
         }
       }
     }
