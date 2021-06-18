@@ -7,6 +7,8 @@
 
 #include <falcon/common.h>
 #include <falcon/algorithm/vertical/tree/node.h>
+#include <falcon/party/party.h>
+
 #include <map>
 
 class Tree {
@@ -49,6 +51,28 @@ class Tree {
    */
   std::vector<int> comp_predict_vector(std::vector<double> sample,
       std::map<int, int> node_index_2_leaf_index_map);
+
+  /**
+   * compute label vec and index map for tree prediction
+   * @param label_vector
+   * @param node_index_2_leaf_index_map
+   */
+  void compute_label_vec_and_index_map(EncodedNumber* label_vector,
+      std::map<int, int>& node_index_2_leaf_index_map);
+
+  /**
+   * given the tree, predict on samples
+   * @param party
+   * @param predicted_samples
+   * @param predicted_sample_size
+   * @param predicted_labels
+   * @return predicted labels (encrypted)
+   */
+  // TODO: check for other models, better to implement the same function call
+  void predict(Party& party,
+      std::vector< std::vector<double> > predicted_samples,
+      int predicted_sample_size,
+      EncodedNumber* predicted_labels);
 };
 
 

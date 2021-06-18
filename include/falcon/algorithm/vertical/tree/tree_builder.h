@@ -203,9 +203,9 @@ class DecisionTreeBuilder : public Model {
       std::map<int,int> node_index_2_leaf_index, falcon::DatasetType eval_type);
 
   /**
- * evaluate the accuracy on the dataset
- * @param party
- * @param eval_type
+     * evaluate the accuracy on the dataset
+     * @param party
+     * @param eval_type
  */
   void eval(Party party, falcon::DatasetType eval_type);
 };
@@ -243,6 +243,6 @@ void spdz_tree_computation(int party_num,
  * @param model_report_file: saved report file
  */
 void train_decision_tree(Party party, const std::string& params_str,
-    std::string model_save_file, const std::string& model_report_file);
+    const std::string& model_save_file, const std::string& model_report_file);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_CART_BUILDER_H_

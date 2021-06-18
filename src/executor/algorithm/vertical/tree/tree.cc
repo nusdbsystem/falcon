@@ -4,6 +4,7 @@
 
 #include <falcon/common.h>
 #include <falcon/algorithm/vertical/tree/tree.h>
+#include <falcon/utils/pb_converter/common_converter.h>
 #include <cmath>
 
 #include <glog/logging.h>
@@ -134,4 +135,131 @@ std::vector<int> Tree::comp_predict_vector(std::vector<double> sample,
     }
   }
   return binary_vector;
+}
+
+void Tree::compute_label_vec_and_index_map(EncodedNumber *label_vector,
+    std::map<int, int> &node_index_2_leaf_index_map) {
+  int leaf_cur_index = 0;
+  for (int i = 0; i < pow(2, max_depth + 1) - 1; i++) {
+    if (nodes[i].node_type == falcon::LEAF) {
+      node_index_2_leaf_index_map.insert(std::make_pair(i, leaf_cur_index));
+      // record leaf label vector
+      label_vector[leaf_cur_index] = nodes[i].label;
+      leaf_cur_index ++;
+    }
+  }
+}
+
+void Tree::predict(Party &party,
+    std::vector< std::vector<double> > predicted_samples,
+    int predicted_sample_size,
+    EncodedNumber *predicted_labels) {
+
+  /// prediction procedure:
+  /// 1. organize the leaf label vector, and record the map
+  ///     between tree node index and leaf index
+  /// 2. for each sample in the predicted samples, search the whole tree
+  ///     and do the following:
+  ///     2.1 if meet feature that not belong to self, mark 1,
+  ///         and iteratively search left and right branches with 1
+  ///     2.2 if meet feature that belongs to self, compare with the split value,
+  ///         mark satisfied branch with 1 while the other branch with 0,
+  ///         and iteratively search left and right branches
+  ///     2.3 if meet the leaf node, record the corresponding leaf index
+  ///         with current value
+  ///     2.4 after each party obtaining a 0-1 vector of leaf nodes, do the following:
+  ///     2.5 the "party_num-1"-th party element-wise multiply with leaf
+  ///         label vector, and encrypt the vector, send to the next party
+  ///     2.6 every party on the Robin cycle updates the vector
+  ///         by element-wise homomorphic multiplication, and send to the next
+  ///     2.7 the last party, i.e., client 0 get the final encrypted vector
+  ///         and homomorphic add together, call share decryption
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  // step 1: organize the leaf label vector, compute the map
+  LOG(INFO) << "Tree internal node num = " << internal_node_num;
+  EncodedNumber* label_vector = new EncodedNumber[internal_node_num + 1];
+  std::map<int, int> node_index_2_leaf_index_map;
+  compute_label_vec_and_index_map(label_vector, node_index_2_leaf_index_map);
+  LOG(INFO) << "Compute label vector and index map finished";
+
+  // step 2: compute prediction for each sample
+  // for each sample
+  for (int i = 0; i < predicted_sample_size; i++) {
+    // compute binary vector for the current sample
+    std::vector<int> binary_vector = comp_predict_vector(predicted_samples[i], node_index_2_leaf_index_map);
+    EncodedNumber *encoded_binary_vector = new EncodedNumber[binary_vector.size()];
+    EncodedNumber *updated_label_vector = new EncodedNumber[binary_vector.size()];
+
+    // update in Robin cycle, from the last client to client 0
+    if (party.party_id == party.party_num - 1) {
+      // updated_label_vector = new EncodedNumber[binary_vector.size()];
+      for (int j = 0; j < binary_vector.size(); j++) {
+        encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
+        djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
+                          label_vector[j], encoded_binary_vector[j]);
+      }
+      // send to the next client
+      std::string send_s;
+      serialize_encoded_number_array(updated_label_vector, binary_vector.size(), send_s);
+      party.send_long_message(party.party_id - 1, send_s);
+    } else if (party.party_id > 0) {
+      std::string recv_s;
+      party.recv_long_message(party.party_id + 1, recv_s);
+      deserialize_encoded_number_array(updated_label_vector, binary_vector.size(), recv_s);
+      for (int j = 0; j < binary_vector.size(); j++) {
+        encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
+        djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
+                          updated_label_vector[j], encoded_binary_vector[j]);
+      }
+      std::string resend_s;
+      serialize_encoded_number_array(updated_label_vector, binary_vector.size(), resend_s);
+      party.send_long_message(party.party_id - 1, resend_s);
+    } else {
+      // the super client update the last, and aggregate before calling share decryption
+      std::string final_recv_s;
+      party.recv_long_message(party.party_id + 1, final_recv_s);
+      deserialize_encoded_number_array(updated_label_vector, binary_vector.size(), final_recv_s);
+      for (int j = 0; j < binary_vector.size(); j++) {
+        encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
+        djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
+            updated_label_vector[j], encoded_binary_vector[j]);
+      }
+    }
+
+    // aggregate and call share decryption
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      predicted_labels[i].set_double(phe_pub_key->n[0], 0, PHE_FIXED_POINT_PRECISION);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+          predicted_labels[i], predicted_labels[i]);
+      for (int j = 0; j < binary_vector.size(); j++) {
+        djcs_t_aux_ee_add(phe_pub_key, predicted_labels[i],
+            predicted_labels[i], updated_label_vector[j]);
+      }
+    }
+    delete [] encoded_binary_vector;
+    delete [] updated_label_vector;
+  }
+
+  // broadcast the predicted labels and call share decrypt
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::string s;
+    serialize_encoded_number_array(predicted_labels, predicted_sample_size, s);
+    for (int x = 0; x < party.party_num; x++) {
+      if (x != party.party_id) {
+        party.send_long_message(x, s);
+      }
+    }
+  } else {
+    std::string recv_s;
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_s);
+    deserialize_encoded_number_array(predicted_labels, predicted_sample_size, recv_s);
+  }
+
+  delete [] label_vector;
+  djcs_t_free_public_key(phe_pub_key);
+  LOG(INFO) << "Compute predictions on samples finished";
 }

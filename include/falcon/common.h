@@ -57,9 +57,12 @@ namespace falcon{
   #define DEBUG true
   #define PRINT_EVERY 500  // if debug, display info at this frequency
 
+  #define CERTAIN_PROBABILITY 1.0
+  #define ZERO_PROBABILITY 0.0
+
   enum FLSetting {HORIZONTAL_FL, VERTICAL_FL};
   enum PartyType {ACTIVE_PARTY, PASSIVE_PARTY};
-  enum AlgorithmName {LR, DT};
+  enum AlgorithmName {LR, DT, RF};
   enum DatasetType {TRAIN, TEST, VALIDATE};
 }
 

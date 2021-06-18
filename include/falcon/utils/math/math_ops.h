@@ -59,4 +59,20 @@ double logistic_function(double logit);
  */
 double logistic_regression_loss(std::vector<double> pred_probs, std::vector<double> labels);
 
+/**
+ * compute the mode value of a vector
+ *
+ * @param inputs
+ * @return
+ */
+double mode(std::vector<double> inputs);
+
+/**
+ * compute the average value of a vector
+ *
+ * @param inputs
+ * @return
+ */
+double average(std::vector<double> inputs);
+
 #endif //FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

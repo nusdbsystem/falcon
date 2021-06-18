@@ -12,6 +12,7 @@
 #include "falcon/operator/mpc/spdz_connector.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression.h"
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
+#include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include "falcon/inference/server/inference_server.h"
 
 #include <glog/logging.h>
@@ -134,6 +135,9 @@ int main(int argc, char *argv[]) {
       case falcon::DT:
         train_decision_tree(party, algorithm_params, model_save_file, model_report_file);
         break;
+      case falcon::RF:
+        train_random_forest(party, algorithm_params, model_save_file, model_report_file);
+        break;
       default:
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
         break;
@@ -155,4 +159,5 @@ int main(int argc, char *argv[]) {
 falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
   if ("logistic_regression" == name) return falcon::LR;
   if ("decision_tree" == name) return falcon::DT;
+  if ("random_forest" == name) return falcon::RF;
 }

@@ -138,4 +138,22 @@ void serialize_tree_model(Tree tree, std::string & output_str);
  */
 void deserialize_tree_model(Tree & tree, std::string input_str);
 
+/**
+ * serialize a random forest model to string
+ *
+ * @param trees
+ * @param n_estimator
+ * @param output_str
+ */
+void serialize_random_forest_model(std::vector<Tree> trees, int n_estimator, std::string & output_str);
+
+/**
+ * deserialize an input string to a random forest model
+ *
+ * @param trees
+ * @param n_estimator
+ * @param input_str
+ */
+void deserialize_random_forest_model(std::vector<Tree>& trees, int& n_estimator, std::string input_str);
+
 #endif //FALCON_INCLUDE_FALCON_UTILS_PB_CONVERTER_TREE_CONVERTER_H_

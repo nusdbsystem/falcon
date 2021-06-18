@@ -46,6 +46,24 @@ void save_dt_model(Tree tree, const std::string& model_save_path);
 void load_dt_model(const std::string& model_save_path, Tree& saved_tree);
 
 /**
+ * save the rf model after training
+ *
+ * @param trees
+ * @param n_estimator
+ * @param model_save_path
+ */
+void save_rf_model(std::vector<Tree> trees, int n_estimator, const std::string& model_save_path);
+
+/**
+ * load the saved rf model
+ *
+ * @param model_save_path
+ * @param saved_trees
+ * @param n_estimator
+ */
+void load_rf_model(const std::string& model_save_path, std::vector<Tree>& saved_trees, int& n_estimator);
+
+/**
  * save the training report
  *
  * @param training_accuracy: model training accuracy

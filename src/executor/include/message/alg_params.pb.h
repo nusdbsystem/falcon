@@ -46,7 +46,7 @@ struct TableStruct_alg_5fparams_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[2]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[3]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -64,6 +64,9 @@ extern DecisionTreeParamsDefaultTypeInternal _DecisionTreeParams_default_instanc
 class LogisticRegressionParams;
 class LogisticRegressionParamsDefaultTypeInternal;
 extern LogisticRegressionParamsDefaultTypeInternal _LogisticRegressionParams_default_instance_;
+class RandomForestParams;
+class RandomForestParamsDefaultTypeInternal;
+extern RandomForestParamsDefaultTypeInternal _RandomForestParams_default_instance_;
 }  // namespace v0
 }  // namespace falcon
 }  // namespace dbsytem
@@ -72,6 +75,7 @@ extern LogisticRegressionParamsDefaultTypeInternal _LogisticRegressionParams_def
 PROTOBUF_NAMESPACE_OPEN
 template<> ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::DecisionTreeParams>(Arena*);
 template<> ::com::nus::dbsytem::falcon::v0::LogisticRegressionParams* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::LogisticRegressionParams>(Arena*);
+template<> ::com::nus::dbsytem::falcon::v0::RandomForestParams* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::RandomForestParams>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace com {
 namespace nus {
@@ -639,6 +643,173 @@ class DecisionTreeParams PROTOBUF_FINAL :
   double min_impurity_decrease_;
   double min_impurity_split_;
   double dp_budget_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_alg_5fparams_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RandomForestParams PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.RandomForestParams) */ {
+ public:
+  inline RandomForestParams() : RandomForestParams(nullptr) {}
+  virtual ~RandomForestParams();
+
+  RandomForestParams(const RandomForestParams& from);
+  RandomForestParams(RandomForestParams&& from) noexcept
+    : RandomForestParams() {
+    *this = ::std::move(from);
+  }
+
+  inline RandomForestParams& operator=(const RandomForestParams& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RandomForestParams& operator=(RandomForestParams&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RandomForestParams& default_instance();
+
+  static inline const RandomForestParams* internal_default_instance() {
+    return reinterpret_cast<const RandomForestParams*>(
+               &_RandomForestParams_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  friend void swap(RandomForestParams& a, RandomForestParams& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RandomForestParams* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RandomForestParams* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RandomForestParams* New() const final {
+    return CreateMaybeMessage<RandomForestParams>(nullptr);
+  }
+
+  RandomForestParams* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RandomForestParams>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RandomForestParams& from);
+  void MergeFrom(const RandomForestParams& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RandomForestParams* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "com.nus.dbsytem.falcon.v0.RandomForestParams";
+  }
+  protected:
+  explicit RandomForestParams(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_alg_5fparams_2eproto);
+    return ::descriptor_table_alg_5fparams_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDtParamFieldNumber = 3,
+    kSampleRateFieldNumber = 2,
+    kNEstimatorFieldNumber = 1,
+  };
+  // .com.nus.dbsytem.falcon.v0.DecisionTreeParams dt_param = 3;
+  bool has_dt_param() const;
+  private:
+  bool _internal_has_dt_param() const;
+  public:
+  void clear_dt_param();
+  const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams& dt_param() const;
+  ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* release_dt_param();
+  ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* mutable_dt_param();
+  void set_allocated_dt_param(::com::nus::dbsytem::falcon::v0::DecisionTreeParams* dt_param);
+  private:
+  const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams& _internal_dt_param() const;
+  ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* _internal_mutable_dt_param();
+  public:
+  void unsafe_arena_set_allocated_dt_param(
+      ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* dt_param);
+  ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* unsafe_arena_release_dt_param();
+
+  // double sample_rate = 2;
+  void clear_sample_rate();
+  double sample_rate() const;
+  void set_sample_rate(double value);
+  private:
+  double _internal_sample_rate() const;
+  void _internal_set_sample_rate(double value);
+  public:
+
+  // int32 n_estimator = 1;
+  void clear_n_estimator();
+  ::PROTOBUF_NAMESPACE_ID::int32 n_estimator() const;
+  void set_n_estimator(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_n_estimator() const;
+  void _internal_set_n_estimator(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.RandomForestParams)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* dt_param_;
+  double sample_rate_;
+  ::PROTOBUF_NAMESPACE_ID::int32 n_estimator_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_alg_5fparams_2eproto;
 };
@@ -1424,9 +1595,138 @@ inline void DecisionTreeParams::set_dp_budget(double value) {
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.DecisionTreeParams.dp_budget)
 }
 
+// -------------------------------------------------------------------
+
+// RandomForestParams
+
+// int32 n_estimator = 1;
+inline void RandomForestParams::clear_n_estimator() {
+  n_estimator_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 RandomForestParams::_internal_n_estimator() const {
+  return n_estimator_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 RandomForestParams::n_estimator() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.RandomForestParams.n_estimator)
+  return _internal_n_estimator();
+}
+inline void RandomForestParams::_internal_set_n_estimator(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  n_estimator_ = value;
+}
+inline void RandomForestParams::set_n_estimator(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_n_estimator(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.RandomForestParams.n_estimator)
+}
+
+// double sample_rate = 2;
+inline void RandomForestParams::clear_sample_rate() {
+  sample_rate_ = 0;
+}
+inline double RandomForestParams::_internal_sample_rate() const {
+  return sample_rate_;
+}
+inline double RandomForestParams::sample_rate() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.RandomForestParams.sample_rate)
+  return _internal_sample_rate();
+}
+inline void RandomForestParams::_internal_set_sample_rate(double value) {
+  
+  sample_rate_ = value;
+}
+inline void RandomForestParams::set_sample_rate(double value) {
+  _internal_set_sample_rate(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.RandomForestParams.sample_rate)
+}
+
+// .com.nus.dbsytem.falcon.v0.DecisionTreeParams dt_param = 3;
+inline bool RandomForestParams::_internal_has_dt_param() const {
+  return this != internal_default_instance() && dt_param_ != nullptr;
+}
+inline bool RandomForestParams::has_dt_param() const {
+  return _internal_has_dt_param();
+}
+inline void RandomForestParams::clear_dt_param() {
+  if (GetArena() == nullptr && dt_param_ != nullptr) {
+    delete dt_param_;
+  }
+  dt_param_ = nullptr;
+}
+inline const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams& RandomForestParams::_internal_dt_param() const {
+  const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* p = dt_param_;
+  return p != nullptr ? *p : reinterpret_cast<const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams&>(
+      ::com::nus::dbsytem::falcon::v0::_DecisionTreeParams_default_instance_);
+}
+inline const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams& RandomForestParams::dt_param() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.RandomForestParams.dt_param)
+  return _internal_dt_param();
+}
+inline void RandomForestParams::unsafe_arena_set_allocated_dt_param(
+    ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* dt_param) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(dt_param_);
+  }
+  dt_param_ = dt_param;
+  if (dt_param) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:com.nus.dbsytem.falcon.v0.RandomForestParams.dt_param)
+}
+inline ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* RandomForestParams::release_dt_param() {
+  
+  ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* temp = dt_param_;
+  dt_param_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* RandomForestParams::unsafe_arena_release_dt_param() {
+  // @@protoc_insertion_point(field_release:com.nus.dbsytem.falcon.v0.RandomForestParams.dt_param)
+  
+  ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* temp = dt_param_;
+  dt_param_ = nullptr;
+  return temp;
+}
+inline ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* RandomForestParams::_internal_mutable_dt_param() {
+  
+  if (dt_param_ == nullptr) {
+    auto* p = CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::DecisionTreeParams>(GetArena());
+    dt_param_ = p;
+  }
+  return dt_param_;
+}
+inline ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* RandomForestParams::mutable_dt_param() {
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.RandomForestParams.dt_param)
+  return _internal_mutable_dt_param();
+}
+inline void RandomForestParams::set_allocated_dt_param(::com::nus::dbsytem::falcon::v0::DecisionTreeParams* dt_param) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete dt_param_;
+  }
+  if (dt_param) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(dt_param);
+    if (message_arena != submessage_arena) {
+      dt_param = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, dt_param, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  dt_param_ = dt_param;
+  // @@protoc_insertion_point(field_set_allocated:com.nus.dbsytem.falcon.v0.RandomForestParams.dt_param)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 

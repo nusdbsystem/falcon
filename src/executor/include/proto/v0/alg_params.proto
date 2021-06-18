@@ -58,4 +58,13 @@ message DecisionTreeParams {
     double dp_budget = 12;
 }
 
+// This message denotes the random forest builder parameters
+message RandomForestParams {
+    // number of trees in the forest
+    int32 n_estimator = 1;
+    // sample rate for each tree in the forest
+    double sample_rate = 2;
+    // decision tree builder params
+    DecisionTreeParams dt_param = 3;
+}
 

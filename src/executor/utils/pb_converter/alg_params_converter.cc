@@ -81,3 +81,47 @@ void deserialize_dt_params(DecisionTreeParams& dt_params, const std::string& inp
   dt_params.min_impurity_split = decision_tree_params.min_impurity_split();
   dt_params.dp_budget = decision_tree_params.dp_budget();
 }
+
+void serialize_rf_params(RandomForestParams rf_params, std::string& output_message) {
+  com::nus::dbsytem::falcon::v0::RandomForestParams random_forest_params;
+  random_forest_params.set_n_estimator(rf_params.n_estimator);
+  random_forest_params.set_sample_rate(rf_params.sample_rate);
+  com::nus::dbsytem::falcon::v0::DecisionTreeParams *decision_tree_params =
+      new com::nus::dbsytem::falcon::v0::DecisionTreeParams;
+  decision_tree_params->set_tree_type(rf_params.dt_param.tree_type);
+  decision_tree_params->set_criterion(rf_params.dt_param.criterion);
+  decision_tree_params->set_split_strategy(rf_params.dt_param.split_strategy);
+  decision_tree_params->set_class_num(rf_params.dt_param.class_num);
+  decision_tree_params->set_max_depth(rf_params.dt_param.max_depth);
+  decision_tree_params->set_max_bins(rf_params.dt_param.max_bins);
+  decision_tree_params->set_min_samples_split(rf_params.dt_param.min_samples_split);
+  decision_tree_params->set_min_samples_leaf(rf_params.dt_param.min_samples_leaf);
+  decision_tree_params->set_max_leaf_nodes(rf_params.dt_param.max_leaf_nodes);
+  decision_tree_params->set_min_impurity_decrease(rf_params.dt_param.min_impurity_decrease);
+  decision_tree_params->set_min_impurity_split(rf_params.dt_param.min_impurity_split);
+  decision_tree_params->set_dp_budget(rf_params.dt_param.dp_budget);
+  random_forest_params.set_allocated_dt_param(decision_tree_params);
+  random_forest_params.SerializeToString(&output_message);
+}
+
+void deserialize_rf_params(RandomForestParams& rf_params, const std::string& input_message) {
+  com::nus::dbsytem::falcon::v0::RandomForestParams random_forest_params;
+  if (!random_forest_params.ParseFromString(input_message)) {
+    LOG(ERROR) << "Deserialize random forest params message failed.";
+    return;
+  }
+  rf_params.n_estimator = random_forest_params.n_estimator();
+  rf_params.sample_rate = random_forest_params.sample_rate();
+  rf_params.dt_param.tree_type = random_forest_params.dt_param().tree_type();
+  rf_params.dt_param.criterion = random_forest_params.dt_param().criterion();
+  rf_params.dt_param.split_strategy = random_forest_params.dt_param().split_strategy();
+  rf_params.dt_param.class_num = random_forest_params.dt_param().class_num();
+  rf_params.dt_param.max_depth = random_forest_params.dt_param().max_depth();
+  rf_params.dt_param.max_bins = random_forest_params.dt_param().max_bins();
+  rf_params.dt_param.min_samples_split = random_forest_params.dt_param().min_samples_split();
+  rf_params.dt_param.min_samples_leaf = random_forest_params.dt_param().min_samples_leaf();
+  rf_params.dt_param.max_leaf_nodes = random_forest_params.dt_param().max_leaf_nodes();
+  rf_params.dt_param.min_impurity_decrease = random_forest_params.dt_param().min_impurity_decrease();
+  rf_params.dt_param.min_impurity_split = random_forest_params.dt_param().min_impurity_split();
+  rf_params.dt_param.dp_budget = random_forest_params.dt_param().dp_budget();
+}

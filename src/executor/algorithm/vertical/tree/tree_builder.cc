@@ -1214,7 +1214,7 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type) {
     }
   } else {
     std::string recv_s;
-    party.recv_long_message(0, recv_s);
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_s);
     deserialize_encoded_number_array(encrypted_aggregation, dataset_size, recv_s);
   }
 
@@ -1401,7 +1401,7 @@ void spdz_tree_computation(int party_num,
 }
 
 void train_decision_tree(Party party, const std::string& params_str,
-    std::string model_save_file, const std::string& model_report_file) {
+    const std::string& model_save_file, const std::string& model_report_file) {
 
   LOG(INFO) << "Run the example decision tree train";
   std::cout << "Run the example decision tree train" << std::endl;

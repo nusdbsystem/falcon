@@ -14,6 +14,7 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
+extern PROTOBUF_INTERNAL_EXPORT_alg_5fparams_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DecisionTreeParams_alg_5fparams_2eproto;
 namespace com {
 namespace nus {
 namespace dbsytem {
@@ -27,6 +28,10 @@ class DecisionTreeParamsDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<DecisionTreeParams> _instance;
 } _DecisionTreeParams_default_instance_;
+class RandomForestParamsDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<RandomForestParams> _instance;
+} _RandomForestParams_default_instance_;
 }  // namespace v0
 }  // namespace falcon
 }  // namespace dbsytem
@@ -58,7 +63,21 @@ static void InitDefaultsscc_info_LogisticRegressionParams_alg_5fparams_2eproto()
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_LogisticRegressionParams_alg_5fparams_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_LogisticRegressionParams_alg_5fparams_2eproto}, {}};
 
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_alg_5fparams_2eproto[2];
+static void InitDefaultsscc_info_RandomForestParams_alg_5fparams_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::com::nus::dbsytem::falcon::v0::_RandomForestParams_default_instance_;
+    new (ptr) ::com::nus::dbsytem::falcon::v0::RandomForestParams();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_RandomForestParams_alg_5fparams_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_RandomForestParams_alg_5fparams_2eproto}, {
+      &scc_info_DecisionTreeParams_alg_5fparams_2eproto.base,}};
+
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_alg_5fparams_2eproto[3];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_alg_5fparams_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_alg_5fparams_2eproto = nullptr;
 
@@ -97,15 +116,25 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_alg_5fparams_2eproto::offsets[
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::DecisionTreeParams, min_impurity_decrease_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::DecisionTreeParams, min_impurity_split_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::DecisionTreeParams, dp_budget_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::RandomForestParams, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::RandomForestParams, n_estimator_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::RandomForestParams, sample_rate_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::RandomForestParams, dt_param_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::com::nus::dbsytem::falcon::v0::LogisticRegressionParams)},
   { 17, -1, sizeof(::com::nus::dbsytem::falcon::v0::DecisionTreeParams)},
+  { 34, -1, sizeof(::com::nus::dbsytem::falcon::v0::RandomForestParams)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_LogisticRegressionParams_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_DecisionTreeParams_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_RandomForestParams_default_instance_),
 };
 
 const char descriptor_table_protodef_alg_5fparams_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -124,21 +153,25 @@ const char descriptor_table_protodef_alg_5fparams_2eproto[] PROTOBUF_SECTION_VAR
   "\n\021min_samples_split\030\007 \001(\005\022\030\n\020min_samples"
   "_leaf\030\010 \001(\005\022\026\n\016max_leaf_nodes\030\t \001(\005\022\035\n\025m"
   "in_impurity_decrease\030\n \001(\001\022\032\n\022min_impuri"
-  "ty_split\030\013 \001(\001\022\021\n\tdp_budget\030\014 \001(\001B\010Z\006com"
-  "monb\006proto3"
+  "ty_split\030\013 \001(\001\022\021\n\tdp_budget\030\014 \001(\001\"\177\n\022Ran"
+  "domForestParams\022\023\n\013n_estimator\030\001 \001(\005\022\023\n\013"
+  "sample_rate\030\002 \001(\001\022\?\n\010dt_param\030\003 \001(\0132-.co"
+  "m.nus.dbsytem.falcon.v0.DecisionTreePara"
+  "msB\010Z\006commonb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_alg_5fparams_2eproto_deps[1] = {
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_alg_5fparams_2eproto_sccs[2] = {
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_alg_5fparams_2eproto_sccs[3] = {
   &scc_info_DecisionTreeParams_alg_5fparams_2eproto.base,
   &scc_info_LogisticRegressionParams_alg_5fparams_2eproto.base,
+  &scc_info_RandomForestParams_alg_5fparams_2eproto.base,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_alg_5fparams_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_alg_5fparams_2eproto = {
-  false, false, descriptor_table_protodef_alg_5fparams_2eproto, "alg_params.proto", 651,
-  &descriptor_table_alg_5fparams_2eproto_once, descriptor_table_alg_5fparams_2eproto_sccs, descriptor_table_alg_5fparams_2eproto_deps, 2, 0,
+  false, false, descriptor_table_protodef_alg_5fparams_2eproto, "alg_params.proto", 780,
+  &descriptor_table_alg_5fparams_2eproto_once, descriptor_table_alg_5fparams_2eproto_sccs, descriptor_table_alg_5fparams_2eproto_deps, 3, 0,
   schemas, file_default_instances, TableStruct_alg_5fparams_2eproto::offsets,
-  file_level_metadata_alg_5fparams_2eproto, 2, file_level_enum_descriptors_alg_5fparams_2eproto, file_level_service_descriptors_alg_5fparams_2eproto,
+  file_level_metadata_alg_5fparams_2eproto, 3, file_level_enum_descriptors_alg_5fparams_2eproto, file_level_service_descriptors_alg_5fparams_2eproto,
 };
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -1158,6 +1191,274 @@ void DecisionTreeParams::InternalSwap(DecisionTreeParams* other) {
 }
 
 
+// ===================================================================
+
+class RandomForestParams::_Internal {
+ public:
+  static const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams& dt_param(const RandomForestParams* msg);
+};
+
+const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams&
+RandomForestParams::_Internal::dt_param(const RandomForestParams* msg) {
+  return *msg->dt_param_;
+}
+RandomForestParams::RandomForestParams(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:com.nus.dbsytem.falcon.v0.RandomForestParams)
+}
+RandomForestParams::RandomForestParams(const RandomForestParams& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_dt_param()) {
+    dt_param_ = new ::com::nus::dbsytem::falcon::v0::DecisionTreeParams(*from.dt_param_);
+  } else {
+    dt_param_ = nullptr;
+  }
+  ::memcpy(&sample_rate_, &from.sample_rate_,
+    static_cast<size_t>(reinterpret_cast<char*>(&n_estimator_) -
+    reinterpret_cast<char*>(&sample_rate_)) + sizeof(n_estimator_));
+  // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.RandomForestParams)
+}
+
+void RandomForestParams::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_RandomForestParams_alg_5fparams_2eproto.base);
+  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+      reinterpret_cast<char*>(&dt_param_) - reinterpret_cast<char*>(this)),
+      0, static_cast<size_t>(reinterpret_cast<char*>(&n_estimator_) -
+      reinterpret_cast<char*>(&dt_param_)) + sizeof(n_estimator_));
+}
+
+RandomForestParams::~RandomForestParams() {
+  // @@protoc_insertion_point(destructor:com.nus.dbsytem.falcon.v0.RandomForestParams)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void RandomForestParams::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete dt_param_;
+}
+
+void RandomForestParams::ArenaDtor(void* object) {
+  RandomForestParams* _this = reinterpret_cast< RandomForestParams* >(object);
+  (void)_this;
+}
+void RandomForestParams::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void RandomForestParams::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const RandomForestParams& RandomForestParams::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_RandomForestParams_alg_5fparams_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void RandomForestParams::Clear() {
+// @@protoc_insertion_point(message_clear_start:com.nus.dbsytem.falcon.v0.RandomForestParams)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArena() == nullptr && dt_param_ != nullptr) {
+    delete dt_param_;
+  }
+  dt_param_ = nullptr;
+  ::memset(&sample_rate_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&n_estimator_) -
+      reinterpret_cast<char*>(&sample_rate_)) + sizeof(n_estimator_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* RandomForestParams::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // int32 n_estimator = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          n_estimator_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // double sample_rate = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 17)) {
+          sample_rate_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // .com.nus.dbsytem.falcon.v0.DecisionTreeParams dt_param = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_dt_param(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* RandomForestParams::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:com.nus.dbsytem.falcon.v0.RandomForestParams)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // int32 n_estimator = 1;
+  if (this->n_estimator() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_n_estimator(), target);
+  }
+
+  // double sample_rate = 2;
+  if (!(this->sample_rate() <= 0 && this->sample_rate() >= 0)) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(2, this->_internal_sample_rate(), target);
+  }
+
+  // .com.nus.dbsytem.falcon.v0.DecisionTreeParams dt_param = 3;
+  if (this->has_dt_param()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        3, _Internal::dt_param(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsytem.falcon.v0.RandomForestParams)
+  return target;
+}
+
+size_t RandomForestParams::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:com.nus.dbsytem.falcon.v0.RandomForestParams)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .com.nus.dbsytem.falcon.v0.DecisionTreeParams dt_param = 3;
+  if (this->has_dt_param()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *dt_param_);
+  }
+
+  // double sample_rate = 2;
+  if (!(this->sample_rate() <= 0 && this->sample_rate() >= 0)) {
+    total_size += 1 + 8;
+  }
+
+  // int32 n_estimator = 1;
+  if (this->n_estimator() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_n_estimator());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void RandomForestParams::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:com.nus.dbsytem.falcon.v0.RandomForestParams)
+  GOOGLE_DCHECK_NE(&from, this);
+  const RandomForestParams* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<RandomForestParams>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:com.nus.dbsytem.falcon.v0.RandomForestParams)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:com.nus.dbsytem.falcon.v0.RandomForestParams)
+    MergeFrom(*source);
+  }
+}
+
+void RandomForestParams::MergeFrom(const RandomForestParams& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:com.nus.dbsytem.falcon.v0.RandomForestParams)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.has_dt_param()) {
+    _internal_mutable_dt_param()->::com::nus::dbsytem::falcon::v0::DecisionTreeParams::MergeFrom(from._internal_dt_param());
+  }
+  if (!(from.sample_rate() <= 0 && from.sample_rate() >= 0)) {
+    _internal_set_sample_rate(from._internal_sample_rate());
+  }
+  if (from.n_estimator() != 0) {
+    _internal_set_n_estimator(from._internal_n_estimator());
+  }
+}
+
+void RandomForestParams::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:com.nus.dbsytem.falcon.v0.RandomForestParams)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void RandomForestParams::CopyFrom(const RandomForestParams& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:com.nus.dbsytem.falcon.v0.RandomForestParams)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RandomForestParams::IsInitialized() const {
+  return true;
+}
+
+void RandomForestParams::InternalSwap(RandomForestParams* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(RandomForestParams, n_estimator_)
+      + sizeof(RandomForestParams::n_estimator_)
+      - PROTOBUF_FIELD_OFFSET(RandomForestParams, dt_param_)>(
+          reinterpret_cast<char*>(&dt_param_),
+          reinterpret_cast<char*>(&other->dt_param_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata RandomForestParams::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace v0
 }  // namespace falcon
@@ -1170,6 +1471,9 @@ template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::LogisticRegression
 }
 template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::DecisionTreeParams* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::DecisionTreeParams >(Arena* arena) {
   return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::DecisionTreeParams >(arena);
+}
+template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::RandomForestParams* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::RandomForestParams >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::RandomForestParams >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 
