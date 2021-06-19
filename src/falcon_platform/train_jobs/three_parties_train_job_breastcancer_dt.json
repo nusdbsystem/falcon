@@ -39,6 +39,7 @@
   ],
   "tasks": {
     "model_training": {
+      "mpc_algorithm_name": "decision_tree",
       "algorithm_name": "decision_tree",
       "input_configs": {
         "data_input": {

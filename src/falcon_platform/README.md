@@ -5,7 +5,7 @@
 
 ## Dependencies for Development
 
-- Server-side is Go (1.13 or 1.14)
+- Server-side is Go 1.14
 - k8s (V1.9 best, V1.7 is also fine)
 - Client-side is any http client, such as Python3 `requests`
 - Storage default is file-based sqlite3, you can also connect to MySQL
@@ -32,34 +32,10 @@ to compile into a binary
 go build <go-program>.go
 ```
 
-## Set up the MPC servers for FL
-
-### Run `semi-party.x` from compiled MP-SPDZ in falcon/third_party
-
-from `src/falcon_platform`, launch the script:
-
-```sh
-# start the 3 semi-party.x simulating 3 parties
-bash scripts/start_semi-party012.sh
-```
-
-To view the MPC server outputs, go the path of where you put the MPC exe. In our example, the MPC server exes are in `MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x`. From that path, the console logs of the semi-party.x are captured in `third_party/MP-SPDZ/logs/semi-parties/` folder.
-
-To terminate the MPC, from `src/falcon_platform`run:
-```sh
-bash scripts/terminate_semi-party012.sh
-```
-
-_NOTE: in the future, MPC and FL Engine will be launched internally by the platform after supplying `MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x"` in the config partyserver file_
-
-
-
-## Supply the FL Engine path
+## Supply the FL Engine and semi-party.x path etc
 
 Update the executor path in `src/falcon_platform/config_partyserver.properties`: `FL_ENGINE_PATH="/opt/falcon/build/src/executor/falcon"`
-
-
-## Platform setup DEV (development without k8)
+Update the mpc path in `src/falcon_platform/config_partyserver.properties`: `MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x"`
 
 Update configurations in
 - `src/falcon_platform/config_coord.properties` for Coordinator server configs
@@ -71,6 +47,24 @@ Supply your configurations in those `.properties` files such as
 - `COORD_SERVER_IP`
 - `PARTY_SERVER_IP`
 - ...
+
+## Platform setup Debug (development for debugging, capture console's outputs in terminal)
+
+
+**Simply call the `debug_coord.sh` script**:
+```bash
+# launch the coordinator 
+bash scripts/debug_coord.sh
+```
+
+**Simply call the `debug_partyserver.sh` script to run few party servers **:
+
+```bash
+# launch the party server 1 
+bash scripts/debug_partyserver.sh --partyID 1 
+```
+
+## Platform setup DEV (development without k8)
 
 
 **Simply call the `dev_start_all.sh` script**:
@@ -125,8 +119,10 @@ The console outputs are captured in `src/falcon_platform/dev_test/` folder:
 
     ```bash
     # python3 coordinator_client.py -url <ip url of coordinator>:30004 -method submit -path ./train_jobs/job.json
-    # UCI tele-marketing bank dataset
+    # Simple test without datasets.
     python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/two_parties_train_job.json
+    # UCI tele-marketing bank dataset
+    python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_banktele.json
     # UCI breast cancer dataset
     python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_breastcancer.json
     ```
@@ -150,31 +146,32 @@ The console outputs are captured in `src/falcon_platform/dev_test/` folder:
 1.  log is at folder `$LOG_PATH/runtime_logs/` , 
     platform setup log is at `$LOG_PATH/logs/` ,
     db is at     `dev_test/coord/falcon.db` 
-
+    
+The folder architecture is:
 ```bash
-dev_test/
-├── coord
-│   ├── falcon.db
-│   └── runtime_logs
-│       └── coord2020-12-27T14:47:31.logs
-├── party1
-│   ├── data_input
-│   ├── data_output
-│   ├── logs
-│   │   └── runtime_logs
-│   │       └── partyserver2020-12-27T14:47:50.logs
-│   └── trained_models
-├── party2
-│   ├── data_input
-│   ├── data_output
-│   ├── logs
-│   │   └── runtime_logs
-│   │       └── partyserver2020-12-27T14:47:45.logs
-│   └── trained_models
-└── party3
-    ├── data_input
-    ├── data_output
-    ├── logs
-    └── trained_models
-...
+    dev_test/
+    ├── coord
+    │   ├── falcon.db
+    │   └── runtime_logs
+    │       └── coord2020-12-27T14:47:31.logs
+    ├── party1
+    │   ├── data_input
+    │   ├── data_output
+    │   ├── logs
+    │   │   └── runtime_logs
+    │   │       └── partyserver2020-12-27T14:47:50.logs
+    │   └── trained_models
+    ├── party2
+    │   ├── data_input
+    │   ├── data_output
+    │   ├── logs
+    │   │   └── runtime_logs
+    │   │       └── partyserver2020-12-27T14:47:45.logs
+    │   └── trained_models
+    └── party3
+        ├── data_input
+        ├── data_output
+        ├── logs
+        └── trained_models
+    ...
 ```

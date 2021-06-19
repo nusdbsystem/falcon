@@ -4,25 +4,25 @@ import (
 	"encoding/json"
 	"errors"
 	"falcon_platform/logger"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"strings"
-
-	"google.golang.org/protobuf/proto"
 )
 
-//
 // TODO: make the train job field consistent with wyc executor flags!
 // TODO: jobFLtype wyc side expects int
 // TODO: partyType wyc side expects int
+
+// TranJob object parsed from dsl file
 type TrainJob struct {
-	JobName     string      `json:"job_name"`
-	JobInfo     string      `json:"job_info"`
-	JobFlType   string      `json:"job_fl_type"`
-	ExistingKey uint        `json:"existing_key"`
-	PartyNums   uint        `json:"party_nums,uint"`
-	TaskNum     uint        `json:"task_num,uint"`
-	PartyInfo   []PartyInfo `json:"party_info"`
-	Tasks       Tasks       `json:"tasks"`
+	JobName       string      `json:"job_name"`
+	JobInfo       string      `json:"job_info"` // job's description
+	JobFlType     string      `json:"job_fl_type"`
+	ExistingKey   uint        `json:"existing_key"`
+	PartyNums     uint        `json:"party_nums,uint"`
+	TaskNum       uint        `json:"task_num,uint"`
+	PartyInfoList []PartyInfo `json:"party_info"`
+	Tasks         Tasks       `json:"tasks"`
 }
 
 type PartyInfo struct {
@@ -44,15 +44,17 @@ type Tasks struct {
 }
 
 type PreProcessTask struct {
-	AlgorithmName string       `json:"algorithm_name"`
-	InputConfigs  InputConfig  `json:"input_configs"`
-	OutputConfigs PreProOutput `json:"output_configs"`
+	MpcAlgorithmName string       `json:"mpc_algorithm_name"`
+	AlgorithmName    string       `json:"algorithm_name"`
+	InputConfigs     InputConfig  `json:"input_configs"`
+	OutputConfigs    PreProOutput `json:"output_configs"`
 }
 
 type ModelTrainTask struct {
-	AlgorithmName string      `json:"algorithm_name"`
-	InputConfigs  InputConfig `json:"input_configs"`
-	OutputConfigs ModelOutput `json:"output_configs"`
+	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
+	AlgorithmName    string      `json:"algorithm_name"`
+	InputConfigs     InputConfig `json:"input_configs"`
+	OutputConfigs    ModelOutput `json:"output_configs"`
 }
 
 type ModelOutput struct {
@@ -127,7 +129,7 @@ func trainJobVerify(jobInfo *TrainJob) error {
 	}
 
 	// verify party info
-	for _, v := range jobInfo.PartyInfo {
+	for _, v := range jobInfo.PartyInfoList {
 
 		if len(v.Addr) == 0 {
 			return errors.New("IP must be provided")
@@ -148,7 +150,7 @@ func ParseAddress(pInfo []PartyInfo) []string {
 
 	for _, v := range pInfo {
 
-		// list of addresses
+		// list of Urlesses
 		Addrs = append(Addrs, v.Addr)
 	}
 	return Addrs
@@ -233,13 +235,13 @@ func GeneratePreProcessparams(cfg map[string]interface{}) string {
 	return ""
 }
 
-func GenerateNetworkConfig(addrs []string, portArray [][]int32) string {
+func GenerateNetworkConfig(Urls []string, portArray [][]int32) string {
 
-	//logger.Log.Println("Scheduler: Assigned IP and ports are: ", addrs, portArray)
+	//logger.Log.Println("Scheduler: Assigned IP and ports are: ", Urls, portArray)
 
-	partyNums := len(addrs)
+	partyNums := len(Urls)
 	var IPs []string
-	for _, v := range addrs {
+	for _, v := range Urls {
 		IPs = append(IPs, strings.Split(v, ":")[0])
 	}
 
@@ -248,7 +250,7 @@ func GenerateNetworkConfig(addrs []string, portArray [][]int32) string {
 		PortArrays: []*PortArray{},
 	}
 
-	// for each IP addr
+	// for each IP Url
 	for i := 0; i < partyNums; i++ {
 		p := &PortArray{Ports: portArray[i]}
 		cfg.PortArrays = append(cfg.PortArrays, p)

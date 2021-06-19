@@ -47,10 +47,10 @@ func Call(address string, network string, rpcname string, args interface{}, repl
 
 func doCall(address string, network string, rpcname string, args interface{}, reply interface{}) error {
 
-	logger.Log.Printf("----in Calling----, Calling network: %s, addr: %s, methodName: %s \n", network, address, rpcname)
+	logger.Log.Printf("----Rpc Call----, addr: %s, methodName: %s \n", address, rpcname)
 	client, err := rpc.Dial(network, address)
 	if err != nil {
-		logger.Log.Printf("----in Calling----, Connection error, <<%s>>\n", err)
+		logger.Log.Printf("----Rpc Call----, Connection error, <<%s>>\n", err)
 		return exceptions.ConnectionError()
 	}
 	defer client.Close()
@@ -59,7 +59,7 @@ func doCall(address string, network string, rpcname string, args interface{}, re
 	if cerr == nil {
 		return nil
 	} else {
-		logger.Log.Printf("----in Calling----, Call method error, <<%s>>\n", cerr)
+		logger.Log.Printf("----Rpc Call----, Call method error, <<%s>>\n", cerr)
 		return exceptions.CallingError()
 	}
 }
