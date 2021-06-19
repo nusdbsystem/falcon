@@ -41,10 +41,10 @@ func (wk *InferenceWorker) Run() {
 	wk.StartRPCServer(rpcSvc, true)
 }
 
-func (wk *InferenceWorker) DoTask(arg []byte, rep *entity.DoTaskReply) error {
+func (wk *InferenceWorker) DoTask(taskName string, rep *entity.DoTaskReply) error {
 
-	var doTaskArgs *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
+	// 1. decode args
 
-	wk.CreateInference(doTaskArgs)
+	wk.CreateInference(taskName)
 	return nil
 }

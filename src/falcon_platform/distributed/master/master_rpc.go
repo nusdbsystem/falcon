@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master *Master) {
+func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string) (master *Master) {
 	// launch 4 thread,
 	// 1. heartbeat loop, stopped by master.Cancel()
 	// 2. waiting for worker register, stopped by master.Cancel()
 	// 3. rpc server, used to get requests from worker, stopped by master.StopRPCServer
 	// 4. scheduling process, call finish to stop above threads
 
-	master = newMaster(masterAddr, len(qItem.AddrList))
+	master = newMaster(masterAddr, len(dslOjb.PartyAddrList))
 	master.workerType = workerType
 	master.reset()
 
@@ -38,15 +38,14 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 	logger.Log.Println("[master_rpc/RunMaster] rpcServer registered with master")
 
 	// thread 2
-	go master.forwardRegistrations(qItem)
+	go master.forwardRegistrations(dslOjb)
 
 	// thread 3
 	// launch a rpc server thread to process the requests.
 	master.StartRPCServer(rpcServer, false)
 
-	scheduler := func() string {
-		js := master.schedule(qItem)
-		return js
+	dispatcher := func() {
+		master.dispatch(dslOjb)
 	}
 
 	var updateStatus func(jsonString string)
@@ -56,9 +55,12 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 
 		updateStatus = func(jsonString string) {
 			// call coordinator to update status
-			client.JobUpdateResInfo(common.CoordAddr, "", string(jsonString), "", qItem.JobId)
-			client.JobUpdateStatus(common.CoordAddr, master.jobStatus, qItem.JobId)
-			client.ModelUpdate(common.CoordAddr, 1, qItem.JobId)
+			client.JobUpdateResInfo(common.CoordAddr, "", jsonString, "", dslOjb.JobId)
+			master.jobStatusLock.Lock()
+			jobStatus := master.jobStatus
+			master.jobStatusLock.Unlock()
+			client.JobUpdateStatus(common.CoordAddr, jobStatus, dslOjb.JobId)
+			client.ModelUpdate(common.CoordAddr, 1, dslOjb.JobId)
 		}
 
 		finish = func() {
@@ -66,13 +68,13 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 			master.StopRPCServer(master.Addr, "Master.Shutdown")
 			// stop other related threads
 			// close heartBeat and forwardRegistrations
-			master.Cancel()
+			master.Clear()
 		}
 
 	} else if workerType == common.InferenceWorker {
 
 		updateStatus = func(jsonString string) {
-			client.InferenceUpdateStatus(common.CoordAddr, master.jobStatus, qItem.JobId)
+			client.InferenceUpdateStatus(common.CoordAddr, master.jobStatus, dslOjb.JobId)
 		}
 
 		finish = func() {
@@ -80,7 +82,7 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 			master.StopRPCServer(master.Addr, "Master.Shutdown")
 			// stop other related threads
 			// close heartBeat and forwardRegistrations
-			master.Cancel()
+			master.Clear()
 		}
 	}
 
@@ -99,7 +101,7 @@ func RunMaster(masterAddr string, qItem *cache.QItem, workerType string) (master
 
 	// thread 4
 	// launch a thread to process then do the scheduling.
-	go master.run(scheduler, updateStatus, finish)
+	go master.run(dispatcher, updateStatus, finish)
 
 	return
 }

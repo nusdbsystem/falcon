@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func SetupDistDev(qItem *cache.QItem, workerType string) {
+func SetupDistDev(dslOjb *cache.DslObj, workerType string) {
 	// run master to call partyserver to set up worker
 
 	masterPort := client.GetFreePort(common.CoordAddr)
@@ -21,7 +21,7 @@ func SetupDistDev(qItem *cache.QItem, workerType string) {
 	logger.Log.Println("SetupDist: Launch master for Dev Env")
 
 	// use a thread
-	SetupMaster(masterAddr, qItem, workerType)
+	SetupMaster(masterAddr, dslOjb, workerType)
 }
 
 func SetupWorkerHelperDev(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string) {

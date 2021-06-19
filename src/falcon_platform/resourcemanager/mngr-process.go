@@ -1,10 +1,8 @@
-package taskmanager
+package resourcemanager
 
 import (
 	"context"
-	"errors"
 	"falcon_platform/common"
-	"falcon_platform/distributed/utils"
 	"falcon_platform/logger"
 	"io/ioutil"
 	"os/exec"
@@ -25,12 +23,12 @@ loop:
 			if err == nil {
 				err = syscall.Kill(pid, syscall.SIGQUIT)
 				if err != nil {
-					logger.Log.Println("[SubProcessManager]: Manually Killed PID=cmd.Process.Pid Error", err)
+					logger.Log.Println("[subProcessMngr]: Manually Killed PID=cmd.Process.Pid Error", err)
 				} else {
-					logger.Log.Println("[SubProcessManager]: Manually Killed PID=cmd.Process.Pid", pid)
+					logger.Log.Println("[subProcessMngr]: Manually Killed PID=cmd.Process.Pid", pid)
 				}
 			} else {
-				logger.Log.Printf("[SubProcessManager]: PID %d is not running\n", pid)
+				logger.Log.Printf("[subProcessMngr]: Clear resources, PID %d is not running, skip!\n", pid)
 			}
 			break loop
 		default:
@@ -40,20 +38,19 @@ loop:
 }
 
 func CreateProc(
-	cmd *exec.Cmd,
-	ctx context.Context,
-	mux *sync.Mutex,
-	NumProc *int,
-
-) (string, string) {
+	cmd *exec.Cmd, // command line to be executed
+	ctx context.Context, // control subprocess groups exist or not
+	mux *sync.Mutex, // lock
+	TotResources *int, // store number of sub-processes
+	TaskStatus *string, // store task status
+	runTimeErrorLog *string, // store task error logs
+) {
 	/**
 	   * @Author
 	   * @Description
 	   * @Date 11:54 上午 10/12/20
 	   * @Param
 	        // Each entry is of the form "key=value".
-	        // If Env is nil, the new process uses the current process's
-	        // environment.
 	        // If Env contains duplicate environment keys, only the last
 	        // value in the slice for each duplicate key is used.
 	        // As a special case on Windows, SYSTEMROOT is always added if
@@ -65,60 +62,78 @@ func CreateProc(
 
 	   * @return
 	   **/
+
 	defer func() {
-		//logger.Log.Println("[SubProcessManager]: lock")
+		//logger.Log.Println("[subProcessMngr]: lock")
 		mux.Lock()
-		*NumProc -= 1
+		*TotResources -= 1
 		mux.Unlock()
-		//logger.Log.Println("[SubProcessManager]: Unlock ")
+		//logger.Log.Println("[subProcessMngr]: Unlock ")
 	}()
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		logger.Log.Println(err)
-		return err.Error(), ""
+		mux.Lock()
+		*runTimeErrorLog = err.Error()
+		mux.Unlock()
+		return
 	}
-	var out utils.OutStream
+	var out OutStream
 	cmd.Stdout = out
 
 	// start with a short statement to execute before the condition
 	if err := cmd.Start(); err != nil {
 		logger.Log.Println("cmd.Start() Error:")
 		logger.Log.Println(err)
-		return err.Error(), ""
+		mux.Lock()
+		*runTimeErrorLog = err.Error()
+		mux.Unlock()
+		return
 	}
 
 	// if start successfully
 	if cmd.Process != nil {
-		logger.Log.Println("[SubProcessManager]: open subProcess, PID=", cmd.Process.Pid)
+		mux.Lock()
+		*TaskStatus = common.TaskRunning
+		mux.Unlock()
+
+		logger.Log.Println("[subProcessMngr]: open subProcess, PID=", cmd.Process.Pid)
 
 		go ProcMonitor(cmd.Process.Pid, ctx)
 		// if there is a running SubProc, nTasks add 1
 		mux.Lock()
-		*NumProc += 1
+		*TotResources += 1
 		mux.Unlock()
 
 		errLog, _ := ioutil.ReadAll(stderr)
 		executeStatus := cmd.Wait()
 
-		// oe is
-		var executeStr string
 		if executeStatus != nil {
-			executeStr = executeStatus.Error()
+			// this means subprocess exit with Non zero code
+			mux.Lock()
+			*TaskStatus = common.TaskFailed
+			mux.Unlock()
+			logger.Log.Printf("[subProcessMngr]: subprocess exit status: << %s >> \n", executeStatus.Error())
+			logger.Log.Printf("[subProcessMngr]: subprocess error logs: \n"+
+				"<<<<<<<<<<\n "+
+				"%s \n"+
+				"<<<<<<<<<<\n",
+				string(errLog))
+			mux.Lock()
+			*runTimeErrorLog = string(errLog)
+			mux.Unlock()
 		} else {
-			executeStr = common.SubProcessNormal
+			// this means subprocess running successful
+			mux.Lock()
+			*TaskStatus = common.TaskSuccessful
+			mux.Unlock()
 		}
 
-		logger.Log.Printf("[SubProcessManager]: subprocess exit status: << %s >> \n", executeStr)
-		logger.Log.Printf("[SubProcessManager]: subprocess error logs: \n"+
-			"<<<<<\n "+
-			"%s \n"+
-			"<<<<<\n",
-			string(errLog))
-
-		return executeStr, string(errLog)
-
 	} else {
-		return errors.New("[SubProcessManager]: cmd.Process is Nil, start error").Error(), ""
+		mux.Lock()
+		*TaskStatus = common.TaskFailed
+		mux.Unlock()
+		logger.Log.Printf("[subProcessMngr]: cmd.Process is Nil, start error")
 	}
 }

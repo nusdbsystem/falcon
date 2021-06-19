@@ -4,7 +4,6 @@ import (
 	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/logger"
-	"strings"
 	"time"
 )
 
@@ -15,7 +14,7 @@ loop:
 		select {
 		case <-master.Ctx.Done():
 
-			logger.Log.Printf("Master: Thread-1 %s quit eventLoop \n", master.Port)
+			logger.Log.Println("Master: Thread-1 heartBeatLoop exit")
 			break loop
 
 		default:
@@ -48,24 +47,17 @@ loop:
 	}
 }
 
-// boardcast heartbeat to current workers in worker list
+// board cast heartbeat to current workers in worker list
 func (master *Master) broadcastHeartbeat() {
 
 	// logger.Log.Println("[broadcastHeartbeat]...")
 	// update lastSendTime
 	master.reset()
 
-	for _, RegisteredWorker := range master.workers {
-		// RegisteredWorker is IP:Port:PartyID
-
-		// logger.Log.Println("RegisteredWorker = ", RegisteredWorker)
-		// Addr = IP:Port
-		RegisteredWorkerAddr := strings.Join(strings.Split(RegisteredWorker, ":")[:2], ":")
-		// logger.Log.Println("RegisteredWorkerAddr = ", RegisteredWorkerAddr)
-
-		ok := client.Call(RegisteredWorkerAddr, master.Network, master.workerType+".ResetTime", new(struct{}), new(struct{}))
+	for _, worker := range master.workers {
+		ok := client.Call(worker.Addr, master.Network, master.workerType+".ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
-			logger.Log.Printf("Master: RPC %s send heartbeat error\n", RegisteredWorkerAddr)
+			logger.Log.Printf("Master: RPC %s send heartbeat error\n", worker.Addr)
 		}
 	}
 }

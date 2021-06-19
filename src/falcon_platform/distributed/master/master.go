@@ -5,11 +5,26 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/distributed/base"
 	"falcon_platform/distributed/entity"
-	"falcon_platform/distributed/utils"
 	"falcon_platform/logger"
+	"strconv"
 	"strings"
 	"sync"
 )
+
+type WorkerInfo struct {
+	Addr string
+	ID   uint
+	IP   string
+}
+
+func Contains(str string, l []WorkerInfo) bool {
+	for _, ls := range l {
+		if ls.Addr+":"+strconv.Itoa(int(ls.ID)) == str {
+			return true
+		}
+	}
+	return false
+}
 
 type Master struct {
 	base.RpcBaseClass
@@ -22,11 +37,16 @@ type Master struct {
 	tmpWorkers chan string
 
 	// slice to store valid workers
-	workers   []string
+	workers   []WorkerInfo
 	workerNum int
 
-	// record the final status of this job
-	jobStatus string
+	// jobStatus indicates if job successful, failed, killed running, init
+	jobStatus     string
+	jobStatusLock sync.Mutex
+	// record job status message to db
+	jobStatusLog string
+	// record runtime status in real time
+	runtimeStatus chan *entity.DoTaskReply
 
 	// master heartbeat setting
 	lastSendTime     int64
@@ -48,6 +68,11 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 
 	ms.tmpWorkers = make(chan string)
 	ms.workerNum = workerNum
+
+	//default to successful, update at runtime, record to db after job finishing
+	ms.jobStatus = common.JobSuccessful
+	ms.runtimeStatus = make(chan *entity.DoTaskReply)
+
 	ms.heartbeatTimeout = common.MasterTimeout
 	return
 }
@@ -63,13 +88,13 @@ func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) err
 }
 
 // sends information of worker to ch. which is used by scheduler
-func (master *Master) forwardRegistrations(qItem *cache.QItem) {
+func (master *Master) forwardRegistrations(dslOjb *cache.DslObj) {
 
 	logger.Log.Printf("Master: start forwardRegistrations... ")
 	var requiredIP []string
 
-	for i := 0; i < len(qItem.AddrList); i++ {
-		IP := strings.Split(qItem.AddrList[i], ":")[0]
+	for i := 0; i < len(dslOjb.PartyAddrList); i++ {
+		IP := strings.Split(dslOjb.PartyAddrList[i], ":")[0]
 		requiredIP = append(requiredIP, IP)
 	}
 
@@ -78,26 +103,31 @@ loop:
 		select {
 		case <-master.Ctx.Done():
 
-			logger.Log.Printf("Master: Thread-2 %s quit forwardRegistrations \n", master.Port)
+			logger.Log.Println("Master: Thread-2 forwardRegistrations: exit")
 			break loop
 
 		// a list of master.workers:
 		// eg: [127.0.0.1:30009:0 127.0.0.1:30010:1 127.0.0.1:30011:2]
 		case tmpWorker := <-master.tmpWorkers:
 			// 1. check if this work already exist
-			if utils.Contains(tmpWorker, master.workers) {
+			master.Lock()
+			if Contains(tmpWorker, master.workers) {
 				logger.Log.Printf("Master: the worker %s already registered, skip \n", tmpWorker)
 			}
-
+			master.Unlock()
 			// 2. check if this worker is needed
-			tmpIP := strings.Split(tmpWorker, ":")[0]
+			// worker is IP:Port:PartyID
+			workerTmpList := strings.Split(tmpWorker, ":")
+			tmpUrl := strings.Join(workerTmpList[:2], ":")
+			tmpIP := workerTmpList[0]
+			tmpID, _ := strconv.Atoi(workerTmpList[2])
 
 			for i, IP := range requiredIP {
 				if tmpIP == IP {
 					logger.Log.Println("Master: Found one worker", tmpWorker)
 
 					master.Lock()
-					master.workers = append(master.workers, tmpWorker)
+					master.workers = append(master.workers, WorkerInfo{Addr: tmpUrl, ID: uint(tmpID), IP: tmpIP})
 					master.Unlock()
 					master.beginCountDown.Broadcast()
 
@@ -118,7 +148,7 @@ loop:
 }
 
 func (master *Master) run(
-	schedule func() string,
+	dispatcher func(),
 	updateStatus func(jsonString string),
 	finish func(),
 ) {
@@ -127,14 +157,14 @@ func (master *Master) run(
 	// 2. collect the job status, call coordinator's endpoints to update status to db
 	// 3. close all resources related to this job
 
-	jsonString := schedule()
-	logger.Log.Println("Master: finish job, update to coord, jobStatus:", master.jobStatus)
+	dispatcher()
+	logger.Log.Printf("Master: Finish job, update to coord, jobStatus: <%s> \n", master.jobStatus)
 
-	updateStatus(jsonString)
-	logger.Log.Println("Master: finish job, close all")
+	updateStatus(master.jobStatusLog)
+	logger.Log.Println("Master: Finish job, begin to shutdown master")
 
 	finish()
-	logger.Log.Printf("Master %s: Thread-4 job completed\n", master.Addr)
+	logger.Log.Printf("Master %s: Thread-4 master.finish, job completed\n", master.Addr)
 
 }
 
@@ -145,7 +175,6 @@ loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
-			logger.Log.Printf("Master: All logic finished !, server %s quit Waitting \n", master.Addr)
 			break loop
 		}
 	}
@@ -164,6 +193,9 @@ func (master *Master) Shutdown(_, _ *struct{}) error {
 // called by coordinator, to shutdown the running job
 func (master *Master) KillJob(_, _ *struct{}) error {
 	master.killWorkers()
+	master.jobStatusLock.Lock()
+	master.jobStatus = common.JobKilled
+	master.jobStatusLock.Unlock()
 	return nil
 }
 
@@ -172,8 +204,9 @@ func (master *Master) killWorkers() {
 	master.Lock()
 	defer master.Unlock()
 
-	for _, WorkerAddrId := range master.workers {
-		worker := strings.Join(strings.Split(WorkerAddrId, ":")[:2], ":")
-		master.StopRPCServer(worker, master.workerType+".Shutdown")
+	for len(master.workers) > 0 {
+		worker := master.workers[0]
+		master.StopRPCServer(worker.Addr, master.workerType+".Shutdown")
+		master.workers = master.workers[1:]
 	}
 }

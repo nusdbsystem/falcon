@@ -5,6 +5,7 @@ import (
 	"falcon_platform/distributed/base"
 	"falcon_platform/distributed/entity"
 	"falcon_platform/logger"
+	"falcon_platform/resourcemanager"
 	"net/rpc"
 )
 
@@ -42,13 +43,85 @@ func (wk *TrainWorker) Run() {
 
 }
 
-func (wk *TrainWorker) DoTask(arg []byte, rep *entity.DoTaskReply) error {
-	logger.Log.Println("TrainWorker DoTask() called")
+func (wk *TrainWorker) DoTask(taskName string, rep *entity.DoTaskReply) error {
+	// 1. decode args
+	logger.Log.Println("[TrainWorker] TrainWorker.DoTask called, taskName: ", taskName)
+	defer func() {
+		logger.Log.Printf("[TrainWorker]: %s: task %s done\n", wk.Addr, taskName)
+	}()
 
-	var doTaskArgs *entity.DoTaskArgs = entity.DecodeDoTaskArgs(arg)
+	// 2. init task manager for this task
+	wk.Tm = resourcemanager.InitResourceManager()
+	defer func() {
+		// once all tasks finish, clear resources monitors,
+		wk.Tm.ResourceClear()
+		// clear wk.Tm
+		wk.Tm = resourcemanager.InitResourceManager()
+	}()
 
-	wk.TrainTask(doTaskArgs, rep)
+	update := func() {
+		// update task error msg
+		rep.TaskMsg.RuntimeMsg = wk.Tm.RunTimeErrorLog
+		// update task status
+		wk.Tm.Mux.Lock()
+		if wk.Tm.TaskStatus == common.TaskFailed {
+			rep.RuntimeError = true
+		} else {
+			rep.RuntimeError = false
+		}
+		wk.Tm.Mux.Unlock()
+	}
 
-	logger.Log.Printf("Worker: %s: task done\n", wk.Addr)
+	if taskName == common.PreProcSubTask {
+		//wk.TestTaskCallee(taskName)// for testing/debug, dont remove,
+		wk.RunPreProcessingTask()
+		// update task error msg
+		update()
+		return nil
+	}
+	if taskName == common.ModelTrainSubTask {
+		//wk.TestTaskCallee(taskName)// for testing/debug, dont remove,
+		wk.RunModelTrainingTask()
+		// update task error msg
+		update()
+		return nil
+	}
+
+	rep.RuntimeError = true
+	rep.TaskMsg.RuntimeMsg = "TaskName wrong! must be in <pre_processing, model_training>"
+
+	return nil
+}
+
+func (wk *TrainWorker) RunMpc(mpcAlgorithmName string, rep *entity.DoTaskReply) error {
+
+	// 1. decode args
+	logger.Log.Println("[TrainWorker] TrainWorker.RunMpc called, mpcAlgorithmName: ", mpcAlgorithmName)
+	defer func() {
+		logger.Log.Printf("[TrainWorker]: %s: task %s done\n", wk.Addr, mpcAlgorithmName)
+	}()
+
+	update := func() {
+		// update task error msg
+		rep.TaskMsg.RuntimeMsg = wk.MpcTm.RunTimeErrorLog
+		// update task status
+		wk.MpcTm.Mux.Lock()
+		if wk.MpcTm.TaskStatus == common.TaskFailed {
+			rep.RuntimeError = true
+		} else {
+			rep.RuntimeError = false
+		}
+		wk.MpcTm.Mux.Unlock()
+	}
+
+	// clear the existing mpc resources if exist
+	wk.MpcTm.ResourceClear()
+	// init new resource manager
+	wk.MpcTm = resourcemanager.InitResourceManager()
+	// as for mpc, don't record it;s final status, as longs as it running, return as successful
+	wk.RunMpcTask(mpcAlgorithmName)
+	//wk.TestMPCCallee(mpcAlgorithmName)// for testing/debug, dont remove,
+
+	update()
 	return nil
 }

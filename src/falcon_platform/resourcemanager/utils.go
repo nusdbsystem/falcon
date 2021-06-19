@@ -1,4 +1,4 @@
-package utils
+package resourcemanager
 
 import (
 	"falcon_platform/logger"
@@ -69,15 +69,6 @@ func GetFreePort4K8s() (int, error) {
 	}
 }
 
-func Contains(str string, l []string) bool {
-	for _, ls := range l {
-		if ls == str {
-			return true
-		}
-	}
-	return false
-}
-
 type OutStream struct{}
 
 func (out OutStream) Write(p []byte) (int, error) {
@@ -86,7 +77,7 @@ func (out OutStream) Write(p []byte) (int, error) {
 }
 
 func ExecuteBash(command string) error {
-	// 返回一个 cmd 对象
+	// return cmd object
 	logger.Log.Println("[SubProcessManager]: execute bash ::", command)
 
 	cmd := exec.Command("bash", "-c", command)
@@ -108,25 +99,23 @@ func ExecuteBash(command string) error {
 
 }
 
-func ExecuteCmd(command string) error {
-	// 返回一个 cmd 对象
+func ExecuteCmd(cmd *exec.Cmd) error {
+	// cmd
 
-	logger.Log.Println("[SubProcessManager]: execute bash,", command)
-
-	cmd := exec.Command(command)
+	logger.Log.Printf("[ExecuteCmd]: Execute cmd \"%s\"", cmd.String())
 
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 
 	if err := cmd.Start(); err != nil {
-		logger.Log.Println("ExecuteBash: Start error ", err)
+		logger.Log.Println("[ExecuteCmd]: Error: ", err)
 		return err
 	}
 	errLog, _ := ioutil.ReadAll(stderr)
 	outLog, _ := ioutil.ReadAll(stdout)
 
-	logger.Log.Println("ExecuteBash: ErrorLog is ", string(errLog))
-	logger.Log.Println("ExecuteBash: OutPut is ", string(outLog))
+	logger.Log.Println("[ExecuteCmd]: ErrorLog is ", string(errLog))
+	logger.Log.Println("[ExecuteCmd]: OutPut is ", string(outLog))
 	outErr := cmd.Wait()
 
 	return outErr
