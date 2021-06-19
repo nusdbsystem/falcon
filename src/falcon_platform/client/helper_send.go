@@ -53,7 +53,7 @@ func PostForm(addr string, data map[string][]string) error {
 	logger.Log.Printf("Sending post request to url: %q", url)
 
 	NTimes := 20
-	interval := 4 // seconds
+	interval := 1 // seconds
 
 	var err error
 	var resp *http.Response

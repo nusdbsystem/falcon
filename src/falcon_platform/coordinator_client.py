@@ -1,5 +1,7 @@
 import argparse
 import requests
+from pprint import pprint
+import json
 
 
 def upload_train_job_file(url, path):
@@ -8,7 +10,10 @@ def upload_train_job_file(url, path):
         print("requesting to ", url)
         res = requests.post(url, files={'upload-train-job-file': f})
         print(res.status_code)
-        print(res.content)
+        try:
+            pprint(json.loads(res.text))
+        except:
+            print(res.content)
 
 
 def stop_train_job(url, jobId):
@@ -16,7 +21,10 @@ def stop_train_job(url, jobId):
     print("requesting to ", url)
     res = requests.get(url)
     print(res.status_code)
-    print(res.content)
+    try:
+        pprint(json.loads(res.text))
+    except:
+        print(res.content)
 
 
 def query_train_job_status(url, jobId):
@@ -24,7 +32,10 @@ def query_train_job_status(url, jobId):
     print("requesting to ", url)
     res = requests.get(url)
     print(res.status_code)
-    print(res.content)
+    try:
+        pprint(json.loads(res.text))
+    except:
+        print(res.content)
 
 
 if __name__ == '__main__':

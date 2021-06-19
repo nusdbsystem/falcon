@@ -34,14 +34,14 @@ type JobIdGet struct {
 	JobId string `json:"job_id"`
 }
 
-// receive a job info file, parse it, put in queue
+// receive a job info file, parse it, put in dslqueue
 func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// Parse multipart form, 32 << 20 specifies a maximum
 	// upload of 32 MB files.
 	_ = r.ParseMultipartForm(32 << 20)
 
+	// 1. read file from multiform
 	var buf bytes.Buffer
-
 	err, contents := client.ReceiveFile(r, buf, common.TrainJobFileKey)
 	if err != nil {
 		errMsg := fmt.Sprintf("client.ReceiveFile Error %s", err)
@@ -50,9 +50,8 @@ func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 	}
 	logger.Log.Println("client.ReceiveFile success")
 
-	// parse it
+	// 2. parser to object
 	var job common.TrainJob
-
 	err = common.ParseTrainJob(contents, &job)
 	if err != nil {
 		errMsg := fmt.Sprintf("common.ParseJob Error %s", err)
@@ -61,12 +60,11 @@ func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 	}
 	logger.Log.Println("common.ParseJob success")
 
-	// submit it
+	// 3. submit job with parsed object
 	JobId, JobName, UserId, PartyIds, TaskNum, Status := controller.JobSubmit(&job, ctx)
 
+	// 4. return to client
 	buf.Reset()
-
-	w.Header().Set("Content-Type", "application/json")
 
 	resIns := JobSubmitRes{
 		JobId,
@@ -76,16 +74,13 @@ func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 		TaskNum,
 		Status}
 
-	// TODO: fix json Marshal add /" '/" to the partyIds
-	js, err := json.Marshal(resIns)
+	err = json.NewEncoder(w).Encode(resIns)
 
 	if err != nil {
 		errMsg := fmt.Sprintf("JSON Marshal Error %s", err)
 		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
 		return
 	}
-	//json.NewEncoder(w).Encode(js)
-	_, _ = w.Write(js)
 }
 
 func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
@@ -115,13 +110,13 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 		}
 	}
 
-	js, err := json.Marshal(jr)
+	err := json.NewEncoder(w).Encode(jr)
 
 	if err != nil {
-		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
+		errMsg := fmt.Sprintf("JSON Marshal Error %s", err)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
 		return
 	}
-	_, _ = w.Write(js)
 
 }
 
@@ -181,12 +176,12 @@ func JobStatusQuery(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 		Status: status,
 	}
 
-	js, err := json.Marshal(jr)
+	err = json.NewEncoder(w).Encode(jr)
 
 	if err != nil {
-		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, err.Error())
+		errMsg := fmt.Sprintf("JSON Marshal Error %s", err)
+		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
 		return
 	}
-	_, _ = w.Write(js)
 
 }

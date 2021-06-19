@@ -54,7 +54,7 @@ func TestParseJson(t *testing.T) {
 	e2 := json.Unmarshal(byteValue, &job)
 	logger.Log.Println(e2)
 
-	b, err := json.Marshal(job.PartyInfo)
+	b, err := json.Marshal(job.PartyInfoList)
 	logger.Log.Println(string(b), err)
 
 	jb, _ := json.Marshal(job.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
