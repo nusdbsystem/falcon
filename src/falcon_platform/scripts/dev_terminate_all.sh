@@ -50,4 +50,7 @@ kill -15 $(cat dev_test/Coord.pid)
 # ref: https://stackoverflow.com/a/3510850
 kill $(ps aux | grep '[f]alcon_platform' | awk '{print $2}')
 
+# check if falcon is killed or not
+ps aux | grep 'falcon'
+
 echo DONE
