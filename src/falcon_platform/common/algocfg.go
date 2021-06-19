@@ -1,5 +1,7 @@
 package common
 
+// algorithm configurations
+
 type LogisticRegression struct {
 	// batch size in each iteration
 	BatchSize int32 `json:"batch_size"`

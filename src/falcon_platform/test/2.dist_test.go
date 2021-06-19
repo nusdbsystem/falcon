@@ -1,15 +1,15 @@
 package test
 
 import (
-	"falcon_platform/distributed/utils"
+	"falcon_platform/resourcemanager"
 	"fmt"
 	"testing"
 )
 
 func TestDist(t *testing.T) {
 
-	res, _ := utils.GetFreePort4K8s()
-	res2, _ := utils.GetFreePorts(3)
+	res, _ := resourcemanager.GetFreePort4K8s()
+	res2, _ := resourcemanager.GetFreePorts(3)
 	fmt.Println(res, res2)
 
 }
