@@ -19,8 +19,8 @@ type RpcBaseClass struct {
 	Port     string //  Port of worker
 	Listener net.Listener
 
-	Ctx    context.Context
-	Cancel context.CancelFunc
+	Ctx   context.Context
+	Clear context.CancelFunc
 }
 
 func (rb *RpcBaseClass) InitRpcBase(Addr string) {
@@ -32,11 +32,11 @@ func (rb *RpcBaseClass) InitRpcBase(Addr string) {
 
 	rb.Port = h[1]
 
-	rb.Ctx, rb.Cancel = context.WithCancel(context.Background())
+	rb.Ctx, rb.Clear = context.WithCancel(context.Background())
 }
 
 func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
-	logger.Log.Println("[rpcbase] StartRPCServer called")
+	//logger.Log.Println("[rpcbase] StartRPCServer called")
 
 	logger.Log.Printf("%s: listening on %s, %s \n", rb.Name, rb.Network, "0.0.0.0:"+rb.Port)
 	listener, e := net.Listen(rb.Network, "0.0.0.0:"+rb.Port)
@@ -99,8 +99,9 @@ func (rb *RpcBaseClass) StopRPCServer(addr, targetSvc string) {
 	logger.Log.Printf("%s: call %s\n", rb.Name, targetSvc)
 	ok := client.Call(addr, rb.Network, targetSvc, new(struct{}), &reply)
 	if ok == false {
-		logger.Log.Printf("%s: Cleanup: RPC %s error\n", rb.Name, addr)
+		logger.Log.Printf("%s: call %s errored\n", rb.Name, targetSvc)
+		return
 	}
 
-	logger.Log.Printf("%s: StopRPCServer: done\n", rb.Name)
+	logger.Log.Printf("%s: call %s successfully\n", rb.Name, targetSvc)
 }

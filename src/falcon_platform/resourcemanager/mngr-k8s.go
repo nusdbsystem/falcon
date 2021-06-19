@@ -1,9 +1,8 @@
-package taskmanager
+package resourcemanager
 
 import (
 	"bytes"
 	"context"
-	"falcon_platform/distributed/utils"
 	"falcon_platform/logger"
 	"io"
 	"io/ioutil"
@@ -129,7 +128,7 @@ func (km *K8sManager) CreateResources(filename string) {
 }
 
 func (km *K8sManager) UpdateYaml(command string) {
-	e := utils.ExecuteBash(command)
+	e := ExecuteBash(command)
 	if e != nil {
 		panic("K8sManager: MasterError " + e.Error())
 	}

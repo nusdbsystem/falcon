@@ -1,8 +1,7 @@
-package taskmanager
+package resourcemanager
 
 import (
 	"context"
-	"falcon_platform/distributed/utils"
 	"falcon_platform/logger"
 	"fmt"
 	"github.com/docker/docker/api/types"
@@ -41,14 +40,14 @@ func CreateContainer(
 	imageName string,
 	Ctx context.Context,
 	mux *sync.Mutex,
-	NumProc *int,
+	TotResources *int,
 
 ) (executeStr string, runTimeErrorLog string) {
 
 	defer func() {
 		logger.Log.Println("[DockerManager]: lock")
 		mux.Lock()
-		*NumProc -= 1
+		*TotResources -= 1
 		mux.Unlock()
 		logger.Log.Println("[DockerManager]: Unlock ")
 	}()
@@ -77,7 +76,7 @@ func CreateContainer(
 
 	go ContainerMonitor(resp.ID, Ctx)
 	mux.Lock()
-	*NumProc += 1
+	*TotResources += 1
 	mux.Unlock()
 
 	//statusCh, errCh := cli.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
@@ -96,7 +95,7 @@ func CreateContainer(
 		return
 	}
 	// print container log
-	var outStream utils.OutStream
+	var outStream OutStream
 	_, _ = stdcopy.StdCopy(outStream, os.Stderr, out)
 
 	return

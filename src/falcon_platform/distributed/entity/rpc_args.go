@@ -3,23 +3,32 @@ package entity
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 	"falcon_platform/common"
 	"falcon_platform/logger"
 	"reflect"
 )
 
-type DoTaskArgs struct {
-	IP          string
-	PartyID     uint
-	PartyNums   uint
+// parsed from DslObj, sent to each worker with all related information
+// add NetWorkFile, MpcIP, MpcPort
+type DslObj4SingleParty struct {
+
+	// those are the same as TranJob object or DslObj
 	JobFlType   string
-	PartyInfo   common.PartyInfo
 	ExistingKey uint
-	TaskInfo    common.Tasks
+	PartyNums   uint
+	Tasks       common.Tasks
+
+	// Only one party's information included
+	PartyInfo common.PartyInfo
+
+	// Proto file for falconMl task communication
 	NetWorkFile string
 
-	// this 2 for mpc
-	MpcIP   string
+	// This 2 for mpc
+	// all mpc process share's party-0's ip
+	MpcIP string
+	// all mpc process use the same port
 	MpcPort uint
 }
 
@@ -37,15 +46,15 @@ type ShutdownReply struct {
 }
 
 type DoTaskReply struct {
-	// indicate if the job is killed
-	Killed bool
+	// base info of this rpc call
+	RpcCallMethod string
+	WorkerUrl     string
 
 	// indicate if the job has error
 	RuntimeError bool
-
-	// indicate if the job has error
+	// indicate if rpc call meet error
 	RpcCallError bool
-
+	// if there are error, store error msg, otherwise empty string
 	TaskMsg TaskMsg
 }
 
@@ -54,12 +63,21 @@ type TaskMsg struct {
 	RpcCallMsg string
 }
 
+// Marshal list to string
+func MarshalStatus(trainStatuses *DoTaskReply) string {
+	jb, e := json.Marshal(trainStatuses)
+	if e != nil {
+		logger.Log.Fatalln(e)
+	}
+	return string(jb)
+}
+
 func argTypeRegister() {
 	gob.Register([]interface{}{})
 	gob.Register(map[string]interface{}{})
 }
 
-func EncodeDoTaskArgs(args *DoTaskArgs) []byte {
+func EncodeDslObj4SingleParty(args *DslObj4SingleParty) []byte {
 
 	argTypeRegister()
 
@@ -74,23 +92,16 @@ func EncodeDoTaskArgs(args *DoTaskArgs) []byte {
 	return converted
 }
 
-func DecodeDoTaskArgs(by []byte) *DoTaskArgs {
+func DecodeDslObj4SingleParty(by []byte) (*DslObj4SingleParty, error) {
 	argTypeRegister()
-
 	reader := bytes.NewReader(by)
-
 	var decoder = gob.NewDecoder(reader)
-	var d DoTaskArgs
-
+	var d DslObj4SingleParty
 	err := decoder.Decode(&d)
-
-	if err != nil {
-		panic(err)
-	}
-	return &d
+	return &d, err
 }
 
-func EncodeDoTaskArgsGeneral(args interface{}) []byte {
+func EncodeDslObj4SinglePartyGeneral(args interface{}) []byte {
 
 	argTypeRegister()
 
@@ -103,8 +114,8 @@ func EncodeDoTaskArgsGeneral(args interface{}) []byte {
 		logger.Log.Println(t)
 	case *ShutdownReply:
 		args = args.(*ShutdownReply)
-	case *DoTaskArgs:
-		args = args.(*DoTaskArgs)
+	case *DslObj4SingleParty:
+		args = args.(*DslObj4SingleParty)
 	case *DoTaskReply:
 		args = args.(*DoTaskReply)
 	}
@@ -116,7 +127,7 @@ func EncodeDoTaskArgsGeneral(args interface{}) []byte {
 	return converted
 }
 
-func DecodeDoTaskArgsGeneral(by []byte, reply interface{}) {
+func DecodeDslObj4SinglePartyGeneral(by []byte, reply interface{}) {
 
 	v := reflect.ValueOf(reply).Elem()
 
@@ -146,8 +157,8 @@ func DecodeDoTaskArgsGeneral(by []byte, reply interface{}) {
 				name := relType.Field(i).Name
 				v.FieldByName(name).Set(elem.FieldByName(name))
 			}
-		case *DoTaskArgs:
-			var d DoTaskArgs
+		case *DslObj4SingleParty:
+			var d DslObj4SingleParty
 			err := decoder.Decode(&d)
 			if err != nil {
 				panic(err)

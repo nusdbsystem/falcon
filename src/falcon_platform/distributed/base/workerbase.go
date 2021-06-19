@@ -5,16 +5,18 @@ import (
 	"falcon_platform/common"
 	_ "falcon_platform/common"
 	"falcon_platform/distributed/entity"
-	"falcon_platform/distributed/taskmanager"
 	"falcon_platform/logger"
+	"falcon_platform/resourcemanager"
 	"time"
 )
 
 type Worker interface {
 	// run worker rpc server
 	Run()
-	//  DoTask rpc call
-	DoTask(arg []byte, rep *entity.DoTaskReply) error
+	// DoTask rpc call
+	DoTask(arg string, rep *entity.DoTaskReply) error
+	// receive job information
+	ReceiveJobInfo(arg string, rep *entity.DoTaskReply) error
 }
 
 // worker server will do 2 things:
@@ -23,7 +25,12 @@ type Worker interface {
 type WorkerBase struct {
 	RpcBaseClass
 
-	Tm *taskmanager.TaskManager
+	// resource manager to manage resource of tasks like preprocess, model training,
+	// init at beginning of each doTask call, delete when dotask finish
+	Tm *resourcemanager.ResourceManager
+
+	// global mpcTM, manage multi mpc, record global mpc status in multi mpcs
+	MpcTm *resourcemanager.ResourceManager
 
 	// used for heartbeat
 	latestHeardTime int64
@@ -34,6 +41,9 @@ type WorkerBase struct {
 
 	// each worker is linked to the PartyID
 	PartyID string
+
+	// each worker store full job information,
+	DslObj entity.DslObj4SingleParty
 }
 
 func (w *WorkerBase) RunWorker(worker Worker) {
@@ -54,21 +64,30 @@ func (w *WorkerBase) InitWorkerBase(workerAddr, name string) {
 	w.InitRpcBase(workerAddr)
 	w.Name = name
 	w.SuicideTimeout = common.WorkerTimeout
-
-	// the lock needs to pass to multi funcs, must create a instance
-	w.Tm = taskmanager.InitTaskManager()
+	w.MpcTm = resourcemanager.InitResourceManager()
 	w.reset()
 }
 
-// call the master's register method to tell master i'm(worker) ready,
+func (w *WorkerBase) ReceiveJobInfo(arg string, rep *entity.DoTaskReply) error {
+	// receive job information, called by master
+	dslObj, err := entity.DecodeDslObj4SingleParty([]byte(arg))
+	if err != nil {
+		rep.RuntimeError = true
+		rep.TaskMsg.RuntimeMsg = err.Error()
+	} else {
+		w.DslObj = *dslObj
+	}
+	return nil
+}
+
 func (w *WorkerBase) Register(MasterAddr string, PartyID string) {
-	logger.Log.Println("[WorkerBase]: Register called")
+	// call the master's register method to tell master i'm(worker) ready,
 	args := new(entity.RegisterArgs)
 	args.WorkerAddr = w.Addr
 	args.PartyID = PartyID
 	args.WorkerAddrId = w.Addr + ":" + PartyID // IP:Port:PartyID
 
-	logger.Log.Printf("WorkerBase: call Master.RegisterWorker to register WorkerAddr: %s \n", args.WorkerAddr)
+	logger.Log.Printf("[WorkerBase]: call Master.RegisterWorker to register WorkerAddr: %s \n", args.WorkerAddr)
 	ok := client.Call(MasterAddr, w.Network, "Master.RegisterWorker", args, new(struct{}))
 	// if not register successfully, close
 	if ok == false {
@@ -76,22 +95,27 @@ func (w *WorkerBase) Register(MasterAddr string, PartyID string) {
 	}
 }
 
-// Shutdown is called by the master when all work has been completed.
-// We should respond with the number of tasks we have processed.
 func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
-	logger.Log.Println("[WorkerBase]: Shutdown called")
-	logger.Log.Printf("%s: Shutdown %s\n", w.Name, w.Addr)
+	// Shutdown is called by the master when all work has been completed.
+	//todo respond with the number of tasks we have processed later.?
 
-	// shutdown other related thread
-	w.Cancel()
-	w.Tm.DeleteResources()
+	logger.Log.Printf("[WorkerBase]: Shutdown called, %s: Shutdown %s\n", w.Name, w.Addr)
+
+	// when worker is about exit, shutdown mpc if any.
+	w.MpcTm.ResourceClear()
+
+	// shutdown worker's hear-beat
+	w.Clear()
+	if w.Tm == nil {
+		logger.Log.Println("[WorkerBase] Worker.ResourceManager must be init")
+	} else {
+		w.Tm.DeleteResources()
+	}
 
 	err := w.Listener.Close() // close the connection, cause error, and then, break the WorkerBase
 	if err != nil {
-		logger.Log.Printf("%s: close error, %s \n", w.Name, err)
+		logger.Log.Printf("[WorkerBase] %s: close error, %s \n", w.Name, err)
 	}
-	// this is used to define shut down the WorkerBase servers
-
 	return nil
 }
 
@@ -103,20 +127,20 @@ loop:
 	for {
 		select {
 		case <-w.Ctx.Done():
-			logger.Log.Printf("%s: server %s quit HeartBeat eventLoop \n", w.Name, w.Addr)
+			logger.Log.Printf("[%s]: server %s quit HeartBeat eventLoop \n", w.Name, w.Addr)
 			break loop
 		default:
 			elapseTime := time.Now().UnixNano() - w.latestHeardTime
 			if int(elapseTime/int64(time.Millisecond)) >= w.SuicideTimeout {
 
-				logger.Log.Printf("%s: Timeout, server %s suicide \n", w.Name, w.Addr)
+				logger.Log.Printf("[%s]: Timeout, server %s suicide \n", w.Name, w.Addr)
 
 				var reply entity.ShutdownReply
 				ok := client.Call(w.Addr, w.Network, w.Name+".Shutdown", new(struct{}), &reply)
 				if ok == false {
-					logger.Log.Printf("%s: RPC %s shutdown error\n", w.Name, w.Addr)
+					logger.Log.Printf("[%s]: RPC %s shutdown error\n", w.Name, w.Addr)
 				} else {
-					logger.Log.Printf("%s: WorkerBase timeout, RPC %s shutdown successfully\n", w.Name, w.Addr)
+					logger.Log.Printf("[%s]: WorkerBase timeout, RPC %s shutdown successfully\n", w.Name, w.Addr)
 				}
 				// quit event loop no matter ok or not
 				break

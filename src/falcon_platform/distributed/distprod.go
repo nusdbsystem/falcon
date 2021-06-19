@@ -4,13 +4,13 @@ import (
 	"falcon_platform/cache"
 	"falcon_platform/client"
 	"falcon_platform/common"
-	"falcon_platform/distributed/taskmanager"
 	"falcon_platform/logger"
+	"falcon_platform/resourcemanager"
 	"fmt"
 	"strings"
 )
 
-func SetupDistProd(qItem *cache.QItem, workerType string) {
+func SetupDistProd(dslOjb *cache.DslObj, workerType string) {
 	// run master to call party server to set up worker
 
 	masterPort := client.GetFreePort(common.CoordAddr)
@@ -22,18 +22,18 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 	logger.Log.Println("SetupDist: Launch master K8sEnv")
 
 	// in prod, use k8s to run train/predict server as a isolate process
-	itemKey := "job" + fmt.Sprintf("%d", qItem.JobId)
+	itemKey := "job" + fmt.Sprintf("%d", dslOjb.JobId)
 
 	serviceName := "master-" + itemKey + "-" + strings.ToLower(workerType)
 
-	// put to the queue, assign key to env
+	// put to the dslqueue, assign key to env
 	logger.Log.Println("SetupDist: Writing item to redis")
 
-	cache.InitRedisClient().Set(itemKey, cache.Serialize(qItem))
+	cache.InitRedisClient().Set(itemKey, cache.Serialize(dslOjb))
 
 	logger.Log.Printf("SetupDist: Get key, %s InitK8sManager\n", itemKey)
 
-	km := taskmanager.InitK8sManager(true, "")
+	km := resourcemanager.InitK8sManager(true, "")
 
 	command := []string{
 		common.MasterYamlCreatePath,
@@ -47,8 +47,8 @@ func SetupDistProd(qItem *cache.QItem, workerType string) {
 		common.Env,
 	}
 
-	//_=taskmanager.ExecuteOthers("ls")
-	//_=taskmanager.ExecuteOthers("pwd")
+	//_=resourcemanager.ExecuteOthers("ls")
+	//_=resourcemanager.ExecuteOthers("pwd")
 	km.UpdateYaml(strings.Join(command, " "))
 
 	logger.Log.Println("SetupDist: Creating yaml done")
@@ -93,7 +93,7 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 		logger.Log.Println("SetupWorkerHelper: Current in Prod, InferenceWorker, svcName", serviceName)
 	}
 
-	km := taskmanager.InitK8sManager(true, "")
+	km := resourcemanager.InitK8sManager(true, "")
 	command := []string{
 		common.WorkerYamlCreatePath,
 		serviceName,                // 1. worker service name
@@ -109,8 +109,8 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 		dataOutput,                 // 11. folder to store processed data
 	}
 
-	//_ = taskmanager.ExecuteCmd("ls")
-	//_ = taskmanager.ExecuteCmd("pwd")
+	//_ = resourcemanager.ExecuteCmd("ls")
+	//_ = resourcemanager.ExecuteCmd("pwd")
 	km.UpdateYaml(strings.Join(command, " "))
 
 	filename := common.YamlBasePath + serviceName + ".yaml"
