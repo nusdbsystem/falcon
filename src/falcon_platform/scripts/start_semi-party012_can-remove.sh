@@ -15,3 +15,6 @@ echo $! > $OUT_DIR/semi-party0.pid
 echo $! > $OUT_DIR/semi-party1.pid
 ./semi-party.x -F -N 3 -p 2 -I logistic_regression > $OUT_DIR/semi-party2.log 2>&1 &
 echo $! > $OUT_DIR/semi-party2.pid
+
+# check if semi-party process exist or not
+ps aux | grep semi-party
