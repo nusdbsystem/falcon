@@ -96,10 +96,13 @@ const (
 
 	HorizontalFl = "horizontal"
 	VerticalFl   = "vertical"
+	RuntimeLogs  = "runtime_logs"
+)
 
-	// algorithms
-	LogisticRegressionKey = "logistic_regression"
-	RuntimeLogs           = "runtime_logs"
+// algorithms names
+const (
+	LogisticRegressAlgName = "logistic_regression"
+	DecisionTreeAlgName    = "decision_tree"
 )
 
 var (

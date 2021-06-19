@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// protoc -I=/Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/ --go_out=/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/common /Users/nailixing/GOProj/src/github.com/falcon/src/executor/include/proto/v0/job.proto
+//
 // TODO: make the train job field consistent with wyc executor flags!
 // TODO: jobFLtype wyc side expects int
 // TODO: partyType wyc side expects int
@@ -93,11 +93,18 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 			GeneratePreProcessparams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
 	// if there is ModelTraining, serialize it
-	if jobInfo.Tasks.ModelTraining.AlgorithmName != "" {
+	if jobInfo.Tasks.ModelTraining.AlgorithmName == LogisticRegressAlgName {
 		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
 			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == DecisionTreeAlgName {
+		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+
+		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+			GenerateTreeParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	} else {
+		return errors.New("algorithm name can not be detected")
 	}
 
 	verifyErr := trainJobVerify(jobInfo)
@@ -178,8 +185,44 @@ func GenerateLrParams(cfg map[string]interface{}) string {
 
 	out, err := proto.Marshal(&lrp)
 	if err != nil {
+		// if error, means parser object wrong,
+		log.Fatalln("Failed to encode GenerateLrparams:", err)
+	}
 
-		// todo, should we exit from here directly ????? error handler management?
+	return string(out)
+}
+
+func GenerateTreeParams(cfg map[string]interface{}) string {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateTreeParams error in doing Marshal")
+	}
+
+	res := DecisionTree{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateTreeParams error in doing Unmarshal")
+	}
+
+	lrp := DecisionTreeParams{
+		TreeType:            res.TreeType,
+		Criterion:           res.Criterion,
+		SplitStrategy:       res.SplitStrategy,
+		ClassNum:            res.ClassNum,
+		MaxDepth:            res.MaxDepth,
+		MaxBins:             res.MaxBins,
+		MinSamplesSplit:     res.MinSamplesSplit,
+		MinSamplesLeaf:      res.MinSamplesLeaf,
+		MaxLeafNodes:        res.MaxLeafNodes,
+		MinImpurityDecrease: res.MinImpurityDecrease,
+		MinImpuritySplit:    res.MinImpuritySplit,
+		DpBudget:            res.DpBudget,
+	}
+
+	out, err := proto.Marshal(&lrp)
+	if err != nil {
 		log.Fatalln("Failed to encode GenerateLrparams:", err)
 	}
 
