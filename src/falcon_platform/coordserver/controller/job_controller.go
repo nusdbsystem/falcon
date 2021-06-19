@@ -18,14 +18,14 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 	string, // Status
 ) {
 
-	logger.Log.Println("HTTP server: in SubmitJob, put to the JobQueue")
+	logger.Log.Println("HTTP server: in SubmitJob, put to the JobDslQueue")
 
-	// generate.sh item pushed to the queue
+	// generate.sh item pushed to the dslqueue
 
-	addresses := common.ParseAddress(job.PartyInfo)
+	addresses := common.ParseAddress(job.PartyInfoList)
 
 	// generate.sh strings used to write to db
-	partyIds, err := json.Marshal(job.PartyInfo)
+	partyIds, err := json.Marshal(job.PartyInfoList)
 	TaskInfo, err := json.Marshal(job.Tasks)
 	if err != nil {
 		panic("json.Marshal(job.PartyIds) error")
@@ -33,7 +33,7 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 
 	ModelName := job.Tasks.ModelTraining.AlgorithmName
 	ModelInfo := job.Tasks.ModelTraining.AlgorithmName
-	PartyNumber := uint(len(job.PartyInfo))
+	PartyNumber := uint(len(job.PartyInfoList))
 
 	// write to db
 	tx := ctx.JobDB.DB.Begin()
@@ -56,18 +56,18 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 
 	ctx.JobDB.Commit(tx, []error{err1, err2, err3, err4})
 
-	qItem := new(cache.QItem)
-	qItem.AddrList = addresses
-	qItem.JobId = u2.JobId
-	qItem.JobName = job.JobName
-	qItem.JobFlType = job.JobFlType
-	qItem.ExistingKey = job.ExistingKey
-	qItem.PartyNums = job.PartyNums
-	qItem.PartyInfo = job.PartyInfo
-	qItem.Tasks = job.Tasks
+	dslOjb := new(cache.DslObj)
+	dslOjb.PartyAddrList = addresses
+	dslOjb.JobId = u2.JobId
+	dslOjb.JobName = job.JobName
+	dslOjb.JobFlType = job.JobFlType
+	dslOjb.ExistingKey = job.ExistingKey
+	dslOjb.PartyNums = job.PartyNums
+	dslOjb.PartyInfoList = job.PartyInfoList
+	dslOjb.Tasks = job.Tasks
 
 	go func() {
-		cache.JobQueue.Push(qItem)
+		cache.JobDslQueue.Push(dslOjb)
 	}()
 
 	return u2.JobId, u1.JobName, u2.UserID, u1.PartyIds, u1.TaskNum, u2.Status

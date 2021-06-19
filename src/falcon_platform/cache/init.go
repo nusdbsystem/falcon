@@ -1,3 +1,3 @@
 package cache
 
-var JobQueue = Queue{}
+var JobDslQueue = DslQueue{}

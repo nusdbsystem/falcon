@@ -55,18 +55,18 @@ loop:
 			}
 		default:
 
-			//logger.Log.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the queue...")
+			//logger.Log.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the dslqueue...")
 
-			if qItem, ok := cache.JobQueue.Pop(); ok {
+			if dslOjb, ok := cache.JobDslQueue.Pop(); ok {
 
-				logger.Log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from queue")
+				logger.Log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from dslqueue")
 
-				models.JobUpdateStatus(qItem.JobId, common.JobRunning)
+				models.JobUpdateStatus(dslOjb.JobId, common.JobRunning)
 
 				// Launching the master
 				go func() {
 					defer logger.HandleErrors()
-					dist.SetupDist(qItem, common.TrainWorker)
+					dist.SetupDist(dslOjb, common.TrainWorker)
 				}()
 			}
 

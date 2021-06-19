@@ -88,19 +88,19 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 
 	addresses := common.ParseAddress(inferencePartyInfo)
 
-	qItem := new(cache.QItem)
-	qItem.AddrList = addresses
-	qItem.JobId = inference.ID
-	qItem.JobName = JobInfo.JobName
-	qItem.JobFlType = JobInfo.FlSetting
-	qItem.ExistingKey = JobInfo.ExistingKey
-	qItem.PartyNums = JobInfo.PartyNum
-	qItem.PartyInfo = inferencePartyInfo
-	qItem.Tasks = TaskInfo
+	dslOjb := new(cache.DslObj)
+	dslOjb.PartyAddrList = addresses
+	dslOjb.JobId = inference.ID
+	dslOjb.JobName = JobInfo.JobName
+	dslOjb.JobFlType = JobInfo.FlSetting
+	dslOjb.ExistingKey = JobInfo.ExistingKey
+	dslOjb.PartyNums = JobInfo.PartyNum
+	dslOjb.PartyInfoList = inferencePartyInfo
+	dslOjb.Tasks = TaskInfo
 
 	go func() {
 		defer logger.HandleErrors()
-		dist.SetupDist(qItem, common.InferenceWorker)
+		dist.SetupDist(dslOjb, common.InferenceWorker)
 	}()
 
 	return true, inference.ID

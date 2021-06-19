@@ -17,11 +17,11 @@ func TestRandomFunc(t *testing.T) {
 
 	a := entity.ShutdownReply{}
 
-	res := entity.EncodeDoTaskArgsGeneral(&a)
+	res := entity.EncodeDslObj4SinglePartyGeneral(&a)
 	logger.Log.Println(res)
 
 	rr := entity.ShutdownReply{}
-	entity.DecodeDoTaskArgsGeneral(res, &rr)
+	entity.DecodeDslObj4SinglePartyGeneral(res, &rr)
 	logger.Log.Println()
 
 }

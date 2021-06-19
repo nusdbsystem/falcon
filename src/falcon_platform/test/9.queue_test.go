@@ -6,9 +6,9 @@ import (
 	"testing"
 )
 
-func TestQueue(t *testing.T) {
+func TestDslQueue(t *testing.T) {
 
-	a := cache.QItem{}
+	a := cache.DslObj{}
 
 	res := cache.Serialize(&a)
 
@@ -18,7 +18,7 @@ func TestQueue(t *testing.T) {
 
 	fmt.Println("---------------------------------------------------------------")
 
-	fmt.Println(res2.AddrList)
+	fmt.Println(res2.PartyAddrList)
 	fmt.Println(res2.JobId)
 
 }

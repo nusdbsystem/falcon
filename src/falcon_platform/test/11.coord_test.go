@@ -5,6 +5,6 @@ package test
 //	logger.Log, logger.LogFile = logger.GetLogger("./TestSubProc2")
 //
 //	common.CoordAddr = "127.0.0.1:30004"
-//	distributed.SetupMaster(masterAddr, qItem, workerType)
+//	distributed.SetupMaster(masterAddr, dslOjb, workerType)
 //
 //}
