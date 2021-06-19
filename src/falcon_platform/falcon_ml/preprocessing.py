@@ -10,9 +10,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print("Args is : ", args.a, args.b, args.c)
 
-    try:
+    try:iou
         for i in range(3):
-            print("Python PreProcessing Counting down", i)
+            print("-----------Python PreProcessing Counting down-----------", i)
             time.sleep(2)
     except:
         print("Error Happens")
