@@ -20,6 +20,7 @@
   "tasks": {
     "model_training": {
       "algorithm_name": "logistic_regression",
+      "mpc_algorithm_name": "logistic_regression",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
