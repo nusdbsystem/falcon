@@ -5,10 +5,10 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/coordserver"
 	"falcon_platform/distributed"
-	"falcon_platform/distributed/taskmanager"
 	"falcon_platform/distributed/worker"
 	"falcon_platform/logger"
 	"falcon_platform/partyserver"
+	"falcon_platform/resourcemanager"
 	"fmt"
 	"log"
 	"os"
@@ -121,7 +121,7 @@ func initEnv(svcName string) {
 			os.Exit(1)
 		}
 	case "partyserver":
-		// partyserver needs coord IP+port,lis port
+		// party server needs coord IP+port,lis port
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 		common.PartyServerIP = common.GetEnv("PARTY_SERVER_IP", "")
@@ -146,8 +146,8 @@ func initEnv(svcName string) {
 	case common.Master:
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 
-		// master needs queue item, task type
-		common.MasterQItem = common.GetEnv("ITEM_KEY", "")
+		// master needs dslqueue item, task type
+		common.MasterDslObj = common.GetEnv("ITEM_KEY", "")
 		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 
@@ -191,6 +191,16 @@ func initEnv(svcName string) {
 		common.WorkerAddr = common.GetEnv("WORKER_ADDR", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
+
+		// get the MPC exe path
+		common.MpcExePath = common.GetEnv(
+			"MPC_EXE_PATH",
+			"/opt/falcon/third_party/MP-SPDZ/semi-party.x")
+		// get the FL engine exe path
+		common.FLEnginePath = common.GetEnv(
+			"FL_ENGINE_PATH",
+			"/opt/falcon/build/src/executor/falcon")
+
 		if common.MasterAddr == "" || common.WorkerAddr == "" {
 			logger.Log.Println("Error: Input Error, either MasterAddr or WorkerAddr  not provided")
 			os.Exit(1)
@@ -207,6 +217,16 @@ func initEnv(svcName string) {
 		common.WorkerAddr = common.GetEnv("WORKER_ADDR", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
+
+		// get the MPC exe path
+		common.MpcExePath = common.GetEnv(
+			"MPC_EXE_PATH",
+			"/opt/falcon/third_party/MP-SPDZ/semi-party.x")
+		// get the FL engine exe path
+		common.FLEnginePath = common.GetEnv(
+			"FL_ENGINE_PATH",
+			"/opt/falcon/build/src/executor/falcon")
+
 		if common.MasterAddr == "" || common.WorkerAddr == "" {
 			logger.Log.Println("Error: Input Error, either MasterAddr or WorkerAddr not provided")
 			os.Exit(1)
@@ -253,11 +273,11 @@ func main() {
 		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 		// this should be the service name, defined at runtime,
 		masterAddr := common.MasterAddr
-		qItem := cache.Deserialize(cache.InitRedisClient().Get(common.MasterQItem))
+		dslOjb := cache.Deserialize(cache.InitRedisClient().Get(common.MasterDslObj))
 		workerType := common.WorkerType
-		distributed.SetupMaster(masterAddr, qItem, workerType)
+		distributed.SetupMaster(masterAddr, dslOjb, workerType)
 		// kill the related service after finish training or prediction.
-		km := taskmanager.InitK8sManager(true, "")
+		km := resourcemanager.InitK8sManager(true, "")
 		km.DeleteService(common.WorkerK8sSvcName)
 
 	case common.TrainWorker:
@@ -267,7 +287,7 @@ func main() {
 		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr, common.PartyID)
 		wk.RunWorker(wk)
 		// once  worker is killed by master, clear the resources.
-		km := taskmanager.InitK8sManager(true, "")
+		km := resourcemanager.InitK8sManager(true, "")
 		km.DeleteService(common.WorkerK8sSvcName)
 
 	case common.InferenceWorker:
@@ -279,6 +299,6 @@ func main() {
 	}
 
 	// once worker is killed by master, clear the resources.
-	km := taskmanager.InitK8sManager(true, "")
+	km := resourcemanager.InitK8sManager(true, "")
 	km.DeleteService(common.WorkerK8sSvcName)
 }

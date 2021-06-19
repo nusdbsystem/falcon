@@ -16,7 +16,7 @@ func Test3(t *testing.T) {
 	//kubeconfig :=  "/Users/nailixing/.kube/config"
 	//filename := "/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/deploy/template/test.yaml"
 	//
-	//km := taskmanager.InitK8sManager(false, kubeconfig)
+	//km := resourcemanager.InitK8sManager(false, kubeconfig)
 	//km.CreateResources(filename)
 
 	//i := 0

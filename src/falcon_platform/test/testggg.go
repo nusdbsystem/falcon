@@ -19,7 +19,7 @@ type SubProcessManager struct {
 	// if stop the subprocess
 	IsStop chan bool
 	// number of subprocess
-	NumProc int
+	TotResources int
 
 	// if the subprocess is killed
 	IsWait bool
@@ -31,7 +31,7 @@ func InitSubProcessManager() *SubProcessManager {
 	pm := new(SubProcessManager)
 
 	pm.IsStop = make(chan bool)
-	pm.NumProc = 0
+	pm.TotResources = 0
 
 	pm.IsWait = true
 
@@ -83,7 +83,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 	defer func() {
 		fmt.Println("SubProcessManager: Getting lock")
 		pm.Lock()
-		pm.NumProc -= 1
+		pm.TotResources -= 1
 		fmt.Println("SubProcessManager: Unlock")
 		pm.Unlock()
 		fmt.Println("SubProcessManager: Unlock done")
@@ -160,7 +160,7 @@ func (pm *SubProcessManager) ExecuteSubProc(
 		go pm.KillSubProc(cmd.Process.Pid, isKilled, isFinish)
 		// if there is a running KillSubProc, nTasks add 1
 		pm.Lock()
-		pm.NumProc += 1
+		pm.TotResources += 1
 		pm.Unlock()
 
 		var errLog []byte
