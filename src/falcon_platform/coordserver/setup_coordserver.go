@@ -38,13 +38,13 @@ func SetupCoordServer(nConsumer int) {
 
 	// Set up Job Scheduler
 	logger.Log.Println("[coordinator server]: Starting multi consumers...")
-	jobScheduler := controller.Init(nConsumer)
+	Driver := controller.Init(nConsumer)
 	// multi-thread consumer
 	for i := 0; i < nConsumer; i++ {
 
-		go jobScheduler.Consume(i)
+		go Driver.Consume(i)
 	}
-	go jobScheduler.MonitorConsumers()
+	go Driver.MonitorConsumers()
 
 	// for logging and tracing
 	http_logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
@@ -76,11 +76,11 @@ func SetupCoordServer(nConsumer int) {
 
 		logger.Log.Println("[coordinator server]: Stop multi consumers")
 
-		jobScheduler.StopMonitor()
+		Driver.StopMonitor()
 		logger.Log.Println("[coordinator server]: Monitor Stopped")
 
 		for i := 0; i < nConsumer; i++ {
-			jobScheduler.StopConsumer()
+			Driver.StopConsumer()
 		}
 
 		logger.Log.Println("[coordinator server]: Consumer Stopped")

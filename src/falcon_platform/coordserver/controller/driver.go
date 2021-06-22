@@ -11,7 +11,9 @@ import (
 	"time"
 )
 
-type JobScheduler struct {
+// Driver is used to launch the jobManager async
+// Driver will read from dslObj queue, once fond one, launch jobManager for the dslObj
+type Driver struct {
 	sync.Mutex
 
 	isStop        chan bool
@@ -20,9 +22,9 @@ type JobScheduler struct {
 	curConsumers  int
 }
 
-func Init(nConsumer int) *JobScheduler {
+func Init(nConsumer int) *Driver {
 	// n worker
-	ds := new(JobScheduler)
+	ds := new(Driver)
 
 	ds.isStop = make(chan bool, nConsumer)
 	ds.isStopMonitor = make(chan bool, 1)
@@ -34,7 +36,7 @@ func Init(nConsumer int) *JobScheduler {
 	return ds
 }
 
-func (ds *JobScheduler) Consume(consumerId int) {
+func (ds *Driver) Consume(consumerId int) {
 	defer func() {
 		err := recover()
 		logger.Log.Println("Consume: Error of this thread, ", consumerId, err)
@@ -76,11 +78,11 @@ loop:
 	logger.Log.Println("Consumer stopped")
 }
 
-func (ds *JobScheduler) StopConsumer() {
+func (ds *Driver) StopConsumer() {
 	ds.isStop <- true
 }
 
-func (ds *JobScheduler) MonitorConsumers() {
+func (ds *Driver) MonitorConsumers() {
 
 loop:
 	for {
@@ -104,6 +106,6 @@ loop:
 
 }
 
-func (ds *JobScheduler) StopMonitor() {
+func (ds *Driver) StopMonitor() {
 	ds.isStopMonitor <- true
 }
