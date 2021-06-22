@@ -3,7 +3,7 @@ package base
 import (
 	"context"
 	"falcon_platform/client"
-	"falcon_platform/distributed/entity"
+	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"net"
 	"net/rpc"

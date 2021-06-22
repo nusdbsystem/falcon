@@ -3,7 +3,7 @@ package test
 import (
 	"falcon_platform/cache"
 	"falcon_platform/common"
-	"falcon_platform/distributed"
+	"falcon_platform/jobmanager"
 	"falcon_platform/logger"
 	"testing"
 )
@@ -17,6 +17,6 @@ func TestClient(t *testing.T) {
 	workerType := common.TrainWorker
 
 	common.CoordAddr = "127.0.0.1:30004"
-	distributed.SetupMaster(masterAddr, dslOjb, workerType)
+	jobmanager.SetupMaster(masterAddr, dslOjb, workerType)
 
 }

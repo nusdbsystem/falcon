@@ -1,10 +1,10 @@
-package distributed
+package jobmanager
 
 import (
 	"falcon_platform/cache"
 	"falcon_platform/client"
 	"falcon_platform/common"
-	"falcon_platform/distributed/master"
+	"falcon_platform/jobmanager/master"
 	"falcon_platform/logger"
 	"fmt"
 	"math/rand"
@@ -17,13 +17,13 @@ func initSvcName() string {
 	return res
 }
 
-func SetupDist(dslOjb *cache.DslObj, workerType string) {
+func SetupJobManager(dslOjb *cache.DslObj, workerType string) {
 	// run master to call party server to set up worker
 
 	if common.Env == common.DevEnv {
-		SetupDistDev(dslOjb, workerType)
+		SetupJobManagerDev(dslOjb, workerType)
 	} else if common.Env == common.K8sEnv {
-		SetupDistProd(dslOjb, workerType)
+		SetupJobManagerProd(dslOjb, workerType)
 	}
 }
 

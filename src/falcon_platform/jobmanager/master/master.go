@@ -3,8 +3,8 @@ package master
 import (
 	"falcon_platform/cache"
 	"falcon_platform/common"
-	"falcon_platform/distributed/base"
-	"falcon_platform/distributed/entity"
+	"falcon_platform/jobmanager/base"
+	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"strconv"
 	"strings"

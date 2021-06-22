@@ -3,8 +3,8 @@ package test
 import (
 	"encoding/json"
 	"falcon_platform/common"
-	"falcon_platform/distributed/entity"
 	"falcon_platform/exceptions"
+	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"fmt"
 	"log"

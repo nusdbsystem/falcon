@@ -1,24 +1,24 @@
-package distributed
+package jobmanager
 
 import (
 	"falcon_platform/cache"
 	"falcon_platform/client"
 	"falcon_platform/common"
-	"falcon_platform/distributed/worker"
+	"falcon_platform/jobmanager/worker"
 	"falcon_platform/logger"
 	"os"
 )
 
-func SetupDistDev(dslOjb *cache.DslObj, workerType string) {
+func SetupJobManagerDev(dslOjb *cache.DslObj, workerType string) {
 	// run master to call partyserver to set up worker
 
 	masterPort := client.GetFreePort(common.CoordAddr)
-	logger.Log.Println("SetupDist: Launch master Get port", masterPort)
+	logger.Log.Println("SetupJobManager: Launch master Get port", masterPort)
 
 	masterIP := common.CoordIP
 	masterAddr := masterIP + ":" + masterPort
 
-	logger.Log.Println("SetupDist: Launch master for Dev Env")
+	logger.Log.Println("SetupJobManager: Launch master for Dev Env")
 
 	// use a thread
 	SetupMaster(masterAddr, dslOjb, workerType)

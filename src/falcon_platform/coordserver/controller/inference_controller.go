@@ -5,7 +5,7 @@ import (
 	"falcon_platform/cache"
 	"falcon_platform/common"
 	"falcon_platform/coordserver/entity"
-	dist "falcon_platform/distributed"
+	"falcon_platform/jobmanager"
 	"falcon_platform/logger"
 	"time"
 )
@@ -100,7 +100,7 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 
 	go func() {
 		defer logger.HandleErrors()
-		dist.SetupDist(dslOjb, common.InferenceWorker)
+		jobmanager.SetupJobManager(dslOjb, common.InferenceWorker)
 	}()
 
 	return true, inference.ID
@@ -155,7 +155,7 @@ loop:
 					panic(e)
 				}
 
-				dist.KillJob(u.MasterAddr, common.Network)
+				jobmanager.KillJob(u.MasterAddr, common.Network)
 
 				tx := ctx.JobDB.DB.Begin()
 				e, _ = ctx.JobDB.InferenceUpdateStatus(tx, infId, common.JobKilled)

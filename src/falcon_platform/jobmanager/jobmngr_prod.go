@@ -1,4 +1,4 @@
-package distributed
+package jobmanager
 
 import (
 	"falcon_platform/cache"
@@ -10,16 +10,16 @@ import (
 	"strings"
 )
 
-func SetupDistProd(dslOjb *cache.DslObj, workerType string) {
+func SetupJobManagerProd(dslOjb *cache.DslObj, workerType string) {
 	// run master to call party server to set up worker
 
 	masterPort := client.GetFreePort(common.CoordAddr)
-	logger.Log.Println("SetupDist: Launch master Get port", masterPort)
+	logger.Log.Println("SetupJobManager: Launch master Get port", masterPort)
 
 	masterIP := common.CoordIP
 	masterAddr := masterIP + ":" + masterPort
 
-	logger.Log.Println("SetupDist: Launch master K8sEnv")
+	logger.Log.Println("SetupJobManager: Launch master K8sEnv")
 
 	// in prod, use k8s to run train/predict server as a isolate process
 	itemKey := "job" + fmt.Sprintf("%d", dslOjb.JobId)
@@ -27,11 +27,11 @@ func SetupDistProd(dslOjb *cache.DslObj, workerType string) {
 	serviceName := "master-" + itemKey + "-" + strings.ToLower(workerType)
 
 	// put to the dslqueue, assign key to env
-	logger.Log.Println("SetupDist: Writing item to redis")
+	logger.Log.Println("SetupJobManager: Writing item to redis")
 
 	cache.InitRedisClient().Set(itemKey, cache.Serialize(dslOjb))
 
-	logger.Log.Printf("SetupDist: Get key, %s InitK8sManager\n", itemKey)
+	logger.Log.Printf("SetupJobManager: Get key, %s InitK8sManager\n", itemKey)
 
 	km := resourcemanager.InitK8sManager(true, "")
 
@@ -51,14 +51,14 @@ func SetupDistProd(dslOjb *cache.DslObj, workerType string) {
 	//_=resourcemanager.ExecuteOthers("pwd")
 	km.UpdateYaml(strings.Join(command, " "))
 
-	logger.Log.Println("SetupDist: Creating yaml done")
+	logger.Log.Println("SetupJobManager: Creating yaml done")
 
 	filename := common.YamlBasePath + serviceName + ".yaml"
 
-	logger.Log.Println("SetupDist: Creating Resources based on file, ", filename)
+	logger.Log.Println("SetupJobManager: Creating Resources based on file, ", filename)
 
 	km.CreateResources(filename)
-	logger.Log.Println("SetupDist: setup master done")
+	logger.Log.Println("SetupJobManager: setup master done")
 }
 
 func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string) {
@@ -115,10 +115,10 @@ func SetupWorkerHelperProd(masterAddr, workerType, jobId, dataPath, modelPath, d
 
 	filename := common.YamlBasePath + serviceName + ".yaml"
 
-	logger.Log.Println("SetupDist: Creating yaml done", filename)
+	logger.Log.Println("SetupJobManager: Creating yaml done", filename)
 
 	km.CreateResources(filename)
 
-	logger.Log.Println("SetupDist: worker is running")
+	logger.Log.Println("SetupJobManager: worker is running")
 
 }

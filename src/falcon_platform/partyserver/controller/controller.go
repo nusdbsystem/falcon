@@ -1,7 +1,7 @@
 package controller
 
 import (
-	dist "falcon_platform/distributed"
+	"falcon_platform/jobmanager"
 )
 
 func SetupWorker(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string) {
@@ -9,7 +9,7 @@ func SetupWorker(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput 
 	// todo add dynamic scheduler when running in cluster, to scheduler the pod the specific server where the data are stored.
 	// 	 schedule according to dataPath
 
-	dist.SetupWorkerHelper(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput)
+	jobmanager.SetupWorkerHelper(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput)
 
 }
 

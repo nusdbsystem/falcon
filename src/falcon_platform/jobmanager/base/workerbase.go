@@ -4,7 +4,7 @@ import (
 	"falcon_platform/client"
 	"falcon_platform/common"
 	_ "falcon_platform/common"
-	"falcon_platform/distributed/entity"
+	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
 	"time"

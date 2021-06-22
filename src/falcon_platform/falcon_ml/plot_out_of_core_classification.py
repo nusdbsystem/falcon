@@ -193,7 +193,7 @@ vectorizer = HashingVectorizer(decode_error='ignore', n_features=2 ** 18,
 data_stream = stream_reuters_documents()
 
 # We learn a binary classification between the "acq" class and all the others.
-# "acq" was chosen as it is more or less evenly distributed in the Reuters
+# "acq" was chosen as it is more or less evenly jobmanager in the Reuters
 # files. For other datasets, one should take care of creating a test set with
 # a realistic portion of positive instances.
 all_classes = np.array([0, 1])

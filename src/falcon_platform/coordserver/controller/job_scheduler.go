@@ -4,7 +4,7 @@ import (
 	"falcon_platform/cache"
 	"falcon_platform/common"
 	"falcon_platform/coordserver/models"
-	dist "falcon_platform/distributed"
+	"falcon_platform/jobmanager"
 	"falcon_platform/logger"
 	"fmt"
 	"sync"
@@ -66,7 +66,7 @@ loop:
 				// Launching the master
 				go func() {
 					defer logger.HandleErrors()
-					dist.SetupDist(dslOjb, common.TrainWorker)
+					jobmanager.SetupJobManager(dslOjb, common.TrainWorker)
 				}()
 			}
 

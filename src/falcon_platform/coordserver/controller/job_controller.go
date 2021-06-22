@@ -5,7 +5,7 @@ import (
 	"falcon_platform/cache"
 	"falcon_platform/common"
 	"falcon_platform/coordserver/entity"
-	"falcon_platform/distributed"
+	"falcon_platform/jobmanager"
 	"falcon_platform/logger"
 )
 
@@ -80,7 +80,7 @@ func JobKill(jobId uint, ctx *entity.Context) error {
 		return e
 	}
 
-	distributed.KillJob(u.MasterAddr, common.Network)
+	jobmanager.KillJob(u.MasterAddr, common.Network)
 
 	tx := ctx.JobDB.DB.Begin()
 	err, _ := ctx.JobDB.JobUpdateStatus(tx, jobId, common.JobKilled)

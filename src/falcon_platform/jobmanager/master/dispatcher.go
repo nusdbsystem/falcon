@@ -5,7 +5,7 @@ import (
 	"falcon_platform/cache"
 	"falcon_platform/client"
 	"falcon_platform/common"
-	"falcon_platform/distributed/entity"
+	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"strconv"
 	"strings"

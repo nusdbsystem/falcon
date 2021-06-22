@@ -4,8 +4,8 @@ import (
 	"falcon_platform/cache"
 	"falcon_platform/common"
 	"falcon_platform/coordserver"
-	"falcon_platform/distributed"
-	"falcon_platform/distributed/worker"
+	"falcon_platform/jobmanager"
+	"falcon_platform/jobmanager/worker"
 	"falcon_platform/logger"
 	"falcon_platform/partyserver"
 	"falcon_platform/resourcemanager"
@@ -275,7 +275,7 @@ func main() {
 		masterAddr := common.MasterAddr
 		dslOjb := cache.Deserialize(cache.InitRedisClient().Get(common.MasterDslObj))
 		workerType := common.WorkerType
-		distributed.SetupMaster(masterAddr, dslOjb, workerType)
+		jobmanager.SetupMaster(masterAddr, dslOjb, workerType)
 		// kill the related service after finish training or prediction.
 		km := resourcemanager.InitK8sManager(true, "")
 		km.DeleteService(common.WorkerK8sSvcName)
