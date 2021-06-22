@@ -50,12 +50,18 @@ func SetupCoordServer(nConsumer int) {
 	http_logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
 	http_logger.Println("HTTP Server is starting...")
 
+	// reference: https://stackoverflow.com/questions/40985920/making-golang-gorilla-cors-handler-work
+	// Where ORIGIN_ALLOWED is like `scheme://dns[:port]`, or `*` (insecure)
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
 	// set up the HTTP server
 	// modified from https://github.com/enricofoltran/simple-go-server/blob/master/main.go
 	server := &http.Server{
 		Addr: "0.0.0.0:" + common.CoordPort,
 		// Pass instance of gorilla/mux in
-		Handler: handlers.CombinedLoggingHandler(os.Stdout, r),
+		Handler: handlers.CombinedLoggingHandler(os.Stdout, handlers.CORS(originsOk, headersOk, methodsOk)(r)),
 		// Handler:  logger.HttpTracing(logger.NextRequestID)(logger.HttpLogging(http_logger)(r)),
 		ErrorLog: http_logger,
 		// Good practice: enforce timeouts for servers to avoid Slowloris attacks
