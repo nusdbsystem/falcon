@@ -20,9 +20,9 @@ try first outside of `/opt`
 
 ```bash
 local_build$ git clone https://github.com/google/glog.git && \
->     cd glog && \
->     cmake -H. -Bbuild -G "Unix Makefiles" && \
->     cmake --build build
+     cd glog && \
+     cmake -H. -Bbuild -G "Unix Makefiles" && \
+     cmake --build build
 ```
 
 test the glob installation with provided `cmake test`:
