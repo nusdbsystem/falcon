@@ -449,7 +449,7 @@ void LogisticRegression::train(Party party) {
     // print evaluation report
     if (iter != (max_iteration - 1)) {
       // but do not duplicate print for last iter
-      eval(party, falcon::TRAIN);
+      eval(party, falcon::TRAIN, std::string());
     }
   }
 #endif
@@ -464,7 +464,8 @@ void LogisticRegression::train(Party party) {
   google::FlushLogFiles(google::INFO);
 }
 
-void LogisticRegression::eval(Party party, falcon::DatasetType eval_type) {
+void LogisticRegression::eval(Party party, falcon::DatasetType eval_type,
+    const std::string& report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
@@ -541,10 +542,20 @@ void LogisticRegression::eval(Party party, falcon::DatasetType eval_type) {
       if (eval_type == falcon::TEST){
         ClfMetrics.compute_metrics(pred_classes, testing_labels);
       }
-      LOG(INFO) << "Classification Confusion Matrix on " << dataset_str << " is:";
-      ClfMetrics.pretty_print_cm();
-      LOG(INFO) << "Classification Report on " << dataset_str << " is:";
-      ClfMetrics.classification_report();
+
+      // write results to report
+      std::ofstream outfile;
+      if (!report_save_path.empty()) {
+        outfile.open(report_save_path, std::ios_base::app);
+        if (outfile) {
+          outfile << "******** Evaluation Report on " << dataset_str << " ********\n";
+        }
+      }
+      LOG(INFO) << "Classification Confusion Matrix on " << dataset_str << " is:\n";
+      ClfMetrics.pretty_print_cm(outfile);
+      LOG(INFO) << "Classification Report on " << dataset_str << " is:\n";
+      ClfMetrics.classification_report(outfile);
+      outfile.close();
     } else {
       LOG(ERROR) << "The " << metric << " metric is not supported";
       return;
@@ -785,16 +796,16 @@ void train_logistic_regression(Party party, std::string params_str,
   std::cout << "Init logistic regression model success" << std::endl;
 
   log_reg_model.train(party);
-  log_reg_model.eval(party, falcon::TRAIN);
-  log_reg_model.eval(party, falcon::TEST);
+  log_reg_model.eval(party, falcon::TRAIN, model_report_file);
+  log_reg_model.eval(party, falcon::TEST, model_report_file);
 
   // save model and report
   EncodedNumber* model_weights = new EncodedNumber[log_reg_model.getter_weight_size()];
   log_reg_model.getter_encoded_weights(model_weights);
   save_lr_model(model_weights, log_reg_model.getter_weight_size(), model_save_file);
-  save_training_report(log_reg_model.getter_training_accuracy(),
-      log_reg_model.getter_testing_accuracy(),
-      model_report_file);
+  // save_training_report(log_reg_model.getter_training_accuracy(),
+  //    log_reg_model.getter_testing_accuracy(),
+  //    model_report_file);
 
   delete [] model_weights;
 }

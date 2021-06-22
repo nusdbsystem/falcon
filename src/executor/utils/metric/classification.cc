@@ -8,6 +8,7 @@
 #include <glog/logging.h>
 #include <iostream>     // std::cout
 #include <iomanip>      // std::setprecision
+#include <fstream>
 
 
 // a metrics class for classification performance
@@ -93,19 +94,27 @@ void ClassificationMetrics::compute_metrics(std::vector<int> predictions, std::v
 
 
 // pretty print confusion matrix
-void ClassificationMetrics::pretty_print_cm() {
+void ClassificationMetrics::pretty_print_cm(std::ofstream& outfile) {
   /* example output:
-Confusion Matrix
-               Pred
-               Class1    Class0
-True Class1    5        3
-     Class0    2        3
+  Confusion Matrix
+                 Pred
+                 Class1    Class0
+  True Class1    5        3
+       Class0    2        3
   */
-  std::cout << "Confusion Matrix (Class 1 is Positive Class)\n";
-  std::cout << "               Pred\n";
-  std::cout << "               Class1    Class0\n";
-  std::cout << "True Class1" << "    " << TP << "        " << FN << std::endl;
-  std::cout << "     Class0" << "    " << FP << "        " << TN << std::endl;
+  if (!outfile) {
+    std::cout << "Confusion Matrix (Class 1 is Positive Class)\n";
+    std::cout << "               Pred\n";
+    std::cout << "               Class1    Class0\n";
+    std::cout << "True Class1" << "    " << TP << "        " << FN << std::endl;
+    std::cout << "     Class0" << "    " << FP << "        " << TN << std::endl;
+  } else {
+    outfile << "Confusion Matrix (Class 1 is Positive Class)\n";
+    outfile << "               Pred\n";
+    outfile << "               Class1    Class0\n";
+    outfile << "True Class1" << "    " << TP << "        " << FN << "\n";
+    outfile << "     Class0" << "    " << FP << "        " << TN << "\n";
+  }
 
   // save a version for gLog
   LOG(INFO) << "Confusion Matrix (Class 1 is Positive Class)";
@@ -116,23 +125,43 @@ True Class1    5        3
 }
 
 // pretty print classification performance report
-void ClassificationMetrics::classification_report() {
-  std::cout << "=== Classification Report ===" << std::endl;
+void ClassificationMetrics::classification_report(std::ofstream& outfile) {
 
-  std::cout << "False negative (FN) = " << FN << std::endl;
-  std::cout << "False positive (FP) = " << FP << std::endl;
-  std::cout << "True positive (TP) = " << TP << std::endl;
-  std::cout << "True negative (TN) = " << TN << std::endl;
+  if (!outfile) {
+    std::cout << "=== Classification Report ===" << std::endl;
 
-  std::cout << "regular_accuracy = " << std::setprecision(17) << regular_accuracy << std::endl;
-  std::cout << "balanced_accuracy = " << std::setprecision(17) << balanced_accuracy << std::endl;
+    std::cout << "False negative (FN) = " << FN << std::endl;
+    std::cout << "False positive (FP) = " << FP << std::endl;
+    std::cout << "True positive (TP) = " << TP << std::endl;
+    std::cout << "True negative (TN) = " << TN << std::endl;
 
-  std::cout << "sensitivity = " << std::setprecision(17) << sensitivity << std::endl;
-  std::cout << "specificity = " << std::setprecision(17) << specificity << std::endl;
+    std::cout << "regular_accuracy = " << std::setprecision(17) << regular_accuracy << std::endl;
+    std::cout << "balanced_accuracy = " << std::setprecision(17) << balanced_accuracy << std::endl;
 
-  std::cout << "precision (PPV) = " << std::setprecision(17) << precision << std::endl;
-  std::cout << "NPV = " << std::setprecision(17) << NPV << std::endl;
-  std::cout << "F1 score = " << std::setprecision(17) << F1 << std::endl;
+    std::cout << "sensitivity = " << std::setprecision(17) << sensitivity << std::endl;
+    std::cout << "specificity = " << std::setprecision(17) << specificity << std::endl;
+
+    std::cout << "precision (PPV) = " << std::setprecision(17) << precision << std::endl;
+    std::cout << "NPV = " << std::setprecision(17) << NPV << std::endl;
+    std::cout << "F1 score = " << std::setprecision(17) << F1 << std::endl;
+  } else {
+    outfile << "=== Classification Report ===\n";
+
+    outfile << "False negative (FN) = " << FN << "\n";
+    outfile << "False positive (FP) = " << FP << "\n";
+    outfile << "True positive (TP) = " << TP << "\n";
+    outfile << "True negative (TN) = " << TN << "\n";
+
+    outfile << "regular_accuracy = " << std::setprecision(17) << regular_accuracy << "\n";
+    outfile << "balanced_accuracy = " << std::setprecision(17) << balanced_accuracy << "\n";
+
+    outfile << "sensitivity = " << std::setprecision(17) << sensitivity << "\n";
+    outfile << "specificity = " << std::setprecision(17) << specificity << "\n";
+
+    outfile << "precision (PPV) = " << std::setprecision(17) << precision << "\n";
+    outfile << "NPV = " << std::setprecision(17) << NPV << "\n";
+    outfile << "F1 score = " << std::setprecision(17) << F1 << "\n";
+  }
 
   // save a version for gLog
   LOG(INFO) << "=== Classification Report ===";

@@ -6,7 +6,7 @@
 #define FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_
 
 #include <vector>
-
+#include <fstream>
 
 // a metrics class for classification performance
 class ClassificationMetrics{
@@ -59,10 +59,10 @@ class ClassificationMetrics{
     void compute_metrics(std::vector<int> predictions, std::vector<double> labels);
 
     // pretty print confusion matrix
-    void pretty_print_cm();
+    void pretty_print_cm(std::ofstream& outfile);
 
     // print the classifier performance report
-    void classification_report();
+    void classification_report(std::ofstream& outfile);
 };
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_

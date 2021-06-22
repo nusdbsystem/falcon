@@ -168,8 +168,10 @@ class LogisticRegression : public Model {
    * @param eval_type: falcon::DatasetType, TRAIN for training data and TEST for testing data
    * will output both a pretty_print of confusion matrix
    * as well as a classification metrics report
+   * @param report_save_path: save the report into path
    */
-  void eval(Party party, falcon::DatasetType eval_type);
+  void eval(Party party, falcon::DatasetType eval_type,
+      const std::string& report_save_path);
 
   /**
    * compute the loss of the dataset in each iteration
