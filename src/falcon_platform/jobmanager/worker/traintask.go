@@ -223,7 +223,7 @@ func (wk *TrainWorker) mpc(algName string) {
 }
 
 func (wk *TrainWorker) TestTaskCallee(TaskName string) {
-	cmd := exec.Command("python3", "-u", "/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/falcon_ml/preprocessing.py", "-a="+TaskName, "-b=2", "-c=123")
+	cmd := exec.Command("python3", "-u", "/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/examples/models/preprocessing.py", "-a="+TaskName, "-b=2", "-c=123")
 	logger.Log.Printf("---------------------------------------------------------------------------------\n")
 	logger.Log.Printf("[TrainWorker]: cmd is \"%s\"\n", cmd.String())
 	logger.Log.Printf("---------------------------------------------------------------------------------\n")
@@ -231,7 +231,7 @@ func (wk *TrainWorker) TestTaskCallee(TaskName string) {
 }
 
 func (wk *TrainWorker) TestMPCCallee(TaskName string) {
-	cmd := exec.Command("python3", "-u", "/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/falcon_ml/preprocessing.py", "-a="+TaskName, "-b=2", "-c=123")
+	cmd := exec.Command("python3", "-u", "/Users/nailixing/GOProj/src/github.com/falcon/src/falcon_platform/examples/models/preprocessing.py", "-a="+TaskName, "-b=2", "-c=123")
 	logger.Log.Printf("---------------------------------------------------------------------------------\n")
 	logger.Log.Printf("[TrainWorker]: cmd is \"%s\"\n", cmd.String())
 	logger.Log.Printf("---------------------------------------------------------------------------------\n")
