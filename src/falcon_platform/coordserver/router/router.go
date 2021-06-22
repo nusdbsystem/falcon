@@ -14,7 +14,7 @@ func NewRouter() *mux.Router {
 	middleware.SysLvPath = []string{common.PartyServerAdd}
 
 	// match html views to routes
-	r.HandleFunc("/", HtmlIndex).Methods("GET")
+	// r.HandleFunc("/", HtmlIndex).Methods("GET")
 	r.HandleFunc("/submit-train-job", HtmlSubmitTrainJob).Methods("GET")
 	r.HandleFunc("/upload-train-job-file", HtmlUploadTrainJobFile).Methods("GET")
 
@@ -46,8 +46,9 @@ func NewRouter() *mux.Router {
 	r.HandleFunc(common.AddPort, middleware.AddRouter(AddPort)).Methods("POST")
 
 	// static files
-	fs := http.FileServer(http.Dir("./static/"))
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
+	// react build static htmls
+	buildHandler := http.FileServer(http.Dir("web/build"))
+	r.PathPrefix("/").Handler(buildHandler)
 
 	return r
 }

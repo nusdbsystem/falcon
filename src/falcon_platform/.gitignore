@@ -30,3 +30,6 @@ dev_test_notes/
 # reference: https://github.com/golang/go/wiki/Modules#should-i-commit-my-gosum-file-as-well-as-my-gomod-file
 !go.sum
 !go.mod
+
+# frontend
+!web/build/
