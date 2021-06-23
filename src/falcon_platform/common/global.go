@@ -114,6 +114,13 @@ const (
 	DecisionTreeAlgName    = "decision_tree"
 )
 
+// Content type
+
+const (
+	JsonContentType      = "application/json"
+	MultipartContentType = "multipart/form-data"
+)
+
 var (
 	// For user defined variables, define them in userdefined.properties first,
 	// and then, add to here

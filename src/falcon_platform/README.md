@@ -141,6 +141,21 @@ The console outputs are captured in `src/falcon_platform/dev_test/` folder:
     python3 coordinator_client.py -url 127.0.0.1:30004 -method query_status -job 60
     ```
 
+## Interact with the platform from cmd line using curl (submit jobs)
+```bash
+curl -i http://127.0.0.1:30004/api/submit-train-job  \
+    -H "Content-type: application/json" \
+    -X POST \
+    -d '{ "job_name": "credit_card_training", "job_info": "this is the job_info", "job_fl_type": "vertical", "existing_key": 0, "party_nums": 2, "task_num": 1, "party_info": [ { "id": 1, "addr": "127.0.0.1:30006", "party_type": "active", "path": { "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0", "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0", "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data" } }, { "id": 2, "addr": "127.0.0.1:30007", "party_type": "passive", "path": { "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1", "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1", "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data" } } ], "tasks": { "pre_processing": { "mpc_algorithm_name": "preprocessing", "algorithm_name": "preprocessing", "input_configs": { "data_input": { "data": "file", "key": "key" }, "algorithm_config": { "max_feature_bin": "32", "iv_threshold": "0.5" } }, "output_configs": { "data_output": "outfile" } }, "model_training": { "mpc_algorithm_name": "logistic_regression", "algorithm_name": "logistic_regression", "input_configs": { "data_input": { "data": "client.txt", "key": "mpcKeys" }, "algorithm_config": { "batch_size": 32, "max_iteration": 50, "convergence_threshold": 0.0001, "with_regularization": 0, "alpha": 0.1, "learning_rate": 0.1, "decay": 0.1, "penalty": "l1", "optimizer": "sgd", "multi_class": "ovr", "metric": "acc", "differential_privacy_budget": 0.1 } }, "output_configs": { "trained_model": "model", "evaluation_report": "model.txt" } } } }'
+```
+
+```bash
+curl -i http://127.0.0.1:30004/api/submit-train-job \
+     -H "Content-Type: multipart/form-data" \
+     -X POST \
+     -F train-job-file=@'./falcon_platform/examples/train_job_dsls/two_parties_train_job.json'
+```
+
 ## check the log
 
 1.  log is at folder `$LOG_PATH/runtime_logs/` , 

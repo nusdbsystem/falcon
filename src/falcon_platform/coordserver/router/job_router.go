@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -38,37 +39,45 @@ func SubmitTrainJob(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 	// declare the job as train job type
 	var job common.TrainJob
 
-	var buf bytes.Buffer
-	// Parse multipart form, 32 << 20 specifies a maximum,upload of 32 MB files.
-	_ = r.ParseMultipartForm(32 << 20)
+	contentType := r.Header.Get("Content-Type")
+	contentType = strings.TrimSpace(strings.Split(contentType, ";")[0])
 
-	rBody := r.Body
-	// 1. check multipart form
-	multiPartyFormErr, contents := client.ReceiveFile(r, buf, common.TrainJobFileKey)
+	if contentType == common.JsonContentType {
+		// 2. check json body first
+		jsonErr := json.NewDecoder(r.Body).Decode(&job)
+		if jsonErr != nil {
+			exceptions.HandleHttpError(w, r, http.StatusBadRequest, jsonErr.Error())
+			return
+		}
 
-	// 2. check json body first
-	jsonErr := json.NewDecoder(rBody).Decode(&job)
-
-	if jsonErr == nil {
-		// if jsonErr == nil, it means we read form json body
-		// if jsonErr == EOF, it means no json body provided
 		logger.Log.Println("[Coordinator]: Submit train job with json body")
-		buf.Reset()
-	} else if multiPartyFormErr == nil {
+
+	} else if contentType == common.MultipartContentType {
+		var buf bytes.Buffer
+		// Parse multipart form, 32 << 20 specifies a maximum,upload of 32 MB files.
+		_ = r.ParseMultipartForm(32 << 20)
+		multiPartyFormErr, contents := client.ReceiveFile(r, buf, common.TrainJobFileKey)
+		if multiPartyFormErr != nil {
+			exceptions.HandleHttpError(w, r, http.StatusBadRequest, multiPartyFormErr.Error())
+			buf.Reset()
+			return
+		}
+
 		logger.Log.Println("[Coordinator]: Submit train job with multipart form")
 		// 2. parser to object
 		err := common.ParseTrainJob(contents, &job)
 		if err != nil {
-			errMsg := fmt.Sprintf("[Coordinator]: common.ParseJob Error %s", err)
-			exceptions.HandleHttpError(w, r, http.StatusBadRequest, errMsg)
+			exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
+			buf.Reset()
 			return
 		}
+
 		buf.Reset()
+
 	} else {
-		logger.Log.Println("[Coordinator]: jsonErr: ", jsonErr.Error())
-		logger.Log.Println("[Coordinator]: multiPartyFormErr: ", multiPartyFormErr.Error())
-		exceptions.HandleHttpError(w, r, http.StatusBadRequest, "Can not read job dsl form either json body or multi party")
-		buf.Reset()
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest,
+			"Can not read job dsl form either json body or multi party, Set the "+
+				"\"Content-type: application/json\" or \"Content-Type: multipart/form-data\"")
 		return
 	}
 
