@@ -17,7 +17,7 @@ const (
 
 const (
 	// router path for coordServer
-	SubmitTrainJob = "/api/submit-train-job"
+	SubmitTrainJob         = "/api/submit-train-job"
 	StopTrainJob           = "/api/stop-train-job"
 	UpdateTrainJobMaster   = "/api/update-train-master"
 	UpdateJobResInfo       = "/api/update-job-res"
