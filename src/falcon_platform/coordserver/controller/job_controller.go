@@ -13,7 +13,6 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 	uint, // JobId
 	string, // JobName
 	uint, // UserID
-	string, // PartyIds
 	uint, // TaskNum
 	string, // Status
 ) {
@@ -70,7 +69,7 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 		cache.JobDslQueue.Push(dslOjb)
 	}()
 
-	return u2.JobId, u1.JobName, u2.UserID, u1.PartyIds, u1.TaskNum, u2.Status
+	return u2.JobId, u1.JobName, u2.UserID, u1.TaskNum, u2.Status
 }
 
 func JobKill(jobId uint, ctx *entity.Context) error {

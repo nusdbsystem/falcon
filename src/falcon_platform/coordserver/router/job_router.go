@@ -17,12 +17,11 @@ import (
 )
 
 type JobSubmitRes struct {
-	JobId    uint   `json:"job_id"`
-	JobName  string `json:"job_name"`
-	UserId   uint   `json:"user_id"`
-	PartyIds string `json:"party_ids"`
-	TaskNum  uint   `json:"task_num,uint"`
-	Status   string `json:"status"`
+	JobId   uint   `json:"job_id"`
+	JobName string `json:"job_name"`
+	UserId  uint   `json:"user_id"`
+	TaskNum uint   `json:"task_num,uint"`
+	Status  string `json:"status"`
 }
 
 type JobStatusRes struct {
@@ -61,7 +60,7 @@ func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 	logger.Log.Println("common.ParseJob success")
 
 	// 3. submit job with parsed object
-	JobId, JobName, UserId, PartyIds, TaskNum, Status := controller.JobSubmit(&job, ctx)
+	JobId, JobName, UserId, TaskNum, Status := controller.JobSubmit(&job, ctx)
 
 	// 4. return to client
 	buf.Reset()
@@ -70,7 +69,6 @@ func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 		JobId,
 		JobName,
 		UserId,
-		PartyIds,
 		TaskNum,
 		Status}
 
