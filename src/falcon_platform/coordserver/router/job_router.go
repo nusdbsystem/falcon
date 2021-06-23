@@ -33,37 +33,49 @@ type JobIdGet struct {
 	JobId string `json:"job_id"`
 }
 
-// receive a job info file, parse it, put in dslqueue
-func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
-	// Parse multipart form, 32 << 20 specifies a maximum
-	// upload of 32 MB files.
+// receive a job from jsonbody or file, parse it, put in dslqueue
+func SubmitTrainJob(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
+	// declare the job as train job type
+	var job common.TrainJob
+
+	var buf bytes.Buffer
+	// Parse multipart form, 32 << 20 specifies a maximum,upload of 32 MB files.
 	_ = r.ParseMultipartForm(32 << 20)
 
-	// 1. read file from multiform
-	var buf bytes.Buffer
-	err, contents := client.ReceiveFile(r, buf, common.TrainJobFileKey)
-	if err != nil {
-		errMsg := fmt.Sprintf("client.ReceiveFile Error %s", err)
-		exceptions.HandleHttpError(w, r, http.StatusBadRequest, errMsg)
-		return
-	}
-	logger.Log.Println("client.ReceiveFile success")
+	rBody := r.Body
+	// 1. check multipart form
+	multiPartyFormErr, contents := client.ReceiveFile(r, buf, common.TrainJobFileKey)
 
-	// 2. parser to object
-	var job common.TrainJob
-	err = common.ParseTrainJob(contents, &job)
-	if err != nil {
-		errMsg := fmt.Sprintf("common.ParseJob Error %s", err)
-		exceptions.HandleHttpError(w, r, http.StatusBadRequest, errMsg)
+	// 2. check json body first
+	jsonErr := json.NewDecoder(rBody).Decode(&job)
+
+	if jsonErr == nil {
+		// if jsonErr == nil, it means we read form json body
+		// if jsonErr == EOF, it means no json body provided
+		logger.Log.Println("[Coordinator]: Submit train job with json body")
+		buf.Reset()
+	} else if multiPartyFormErr == nil {
+		logger.Log.Println("[Coordinator]: Submit train job with multipart form")
+		// 2. parser to object
+		err := common.ParseTrainJob(contents, &job)
+		if err != nil {
+			errMsg := fmt.Sprintf("[Coordinator]: common.ParseJob Error %s", err)
+			exceptions.HandleHttpError(w, r, http.StatusBadRequest, errMsg)
+			return
+		}
+		buf.Reset()
+	} else {
+		logger.Log.Println("[Coordinator]: jsonErr: ", jsonErr.Error())
+		logger.Log.Println("[Coordinator]: multiPartyFormErr: ", multiPartyFormErr.Error())
+		exceptions.HandleHttpError(w, r, http.StatusBadRequest, "Can not read job dsl form either json body or multi party")
+		buf.Reset()
 		return
 	}
-	logger.Log.Println("common.ParseJob success")
 
 	// 3. submit job with parsed object
 	JobId, JobName, UserId, TaskNum, Status := controller.JobSubmit(&job, ctx)
 
 	// 4. return to client
-	buf.Reset()
 
 	resIns := JobSubmitRes{
 		JobId,
@@ -72,7 +84,7 @@ func SubmitTrainJobFile(w http.ResponseWriter, r *http.Request, ctx *entity.Cont
 		TaskNum,
 		Status}
 
-	err = json.NewEncoder(w).Encode(resIns)
+	err := json.NewEncoder(w).Encode(resIns)
 
 	if err != nil {
 		errMsg := fmt.Sprintf("JSON Marshal Error %s", err)

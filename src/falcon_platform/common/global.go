@@ -17,7 +17,7 @@ const (
 
 const (
 	// router path for coordServer
-	UploadTrainJobFile   = "/api/upload-train-job-file"
+	SubmitTrainJob       = "/api/submit-train-job"
 	StopTrainJob         = "/api/stop-train-job"
 	UpdateTrainJobMaster = "/api/update-train-master"
 	UpdateJobResInfo     = "/api/update-job-res"
@@ -54,7 +54,7 @@ const (
 
 	JobStatus = "status"
 
-	TrainJobFileKey = "upload-train-job-file"
+	TrainJobFileKey = "train-job-file"
 
 	TaskTypeKey = "task-type"
 

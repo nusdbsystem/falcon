@@ -14,8 +14,6 @@ func ReceiveFile(r *http.Request, buf bytes.Buffer, key string) (error, string) 
 	// the Header and the size of the file
 	file, handler, err := r.FormFile(key)
 	if err != nil {
-		logger.Log.Println("Error Retrieving the File")
-		logger.Log.Println(err)
 		return err, ""
 	}
 	defer file.Close()
