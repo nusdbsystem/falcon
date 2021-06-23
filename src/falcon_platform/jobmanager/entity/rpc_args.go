@@ -36,9 +36,9 @@ type DslObj4SingleParty struct {
 // the worker's UNIX-domain socket name, i.e. its RPC addr
 type RegisterArgs struct {
 	// this is worker addr
-	WorkerAddr   string
-	PartyID      string
-	WorkerAddrId string // = WorkerAddr:PartyID
+	WorkerAddr string
+	// the same as the ID of the party
+	WorkerID string
 }
 
 type ShutdownReply struct {
@@ -61,6 +61,13 @@ type DoTaskReply struct {
 type TaskMsg struct {
 	RuntimeMsg string
 	RpcCallMsg string
+}
+
+type RetrieveModelReportReply struct {
+	DoTaskReply
+	ModelReport string
+	// if the worker is passive, it's d
+	ContainsModelReport bool
 }
 
 // Marshal list to string

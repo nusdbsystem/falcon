@@ -129,6 +129,17 @@ def query_train_job_status(url, jobId):
         print(res.content)
 
 
+def retrieve_train_job_report(url, jobId):
+    url = "http://"+url+"/api/get-evaluation-report-by-train-job-id/"+str(jobId)
+    print("requesting to ", url)
+    res = requests.get(url)
+    print(res.status_code)
+    try:
+        pprint(json.loads(res.text))
+    except:
+        print(res.content)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-url', '--url', required=True, type=str, help="url")
@@ -150,3 +161,6 @@ if __name__ == '__main__':
 
     if args.method == "query_status":
         query_train_job_status(args.url, args.job)
+
+    if args.method == "report":
+        retrieve_train_job_report(args.url, args.job)

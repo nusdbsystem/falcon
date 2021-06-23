@@ -6,6 +6,7 @@ import (
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
+	"falcon_platform/utils"
 	"net/rpc"
 )
 
@@ -18,7 +19,7 @@ func InitTrainWorker(masterAddr, workerAddr string, PartyID string) *TrainWorker
 	wk := TrainWorker{}
 	wk.InitWorkerBase(workerAddr, common.TrainWorker)
 	wk.MasterAddr = masterAddr
-	wk.PartyID = PartyID
+	wk.WorkerID = PartyID
 
 	return &wk
 }
@@ -35,8 +36,8 @@ func (wk *TrainWorker) Run() {
 		logger.Log.Fatalf("%s: start Error \n", wk.Name)
 	}
 
-	logger.Log.Printf("%s from PartyID %s to register with masterAddr(%s)\n", wk.Name, wk.PartyID, wk.MasterAddr)
-	wk.Register(wk.MasterAddr, wk.PartyID)
+	logger.Log.Printf("%s from PartyID %s to register with masterAddr(%s)\n", wk.Name, wk.WorkerID, wk.MasterAddr)
+	wk.Register(wk.MasterAddr)
 
 	// start rpc server blocking...
 	wk.StartRPCServer(rpcSvc, true)
@@ -123,5 +124,34 @@ func (wk *TrainWorker) RunMpc(mpcAlgorithmName string, rep *entity.DoTaskReply) 
 	//wk.TestMPCCallee(mpcAlgorithmName)// for testing/debug, dont remove,
 
 	update()
+	return nil
+}
+
+func (w *TrainWorker) RetrieveModelReport(_ string, rep *entity.RetrieveModelReportReply) error {
+
+	workerActiveType := w.DslObj.PartyInfo.PartyType
+
+	if workerActiveType == common.ActiveParty {
+		rep.RuntimeError = false
+		rep.ContainsModelReport = true
+
+		// read local file and send back
+		//modelReportFile := common.TaskModelPath + "/" + w.DslObj.Tasks.ModelTraining.OutputConfigs.EvaluationReport
+		modelReportFile := "/Users/nailixing/GOProj/src/github.com/scripts/report"
+		logger.Log.Println("[TrainWorker] TrainWorker.RetrieveModelReport called, read file: ", modelReportFile)
+		reportStr, err := utils.ReadFile(modelReportFile)
+		if err != nil {
+			rep.RuntimeError = true
+			rep.TaskMsg.RuntimeMsg = err.Error()
+		}
+		rep.ModelReport = reportStr
+	} else if workerActiveType == common.PassiveParty {
+		rep.RuntimeError = false
+		rep.ContainsModelReport = false
+	} else {
+		rep.RuntimeError = true
+		rep.TaskMsg.RuntimeMsg = "PartyType not recognized"
+	}
+	logger.Log.Println("[TrainWorker] :RetrieveModelReport finished")
 	return nil
 }

@@ -26,6 +26,7 @@ func NewRouter() *mux.Router {
 	r.HandleFunc(common.UpdateJobStatus, middleware.AddRouter(JobUpdateStatus)).Methods("POST")
 	r.HandleFunc(common.UpdateJobResInfo, middleware.AddRouter(JobUpdateResInfo)).Methods("POST")
 	r.HandleFunc(common.QueryTrainJobStatus+"/{jobId}", middleware.AddRouter(JobStatusQuery)).Methods("GET")
+	r.HandleFunc(common.RetrieveTrainJobReport+"/{jobId}", middleware.AddRouter(JobTrainingReportRetrieve)).Methods("GET")
 
 	//party server
 	r.HandleFunc(common.PartyServerAdd, middleware.AddRouter(PartyServerAdd)).Methods("POST")

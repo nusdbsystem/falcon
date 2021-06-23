@@ -82,8 +82,10 @@ func newMaster(masterAddr string, workerNum int) (ms *Master) {
 func (master *Master) RegisterWorker(args *entity.RegisterArgs, _ *struct{}) error {
 
 	logger.Log.Println("[master/RegisterWorker] one Worker registered!")
-	// Pass WorkerAddrId (addr:partyID) into tmpWorkers for pre-processing
-	master.tmpWorkers <- args.WorkerAddrId
+	// Pass WorkerAddrIdType (addr:partyID) into tmpWorkers for pre-processing
+	// IP:Port:WorkerID
+	workerAddrId := args.WorkerAddr + ":" + args.WorkerID
+	master.tmpWorkers <- workerAddrId
 	return nil
 }
 

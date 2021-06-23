@@ -17,12 +17,13 @@ const (
 
 const (
 	// router path for coordServer
-	SubmitTrainJob       = "/api/submit-train-job"
-	StopTrainJob         = "/api/stop-train-job"
-	UpdateTrainJobMaster = "/api/update-train-master"
-	UpdateJobResInfo     = "/api/update-job-res"
-	UpdateJobStatus      = "/api/update-job-status"
-	QueryTrainJobStatus  = "/api/query-train-job-status"
+	UploadTrainJobFile     = "/api/upload-train-job-file"
+	StopTrainJob           = "/api/stop-train-job"
+	UpdateTrainJobMaster   = "/api/update-train-master"
+	UpdateJobResInfo       = "/api/update-job-res"
+	UpdateJobStatus        = "/api/update-job-status"
+	QueryTrainJobStatus    = "/api/query-train-job-status"
+	RetrieveTrainJobReport = "/api/get-evaluation-report-by-train-job-id"
 
 	UpdateInferenceJobMaster = "/api/update-inference-master"
 	InferenceStatusUpdate    = "/api/update-prediction-service-status"
@@ -103,9 +104,13 @@ const (
 	RuntimeLogs = "runtime_logs"
 
 	// train sub tasks
-	MpcSubTask        = "mpc"
-	PreProcSubTask    = "pre_processing"
-	ModelTrainSubTask = "model_training"
+	MpcSubTask                 = "mpc"
+	PreProcSubTask             = "pre_processing"
+	ModelTrainSubTask          = "model_training"
+	RetrieveModelReportSubTask = "model_report_retrieve"
+
+	ActiveParty  = "active"
+	PassiveParty = "passive"
 )
 
 // algorithms names
@@ -145,6 +150,7 @@ var (
 	PartyServerIP       = ""
 	PartyServerPort     = ""
 	PartyID             = ""
+	PartyType           = ""
 	PartyServerBasePath = ""
 
 	// JobDB and Database Configs

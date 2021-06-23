@@ -16,7 +16,7 @@ func InitInferenceWorker(masterAddr, workerAddr string, PartyID string) *Inferen
 	wk := InferenceWorker{}
 	wk.InitWorkerBase(workerAddr, common.InferenceWorker)
 	wk.MasterAddr = masterAddr
-	wk.PartyID = PartyID
+	wk.WorkerID = PartyID
 
 	return &wk
 }
@@ -34,8 +34,8 @@ func (wk *InferenceWorker) Run() {
 		logger.Log.Fatalf("%s: start Error \n", wk.Name)
 	}
 
-	logger.Log.Printf("%s from PartyID %s: register to masterAddr = %s \n", wk.Name, wk.PartyID, wk.MasterAddr)
-	wk.Register(wk.MasterAddr, wk.PartyID)
+	logger.Log.Printf("%s from PartyID %s: register to masterAddr = %s \n", wk.Name, wk.WorkerID, wk.MasterAddr)
+	wk.Register(wk.MasterAddr)
 
 	// start rpc server blocking...
 	wk.StartRPCServer(rpcSvc, true)

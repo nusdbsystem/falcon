@@ -40,7 +40,7 @@ type WorkerBase struct {
 	MasterAddr string
 
 	// each worker is linked to the PartyID
-	PartyID string
+	WorkerID string
 
 	// each worker store full job information,
 	DslObj entity.DslObj4SingleParty
@@ -80,12 +80,11 @@ func (w *WorkerBase) ReceiveJobInfo(arg string, rep *entity.DoTaskReply) error {
 	return nil
 }
 
-func (w *WorkerBase) Register(MasterAddr string, PartyID string) {
+func (w *WorkerBase) Register(MasterAddr string) {
 	// call the master's register method to tell master i'm(worker) ready,
 	args := new(entity.RegisterArgs)
 	args.WorkerAddr = w.Addr
-	args.PartyID = PartyID
-	args.WorkerAddrId = w.Addr + ":" + PartyID // IP:Port:PartyID
+	args.WorkerID = w.WorkerID
 
 	logger.Log.Printf("[WorkerBase]: call Master.RegisterWorker to register WorkerAddr: %s \n", args.WorkerAddr)
 	ok := client.Call(MasterAddr, w.Network, "Master.RegisterWorker", args, new(struct{}))
