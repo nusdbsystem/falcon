@@ -9,6 +9,7 @@ import (
 	"falcon_platform/coordserver/entity"
 	"falcon_platform/exceptions"
 	"falcon_platform/logger"
+	"falcon_platform/utils"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -211,21 +212,24 @@ func JobStatusQuery(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 }
 
 func JobTrainingReportRetrieve(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
-	params := mux.Vars(r)
-	jobId, _ := strconv.Atoi(params["jobId"])
+	//params := mux.Vars(r)
+	//jobId, _ := strconv.Atoi(params["jobId"])
 
 	filename := "/opt/falcon/src/falcon_platform/web/build/static/media/model_report"
+	reportStr, _ := utils.ReadFile(filename)
 
-	res := JobModelReportRes{
-		JobId:                uint(jobId),
-		EvaluationReportPath: filename,
-	}
-	err := json.NewEncoder(w).Encode(res)
+	_, _ = w.Write([]byte(reportStr))
 
-	if err != nil {
-		errMsg := fmt.Sprintf("JSON Marshal Error %s", err)
-		exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
-		return
-	}
+	//res := JobModelReportRes{
+	//	JobId:                uint(jobId),
+	//	EvaluationReportPath: filename,
+	//}
+	//err := json.NewEncoder(w).Encode(res)
+	//
+	//if err != nil {
+	//	errMsg := fmt.Sprintf("JSON Marshal Error %s", err)
+	//	exceptions.HandleHttpError(w, r, http.StatusInternalServerError, errMsg)
+	//	return
+	//}
 
 }
