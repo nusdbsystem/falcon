@@ -13,6 +13,7 @@
 
 EncodedNumber::EncodedNumber()
 {
+  //mpz_init (mpz_t x) Initialize x, and set its value to 0.
   mpz_init(n);
   mpz_init(value);
   type = Plaintext;
@@ -26,14 +27,17 @@ EncodedNumber::EncodedNumber(const EncodedNumber &number)
   mpz_t n_helper, value_helper;
   mpz_init(n_helper);
   mpz_init(value_helper);
+  // assign the "n" value of the EncodedNumber instance "number" to n_helper
   number.getter_n(n_helper);
   number.getter_value(value_helper);
 
+  // assign the value of n_helper to n of current EncodedNumber instance
   mpz_set(n, n_helper);
   mpz_set(value, value_helper);
   exponent = number.getter_exponent();
   type = number.getter_type();
 
+  // delete from memory
   mpz_clear(n_helper);
   mpz_clear(value_helper);
 }

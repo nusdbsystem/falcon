@@ -225,7 +225,9 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
     // store the encrypted_exact_answer
     mpz_t tmp;
     mpz_init(tmp);
+    // Multiply a plaintext value mpz_plains[j] with an encrypted value mpz_ciphers[j], storing the result in tmp.
     djcs_t_ep_mul(pk, tmp, mpz_ciphers[j], mpz_plains[j]);
+    // Add an encrypted value tmp to an encrypted value sum, storing the result in sum.
     djcs_t_ee_add(pk, sum, sum, tmp);
 
     mpz_clear(tmp);
@@ -233,6 +235,7 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
 
   res.setter_value(sum);
 
+  // clear everything
   mpz_clear(t1);
   mpz_clear(t2);
   mpz_clear(t3);
@@ -261,6 +264,7 @@ void djcs_t_aux_matrix_mult(djcs_t_public_key* pk,
   mpz_t t1, t2;
   mpz_init(t1);
   mpz_init(t2);
+  // the first element of both array is used to store the public key
   ciphers[0].getter_n(t1);
   plains[0][0].getter_n(t2);
 

@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include "gmp.h"
-#include "libhcs.h"
+#include "gmp.h"    // gmp is included implicitly
+#include "libhcs.h" // master header includes everything
 
 #include "falcon/operator/phe/fixed_point_encoder.h"
 

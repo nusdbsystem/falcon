@@ -173,7 +173,9 @@ class Party {
       int size, int req_party_id) const;
 
   /**
-   * convert ciphertext vector to secret shares securely
+   * convert ciphertext vector to secret shares securely,
+   * Algorithm 1: Conversion to secretly shared value in paper
+   * <Privacy Preserving Vertical Federated Learning for Tree-based Models>
    *
    * @param src_ciphers: ciphertext vector to be decrypted
    * @param secret_shares: decrypted and decoded secret shares

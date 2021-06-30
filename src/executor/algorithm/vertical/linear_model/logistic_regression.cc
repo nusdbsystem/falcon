@@ -158,10 +158,11 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // copy self local aggregation results
     for (int i = 0; i < cur_batch_size; i++) {
+      // each element (i) in local_batch_phe_aggregation is [W].Xi, Xi is a part of feature vector in example i
       batch_phe_aggregation[i] = local_batch_phe_aggregation[i];
     }
 
-    // receive serialized string from other parties
+    // 1. active party receive serialized string from other parties
     // deserialize and sum to batch_phe_aggregation
     for (int id = 0; id < party.party_num; id++) {
       if (id != party.party_id) {
@@ -171,6 +172,8 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
         deserialize_encoded_number_array(recv_batch_phe_aggregation,
             cur_batch_size, recv_local_aggregation_str);
         // homomorphic addition of the received aggregations
+        // After addition, each element (i) in batch_phe_aggregation is [W1].Xi1+[W2].Xi2+...+[Wn].Xin
+        // Xin is example i's n-th feature, W1 is first element in weigh vector
         for (int i = 0; i < cur_batch_size; i++) {
           djcs_t_aux_ee_add(phe_pub_key,batch_phe_aggregation[i],
               batch_phe_aggregation[i], recv_batch_phe_aggregation[i]);
@@ -179,7 +182,7 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
       }
     }
 
-    // serialize and send the batch_phe_aggregation to other parties
+    // 2. active party serialize and send the aggregated batch_phe_aggregation to other parties
     std::string global_aggregation_str;
     serialize_encoded_number_array(batch_phe_aggregation,
         cur_batch_size, global_aggregation_str);
@@ -189,13 +192,14 @@ void LogisticRegression::compute_batch_phe_aggregation(const Party &party,
       }
     }
   } else {
-    // serialize local batch aggregation and send to active party
+    // if it's passive party, it will not do the aggregation,
+    // 1. it just serialize local batch aggregation and send to active party
     std::string local_aggregation_str;
     serialize_encoded_number_array(local_batch_phe_aggregation,
         cur_batch_size, local_aggregation_str);
     party.send_long_message(ACTIVE_PARTY_ID, local_aggregation_str);
 
-    // receive the global batch aggregation from the active party
+    // 2. passive party receive the global batch aggregation from the active party
     std::string recv_global_aggregation_str;
     party.recv_long_message(ACTIVE_PARTY_ID, recv_global_aggregation_str);
     deserialize_encoded_number_array(batch_phe_aggregation,
@@ -222,13 +226,15 @@ void LogisticRegression::update_encrypted_weights(Party& party,
   // convert batch loss shares back to encrypted losses
   int cur_batch_size = batch_indexes.size();
   EncodedNumber* encrypted_batch_losses = new EncodedNumber[cur_batch_size];
+  // active party receive all shares from other party and do the aggregation,and board-cast it to other party.
   party.secret_shares_to_ciphers(encrypted_batch_losses,
                                  batch_logistic_shares,
                                  cur_batch_size,
                                  ACTIVE_PARTY_ID,
                                  precision);
 
-  // compute [f_t - y_t], i.e., [batch_losses]=[batch_losses]-[batch_labels] and broadcast
+  // compute [f_t - y_t], i.e., [batch_losses]=[batch_outputs]-[batch_labels] and broadcast
+  // active party use the label to calculate loss, and sent it to other parties
   if (party.party_type == falcon::ACTIVE_PARTY) {
     std::vector<double> batch_labels;
     for (int i = 0; i < cur_batch_size; i++) {
@@ -257,6 +263,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
     std::cout << "Finish compute encrypted loss and send to other parties" << std::endl;
     LOG(INFO) << "Finish compute encrypted loss and send to other parties";
   } else {
+    // passive party receive encrypted loss vector
     std::string recv_encrypted_batch_losses_str;
     party.recv_long_message(ACTIVE_PARTY_ID, recv_encrypted_batch_losses_str);
     deserialize_encoded_number_array(encrypted_batch_losses, cur_batch_size, recv_encrypted_batch_losses_str);
@@ -301,6 +308,7 @@ void LogisticRegression::update_encrypted_weights(Party& party,
           encrypted_batch_losses,
           batch_feature_j,
           cur_batch_size);
+      // update the j-th weight in local_weight vector
       // need to make sure that the exponents of inner_product and local weights are same
       djcs_t_aux_ee_add(phe_pub_key, local_weights[j], local_weights[j], inner_product);
       delete [] batch_feature_j;
@@ -324,13 +332,55 @@ void LogisticRegression::train(Party party) {
   const clock_t training_start_time = clock();
 
   /// The training stage consists of the following steps
-  /// 1. init encrypted local weights
+  /// 1. init encrypted local weights, "local_weights" = [w1],[w2],...[wn]
   /// 2. iterative computation
-  ///     2.1 randomly select a batch of indexes for current iteration
-  ///     2.2 homomorphic aggregation on the batch samples
-  ///     2.3 convert the batch ciphertexts to secret shares
-  ///     2.4 connect to spdz parties for mpc computations and receive results
-  ///     2.5 update encrypted local weights carefully
+  ///   2.1 randomly select a batch of indexes for current iteration
+  ///   2.2 compute homomorphic aggregation on the batch samples:
+  ///         eg, the party select m examples and have n features
+  ///         "local_batch_phe_aggregation"(m*1) = { [w1]x11+[w2]x12+...+[wn]x1n,
+  ///                                                [w1]x21+[w2]x22+...+[wn]x2n,
+  ///                                                         ....
+  ///                                                [w1]xm1+[w2]xm2+...+[wn]xmn,}
+  ///       2.2.1. For active party:
+  ///          a) receive batch_phe_aggregation string from other parties
+  ///          b) add the received batch_phe_aggregation with current batch_phe_aggregation
+  ///                 after adding, the final batch_phe_aggregation =
+  ///                     {   [w1]x11+[w2]x12+...+[wn]x1n + [w(n+1)]x1(n+1) + [wF]x1F,
+  ///                         [w1]x21+[w2]x22+...+[wn]x2n + [w(n+1)]x2(n+1) + [wF]x2F,
+  ///                                              ...
+  ///                         [w1]xm1+[w2]xm2+...+[wn]xmn  + [w(n+1)]xm(n+1) + [wF]xmF, }
+  ///                     = { [WX1], [WX2],...,[WXm]  }
+  ///                 F is total number of features. m is number of examples
+  ///           c) board-cast the final batch_phe_aggregation to other party
+  ///        2.2.2. For passive party:
+  ///           a) receive final batch_phe_aggregation string from active parties
+  ///   2.3 convert the batch "batch_phe_aggregation" to secret shares, Whole process follow Algorithm 1 in paper "Privacy Preserving Vertical Federated Learning for Tree-based Model"
+  ///       2.3.1. For active party:
+  ///          a) randomly chooses ri belongs and encrypts it as [ri]
+  ///          b) collect other party's encrypted_shares_str, eg [ri]
+  ///          c) computes [e] = [batch_phe_aggregation[i]] + [r1]+...+[rk] (k parties)
+  ///          d) board-cast the complete aggregated_shares_str to other party
+  ///          e) collaborative decrypt the aggregated shares, clients jointly decrypt [e]
+  ///          f) set secret_shares[i] = e - r1 mod q
+  ///       2.3.2. For passive party:
+  ///          a) send local encrypted_shares_str (serialized [ri]) to active party
+  ///          b) receive the aggregated shares from active party
+  ///          c) the same as active party eg,collaborative decrypt the aggregated shares, clients jointly decrypt [e]
+  ///          d) set secret_shares[i] = -ri mod q
+  ///   2.4 connect to spdz parties, feed the batch_aggregation_shares and do mpc computations to get the gradient [1/(1+e^(wx))],
+  ///       which is also stored as shares.Name it as loss_shares
+  ///   2.5 combine loss shares and update encrypted local weights carefully
+  ///       2.5.1. For active party:
+  ///          a) collect other party's loss shares
+  ///          c) aggregate other party's encrypted loss shares with local loss shares, and deserialize it to get [1/(1+e^(wx))]
+  ///          d) board-cast the dest_ciphers to other party
+  ///          e) calculate loss_i: [yi] + [-1/(1+e^(Wxi))] for each example i
+  ///          f) board-cast the encrypted_batch_losses_str to other party
+  ///          g) update the local weight using [w_j]=[w_j]-lr*(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}}
+  ///       2.5.2. For passive party:
+  ///          a) send local encrypted_shares_str to active party
+  ///          b) receive the dest_ciphers from active party
+  ///          c) update the local weight using [w_j]=[w_j]-lr*(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}}
   /// 3. decrypt weights ciphertext
 
   if (optimizer != "sgd") {
@@ -376,7 +426,7 @@ void LogisticRegression::train(Party party) {
 
     // std::cout << "step 2.2 success" << std::endl;
 
-    // step 2.3: convert the encrypted batch aggregation into secret shares
+    // step 2.3: convert the encrypted batch aggregation into secret shares in order to do the exponential calculation
     int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
     std::vector<double> batch_aggregation_shares;
     party.ciphers_to_secret_shares(encrypted_batch_aggregation,
@@ -388,6 +438,7 @@ void LogisticRegression::train(Party party) {
     // std::cout << "step 2.3 success" << std::endl;
 
     // step 2.4: communicate with spdz parties and receive results
+    // the spdz_logistic_function_computation will do the 1/(1+e^(wx)) operation
     std::promise<std::vector<double>> promise_values;
     std::future<std::vector<double>> future_values = promise_values.get_future();
     std::thread spdz_thread(spdz_logistic_function_computation,
@@ -400,6 +451,7 @@ void LogisticRegression::train(Party party) {
         cur_batch_size,
         &promise_values);
     std::vector<double> batch_logistic_shares = future_values.get();
+    // main thread wait spdz_thread to finish
     spdz_thread.join();
 
     // std::cout << "step 2.4 success" << std::endl;

@@ -480,6 +480,7 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
     int phe_precision) {
   // each party generates a random vector with size values
   // (the request party will add the summation to the share)
+  // ui randomly chooses ri belongs to Zq and encrypts it as [ri]
   EncodedNumber* encrypted_shares = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {
     // TODO: check how to replace with spdz random values
@@ -503,7 +504,7 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
       aggregated_shares[i] = encrypted_shares[i];
       djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i], aggregated_shares[i], src_ciphers[i]);
     }
-    // recv message and add to aggregated shares
+    // recv message and add to aggregated shares, u1 computes [e] = [x]+[r1]+..+[rm]
     for (int id = 0; id < party_num; id++) {
       if (id != party_id) {
         std::string recv_encrypted_shares_str;
@@ -526,6 +527,7 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
     }
   } else {
     // send encrypted shares to the request party
+    // ui sends [ri] to u1
     std::string encrypted_shares_str;
     serialize_encoded_number_array(encrypted_shares, size, encrypted_shares_str);
     send_long_message(req_party_id, encrypted_shares_str);
@@ -535,10 +537,11 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
     recv_long_message(req_party_id, recv_aggregated_shares_str);
     deserialize_encoded_number_array(aggregated_shares, size, recv_aggregated_shares_str);
   }
-  // collaborative decrypt the aggregated shares
+  // collaborative decrypt the aggregated shares, clients jointly decrypt [e]
   EncodedNumber* decrypted_sum = new EncodedNumber[size];
   collaborative_decrypt(aggregated_shares, decrypted_sum, size, req_party_id);
   // if request party, add the decoded results to the secret shares
+  // u1 sets [x]1 = e − r1 mod q
   if (party_id == req_party_id) {
     for (int i = 0; i < size; i++) {
       if (phe_precision != 0) {
