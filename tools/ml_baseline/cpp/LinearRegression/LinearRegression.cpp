@@ -17,7 +17,10 @@ float LinearRegression::OLS_Cost(
                                 (X * theta - y).array(),
                                 2
                             );
-    // TODO: why divide by 2xX.rows()?
+    // X.rows is the number of examples,
+    // divided by 2 * X.rows() means the average loss over all examples,
+    // since the cost is only use to display, it's ok to show the average loss,
+    // the form of gradient in GradientDescent func is correct
     return (inner.sum() / (2 * X.rows()));
 }
 
@@ -33,8 +36,7 @@ tuple<Eigen::VectorXd, vector<float>> LinearRegression::GradientDescent(
     // place holder for to-be-updated weights (theta)
     Eigen::MatrixXd updated_theta = theta;
 
-    // number of parameters in theta
-    // == number of features
+    // number of parameters in theta == number of features
     int nb_params = theta.rows();
 
     vector<float> cost_vec;

@@ -10,9 +10,8 @@ using namespace std;
 class LinearRegression
 {
 public:
-    // constructor
-    LinearRegression()
-    {}
+    // default constructor，empty function
+    LinearRegression(){}
 
     // Ordinary Least Square Cost function
     float OLS_Cost(

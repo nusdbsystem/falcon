@@ -19,8 +19,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Eigen is a header only library
 # and does not need to be compiled,
 # just included
+# the default localtion for eigen is /usr/local/include/
 include_directories(
     ./eigen-3.3.9
+    #/usr/local/include/
 )
 
 # manually add the sources

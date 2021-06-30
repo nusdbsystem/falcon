@@ -68,7 +68,7 @@ Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat, bool normalizeTarg
 
     // whether to normalize the last column (labels)
     Eigen::MatrixXd dataNorm;
-    if (normalizeTarget==true) {
+    if (normalizeTarget) {
         dataNorm = dataMat;
     } else {
         dataNorm = dataMat.leftCols(dataMat.cols()-1);
@@ -95,7 +95,7 @@ Eigen::MatrixXd ETL::NormalizeZscore(Eigen::MatrixXd dataMat, bool normalizeTarg
     // apply the z-score normalization
     Eigen::MatrixXd norm_z = scaled_data.array().rowwise() / std;
 
-    if (normalizeTarget==false) {
+    if (!normalizeTarget ){
         // restore the original labels at last column
         norm_z.conservativeResize(norm_z.rows(), norm_z.cols()+1);
         norm_z.col(norm_z.cols()-1) = dataMat.rightCols(1);

@@ -5,6 +5,7 @@
 #include <list>
 #include <vector>
 
+using namespace std;
 
 // Logistic Regression has four main methods
 // 1. Sigmoid
@@ -21,7 +22,7 @@ public:
     Eigen::MatrixXd Sigmoid(Eigen::MatrixXd Z);
 
     // propagate (calculate the cost)
-    std::tuple<Eigen::MatrixXd, double, double> Propagate(
+    tuple<Eigen::MatrixXd, double, double> Propagate(
         Eigen::MatrixXd Weights,
         double bias,
         Eigen::MatrixXd X,
@@ -31,7 +32,15 @@ public:
 
 
     // optimize with SGD
-    std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> Optimize(Eigen::MatrixXd W, double b, Eigen::MatrixXd X, Eigen::MatrixXd y, int num_iter, double learning_rate, double lambda, bool print_cost);
+    tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, list<double>> Optimize(
+            Eigen::MatrixXd W,
+            double b, Eigen::MatrixXd X,
+            Eigen::MatrixXd y,
+            int num_iter,
+            double learning_rate,
+            double lambda, bool
+            print_cost
+            );
 
 
     // predict the labels

@@ -5,7 +5,7 @@ currently, The platform only can be built on <ubuntu:18.04>
 ## 0. Install package
 
 ```bash
-RUN apt-get update && apt-get upgrade -y && \
+apt-get update && apt-get upgrade -y && \
         apt-get install -y --no-install-recommends \
         git \
         sqlite3 \

@@ -87,6 +87,7 @@ set(SOURCE_FILES
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
 
+# Indicate which source files should be included
 add_library(executor ${SOURCE_FILES})
 
 # Need to Revise protobuf version to 3.14 that is compatible with grpc;

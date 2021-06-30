@@ -17,7 +17,7 @@ implemented in SPDZ by writing .mpc programs.
 In the executor, we define the following functions for communicating with SPDZ 
 engine.
 
- * setup connections. Since SPDZ program is run in a decentralized way, the executors
+ * setup connections. Since SPDZ program run in a decentralized way, the executors
  need to connect to SPDZ engine before sending inputs and receive outputs.
  * send public inputs. The APIs for public inputs and private inputs are different
  in SPDZ, thus, we differentiate the two cases.

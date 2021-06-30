@@ -6,6 +6,8 @@
 #include <list>
 
 
+using namespace std;
+
 // sigmoid or logistic function
 Eigen::MatrixXd LogisticRegression::Sigmoid(Eigen::MatrixXd Z) {
     // Z is the logit
@@ -15,7 +17,7 @@ Eigen::MatrixXd LogisticRegression::Sigmoid(Eigen::MatrixXd Z) {
 
 // propagate
 // computes the cost and gradient of the propagation
-std::tuple<Eigen::MatrixXd, double, double> LogisticRegression::Propagate(
+tuple<Eigen::MatrixXd, double, double> LogisticRegression::Propagate(
             Eigen::MatrixXd Weights,
             double bias,
             Eigen::MatrixXd X,
@@ -56,13 +58,22 @@ std::tuple<Eigen::MatrixXd, double, double> LogisticRegression::Propagate(
 
     double db = (logit-y.transpose()).array().sum()/m;
 
-    return std::make_tuple(dw,db,cost);
+    return make_tuple(dw,db,cost);
 }
 
 // update the parameters with gradient descend
-std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> LogisticRegression::Optimize(Eigen::MatrixXd W, double b, Eigen::MatrixXd X, Eigen::MatrixXd y, int num_iter, double learning_rate, double lambda, bool print_cost) {
+tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, list<double>> LogisticRegression::Optimize(
+        Eigen::MatrixXd W,
+        double b,
+        Eigen::MatrixXd X,
+        Eigen::MatrixXd y,
+        int num_iter,
+        double learning_rate,
+        double lambda,
+        bool print_cost
+        ) {
 
-    std::list<double> costsList;
+    list<double> costsList;
 
     Eigen::MatrixXd dw;
     double db, cost;
@@ -70,8 +81,8 @@ std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> 
     int print_every = 100;
 
     for(int i=0; i<num_iter; i++){
-        std::tuple<Eigen::MatrixXd, double, double> propagate = Propagate(W, b, X, y, lambda);
-        std::tie(dw, db, cost) = propagate;
+        tuple<Eigen::MatrixXd, double, double> propagate = Propagate(W, b, X, y, lambda);
+        tie(dw, db, cost) = propagate;
 
         W = W - (learning_rate*dw).transpose();
         b = b - (learning_rate*db);
@@ -82,11 +93,11 @@ std::tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, std::list<double>> 
         }
 
         if(print_cost && i%print_every==0) {
-            std::cout << "Cost after iteration " << i << ": " << cost << std::endl;
+            cout << "Cost after iteration " << i << ": " << cost <<endl;
         }
     }
 
-    return std::make_tuple(W,b,dw,db,costsList);
+    return make_tuple(W,b,dw,db,costsList);
 }
 
 // predict whether the label is 1 or 0
