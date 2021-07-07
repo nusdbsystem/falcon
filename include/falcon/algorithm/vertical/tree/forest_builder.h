@@ -16,7 +16,7 @@ struct RandomForestParams {
   DecisionTreeParams dt_param;
 };
 
-class RandomForestBuilder : public Model {
+class RandomForestBuilder : public ModelBuilder {
  public:
   // number of trees in the forest
   int n_estimator;
@@ -72,14 +72,16 @@ class RandomForestBuilder : public Model {
    * @param party
    * @param sample_rate
    */
-  void train(Party& party);
+  void train(Party party);
 
   /**
    * evaluate the accuracy on the dataset
    * @param party
    * @param eval_type
+   * @param report_save_path
 */
-  void eval(Party party, falcon::DatasetType eval_type);
+  void eval(Party party, falcon::DatasetType eval_type,
+      const std::string& report_save_path = std::string());
 };
 
 /**

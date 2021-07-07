@@ -6,7 +6,7 @@
 #define FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_H_
 
 #include <falcon/operator/phe/fixed_point_encoder.h>
-#include <falcon/algorithm/model.h>
+#include <falcon/algorithm/model_builder.h>
 #include <falcon/party/party.h>
 #include <falcon/common.h>
 
@@ -44,7 +44,7 @@ struct LogisticRegressionParams {
   float dp_budget;
 };
 
-class LogisticRegression : public Model {
+class LogisticRegression : public ModelBuilder {
  public:
   // size of mini-batch in each iteration
   int batch_size;
@@ -159,7 +159,7 @@ class LogisticRegression : public Model {
    *
    * @param party: initialized party object
    */
-  void train(Party party);
+  void train(Party party) override;
 
   /**
    * evaluate a logistic regression model
@@ -170,8 +170,9 @@ class LogisticRegression : public Model {
    * as well as a classification metrics report
    * @param report_save_path: save the report into path
    */
-  void eval(Party party, falcon::DatasetType eval_type,
-      const std::string& report_save_path);
+  void eval(Party party,
+      falcon::DatasetType eval_type,
+      const std::string& report_save_path = std::string());
 
   /**
    * compute the loss of the dataset in each iteration

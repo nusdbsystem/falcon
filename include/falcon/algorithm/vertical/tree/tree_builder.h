@@ -6,7 +6,7 @@
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_CART_BUILDER_H_
 
 #include <falcon/operator/phe/fixed_point_encoder.h>
-#include <falcon/algorithm/model.h>
+#include <falcon/algorithm/model_builder.h>
 #include <falcon/party/party.h>
 #include <falcon/common.h>
 #include <falcon/algorithm/vertical/tree/tree.h>
@@ -45,7 +45,7 @@ struct DecisionTreeParams {
   double dp_budget;
 };
 
-class DecisionTreeBuilder : public Model {
+class DecisionTreeBuilder : public ModelBuilder {
  public:
   // type of the tree, 'classification' or 'regression'
   falcon::TreeType tree_type;
@@ -206,8 +206,11 @@ class DecisionTreeBuilder : public Model {
      * evaluate the accuracy on the dataset
      * @param party
      * @param eval_type
+     * @param report_save_path
  */
-  void eval(Party party, falcon::DatasetType eval_type);
+  void eval(Party party,
+      falcon::DatasetType eval_type,
+      const std::string& report_save_path = std::string());
 };
 
 /**

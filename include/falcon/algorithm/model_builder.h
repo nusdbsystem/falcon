@@ -7,8 +7,9 @@
 
 #include <utility>
 #include <vector>
+#include <falcon/party/party.h>
 
-class Model {
+class ModelBuilder {
  protected:
   // training data (without label column)
   std::vector< std::vector<double> > training_data;
@@ -27,7 +28,7 @@ class Model {
   /**
    * default constructor
    */
-  Model();
+  ModelBuilder();
 
   /**
    * model constructor
@@ -39,7 +40,7 @@ class Model {
    * @param m_training_accuracy
    * @param m_testing_accuracy
    */
-  Model(std::vector< std::vector<double> > m_training_data,
+  ModelBuilder(std::vector< std::vector<double> > m_training_data,
       std::vector< std::vector<double> > m_testing_data,
       std::vector<double> m_training_labels,
       std::vector<double> m_testing_labels,
@@ -49,7 +50,23 @@ class Model {
   /**
    * destructor
    */
-  ~Model();
+  ~ModelBuilder();
+
+  /**
+   * build the model
+   * @param party
+   */
+  virtual void train(Party party) = 0;
+
+  /**
+     * evaluate the accuracy on a dataset
+     * @param party
+     * @param eval_type
+     * @param report_save_path
+ */
+  virtual void eval(Party party,
+      falcon::DatasetType eval_type,
+      const std::string& report_save_path = std::string()) = 0;
 
   /** set training data */
   void setter_training_data(std::vector< std::vector<double> > s_training_data) {

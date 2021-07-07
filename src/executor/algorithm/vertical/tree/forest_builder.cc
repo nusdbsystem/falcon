@@ -33,7 +33,7 @@ RandomForestBuilder::RandomForestBuilder(RandomForestParams params,
     std::vector<double> m_training_labels,
     std::vector<double> m_testing_labels,
     double m_training_accuracy,
-    double m_testing_accuracy) : Model(std::move(m_training_data),
+    double m_testing_accuracy) : ModelBuilder(std::move(m_training_data),
     std::move(m_testing_data),
     std::move(m_training_labels),
     std::move(m_testing_labels),
@@ -108,7 +108,7 @@ void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
   LOG(INFO) << "Shuffle training data and init dataset for tree " << tree_id << " finished";
 }
 
-void RandomForestBuilder::train(Party &party) {
+void RandomForestBuilder::train(Party party) {
   LOG(INFO) << "************ Begin to train the random forest model ************";
   init_forest_builder(party);
   LOG(INFO) << "Init " << n_estimator << " tree builders in the random forest";
@@ -121,7 +121,8 @@ void RandomForestBuilder::train(Party &party) {
   google::FlushLogFiles(google::INFO);
 }
 
-void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
+void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
+    const std::string& report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
