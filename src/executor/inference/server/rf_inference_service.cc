@@ -163,7 +163,7 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
 
  private:
   Party party_;
-  std::vector<Tree> saved_rf_model_;
+  std::vector<TreeModel> saved_rf_model_;
   int n_estimator_;
 };
 
@@ -192,7 +192,7 @@ void run_active_server_rf(const std::string& endpoint,
 
 void run_passive_server_rf(const std::string& saved_model_file,
     const Party& party) {
-  std::vector<Tree> saved_rf_model;
+  std::vector<TreeModel> saved_rf_model;
   int n_estimator;
   load_rf_model(saved_model_file, saved_rf_model, n_estimator);
 

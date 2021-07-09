@@ -300,7 +300,7 @@ void train_random_forest(Party party, const std::string& params_str,
   random_forest_builder.eval(party, falcon::TRAIN);
   random_forest_builder.eval(party, falcon::TEST);
 
-  std::vector<Tree> forest_trees;
+  std::vector<TreeModel> forest_trees;
   for (int i = 0; i < random_forest_builder.n_estimator; i++) {
     forest_trees.push_back(random_forest_builder.tree_builders[i].tree);
   }

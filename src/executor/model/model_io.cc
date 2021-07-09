@@ -83,7 +83,7 @@ void load_lr_model(const std::string& model_save_path, int& weight_size, Encoded
   model_infile.close();
 }
 
-void save_dt_model(Tree tree, const std::string& model_save_path) {
+void save_dt_model(TreeModel tree, const std::string& model_save_path) {
   std::ofstream write_outfile(model_save_path);
   if (!write_outfile) {
     LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";
@@ -96,7 +96,7 @@ void save_dt_model(Tree tree, const std::string& model_save_path) {
   write_outfile.close();
 }
 
-void load_dt_model(const std::string& model_save_path, Tree& saved_tree) {
+void load_dt_model(const std::string& model_save_path, TreeModel& saved_tree) {
   std::ifstream model_infile(model_save_path);
   if (!model_infile) {
     LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";
@@ -114,7 +114,7 @@ void load_dt_model(const std::string& model_save_path, Tree& saved_tree) {
   model_infile.close();
 }
 
-void save_rf_model(std::vector<Tree> trees, int n_estimator, const std::string& model_save_path) {
+void save_rf_model(std::vector<TreeModel> trees, int n_estimator, const std::string& model_save_path) {
   std::ofstream write_outfile(model_save_path);
   if (!write_outfile) {
     LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";
@@ -127,7 +127,7 @@ void save_rf_model(std::vector<Tree> trees, int n_estimator, const std::string& 
   write_outfile.close();
 }
 
-void load_rf_model(const std::string& model_save_path, std::vector<Tree>& saved_trees, int& n_estimator) {
+void load_rf_model(const std::string& model_save_path, std::vector<TreeModel>& saved_trees, int& n_estimator) {
   std::ifstream model_infile(model_save_path);
   if (!model_infile) {
     LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";

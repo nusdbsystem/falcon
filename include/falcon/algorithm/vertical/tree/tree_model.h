@@ -2,8 +2,8 @@
 // Created by wuyuncheng on 13/5/21.
 //
 
-#ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_TREE_H_
-#define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_TREE_H_
+#ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_TREE_MODEL_H_
+#define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_TREE_MODEL_H_
 
 #include <falcon/common.h>
 #include <falcon/algorithm/vertical/tree/node.h>
@@ -11,7 +11,7 @@
 
 #include <map>
 
-class Tree {
+class TreeModel {
  public:
   // classification or regression
   falcon::TreeType type;
@@ -29,22 +29,22 @@ class Tree {
   int capacity;
 
  public:
-  Tree();
-  Tree(falcon::TreeType m_type, int m_class_num, int m_max_depth);
-  ~Tree();
+  TreeModel();
+  TreeModel(falcon::TreeType m_type, int m_class_num, int m_max_depth);
+  ~TreeModel();
 
   /**
    * copy constructor
    * @param tree
    */
-  Tree(const Tree &tree);
+  TreeModel(const TreeModel &tree);
 
   /**
    * assignment constructor
    * @param tree
    * @return
    */
-  Tree &operator=(const Tree &tree);
+  TreeModel &operator=(const TreeModel &tree);
 
   /**
    * compute the binary predict vector for a sample on a party
@@ -109,4 +109,4 @@ struct PredictHelper {
   ~PredictHelper() = default;
 };
 
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_TREE_H_
+#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_TREE_MODEL_H_

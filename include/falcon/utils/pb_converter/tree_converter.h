@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include <falcon/operator/phe/fixed_point_encoder.h>
-#include <falcon/algorithm/vertical/tree/tree.h>
+#include <falcon/algorithm/vertical/tree/tree_model.h>
 #include <falcon/algorithm/vertical/tree/node.h>
 
 /**
@@ -128,7 +128,7 @@ void deserialize_split_info(int & global_split_num,
  * @param tree
  * @param output_str
  */
-void serialize_tree_model(Tree tree, std::string & output_str);
+void serialize_tree_model(TreeModel tree, std::string & output_str);
 
 /**
  * deserialize an input string to a tree model
@@ -136,7 +136,7 @@ void serialize_tree_model(Tree tree, std::string & output_str);
  * @param tree
  * @param input_str
  */
-void deserialize_tree_model(Tree & tree, std::string input_str);
+void deserialize_tree_model(TreeModel& tree, std::string input_str);
 
 /**
  * serialize a random forest model to string
@@ -145,7 +145,7 @@ void deserialize_tree_model(Tree & tree, std::string input_str);
  * @param n_estimator
  * @param output_str
  */
-void serialize_random_forest_model(std::vector<Tree> trees, int n_estimator, std::string & output_str);
+void serialize_random_forest_model(std::vector<TreeModel> trees, int n_estimator, std::string & output_str);
 
 /**
  * deserialize an input string to a random forest model
@@ -154,6 +154,6 @@ void serialize_random_forest_model(std::vector<Tree> trees, int n_estimator, std
  * @param n_estimator
  * @param input_str
  */
-void deserialize_random_forest_model(std::vector<Tree>& trees, int& n_estimator, std::string input_str);
+void deserialize_random_forest_model(std::vector<TreeModel>& trees, int& n_estimator, std::string input_str);
 
 #endif //FALCON_INCLUDE_FALCON_UTILS_PB_CONVERTER_TREE_CONVERTER_H_

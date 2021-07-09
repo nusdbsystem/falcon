@@ -188,7 +188,7 @@ class DTInferenceServiceImpl final : public InferenceService::Service {
 
  private:
   Party party_;
-  Tree saved_tree_model_;
+  TreeModel saved_tree_model_;
 };
 
 void run_active_server_dt(const std::string& endpoint,
@@ -215,7 +215,7 @@ void run_active_server_dt(const std::string& endpoint,
 
 void run_passive_server_dt(const std::string& saved_model_file,
                            const Party& party) {
-  Tree saved_tree_model;
+  TreeModel saved_tree_model;
   load_dt_model(saved_model_file, saved_tree_model);
 
   // keep listening requests from the active party

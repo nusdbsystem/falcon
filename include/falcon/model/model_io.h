@@ -6,7 +6,7 @@
 #define FALCON_INCLUDE_FALCON_MODEL_MODEL_IO_H
 
 #include <falcon/algorithm/vertical/linear_model/logistic_regression_builder.h>
-#include <falcon/algorithm/vertical/tree/tree.h>
+#include <falcon/algorithm/vertical/tree/tree_model.h>
 #include <falcon/algorithm/vertical/tree/node.h>
 
 #include <glog/logging.h>
@@ -35,7 +35,7 @@ void load_lr_model(const std::string& model_save_path, int& weight_size, Encoded
  * @param tree: trained tree model
  * @param model_save_path: model file to be saved
  */
-void save_dt_model(Tree tree, const std::string& model_save_path);
+void save_dt_model(TreeModel tree, const std::string& model_save_path);
 
 /**
  * load the saved lr model
@@ -43,7 +43,7 @@ void save_dt_model(Tree tree, const std::string& model_save_path);
  * @param model_save_path: model file saved
  * @param saved_tree: saved tree model
  */
-void load_dt_model(const std::string& model_save_path, Tree& saved_tree);
+void load_dt_model(const std::string& model_save_path, TreeModel& saved_tree);
 
 /**
  * save the rf model after training
@@ -52,7 +52,7 @@ void load_dt_model(const std::string& model_save_path, Tree& saved_tree);
  * @param n_estimator
  * @param model_save_path
  */
-void save_rf_model(std::vector<Tree> trees, int n_estimator, const std::string& model_save_path);
+void save_rf_model(std::vector<TreeModel> trees, int n_estimator, const std::string& model_save_path);
 
 /**
  * load the saved rf model
@@ -61,7 +61,7 @@ void save_rf_model(std::vector<Tree> trees, int n_estimator, const std::string& 
  * @param saved_trees
  * @param n_estimator
  */
-void load_rf_model(const std::string& model_save_path, std::vector<Tree>& saved_trees, int& n_estimator);
+void load_rf_model(const std::string& model_save_path, std::vector<TreeModel>& saved_trees, int& n_estimator);
 
 /**
  * save the training report

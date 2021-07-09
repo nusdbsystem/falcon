@@ -79,12 +79,14 @@ set(SOURCE_FILES
         algorithm/vertical/tree/node.cc
         ../../include/falcon/algorithm/vertical/tree/feature.h
         algorithm/vertical/tree/feature.cc
-        ../../include/falcon/algorithm/vertical/tree/tree.h
-        algorithm/vertical/tree/tree.cc
+        ../../include/falcon/algorithm/vertical/tree/tree_model.h
+        algorithm/vertical/tree/tree_model.cc
         ../../include/falcon/algorithm/vertical/tree/tree_builder.h
         algorithm/vertical/tree/tree_builder.cc
         ../../include/falcon/algorithm/vertical/tree/forest_builder.h
-        algorithm/vertical/tree/forest_builder.cc)
+        algorithm/vertical/tree/forest_builder.cc
+        ../../include/falcon/algorithm/vertical/tree/forest_model.h
+        algorithm/vertical/tree/forest_model.cc)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")

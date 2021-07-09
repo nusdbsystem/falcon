@@ -415,7 +415,7 @@ void deserialize_split_info(int & global_split_num,
 }
 
 
-void serialize_tree_model(Tree tree, std::string & output_str) {
+void serialize_tree_model(TreeModel tree, std::string & output_str) {
   com::nus::dbsytem::falcon::v0::Tree pb_tree;
   pb_tree.set_tree_type(tree.type);
   pb_tree.set_class_num(tree.class_num);
@@ -488,7 +488,7 @@ void serialize_tree_model(Tree tree, std::string & output_str) {
 }
 
 
-void deserialize_tree_model(Tree & tree, std::string input_str) {
+void deserialize_tree_model(TreeModel& tree, std::string input_str) {
   com::nus::dbsytem::falcon::v0::Tree deserialized_tree;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);
@@ -552,7 +552,7 @@ void deserialize_tree_model(Tree & tree, std::string input_str) {
   }
 }
 
-void serialize_random_forest_model(std::vector<Tree> trees, int n_estimator, std::string & output_str) {
+void serialize_random_forest_model(std::vector<TreeModel> trees, int n_estimator, std::string & output_str) {
   com::nus::dbsytem::falcon::v0::RandomForest pb_forest;
   pb_forest.set_n_estimator(n_estimator);
   // std::cout << "n_estimator = " << n_estimator << std::endl;
@@ -629,7 +629,7 @@ void serialize_random_forest_model(std::vector<Tree> trees, int n_estimator, std
   pb_forest.SerializeToString(&output_str);
 }
 
-void deserialize_random_forest_model(std::vector<Tree>& trees, int& n_estimator, std::string input_str) {
+void deserialize_random_forest_model(std::vector<TreeModel>& trees, int& n_estimator, std::string input_str) {
   com::nus::dbsytem::falcon::v0::RandomForest deserialized_random_forest;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);
@@ -640,7 +640,7 @@ void deserialize_random_forest_model(std::vector<Tree>& trees, int& n_estimator,
   n_estimator = deserialized_random_forest.n_estimator();
   // std::cout << "n_estimator = " << n_estimator << std::endl;
   for (int t = 0; t < n_estimator; t++) {
-    Tree tree;
+    TreeModel tree;
     tree.type = (falcon::TreeType) deserialized_random_forest.trees(t).tree_type();
     tree.class_num = deserialized_random_forest.trees(t).class_num();
     tree.max_depth = deserialized_random_forest.trees(t).max_depth();

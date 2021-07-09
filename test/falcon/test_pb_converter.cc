@@ -588,7 +588,7 @@ TEST(PB_Converter, TreeSplitInfo) {
 }
 
 TEST(PB_Converter, TreeModel) {
-  Tree tree;
+  TreeModel tree;
   tree.type = falcon::CLASSIFICATION;
   tree.class_num = 2;
   tree.max_depth = 2;
@@ -638,7 +638,7 @@ TEST(PB_Converter, TreeModel) {
   std::string out_message;
   serialize_tree_model(tree, out_message);
 
-  Tree deserialized_tree;
+  TreeModel deserialized_tree;
   deserialize_tree_model(deserialized_tree, out_message);
 
   EXPECT_EQ(deserialized_tree.type, tree.type);
@@ -700,7 +700,7 @@ TEST(PB_Converter, TreeModel) {
 }
 
 TEST(PB_Converter, RandomForestModel) {
-  std::vector<Tree> trees;
+  std::vector<TreeModel> trees;
   int n_estimator = 3;
   mpz_t v_n;
   mpz_t v_value;
@@ -711,7 +711,7 @@ TEST(PB_Converter, RandomForestModel) {
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
   for (int t = 0; t < n_estimator; t++) {
-    Tree tree;
+    TreeModel tree;
     tree.type = falcon::CLASSIFICATION;
     tree.class_num = 2;
     tree.max_depth = 2;
@@ -755,12 +755,12 @@ TEST(PB_Converter, RandomForestModel) {
   std::string out_message;
   serialize_random_forest_model(trees, n_estimator,out_message);
 
-  std::vector<Tree> deserialized_trees;
+  std::vector<TreeModel> deserialized_trees;
   int deserialized_n_estimator;
   deserialize_random_forest_model(deserialized_trees, deserialized_n_estimator, out_message);
   EXPECT_EQ(n_estimator, deserialized_n_estimator);
   for (int t = 0; t < n_estimator; t++) {
-    Tree tree = deserialized_trees[t];
+    TreeModel tree = deserialized_trees[t];
     EXPECT_EQ(deserialized_trees[t].type, tree.type);
     EXPECT_EQ(deserialized_trees[t].class_num, tree.class_num);
     EXPECT_EQ(deserialized_trees[t].max_depth, tree.max_depth);

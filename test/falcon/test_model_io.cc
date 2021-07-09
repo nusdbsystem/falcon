@@ -58,7 +58,7 @@ TEST(Model_IO, SaveLRModel) {
 }
 
 TEST(Model_IO, SaveDTModel) {
-  Tree tree;
+  TreeModel tree;
   tree.type = falcon::CLASSIFICATION;
   tree.class_num = 2;
   tree.max_depth = 2;
@@ -107,7 +107,7 @@ TEST(Model_IO, SaveDTModel) {
 
   std::string save_model_file = "saved_model.txt";
   save_dt_model(tree, save_model_file);
-  Tree saved_tree_model;
+  TreeModel saved_tree_model;
   load_dt_model(save_model_file, saved_tree_model);
 
   EXPECT_EQ(saved_tree_model.type, tree.type);
@@ -169,7 +169,7 @@ TEST(Model_IO, SaveDTModel) {
 }
 
 TEST(Model_IO, SaveRFModel) {
-  std::vector<Tree> trees;
+  std::vector<TreeModel> trees;
   int n_estimator = 3;
   mpz_t v_n;
   mpz_t v_value;
@@ -180,7 +180,7 @@ TEST(Model_IO, SaveRFModel) {
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
   for (int t = 0; t < n_estimator; t++) {
-    Tree tree;
+    TreeModel tree;
     tree.type = falcon::CLASSIFICATION;
     tree.class_num = 2;
     tree.max_depth = 2;
@@ -224,13 +224,13 @@ TEST(Model_IO, SaveRFModel) {
 
   std::string save_model_file = "saved_model.txt";
   save_rf_model(trees, n_estimator, save_model_file);
-  std::vector<Tree> saved_trees;
+  std::vector<TreeModel> saved_trees;
   int deserialized_n_estimator;
   load_rf_model(save_model_file, saved_trees, deserialized_n_estimator);
   EXPECT_EQ(n_estimator, deserialized_n_estimator);
   for (int t = 0; t < n_estimator; t++) {
-    Tree saved_tree_model = saved_trees[t];
-    Tree tree = trees[t];
+    TreeModel saved_tree_model = saved_trees[t];
+    TreeModel tree = trees[t];
     EXPECT_EQ(saved_tree_model.type, tree.type);
     EXPECT_EQ(saved_tree_model.class_num, tree.class_num);
     EXPECT_EQ(saved_tree_model.max_depth, tree.max_depth);

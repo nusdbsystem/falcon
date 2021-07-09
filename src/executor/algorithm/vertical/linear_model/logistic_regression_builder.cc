@@ -732,7 +732,7 @@ void train_logistic_regression(Party party, std::string params_str,
   LOG(INFO) << "params.metric = " << params.metric;
   LOG(INFO) << "params.dp_budget = " << params.dp_budget;
 
-  std::cout << "Init logistic regressilocal_weightson model" << std::endl;
+  std::cout << "Init logistic regression model" << std::endl;
   LOG(INFO) << "Init logistic regression model";
 
   LogisticRegressionBuilder log_reg_model_builder(params,
@@ -757,10 +757,6 @@ void train_logistic_regression(Party party, std::string params_str,
   // save_training_report(log_reg_model.getter_training_accuracy(),
   //    log_reg_model.getter_testing_accuracy(),
   //    model_report_file);
-  LOG(INFO) << "Training accuracy = " << log_reg_model_builder.getter_training_accuracy();
-  LOG(INFO) << "Testing accuracy = " << log_reg_model_builder.getter_testing_accuracy();
-  std::cout << "Training accuracy = " << log_reg_model_builder.getter_training_accuracy() << std::endl;
-  std::cout << "Testing accuracy = " << log_reg_model_builder.getter_testing_accuracy() << std::endl;
 
   delete [] model_weights;
 }

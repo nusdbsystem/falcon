@@ -9,7 +9,7 @@
 #include <falcon/algorithm/model_builder.h>
 #include <falcon/party/party.h>
 #include <falcon/common.h>
-#include <falcon/algorithm/vertical/tree/tree.h>
+#include <falcon/algorithm/vertical/tree/tree_model.h>
 #include <falcon/algorithm/vertical/tree/node.h>
 #include <falcon/algorithm/vertical/tree/feature.h>
 
@@ -84,7 +84,7 @@ class DecisionTreeBuilder : public ModelBuilder {
   // variance vectors of labels, y and y^2, if regression
   std::vector< std::vector<double> > variance_stat_vecs;
   // the decision tree
-  Tree tree;
+  TreeModel tree;
 
  public:
   /** default constructor */
