@@ -6,6 +6,7 @@
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_BUILDER_H_
 
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
+#include <falcon/algorithm/vertical/tree/forest_model.h>
 
 struct RandomForestParams {
   // number of trees in the forest
@@ -30,6 +31,8 @@ class RandomForestBuilder : public ModelBuilder {
   int local_feature_num;
   // tree builders of each tree in the forest
   std::vector<DecisionTreeBuilder> tree_builders;
+  // forest tree model
+  ForestModel forest_model;
 
  public:
   /** default constructor */

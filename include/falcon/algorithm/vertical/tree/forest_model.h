@@ -9,16 +9,21 @@
 #include <falcon/party/party.h>
 #include <falcon/algorithm/vertical/tree/tree_model.h>
 
+#include <thread>
+#include <future>
+
 class ForestModel {
  public:
   // number of trees in the model
   int tree_size;
+  // type of the tree, 'classification' or 'regression'
+  falcon::TreeType tree_type;
   // vector of tree models
   std::vector<TreeModel> forest_trees;
 
  public:
   ForestModel();
-  ForestModel(int m_tree_size);
+  ForestModel(int m_tree_size, std::string m_tree_type);
   ~ForestModel();
 
   /**
