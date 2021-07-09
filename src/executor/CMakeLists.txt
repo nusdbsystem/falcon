@@ -59,10 +59,12 @@ set(SOURCE_FILES
         operator/mpc/spdz_connector.cc
         ../../include/falcon/utils/io_util.h
         utils/io_util.cc
-        ../../include/falcon/algorithm/vertical/linear_model/logistic_regression.h
-        algorithm/vertical/linear_model/logistic_regression.cc
-        ../../include/falcon/algorithm/model.h
-        algorithm/model.cc
+        ../../include/falcon/algorithm/vertical/linear_model/logistic_regression_builder.h
+        algorithm/vertical/linear_model/logistic_regression_builder.cc
+        ../../include/falcon/algorithm/vertical/linear_model/logistic_regression_model.h
+        algorithm/vertical/linear_model/logistic_regression_model.cc
+        ../../include/falcon/algorithm/model_builder.h
+        algorithm/model_builder.cc
         ../../include/falcon/model/model_io.h
         model/model_io.cc
         ../../include/falcon/inference/server/inference_server.h

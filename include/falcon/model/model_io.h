@@ -5,7 +5,7 @@
 #ifndef FALCON_INCLUDE_FALCON_MODEL_MODEL_IO_H
 #define FALCON_INCLUDE_FALCON_MODEL_MODEL_IO_H
 
-#include <falcon/algorithm/vertical/linear_model/logistic_regression.h>
+#include <falcon/algorithm/vertical/linear_model/logistic_regression_builder.h>
 #include <falcon/algorithm/vertical/tree/tree.h>
 #include <falcon/algorithm/vertical/tree/node.h>
 

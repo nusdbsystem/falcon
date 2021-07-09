@@ -6,7 +6,7 @@
 #define FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_LR_PARAMS_CONVERTER_H_
 
 #include <string>
-#include <falcon/algorithm/vertical/linear_model/logistic_regression.h>
+#include <falcon/algorithm/vertical/linear_model/logistic_regression_builder.h>
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 

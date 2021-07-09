@@ -7,6 +7,7 @@
 
 #include <falcon/operator/phe/fixed_point_encoder.h>
 #include <falcon/algorithm/model_builder.h>
+#include <falcon/algorithm/vertical/linear_model/logistic_regression_model.h>
 #include <falcon/party/party.h>
 #include <falcon/common.h>
 
@@ -44,7 +45,7 @@ struct LogisticRegressionParams {
   float dp_budget;
 };
 
-class LogisticRegression : public ModelBuilder {
+class LogisticRegressionBuilder : public ModelBuilder {
  public:
   // size of mini-batch in each iteration
   int batch_size;
@@ -72,15 +73,13 @@ class LogisticRegression : public ModelBuilder {
   // differential privacy budget
   double dp_budget;
 
- private:
-  // number of weights in the model
-  int weight_size;
-  // model weights vector, encrypted values during training, size equals to weight_size
-  EncodedNumber* local_weights;
+ public:
+  // logistic regression model
+  LogisticRegressionModel log_reg_model;
 
  public:
   /** default constructor */
-  LogisticRegression();
+  LogisticRegressionBuilder();
 
   /**
    * logistic regression constructor
@@ -94,7 +93,7 @@ class LogisticRegression : public ModelBuilder {
    * @param m_training_accuracy: training accuracy
    * @param m_testing_accuracy: testing accuracy
    */
-  LogisticRegression(LogisticRegressionParams lr_params,
+  LogisticRegressionBuilder(LogisticRegressionParams lr_params,
       int m_weight_size,
       std::vector< std::vector<double> > m_training_data,
       std::vector< std::vector<double> > m_testing_data,
@@ -104,7 +103,7 @@ class LogisticRegression : public ModelBuilder {
       double m_testing_accuracy = 0.0);
 
   /** destructor */
-  ~LogisticRegression();
+  ~LogisticRegressionBuilder();
 
   /**
    * initialize encrypted local weights
@@ -197,44 +196,7 @@ class LogisticRegression : public ModelBuilder {
    * @param number: ciphertext to be decrypted
    */
   void display_one_ciphertext(Party party, EncodedNumber *number);
-
-  /** set weight size */
-  void setter_weight_size(int s_weight_size) {
-    weight_size = s_weight_size;
-  }
-
-  /** set weight params */
-  void setter_encoded_weights(EncodedNumber* s_weights);
-
-  /** get weight size */
-  int getter_weight_size() {
-    return weight_size;
-  }
-
-  /** set weight params */
-  void getter_encoded_weights(EncodedNumber* g_weights);
 };
-
-/**
- * spdz computation with thread
- *
- * @param party_num: number of parties
- * @param party_id: current party id
- * @param mpc_port_base: port base of the spdz parties
- * @param mpc_player_path: player data path of the spdz parties
- * @param party_host_names: spdz parties host names (ips)
- * @param batch_aggregation_shares: the batch shares
- * @param cur_batch_size: size of current batch
- * @param batch_loss_shares: promise structure of the loss shares
- */
-void spdz_logistic_function_computation(int party_num,
-    int party_id,
-    int mpc_port_base,
-    std::string mpc_player_path,
-    std::vector<std::string> party_host_names,
-    std::vector<double> batch_aggregation_shares,
-    int cur_batch_size,
-    std::promise<std::vector<double>> *batch_loss_shares);
 
 /**
  * train a logistic regression model
