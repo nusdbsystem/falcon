@@ -12,11 +12,17 @@ such as:
 - libcrypto++
 
 
+### Put Falcon Code Base at `/opt`
+
+For sake of convenience, dock the falcon code base at `/opt`, and install `libhcs`, `mp-spdz`, and build `executor` from `/opt/falcon/`
+
+
 ## 2. install glog library (with cmake)
 
 The Google Logging Library (glog) implements application-level logging. The library provides logging APIs based on C++-style streams and various helper macros.
 
-try first outside of `/opt`
+Need to cmake glog at `/opt` with `sudo`
+
 
 ```bash
 local_build$ git clone https://github.com/google/glog.git && \
@@ -31,25 +37,23 @@ test the glob installation with provided `cmake test`:
 glog$ sudo cmake --build build --target test
 ```
 
-for local outside of `/opt` build, ran into problem with IO permission at `.cmake` when `cmake -H. -Bbuild -G "Unix Makefiles"`:
 
-```bash
-CMake Warning at CMakeLists.txt:806 (export):
-  Cannot create package registry file:
+## 3. link gtest library
 
-    /home/svd/.cmake/packages/glog/528d47ec07e94b6690cdb1e17fca9d09
-
-  Permission denied
+```sh
+# Ln gtest library
+cd /usr/src/googletest/googletest && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    cp lib/libgtest* /usr/lib/ && \
+    cd .. && \
+    rm -rf build && \
+    mkdir /usr/local/lib/googletest && \
+    ln -s /usr/lib/libgtest.a /usr/local/lib/googletest/libgtest.a && \
+    ln -s /usr/lib/libgtest_main.a /usr/local/lib/googletest/libgtest_main.a
 ```
-
-try using `sudo` with `cmake -H. -Bbuild -G "Unix Makefiles"`, got problem `-- Could NOT find Unwind (missing: Unwind_INCLUDE_DIR Unwind_LIBRARY Unwind_PLATFORM_LIBRARY)`
-
-not sure if it is affecting the falcon platform...
-
-cmake glog at `/opt` with `sudo` is fine
-
-
-## 3. link gtest library (why creating the extra symlink?)
 
 create symbolic links using `ln` for `gtest` system locations
 
@@ -58,23 +62,26 @@ create symbolic links using `ln` for `gtest` system locations
 
 If both the `FILE` and `LINK` are given, `ln` will create a link from the file specified as the first argument (FILE) to the file specified as the second argument (LINK)
 
-### Put Falcon Code Base at `/opt`
-
-For sake of convenience, dock the falcon code base at `/opt`, and install `libhcs`, `mp-spdz`, and build `executor` from `/opt/falcon/`
 
 ## 4. install third_party libhcs
 
 make sure you have the falcon code base at `/opt/falcon`
 
-`sudo bash tools/build_from_source/libhcs_setup.sh`
+`sudo bash tools/scripts/libhcs_setup.sh`
 
 ## 5. install third_patry MP-SPDZ
 
 this step takes the most resources and time
 
-`sudo bash tools/build_from_source/mp-spdz_setup.sh`
+`sudo bash tools/scripts/mp-spdz_setup.sh`
 
 _Need to grant permission for `Player-Data` folder_
+
+**MPIR dependency**:
+Please refer to the README of third_party MP-SPDZ `third_party/MP-SPDZ/README.md`
+> MPIR library, compiled with C++ support (use flag `--enable-cxx` when running configure). You can use `make -j8 tldr` to install it locally.
+
+When running `mp-spdz_setup.sh`, you can choose to whether to compile for mpir (needed for compilation for the first time) with flag `--fMPIR`
 
 ### Check `/usr/local/lib`
 
@@ -116,7 +123,9 @@ Follow the build from source from the gRPC.io website [grpc.io tutorial](https:/
 
 > The steps in the section explain now to build and locally install gRPC and Protocol Buffers using `cmake`.
 
-#### install gRPC by `vcpkg`
+#### install gRPC and protoc by `vcpkg`
+
+see installation notes for installing gRPC `1.33.1` and protoc `3.14.0` at [vcpkg_grpc_protobuf.md](./vcpkg_grpc_protobuf.md)
 
 found that gRPC can be installed by vcpkg [official link](https://github.com/grpc/grpc/tree/master/src/cpp#install-using-vcpkg-package)
 
@@ -127,7 +136,7 @@ In order to use `vcpkg` with CMake:
 $ ./vcpkg integrate install
 Applied user-wide integration for this vcpkg root.
 
-CMake projects should use: "-DCMAKE_TOOLCHAIN_FILE=/home/svd/Downloads/vcpkg/scripts/buildsystems/vcpkg.cmake"
+CMake projects should use: "-DCMAKE_TOOLCHAIN_FILE=/home/eigen/bin/vcpkg/scripts/buildsystems/vcpkg.cmake"
 ```
 
 Install `vcpkg` and `gRPC`:
@@ -183,6 +192,8 @@ If your library is not listed, please open an issue at and/or consider making a 
 
 
 ## 7. build falcon executor
+
+**NOTE on protoc message**: if needed, run the script `src/executor/include/proto/proto_gen_grpc.sh` to generate the protoc message
 
 Run the build script from `tools/scripts/build_executor.sh`
 
@@ -282,4 +293,5 @@ drwxr-xr-x 4 root root 4.0K Jan  5 14:30 CMakeFiles
   - rebuild from `/tools/scripts/mp-spdz_setup.sh`
 
   **NOTE: `mv Math/Setup.h.prod Math/Setup.h` is critical! `*.prod` specifies `/opt/falcon` as base path**
+
 

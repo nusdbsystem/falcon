@@ -6,7 +6,10 @@ After the inference gRPC pull request, the inference components in the system re
 
 The protobuf/protoc version required is now **3.14.0**.
 
-### Install Protobuf 3.0.0
+_NOTE: if you use gRPC installed by vcpkg, the protobuf will be installed by vcpkg_
+
+Below lists how you can install protobuf specific versions like `3.0.0` and `3.14.0`:
+### How to Install Protobuf 3.0.0
 
 From v3.0.0, a new language version (proto3)
 
@@ -14,6 +17,32 @@ Download the protobuf source from https://github.com/protocolbuffers/protobuf/re
 
 Get the zip `protobuf-cpp-3.0.0.tar.gz` (For example: if you only need C++, download `protobuf-cpp-[VERSION].tar.gz`; every package
 contains C++ source already)
+
+### How to Install Protobuf 3.14.0
+
+Download `protobuf-cpp-[VERSION].tar.gz` for 3.14.0.
+
+Download the protobuf source from (https://github.com/protocolbuffers/protobuf/releases/tag/v3.14.0)
+
+Install to `/usr/local` by:
+
+```sh
+make clean
+./configure
+sudo echo
+make && sudo make install && sudo ldconfig
+```
+
+Verify the installation:
+
+```sh
+$ which protoc
+/usr/local/bin/protoc
+$ protoc --version
+libprotoc 3.14.0
+```
+
+### Installation Notes
 
 From https://raw.githubusercontent.com/protocolbuffers/protobuf/master/src/README.md
 
@@ -52,23 +81,3 @@ Proceed at your own risk.
 By default, the package will be installed to **`/usr/local`**.
 
 make sure to run `make clean` before building again.
-
-### Install Protobuf 3.14.0
-
-Download `protobuf-cpp-[VERSION].tar.gz` for 3.14.0.
-
-Install to `/usr/local` by:
-
-```sh
-make clean
-./configure
-sudo echo
-make && sudo make install && sudo ldconfig
-```
-
-```sh
-$ which protoc
-/usr/local/bin/protoc
-$ protoc --version
-libprotoc 3.14.0
-```

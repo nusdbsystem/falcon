@@ -36,7 +36,7 @@ integers, rational numbers, and floating point numbers.
 
 ### MP-SPDZ Requirements
  - GCC 5 or later (tested with up to 9) or LLVM/clang 5 or later (tested with up to 9). We recommend clang because it performs better.
- - MPIR library, compiled with C++ support (use flag `--enable-cxx` when running configure). You can use `make -j8 tldr` to install it locally.
+ - MPIR library, compiled with C++ support (use flag `--enable-cxx` when running configure). **You can use `make -j8 tldr` to install it locally.**
  - libsodium library, tested against 1.0.16
  - OpenSSL, tested against and 1.0.2 and 1.1.0
  - Boost.Asio with SSL support (`libboost-dev` on Ubuntu), tested against 1.65

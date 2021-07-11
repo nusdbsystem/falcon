@@ -34,10 +34,10 @@ namespace v0 {
 namespace inference {
 
 // The logistic regression inference service definition.
-class InferenceLR final {
+class InferenceService final {
  public:
   static constexpr char const* service_full_name() {
-    return "com.nus.dbsytem.falcon.v0.inference.InferenceLR";
+    return "com.nus.dbsytem.falcon.v0.inference.InferenceService";
   }
   class StubInterface {
    public:

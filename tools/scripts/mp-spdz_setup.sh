@@ -14,7 +14,25 @@ git checkout CONFIG.mine
 # git pull origin master
 
 mv Math/Setup.h.prod Math/Setup.h
-# make -j 8 tldr  # no need to build this part after May 11th 2021
+
+# below is needed for MPIR library
+# If compiling MP-SPDZ for the first time, need to compile for mpir
+# append "--fMPIR" flag
+if [[ $* == *--fMPIR* ]]
+then
+    # try with fMPIR flag for mpir headers
+    echo "Compiling for MPIR"
+    # make -j 8 tldr line should be included for the first time we build the third-party library,
+    # otherwise, the mpir dependency will not be compiled
+    make -j 8 tldr
+else
+    # Default no flag in cmd
+    # no need to build this part after May 11th 2021
+    # But for the subsequent build on the same machine, this is not needed
+    # as make tldr takes a long time
+    echo "Skipping MPIR"
+fi
+
 # set up online phase
 # Scripts/setup-ssl.sh 3 (included in fast-make.sh)
 bash fast-make.sh
