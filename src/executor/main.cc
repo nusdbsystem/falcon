@@ -127,7 +127,19 @@ int main(int argc, char *argv[]) {
 
   falcon::AlgorithmName parsed_algorithm_name = parse_algorithm_name(algorithm_name);
 
-#if IS_INFERENCE == 0
+// IS_INFERENCE is from common.h
+#if IS_INFERENCE
+  LOG(INFO) << "IS_INFERENCE is true\n";
+  // invoke creating endpoint for inference requests
+  // TODO: there is a problem when using grpc server with spdz_logistic_function_computation
+  // TODO: now alleviate the problem by not including during training (need to check later)
+  if (party_type == falcon::ACTIVE_PARTY) {
+    run_active_server(inference_endpoint, model_save_file, party, parsed_algorithm_name);
+  } else {
+    run_passive_server(model_save_file, party, parsed_algorithm_name);
+  }
+#else
+  LOG(INFO) << "IS_INFERENCE is false\n";
   switch(parsed_algorithm_name) {
       case falcon::LR:
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
@@ -143,21 +155,14 @@ int main(int argc, char *argv[]) {
         break;
     }
   std::cout << "Finish algorithm " << std::endl;
-#else
-  // invoke creating endpoint for inference requests
-  // TODO: there is a problem when using grpc server with spdz_logistic_function_computation
-  // TODO: now alleviate the problem by not including during training (need to check later)
-  if (party_type == falcon::ACTIVE_PARTY) {
-    run_active_server(inference_endpoint, model_save_file, party, parsed_algorithm_name);
-  } else {
-    run_passive_server(model_save_file, party, parsed_algorithm_name);
-  }
 #endif
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
-  if ("logistic_regression" == name) return falcon::LR;
-  if ("decision_tree" == name) return falcon::DT;
-  if ("random_forest" == name) return falcon::RF;
+  falcon::AlgorithmName output = falcon::LR;
+  if ("logistic_regression" == name) output = falcon::LR;
+  if ("decision_tree" == name) output = falcon::DT;
+  if ("random_forest" == name) output = falcon::RF;
+  return output;
 }

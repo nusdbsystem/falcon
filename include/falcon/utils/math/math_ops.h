@@ -4,7 +4,8 @@
 #include <vector>
 
 /**
- * given two vectors, compute the mean squared error (i.e., accuracy) in regression
+ * given two vectors, compute the mean squared error
+ * (i.e., accuracy) in regression
  *
  * @param a
  * @param b
@@ -31,7 +32,6 @@ bool rounded_comparison(double a, double b);
  */
 std::vector<double> softmax(std::vector<double> inputs);
 
-
 /**
  * return the argmax index of an input vector
  *
@@ -39,7 +39,6 @@ std::vector<double> softmax(std::vector<double> inputs);
  * @return
  */
 double argmax(std::vector<double> inputs);
-
 
 /**
  * compute the logistic function for logit
@@ -57,7 +56,8 @@ double logistic_function(double logit);
  * @param labels: ground truth labels
  * @return
  */
-double logistic_regression_loss(std::vector<double> pred_probs, std::vector<double> labels);
+double logistic_regression_loss(std::vector<double> pred_probs,
+                                std::vector<double> labels);
 
 /**
  * compute the mode value of a vector
@@ -75,4 +75,4 @@ double mode(std::vector<double> inputs);
  */
 double average(std::vector<double> inputs);
 
-#endif //FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_
+#endif  // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

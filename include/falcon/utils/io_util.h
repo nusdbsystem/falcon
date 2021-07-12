@@ -16,17 +16,19 @@
  * read dataset as 2d-float vectors
  *
  * @param data_file
+ * @param delimiter
  * @return
  */
-std::vector< std::vector<double> > read_dataset(const std::string& data_file);
+std::vector< std::vector<double> > read_dataset(const std::string& data_file, char delimiter);
 
 /**
  * write dataset to file
  *
  * @param data: data to write
+ * @param delimiter
  * @param data_file: file to write
  */
-void write_dataset_to_file(std::vector< std::vector<double> > data, const std::string& data_file);
+void write_dataset_to_file(std::vector< std::vector<double> > data, char delimiter, const std::string& data_file);
 
 /**
  * read pb serialized phe keys

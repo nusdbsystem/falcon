@@ -798,7 +798,7 @@ bool DecisionTreeBuilder::check_pruning_conditions(Party &party,
   return is_satisfied;
 }
 
-bool DecisionTreeBuilder::compute_leaf_statistics(Party &party,
+void DecisionTreeBuilder::compute_leaf_statistics(Party &party,
     int node_index,
     EncodedNumber *sample_mask_iv,
     EncodedNumber *encrypted_labels) {

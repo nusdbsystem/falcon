@@ -5,15 +5,15 @@
 #ifndef FALCON_SRC_EXECUTOR_PARTY_PARTY_H_
 #define FALCON_SRC_EXECUTOR_PARTY_PARTY_H_
 
-#include "falcon/network/Comm.hpp"
-#include <falcon/operator/phe/djcs_t_aux.h>
 #include <falcon/common.h>
+#include <falcon/operator/phe/djcs_t_aux.h>
+#include <libhcs.h>
 
 #include <string>
 #include <utility>
 #include <vector>
-#include <libhcs.h>
 
+#include "falcon/network/Comm.hpp"
 
 class Party {
  public:
@@ -26,7 +26,7 @@ class Party {
   // federated learning setting
   falcon::FLSetting fl_setting;
   // communication channel with other parties
-  std::vector< shared_ptr<CommParty> > channels;
+  std::vector<shared_ptr<CommParty> > channels;
   // boost i/o functionality
   boost::asio::io_service io_service;
   // host names of other parties
@@ -40,7 +40,7 @@ class Party {
   // feature number in the local dataset
   int feature_num;
   // 2-dimensional dataset (currently only support relational data)
-  std::vector< std::vector <double> > local_data;
+  std::vector<std::vector<double> > local_data;
   // 1-dimensional label if the party has
   std::vector<double> labels;
   // public key of PHE
@@ -66,14 +66,10 @@ class Party {
    * @param m_use_existing_key: whether use existing phe key
    * @param m_key_file: if true above, provide phe key file
    */
-  Party(int m_party_id,
-      int m_party_num,
-      falcon::PartyType m_party_type,
-      falcon::FLSetting m_fl_setting,
-      const std::string& m_network_file,
-      const std::string& m_data_file,
-      bool m_use_existing_key,
-      const std::string& m_key_file);
+  Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
+        falcon::FLSetting m_fl_setting, const std::string& m_network_file,
+        const std::string& m_data_file, bool m_use_existing_key,
+        const std::string& m_key_file);
 
   /**
    * copy constructor
@@ -85,7 +81,7 @@ class Party {
    * assignment constructor
    * @param party
    */
-  Party& operator = (const Party &party);
+  Party& operator=(const Party& party);
 
   /**
    * destructor
@@ -99,7 +95,8 @@ class Party {
    * @param phe_key_size: djcs_t key size
    * @param required_party_num: i.e., party num (additive secret sharing)
    */
-  void init_with_new_phe_keys(int epsilon, int phe_key_size, int required_party_num);
+  void init_with_new_phe_keys(int epsilon, int phe_key_size,
+                              int required_party_num);
 
   /**
    * when use existing key file, deserialize and init phe keys
@@ -122,7 +119,7 @@ class Party {
    * @param id: other party id
    * @param message: sent message
    */
-  void send_long_message (int id, string message) const;
+  void send_long_message(int id, string message) const;
 
   /**
    * receive message from channel comm_party
@@ -132,7 +129,8 @@ class Party {
    * @param buffer: received buffer
    * @param expected_size: buffer size
    */
-  void recv_message(int id, std::string message, byte* buffer, int expected_size) const;
+  void recv_message(int id, std::string message, byte* buffer,
+                    int expected_size) const;
 
   /**
    * receive message from channel comm_party
@@ -140,7 +138,7 @@ class Party {
    * @param id: other party id
    * @param message: received message
    */
-  void recv_long_message (int id, std::string & message) const;
+  void recv_long_message(int id, std::string& message) const;
 
   /**
    * split local data and labels into train-test
@@ -152,10 +150,10 @@ class Party {
    * @param testing_labels: split testing labels for active party
    */
   void split_train_test_data(double split_percentage,
-      std::vector< std::vector<double> >& training_data,
-      std::vector< std::vector<double> >& testing_data,
-      std::vector<double>& training_labels,
-      std::vector<double>& testing_labels) const;
+                             std::vector<std::vector<double> >& training_data,
+                             std::vector<std::vector<double> >& testing_data,
+                             std::vector<double>& training_labels,
+                             std::vector<double>& testing_labels) const;
 
   /**
    * parties jointly decrypt a ciphertext vector,
@@ -169,8 +167,8 @@ class Party {
    * @param req_party_id: party that initiate decryption
    */
   void collaborative_decrypt(EncodedNumber* src_ciphers,
-      EncodedNumber* dest_plains,
-      int size, int req_party_id) const;
+                             EncodedNumber* dest_plains, int size,
+                             int req_party_id) const;
 
   /**
    * convert ciphertext vector to secret shares securely,
@@ -184,9 +182,8 @@ class Party {
    * @param phe_precision: fixed point precision when encoding
    */
   void ciphers_to_secret_shares(EncodedNumber* src_ciphers,
-      std::vector<double>& secret_shares,
-      int size, int req_party_id,
-      int phe_precision);
+                                std::vector<double>& secret_shares, int size,
+                                int req_party_id, int phe_precision);
 
   /**
    * convert secret shares back to ciphertext vector
@@ -198,9 +195,8 @@ class Party {
    * @param phe_precision: ciphertext vector precision, need careful design
    */
   void secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
-      std::vector<double> secret_shares,
-      int size, int req_party_id,
-      int phe_precision);
+                                std::vector<double> secret_shares, int size,
+                                int req_party_id, int phe_precision);
 
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }
@@ -209,12 +205,14 @@ class Party {
   void setter_feature_num(int s_feature_num) { feature_num = s_feature_num; }
 
   /** set party's local dataset (support only relational data) */
-  void setter_local_data(std::vector< std::vector<double> > s_local_data) {
+  void setter_local_data(std::vector<std::vector<double> > s_local_data) {
     local_data = std::move(s_local_data);
   }
 
   /** set party's local labels if the party is an active party */
-  void setter_labels(std::vector<double> s_labels) { labels = std::move(s_labels); }
+  void setter_labels(std::vector<double> s_labels) {
+    labels = std::move(s_labels);
+  }
 
   /** set party's phe public key */
   void setter_phe_pub_key(djcs_t_public_key* s_phe_pub_key) {
@@ -238,7 +236,9 @@ class Party {
   int getter_feature_num() const { return feature_num; }
 
   /** get party's local dataset (support only relational data) */
-  std::vector< std::vector<double> > getter_local_data() const { return local_data; }
+  std::vector<std::vector<double> > getter_local_data() const {
+    return local_data;
+  }
 
   /** get party's local labels if the party is an active party */
   std::vector<double> getter_labels() const { return labels; }
@@ -259,4 +259,4 @@ class Party {
   }
 };
 
-#endif //FALCON_SRC_EXECUTOR_PARTY_PARTY_H_
+#endif  // FALCON_SRC_EXECUTOR_PARTY_PARTY_H_

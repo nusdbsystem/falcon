@@ -2,35 +2,30 @@
 // Created by wuyuncheng on 13/8/20.
 //
 
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <random>
-#include <stack>
-#include <cstdlib>
-#include <ctime>
-#include <iostream>
-
-#include <glog/logging.h>
-
+#include <falcon/common.h>
 #include <falcon/operator/phe/djcs_t_aux.h>
-#include <falcon/network/ConfigFile.hpp>
 #include <falcon/party/party.h>
 #include <falcon/utils/io_util.h>
-#include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/network_converter.h>
-#include <falcon/common.h>
+#include <falcon/utils/pb_converter/phe_keys_converter.h>
+#include <glog/logging.h>
 
-Party::Party(){}
+#include <cstdlib>
+#include <ctime>
+#include <falcon/network/ConfigFile.hpp>
+#include <fstream>
+#include <iostream>
+#include <random>
+#include <sstream>
+#include <stack>
+#include <string>
 
-Party::Party(int m_party_id,
-             int m_party_num,
-             falcon::PartyType m_party_type,
-             falcon::FLSetting m_fl_setting,
-             const std::string& m_network_file,
-             const std::string& m_data_file,
-             bool m_use_existing_key,
+Party::Party() {}
+
+Party::Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
+             falcon::FLSetting m_fl_setting, const std::string& m_network_file,
+             const std::string& m_data_file, bool m_use_existing_key,
              const std::string& m_key_file) {
   // copy params
   party_id = m_party_id;
@@ -39,7 +34,8 @@ Party::Party(int m_party_id,
   fl_setting = m_fl_setting;
 
   // read dataset
-  local_data = read_dataset(m_data_file);
+  char delimiter = ',';
+  local_data = read_dataset(m_data_file, delimiter);
   sample_num = local_data.size();
   feature_num = local_data[0].size();
 
@@ -50,12 +46,14 @@ Party::Party(int m_party_id,
   // if this is active party, slice the last column as labels
   if (party_type == falcon::ACTIVE_PARTY) {
     for (int i = 0; i < sample_num; i++) {
-      labels.push_back(local_data[i][feature_num-1]);
+      labels.push_back(local_data[i][feature_num - 1]);
       local_data[i].pop_back();
     }
     feature_num = feature_num - 1;
   }
 
+  // TODO: the logic for NETWORK_CONFIG_PROTO 0/1 seems to have
+  // a number of overlaps, probably can refactor
   if (NETWORK_CONFIG_PROTO == 0) {
     // read network config file
     ConfigFile config_file(m_network_file);
@@ -65,7 +63,7 @@ Party::Party(int m_party_id,
     for (int i = 0; i < party_num; i++) {
       port_string = "party_" + to_string(i) + "_port";
       ip_string = "party_" + to_string(i) + "_ip";
-      //get parties ips and ports
+      // get parties ips and ports
       ports[i] = stoi(config_file.Value("", port_string));
       ips[i] = config_file.Value("", ip_string);
     }
@@ -74,26 +72,34 @@ Party::Party(int m_party_id,
 
     // establish communication connections
     SocketPartyData me, other;
-    for (int  i = 0;  i < party_num; ++ i) {
+    for (int i = 0; i < party_num; ++i) {
       if (i < party_id) {
         // this party will be the receiver in the protocol
-        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), ports[party_id] + i);
-        other = SocketPartyData(boost_ip::address::from_string(ips[i]), ports[i] + party_id - 1);
-        shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]),
+                             ports[party_id] + i);
+        other = SocketPartyData(boost_ip::address::from_string(ips[i]),
+                                ports[i] + party_id - 1);
+        shared_ptr<CommParty> channel =
+            make_shared<CommPartyTCPSynced>(io_service, me, other);
 
         // connect to the other party and add channel
-        channel->join(500,5000);
-        LOG(INFO) << "Communication channel established with party " << i << ", port is " << ports[party_id] + i << ".";
+        channel->join(500, 5000);
+        LOG(INFO) << "Communication channel established with party " << i
+                  << ", port is " << ports[party_id] + i << ".";
         channels.push_back(std::move(channel));
       } else if (i > party_id) {
         // this party will be the sender in the protocol
-        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), ports[party_id] + i - 1);
-        other = SocketPartyData(boost_ip::address::from_string(ips[i]), ports[i] + party_id);
-        shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]),
+                             ports[party_id] + i - 1);
+        other = SocketPartyData(boost_ip::address::from_string(ips[i]),
+                                ports[i] + party_id);
+        shared_ptr<CommParty> channel =
+            make_shared<CommPartyTCPSynced>(io_service, me, other);
 
         // connect to the other party and add channel
-        channel->join(500,5000);
-        LOG(INFO) << "Communication channel established with party " << i << ", port is " << ports[party_id] + i << ".";
+        channel->join(500, 5000);
+        LOG(INFO) << "Communication channel established with party " << i
+                  << ", port is " << ports[party_id] + i << ".";
         channels.push_back(std::move(channel));
       } else {
         // self communication
@@ -106,7 +112,7 @@ Party::Party(int m_party_id,
   } else {
     // read network config proto from coordinator
     std::vector<std::string> ips;
-    std::vector< std::vector<int> > port_arrays;
+    std::vector<std::vector<int> > port_arrays;
     deserialize_network_configs(ips, port_arrays, m_network_file);
 
     LOG(INFO) << "Establish network communications with other parties";
@@ -114,38 +120,47 @@ Party::Party(int m_party_id,
     for (int i = 0; i < ips.size(); i++) {
       LOG(INFO) << "ips[" << i << "] = " << ips[i];
       for (int j = 0; j < port_arrays[i].size(); j++) {
-        LOG(INFO) << "port_array[" << i << "][" << j << "] = " << port_arrays[i][j];
+        LOG(INFO) << "port_array[" << i << "][" << j
+                  << "] = " << port_arrays[i][j];
       }
     }
 
     // establish communication connections
     SocketPartyData me, other;
-    for (int  i = 0;  i < party_num; ++ i) {
-     if (i < party_id) {
-       // this party will be the receiver in the protocol
-       me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), port_arrays[party_id][i]);
-       other = SocketPartyData(boost_ip::address::from_string(ips[i]), port_arrays[i][party_id]);
-       shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+    for (int i = 0; i < party_num; ++i) {
+      if (i < party_id) {
+        // this party will be the receiver in the protocol
+        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]),
+                             port_arrays[party_id][i]);
+        other = SocketPartyData(boost_ip::address::from_string(ips[i]),
+                                port_arrays[i][party_id]);
+        shared_ptr<CommParty> channel =
+            make_shared<CommPartyTCPSynced>(io_service, me, other);
 
-       // connect to the other party and add channel
-       channel->join(500,5000);
-       LOG(INFO) << "Communication channel established with party " << i << ", port is " << port_arrays[party_id][i] << ".";
-       channels.push_back(std::move(channel));
-      } else if (i > party_id){
-       // this party will be the sender in the protocol
-       me = SocketPartyData(boost_ip::address::from_string(ips[party_id]), port_arrays[party_id][i]);
-       other = SocketPartyData(boost_ip::address::from_string(ips[i]), port_arrays[i][party_id]);
-       shared_ptr<CommParty> channel = make_shared<CommPartyTCPSynced>(io_service, me, other);
+        // connect to the other party and add channel
+        channel->join(500, 5000);
+        LOG(INFO) << "Communication channel established with party " << i
+                  << ", port is " << port_arrays[party_id][i] << ".";
+        channels.push_back(std::move(channel));
+      } else if (i > party_id) {
+        // this party will be the sender in the protocol
+        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]),
+                             port_arrays[party_id][i]);
+        other = SocketPartyData(boost_ip::address::from_string(ips[i]),
+                                port_arrays[i][party_id]);
+        shared_ptr<CommParty> channel =
+            make_shared<CommPartyTCPSynced>(io_service, me, other);
 
-       // connect to the other party and add channel
-       channel->join(500,5000);
-       LOG(INFO) << "Communication channel established with party " << i << ", port is " << port_arrays[party_id][i] << ".";
-       channels.push_back(std::move(channel));
+        // connect to the other party and add channel
+        channel->join(500, 5000);
+        LOG(INFO) << "Communication channel established with party " << i
+                  << ", port is " << port_arrays[party_id][i] << ".";
+        channels.push_back(std::move(channel));
       } else {
-       // self communication
-       shared_ptr<CommParty> channel = nullptr;
-       channels.push_back(std::move(channel));
-     }
+        // self communication
+        shared_ptr<CommParty> channel = nullptr;
+        channels.push_back(std::move(channel));
+      }
     }
     host_names = ips;
   }
@@ -173,7 +188,7 @@ Party::Party(int m_party_id,
   }
 }
 
-Party::Party(const Party &party) {
+Party::Party(const Party& party) {
   // copy public variables
   party_id = party.party_id;
   party_num = party.party_num;
@@ -204,7 +219,7 @@ Party::Party(const Party &party) {
   djcs_t_free_auth_server(tmp_auth_server);
 }
 
-Party& Party::operator = (const Party &party) {
+Party& Party::operator=(const Party& party) {
   // copy public variables
   party_id = party.party_id;
   party_num = party.party_num;
@@ -236,16 +251,19 @@ Party& Party::operator = (const Party &party) {
   return *this;
 }
 
-void Party::init_with_new_phe_keys(int epsilon, int phe_key_size, int required_party_num) {
+void Party::init_with_new_phe_keys(int epsilon, int phe_key_size,
+                                   int required_party_num) {
   LOG(INFO) << "party type = " << party_type;
   if (party_type == falcon::ACTIVE_PARTY) {
     // generate phe keys
     hcs_random* random = hcs_init_random();
     djcs_t_public_key* pub_key = djcs_t_init_public_key();
     djcs_t_private_key* priv_key = djcs_t_init_private_key();
-    djcs_t_auth_server** auth_server = (djcs_t_auth_server **) malloc (party_num * sizeof(djcs_t_auth_server *));
-    mpz_t* si = (mpz_t *) malloc (party_num * sizeof(mpz_t));
-    djcs_t_generate_key_pair(pub_key, priv_key, random, epsilon, phe_key_size, party_num, required_party_num);
+    djcs_t_auth_server** auth_server =
+        (djcs_t_auth_server**)malloc(party_num * sizeof(djcs_t_auth_server*));
+    mpz_t* si = (mpz_t*)malloc(party_num * sizeof(mpz_t));
+    djcs_t_generate_key_pair(pub_key, priv_key, random, epsilon, phe_key_size,
+                             party_num, required_party_num);
     mpz_t* coeff = djcs_t_init_polynomial(priv_key, random);
     for (int i = 0; i < party_num; i++) {
       mpz_init(si[i]);
@@ -256,11 +274,12 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size, int required_p
 
     // serialize phe keys and send to passive parties
     LOG(INFO) << "party id = " << party_id;
-    for(int i = 0; i < party_num; i++) {
+    for (int i = 0; i < party_num; i++) {
       if (i == party_id) {
         djcs_t_public_key_copy(pub_key, phe_pub_key);
         djcs_t_auth_server_copy(auth_server[i], phe_auth_server);
-        // LOG(INFO) << "i = " << i << ", party id = " << party_id << ", copy succeed";
+        // LOG(INFO) << "i = " << i << ", party id = " << party_id << ", copy
+        // succeed";
       } else {
         std::string phe_keys_message_i;
         serialize_phe_keys(pub_key, auth_server[i], phe_keys_message_i);
@@ -302,33 +321,35 @@ void Party::init_with_key_file(const std::string& key_file) {
 }
 
 void Party::send_message(int id, std::string message) const {
-  channels[id]->write((const byte *) message.c_str(), message.size());
+  channels[id]->write((const byte*)message.c_str(), message.size());
 }
 
 void Party::send_long_message(int id, string message) const {
   channels[id]->writeWithSize(message);
 }
 
-void Party::recv_message(int id, std::string message, byte *buffer, int expected_size) const {
+void Party::recv_message(int id, std::string message, byte* buffer,
+                         int expected_size) const {
   channels[id]->read(buffer, expected_size);
   // the size of all strings is 2. Parse the message to get the original strings
   auto s = string(reinterpret_cast<char const*>(buffer), expected_size);
   message = s;
 }
 
-void Party::recv_long_message(int id, std::string &message) const {
+void Party::recv_long_message(int id, std::string& message) const {
   vector<byte> recv_message;
   channels[id]->readWithSizeIntoVector(recv_message);
-  const byte * uc = &(recv_message[0]);
-  string recv_message_str(reinterpret_cast<char const*>(uc), recv_message.size());
+  const byte* uc = &(recv_message[0]);
+  string recv_message_str(reinterpret_cast<char const*>(uc),
+                          recv_message.size());
   message = recv_message_str;
 }
 
-void Party::split_train_test_data(double split_percentage,
-                          std::vector<std::vector<double> > &training_data,
-                          std::vector<std::vector<double> > &testing_data,
-                          std::vector<double> &training_labels,
-                          std::vector<double> &testing_labels) const {
+void Party::split_train_test_data(
+    double split_percentage, std::vector<std::vector<double> >& training_data,
+    std::vector<std::vector<double> >& testing_data,
+    std::vector<double>& training_labels,
+    std::vector<double>& testing_labels) const {
   LOG(INFO) << "Split local data and labels into training and testing dataset.";
   int training_data_size = sample_num * split_percentage;
   LOG(INFO) << "Split percentage for train-test = " << split_percentage;
@@ -342,19 +363,18 @@ void Party::split_train_test_data(double split_percentage,
     for (int i = 0; i < sample_num; i++) {
       data_indexes.push_back(i);
     }
-    // without seed: 
+    // without seed:
     // std::random_device rd;
     // std::default_random_engine rng(rd());
     // using seed, for development:
     std::default_random_engine rng(RANDOM_SEED);
     std::shuffle(std::begin(data_indexes), std::end(data_indexes), rng);
 
+#if DEBUG
     // save a copy of data_indexes vector<int> as string for local debugging
     std::stringstream ss;
-    for (size_t i = 0; i < data_indexes.size(); ++i)
-    {
-      if (i != 0)
-        ss << ",";
+    for (size_t i = 0; i < data_indexes.size(); ++i) {
+      if (i != 0) ss << ",";
       ss << data_indexes[i];
     }
     std::string data_indexes_str = ss.str();
@@ -367,8 +387,10 @@ void Party::split_train_test_data(double split_percentage,
     LOG(INFO) << "data_indexes[0] = " << data_indexes[0] << std::endl;
     LOG(INFO) << "data_indexes[1] = " << data_indexes[1] << std::endl;
     LOG(INFO) << "data_indexes[2] = " << data_indexes[2] << std::endl;
+#endif
 
-    // select the former training data size as training data, and the latter as testing data
+    // select the former training data size as training data,
+    // and the latter as testing data
     for (int i = 0; i < sample_num; i++) {
       if (i < training_data_size) {
         // add to training dataset and labels
@@ -397,7 +419,8 @@ void Party::split_train_test_data(double split_percentage,
     deserialize_int_array(data_indexes, recv_shuffled_indexes_str);
 
     if (data_indexes.size() != sample_num) {
-      LOG(ERROR) << "Received size of shuffled indexes does not equal to sample num.";
+      LOG(ERROR)
+          << "Received size of shuffled indexes does not equal to sample num.";
       return;
     }
 
@@ -412,15 +435,14 @@ void Party::split_train_test_data(double split_percentage,
   }
 }
 
-void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
-    EncodedNumber *dest_plains,
-    int size,
-    int req_party_id) const {
+void Party::collaborative_decrypt(EncodedNumber* src_ciphers,
+                                  EncodedNumber* dest_plains, int size,
+                                  int req_party_id) const {
   // partially decrypt the ciphertext vector
   EncodedNumber* partial_decryption = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {
-    djcs_t_aux_partial_decrypt(phe_pub_key,
-        phe_auth_server, partial_decryption[i], src_ciphers[i]);
+    djcs_t_aux_partial_decrypt(phe_pub_key, phe_auth_server,
+                               partial_decryption[i], src_ciphers[i]);
   }
 
   if (party_id == req_party_id) {
@@ -443,41 +465,42 @@ void Party::collaborative_decrypt(EncodedNumber *src_ciphers,
         std::string recv_partial_decryption_str;
         recv_long_message(id, recv_partial_decryption_str);
         EncodedNumber* recv_partial_decryption = new EncodedNumber[size];
-        deserialize_encoded_number_array(recv_partial_decryption,
-            size, recv_partial_decryption_str);
+        deserialize_encoded_number_array(recv_partial_decryption, size,
+                                         recv_partial_decryption_str);
         // copy other party's decrypted shares
         for (int i = 0; i < size; i++) {
           decryption_shares[i][id] = recv_partial_decryption[i];
         }
-        delete [] recv_partial_decryption;
+        delete[] recv_partial_decryption;
       }
     }
 
     // share combine for decryption
     for (int i = 0; i < size; i++) {
-      djcs_t_aux_share_combine(phe_pub_key, dest_plains[i], decryption_shares[i], party_num);
+      djcs_t_aux_share_combine(phe_pub_key, dest_plains[i],
+                               decryption_shares[i], party_num);
     }
 
     // free memory
     for (int i = 0; i < size; i++) {
-      delete [] decryption_shares[i];
+      delete[] decryption_shares[i];
     }
-    delete [] decryption_shares;
+    delete[] decryption_shares;
   } else {
     // send decrypted shares to the req_party_id
     std::string partial_decryption_str;
-    serialize_encoded_number_array(partial_decryption, size, partial_decryption_str);
+    serialize_encoded_number_array(partial_decryption, size,
+                                   partial_decryption_str);
     send_long_message(req_party_id, partial_decryption_str);
   }
 
-  delete [] partial_decryption;
+  delete[] partial_decryption;
 }
 
-void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
-    std::vector<double>& secret_shares,
-    int size,
-    int req_party_id,
-    int phe_precision) {
+void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
+                                     std::vector<double>& secret_shares,
+                                     int size, int req_party_id,
+                                     int phe_precision) {
   // each party generates a random vector with size values
   // (the request party will add the summation to the share)
   // ui randomly chooses ri belongs to Zq and encrypts it as [ri]
@@ -485,14 +508,16 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
   for (int i = 0; i < size; i++) {
     // TODO: check how to replace with spdz random values
     if (phe_precision != 0) {
-      double s = static_cast<double> (rand() % MAXIMUM_RAND_VALUE);
+      double s = static_cast<double>(rand() % MAXIMUM_RAND_VALUE);
       encrypted_shares[i].set_double(phe_pub_key->n[0], s, phe_precision);
-      djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i], encrypted_shares[i]);
+      djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i],
+                         encrypted_shares[i]);
       secret_shares.push_back(0 - s);
     } else {
       int s = rand() % MAXIMUM_RAND_VALUE;
       encrypted_shares[i].set_integer(phe_pub_key->n[0], s);
-      djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i], encrypted_shares[i]);
+      djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i],
+                         encrypted_shares[i]);
       secret_shares.push_back(0 - s);
     }
   }
@@ -502,24 +527,29 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
   if (party_id == req_party_id) {
     for (int i = 0; i < size; i++) {
       aggregated_shares[i] = encrypted_shares[i];
-      djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i], aggregated_shares[i], src_ciphers[i]);
+      djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i], aggregated_shares[i],
+                        src_ciphers[i]);
     }
-    // recv message and add to aggregated shares, u1 computes [e] = [x]+[r1]+..+[rm]
+    // recv message and add to aggregated shares,
+    // u1 computes [e] = [x]+[r1]+..+[rm]
     for (int id = 0; id < party_num; id++) {
       if (id != party_id) {
         std::string recv_encrypted_shares_str;
         recv_long_message(id, recv_encrypted_shares_str);
         EncodedNumber* recv_encrypted_shares = new EncodedNumber[size];
-        deserialize_encoded_number_array(recv_encrypted_shares, size, recv_encrypted_shares_str);
+        deserialize_encoded_number_array(recv_encrypted_shares, size,
+                                         recv_encrypted_shares_str);
         for (int i = 0; i < size; i++) {
-          djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i], aggregated_shares[i], recv_encrypted_shares[i]);
+          djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i],
+                            aggregated_shares[i], recv_encrypted_shares[i]);
         }
-        delete [] recv_encrypted_shares;
+        delete[] recv_encrypted_shares;
       }
     }
     // serialize and send to other parties
     std::string aggregated_shares_str;
-    serialize_encoded_number_array(aggregated_shares, size, aggregated_shares_str);
+    serialize_encoded_number_array(aggregated_shares, size,
+                                   aggregated_shares_str);
     for (int id = 0; id < party_num; id++) {
       if (id != party_id) {
         send_long_message(id, aggregated_shares_str);
@@ -529,13 +559,15 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
     // send encrypted shares to the request party
     // ui sends [ri] to u1
     std::string encrypted_shares_str;
-    serialize_encoded_number_array(encrypted_shares, size, encrypted_shares_str);
+    serialize_encoded_number_array(encrypted_shares, size,
+                                   encrypted_shares_str);
     send_long_message(req_party_id, encrypted_shares_str);
 
     // receive aggregated shares from the request party
     std::string recv_aggregated_shares_str;
     recv_long_message(req_party_id, recv_aggregated_shares_str);
-    deserialize_encoded_number_array(aggregated_shares, size, recv_aggregated_shares_str);
+    deserialize_encoded_number_array(aggregated_shares, size,
+                                     recv_aggregated_shares_str);
   }
   // collaborative decrypt the aggregated shares, clients jointly decrypt [e]
   EncodedNumber* decrypted_sum = new EncodedNumber[size];
@@ -551,28 +583,29 @@ void Party::ciphers_to_secret_shares(EncodedNumber *src_ciphers,
       } else {
         long decoded_sum_i;
         decrypted_sum[i].decode(decoded_sum_i);
-        secret_shares[i] += (double) decoded_sum_i;
+        secret_shares[i] += (double)decoded_sum_i;
       }
     }
   }
 
-  delete [] encrypted_shares;
-  delete [] aggregated_shares;
-  delete [] decrypted_sum;
+  delete[] encrypted_shares;
+  delete[] aggregated_shares;
+  delete[] decrypted_sum;
 }
 
-void Party::secret_shares_to_ciphers(EncodedNumber *dest_ciphers,
-    std::vector<double> secret_shares,
-    int size,
-    int req_party_id,
-    int phe_precision) {
+void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
+                                     std::vector<double> secret_shares,
+                                     int size, int req_party_id,
+                                     int phe_precision) {
   // encode and encrypt the secret shares
   // and send to req_party, who aggregates
   // and send back to the other parties
   EncodedNumber* encrypted_shares = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {
-    encrypted_shares[i].set_double(phe_pub_key->n[0], secret_shares[i], phe_precision);
-    djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i], encrypted_shares[i]);
+    encrypted_shares[i].set_double(phe_pub_key->n[0], secret_shares[i],
+                                   phe_precision);
+    djcs_t_aux_encrypt(phe_pub_key, phe_random, encrypted_shares[i],
+                       encrypted_shares[i]);
   }
 
   if (party_id == req_party_id) {
@@ -586,12 +619,14 @@ void Party::secret_shares_to_ciphers(EncodedNumber *dest_ciphers,
         std::string recv_encrypted_shares_str;
         recv_long_message(id, recv_encrypted_shares_str);
         EncodedNumber* recv_encrypted_shares = new EncodedNumber[size];
-        deserialize_encoded_number_array(recv_encrypted_shares, size, recv_encrypted_shares_str);
+        deserialize_encoded_number_array(recv_encrypted_shares, size,
+                                         recv_encrypted_shares_str);
         // homomorphic aggregation
         for (int i = 0; i < size; i++) {
-          djcs_t_aux_ee_add(phe_pub_key, dest_ciphers[i], dest_ciphers[i], recv_encrypted_shares[i]);
+          djcs_t_aux_ee_add(phe_pub_key, dest_ciphers[i], dest_ciphers[i],
+                            recv_encrypted_shares[i]);
         }
-        delete [] recv_encrypted_shares;
+        delete[] recv_encrypted_shares;
       }
     }
     // serialize dest_ciphers and broadcast
@@ -605,7 +640,8 @@ void Party::secret_shares_to_ciphers(EncodedNumber *dest_ciphers,
   } else {
     // serialize and send to req_party
     std::string encrypted_shares_str;
-    serialize_encoded_number_array(encrypted_shares, size, encrypted_shares_str);
+    serialize_encoded_number_array(encrypted_shares, size,
+                                   encrypted_shares_str);
     send_long_message(req_party_id, encrypted_shares_str);
 
     // receive and set dest_ciphers
@@ -614,7 +650,7 @@ void Party::secret_shares_to_ciphers(EncodedNumber *dest_ciphers,
     deserialize_encoded_number_array(dest_ciphers, size, recv_dest_ciphers_str);
   }
 
-  delete [] encrypted_shares;
+  delete[] encrypted_shares;
 }
 
 Party::~Party() {

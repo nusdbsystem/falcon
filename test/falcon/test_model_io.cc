@@ -2,11 +2,10 @@
 // Created by wuyuncheng on 3/2/21.
 //
 
-#include <vector>
-
 #include <falcon/model/model_io.h>
-
 #include <gtest/gtest.h>
+
+#include <vector>
 
 TEST(Model_IO, SaveLRModel) {
   int weight_size = 5;
@@ -26,7 +25,8 @@ TEST(Model_IO, SaveLRModel) {
     encoded_model[i].setter_type(v_type);
   }
 
-  std::string save_model_file = "saved_model.txt";
+  std::string save_model_file =
+      std::string(TEST_IO_OUTDIR) + "/saved_LR_model.pb";
   save_lr_model(encoded_model, weight_size, save_model_file);
 
   EncodedNumber* loaded_model = new EncodedNumber[weight_size];
@@ -53,8 +53,8 @@ TEST(Model_IO, SaveLRModel) {
 
   mpz_clear(v_n);
   mpz_clear(v_value);
-  delete [] encoded_model;
-  delete [] loaded_model;
+  delete[] encoded_model;
+  delete[] loaded_model;
 }
 
 TEST(Model_IO, SaveDTModel) {
@@ -105,7 +105,8 @@ TEST(Model_IO, SaveDTModel) {
     tree.nodes[i].label = label;
   }
 
-  std::string save_model_file = "saved_model.txt";
+  std::string save_model_file =
+      std::string(TEST_IO_OUTDIR) + "/saved_DT_model.pb";
   save_dt_model(tree, save_model_file);
   Tree saved_tree_model;
   load_dt_model(save_model_file, saved_tree_model);
@@ -119,16 +120,23 @@ TEST(Model_IO, SaveDTModel) {
   for (int i = 0; i < tree.capacity; i++) {
     EXPECT_EQ(saved_tree_model.nodes[i].node_type, tree.nodes[i].node_type);
     EXPECT_EQ(saved_tree_model.nodes[i].depth, tree.nodes[i].depth);
-    EXPECT_EQ(saved_tree_model.nodes[i].is_self_feature, tree.nodes[i].is_self_feature);
-    EXPECT_EQ(saved_tree_model.nodes[i].best_party_id, tree.nodes[i].best_party_id);
-    EXPECT_EQ(saved_tree_model.nodes[i].best_feature_id, tree.nodes[i].best_feature_id);
-    EXPECT_EQ(saved_tree_model.nodes[i].best_split_id, tree.nodes[i].best_split_id);
-    EXPECT_EQ(saved_tree_model.nodes[i].split_threshold, tree.nodes[i].split_threshold);
-    EXPECT_EQ(saved_tree_model.nodes[i].node_sample_num, tree.nodes[i].node_sample_num);
+    EXPECT_EQ(saved_tree_model.nodes[i].is_self_feature,
+              tree.nodes[i].is_self_feature);
+    EXPECT_EQ(saved_tree_model.nodes[i].best_party_id,
+              tree.nodes[i].best_party_id);
+    EXPECT_EQ(saved_tree_model.nodes[i].best_feature_id,
+              tree.nodes[i].best_feature_id);
+    EXPECT_EQ(saved_tree_model.nodes[i].best_split_id,
+              tree.nodes[i].best_split_id);
+    EXPECT_EQ(saved_tree_model.nodes[i].split_threshold,
+              tree.nodes[i].split_threshold);
+    EXPECT_EQ(saved_tree_model.nodes[i].node_sample_num,
+              tree.nodes[i].node_sample_num);
     EXPECT_EQ(saved_tree_model.nodes[i].left_child, tree.nodes[i].left_child);
     EXPECT_EQ(saved_tree_model.nodes[i].right_child, tree.nodes[i].right_child);
     for (int j = 0; j < tree.nodes[i].node_sample_distribution.size(); j++) {
-      EXPECT_EQ(saved_tree_model.nodes[i].node_sample_distribution[j], tree.nodes[i].node_sample_distribution[j]);
+      EXPECT_EQ(saved_tree_model.nodes[i].node_sample_distribution[j],
+                tree.nodes[i].node_sample_distribution[j]);
     }
 
     EncodedNumber deserialized_impurity = saved_tree_model.nodes[i].impurity;
@@ -222,7 +230,8 @@ TEST(Model_IO, SaveRFModel) {
     trees.push_back(tree);
   }
 
-  std::string save_model_file = "saved_model.txt";
+  std::string save_model_file =
+      std::string(TEST_IO_OUTDIR) + "/saved_RF_model.pb";
   save_rf_model(trees, n_estimator, save_model_file);
   std::vector<Tree> saved_trees;
   int deserialized_n_estimator;
@@ -240,16 +249,24 @@ TEST(Model_IO, SaveRFModel) {
     for (int i = 0; i < tree.capacity; i++) {
       EXPECT_EQ(saved_tree_model.nodes[i].node_type, tree.nodes[i].node_type);
       EXPECT_EQ(saved_tree_model.nodes[i].depth, tree.nodes[i].depth);
-      EXPECT_EQ(saved_tree_model.nodes[i].is_self_feature, tree.nodes[i].is_self_feature);
-      EXPECT_EQ(saved_tree_model.nodes[i].best_party_id, tree.nodes[i].best_party_id);
-      EXPECT_EQ(saved_tree_model.nodes[i].best_feature_id, tree.nodes[i].best_feature_id);
-      EXPECT_EQ(saved_tree_model.nodes[i].best_split_id, tree.nodes[i].best_split_id);
-      EXPECT_EQ(saved_tree_model.nodes[i].split_threshold, tree.nodes[i].split_threshold);
-      EXPECT_EQ(saved_tree_model.nodes[i].node_sample_num, tree.nodes[i].node_sample_num);
+      EXPECT_EQ(saved_tree_model.nodes[i].is_self_feature,
+                tree.nodes[i].is_self_feature);
+      EXPECT_EQ(saved_tree_model.nodes[i].best_party_id,
+                tree.nodes[i].best_party_id);
+      EXPECT_EQ(saved_tree_model.nodes[i].best_feature_id,
+                tree.nodes[i].best_feature_id);
+      EXPECT_EQ(saved_tree_model.nodes[i].best_split_id,
+                tree.nodes[i].best_split_id);
+      EXPECT_EQ(saved_tree_model.nodes[i].split_threshold,
+                tree.nodes[i].split_threshold);
+      EXPECT_EQ(saved_tree_model.nodes[i].node_sample_num,
+                tree.nodes[i].node_sample_num);
       EXPECT_EQ(saved_tree_model.nodes[i].left_child, tree.nodes[i].left_child);
-      EXPECT_EQ(saved_tree_model.nodes[i].right_child, tree.nodes[i].right_child);
+      EXPECT_EQ(saved_tree_model.nodes[i].right_child,
+                tree.nodes[i].right_child);
       for (int j = 0; j < tree.nodes[i].node_sample_distribution.size(); j++) {
-        EXPECT_EQ(saved_tree_model.nodes[i].node_sample_distribution[j], tree.nodes[i].node_sample_distribution[j]);
+        EXPECT_EQ(saved_tree_model.nodes[i].node_sample_distribution[j],
+                  tree.nodes[i].node_sample_distribution[j]);
       }
 
       EncodedNumber deserialized_impurity = saved_tree_model.nodes[i].impurity;
