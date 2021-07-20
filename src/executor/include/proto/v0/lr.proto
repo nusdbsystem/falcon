@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package com.nus.dbsytem.falcon.v0;
+
+import public "common.proto";
+
+message LrModel {
+    int32 weight_size = 1;  // model weight size
+    repeated FixedPointEncodedNumber model_weights = 2;  // model weights vector
+}

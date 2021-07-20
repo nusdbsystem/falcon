@@ -10,6 +10,7 @@
 #include <falcon/algorithm/vertical/tree/node.h>
 
 #include <glog/logging.h>
+#include <falcon/algorithm/vertical/tree/forest_model.h>
 
 /**
  * save the lr model weights after training
@@ -18,7 +19,7 @@
  * @param weight_size: size of model
  * @param model_save_path: model file to be saved
  */
-void save_lr_model(EncodedNumber* model_weights, int weight_size, const std::string& model_save_path);
+void save_lr_model(LogisticRegressionModel lr_model, const std::string& model_save_path);
 
 /**
  * load the saved lr model
@@ -27,7 +28,7 @@ void save_lr_model(EncodedNumber* model_weights, int weight_size, const std::str
  * @param weight_size: number of weights
  * @param saved_weights: encoded weights
  */
-void load_lr_model(const std::string& model_save_path, int& weight_size, EncodedNumber* saved_weights);
+void load_lr_model(const std::string& model_save_path, LogisticRegressionModel& saved_lr_model);
 
 /**
  * save the dt model after training
@@ -52,7 +53,7 @@ void load_dt_model(const std::string& model_save_path, TreeModel& saved_tree);
  * @param n_estimator
  * @param model_save_path
  */
-void save_rf_model(std::vector<TreeModel> trees, int n_estimator, const std::string& model_save_path);
+void save_rf_model(ForestModel forest_model, const std::string& model_save_path);
 
 /**
  * load the saved rf model
@@ -61,7 +62,7 @@ void save_rf_model(std::vector<TreeModel> trees, int n_estimator, const std::str
  * @param saved_trees
  * @param n_estimator
  */
-void load_rf_model(const std::string& model_save_path, std::vector<TreeModel>& saved_trees, int& n_estimator);
+void load_rf_model(const std::string& model_save_path, ForestModel& saved_forest_model);
 
 /**
  * save the training report

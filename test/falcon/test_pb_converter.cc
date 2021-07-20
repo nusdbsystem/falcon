@@ -12,6 +12,7 @@
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/pb_converter/network_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
+#include <falcon/utils/pb_converter/lr_converter.h>
 
 TEST(PB_Converter, ModelPublishRequest) {
   int model_id = 1;
@@ -250,6 +251,50 @@ TEST(PB_Converter, LogisticRegressionParams) {
   EXPECT_TRUE(lr_params.optimizer == deserialized_lr_params.optimizer);
   EXPECT_TRUE(lr_params.multi_class == deserialized_lr_params.multi_class);
   EXPECT_TRUE(lr_params.metric == deserialized_lr_params.metric);
+}
+
+TEST(PB_Converter, LogisticRegressionModel) {
+  LogisticRegressionModel lr_model;
+  lr_model.weight_size = 3;
+  lr_model.local_weights = new EncodedNumber[3];
+  mpz_t v_n;
+  mpz_t v_value;
+  mpz_init(v_n);
+  mpz_init(v_value);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
+  int v_exponent = -8;
+  EncodedNumberType v_type = Ciphertext;
+  for (int i = 0; i < 3; i++) {
+    lr_model.local_weights[i].setter_n(v_n);
+    lr_model.local_weights[i].setter_value(v_value);
+    lr_model.local_weights[i].setter_exponent(v_exponent);
+    lr_model.local_weights[i].setter_type(v_type);
+  }
+
+  std::string out_message;
+  serialize_lr_model(lr_model, out_message);
+  LogisticRegressionModel deserialized_lr_model;
+  deserialize_lr_model(deserialized_lr_model, out_message);
+
+  EXPECT_EQ(lr_model.weight_size, deserialized_lr_model.weight_size);
+  for (int i = 0; i < 3; i++) {
+    mpz_t deserialized_n, deserialized_value;
+    mpz_init(deserialized_n);
+    mpz_init(deserialized_value);
+    deserialized_lr_model.local_weights[i].getter_n(deserialized_n);
+    deserialized_lr_model.local_weights[i].getter_value(deserialized_value);
+    int n_cmp = mpz_cmp(v_n, deserialized_n);
+    int value_cmp = mpz_cmp(v_value, deserialized_value);
+    EXPECT_EQ(0, n_cmp);
+    EXPECT_EQ(0, value_cmp);
+    EXPECT_EQ(v_exponent, deserialized_lr_model.local_weights[i].getter_exponent());
+    EXPECT_EQ(v_type, deserialized_lr_model.local_weights[i].getter_type());
+    mpz_clear(deserialized_n);
+    mpz_clear(deserialized_value);
+  }
+  mpz_clear(v_n);
+  mpz_clear(v_value);
 }
 
 TEST(PB_Converter, DecisionTreeParams) {
@@ -700,7 +745,9 @@ TEST(PB_Converter, TreeModel) {
 }
 
 TEST(PB_Converter, RandomForestModel) {
-  std::vector<TreeModel> trees;
+  ForestModel forest_model;
+  forest_model.tree_size = 3;
+  forest_model.tree_type = falcon::CLASSIFICATION;
   int n_estimator = 3;
   mpz_t v_n;
   mpz_t v_value;
@@ -710,81 +757,96 @@ TEST(PB_Converter, RandomForestModel) {
   mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
-  for (int t = 0; t < n_estimator; t++) {
-    TreeModel tree;
-    tree.type = falcon::CLASSIFICATION;
-    tree.class_num = 2;
-    tree.max_depth = 2;
-    tree.internal_node_num = 3;
-    tree.total_node_num = 7;
-    tree.capacity = 7;
-    tree.nodes = new Node[tree.capacity];
-    for (int i = 0; i < tree.capacity; i++) {
-      if (i < 7) {
-        tree.nodes[i].node_type = falcon::INTERNAL;
-      } else {
-        tree.nodes[i].node_type = falcon::LEAF;
-      }
-      tree.nodes[i].depth = 1;
-      tree.nodes[i].is_self_feature = 1;
-      tree.nodes[i].best_party_id = 0;
-      tree.nodes[i].best_feature_id = 1;
-      tree.nodes[i].best_split_id = 2;
-      tree.nodes[i].split_threshold = 0.25;
-      tree.nodes[i].node_sample_num = 1000;
-      tree.nodes[i].node_sample_distribution.push_back(200);
-      tree.nodes[i].node_sample_distribution.push_back(300);
-      tree.nodes[i].node_sample_distribution.push_back(500);
-      tree.nodes[i].left_child = 2 * i + 1;
-      tree.nodes[i].right_child = 2 * i + 2;
-      EncodedNumber impurity, label;
-      impurity.setter_n(v_n);
-      impurity.setter_value(v_value);
-      impurity.setter_exponent(v_exponent);
-      impurity.setter_type(v_type);
-      label.setter_n(v_n);
-      label.setter_value(v_value);
-      label.setter_exponent(v_exponent);
-      label.setter_type(v_type);
-      tree.nodes[i].impurity = impurity;
-      tree.nodes[i].label = label;
+  TreeModel tree;
+  tree.type = falcon::CLASSIFICATION;
+  tree.class_num = 2;
+  tree.max_depth = 2;
+  tree.internal_node_num = 3;
+  tree.total_node_num = 7;
+  tree.capacity = 7;
+  tree.nodes = new Node[tree.capacity];
+  for (int i = 0; i < tree.capacity; i++) {
+    if (i < 7) {
+      tree.nodes[i].node_type = falcon::INTERNAL;
+    } else {
+      tree.nodes[i].node_type = falcon::LEAF;
     }
-    trees.push_back(tree);
+    tree.nodes[i].depth = 1;
+    tree.nodes[i].is_self_feature = 1;
+    tree.nodes[i].best_party_id = 0;
+    tree.nodes[i].best_feature_id = 1;
+    tree.nodes[i].best_split_id = 2;
+    tree.nodes[i].split_threshold = 0.25;
+    tree.nodes[i].node_sample_num = 1000;
+    tree.nodes[i].node_sample_distribution.push_back(200);
+    tree.nodes[i].node_sample_distribution.push_back(300);
+    tree.nodes[i].node_sample_distribution.push_back(500);
+    tree.nodes[i].left_child = 2 * i + 1;
+    tree.nodes[i].right_child = 2 * i + 2;
+    EncodedNumber impurity, label;
+    impurity.setter_n(v_n);
+    impurity.setter_value(v_value);
+    impurity.setter_exponent(v_exponent);
+    impurity.setter_type(v_type);
+    label.setter_n(v_n);
+    label.setter_value(v_value);
+    label.setter_exponent(v_exponent);
+    label.setter_type(v_type);
+    tree.nodes[i].impurity = impurity;
+    tree.nodes[i].label = label;
+  }
+  for (int t = 0; t < n_estimator; t++) {
+    forest_model.forest_trees.push_back(tree);
   }
 
   std::string out_message;
-  serialize_random_forest_model(trees, n_estimator,out_message);
+  serialize_random_forest_model(forest_model, out_message);
 
-  std::vector<TreeModel> deserialized_trees;
-  int deserialized_n_estimator;
-  deserialize_random_forest_model(deserialized_trees, deserialized_n_estimator, out_message);
-  EXPECT_EQ(n_estimator, deserialized_n_estimator);
-  for (int t = 0; t < n_estimator; t++) {
-    TreeModel tree = deserialized_trees[t];
-    EXPECT_EQ(deserialized_trees[t].type, tree.type);
-    EXPECT_EQ(deserialized_trees[t].class_num, tree.class_num);
-    EXPECT_EQ(deserialized_trees[t].max_depth, tree.max_depth);
-    EXPECT_EQ(deserialized_trees[t].internal_node_num, tree.internal_node_num);
-    EXPECT_EQ(deserialized_trees[t].total_node_num, tree.total_node_num);
-    EXPECT_EQ(deserialized_trees[t].capacity, tree.capacity);
+  ForestModel deserialized_forest_model;
+  deserialize_random_forest_model(deserialized_forest_model, out_message);
+  EXPECT_EQ(forest_model.tree_size, deserialized_forest_model.tree_size);
+  EXPECT_EQ(forest_model.tree_type, deserialized_forest_model.tree_type);
+  for (int t = 0; t < deserialized_forest_model.tree_size; t++) {
+    EXPECT_EQ(deserialized_forest_model.forest_trees[t].type,
+        tree.type);
+    EXPECT_EQ(deserialized_forest_model.forest_trees[t].class_num,
+        tree.class_num);
+    EXPECT_EQ(deserialized_forest_model.forest_trees[t].max_depth,
+        tree.max_depth);
+    EXPECT_EQ(deserialized_forest_model.forest_trees[t].internal_node_num,
+        tree.internal_node_num);
+    EXPECT_EQ(deserialized_forest_model.forest_trees[t].total_node_num,
+        tree.total_node_num);
+    EXPECT_EQ(deserialized_forest_model.forest_trees[t].capacity,
+        tree.capacity);
     for (int i = 0; i < tree.capacity; i++) {
-      EXPECT_EQ(deserialized_trees[t].nodes[i].node_type, tree.nodes[i].node_type);
-      EXPECT_EQ(deserialized_trees[t].nodes[i].depth, tree.nodes[i].depth);
-      EXPECT_EQ(deserialized_trees[t].nodes[i].is_self_feature, tree.nodes[i].is_self_feature);
-      EXPECT_EQ(deserialized_trees[t].nodes[i].best_party_id, tree.nodes[i].best_party_id);
-      EXPECT_EQ(deserialized_trees[t].nodes[i].best_feature_id, tree.nodes[i].best_feature_id);
-      EXPECT_EQ(deserialized_trees[t].nodes[i].best_split_id, tree.nodes[i].best_split_id);
-      EXPECT_EQ(deserialized_trees[t].nodes[i].split_threshold, tree.nodes[i].split_threshold);
-      EXPECT_EQ(deserialized_trees[t].nodes[i].node_sample_num, tree.nodes[i].node_sample_num);
-      EXPECT_EQ(deserialized_trees[t].nodes[i].left_child, tree.nodes[i].left_child);
-      EXPECT_EQ(deserialized_trees[t].nodes[i].right_child, tree.nodes[i].right_child);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].node_type,
+          tree.nodes[i].node_type);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].depth,
+          tree.nodes[i].depth);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].is_self_feature,
+          tree.nodes[i].is_self_feature);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].best_party_id,
+          tree.nodes[i].best_party_id);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].best_feature_id,
+          tree.nodes[i].best_feature_id);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].best_split_id,
+          tree.nodes[i].best_split_id);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].split_threshold,
+          tree.nodes[i].split_threshold);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].node_sample_num,
+          tree.nodes[i].node_sample_num);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].left_child,
+          tree.nodes[i].left_child);
+      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].right_child,
+          tree.nodes[i].right_child);
       for (int j = 0; j < tree.nodes[i].node_sample_distribution.size(); j++) {
-        EXPECT_EQ(deserialized_trees[t].nodes[i].node_sample_distribution[j],
+        EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].node_sample_distribution[j],
             tree.nodes[i].node_sample_distribution[j]);
       }
 
-      EncodedNumber deserialized_impurity = deserialized_trees[t].nodes[i].impurity;
-      EncodedNumber deserialized_label = deserialized_trees[t].nodes[i].label;
+      EncodedNumber deserialized_impurity = deserialized_forest_model.forest_trees[t].nodes[i].impurity;
+      EncodedNumber deserialized_label = deserialized_forest_model.forest_trees[t].nodes[i].label;
       mpz_t deserialized_impurity_n, deserialized_impurity_value;
       mpz_t deserialized_label_n, deserialized_label_value;
       mpz_init(deserialized_impurity_n);

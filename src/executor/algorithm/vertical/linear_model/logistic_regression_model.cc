@@ -26,6 +26,7 @@ LogisticRegressionModel::~LogisticRegressionModel() {
 
 LogisticRegressionModel::LogisticRegressionModel(const LogisticRegressionModel& log_reg_model) {
   weight_size = log_reg_model.weight_size;
+  local_weights = new EncodedNumber[weight_size];
   for (int i = 0; i < weight_size; i++) {
     local_weights[i] = log_reg_model.local_weights[i];
   }

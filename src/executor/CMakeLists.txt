@@ -31,6 +31,8 @@ set(SOURCE_FILES
         utils/pb_converter/network_converter.cc
         ../../include/falcon/utils/pb_converter/tree_converter.h
         utils/pb_converter/tree_converter.cc
+        ../../include/falcon/utils/pb_converter/lr_converter.h
+        utils/pb_converter/lr_converter.cc
         utils/metric/classification.cc
         utils/math/math_ops.cc
         ../../include/falcon/utils/base64.h
@@ -51,6 +53,8 @@ set(SOURCE_FILES
         include/message/inference/lr_grpc.grpc.pb.cc
         include/message/tree.pb.h
         include/message/tree.pb.cc
+        include/message/lr.pb.h
+        include/message/lr.pb.cc
         ../../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
         ../../include/falcon/operator/phe/djcs_t_aux.h

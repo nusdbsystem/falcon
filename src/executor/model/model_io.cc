@@ -12,9 +12,10 @@
 #include <falcon/model/model_io.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
+#include <falcon/utils/pb_converter/lr_converter.h>
 #include <falcon/utils/base64.h>
 
-void save_lr_model(EncodedNumber* model_weights, int weight_size, const std::string& model_save_path){
+void save_lr_model(LogisticRegressionModel lr_model, const std::string& model_save_path){
   std::ofstream write_outfile(model_save_path);
   if (!write_outfile) {
     LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";
@@ -22,28 +23,14 @@ void save_lr_model(EncodedNumber* model_weights, int weight_size, const std::str
   }
   std::string local_model_str;
 
-  // print saved model weights
-  //  for (int i = 0; i < local_model_size; i++) {
-  //    mpz_t deserialized_n, deserialized_value;
-  //    mpz_init(deserialized_n);
-  //    mpz_init(deserialized_value);
-  //    local_model_weights[i].getter_n(deserialized_n);
-  //    local_model_weights[i].getter_value(deserialized_value);
-  //    gmp_printf("model weights %d n = %Zd\n", i, deserialized_n);
-  //    gmp_printf("model weights %d value = %Zd\n", i, deserialized_value);
-  //    mpz_clear(deserialized_n);
-  //    mpz_clear(deserialized_value);
-  //  }
-
-  serialize_encoded_number_array(model_weights, weight_size, local_model_str);
+  serialize_lr_model(lr_model, local_model_str);
   std::string b64_local_model_str = base64_encode(reinterpret_cast<const BYTE *>(local_model_str.c_str()), local_model_str.size());
 
-  write_outfile << weight_size << "\n";
   write_outfile << b64_local_model_str << "\n";
   write_outfile.close();
 }
 
-void load_lr_model(const std::string& model_save_path, int& weight_size, EncodedNumber* saved_weights) {
+void load_lr_model(const std::string& model_save_path, LogisticRegressionModel& saved_lr_model) {
   std::ifstream model_infile(model_save_path);
   if (!model_infile) {
     LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";
@@ -51,34 +38,12 @@ void load_lr_model(const std::string& model_save_path, int& weight_size, Encoded
   }
 
   std::string line;
-  int line_num = 0;
   while (std::getline(model_infile, line)) {
-    if (line_num == 0) {
-      // read weight size
-      weight_size = ::atoi(line.c_str());
-    } else if (line_num == 1) {
-      // read weights string
-      vector<BYTE> saved_model_vec = base64_decode(line.c_str());
-      std::string s(saved_model_vec.begin(), saved_model_vec.end());
-      deserialize_encoded_number_array(saved_weights, weight_size, s);
-    } else {
-      break;
-    }
-    line_num ++;
+    // read weights string
+    vector<BYTE> saved_model_vec = base64_decode(line.c_str());
+    std::string s(saved_model_vec.begin(), saved_model_vec.end());
+    deserialize_lr_model(saved_lr_model, s);
   }
-
-  // print saved model weights
-  //  for (int i = 0; i < weight_size; i++) {
-  //    mpz_t deserialized_n, deserialized_value;
-  //    mpz_init(deserialized_n);
-  //    mpz_init(deserialized_value);
-  //    saved_weights[i].getter_n(deserialized_n);
-  //    saved_weights[i].getter_value(deserialized_value);
-  //    gmp_printf("model weights %d n = %Zd\n", i, deserialized_n);
-  //    gmp_printf("model weights %d value = %Zd\n", i, deserialized_value);
-  //    mpz_clear(deserialized_n);
-  //    mpz_clear(deserialized_value);
-  //  }
 
   model_infile.close();
 }
@@ -91,7 +56,8 @@ void save_dt_model(TreeModel tree, const std::string& model_save_path) {
   }
   std::string local_model_str;
   serialize_tree_model(tree, local_model_str);
-  std::string b64_local_model_str = base64_encode(reinterpret_cast<const BYTE *>(local_model_str.c_str()), local_model_str.size());
+  std::string b64_local_model_str = base64_encode(reinterpret_cast<const BYTE *>(
+      local_model_str.c_str()), local_model_str.size());
   write_outfile << b64_local_model_str << "\n";
   write_outfile.close();
 }
@@ -114,20 +80,20 @@ void load_dt_model(const std::string& model_save_path, TreeModel& saved_tree) {
   model_infile.close();
 }
 
-void save_rf_model(std::vector<TreeModel> trees, int n_estimator, const std::string& model_save_path) {
+void save_rf_model(ForestModel forest_model, const std::string& model_save_path) {
   std::ofstream write_outfile(model_save_path);
   if (!write_outfile) {
     LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";
     exit(EXIT_FAILURE);
   }
   std::string local_model_str;
-  serialize_random_forest_model(std::move(trees), n_estimator, local_model_str);
+  serialize_random_forest_model(forest_model, local_model_str);
   std::string b64_local_model_str = base64_encode(reinterpret_cast<const BYTE *>(local_model_str.c_str()), local_model_str.size());
   write_outfile << b64_local_model_str << "\n";
   write_outfile.close();
 }
 
-void load_rf_model(const std::string& model_save_path, std::vector<TreeModel>& saved_trees, int& n_estimator) {
+void load_rf_model(const std::string& model_save_path, ForestModel& saved_forest_model) {
   std::ifstream model_infile(model_save_path);
   if (!model_infile) {
     LOG(INFO) << "Open " << model_save_path.c_str() << " file error.";
@@ -139,7 +105,7 @@ void load_rf_model(const std::string& model_save_path, std::vector<TreeModel>& s
     // read weights string
     vector<BYTE> saved_model_vec = base64_decode(line.c_str());
     std::string s(saved_model_vec.begin(), saved_model_vec.end());
-    deserialize_random_forest_model(saved_trees, n_estimator, s);
+    deserialize_random_forest_model(saved_forest_model, s);
   }
 
   model_infile.close();

@@ -36,7 +36,7 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
       const std::string& saved_model_file,
       const Party& party) {
     party_ = party;
-    load_rf_model(saved_model_file, saved_rf_model_, n_estimator_);
+    load_rf_model(saved_model_file, saved_forest_model_);
   }
 
   Status Prediction(ServerContext* context, const PredictionRequest* request,
@@ -77,17 +77,17 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
     // init predicted forest labels to record the predictions, the first dimension
     // is the number of trees in the forest, and the second dimension is the number
     // of the samples in the predicted dataset
-    EncodedNumber** predicted_forest_labels = new EncodedNumber*[n_estimator_];
-    EncodedNumber** decrypted_predicted_forest_labels = new EncodedNumber*[n_estimator_];
-    for (int tree_id = 0; tree_id < n_estimator_; tree_id++) {
+    EncodedNumber** predicted_forest_labels = new EncodedNumber*[saved_forest_model_.tree_size];
+    EncodedNumber** decrypted_predicted_forest_labels = new EncodedNumber*[saved_forest_model_.tree_size];
+    for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
       predicted_forest_labels[tree_id] = new EncodedNumber[sample_num];
       decrypted_predicted_forest_labels[tree_id] = new EncodedNumber[sample_num];
     }
 
     // compute predictions
-    for (int tree_id = 0; tree_id < n_estimator_; tree_id++) {
+    for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
       // compute predictions for each tree in the forest
-      saved_rf_model_[tree_id].predict(party_,
+      saved_forest_model_.forest_trees[tree_id].predict(party_,
                                           batch_samples,
                                           sample_num,
                                           predicted_forest_labels[tree_id]);
@@ -99,8 +99,8 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
 
     // decode decrypted predicted labels
     std::vector< std::vector<double> > decoded_predicted_forest_labels (
-        n_estimator_, std::vector<double>(sample_num));
-    for (int tree_id = 0; tree_id < n_estimator_; tree_id++) {
+        saved_forest_model_.tree_size, std::vector<double>(sample_num));
+    for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
       for (int i = 0; i < sample_num; i++) {
         decrypted_predicted_forest_labels[tree_id][i].decode(decoded_predicted_forest_labels[tree_id][i]);
       }
@@ -112,15 +112,15 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
     if (party_.party_type == falcon::ACTIVE_PARTY) {
       for (int i = 0; i < sample_num; i++) {
         std::vector<double> forest_labels_i;
-        for (int tree_id = 0; tree_id < n_estimator_; tree_id++) {
+        for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
           forest_labels_i.push_back(decoded_predicted_forest_labels[tree_id][i]);
         }
         // compute mode or average, depending on the tree type
         std::vector<double> prob;
-        if (saved_rf_model_[0].type == falcon::CLASSIFICATION) {
+        if (saved_forest_model_.forest_trees[0].type == falcon::CLASSIFICATION) {
           double pred = mode(forest_labels_i);
           labels.push_back(pred);
-          for (int k = 0; k < saved_rf_model_[0].class_num; k++) {
+          for (int k = 0; k < saved_forest_model_.forest_trees[0].class_num; k++) {
             if (pred == k) {
               prob.push_back(CERTAIN_PROBABILITY);
             } else {
@@ -150,7 +150,7 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
     }
 
     // free memory
-    for (int tree_id = 0; tree_id < n_estimator_; tree_id++) {
+    for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
       delete [] predicted_forest_labels[tree_id];
       delete [] decrypted_predicted_forest_labels[tree_id];
     }
@@ -163,8 +163,7 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
 
  private:
   Party party_;
-  std::vector<TreeModel> saved_rf_model_;
-  int n_estimator_;
+  ForestModel saved_forest_model_;
 };
 
 
@@ -192,9 +191,8 @@ void run_active_server_rf(const std::string& endpoint,
 
 void run_passive_server_rf(const std::string& saved_model_file,
     const Party& party) {
-  std::vector<TreeModel> saved_rf_model;
-  int n_estimator;
-  load_rf_model(saved_model_file, saved_rf_model, n_estimator);
+  ForestModel saved_forest_model;
+  load_rf_model(saved_model_file, saved_forest_model);
 
   // keep listening requests from the active party
   while (true) {
@@ -219,17 +217,17 @@ void run_passive_server_rf(const std::string& saved_model_file,
     // init predicted forest labels to record the predictions, the first dimension
     // is the number of trees in the forest, and the second dimension is the number
     // of the samples in the predicted dataset
-    EncodedNumber** predicted_forest_labels = new EncodedNumber*[n_estimator];
-    EncodedNumber** decrypted_predicted_forest_labels = new EncodedNumber*[n_estimator];
-    for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
+    EncodedNumber** predicted_forest_labels = new EncodedNumber*[saved_forest_model.tree_size];
+    EncodedNumber** decrypted_predicted_forest_labels = new EncodedNumber*[saved_forest_model.tree_size];
+    for (int tree_id = 0; tree_id < saved_forest_model.tree_size; tree_id++) {
       predicted_forest_labels[tree_id] = new EncodedNumber[cur_batch_size];
       decrypted_predicted_forest_labels[tree_id] = new EncodedNumber[cur_batch_size];
     }
 
     // compute predictions
-    for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
+    for (int tree_id = 0; tree_id < saved_forest_model.tree_size; tree_id++) {
       // compute predictions for each tree in the forest
-      saved_rf_model[tree_id].predict(const_cast<Party &>(party),
+      saved_forest_model.forest_trees[tree_id].predict(const_cast<Party &>(party),
           batch_samples,
           cur_batch_size,
           predicted_forest_labels[tree_id]);
@@ -252,7 +250,7 @@ void run_passive_server_rf(const std::string& saved_model_file,
     LOG(INFO) << "Collaboratively decryption finished";
 
     // free memory
-    for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
+    for (int tree_id = 0; tree_id < saved_forest_model.tree_size; tree_id++) {
       delete [] predicted_forest_labels[tree_id];
       delete [] decrypted_predicted_forest_labels[tree_id];
     }

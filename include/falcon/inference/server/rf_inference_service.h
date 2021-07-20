@@ -7,6 +7,7 @@
 
 #include <string>
 #include <falcon/party/party.h>
+#include <falcon/algorithm/vertical/tree/forest_model.h>
 
 /**
  * run grpc server to listen client requests

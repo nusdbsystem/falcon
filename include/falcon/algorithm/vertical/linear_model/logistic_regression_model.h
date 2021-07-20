@@ -16,7 +16,7 @@ class LogisticRegressionModel {
   // number of weights in the model
   int weight_size;
   // model weights vector, encrypted values during training, size equals to weight_size
-  EncodedNumber* local_weights;
+  EncodedNumber* local_weights{};
 
  public:
   LogisticRegressionModel();

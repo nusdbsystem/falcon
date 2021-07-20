@@ -52,7 +52,7 @@ message Node {
 }
 
 // decision tree model
-message Tree {
+message TreeModel {
     int32 tree_type = 1;            // classification or regression
     int32 class_num = 2;            // number of classes if classification
     int32 max_depth = 3;            // maximum tree depth
@@ -63,7 +63,8 @@ message Tree {
 }
 
 // ensemble tree model
-message RandomForest {
-    int32 n_estimator = 1;          // the number of estimator stored
-    repeated Tree trees = 2;        // the trees
+message ForestModel {
+    int32 tree_size = 1;          // the number of estimator stored
+    int32 tree_type = 2;
+    repeated TreeModel trees = 3;        // the trees
 }

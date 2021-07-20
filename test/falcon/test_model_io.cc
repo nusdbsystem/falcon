@@ -9,8 +9,9 @@
 #include <gtest/gtest.h>
 
 TEST(Model_IO, SaveLRModel) {
-  int weight_size = 5;
-  EncodedNumber* encoded_model = new EncodedNumber[weight_size];
+  LogisticRegressionModel lr_model;
+  lr_model.weight_size = 5;
+  lr_model.local_weights = new EncodedNumber[lr_model.weight_size];
   mpz_t v_n;
   mpz_t v_value;
   mpz_init(v_n);
@@ -19,42 +20,39 @@ TEST(Model_IO, SaveLRModel) {
   mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
-  for (int i = 0; i < weight_size; i++) {
-    encoded_model[i].setter_n(v_n);
-    encoded_model[i].setter_value(v_value);
-    encoded_model[i].setter_exponent(v_exponent);
-    encoded_model[i].setter_type(v_type);
+  for (int i = 0; i < lr_model.weight_size; i++) {
+    lr_model.local_weights[i].setter_n(v_n);
+    lr_model.local_weights[i].setter_value(v_value);
+    lr_model.local_weights[i].setter_exponent(v_exponent);
+    lr_model.local_weights[i].setter_type(v_type);
   }
 
   std::string save_model_file = "saved_model.txt";
-  save_lr_model(encoded_model, weight_size, save_model_file);
+  save_lr_model(lr_model, save_model_file);
 
-  EncodedNumber* loaded_model = new EncodedNumber[weight_size];
-  int loaded_weight_size = 0;
-  load_lr_model(save_model_file, loaded_weight_size, loaded_model);
+  LogisticRegressionModel saved_lr_model;
+  load_lr_model(save_model_file, saved_lr_model);
 
-  EXPECT_EQ(weight_size, loaded_weight_size);
+  EXPECT_EQ(lr_model.weight_size, saved_lr_model.weight_size);
 
-  for (int i = 0; i < weight_size; i++) {
+  for (int i = 0; i < lr_model.weight_size; i++) {
     mpz_t deserialized_n, deserialized_value;
     mpz_init(deserialized_n);
     mpz_init(deserialized_value);
-    loaded_model[i].getter_n(deserialized_n);
-    loaded_model[i].getter_value(deserialized_value);
+    saved_lr_model.local_weights[i].getter_n(deserialized_n);
+    saved_lr_model.local_weights[i].getter_value(deserialized_value);
     int n_cmp = mpz_cmp(v_n, deserialized_n);
     int value_cmp = mpz_cmp(v_value, deserialized_value);
     EXPECT_EQ(0, n_cmp);
     EXPECT_EQ(0, value_cmp);
-    EXPECT_EQ(v_exponent, loaded_model[i].getter_exponent());
-    EXPECT_EQ(v_type, loaded_model[i].getter_type());
+    EXPECT_EQ(v_exponent, saved_lr_model.local_weights[i].getter_exponent());
+    EXPECT_EQ(v_type, saved_lr_model.local_weights[i].getter_type());
     mpz_clear(deserialized_n);
     mpz_clear(deserialized_value);
   }
 
   mpz_clear(v_n);
   mpz_clear(v_value);
-  delete [] encoded_model;
-  delete [] loaded_model;
 }
 
 TEST(Model_IO, SaveDTModel) {
@@ -169,8 +167,9 @@ TEST(Model_IO, SaveDTModel) {
 }
 
 TEST(Model_IO, SaveRFModel) {
-  std::vector<TreeModel> trees;
-  int n_estimator = 3;
+  ForestModel forest_model;
+  forest_model.tree_size = 3;
+  forest_model.tree_type = falcon::CLASSIFICATION;
   mpz_t v_n;
   mpz_t v_value;
   mpz_init(v_n);
@@ -179,7 +178,7 @@ TEST(Model_IO, SaveRFModel) {
   mpz_set_str(v_value, "100", PHE_STR_BASE);
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
-  for (int t = 0; t < n_estimator; t++) {
+  for (int t = 0; t < forest_model.tree_size; t++) {
     TreeModel tree;
     tree.type = falcon::CLASSIFICATION;
     tree.class_num = 2;
@@ -219,18 +218,18 @@ TEST(Model_IO, SaveRFModel) {
       tree.nodes[i].impurity = impurity;
       tree.nodes[i].label = label;
     }
-    trees.push_back(tree);
+    forest_model.forest_trees.push_back(tree);
   }
 
   std::string save_model_file = "saved_model.txt";
-  save_rf_model(trees, n_estimator, save_model_file);
-  std::vector<TreeModel> saved_trees;
-  int deserialized_n_estimator;
-  load_rf_model(save_model_file, saved_trees, deserialized_n_estimator);
-  EXPECT_EQ(n_estimator, deserialized_n_estimator);
-  for (int t = 0; t < n_estimator; t++) {
-    TreeModel saved_tree_model = saved_trees[t];
-    TreeModel tree = trees[t];
+  save_rf_model(forest_model, save_model_file);
+  ForestModel saved_forest_model;
+  load_rf_model(save_model_file, saved_forest_model);
+  EXPECT_EQ(forest_model.tree_size, saved_forest_model.tree_size);
+  EXPECT_EQ(forest_model.tree_type, saved_forest_model.tree_type);
+  for (int t = 0; t < forest_model.tree_size; t++) {
+    TreeModel saved_tree_model = saved_forest_model.forest_trees[t];
+    TreeModel tree = forest_model.forest_trees[t];
     EXPECT_EQ(saved_tree_model.type, tree.type);
     EXPECT_EQ(saved_tree_model.class_num, tree.class_num);
     EXPECT_EQ(saved_tree_model.max_depth, tree.max_depth);

@@ -35,9 +35,7 @@ class LRInferenceServiceImpl final : public InferenceService::Service {
       const std::string& saved_model_file,
       const Party& party) {
     party_ = party;
-    weight_size_ = party.getter_feature_num();
-    local_weights_ = new EncodedNumber[weight_size_];
-    load_lr_model(saved_model_file, weight_size_, local_weights_);
+    load_lr_model(saved_model_file, saved_lr_model_);
   }
 
   Status Prediction(ServerContext* context, const PredictionRequest* request,
@@ -82,10 +80,10 @@ class LRInferenceServiceImpl final : public InferenceService::Service {
     }
     EncodedNumber** encoded_batch_samples = new EncodedNumber*[sample_num];
     for (int i = 0; i < sample_num; i++) {
-      encoded_batch_samples[i] = new EncodedNumber[weight_size_];
+      encoded_batch_samples[i] = new EncodedNumber[saved_lr_model_.weight_size];
     }
     for (int i = 0; i < sample_num; i++) {
-      for (int j = 0; j < weight_size_; j++) {
+      for (int j = 0; j < saved_lr_model_.weight_size; j++) {
         encoded_batch_samples[i][j].set_double(phe_pub_key->n[0],
                                                batch_samples[i][j], PHE_FIXED_POINT_PRECISION);
       }
@@ -94,7 +92,7 @@ class LRInferenceServiceImpl final : public InferenceService::Service {
     // compute local homomorphic aggregation
     EncodedNumber* local_batch_phe_aggregation = new EncodedNumber[sample_num];
     djcs_t_aux_matrix_mult(phe_pub_key, party_.phe_random, local_batch_phe_aggregation,
-                           local_weights_, encoded_batch_samples, sample_num, weight_size_);
+                           saved_lr_model_.local_weights, encoded_batch_samples, sample_num, saved_lr_model_.weight_size);
 
     // every party sends the local aggregation to the active party
     // copy self local aggregation results
@@ -196,8 +194,7 @@ class LRInferenceServiceImpl final : public InferenceService::Service {
 
  private:
   Party party_;
-  int weight_size_;
-  EncodedNumber* local_weights_;
+  LogisticRegressionModel saved_lr_model_;
 };
 
 void run_active_server_lr(const std::string& endpoint,
@@ -224,9 +221,8 @@ void run_active_server_lr(const std::string& endpoint,
 
 void run_passive_server_lr(const std::string& saved_model_file,
     const Party& party) {
-  int weight_size = party.getter_feature_num();
-  EncodedNumber* local_weights = new EncodedNumber[weight_size];
-  load_lr_model(saved_model_file, weight_size, local_weights);
+  LogisticRegressionModel saved_lr_model;
+  load_lr_model(saved_model_file, saved_lr_model);
 
   // keep listening requests from the active party
   while (true) {
@@ -254,10 +250,10 @@ void run_passive_server_lr(const std::string& saved_model_file,
     }
     EncodedNumber** encoded_batch_samples = new EncodedNumber*[cur_batch_size];
     for (int i = 0; i < cur_batch_size; i++) {
-      encoded_batch_samples[i] = new EncodedNumber[weight_size];
+      encoded_batch_samples[i] = new EncodedNumber[saved_lr_model.weight_size];
     }
     for (int i = 0; i < cur_batch_size; i++) {
-      for (int j = 0; j < weight_size; j++) {
+      for (int j = 0; j < saved_lr_model.weight_size; j++) {
         encoded_batch_samples[i][j].set_double(phe_pub_key->n[0],
                                                batch_samples[i][j], PHE_FIXED_POINT_PRECISION);
       }
@@ -266,7 +262,7 @@ void run_passive_server_lr(const std::string& saved_model_file,
     // compute local homomorphic aggregation
     EncodedNumber* local_batch_phe_aggregation = new EncodedNumber[cur_batch_size];
     djcs_t_aux_matrix_mult(phe_pub_key, party.phe_random, local_batch_phe_aggregation,
-                           local_weights, encoded_batch_samples, cur_batch_size, weight_size);
+                           saved_lr_model.local_weights, encoded_batch_samples, cur_batch_size, saved_lr_model.weight_size);
 
     std::cout << "Local phe aggregation finished" << std::endl;
     LOG(INFO) << "Local phe aggregation finished";
