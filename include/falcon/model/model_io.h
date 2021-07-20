@@ -13,56 +13,20 @@
 #include <falcon/algorithm/vertical/tree/forest_model.h>
 
 /**
- * save the lr model weights after training
- *
- * @param model_weights: trained lr model weights
- * @param weight_size: size of model
- * @param model_save_path: model file to be saved
+ * save the serialized model to the specified path
+ * @param pb_model_string: the serialized proto message of the model
+ * @param model_save_path: the path to save the model
  */
-void save_lr_model(LogisticRegressionModel lr_model, const std::string& model_save_path);
+void save_pb_model_string(const std::string& pb_model_string,
+    const std::string& model_save_path);
 
 /**
- * load the saved lr model
- *
- * @param model_save_path: model file saved
- * @param weight_size: number of weights
- * @param saved_weights: encoded weights
+ * load the serialized model from the specified path
+ * @param saved_pb_model_string: the serialized proto message of the model
+ * @param model_save_path: the path to save the model
  */
-void load_lr_model(const std::string& model_save_path, LogisticRegressionModel& saved_lr_model);
-
-/**
- * save the dt model after training
- *
- * @param tree: trained tree model
- * @param model_save_path: model file to be saved
- */
-void save_dt_model(TreeModel tree, const std::string& model_save_path);
-
-/**
- * load the saved lr model
- *
- * @param model_save_path: model file saved
- * @param saved_tree: saved tree model
- */
-void load_dt_model(const std::string& model_save_path, TreeModel& saved_tree);
-
-/**
- * save the rf model after training
- *
- * @param trees
- * @param n_estimator
- * @param model_save_path
- */
-void save_rf_model(ForestModel forest_model, const std::string& model_save_path);
-
-/**
- * load the saved rf model
- *
- * @param model_save_path
- * @param saved_trees
- * @param n_estimator
- */
-void load_rf_model(const std::string& model_save_path, ForestModel& saved_forest_model);
+void load_pb_model_string(std::string& saved_pb_model_string,
+    const std::string& model_save_path);
 
 /**
  * save the training report

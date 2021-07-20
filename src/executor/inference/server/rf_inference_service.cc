@@ -17,6 +17,7 @@
 #include <falcon/model/model_io.h>
 #include <falcon/inference/server/dt_inference_service.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/tree_converter.h>
 
 #include <glog/logging.h>
 #include <falcon/utils/math/math_ops.h>
@@ -36,7 +37,10 @@ class RFInferenceServiceImpl final : public InferenceService::Service {
       const std::string& saved_model_file,
       const Party& party) {
     party_ = party;
-    load_rf_model(saved_model_file, saved_forest_model_);
+    // load_rf_model(saved_model_file, saved_forest_model_);
+    std::string saved_model_string;
+    load_pb_model_string(saved_model_string, saved_model_file);
+    deserialize_random_forest_model(saved_forest_model_, saved_model_string);
   }
 
   Status Prediction(ServerContext* context, const PredictionRequest* request,
@@ -192,7 +196,9 @@ void run_active_server_rf(const std::string& endpoint,
 void run_passive_server_rf(const std::string& saved_model_file,
     const Party& party) {
   ForestModel saved_forest_model;
-  load_rf_model(saved_model_file, saved_forest_model);
+  std::string saved_model_string;
+  load_pb_model_string(saved_model_string, saved_model_file);
+  deserialize_random_forest_model(saved_forest_model, saved_model_string);
 
   // keep listening requests from the active party
   while (true) {

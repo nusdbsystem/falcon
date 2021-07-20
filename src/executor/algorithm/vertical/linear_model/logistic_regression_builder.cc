@@ -4,6 +4,7 @@
 
 #include <falcon/algorithm/vertical/linear_model/logistic_regression_builder.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/lr_converter.h>
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/utils/metric/classification.h>
@@ -753,7 +754,10 @@ void train_logistic_regression(Party party, std::string params_str,
 
   // save model and report
   EncodedNumber* model_weights = new EncodedNumber[weight_size];
-  save_lr_model(log_reg_model_builder.log_reg_model, model_save_file);
+  std::string pb_lr_model_string;
+  serialize_lr_model(log_reg_model_builder.log_reg_model, pb_lr_model_string);
+  save_pb_model_string(pb_lr_model_string, model_save_file);
+  // save_lr_model(log_reg_model_builder.log_reg_model, model_save_file);
   // save_training_report(log_reg_model.getter_training_accuracy(),
   //    log_reg_model.getter_testing_accuracy(),
   //    model_report_file);

@@ -17,6 +17,7 @@
 #include <falcon/model/model_io.h>
 #include <falcon/inference/server/lr_inference_service.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/lr_converter.h>
 
 #include <glog/logging.h>
 
@@ -35,7 +36,10 @@ class LRInferenceServiceImpl final : public InferenceService::Service {
       const std::string& saved_model_file,
       const Party& party) {
     party_ = party;
-    load_lr_model(saved_model_file, saved_lr_model_);
+    // load_lr_model(saved_model_file, saved_lr_model_);
+    std::string saved_model_string;
+    load_pb_model_string(saved_model_string, saved_model_file);
+    deserialize_lr_model(saved_lr_model_, saved_model_string);
   }
 
   Status Prediction(ServerContext* context, const PredictionRequest* request,
@@ -222,7 +226,10 @@ void run_active_server_lr(const std::string& endpoint,
 void run_passive_server_lr(const std::string& saved_model_file,
     const Party& party) {
   LogisticRegressionModel saved_lr_model;
-  load_lr_model(saved_model_file, saved_lr_model);
+  // load_lr_model(saved_model_file, saved_lr_model);
+  std::string saved_model_string;
+  load_pb_model_string(saved_model_string, saved_model_file);
+  deserialize_lr_model(saved_lr_model, saved_model_string);
 
   // keep listening requests from the active party
   while (true) {

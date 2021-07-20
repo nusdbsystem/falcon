@@ -4,6 +4,7 @@
 
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/math/math_ops.h>
 
 #include <glog/logging.h>
@@ -275,7 +276,10 @@ void train_random_forest(Party party, const std::string& params_str,
   for (int i = 0; i < random_forest_builder.n_estimator; i++) {
     forest_trees.push_back(random_forest_builder.tree_builders[i].tree);
   }
-  save_rf_model(random_forest_builder.forest_model, model_save_file);
+  // save_rf_model(random_forest_builder.forest_model, model_save_file);
+  std::string pb_rf_model_string;
+  serialize_random_forest_model(random_forest_builder.forest_model, pb_rf_model_string);
+  save_pb_model_string(pb_rf_model_string, model_save_file);
   save_training_report(random_forest_builder.getter_training_accuracy(),
       random_forest_builder.getter_testing_accuracy(),
       model_report_file);

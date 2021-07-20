@@ -1387,7 +1387,10 @@ void train_decision_tree(Party party, const std::string& params_str,
   decision_tree_builder.eval(party, falcon::TRAIN);
   decision_tree_builder.eval(party, falcon::TEST);
 
-  save_dt_model(decision_tree_builder.tree, model_save_file);
+  // save_dt_model(decision_tree_builder.tree, model_save_file);
+  std::string pb_dt_model_string;
+  serialize_tree_model(decision_tree_builder.tree, pb_dt_model_string);
+  save_pb_model_string(pb_dt_model_string, model_save_file);
   save_training_report(decision_tree_builder.getter_training_accuracy(),
       decision_tree_builder.getter_testing_accuracy(),
       model_report_file);
