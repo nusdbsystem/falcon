@@ -3,7 +3,7 @@
 //
 
 #include <falcon/common.h>
-#include <falcon/algorithm/vertical/tree/tree.h>
+#include <falcon/algorithm/vertical/tree/tree_model.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <cmath>
 
@@ -11,9 +11,9 @@
 #include <iostream>
 #include <stack>
 
-Tree::Tree() {}
+TreeModel::TreeModel() {}
 
-Tree::Tree(falcon::TreeType m_type, int m_class_num, int m_max_depth) {
+TreeModel::TreeModel(falcon::TreeType m_type, int m_class_num, int m_max_depth) {
   type = m_type;
   class_num = m_class_num;
   max_depth = m_max_depth;
@@ -24,11 +24,11 @@ Tree::Tree(falcon::TreeType m_type, int m_class_num, int m_max_depth) {
   nodes = new Node[capacity];
 }
 
-Tree::~Tree() {
+TreeModel::~TreeModel() {
   delete [] nodes;
 }
 
-Tree::Tree(const Tree &tree) {
+TreeModel::TreeModel(const TreeModel &tree) {
   type = tree.type;
   class_num = tree.class_num;
   max_depth = tree.max_depth;
@@ -42,7 +42,7 @@ Tree::Tree(const Tree &tree) {
   capacity = tree.capacity;
 }
 
-Tree& Tree::operator=(const Tree &tree) {
+TreeModel& TreeModel::operator=(const TreeModel &tree) {
   type = tree.type;
   class_num = tree.class_num;
   max_depth = tree.max_depth;
@@ -56,7 +56,7 @@ Tree& Tree::operator=(const Tree &tree) {
   capacity = tree.capacity;
 }
 
-std::vector<int> Tree::comp_predict_vector(std::vector<double> sample,
+std::vector<int> TreeModel::comp_predict_vector(std::vector<double> sample,
     std::map<int, int> node_index_2_leaf_index_map) {
   std::vector<int> binary_vector(internal_node_num + 1);
   // traverse the whole tree iteratively, and compute binary_vector
@@ -137,7 +137,7 @@ std::vector<int> Tree::comp_predict_vector(std::vector<double> sample,
   return binary_vector;
 }
 
-void Tree::compute_label_vec_and_index_map(EncodedNumber *label_vector,
+void TreeModel::compute_label_vec_and_index_map(EncodedNumber *label_vector,
     std::map<int, int> &node_index_2_leaf_index_map) {
   int leaf_cur_index = 0;
   for (int i = 0; i < pow(2, max_depth + 1) - 1; i++) {
@@ -150,7 +150,7 @@ void Tree::compute_label_vec_and_index_map(EncodedNumber *label_vector,
   }
 }
 
-void Tree::predict(Party &party,
+void TreeModel::predict(Party &party,
     std::vector< std::vector<double> > predicted_samples,
     int predicted_sample_size,
     EncodedNumber *predicted_labels) {
@@ -230,7 +230,7 @@ void Tree::predict(Party &party,
       }
     }
 
-    // aggregate and call share decryption
+    // aggregate
     if (party.party_type == falcon::ACTIVE_PARTY) {
       predicted_labels[i].set_double(phe_pub_key->n[0], 0, PHE_FIXED_POINT_PRECISION);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random,

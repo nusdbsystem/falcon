@@ -33,7 +33,7 @@ DecisionTreeBuilder::DecisionTreeBuilder(DecisionTreeParams params,
     std::vector<double> m_training_labels,
     std::vector<double> m_testing_labels,
     double m_training_accuracy,
-    double m_testing_accuracy) : Model(std::move(m_training_data),
+    double m_testing_accuracy) : ModelBuilder(std::move(m_training_data),
           std::move(m_testing_data),
           std::move(m_training_labels),
           std::move(m_testing_labels),
@@ -67,7 +67,7 @@ DecisionTreeBuilder::DecisionTreeBuilder(DecisionTreeParams params,
   }
   feature_helpers = new FeatureHelper[local_feature_num];
   // init tree object
-  tree = Tree(tree_type, class_num, max_depth);
+  tree = TreeModel(tree_type, class_num, max_depth);
 }
 
 void DecisionTreeBuilder::precompute_label_helper(falcon::PartyType party_type) {
@@ -1094,7 +1094,8 @@ std::vector<int> DecisionTreeBuilder::compute_binary_vector(int sample_id,
   return binary_vector;
 }
 
-void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type) {
+void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type,
+    const std::string& report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
@@ -1132,96 +1133,14 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type) {
   std::vector<double> cur_test_dataset_labels =
       (eval_type == falcon::TRAIN) ? training_labels : testing_labels;
 
-  // step 1: organize the leaf label vector, compute the map
-  LOG(INFO) << "Tree internal node num = " << tree.internal_node_num;
-  EncodedNumber *label_vector = new EncodedNumber[tree.internal_node_num + 1];
-  std::map<int, int> node_index_2_leaf_index_map;
-  int leaf_cur_index = 0;
-  for (int i = 0; i < pow(2, max_depth + 1) - 1; i++) {
-    if (tree.nodes[i].node_type == falcon::LEAF) {
-      node_index_2_leaf_index_map.insert(std::make_pair(i, leaf_cur_index));
-      label_vector[leaf_cur_index] = tree.nodes[i].label;  // record leaf label vector
-      leaf_cur_index ++;
-    }
-  }
-
-  // record the ciphertext of the label
-  EncodedNumber *encrypted_aggregation = new EncodedNumber[dataset_size];
-  // for each sample
-  for (int i = 0; i < dataset_size; i++) {
-    // compute binary vector for the current sample
-    std::vector<int> binary_vector = compute_binary_vector(i, node_index_2_leaf_index_map, eval_type);
-    EncodedNumber *encoded_binary_vector = new EncodedNumber[binary_vector.size()];
-    EncodedNumber *updated_label_vector = new EncodedNumber[binary_vector.size()];
-
-    // update in Robin cycle, from the last client to client 0
-    if (party.party_id == party.party_num - 1) {
-      // updated_label_vector = new EncodedNumber[binary_vector.size()];
-      for (int j = 0; j < binary_vector.size(); j++) {
-        encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
-        djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
-            label_vector[j], encoded_binary_vector[j]);
-      }
-      // send to the next client
-      std::string send_s;
-      serialize_encoded_number_array(updated_label_vector, binary_vector.size(), send_s);
-      party.send_long_message(party.party_id - 1, send_s);
-    } else if (party.party_id > 0) {
-      std::string recv_s;
-      party.recv_long_message(party.party_id + 1, recv_s);
-      deserialize_encoded_number_array(updated_label_vector, binary_vector.size(), recv_s);
-      for (int j = 0; j < binary_vector.size(); j++) {
-        encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
-        djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
-            updated_label_vector[j], encoded_binary_vector[j]);
-      }
-      std::string resend_s;
-      serialize_encoded_number_array(updated_label_vector, binary_vector.size(), resend_s);
-      party.send_long_message(party.party_id - 1, resend_s);
-    } else {
-      // the super client update the last, and aggregate before calling share decryption
-      std::string final_recv_s;
-      party.recv_long_message(party.party_id + 1, final_recv_s);
-      deserialize_encoded_number_array(updated_label_vector, binary_vector.size(), final_recv_s);
-      for (int j = 0; j < binary_vector.size(); j++) {
-        encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
-        djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j], updated_label_vector[j], encoded_binary_vector[j]);
-      }
-    }
-
-    // aggregate and call share decryption
-    if (party.party_type == falcon::ACTIVE_PARTY) {
-      encrypted_aggregation[i].set_double(phe_pub_key->n[0], 0, PHE_FIXED_POINT_PRECISION);
-      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-                         encrypted_aggregation[i], encrypted_aggregation[i]);
-      for (int j = 0; j < binary_vector.size(); j++) {
-        djcs_t_aux_ee_add(phe_pub_key, encrypted_aggregation[i],
-                          encrypted_aggregation[i], updated_label_vector[j]);
-      }
-    }
-    delete [] encoded_binary_vector;
-    delete [] updated_label_vector;
-  }
-
-  // broadcast the predicted labels and call share decrypt
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    std::string s;
-    serialize_encoded_number_array(encrypted_aggregation, dataset_size, s);
-    for (int x = 0; x < party.party_num; x++) {
-      if (x != party.party_id) {
-        party.send_long_message(x, s);
-      }
-    }
-  } else {
-    std::string recv_s;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_s);
-    deserialize_encoded_number_array(encrypted_aggregation, dataset_size, recv_s);
-  }
+  // step 2: call tree model predict function to obtain predicted_labels
+  EncodedNumber* predicted_labels = new EncodedNumber[dataset_size];
+  tree.predict(party, cur_test_dataset, dataset_size, predicted_labels);
 
   // step 3: active party aggregates and call collaborative decryption
-  EncodedNumber* decrypted_aggregation = new EncodedNumber[dataset_size];
-  party.collaborative_decrypt(encrypted_aggregation,
-      decrypted_aggregation,
+  EncodedNumber* decrypted_labels = new EncodedNumber[dataset_size];
+  party.collaborative_decrypt(predicted_labels,
+      decrypted_labels,
       dataset_size,
       ACTIVE_PARTY_ID);
 
@@ -1233,7 +1152,7 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type) {
       predicted_label_vector.push_back(0.0);
     }
     for (int i = 0; i < dataset_size; i++) {
-      decrypted_aggregation[i].decode(predicted_label_vector[i]);
+      decrypted_labels[i].decode(predicted_label_vector[i]);
     }
 
     if (tree_type == falcon::CLASSIFICATION) {
@@ -1265,9 +1184,8 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type) {
     }
   }
 
-  delete [] label_vector;
-  delete [] encrypted_aggregation;
-  delete [] decrypted_aggregation;
+  delete [] predicted_labels;
+  delete [] decrypted_labels;
   djcs_t_free_public_key(phe_pub_key);
 
   const clock_t testing_finish_time = clock();
@@ -1469,7 +1387,10 @@ void train_decision_tree(Party party, const std::string& params_str,
   decision_tree_builder.eval(party, falcon::TRAIN);
   decision_tree_builder.eval(party, falcon::TEST);
 
-  save_dt_model(decision_tree_builder.tree, model_save_file);
+  // save_dt_model(decision_tree_builder.tree, model_save_file);
+  std::string pb_dt_model_string;
+  serialize_tree_model(decision_tree_builder.tree, pb_dt_model_string);
+  save_pb_model_string(pb_dt_model_string, model_save_file);
   save_training_report(decision_tree_builder.getter_training_accuracy(),
       decision_tree_builder.getter_testing_accuracy(),
       model_report_file);

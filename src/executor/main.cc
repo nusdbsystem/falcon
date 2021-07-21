@@ -10,7 +10,7 @@
 #include "falcon/network/Comm.hpp"
 #include "falcon/party/party.h"
 #include "falcon/operator/mpc/spdz_connector.h"
-#include "falcon/algorithm/vertical/linear_model/logistic_regression.h"
+#include "falcon/algorithm/vertical/linear_model/logistic_regression_builder.h"
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include "falcon/inference/server/inference_server.h"

@@ -415,28 +415,28 @@ void deserialize_split_info(int & global_split_num,
 }
 
 
-void serialize_tree_model(Tree tree, std::string & output_str) {
-  com::nus::dbsytem::falcon::v0::Tree pb_tree;
-  pb_tree.set_tree_type(tree.type);
-  pb_tree.set_class_num(tree.class_num);
-  pb_tree.set_max_depth(tree.max_depth);
-  pb_tree.set_internal_node_num(tree.internal_node_num);
-  pb_tree.set_total_node_num(tree.total_node_num);
-  pb_tree.set_capacity(tree.capacity);
-  for (int i = 0; i < tree.capacity; i++) {
+void serialize_tree_model(TreeModel tree_model, std::string & output_str) {
+  com::nus::dbsytem::falcon::v0::TreeModel pb_tree;
+  pb_tree.set_tree_type(tree_model.type);
+  pb_tree.set_class_num(tree_model.class_num);
+  pb_tree.set_max_depth(tree_model.max_depth);
+  pb_tree.set_internal_node_num(tree_model.internal_node_num);
+  pb_tree.set_total_node_num(tree_model.total_node_num);
+  pb_tree.set_capacity(tree_model.capacity);
+  for (int i = 0; i < tree_model.capacity; i++) {
     com::nus::dbsytem::falcon::v0::Node *pb_node = pb_tree.add_nodes();
-    pb_node->set_node_type(tree.nodes[i].node_type);
-    pb_node->set_depth(tree.nodes[i].depth);
-    pb_node->set_is_self_feature(tree.nodes[i].is_self_feature);
-    pb_node->set_best_party_id(tree.nodes[i].best_party_id);
-    pb_node->set_best_feature_id(tree.nodes[i].best_feature_id);
-    pb_node->set_best_split_id(tree.nodes[i].best_split_id);
-    pb_node->set_split_threshold(tree.nodes[i].split_threshold);
-    pb_node->set_node_sample_num(tree.nodes[i].node_sample_num);
-    pb_node->set_left_child(tree.nodes[i].left_child);
-    pb_node->set_right_child(tree.nodes[i].right_child);
+    pb_node->set_node_type(tree_model.nodes[i].node_type);
+    pb_node->set_depth(tree_model.nodes[i].depth);
+    pb_node->set_is_self_feature(tree_model.nodes[i].is_self_feature);
+    pb_node->set_best_party_id(tree_model.nodes[i].best_party_id);
+    pb_node->set_best_feature_id(tree_model.nodes[i].best_feature_id);
+    pb_node->set_best_split_id(tree_model.nodes[i].best_split_id);
+    pb_node->set_split_threshold(tree_model.nodes[i].split_threshold);
+    pb_node->set_node_sample_num(tree_model.nodes[i].node_sample_num);
+    pb_node->set_left_child(tree_model.nodes[i].left_child);
+    pb_node->set_right_child(tree_model.nodes[i].right_child);
 
-    for (int j : tree.nodes[i].node_sample_distribution) {
+    for (int j : tree_model.nodes[i].node_sample_distribution) {
       pb_node->add_node_sample_distribution(j);
     }
 
@@ -449,10 +449,10 @@ void serialize_tree_model(Tree tree, std::string & output_str) {
     mpz_init(g_value_impurity);
     mpz_init(g_n_label);
     mpz_init(g_value_label);
-    tree.nodes[i].impurity.getter_n(g_n_impurity);
-    tree.nodes[i].impurity.getter_value(g_value_impurity);
-    tree.nodes[i].label.getter_n(g_n_label);
-    tree.nodes[i].label.getter_value(g_value_label);
+    tree_model.nodes[i].impurity.getter_n(g_n_impurity);
+    tree_model.nodes[i].impurity.getter_value(g_value_impurity);
+    tree_model.nodes[i].label.getter_n(g_n_label);
+    tree_model.nodes[i].label.getter_value(g_value_label);
 
     n_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_impurity);
     value_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_impurity);
@@ -462,14 +462,14 @@ void serialize_tree_model(Tree tree, std::string & output_str) {
     std::string n_str_impurity(n_str_impurity_c), value_str_impurity(value_str_impurity_c);
     pb_impurity->set_n(n_str_impurity);
     pb_impurity->set_value(value_str_impurity);
-    pb_impurity->set_exponent(tree.nodes[i].impurity.getter_exponent());
-    pb_impurity->set_type(tree.nodes[i].impurity.getter_type());
+    pb_impurity->set_exponent(tree_model.nodes[i].impurity.getter_exponent());
+    pb_impurity->set_type(tree_model.nodes[i].impurity.getter_type());
 
     std::string n_str_label(n_str_label_c), value_str_label(value_str_label_c);
     pb_label->set_n(n_str_label);
     pb_label->set_value(value_str_label);
-    pb_label->set_exponent(tree.nodes[i].label.getter_exponent());
-    pb_label->set_type(tree.nodes[i].label.getter_type());
+    pb_label->set_exponent(tree_model.nodes[i].label.getter_exponent());
+    pb_label->set_type(tree_model.nodes[i].label.getter_type());
 
     pb_node->set_allocated_impurity(pb_impurity);
     pb_node->set_allocated_label(pb_label);
@@ -488,35 +488,35 @@ void serialize_tree_model(Tree tree, std::string & output_str) {
 }
 
 
-void deserialize_tree_model(Tree & tree, std::string input_str) {
-  com::nus::dbsytem::falcon::v0::Tree deserialized_tree;
+void deserialize_tree_model(TreeModel& tree_model, std::string input_str) {
+  com::nus::dbsytem::falcon::v0::TreeModel deserialized_tree;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_tree.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_Tree from string";
     return;
   }
-  tree.type = (falcon::TreeType) deserialized_tree.tree_type();
-  tree.class_num = deserialized_tree.class_num();
-  tree.max_depth = deserialized_tree.max_depth();
-  tree.internal_node_num = deserialized_tree.internal_node_num();
-  tree.total_node_num = deserialized_tree.total_node_num();
-  tree.capacity = deserialized_tree.capacity();
-  tree.nodes = new Node[tree.capacity];
-  for (int i = 0; i < tree.capacity; i++) {
+  tree_model.type = (falcon::TreeType) deserialized_tree.tree_type();
+  tree_model.class_num = deserialized_tree.class_num();
+  tree_model.max_depth = deserialized_tree.max_depth();
+  tree_model.internal_node_num = deserialized_tree.internal_node_num();
+  tree_model.total_node_num = deserialized_tree.total_node_num();
+  tree_model.capacity = deserialized_tree.capacity();
+  tree_model.nodes = new Node[tree_model.capacity];
+  for (int i = 0; i < tree_model.capacity; i++) {
     const com::nus::dbsytem::falcon::v0::Node& deserialized_node_i = deserialized_tree.nodes(i);
-    tree.nodes[i].node_type = (falcon::TreeNodeType) deserialized_node_i.node_type();
-    tree.nodes[i].depth = deserialized_node_i.depth();
-    tree.nodes[i].is_self_feature = deserialized_node_i.is_self_feature();
-    tree.nodes[i].best_party_id = deserialized_node_i.best_party_id();
-    tree.nodes[i].best_feature_id = deserialized_node_i.best_feature_id();
-    tree.nodes[i].best_split_id = deserialized_node_i.best_split_id();
-    tree.nodes[i].split_threshold = deserialized_node_i.split_threshold();
-    tree.nodes[i].node_sample_num = deserialized_node_i.node_sample_num();
-    tree.nodes[i].left_child = deserialized_node_i.left_child();
-    tree.nodes[i].right_child = deserialized_node_i.right_child();
+    tree_model.nodes[i].node_type = (falcon::TreeNodeType) deserialized_node_i.node_type();
+    tree_model.nodes[i].depth = deserialized_node_i.depth();
+    tree_model.nodes[i].is_self_feature = deserialized_node_i.is_self_feature();
+    tree_model.nodes[i].best_party_id = deserialized_node_i.best_party_id();
+    tree_model.nodes[i].best_feature_id = deserialized_node_i.best_feature_id();
+    tree_model.nodes[i].best_split_id = deserialized_node_i.best_split_id();
+    tree_model.nodes[i].split_threshold = deserialized_node_i.split_threshold();
+    tree_model.nodes[i].node_sample_num = deserialized_node_i.node_sample_num();
+    tree_model.nodes[i].left_child = deserialized_node_i.left_child();
+    tree_model.nodes[i].right_child = deserialized_node_i.right_child();
     for (int j = 0; j < deserialized_node_i.node_sample_distribution_size(); j++) {
-      tree.nodes[i].node_sample_distribution.push_back(deserialized_node_i.node_sample_distribution(j));
+      tree_model.nodes[i].node_sample_distribution.push_back(deserialized_node_i.node_sample_distribution(j));
     }
 
     const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& pb_impurity =
@@ -533,17 +533,17 @@ void deserialize_tree_model(Tree & tree, std::string input_str) {
     mpz_set_str(g_value_impurity, pb_impurity.value().c_str(), PHE_STR_BASE);
     mpz_set_str(g_n_label, pb_label.n().c_str(), PHE_STR_BASE);
     mpz_set_str(g_value_label, pb_label.value().c_str(), PHE_STR_BASE);
-    tree.nodes[i].impurity.setter_n(g_n_impurity);
-    tree.nodes[i].impurity.setter_value(g_value_impurity);
-    tree.nodes[i].impurity.setter_exponent(pb_impurity.exponent());
+    tree_model.nodes[i].impurity.setter_n(g_n_impurity);
+    tree_model.nodes[i].impurity.setter_value(g_value_impurity);
+    tree_model.nodes[i].impurity.setter_exponent(pb_impurity.exponent());
     EncodedNumberType type_impurity = (EncodedNumberType) pb_impurity.type();
-    tree.nodes[i].impurity.setter_type(type_impurity);
+    tree_model.nodes[i].impurity.setter_type(type_impurity);
 
-    tree.nodes[i].label.setter_n(g_n_label);
-    tree.nodes[i].label.setter_value(g_value_label);
-    tree.nodes[i].label.setter_exponent(pb_label.exponent());
+    tree_model.nodes[i].label.setter_n(g_n_label);
+    tree_model.nodes[i].label.setter_value(g_value_label);
+    tree_model.nodes[i].label.setter_exponent(pb_label.exponent());
     EncodedNumberType type_label = (EncodedNumberType) pb_label.type();
-    tree.nodes[i].label.setter_type(type_label);
+    tree_model.nodes[i].label.setter_type(type_label);
 
     mpz_clear(g_n_impurity);
     mpz_clear(g_value_impurity);
@@ -552,32 +552,34 @@ void deserialize_tree_model(Tree & tree, std::string input_str) {
   }
 }
 
-void serialize_random_forest_model(std::vector<Tree> trees, int n_estimator, std::string & output_str) {
-  com::nus::dbsytem::falcon::v0::RandomForest pb_forest;
-  pb_forest.set_n_estimator(n_estimator);
-  // std::cout << "n_estimator = " << n_estimator << std::endl;
-  for (int t = 0; t < n_estimator; t++) {
-    com::nus::dbsytem::falcon::v0::Tree *pb_tree = pb_forest.add_trees();
-    pb_tree->set_tree_type(trees[t].type);
-    pb_tree->set_class_num(trees[t].class_num);
-    pb_tree->set_max_depth(trees[t].max_depth);
-    pb_tree->set_internal_node_num(trees[t].internal_node_num);
-    pb_tree->set_total_node_num(trees[t].total_node_num);
-    pb_tree->set_capacity(trees[t].capacity);
-    for (int i = 0; i < trees[t].capacity; i++) {
+void serialize_random_forest_model(ForestModel forest_model, std::string & output_str) {
+  com::nus::dbsytem::falcon::v0::ForestModel pb_forest;
+  pb_forest.set_tree_size(forest_model.tree_size);
+  pb_forest.set_tree_type(forest_model.tree_type);
+//  std::cout << "tree_size = " << forest_model.tree_size << std::endl;
+//  std::cout << "tree_type = " << forest_model.tree_type << std::endl;
+  for (int t = 0; t < forest_model.tree_size; t++) {
+    com::nus::dbsytem::falcon::v0::TreeModel *pb_tree = pb_forest.add_trees();
+    pb_tree->set_tree_type(forest_model.forest_trees[t].type);
+    pb_tree->set_class_num(forest_model.forest_trees[t].class_num);
+    pb_tree->set_max_depth(forest_model.forest_trees[t].max_depth);
+    pb_tree->set_internal_node_num(forest_model.forest_trees[t].internal_node_num);
+    pb_tree->set_total_node_num(forest_model.forest_trees[t].total_node_num);
+    pb_tree->set_capacity(forest_model.forest_trees[t].capacity);
+    for (int i = 0; i < forest_model.forest_trees[t].capacity; i++) {
       com::nus::dbsytem::falcon::v0::Node *pb_node = pb_tree->add_nodes();
-      pb_node->set_node_type(trees[t].nodes[i].node_type);
-      pb_node->set_depth(trees[t].nodes[i].depth);
-      pb_node->set_is_self_feature(trees[t].nodes[i].is_self_feature);
-      pb_node->set_best_party_id(trees[t].nodes[i].best_party_id);
-      pb_node->set_best_feature_id(trees[t].nodes[i].best_feature_id);
-      pb_node->set_best_split_id(trees[t].nodes[i].best_split_id);
-      pb_node->set_split_threshold(trees[t].nodes[i].split_threshold);
-      pb_node->set_node_sample_num(trees[t].nodes[i].node_sample_num);
-      pb_node->set_left_child(trees[t].nodes[i].left_child);
-      pb_node->set_right_child(trees[t].nodes[i].right_child);
+      pb_node->set_node_type(forest_model.forest_trees[t].nodes[i].node_type);
+      pb_node->set_depth(forest_model.forest_trees[t].nodes[i].depth);
+      pb_node->set_is_self_feature(forest_model.forest_trees[t].nodes[i].is_self_feature);
+      pb_node->set_best_party_id(forest_model.forest_trees[t].nodes[i].best_party_id);
+      pb_node->set_best_feature_id(forest_model.forest_trees[t].nodes[i].best_feature_id);
+      pb_node->set_best_split_id(forest_model.forest_trees[t].nodes[i].best_split_id);
+      pb_node->set_split_threshold(forest_model.forest_trees[t].nodes[i].split_threshold);
+      pb_node->set_node_sample_num(forest_model.forest_trees[t].nodes[i].node_sample_num);
+      pb_node->set_left_child(forest_model.forest_trees[t].nodes[i].left_child);
+      pb_node->set_right_child(forest_model.forest_trees[t].nodes[i].right_child);
 
-      for (int j : trees[t].nodes[i].node_sample_distribution) {
+      for (int j : forest_model.forest_trees[t].nodes[i].node_sample_distribution) {
         pb_node->add_node_sample_distribution(j);
       }
 
@@ -590,10 +592,10 @@ void serialize_random_forest_model(std::vector<Tree> trees, int n_estimator, std
       mpz_init(g_value_impurity);
       mpz_init(g_n_label);
       mpz_init(g_value_label);
-      trees[t].nodes[i].impurity.getter_n(g_n_impurity);
-      trees[t].nodes[i].impurity.getter_value(g_value_impurity);
-      trees[t].nodes[i].label.getter_n(g_n_label);
-      trees[t].nodes[i].label.getter_value(g_value_label);
+      forest_model.forest_trees[t].nodes[i].impurity.getter_n(g_n_impurity);
+      forest_model.forest_trees[t].nodes[i].impurity.getter_value(g_value_impurity);
+      forest_model.forest_trees[t].nodes[i].label.getter_n(g_n_label);
+      forest_model.forest_trees[t].nodes[i].label.getter_value(g_value_label);
 
       n_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_impurity);
       value_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_impurity);
@@ -603,14 +605,14 @@ void serialize_random_forest_model(std::vector<Tree> trees, int n_estimator, std
       std::string n_str_impurity(n_str_impurity_c), value_str_impurity(value_str_impurity_c);
       pb_impurity->set_n(n_str_impurity);
       pb_impurity->set_value(value_str_impurity);
-      pb_impurity->set_exponent(trees[t].nodes[i].impurity.getter_exponent());
-      pb_impurity->set_type(trees[t].nodes[i].impurity.getter_type());
+      pb_impurity->set_exponent(forest_model.forest_trees[t].nodes[i].impurity.getter_exponent());
+      pb_impurity->set_type(forest_model.forest_trees[t].nodes[i].impurity.getter_type());
 
       std::string n_str_label(n_str_label_c), value_str_label(value_str_label_c);
       pb_label->set_n(n_str_label);
       pb_label->set_value(value_str_label);
-      pb_label->set_exponent(trees[t].nodes[i].label.getter_exponent());
-      pb_label->set_type(trees[t].nodes[i].label.getter_type());
+      pb_label->set_exponent(forest_model.forest_trees[t].nodes[i].label.getter_exponent());
+      pb_label->set_type(forest_model.forest_trees[t].nodes[i].label.getter_type());
 
       pb_node->set_allocated_impurity(pb_impurity);
       pb_node->set_allocated_label(pb_label);
@@ -629,18 +631,20 @@ void serialize_random_forest_model(std::vector<Tree> trees, int n_estimator, std
   pb_forest.SerializeToString(&output_str);
 }
 
-void deserialize_random_forest_model(std::vector<Tree>& trees, int& n_estimator, std::string input_str) {
-  com::nus::dbsytem::falcon::v0::RandomForest deserialized_random_forest;
+void deserialize_random_forest_model(ForestModel& forest_model, std::string input_str) {
+  com::nus::dbsytem::falcon::v0::ForestModel deserialized_random_forest;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_random_forest.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_RandomForest from string";
     return;
   }
-  n_estimator = deserialized_random_forest.n_estimator();
-  // std::cout << "n_estimator = " << n_estimator << std::endl;
-  for (int t = 0; t < n_estimator; t++) {
-    Tree tree;
+  forest_model.tree_size = deserialized_random_forest.tree_size();
+  forest_model.tree_type = (falcon::TreeType) deserialized_random_forest.tree_type();
+//  std::cout << "tree_size = " << forest_model.tree_size << std::endl;
+//  std::cout << "tree_type = " << forest_model.tree_type << std::endl;
+  for (int t = 0; t < forest_model.tree_size; t++) {
+    TreeModel tree;
     tree.type = (falcon::TreeType) deserialized_random_forest.trees(t).tree_type();
     tree.class_num = deserialized_random_forest.trees(t).class_num();
     tree.max_depth = deserialized_random_forest.trees(t).max_depth();
@@ -696,6 +700,6 @@ void deserialize_random_forest_model(std::vector<Tree>& trees, int& n_estimator,
       mpz_clear(g_value_label);
     }
 
-    trees.push_back(tree);
+    forest_model.forest_trees.push_back(tree);
   }
 }

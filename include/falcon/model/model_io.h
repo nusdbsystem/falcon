@@ -5,63 +5,28 @@
 #ifndef FALCON_INCLUDE_FALCON_MODEL_MODEL_IO_H
 #define FALCON_INCLUDE_FALCON_MODEL_MODEL_IO_H
 
-#include <falcon/algorithm/vertical/linear_model/logistic_regression.h>
-#include <falcon/algorithm/vertical/tree/tree.h>
+#include <falcon/algorithm/vertical/linear_model/logistic_regression_builder.h>
+#include <falcon/algorithm/vertical/tree/tree_model.h>
 #include <falcon/algorithm/vertical/tree/node.h>
 
 #include <glog/logging.h>
+#include <falcon/algorithm/vertical/tree/forest_model.h>
 
 /**
- * save the lr model weights after training
- *
- * @param model_weights: trained lr model weights
- * @param weight_size: size of model
- * @param model_save_path: model file to be saved
+ * save the serialized model to the specified path
+ * @param pb_model_string: the serialized proto message of the model
+ * @param model_save_path: the path to save the model
  */
-void save_lr_model(EncodedNumber* model_weights, int weight_size, const std::string& model_save_path);
+void save_pb_model_string(const std::string& pb_model_string,
+    const std::string& model_save_path);
 
 /**
- * load the saved lr model
- *
- * @param model_save_path: model file saved
- * @param weight_size: number of weights
- * @param saved_weights: encoded weights
+ * load the serialized model from the specified path
+ * @param saved_pb_model_string: the serialized proto message of the model
+ * @param model_save_path: the path to save the model
  */
-void load_lr_model(const std::string& model_save_path, int& weight_size, EncodedNumber* saved_weights);
-
-/**
- * save the dt model after training
- *
- * @param tree: trained tree model
- * @param model_save_path: model file to be saved
- */
-void save_dt_model(Tree tree, const std::string& model_save_path);
-
-/**
- * load the saved lr model
- *
- * @param model_save_path: model file saved
- * @param saved_tree: saved tree model
- */
-void load_dt_model(const std::string& model_save_path, Tree& saved_tree);
-
-/**
- * save the rf model after training
- *
- * @param trees
- * @param n_estimator
- * @param model_save_path
- */
-void save_rf_model(std::vector<Tree> trees, int n_estimator, const std::string& model_save_path);
-
-/**
- * load the saved rf model
- *
- * @param model_save_path
- * @param saved_trees
- * @param n_estimator
- */
-void load_rf_model(const std::string& model_save_path, std::vector<Tree>& saved_trees, int& n_estimator);
+void load_pb_model_string(std::string& saved_pb_model_string,
+    const std::string& model_save_path);
 
 /**
  * save the training report

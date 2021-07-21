@@ -6,6 +6,7 @@
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_BUILDER_H_
 
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
+#include <falcon/algorithm/vertical/tree/forest_model.h>
 
 struct RandomForestParams {
   // number of trees in the forest
@@ -16,7 +17,7 @@ struct RandomForestParams {
   DecisionTreeParams dt_param;
 };
 
-class RandomForestBuilder : public Model {
+class RandomForestBuilder : public ModelBuilder {
  public:
   // number of trees in the forest
   int n_estimator;
@@ -30,6 +31,8 @@ class RandomForestBuilder : public Model {
   int local_feature_num;
   // tree builders of each tree in the forest
   std::vector<DecisionTreeBuilder> tree_builders;
+  // forest tree model
+  ForestModel forest_model;
 
  public:
   /** default constructor */
@@ -72,14 +75,16 @@ class RandomForestBuilder : public Model {
    * @param party
    * @param sample_rate
    */
-  void train(Party& party);
+  void train(Party party);
 
   /**
    * evaluate the accuracy on the dataset
    * @param party
    * @param eval_type
+   * @param report_save_path
 */
-  void eval(Party party, falcon::DatasetType eval_type);
+  void eval(Party party, falcon::DatasetType eval_type,
+      const std::string& report_save_path = std::string());
 };
 
 /**

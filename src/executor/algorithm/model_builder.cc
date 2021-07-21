@@ -2,16 +2,16 @@
 // Created by wuyuncheng on 14/11/20.
 //
 
-#include <falcon/algorithm/model.h>
+#include <falcon/algorithm/model_builder.h>
 
 #include <utility>
 
-Model::Model() {
+ModelBuilder::ModelBuilder() {
   training_accuracy = 0.0;
   testing_accuracy = 0.0;
 }
 
-Model::Model(std::vector<std::vector<double> > m_training_data,
+ModelBuilder::ModelBuilder(std::vector<std::vector<double> > m_training_data,
              std::vector<std::vector<double> > m_testing_data,
              std::vector<double> m_training_labels,
              std::vector<double> m_testing_labels,
@@ -25,4 +25,4 @@ Model::Model(std::vector<std::vector<double> > m_training_data,
   testing_accuracy = m_testing_accuracy;
 }
 
-Model::~Model() {}
+ModelBuilder::~ModelBuilder() {}

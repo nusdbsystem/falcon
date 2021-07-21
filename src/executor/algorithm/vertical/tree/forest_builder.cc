@@ -4,6 +4,7 @@
 
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/math/math_ops.h>
 
 #include <glog/logging.h>
@@ -33,7 +34,7 @@ RandomForestBuilder::RandomForestBuilder(RandomForestParams params,
     std::vector<double> m_training_labels,
     std::vector<double> m_testing_labels,
     double m_training_accuracy,
-    double m_testing_accuracy) : Model(std::move(m_training_data),
+    double m_testing_accuracy) : ModelBuilder(std::move(m_training_data),
     std::move(m_testing_data),
     std::move(m_training_labels),
     std::move(m_testing_labels),
@@ -43,6 +44,7 @@ RandomForestBuilder::RandomForestBuilder(RandomForestParams params,
   sample_rate = params.sample_rate;
   dt_param = params.dt_param;
   tree_builders.reserve(n_estimator);
+  forest_model = ForestModel(n_estimator, dt_param.tree_type);
   local_feature_num = training_data[0].size();
 }
 
@@ -109,20 +111,22 @@ void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
   LOG(INFO) << "Shuffle training data and init dataset for tree " << tree_id << " finished";
 }
 
-void RandomForestBuilder::train(Party &party) {
+void RandomForestBuilder::train(Party party) {
   LOG(INFO) << "************ Begin to train the random forest model ************";
   init_forest_builder(party);
   LOG(INFO) << "Init " << n_estimator << " tree builders in the random forest";
   for (int tree_id = 0; tree_id < n_estimator; ++tree_id) {
     LOG(INFO) << "------------- build the " << tree_id << "-th tree -------------";
     tree_builders[tree_id].train(party);
+    forest_model.forest_trees.emplace_back(tree_builders[tree_id].tree);
     google::FlushLogFiles(google::INFO);
   }
   LOG(INFO) << "End train the random forest";
   google::FlushLogFiles(google::INFO);
 }
 
-void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
+void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
+    const std::string& report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
@@ -134,52 +138,26 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
   std::vector<double> cur_test_dataset_labels =
       (eval_type == falcon::TRAIN) ? training_labels : testing_labels;
 
-  // init predicted forest labels to record the predictions, the first dimension
-  // is the number of trees in the forest, and the second dimension is the number
-  // of the samples in the predicted dataset
-  EncodedNumber** predicted_forest_labels = new EncodedNumber*[n_estimator];
-  EncodedNumber** decrypted_predicted_forest_labels = new EncodedNumber*[n_estimator];
-  for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
-    predicted_forest_labels[tree_id] = new EncodedNumber[dataset_size];
-    decrypted_predicted_forest_labels[tree_id] = new EncodedNumber[dataset_size];
-  }
-
   // compute predictions
-  for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
-    // compute predictions for each tree in the forest
-    tree_builders[tree_id].tree.predict(party,
-        cur_test_dataset,
-        dataset_size,
-        predicted_forest_labels[tree_id]);
-    // decrypt the predicted labels and compute the accuracy
-    party.collaborative_decrypt(predicted_forest_labels[tree_id],
-        decrypted_predicted_forest_labels[tree_id],
-        dataset_size, ACTIVE_PARTY_ID);
-  }
+  // now the predicted labels are computed by mpc, thus it is already the final label
+  EncodedNumber* predicted_labels = new EncodedNumber[dataset_size];
+  forest_model.predict(party, cur_test_dataset, dataset_size, predicted_labels);
+
+  // step 3: active party aggregates and call collaborative decryption
+  EncodedNumber* decrypted_labels = new EncodedNumber[dataset_size];
+  party.collaborative_decrypt(predicted_labels,
+                              decrypted_labels,
+                              dataset_size,
+                              ACTIVE_PARTY_ID);
 
   // calculate accuracy by the active party
   std::vector<double> predictions;
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // decode decrypted predicted labels
-    std::vector< std::vector<double> > decoded_predicted_forest_labels (
-        n_estimator, std::vector<double>(dataset_size));
-    for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
-      for (int i = 0; i < dataset_size; i++) {
-        decrypted_predicted_forest_labels[tree_id][i].decode(decoded_predicted_forest_labels[tree_id][i]);
-      }
-    }
-    // compute predicted label
     for (int i = 0; i < dataset_size; i++) {
-      std::vector<double> forest_labels_i;
-      for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
-        forest_labels_i.push_back(decoded_predicted_forest_labels[tree_id][i]);
-      }
-      // compute mode or average, depending on the tree type
-      if (tree_builders[0].tree_type == falcon::CLASSIFICATION) {
-        predictions.push_back(mode(forest_labels_i));
-      } else {
-        predictions.push_back(average(forest_labels_i));
-      }
+      double x;
+      predicted_labels[i].decode(x);
+      predictions.push_back(x);
     }
 
     // compute accuracy
@@ -213,12 +191,7 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type) {
   }
 
   // free memory
-  for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
-    delete [] predicted_forest_labels[tree_id];
-    delete [] decrypted_predicted_forest_labels[tree_id];
-  }
-  delete [] predicted_forest_labels;
-  delete [] decrypted_predicted_forest_labels;
+  delete [] predicted_labels;
 
   const clock_t testing_finish_time = clock();
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
@@ -300,11 +273,14 @@ void train_random_forest(Party party, const std::string& params_str,
   random_forest_builder.eval(party, falcon::TRAIN);
   random_forest_builder.eval(party, falcon::TEST);
 
-  std::vector<Tree> forest_trees;
+  std::vector<TreeModel> forest_trees;
   for (int i = 0; i < random_forest_builder.n_estimator; i++) {
     forest_trees.push_back(random_forest_builder.tree_builders[i].tree);
   }
-  save_rf_model(forest_trees, random_forest_builder.n_estimator, model_save_file);
+  // save_rf_model(random_forest_builder.forest_model, model_save_file);
+  std::string pb_rf_model_string;
+  serialize_random_forest_model(random_forest_builder.forest_model, pb_rf_model_string);
+  save_pb_model_string(pb_rf_model_string, model_save_file);
   save_training_report(random_forest_builder.getter_training_accuracy(),
       random_forest_builder.getter_testing_accuracy(),
       model_report_file);
