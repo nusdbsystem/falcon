@@ -27,7 +27,7 @@ namespace v0 {
 namespace inference {
 
 static const char* InferenceService_method_names[] = {
-  "/com.nus.dbsytem.falcon.v0.inference.InferenceService/Prediction",
+    "/com.nus.dbsytem.falcon.v0.inference.InferenceService/Prediction",
 };
 
 std::unique_ptr< InferenceService::Stub> InferenceService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -37,8 +37,8 @@ std::unique_ptr< InferenceService::Stub> InferenceService::NewStub(const std::sh
 }
 
 InferenceService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
-  : channel_(channel), rpcmethod_Prediction_(InferenceService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  {}
+    : channel_(channel), rpcmethod_Prediction_(InferenceService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+{}
 
 ::grpc::Status InferenceService::Stub::Prediction(::grpc::ClientContext* context, const ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest& request, ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse* response) {
   return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Prediction_, context, request, response);
@@ -58,7 +58,7 @@ void InferenceService::Stub::experimental_async::Prediction(::grpc::ClientContex
 
 ::grpc::ClientAsyncResponseReader< ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse>* InferenceService::Stub::AsyncPredictionRaw(::grpc::ClientContext* context, const ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
-    this->PrepareAsyncPredictionRaw(context, request, cq);
+      this->PrepareAsyncPredictionRaw(context, request, cq);
   result->StartCall();
   return result;
 }
@@ -72,8 +72,8 @@ InferenceService::Service::Service() {
              ::grpc::ServerContext* ctx,
              const ::com::nus::dbsytem::falcon::v0::inference::PredictionRequest* req,
              ::com::nus::dbsytem::falcon::v0::inference::PredictionResponse* resp) {
-               return service->Prediction(ctx, req, resp);
-             }, this)));
+            return service->Prediction(ctx, req, resp);
+          }, this)));
 }
 
 InferenceService::Service::~Service() {
