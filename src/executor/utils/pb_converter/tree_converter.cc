@@ -110,7 +110,7 @@ void deserialize_encrypted_statistics(int & client_id,
     std::string input_str) {
   com::nus::dbsytem::falcon::v0::EncryptedStatistics deserialized_encrypted_statistics;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
-  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);
+  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
 
   if (!deserialized_encrypted_statistics.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_EncryptedStatistics from string";
@@ -304,7 +304,7 @@ void deserialize_update_info(int & source_client_id,
     std::string input_str) {
   com::nus::dbsytem::falcon::v0::NodeUpdateInfo deserialized_update_info;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
-  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);
+  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
 
   if (!deserialized_update_info.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_UpdateInfo from string";
@@ -403,7 +403,7 @@ void deserialize_split_info(int & global_split_num,
     std::string input_str) {
   com::nus::dbsytem::falcon::v0::SplitInfo deserialized_split_info;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
-  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);
+  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_split_info.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_SplitInfo from string";
     return;
@@ -491,7 +491,7 @@ void serialize_tree_model(TreeModel tree_model, std::string & output_str) {
 void deserialize_tree_model(TreeModel& tree_model, std::string input_str) {
   com::nus::dbsytem::falcon::v0::TreeModel deserialized_tree;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
-  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);
+  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_tree.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_Tree from string";
     return;
@@ -634,7 +634,7 @@ void serialize_random_forest_model(ForestModel forest_model, std::string & outpu
 void deserialize_random_forest_model(ForestModel& forest_model, std::string input_str) {
   com::nus::dbsytem::falcon::v0::ForestModel deserialized_random_forest;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
-  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);
+  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_random_forest.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_RandomForest from string";
     return;

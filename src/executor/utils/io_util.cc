@@ -6,7 +6,7 @@
 
 #include <iterator>
 
-std::vector< std::vector<double> > read_dataset(const std::string& data_file) {
+std::vector< std::vector<double> > read_dataset(const std::string& data_file, char delimiter) {
   std::ifstream data_infile(data_file);
   if (!data_infile) {
     LOG(INFO) << "Open " << data_file.c_str() << " file error.";
@@ -20,7 +20,7 @@ std::vector< std::vector<double> > read_dataset(const std::string& data_file) {
     std::istringstream ss(line);
     std::string item;
     // split line with delimiter, default ','
-    while(getline(ss, item,','))
+    while(getline(ss, item, delimiter))
     {
       items.push_back(::atof(item.c_str()));
     }
@@ -31,7 +31,7 @@ std::vector< std::vector<double> > read_dataset(const std::string& data_file) {
   return data;
 }
 
-void write_dataset_to_file(std::vector< std::vector<double> > data, const std::string& data_file) {
+void write_dataset_to_file(std::vector< std::vector<double> > data, char delimiter, const std::string& data_file) {
   std::ofstream write_outfile(data_file);
   if (!write_outfile) {
     LOG(INFO) << "Open " << data_file.c_str() << " file error.";
@@ -44,7 +44,7 @@ void write_dataset_to_file(std::vector< std::vector<double> > data, const std::s
     for (int j = 0; j < column_num; j++) {
       line = line + std::to_string(data[i][j]);
       if (j != column_num - 1) {
-        line += ",";
+        line += delimiter;
       } else {
         line += "\n";
       }

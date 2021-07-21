@@ -103,7 +103,7 @@ void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::
 void deserialize_encoded_number_array(EncodedNumber* number_array, int size, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::EncodedNumberArray deserialized_encoded_number_array;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_message.c_str(), input_message.length());
-  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);
+  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_encoded_number_array.ParseFromString(input_message)) {
     LOG(ERROR) << "Deserialize encoded number array message failed.";
     return;

@@ -78,7 +78,8 @@ void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
       sampled_data_indexes.push_back(i);
     }
     // shuffle the training data
-    std::random_device rd;
+    // std::random_device rd;
+    // using seed, for development
     std::default_random_engine rng(RANDOM_SEED);
     //auto rng = std::default_random_engine();
     std::shuffle(std::begin(sampled_data_indexes), std::end(sampled_data_indexes), rng);

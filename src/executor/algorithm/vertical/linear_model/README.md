@@ -149,7 +149,61 @@ Writing to /opt/falcon/third_party/MP-SPDZ/Programs/Schedules/logistic_regressio
 Writing to /opt/falcon/third_party/MP-SPDZ/Programs/Bytecode/logistic_regression-0.bc
 ```
 
+## Training Vertical FL in Falcon
 
+The training stage consists of the following steps:
+```
+1. init encrypted local weights, "local_weights" = [w1],[w2],...[wn]
+2. iterative computation
+  2.1 randomly select a batch of indexes for current iteration
+  2.2 compute homomorphic aggregation on the batch samples:
+        eg, the party select m examples and have n features
+        "local_batch_phe_aggregation"(m*1) = { [w1]x11+[w2]x12+...+[wn]x1n,
+                                               [w1]x21+[w2]x22+...+[wn]x2n,
+                                                        ....
+                                               [w1]xm1+[w2]xm2+...+[wn]xmn,}
+      2.2.1. For active party:
+         a) receive batch_phe_aggregation string from other parties
+         b) add the received batch_phe_aggregation with current batch_phe_aggregation
+                after adding, the final batch_phe_aggregation =
+                    {   [w1]x11+[w2]x12+...+[wn]x1n + [w(n+1)]x1(n+1) + [wF]x1F,
+                        [w1]x21+[w2]x22+...+[wn]x2n + [w(n+1)]x2(n+1) + [wF]x2F,
+                                             ...
+                        [w1]xm1+[w2]xm2+...+[wn]xmn  + [w(n+1)]xm(n+1) + [wF]xmF, }
+                    = { [WX1], [WX2],...,[WXm]  }
+                F is total number of features. m is number of examples
+          c) board-cast the final batch_phe_aggregation to other party
+       2.2.2. For passive party:
+          a) receive final batch_phe_aggregation string from active parties
+  2.3 convert the batch "batch_phe_aggregation" to secret shares, Whole process follow Algorithm 1 in paper "Privacy Preserving Vertical Federated Learning for Tree-based Model"
+    2.3.1. For active party:
+       a) randomly chooses ri belongs and encrypts it as [ri]
+       b) collect other party's encrypted_shares_str, eg [ri]
+       c) computes [e] = [batch_phe_aggregation[i]] + [r1]+...+[rk] (k parties)
+       d) board-cast the complete aggregated_shares_str to other party
+       e) collaborative decrypt the aggregated shares, clients jointly decrypt [e]
+       f) set secret_shares[i] = e - r1 mod q
+    2.3.2. For passive party:
+       a) send local encrypted_shares_str (serialized [ri]) to active party
+       b) receive the aggregated shares from active party
+       c) the same as active party eg,collaborative decrypt the aggregated shares, clients jointly decrypt [e]
+       d) set secret_shares[i] = -ri mod q
+2.4 connect to spdz parties, feed the batch_aggregation_shares and do mpc computations to get the gradient [1/(1+e^(wx))],
+    which is also stored as shares.Name it as loss_shares
+2.5 combine loss shares and update encrypted local weights carefully
+    2.5.1. For active party:
+       a) collect other party's loss shares
+       c) aggregate other party's encrypted loss shares with local loss shares, and deserialize it to get [1/(1+e^(wx))]
+       d) board-cast the dest_ciphers to other party
+       e) calculate loss_i: [yi] + [-1/(1+e^(Wxi))] for each example i
+       f) board-cast the encrypted_batch_losses_str to other party
+       g) update the local weight using [w_j]=[w_j]-lr*(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}}
+    2.5.2. For passive party:
+       a) send local encrypted_shares_str to active party
+       b) receive the dest_ciphers from active party
+       c) update the local weight using [w_j]=[w_j]-lr*(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}}
+3. decrypt weights ciphertext
+```
 
 ## References
 

@@ -55,7 +55,9 @@ done
 
 echo DONE
 
+echo "Coordinator is now live @ http://localhost:30004"
+
 #	//////////////////////////////////////////////////////////////////////////
 #	//			checking if the process are running                             //
 #	//////////////////////////////////////////////////////////////////////////
-ps aux | grep falcon
+# ps aux | grep '[f]alcon_platform'

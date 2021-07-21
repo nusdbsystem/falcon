@@ -1,21 +1,19 @@
 // math operations
 
-
-#include <cmath>
 #include <falcon/common.h>
-
 #include <glog/logging.h>
 #include <google/protobuf/io/coded_stream.h>
 
-#include <iostream>     // std::cout
-#include <iomanip>      // std::setprecision
-#include <numeric>
+#include <cmath>
+#include <iomanip>   // std::setprecision
+#include <iostream>  // std::cout
 #include <map>
-
+#include <numeric>
 
 double mean_squared_error(std::vector<double> a, std::vector<double> b) {
   if (a.size() != b.size()) {
-    LOG(ERROR) << "Mean squared error computation wrong: sizes of the two vectors not same";
+    LOG(ERROR) << "Mean squared error computation wrong: sizes of the two "
+                  "vectors not same";
   }
 
   int num = a.size();
@@ -28,14 +26,11 @@ double mean_squared_error(std::vector<double> a, std::vector<double> b) {
   return mean_squared_error;
 }
 
-
 bool rounded_comparison(double a, double b) {
   return (a >= b - ROUNDED_PRECISION) && (a <= b + ROUNDED_PRECISION);
 }
 
-
 std::vector<double> softmax(std::vector<double> inputs) {
-
   double sum = 0.0;
   for (int i = 0; i < inputs.size(); i++) {
     sum += inputs[i];
@@ -44,12 +39,11 @@ std::vector<double> softmax(std::vector<double> inputs) {
   std::vector<double> probs;
   probs.reserve(inputs.size());
   for (int i = 0; i < inputs.size(); i++) {
-    probs.push_back(inputs[i]/sum);
+    probs.push_back(inputs[i] / sum);
   }
 
   return probs;
 }
-
 
 double argmax(std::vector<double> inputs) {
   double index = 0, max = -1;
@@ -62,18 +56,17 @@ double argmax(std::vector<double> inputs) {
   return index;
 }
 
-
 double logistic_function(double logit) {
   // Input logit to the logistic function
   // logistic function is a sigmoid function (S-shaped)
   // logistic function outputs an estimated probability between 0 and 1
   double est_prob;  // estimated probability
-  est_prob =  1.0 / (1 + exp(0 - logit));
+  est_prob = 1.0 / (1 + exp(0 - logit));
   return est_prob;
 }
 
-
-double logistic_regression_loss(std::vector<double> pred_probs, std::vector<double> labels) {
+double logistic_regression_loss(std::vector<double> pred_probs,
+                                std::vector<double> labels) {
   // the log taken here is with base e (natural log)
   // L = -(1/n)[\sum_{i=1}^{n} y_i \log{f} + (1-y_i) \log{1-f}]
   int n = pred_probs.size();
@@ -88,7 +81,7 @@ double logistic_regression_loss(std::vector<double> pred_probs, std::vector<doub
     // sklearn use eps=1e-15
     // fix by setting bounds of pred_probs between 0~1
     double eps = 1e-15;
-    double UPPER = (1-eps);
+    double UPPER = (1 - eps);
     double LOWER = eps;
     double est_prob = pred_probs[i];
 
@@ -101,12 +94,14 @@ double logistic_regression_loss(std::vector<double> pred_probs, std::vector<doub
     }
     // std::cout << "est_prob = " << std::setprecision(17) << est_prob << "\n";
 
-    loss_i += (double) (labels[i] * log(est_prob));
-    loss_i += (double) ((1.0 - labels[i]) * log(1.0 - est_prob));
+    loss_i += (double)(labels[i] * log(est_prob));
+    loss_i += (double)((1.0 - labels[i]) * log(1.0 - est_prob));
     loss_sum += loss_i;
     // if (i < 5) {
-    //   std::cout << "predicted probability = " << std::setprecision(17) << est_prob <<
-    //     ", ground truth label = " << labels[i] << ", loss_sum = " << std::setprecision(17) << loss_sum << std::endl;
+    //   std::cout << "predicted probability = " << std::setprecision(17) <<
+    //   est_prob <<
+    //     ", ground truth label = " << labels[i] << ", loss_sum = " <<
+    //     std::setprecision(17) << loss_sum << std::endl;
     // }
   }
   double loss = (0 - loss_sum) / n;

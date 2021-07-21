@@ -38,11 +38,11 @@ echo "PARTY_COUNT = ${PARTY_COUNT}"
 for (( c=0; c<$PARTY_COUNT; c++ ))
 do
   echo "Terminate Party $c..."
-  kill -15 $(cat dev_test/Party-$c.pid)
+  kill -9 $(cat dev_test/Party-$c.pid)
 done
 
 echo "Terminate Coordinator..."
-kill -15 $(cat dev_test/Coord.pid)
+kill -9 $(cat dev_test/Coord.pid)
 
 # just in case, kill after grep for keyword
 # The grep filters that based on your search string,
@@ -51,6 +51,14 @@ kill -15 $(cat dev_test/Coord.pid)
 kill $(ps aux | grep '[f]alcon_platform' | awk '{print $2}')
 
 # check if falcon is killed or not
-ps aux | grep 'falcon'
+ps aux | grep '[f]alcon_platform'
 
-echo DONE
+echo kill falcon_platform DONE
+
+# just in case, kill after grep for keyword
+# The grep filters that based on your search string,
+# [x] is a trick to stop you picking up the actual grep process itself.
+# ref: https://stackoverflow.com/a/3510850
+kill $(ps aux | grep '[s]emi-party.x' | awk '{print $2}')
+
+echo kill semi-pary DONE

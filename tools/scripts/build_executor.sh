@@ -17,7 +17,7 @@ mkdir build
 if [[ $* == *--vcpkg* ]]
 then
     # try with vcpkg for gRPC
-    VCPKG_DIR="/home/svd/Downloads/"
+    VCPKG_DIR="/home/eigen/bin/"
     cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=${VCPKG_DIR}vcpkg/scripts/buildsystems/vcpkg.cmake
     cmake --build build
 else
