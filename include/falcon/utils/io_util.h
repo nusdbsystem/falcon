@@ -46,4 +46,18 @@ std::string read_key_file(const std::string& key_file);
  */
 void write_key_to_file(std::string phe_keys_str, const std::string& key_file);
 
+/**
+ * convert a number to string for output
+ * @tparam T
+ * @param Number
+ * @return
+ */
+template <typename T>
+std::string NumberToString ( T Number )
+{
+  std::ostringstream ss;
+  ss << Number;
+  return ss.str();
+}
+
 #endif //FALCON_SRC_EXECUTOR_UTILS_IO_UTIL_H_

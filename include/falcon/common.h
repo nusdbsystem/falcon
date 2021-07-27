@@ -21,7 +21,7 @@ namespace falcon {
 #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024
 #define MAXIMUM_RAND_VALUE 32767
 #define ROUNDED_PRECISION 1e-3
-#define NETWORK_CONFIG_PROTO 0
+#define NETWORK_CONFIG_PROTO 1
 
   /** for Logistic Regression */
   #define SPDZ_PORT_BASE 14000
@@ -49,8 +49,8 @@ namespace falcon {
   #define MAX_GLOBAL_SPLIT_NUM 6000
 
   // for inference service
-  #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"
-  #define IS_INFERENCE 0
+  #define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
+  #define IS_INFERENCE 1
 
 // for DEBUG
 // to display intermediate information

@@ -127,19 +127,6 @@ int main(int argc, char *argv[]) {
 
   falcon::AlgorithmName parsed_algorithm_name = parse_algorithm_name(algorithm_name);
 
-  // Here put the whole setup socket code together, as using a function call
-  // would result in a problem when deleting the created sockets
-  // setup connections from this party to each spdz party socket
-  std::vector<ssl_socket*> mpc_sockets(party.party_num);
-  vector<int> plain_sockets(party.party_num);
-  // ssl_ctx ctx(mpc_player_path, "C" + to_string(party_id));
-  ssl_ctx ctx("C" + to_string(party.party_id));
-  // std::cout << "correct init ctx" << std::endl;
-  ssl_service io_service;
-  octetStream specification;
-  std::cout << "begin connect to spdz parties" << std::endl;
-  std::cout << "party_num = " << party.party_num << std::endl;
-
 // IS_INFERENCE is from common.h
 #if IS_INFERENCE
   LOG(INFO) << "IS_INFERENCE is true\n";
