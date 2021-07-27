@@ -6,3 +6,7 @@
 	path = third_party/MP-SPDZ
 	url = git@github.com:lemonviv/MP-SPDZ.git
 	ignore = dirty
+[submodule "third_party/served"]
+	path = third_party/served
+	url = git@github.com:meltwater/served.git
+    ignore = dirty
