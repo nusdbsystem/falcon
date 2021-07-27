@@ -50,13 +50,13 @@ namespace falcon {
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"
-  #define IS_INFERENCE 0
+  #define IS_INFERENCE 1
 
 // for DEBUG
 // to display intermediate information
 // turn DEBUG off in the real application
 #define DEBUG true
-#define PRINT_EVERY 1  // if debug, display info at this frequency
+#define PRINT_EVERY 500  // if debug, display info at this frequency
 // gtest IO folder
 #define TEST_IO_OUTDIR "/opt/falcon/test/falcon/io"
 
