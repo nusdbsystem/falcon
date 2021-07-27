@@ -108,7 +108,8 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "model_save_file: " << model_save_file;
   LOG(INFO) << "model_report_file: " << model_report_file;
 
-  //is_inference = 1;
+  // TODO: should be read from the coordinator
+  is_inference = 0;
   inference_endpoint = DEFAULT_INFERENCE_ENDPOINT;
 
   LOG(INFO) << "is_inference: " << is_inference;
@@ -127,20 +128,19 @@ int main(int argc, char *argv[]) {
 
   falcon::AlgorithmName parsed_algorithm_name = parse_algorithm_name(algorithm_name);
 
-// IS_INFERENCE is from common.h
-#if IS_INFERENCE
-  LOG(INFO) << "IS_INFERENCE is true\n";
-  // invoke creating endpoint for inference requests
-  // TODO: there is a problem when using grpc server with spdz_logistic_function_computation
-  // TODO: now alleviate the problem by not including during training (need to check later)
-  if (party_type == falcon::ACTIVE_PARTY) {
-    run_active_server(inference_endpoint, model_save_file, party, parsed_algorithm_name);
+  if (is_inference) {
+    LOG(INFO) << "Execute inference logic\n";
+    // invoke creating endpoint for inference requests
+    // TODO: there is a problem when using grpc server with spdz_logistic_function_computation
+    // TODO: now alleviate the problem by not including during training (need to check later)
+    if (party_type == falcon::ACTIVE_PARTY) {
+      run_active_server(inference_endpoint, model_save_file, party, parsed_algorithm_name);
+    } else {
+      run_passive_server(model_save_file, party, parsed_algorithm_name);
+    }
   } else {
-    run_passive_server(model_save_file, party, parsed_algorithm_name);
-  }
-#else
-  LOG(INFO) << "IS_INFERENCE is false\n";
-  switch(parsed_algorithm_name) {
+    LOG(INFO) << "Execute training logic\n";
+    switch(parsed_algorithm_name) {
       case falcon::LR:
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
         break;
@@ -154,8 +154,8 @@ int main(int argc, char *argv[]) {
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
         break;
     }
-  std::cout << "Finish algorithm " << std::endl;
-#endif
+    std::cout << "Finish algorithm " << std::endl;
+  }
   return EXIT_SUCCESS;
 }
 

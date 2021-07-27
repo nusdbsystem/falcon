@@ -50,7 +50,6 @@ namespace falcon {
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
-  #define IS_INFERENCE 1
 
 // for DEBUG
 // to display intermediate information
