@@ -193,9 +193,9 @@ If your library is not listed, please open an issue at and/or consider making a 
 
 ## 7. build falcon executor
 
-**NOTE on protoc message**: if needed, run the script `src/executor/include/proto/proto_gen_grpc.sh` to generate the protoc message
+**NOTE on protoc message**: if needed, run the script `src/executor/include/proto/proto_gen_golang.sh` and `src/executor/include/proto/proto_gen_cpp.sh` to generate the protoc message
 
-Run the build script from `tools/scripts/build_executor.sh`
+Then Run the build script from `tools/scripts/build_executor.sh`
 
 _If the gRPC is installed via vcpkg, provide a flag `--vcpkg` to the above build script_: `bash tools/scripts/build_executor.sh --vcpkg`
 
@@ -289,8 +289,8 @@ drwxr-xr-x 4 root root 4.0K Jan  5 14:30 CMakeFiles
   **NOTE:** this is not related to whether to use "existing_key" in the train_job config. **this is key related to MPC, not the Falcon engine.**
 
   **Solution to this problem:**
-  - actually, you do not need to rebuild the whole library, just run the `Scripts/setup-ssl.sh 3 128 128` should be okay.
-  - rebuild from `/tools/scripts/mp-spdz_setup.sh`
+  - actually, you do not need to rebuild the whole library, just run the `Scripts/setup-ssl.sh 3 128 128` should be okay. (`/opt/falcon/third_party/MP-SPDZ/Scripts$ bash setup-ssl.sh 3 128 128`)
+  - or rebuild from `/tools/scripts/mp-spdz_setup.sh`
 
   **NOTE: `mv Math/Setup.h.prod Math/Setup.h` is critical! `*.prod` specifies `/opt/falcon` as base path**
 

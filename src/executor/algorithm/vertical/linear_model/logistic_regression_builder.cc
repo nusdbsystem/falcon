@@ -39,18 +39,20 @@ LogisticRegressionBuilder::LogisticRegressionBuilder(LogisticRegressionParams lr
         m_testing_accuracy) {
   batch_size = lr_params.batch_size;
   max_iteration = lr_params.max_iteration;
-  converge_threshold = (double)lr_params.converge_threshold;
+  converge_threshold = lr_params.converge_threshold;
   with_regularization = lr_params.with_regularization;
-  alpha = (double)lr_params.alpha;
+  alpha = lr_params.alpha;
   // NOTE: with double-precision, learning_rate can be 0.005
   // previously with float-precision, learning_rate is default 0.1
-  learning_rate = (double) lr_params.alpha;
-  decay = (double) lr_params.decay;
+  learning_rate = lr_params.alpha;
+  decay = lr_params.decay;
   penalty = std::move(lr_params.penalty);
   optimizer = std::move(lr_params.optimizer);
   multi_class = std::move(lr_params.multi_class);
   metric = std::move(lr_params.metric);
-  dp_budget = (double) lr_params.dp_budget;
+  dp_budget = lr_params.dp_budget;
+  // whether to fit the bias term
+  fit_bias = lr_params.fit_bias;
   log_reg_model = LogisticRegressionModel(m_weight_size);
 }
 
@@ -84,16 +86,25 @@ void LogisticRegressionBuilder::init_encrypted_weights(const Party &party, int p
   djcs_t_free_public_key(phe_pub_key);
 }
 
-std::vector<int> LogisticRegressionBuilder::select_batch_idx(const Party &party,
-    std::vector<int> data_indexes) {
+// generate a batch (array) of data indexes according to the shuffle
+// array size is the batch-size
+// called in each new iteration
+std::vector<int> LogisticRegressionBuilder::select_batch_idx(
+    const Party& party, std::vector<int> data_indexes) {
+  LOG(INFO) << "LogisticRegression::select_batch_idx called\n";
   std::vector<int> batch_indexes;
   // if active party, randomly select batch indexes and send to other parties
   // if passive parties, receive batch indexes and return
   if (party.party_type == falcon::ACTIVE_PARTY) {
+    LOG(INFO) << "ACTIVE_PARTY select batch indexes\n";
+    // NOTE: cannot use a fixed seed here!!
+    // select_batch_idx actually return a batch of indexes
+    // cannot use a fixed seed, otherwise the data indexes are fixed
     std::random_device rd;
     std::default_random_engine rng(rd());
     std::shuffle(std::begin(data_indexes), std::end(data_indexes), rng);
     for (int i = 0; i < batch_size; i++) {
+      // LOG(INFO) << "data_indexes selected = " << data_indexes[i] << std::endl;
       batch_indexes.push_back(data_indexes[i]);
     }
     // send to other parties
@@ -320,7 +331,8 @@ void LogisticRegressionBuilder::update_encrypted_weights(Party& party,
                                encrypted_batch_losses, batch_feature_j,
                                cur_batch_size);
       // update the j-th weight in local_weight vector
-      // need to make sure that the exponents of inner_product and local weights are same
+      // need to make sure that the exponents of inner_product
+      // and local weights are the same
       djcs_t_aux_ee_add(phe_pub_key,log_reg_model.local_weights[j],
           log_reg_model.local_weights[j], inner_product);
       delete [] batch_feature_j;
@@ -711,40 +723,17 @@ void LogisticRegressionBuilder::loss_computation(Party party, falcon::DatasetTyp
   google::FlushLogFiles(google::INFO);
 }
 
+// initializes the LogisticRegressionBuilder instance
+// and run .train() .eval() methods, then save model
 void train_logistic_regression(Party party, std::string params_str,
                                std::string model_save_file,
                                std::string model_report_file) {
-  LOG(INFO) << "Run the example logistic regression train";
-  std::cout << "Run the example logistic regression train" << std::endl;
+  LOG(INFO) << "Run train_logistic_regression";
+  std::cout << "Run train_logistic_regression" << std::endl;
 
   LogisticRegressionParams params;
-  //  currently for testing
-  //  params.batch_size = 32;
-  //  params.max_iteration = 1;
-  //  params.converge_threshold = 1e-3;
-  //  params.with_regularization = false;
-  //  params.alpha = 0.1;
-  //  params.learning_rate = 0.05;
-  //  params.decay = 1.0;
-  //  params.penalty = "l2";
-  //  params.optimizer = "sgd";
-  //  params.multi_class = "ovr";
-  //  params.metric = "acc";
-  //  params.dp_budget = 0.1;
   deserialize_lr_params(params, params_str);
-  int weight_size = party.getter_feature_num();
-  double training_accuracy = 0.0;
-  double testing_accuracy = 0.0;
 
-  std::vector<std::vector<double>> training_data;
-  std::vector<std::vector<double>> testing_data;
-  std::vector<double> training_labels;
-  std::vector<double> testing_labels;
-  double split_percentage = SPLIT_TRAIN_TEST_RATIO;
-  party.split_train_test_data(split_percentage, training_data, testing_data,
-                              training_labels, testing_labels);
-
-  LOG(INFO) << "Init logistic regression model";
   LOG(INFO) << "params.batch_size = " << params.batch_size;
   LOG(INFO) << "params.max_iteration = " << params.max_iteration;
   LOG(INFO) << "params.converge_threshold = " << params.converge_threshold;
@@ -757,9 +746,55 @@ void train_logistic_regression(Party party, std::string params_str,
   LOG(INFO) << "params.multi_class = " << params.multi_class;
   LOG(INFO) << "params.metric = " << params.metric;
   LOG(INFO) << "params.dp_budget = " << params.dp_budget;
+  LOG(INFO) << "params.fit_bias = " << params.fit_bias;
+
+  // split train test data for party and populate the vectors
+  std::vector<std::vector<double>> training_data;
+  std::vector<std::vector<double>> testing_data;
+  std::vector<double> training_labels;
+  std::vector<double> testing_labels;
+  double split_percentage = SPLIT_TRAIN_TEST_RATIO;
+  party.split_train_test_data(split_percentage, training_data, testing_data,
+                              training_labels, testing_labels);
+
+  int weight_size = party.getter_feature_num();
+  LOG(INFO) << "original weight_size = " << weight_size << std::endl;
+  // retrieve the fit_bias term
+  bool m_fit_bias = params.fit_bias;
+
+  // if this is active party, and fit_bias is true
+  // fit_bias or fit_intercept, for whether to plus the
+  // constant _bias_ or _intercept_ term
+  if ((party.party_type == falcon::ACTIVE_PARTY) && m_fit_bias) {
+    LOG(INFO) << "will insert x1=1 to features\n";
+    // insert x1=1 to front of the features
+    double x1 = 1.0;
+    for (int i = 0; i < training_data.size(); i++) {
+      training_data[i].insert(training_data[i].begin(), x1);
+    }
+    for (int i = 0; i < testing_data.size(); i++) {
+      testing_data[i].insert(testing_data[i].begin(), x1);
+    }
+    // update the new feature_num for the active party
+    // also update the weight_size value +1
+    // before passing weight_size to LogisticRegression instance below
+    party.setter_feature_num(++weight_size);
+    LOG(INFO) << "updated weight_size = " << weight_size << std::endl;
+    LOG(INFO) << "party getter feature_num = " << party.getter_feature_num() << std::endl;
+  }
+
+  LOG(INFO) << "training_data.size() = " << training_data.size() << std::endl;
+  LOG(INFO) << "training_data[0].size() = " << training_data[0].size() << std::endl;
+  LOG(INFO) << "testing_data.size() = " << testing_data.size() << std::endl;
+  LOG(INFO) << "testing_data[0].size() = " << testing_data[0].size() << std::endl;
+  LOG(INFO) << "training_labels.size() = " << training_labels.size() << std::endl;
+  LOG(INFO) << "testing_labels.size() = " << testing_labels.size() << std::endl;
 
   std::cout << "Init logistic regression model" << std::endl;
   LOG(INFO) << "Init logistic regression model";
+
+  double training_accuracy = 0.0;
+  double testing_accuracy = 0.0;
 
   LogisticRegressionBuilder log_reg_model_builder(params,
       weight_size,

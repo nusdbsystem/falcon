@@ -204,11 +204,12 @@ class LogisticRegressionParams PROTOBUF_FINAL :
     kBatchSizeFieldNumber = 1,
     kMaxIterationFieldNumber = 2,
     kConvergeThresholdFieldNumber = 3,
-    kWithRegularizationFieldNumber = 4,
     kAlphaFieldNumber = 5,
     kLearningRateFieldNumber = 6,
     kDecayFieldNumber = 7,
     kDifferentialPrivacyBudgetFieldNumber = 12,
+    kWithRegularizationFieldNumber = 4,
+    kFitBiasFieldNumber = 13,
   };
   // string penalty = 8;
   void clear_penalty();
@@ -292,58 +293,67 @@ class LogisticRegressionParams PROTOBUF_FINAL :
   void _internal_set_max_iteration(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // float converge_threshold = 3;
+  // double converge_threshold = 3;
   void clear_converge_threshold();
-  float converge_threshold() const;
-  void set_converge_threshold(float value);
+  double converge_threshold() const;
+  void set_converge_threshold(double value);
   private:
-  float _internal_converge_threshold() const;
-  void _internal_set_converge_threshold(float value);
+  double _internal_converge_threshold() const;
+  void _internal_set_converge_threshold(double value);
   public:
 
-  // int32 with_regularization = 4;
-  void clear_with_regularization();
-  ::PROTOBUF_NAMESPACE_ID::int32 with_regularization() const;
-  void set_with_regularization(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_with_regularization() const;
-  void _internal_set_with_regularization(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // float alpha = 5;
+  // double alpha = 5;
   void clear_alpha();
-  float alpha() const;
-  void set_alpha(float value);
+  double alpha() const;
+  void set_alpha(double value);
   private:
-  float _internal_alpha() const;
-  void _internal_set_alpha(float value);
+  double _internal_alpha() const;
+  void _internal_set_alpha(double value);
   public:
 
-  // float learning_rate = 6;
+  // double learning_rate = 6;
   void clear_learning_rate();
-  float learning_rate() const;
-  void set_learning_rate(float value);
+  double learning_rate() const;
+  void set_learning_rate(double value);
   private:
-  float _internal_learning_rate() const;
-  void _internal_set_learning_rate(float value);
+  double _internal_learning_rate() const;
+  void _internal_set_learning_rate(double value);
   public:
 
-  // float decay = 7;
+  // double decay = 7;
   void clear_decay();
-  float decay() const;
-  void set_decay(float value);
+  double decay() const;
+  void set_decay(double value);
   private:
-  float _internal_decay() const;
-  void _internal_set_decay(float value);
+  double _internal_decay() const;
+  void _internal_set_decay(double value);
   public:
 
-  // float differential_privacy_budget = 12;
+  // double differential_privacy_budget = 12;
   void clear_differential_privacy_budget();
-  float differential_privacy_budget() const;
-  void set_differential_privacy_budget(float value);
+  double differential_privacy_budget() const;
+  void set_differential_privacy_budget(double value);
   private:
-  float _internal_differential_privacy_budget() const;
-  void _internal_set_differential_privacy_budget(float value);
+  double _internal_differential_privacy_budget() const;
+  void _internal_set_differential_privacy_budget(double value);
+  public:
+
+  // bool with_regularization = 4;
+  void clear_with_regularization();
+  bool with_regularization() const;
+  void set_with_regularization(bool value);
+  private:
+  bool _internal_with_regularization() const;
+  void _internal_set_with_regularization(bool value);
+  public:
+
+  // bool fit_bias = 13;
+  void clear_fit_bias();
+  bool fit_bias() const;
+  void set_fit_bias(bool value);
+  private:
+  bool _internal_fit_bias() const;
+  void _internal_set_fit_bias(bool value);
   public:
 
   // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.LogisticRegressionParams)
@@ -359,12 +369,13 @@ class LogisticRegressionParams PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr metric_;
   ::PROTOBUF_NAMESPACE_ID::int32 batch_size_;
   ::PROTOBUF_NAMESPACE_ID::int32 max_iteration_;
-  float converge_threshold_;
-  ::PROTOBUF_NAMESPACE_ID::int32 with_regularization_;
-  float alpha_;
-  float learning_rate_;
-  float decay_;
-  float differential_privacy_budget_;
+  double converge_threshold_;
+  double alpha_;
+  double learning_rate_;
+  double decay_;
+  double differential_privacy_budget_;
+  bool with_regularization_;
+  bool fit_bias_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_alg_5fparams_2eproto;
 };
@@ -864,102 +875,102 @@ inline void LogisticRegressionParams::set_max_iteration(::PROTOBUF_NAMESPACE_ID:
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.max_iteration)
 }
 
-// float converge_threshold = 3;
+// double converge_threshold = 3;
 inline void LogisticRegressionParams::clear_converge_threshold() {
   converge_threshold_ = 0;
 }
-inline float LogisticRegressionParams::_internal_converge_threshold() const {
+inline double LogisticRegressionParams::_internal_converge_threshold() const {
   return converge_threshold_;
 }
-inline float LogisticRegressionParams::converge_threshold() const {
+inline double LogisticRegressionParams::converge_threshold() const {
   // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.converge_threshold)
   return _internal_converge_threshold();
 }
-inline void LogisticRegressionParams::_internal_set_converge_threshold(float value) {
+inline void LogisticRegressionParams::_internal_set_converge_threshold(double value) {
   
   converge_threshold_ = value;
 }
-inline void LogisticRegressionParams::set_converge_threshold(float value) {
+inline void LogisticRegressionParams::set_converge_threshold(double value) {
   _internal_set_converge_threshold(value);
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.converge_threshold)
 }
 
-// int32 with_regularization = 4;
+// bool with_regularization = 4;
 inline void LogisticRegressionParams::clear_with_regularization() {
-  with_regularization_ = 0;
+  with_regularization_ = false;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 LogisticRegressionParams::_internal_with_regularization() const {
+inline bool LogisticRegressionParams::_internal_with_regularization() const {
   return with_regularization_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 LogisticRegressionParams::with_regularization() const {
+inline bool LogisticRegressionParams::with_regularization() const {
   // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.with_regularization)
   return _internal_with_regularization();
 }
-inline void LogisticRegressionParams::_internal_set_with_regularization(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void LogisticRegressionParams::_internal_set_with_regularization(bool value) {
   
   with_regularization_ = value;
 }
-inline void LogisticRegressionParams::set_with_regularization(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void LogisticRegressionParams::set_with_regularization(bool value) {
   _internal_set_with_regularization(value);
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.with_regularization)
 }
 
-// float alpha = 5;
+// double alpha = 5;
 inline void LogisticRegressionParams::clear_alpha() {
   alpha_ = 0;
 }
-inline float LogisticRegressionParams::_internal_alpha() const {
+inline double LogisticRegressionParams::_internal_alpha() const {
   return alpha_;
 }
-inline float LogisticRegressionParams::alpha() const {
+inline double LogisticRegressionParams::alpha() const {
   // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.alpha)
   return _internal_alpha();
 }
-inline void LogisticRegressionParams::_internal_set_alpha(float value) {
+inline void LogisticRegressionParams::_internal_set_alpha(double value) {
   
   alpha_ = value;
 }
-inline void LogisticRegressionParams::set_alpha(float value) {
+inline void LogisticRegressionParams::set_alpha(double value) {
   _internal_set_alpha(value);
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.alpha)
 }
 
-// float learning_rate = 6;
+// double learning_rate = 6;
 inline void LogisticRegressionParams::clear_learning_rate() {
   learning_rate_ = 0;
 }
-inline float LogisticRegressionParams::_internal_learning_rate() const {
+inline double LogisticRegressionParams::_internal_learning_rate() const {
   return learning_rate_;
 }
-inline float LogisticRegressionParams::learning_rate() const {
+inline double LogisticRegressionParams::learning_rate() const {
   // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.learning_rate)
   return _internal_learning_rate();
 }
-inline void LogisticRegressionParams::_internal_set_learning_rate(float value) {
+inline void LogisticRegressionParams::_internal_set_learning_rate(double value) {
   
   learning_rate_ = value;
 }
-inline void LogisticRegressionParams::set_learning_rate(float value) {
+inline void LogisticRegressionParams::set_learning_rate(double value) {
   _internal_set_learning_rate(value);
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.learning_rate)
 }
 
-// float decay = 7;
+// double decay = 7;
 inline void LogisticRegressionParams::clear_decay() {
   decay_ = 0;
 }
-inline float LogisticRegressionParams::_internal_decay() const {
+inline double LogisticRegressionParams::_internal_decay() const {
   return decay_;
 }
-inline float LogisticRegressionParams::decay() const {
+inline double LogisticRegressionParams::decay() const {
   // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.decay)
   return _internal_decay();
 }
-inline void LogisticRegressionParams::_internal_set_decay(float value) {
+inline void LogisticRegressionParams::_internal_set_decay(double value) {
   
   decay_ = value;
 }
-inline void LogisticRegressionParams::set_decay(float value) {
+inline void LogisticRegressionParams::set_decay(double value) {
   _internal_set_decay(value);
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.decay)
 }
@@ -1208,24 +1219,44 @@ inline void LogisticRegressionParams::set_allocated_metric(std::string* metric) 
   // @@protoc_insertion_point(field_set_allocated:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.metric)
 }
 
-// float differential_privacy_budget = 12;
+// double differential_privacy_budget = 12;
 inline void LogisticRegressionParams::clear_differential_privacy_budget() {
   differential_privacy_budget_ = 0;
 }
-inline float LogisticRegressionParams::_internal_differential_privacy_budget() const {
+inline double LogisticRegressionParams::_internal_differential_privacy_budget() const {
   return differential_privacy_budget_;
 }
-inline float LogisticRegressionParams::differential_privacy_budget() const {
+inline double LogisticRegressionParams::differential_privacy_budget() const {
   // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.differential_privacy_budget)
   return _internal_differential_privacy_budget();
 }
-inline void LogisticRegressionParams::_internal_set_differential_privacy_budget(float value) {
+inline void LogisticRegressionParams::_internal_set_differential_privacy_budget(double value) {
   
   differential_privacy_budget_ = value;
 }
-inline void LogisticRegressionParams::set_differential_privacy_budget(float value) {
+inline void LogisticRegressionParams::set_differential_privacy_budget(double value) {
   _internal_set_differential_privacy_budget(value);
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.differential_privacy_budget)
+}
+
+// bool fit_bias = 13;
+inline void LogisticRegressionParams::clear_fit_bias() {
+  fit_bias_ = false;
+}
+inline bool LogisticRegressionParams::_internal_fit_bias() const {
+  return fit_bias_;
+}
+inline bool LogisticRegressionParams::fit_bias() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.fit_bias)
+  return _internal_fit_bias();
+}
+inline void LogisticRegressionParams::_internal_set_fit_bias(bool value) {
+  
+  fit_bias_ = value;
+}
+inline void LogisticRegressionParams::set_fit_bias(bool value) {
+  _internal_set_fit_bias(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.LogisticRegressionParams.fit_bias)
 }
 
 // -------------------------------------------------------------------

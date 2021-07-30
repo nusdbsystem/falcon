@@ -7,6 +7,7 @@
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <gtest/gtest.h>
 
+#include <random>
 #include <vector>
 
 TEST(IO_Util, ReadWriteData) {
@@ -33,6 +34,35 @@ TEST(IO_Util, ReadWriteData) {
       EXPECT_EQ(write_data[i][j], read_data[i][j]);
     }
   }
+}
+
+TEST(IO_Util, WriteShuffledDataIndexes) {
+  std::vector<int> data_indexes;
+  // sample number in the local dataset
+  int sample_num = 10;
+  for (int i = 0; i < sample_num; i++) {
+    data_indexes.push_back(i);
+  }
+  int seed = 42;
+  std::default_random_engine rng(seed);
+  std::shuffle(std::begin(data_indexes), std::end(data_indexes), rng);
+
+  // std::cout << "data_indexes[0] = " << data_indexes[0] << std::endl;
+  // std::cout << "data_indexes[1] = " << data_indexes[1] << std::endl;
+  // std::cout << "data_indexes[2] = " << data_indexes[2] << std::endl;
+
+  std::string file_name =
+      std::string(TEST_IO_OUTDIR) + "/test_write_shuffled_data_indexes.txt";
+  write_shuffled_data_indexes_to_file(data_indexes, file_name);
+
+  // read data and compare
+  char delimiter = ',';
+  std::vector<std::vector<double> > read_data =
+      read_dataset(file_name, delimiter);
+  // Seed = 42, data_indexes = {1,6,3...}
+  EXPECT_EQ(1, read_data[0][0]);
+  EXPECT_EQ(6, read_data[1][0]);
+  EXPECT_EQ(3, read_data[2][0]);
 }
 
 TEST(IO_Util, ReadWriteKeys) {

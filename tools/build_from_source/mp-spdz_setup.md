@@ -140,6 +140,8 @@ Each round / game will reset and so this runs indefinitiely.
 
 **NOTE: `fast-make.sh` already carries out the compilation for `logistic_regression.mpc` file, so recompiling the entire MP-SPDZ with `mp-spdz_setup.sh` does this step already**
 
+**NOTE: with commit `8a19095 - Revise logistic regression mpc program to handle flexible sample size (Fri Jul 9 2021)`, now there is no need to compile for different `ARRAY_SIZE` or batch size. Now the batch size is automatically adjusted `MAX_ARRAY_SIZE = 100000`**
+
 ### Run `semi-party.x` on one machine
 
 To run the `semi-party.x` with three parties on one machine, run:
