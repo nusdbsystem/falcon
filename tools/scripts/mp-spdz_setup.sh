@@ -7,6 +7,8 @@ set -e
 # Install third_party MP-SPDZ library
 cd /opt/falcon
 cd third_party/MP-SPDZ
+# get the latest commits
+git pull origin master
 # restore MP-SPDZ dir with git
 git checkout Math/Setup.h.prod Math/Setup.h
 git checkout CONFIG.mine

@@ -22,6 +22,7 @@ void serialize_lr_params(LogisticRegressionParams lr_params, std::string& output
   logistic_regression_params.set_multi_class(lr_params.multi_class);
   logistic_regression_params.set_metric(lr_params.metric);
   logistic_regression_params.set_differential_privacy_budget(lr_params.dp_budget);
+  logistic_regression_params.set_fit_bias(lr_params.fit_bias);
   logistic_regression_params.SerializeToString(&output_message);
 }
 
@@ -43,6 +44,7 @@ void deserialize_lr_params(LogisticRegressionParams& lr_params, const std::strin
   lr_params.multi_class = logistic_regression_params.multi_class();
   lr_params.metric = logistic_regression_params.metric();
   lr_params.dp_budget = logistic_regression_params.differential_privacy_budget();
+  lr_params.fit_bias = logistic_regression_params.fit_bias();
 }
 
 void serialize_dt_params(DecisionTreeParams dt_params, std::string& output_message) {

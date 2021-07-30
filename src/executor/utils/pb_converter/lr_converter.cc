@@ -43,7 +43,7 @@ void serialize_lr_model(LogisticRegressionModel lr_model, std::string & output_s
 void deserialize_lr_model(LogisticRegressionModel& lr_model, std::string input_str) {
   com::nus::dbsytem::falcon::v0::LrModel deserialized_lr_model;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
-  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT, PROTOBUF_SIZE_LIMIT);
+  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_lr_model.ParseFromString(input_str)) {
     LOG(ERROR) << "Deserialize logistic regression model message failed.";
     return;

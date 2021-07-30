@@ -99,6 +99,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_alg_5fparams_2eproto::offsets[
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::LogisticRegressionParams, multi_class_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::LogisticRegressionParams, metric_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::LogisticRegressionParams, differential_privacy_budget_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::LogisticRegressionParams, fit_bias_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::DecisionTreeParams, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -127,8 +128,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_alg_5fparams_2eproto::offsets[
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::com::nus::dbsytem::falcon::v0::LogisticRegressionParams)},
-  { 17, -1, sizeof(::com::nus::dbsytem::falcon::v0::DecisionTreeParams)},
-  { 34, -1, sizeof(::com::nus::dbsytem::falcon::v0::RandomForestParams)},
+  { 18, -1, sizeof(::com::nus::dbsytem::falcon::v0::DecisionTreeParams)},
+  { 35, -1, sizeof(::com::nus::dbsytem::falcon::v0::RandomForestParams)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -139,25 +140,25 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_alg_5fparams_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\020alg_params.proto\022\031com.nus.dbsytem.falc"
-  "on.v0\"\241\002\n\030LogisticRegressionParams\022\022\n\nba"
+  "on.v0\"\263\002\n\030LogisticRegressionParams\022\022\n\nba"
   "tch_size\030\001 \001(\005\022\025\n\rmax_iteration\030\002 \001(\005\022\032\n"
-  "\022converge_threshold\030\003 \001(\002\022\033\n\023with_regula"
-  "rization\030\004 \001(\005\022\r\n\005alpha\030\005 \001(\002\022\025\n\rlearnin"
-  "g_rate\030\006 \001(\002\022\r\n\005decay\030\007 \001(\002\022\017\n\007penalty\030\010"
+  "\022converge_threshold\030\003 \001(\001\022\033\n\023with_regula"
+  "rization\030\004 \001(\010\022\r\n\005alpha\030\005 \001(\001\022\025\n\rlearnin"
+  "g_rate\030\006 \001(\001\022\r\n\005decay\030\007 \001(\001\022\017\n\007penalty\030\010"
   " \001(\t\022\021\n\toptimizer\030\t \001(\t\022\023\n\013multi_class\030\n"
   " \001(\t\022\016\n\006metric\030\013 \001(\t\022#\n\033differential_pri"
-  "vacy_budget\030\014 \001(\002\"\245\002\n\022DecisionTreeParams"
-  "\022\021\n\ttree_type\030\001 \001(\t\022\021\n\tcriterion\030\002 \001(\t\022\026"
-  "\n\016split_strategy\030\003 \001(\t\022\021\n\tclass_num\030\004 \001("
-  "\005\022\021\n\tmax_depth\030\005 \001(\005\022\020\n\010max_bins\030\006 \001(\005\022\031"
-  "\n\021min_samples_split\030\007 \001(\005\022\030\n\020min_samples"
-  "_leaf\030\010 \001(\005\022\026\n\016max_leaf_nodes\030\t \001(\005\022\035\n\025m"
-  "in_impurity_decrease\030\n \001(\001\022\032\n\022min_impuri"
-  "ty_split\030\013 \001(\001\022\021\n\tdp_budget\030\014 \001(\001\"\177\n\022Ran"
-  "domForestParams\022\023\n\013n_estimator\030\001 \001(\005\022\023\n\013"
-  "sample_rate\030\002 \001(\001\022\?\n\010dt_param\030\003 \001(\0132-.co"
-  "m.nus.dbsytem.falcon.v0.DecisionTreePara"
-  "msB\010Z\006commonb\006proto3"
+  "vacy_budget\030\014 \001(\001\022\020\n\010fit_bias\030\r \001(\010\"\245\002\n\022"
+  "DecisionTreeParams\022\021\n\ttree_type\030\001 \001(\t\022\021\n"
+  "\tcriterion\030\002 \001(\t\022\026\n\016split_strategy\030\003 \001(\t"
+  "\022\021\n\tclass_num\030\004 \001(\005\022\021\n\tmax_depth\030\005 \001(\005\022\020"
+  "\n\010max_bins\030\006 \001(\005\022\031\n\021min_samples_split\030\007 "
+  "\001(\005\022\030\n\020min_samples_leaf\030\010 \001(\005\022\026\n\016max_lea"
+  "f_nodes\030\t \001(\005\022\035\n\025min_impurity_decrease\030\n"
+  " \001(\001\022\032\n\022min_impurity_split\030\013 \001(\001\022\021\n\tdp_b"
+  "udget\030\014 \001(\001\"\177\n\022RandomForestParams\022\023\n\013n_e"
+  "stimator\030\001 \001(\005\022\023\n\013sample_rate\030\002 \001(\001\022\?\n\010d"
+  "t_param\030\003 \001(\0132-.com.nus.dbsytem.falcon.v"
+  "0.DecisionTreeParamsB\tZ\007/commonb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_alg_5fparams_2eproto_deps[1] = {
 };
@@ -168,7 +169,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_alg
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_alg_5fparams_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_alg_5fparams_2eproto = {
-  false, false, descriptor_table_protodef_alg_5fparams_2eproto, "alg_params.proto", 780,
+  false, false, descriptor_table_protodef_alg_5fparams_2eproto, "alg_params.proto", 799,
   &descriptor_table_alg_5fparams_2eproto_once, descriptor_table_alg_5fparams_2eproto_sccs, descriptor_table_alg_5fparams_2eproto_deps, 3, 0,
   schemas, file_default_instances, TableStruct_alg_5fparams_2eproto::offsets,
   file_level_metadata_alg_5fparams_2eproto, 3, file_level_enum_descriptors_alg_5fparams_2eproto, file_level_service_descriptors_alg_5fparams_2eproto,
@@ -218,8 +219,8 @@ LogisticRegressionParams::LogisticRegressionParams(const LogisticRegressionParam
       GetArena());
   }
   ::memcpy(&batch_size_, &from.batch_size_,
-    static_cast<size_t>(reinterpret_cast<char*>(&differential_privacy_budget_) -
-    reinterpret_cast<char*>(&batch_size_)) + sizeof(differential_privacy_budget_));
+    static_cast<size_t>(reinterpret_cast<char*>(&fit_bias_) -
+    reinterpret_cast<char*>(&batch_size_)) + sizeof(fit_bias_));
   // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.LogisticRegressionParams)
 }
 
@@ -231,8 +232,8 @@ void LogisticRegressionParams::SharedCtor() {
   metric_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
       reinterpret_cast<char*>(&batch_size_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&differential_privacy_budget_) -
-      reinterpret_cast<char*>(&batch_size_)) + sizeof(differential_privacy_budget_));
+      0, static_cast<size_t>(reinterpret_cast<char*>(&fit_bias_) -
+      reinterpret_cast<char*>(&batch_size_)) + sizeof(fit_bias_));
 }
 
 LogisticRegressionParams::~LogisticRegressionParams() {
@@ -275,8 +276,8 @@ void LogisticRegressionParams::Clear() {
   multi_class_.ClearToEmpty();
   metric_.ClearToEmpty();
   ::memset(&batch_size_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&differential_privacy_budget_) -
-      reinterpret_cast<char*>(&batch_size_)) + sizeof(differential_privacy_budget_));
+      reinterpret_cast<char*>(&fit_bias_) -
+      reinterpret_cast<char*>(&batch_size_)) + sizeof(fit_bias_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -301,39 +302,39 @@ const char* LogisticRegressionParams::_InternalParse(const char* ptr, ::PROTOBUF
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // float converge_threshold = 3;
+      // double converge_threshold = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 29)) {
-          converge_threshold_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
-          ptr += sizeof(float);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 25)) {
+          converge_threshold_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
-      // int32 with_regularization = 4;
+      // bool with_regularization = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
           with_regularization_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // float alpha = 5;
+      // double alpha = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 45)) {
-          alpha_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
-          ptr += sizeof(float);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 41)) {
+          alpha_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
-      // float learning_rate = 6;
+      // double learning_rate = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 53)) {
-          learning_rate_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
-          ptr += sizeof(float);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 49)) {
+          learning_rate_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
-      // float decay = 7;
+      // double decay = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 61)) {
-          decay_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
-          ptr += sizeof(float);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 57)) {
+          decay_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
       // string penalty = 8;
@@ -372,11 +373,18 @@ const char* LogisticRegressionParams::_InternalParse(const char* ptr, ::PROTOBUF
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // float differential_privacy_budget = 12;
+      // double differential_privacy_budget = 12;
       case 12:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 101)) {
-          differential_privacy_budget_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
-          ptr += sizeof(float);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 97)) {
+          differential_privacy_budget_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // bool fit_bias = 13;
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
+          fit_bias_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
         } else goto handle_unusual;
         continue;
       default: {
@@ -419,34 +427,34 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_max_iteration(), target);
   }
 
-  // float converge_threshold = 3;
+  // double converge_threshold = 3;
   if (!(this->converge_threshold() <= 0 && this->converge_threshold() >= 0)) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(3, this->_internal_converge_threshold(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(3, this->_internal_converge_threshold(), target);
   }
 
-  // int32 with_regularization = 4;
+  // bool with_regularization = 4;
   if (this->with_regularization() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_with_regularization(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_with_regularization(), target);
   }
 
-  // float alpha = 5;
+  // double alpha = 5;
   if (!(this->alpha() <= 0 && this->alpha() >= 0)) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(5, this->_internal_alpha(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(5, this->_internal_alpha(), target);
   }
 
-  // float learning_rate = 6;
+  // double learning_rate = 6;
   if (!(this->learning_rate() <= 0 && this->learning_rate() >= 0)) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(6, this->_internal_learning_rate(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(6, this->_internal_learning_rate(), target);
   }
 
-  // float decay = 7;
+  // double decay = 7;
   if (!(this->decay() <= 0 && this->decay() >= 0)) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(7, this->_internal_decay(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(7, this->_internal_decay(), target);
   }
 
   // string penalty = 8;
@@ -489,10 +497,16 @@ failure:
         11, this->_internal_metric(), target);
   }
 
-  // float differential_privacy_budget = 12;
+  // double differential_privacy_budget = 12;
   if (!(this->differential_privacy_budget() <= 0 && this->differential_privacy_budget() >= 0)) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(12, this->_internal_differential_privacy_budget(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(12, this->_internal_differential_privacy_budget(), target);
+  }
+
+  // bool fit_bias = 13;
+  if (this->fit_bias() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(13, this->_internal_fit_bias(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -553,36 +567,39 @@ size_t LogisticRegressionParams::ByteSizeLong() const {
         this->_internal_max_iteration());
   }
 
-  // float converge_threshold = 3;
+  // double converge_threshold = 3;
   if (!(this->converge_threshold() <= 0 && this->converge_threshold() >= 0)) {
-    total_size += 1 + 4;
+    total_size += 1 + 8;
   }
 
-  // int32 with_regularization = 4;
-  if (this->with_regularization() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_with_regularization());
-  }
-
-  // float alpha = 5;
+  // double alpha = 5;
   if (!(this->alpha() <= 0 && this->alpha() >= 0)) {
-    total_size += 1 + 4;
+    total_size += 1 + 8;
   }
 
-  // float learning_rate = 6;
+  // double learning_rate = 6;
   if (!(this->learning_rate() <= 0 && this->learning_rate() >= 0)) {
-    total_size += 1 + 4;
+    total_size += 1 + 8;
   }
 
-  // float decay = 7;
+  // double decay = 7;
   if (!(this->decay() <= 0 && this->decay() >= 0)) {
-    total_size += 1 + 4;
+    total_size += 1 + 8;
   }
 
-  // float differential_privacy_budget = 12;
+  // double differential_privacy_budget = 12;
   if (!(this->differential_privacy_budget() <= 0 && this->differential_privacy_budget() >= 0)) {
-    total_size += 1 + 4;
+    total_size += 1 + 8;
+  }
+
+  // bool with_regularization = 4;
+  if (this->with_regularization() != 0) {
+    total_size += 1 + 1;
+  }
+
+  // bool fit_bias = 13;
+  if (this->fit_bias() != 0) {
+    total_size += 1 + 1;
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -637,9 +654,6 @@ void LogisticRegressionParams::MergeFrom(const LogisticRegressionParams& from) {
   if (!(from.converge_threshold() <= 0 && from.converge_threshold() >= 0)) {
     _internal_set_converge_threshold(from._internal_converge_threshold());
   }
-  if (from.with_regularization() != 0) {
-    _internal_set_with_regularization(from._internal_with_regularization());
-  }
   if (!(from.alpha() <= 0 && from.alpha() >= 0)) {
     _internal_set_alpha(from._internal_alpha());
   }
@@ -651,6 +665,12 @@ void LogisticRegressionParams::MergeFrom(const LogisticRegressionParams& from) {
   }
   if (!(from.differential_privacy_budget() <= 0 && from.differential_privacy_budget() >= 0)) {
     _internal_set_differential_privacy_budget(from._internal_differential_privacy_budget());
+  }
+  if (from.with_regularization() != 0) {
+    _internal_set_with_regularization(from._internal_with_regularization());
+  }
+  if (from.fit_bias() != 0) {
+    _internal_set_fit_bias(from._internal_fit_bias());
   }
 }
 
@@ -680,8 +700,8 @@ void LogisticRegressionParams::InternalSwap(LogisticRegressionParams* other) {
   multi_class_.Swap(&other->multi_class_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   metric_.Swap(&other->metric_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(LogisticRegressionParams, differential_privacy_budget_)
-      + sizeof(LogisticRegressionParams::differential_privacy_budget_)
+      PROTOBUF_FIELD_OFFSET(LogisticRegressionParams, fit_bias_)
+      + sizeof(LogisticRegressionParams::fit_bias_)
       - PROTOBUF_FIELD_OFFSET(LogisticRegressionParams, batch_size_)>(
           reinterpret_cast<char*>(&batch_size_),
           reinterpret_cast<char*>(&other->batch_size_));

@@ -94,7 +94,7 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "v0\"W\n\rNetworkConfig\022\013\n\003ips\030\001 \003(\t\0229\n\013port"
   "_arrays\030\002 \003(\0132$.com.nus.dbsytem.falcon.v"
   "0.PortArray\"\032\n\tPortArray\022\r\n\005ports\030\001 \003(\005B"
-  "\010Z\006commonb\006proto3"
+  "\tZ\007/commonb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_network_2eproto_deps[1] = {
 };
@@ -104,7 +104,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_net
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_network_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto = {
-  false, false, descriptor_table_protodef_network_2eproto, "network.proto", 177,
+  false, false, descriptor_table_protodef_network_2eproto, "network.proto", 178,
   &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_sccs, descriptor_table_network_2eproto_deps, 2, 0,
   schemas, file_default_instances, TableStruct_network_2eproto::offsets,
   file_level_metadata_network_2eproto, 2, file_level_enum_descriptors_network_2eproto, file_level_service_descriptors_network_2eproto,

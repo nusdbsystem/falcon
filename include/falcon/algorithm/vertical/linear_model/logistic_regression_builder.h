@@ -16,23 +16,22 @@
 #include <thread>
 #include <vector>
 
-// TODO: convert float to double for the proto message
 struct LogisticRegressionParams {
   // size of mini-batch in each iteration
   int batch_size;
   // maximum number of iterations for training
   int max_iteration;
   // tolerance of convergence
-  float converge_threshold;
+  double converge_threshold;
   // whether use regularization or not
   bool with_regularization;
   // regularization parameter
-  float alpha;
+  double alpha;
   // learning rate for parameter updating
-  float learning_rate;
+  double learning_rate;
   // decay rate for learning rate, following lr = lr0 / (1 + decay*t),
   // t is #iteration
-  float decay;
+  double decay;
   // penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
   std::string penalty;
   // optimization method, default 'sgd', currently support 'sgd'
@@ -45,7 +44,9 @@ struct LogisticRegressionParams {
   // currently support 'acc'
   std::string metric;
   // differential privacy (DP) budget, 0 denotes not use DP
-  float dp_budget;
+  double dp_budget;
+  // whether to fit the bias term
+  bool fit_bias;
 };
 
 class LogisticRegressionBuilder : public ModelBuilder {
@@ -78,6 +79,8 @@ class LogisticRegressionBuilder : public ModelBuilder {
   std::string metric;
   // differential privacy budget
   double dp_budget;
+  // whether to fit the bias term
+  bool fit_bias;
 
  public:
   // logistic regression model

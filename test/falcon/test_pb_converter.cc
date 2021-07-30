@@ -234,6 +234,7 @@ TEST(PB_Converter, LogisticRegressionParams) {
   lr_params.multi_class = "ovr";
   lr_params.metric = "acc";
   lr_params.dp_budget = 0;
+  lr_params.fit_bias = true;
   std::string output_message;
   serialize_lr_params(lr_params, output_message);
 
@@ -243,10 +244,13 @@ TEST(PB_Converter, LogisticRegressionParams) {
   EXPECT_EQ(lr_params.max_iteration, deserialized_lr_params.max_iteration);
   EXPECT_EQ(lr_params.converge_threshold, deserialized_lr_params.converge_threshold);
   EXPECT_EQ(lr_params.with_regularization, deserialized_lr_params.with_regularization);
+  // std::cout << "deserialized_lr_params.with_regularization = " << deserialized_lr_params.with_regularization << std::endl;
   EXPECT_EQ(lr_params.alpha, deserialized_lr_params.alpha);
   EXPECT_EQ(lr_params.learning_rate, deserialized_lr_params.learning_rate);
   EXPECT_EQ(lr_params.decay, deserialized_lr_params.decay);
   EXPECT_EQ(lr_params.dp_budget, deserialized_lr_params.dp_budget);
+  EXPECT_EQ(lr_params.fit_bias, deserialized_lr_params.fit_bias);
+  // std::cout << "deserialized_lr_params.fit_bias = " << deserialized_lr_params.fit_bias << std::endl;
   EXPECT_TRUE(lr_params.penalty == deserialized_lr_params.penalty);
   EXPECT_TRUE(lr_params.optimizer == deserialized_lr_params.optimizer);
   EXPECT_TRUE(lr_params.multi_class == deserialized_lr_params.multi_class);

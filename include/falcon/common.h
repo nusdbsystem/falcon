@@ -23,30 +23,30 @@ namespace falcon {
 #define ROUNDED_PRECISION 1e-3
 #define NETWORK_CONFIG_PROTO 1
 
-  /** for Logistic Regression */
-  #define SPDZ_PORT_BASE 14000
-  #define RANDOM_SEED 42
-  #define SPLIT_TRAIN_TEST_RATIO 0.8
-  #define ACTIVE_PARTY_ID 0
-  // default threshold for LR is 50%
-  #define LOGREG_THRES 0.5
-  // initialization of weights
-  // commonly zero-initialized
-  // sklearn default one-initialized
-  #define WEIGHTS_INIT_MIN 0.0
-  #define WEIGHTS_INIT_MAX 0.0
+/** for Logistic Regression */
+#define SPDZ_PORT_BASE 14000
+#define RANDOM_SEED 42
+#define SPLIT_TRAIN_TEST_RATIO 0.8
+#define ACTIVE_PARTY_ID 0
+// default threshold for LR is 50%
+#define LOGREG_THRES 0.5
+// initialization of weights
+// commonly zero-initialized
+// sklearn default one-initialized
+#define WEIGHTS_INIT_MIN 0.0
+#define WEIGHTS_INIT_MAX 0.0
 
-  /** for Decision Tree */
-  enum TreeNodeType{INTERNAL, LEAF};
-  enum TreeFeatureType{CONTINUOUS, CATEGORICAL};
-  enum TreeType{CLASSIFICATION, REGRESSION};
-  enum SpdzTreeCompType{PRUNING_CHECK, COMPUTE_LABEL, FIND_BEST_SPLIT,
-      GBDT_SQUARE_LABEL, GBDT_SOFTMAX, RF_LABEL_MODE};
-  #define REGRESSION_TREE_CLASS_NUM 2
-  #define SPDZ_PORT_TREE 18000
-  #define MAX_IMPURITY 100000.0
-  // refers the maximum number of splits considered in a tree
-  #define MAX_GLOBAL_SPLIT_NUM 6000
+/** for Decision Tree */
+enum TreeNodeType{ INTERNAL, LEAF };
+enum TreeFeatureType{ CONTINUOUS, CATEGORICAL };
+enum TreeType{ CLASSIFICATION, REGRESSION };
+enum SpdzTreeCompType{ PRUNING_CHECK, COMPUTE_LABEL, FIND_BEST_SPLIT,
+    GBDT_SQUARE_LABEL, GBDT_SOFTMAX, RF_LABEL_MODE };
+#define REGRESSION_TREE_CLASS_NUM 2
+#define SPDZ_PORT_TREE 18000
+#define MAX_IMPURITY 100000.0
+// refers the maximum number of splits considered in a tree
+#define MAX_GLOBAL_SPLIT_NUM 6000
 
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
@@ -68,4 +68,4 @@ enum AlgorithmName { LR, DT, RF };
 enum DatasetType { TRAIN, TEST, VALIDATE };
 }  // namespace falcon
 
-#endif //FALCON_INCLUDE_COMMON_H_
+#endif // FALCON_INCLUDE_COMMON_H_

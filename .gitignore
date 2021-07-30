@@ -76,6 +76,7 @@ data/dataset/breast_cancer_data/client2/report.txt
 # gtest folder
 ##############
 test/falcon/io/*
+!test/falcon/io/.gitkeep
 
 # falcon_platform dependencies
 pkg/*

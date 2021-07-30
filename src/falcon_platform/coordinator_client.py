@@ -68,7 +68,7 @@ def submit_train_job_json():
           "batch_size": 32,
           "max_iteration": 50,
           "convergence_threshold": 0.0001,
-          "with_regularization": 0,
+          "with_regularization": false,
           "alpha": 0.1,
           "learning_rate": 0.1,
           "decay": 0.1,
@@ -76,7 +76,8 @@ def submit_train_job_json():
           "optimizer": "sgd",
           "multi_class": "ovr",
           "metric": "acc",
-          "differential_privacy_budget": 0.1
+          "differential_privacy_budget": 0.1,
+          "fit_bias": true
         }
       },
       "output_configs": {

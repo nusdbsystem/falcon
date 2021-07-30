@@ -8,15 +8,15 @@ type LogisticRegression struct {
 	// maximum number of iterations for training
 	MaxIteration int32 `json:"max_iteration"`
 	// tolerance of convergence
-	ConvergeThreshold float32 `json:"convergence_threshold"`
+	ConvergeThreshold float64 `json:"convergence_threshold"`
 	// whether use regularization or not
-	WithRegularization int32 `json:"with_regularization"`
+	WithRegularization bool `json:"with_regularization"`
 	// regularization parameter
-	Alpha float32 `json:"alpha"`
+	Alpha float64 `json:"alpha"`
 	// learning rate for parameter updating
-	LearningRate float32 `json:"learning_rate"`
+	LearningRate float64 `json:"learning_rate"`
 	// decay rate for learning rate, following lr = lr0 / (1 + decay*t), t is #iteration
-	Decay float32 `json:"decay"`
+	Decay float64 `json:"decay"`
 	// penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
 	Penalty string `json:"penalty"`
 	// optimization method, default 'sgd', currently support 'sgd'
@@ -26,7 +26,9 @@ type LogisticRegression struct {
 	// evaluation metric for training and testing, 'acc', 'auc', or 'ks', currently support 'acc'
 	Metric string `json:"metric"`
 	// differential privacy budget
-	DifferentialPrivacyBudget float32 `json:"differential_privacy_budget"`
+	DifferentialPrivacyBudget float64 `json:"differential_privacy_budget"`
+	// fit_bias term
+	FitBias bool `json:"fit_bias"`
 }
 
 type DecisionTree struct {

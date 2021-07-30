@@ -5,12 +5,12 @@
 #ifndef FALCON_SRC_EXECUTOR_UTILS_IO_UTIL_H_
 #define FALCON_SRC_EXECUTOR_UTILS_IO_UTIL_H_
 
+#include <glog/logging.h>
+
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <glog/logging.h>
 
 /**
  * read dataset as 2d-float vectors
@@ -19,7 +19,8 @@
  * @param delimiter
  * @return
  */
-std::vector< std::vector<double> > read_dataset(const std::string& data_file, char delimiter);
+std::vector<std::vector<double> > read_dataset(const std::string& data_file,
+                                               char delimiter);
 
 /**
  * write dataset to file
@@ -28,7 +29,13 @@ std::vector< std::vector<double> > read_dataset(const std::string& data_file, ch
  * @param delimiter
  * @param data_file: file to write
  */
-void write_dataset_to_file(std::vector< std::vector<double> > data, char delimiter, const std::string& data_file);
+void write_dataset_to_file(std::vector<std::vector<double> > data,
+                           char delimiter, const std::string& data_file);
+
+// for Party::split_train_test_data
+// save a copy of shuffled data_indexes vector<int> to file for local debugging
+void write_shuffled_data_indexes_to_file(std::vector<int> data_indexes,
+                                         const std::string& data_file);
 
 /**
  * read pb serialized phe keys

@@ -41,7 +41,7 @@ Party::Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
 
   LOG(INFO) << "local_data is reading dataset from: " << m_data_file;
   LOG(INFO) << "sample_num = " << sample_num;
-  LOG(INFO) << "feature_num = " << feature_num;
+
 
   // if this is active party, slice the last column as labels
   if (party_type == falcon::ACTIVE_PARTY) {
@@ -49,8 +49,11 @@ Party::Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
       labels.push_back(local_data[i][feature_num - 1]);
       local_data[i].pop_back();
     }
-    feature_num = feature_num - 1;
+    LOG(INFO) << "Active party last column is label, so feature_num-1\n";
+    --feature_num;
   }
+
+  LOG(INFO) << "feature_num = " << feature_num;
 
   // TODO: the logic for NETWORK_CONFIG_PROTO 0/1 seems to have
   // a number of overlaps, probably can refactor
@@ -370,25 +373,6 @@ void Party::split_train_test_data(
     std::default_random_engine rng(RANDOM_SEED);
     std::shuffle(std::begin(data_indexes), std::end(data_indexes), rng);
 
-#if DEBUG
-    // save a copy of data_indexes vector<int> as string for local debugging
-    std::stringstream ss;
-    for (size_t i = 0; i < data_indexes.size(); ++i) {
-      if (i != 0) ss << ",";
-      ss << data_indexes[i];
-    }
-    std::string data_indexes_str = ss.str();
-    // save the data_indexes_str in a file for debugging
-    std::ofstream out("/tmp/falcon_client0_data_indexes_str.txt");
-    out << data_indexes_str;
-    out.close();
-
-    // check if the data_indexes match the saved txt in tmp
-    LOG(INFO) << "data_indexes[0] = " << data_indexes[0] << std::endl;
-    LOG(INFO) << "data_indexes[1] = " << data_indexes[1] << std::endl;
-    LOG(INFO) << "data_indexes[2] = " << data_indexes[2] << std::endl;
-#endif
-
     // select the former training data size as training data,
     // and the latter as testing data
     for (int i = 0; i < sample_num; i++) {
@@ -412,6 +396,39 @@ void Party::split_train_test_data(
         send_long_message(i, shuffled_indexes_str);
       }
     }
+
+#if DEBUG
+    // save shuffled data_indexes vector<int> local debugging
+    std::ostringstream oss;
+    oss << TEST_IO_OUTDIR << "/falcon_client0_data_indexes_seed" << RANDOM_SEED
+        << ".txt";
+    std::string shuffled_data_indexes_file_name = oss.str();
+
+    write_shuffled_data_indexes_to_file(data_indexes, shuffled_data_indexes_file_name);
+
+    // check if the data_indexes match the saved txt in TEST_IO_OUTDIR
+    LOG(INFO) << "data_indexes[0] = " << data_indexes[0] << std::endl;
+    LOG(INFO) << "data_indexes[1] = " << data_indexes[1] << std::endl;
+    LOG(INFO) << "data_indexes[2] = " << data_indexes[2] << std::endl;
+
+    char delimiter = ',';
+    // save active party's training_data and testing_data
+    // write vector<vector<double>> to file in TEST_IO_OUTDIR
+    oss.str(std::string());  // reset the ostringstream
+    oss << TEST_IO_OUTDIR << "/falcon_client0_training_data_seed" << RANDOM_SEED
+        << ".txt";
+    std::string training_data_file_name = oss.str();
+    write_dataset_to_file(training_data, delimiter, training_data_file_name);
+    LOG(INFO) << "saved a copy of training_data in TEST_IO_OUTDIR\n";
+
+    oss.str(std::string());  // reset the ostringstream
+    oss << TEST_IO_OUTDIR << "/falcon_client0_testing_data_seed" << RANDOM_SEED
+        << ".txt";
+    std::string testing_data_file_name = oss.str();
+    write_dataset_to_file(testing_data, delimiter, testing_data_file_name);
+    LOG(INFO) << "saved a copy of testing_data in TEST_IO_OUTDIR\n";
+#endif
+
   } else {
     // receive shuffled indexes and split in the same way
     std::string recv_shuffled_indexes_str;

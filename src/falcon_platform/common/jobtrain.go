@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"falcon_platform/logger"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"strings"
+
+	"google.golang.org/protobuf/proto"
 )
 
 // TODO: make the train job field consistent with wyc executor flags!
@@ -183,6 +184,7 @@ func GenerateLrParams(cfg map[string]interface{}) string {
 		MultiClass:                res.MultiClass,
 		Metric:                    res.Metric,
 		DifferentialPrivacyBudget: res.DifferentialPrivacyBudget,
+		FitBias:                   res.FitBias,
 	}
 
 	out, err := proto.Marshal(&lrp)
@@ -246,7 +248,7 @@ func GenerateNetworkConfig(Urls []string, portArray [][]int32) string {
 	}
 
 	cfg := NetworkConfig{
-		IPs:        IPs,
+		Ips:        IPs,
 		PortArrays: []*PortArray{},
 	}
 
