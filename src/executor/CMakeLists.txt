@@ -47,10 +47,6 @@ set(SOURCE_FILES
         include/message/alg_params.pb.cc
         include/message/network.pb.h
         include/message/network.pb.cc
-        include/message/inference/lr_grpc.pb.h
-        include/message/inference/lr_grpc.pb.cc
-        include/message/inference/lr_grpc.grpc.pb.h
-        include/message/inference/lr_grpc.grpc.pb.cc
         include/message/tree.pb.h
         include/message/tree.pb.cc
         include/message/lr.pb.h
@@ -124,26 +120,16 @@ find_package(Threads REQUIRED)
 # Looks for protobuf-config.cmake file installed by Protobuf's cmake installation.
 
 set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
-set(_REFLECTION gRPC::grpc++_reflection)
 if(CMAKE_CROSSCOMPILING)
     find_program(_PROTOBUF_PROTOC protoc)
 else()
     set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
 endif()
 
-# Find gRPC installation
-# Looks for gRPCConfig.cmake file installed by gRPC's cmake installation.
-find_package(gRPC CONFIG REQUIRED)
-message(STATUS "Using gRPC ${gRPC_VERSION}")
-
-set(_GRPC_GRPCPP gRPC::grpc++)
-if(CMAKE_CROSSCOMPILING)
-    find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
-else()
-    set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
-endif()
-
 find_package(Boost COMPONENTS program_options REQUIRED)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SERVED_PKG REQUIRED IMPORTED_TARGET served)
 
 target_include_directories(executor PUBLIC
         ${Boost_INCLUDE_DIRS}
@@ -211,6 +197,7 @@ target_link_libraries(falcon
         /usr/lib/x86_64-linux-gnu/libgmpxx.so
         ${_REFLECTION}
         ${_GRPC_GRPCPP}
-        ${_PROTOBUF_LIBPROTOBUF})
+        ${_PROTOBUF_LIBPROTOBUF}
+        PkgConfig::SERVED_PKG)
 
-add_subdirectory(inference/client)
+# add_subdirectory(inference/client)

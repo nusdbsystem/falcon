@@ -10,7 +10,7 @@ serve for new requests.
 
 * install secure multiparty computation library **MP-SPDZ**.
 
-* install google remote procedure call library **GRPC**. (`<= 1.33.1` with protoc `3.14.0`)
+* install web server request handling library **[served](https://github.com/meltwater/served)**. 
 
 ## Quick Setup
 

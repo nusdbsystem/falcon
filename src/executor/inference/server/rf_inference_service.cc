@@ -6,11 +6,7 @@
 #include <memory>
 #include <string>
 
-#include <grpcpp/grpcpp.h>
-#include <grpcpp/health_check_service_interface.h>
-#include <grpcpp/ext/proto_server_reflection_plugin.h>
-
-#include "../../include/message/inference/lr_grpc.grpc.pb.h"
+#include <served/served.hpp>
 
 #include <falcon/common.h>
 #include <falcon/operator/phe/fixed_point_encoder.h>
@@ -18,183 +14,136 @@
 #include <falcon/inference/server/dt_inference_service.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
+#include <falcon/utils/io_util.h>
 
 #include <glog/logging.h>
 #include <falcon/utils/math/math_ops.h>
 
-using grpc::Server;
-using grpc::ServerBuilder;
-using grpc::ServerContext;
-using grpc::Status;
-using com::nus::dbsytem::falcon::v0::inference::PredictionRequest;
-using com::nus::dbsytem::falcon::v0::inference::PredictionResponse;
-using com::nus::dbsytem::falcon::v0::inference::InferenceService;
-
-// Logic and data behind the server's behavior.
-class RFInferenceServiceImpl final : public InferenceService::Service {
- public:
-  explicit RFInferenceServiceImpl(
-      const std::string& saved_model_file,
-      const Party& party) {
-    party_ = party;
-    // load_rf_model(saved_model_file, saved_forest_model_);
-    std::string saved_model_string;
-    load_pb_model_string(saved_model_string, saved_model_file);
-    deserialize_random_forest_model(saved_forest_model_, saved_model_string);
-  }
-
-  Status Prediction(ServerContext* context, const PredictionRequest* request,
-                    PredictionResponse* response) override {
-    std::cout << "Receive client's request" << std::endl;
-    LOG(INFO) << "Receive client's request";
-
-    // parse the client request
-    int sample_num = request->sample_num();
-    std::vector<int> batch_indexes;
-    // execute prediction for each sample id
-    for (int i = 0; i < sample_num; i++) {
-      batch_indexes.push_back(request->sample_ids(i));
-    }
-
-    std::cout << "Parse client's request finished" << std::endl;
-    LOG(INFO) << "Parse client's request finished";
-
-    // send batch indexes to passive parties
-    std::string batch_indexes_str;
-    serialize_int_array(batch_indexes, batch_indexes_str);
-    for (int i = 0; i < party_.party_num; i++) {
-      if (i != party_.party_id) {
-        party_.send_long_message(i, batch_indexes_str);
-      }
-    }
-
-    std::cout << "Broadcast client's batch requests to other parties" << std::endl;
-    LOG(INFO) << "Broadcast client's batch requests to other parties";
-
-    // retrieve batch samples and encode (notice to use cur_batch_size
-    // instead of default batch size to avoid unexpected batch)
-    std::vector< std::vector<double> > batch_samples;
-    for (int i = 0; i < sample_num; i++) {
-      batch_samples.push_back(party_.getter_local_data()[batch_indexes[i]]);
-    }
-
-    // init predicted forest labels to record the predictions, the first dimension
-    // is the number of trees in the forest, and the second dimension is the number
-    // of the samples in the predicted dataset
-    EncodedNumber** predicted_forest_labels = new EncodedNumber*[saved_forest_model_.tree_size];
-    EncodedNumber** decrypted_predicted_forest_labels = new EncodedNumber*[saved_forest_model_.tree_size];
-    for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
-      predicted_forest_labels[tree_id] = new EncodedNumber[sample_num];
-      decrypted_predicted_forest_labels[tree_id] = new EncodedNumber[sample_num];
-    }
-
-    // compute predictions
-    for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
-      // compute predictions for each tree in the forest
-      saved_forest_model_.forest_trees[tree_id].predict(party_,
-                                          batch_samples,
-                                          sample_num,
-                                          predicted_forest_labels[tree_id]);
-      // decrypt the predicted labels and compute the accuracy
-      party_.collaborative_decrypt(predicted_forest_labels[tree_id],
-                                  decrypted_predicted_forest_labels[tree_id],
-                                  sample_num, ACTIVE_PARTY_ID);
-    }
-
-    // decode decrypted predicted labels
-    std::vector< std::vector<double> > decoded_predicted_forest_labels (
-        saved_forest_model_.tree_size, std::vector<double>(sample_num));
-    for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
-      for (int i = 0; i < sample_num; i++) {
-        decrypted_predicted_forest_labels[tree_id][i].decode(decoded_predicted_forest_labels[tree_id][i]);
-      }
-    }
-
-    // calculate accuracy by the super client
-    std::vector<double> labels;
-    std::vector< std::vector<double> > probabilities;
-    if (party_.party_type == falcon::ACTIVE_PARTY) {
-      for (int i = 0; i < sample_num; i++) {
-        std::vector<double> forest_labels_i;
-        for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
-          forest_labels_i.push_back(decoded_predicted_forest_labels[tree_id][i]);
-        }
-        // compute mode or average, depending on the tree type
-        std::vector<double> prob;
-        if (saved_forest_model_.forest_trees[0].type == falcon::CLASSIFICATION) {
-          double pred = mode(forest_labels_i);
-          labels.push_back(pred);
-          for (int k = 0; k < saved_forest_model_.forest_trees[0].class_num; k++) {
-            if (pred == k) {
-              prob.push_back(CERTAIN_PROBABILITY);
-            } else {
-              prob.push_back(ZERO_PROBABILITY);
-            }
-          }
-          probabilities.push_back(prob);
-        } else {
-          labels.push_back(average(forest_labels_i));
-          prob.push_back(CERTAIN_PROBABILITY);
-        }
-      }
-    }
-
-    std::cout << "Compute prediction finished" << std::endl;
-    LOG(INFO) << "Compute prediction finished";
-
-    // assemble response
-    response->set_sample_num(sample_num);
-    for (int i = 0; i < sample_num; i++) {
-      com::nus::dbsytem::falcon::v0::inference::PredictionOutput *output = response->add_outputs();
-      output->set_label(labels[i]);
-      // std::cout << "probabilities[0].size = " << probabilities[0].size() << std::endl;
-      for (int j = 0; j < probabilities[0].size(); j++) {
-        output->add_probabilities(probabilities[i][j]);
-      }
-    }
-
-    // free memory
-    for (int tree_id = 0; tree_id < saved_forest_model_.tree_size; tree_id++) {
-      delete [] predicted_forest_labels[tree_id];
-      delete [] decrypted_predicted_forest_labels[tree_id];
-    }
-    delete [] predicted_forest_labels;
-    delete [] decrypted_predicted_forest_labels;
-
-    google::FlushLogFiles(google::INFO);
-    return Status::OK;
-  }
-
- private:
-  Party party_;
-  ForestModel saved_forest_model_;
-};
-
 
 void run_active_server_rf(const std::string& endpoint,
-    const std::string& saved_model_file,
-    const Party& party) {
-  RFInferenceServiceImpl service(saved_model_file, party);
+                          const std::string& saved_model_file,
+                          const Party& party) {
+  // The actual processing. Add process logic here
+  ForestModel saved_forest_model_;
+  std::string saved_model_string;
+  load_pb_model_string(saved_model_string, saved_model_file);
+  deserialize_random_forest_model(saved_forest_model_, saved_model_string);
 
-  grpc::EnableDefaultHealthCheckService(true);
-  grpc::reflection::InitProtoReflectionServerBuilderPlugin();
-  ServerBuilder builder;
-  // Listen on the given address without any authentication mechanism.
-  builder.AddListeningPort(endpoint, grpc::InsecureServerCredentials());
-  // Register "service" as the instance through which we'll communicate with
-  // clients. In this case it corresponds to an *synchronous* service.
-  builder.RegisterService(&service);
-  // Finally assemble the server.
-  std::unique_ptr<Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << endpoint << std::endl;
+  served::multiplexer mux;
 
-  // Wait for the server to shutdown. Note that some other thread must be
-  // responsible for shutting down the server for this call to ever return.
-  server->Wait();
+  mux.handle("/inference")
+      .get([&](served::response & res, const served::request & req) {
+        std::cout << "Receive client's request" << std::endl;
+        LOG(INFO) << "Receive client's request";
+        int sample_num = 0;
+        std::vector<int> batch_indexes;
+        // iterate all query param, sparse the client request
+        for ( const auto & query_param : req.query )
+        {
+          if (query_param.first == "sampleNum") {
+            sample_num = std::stoi(query_param.second);
+          }
+          if (query_param.first == "sampleIds") {
+            stringstream ss(query_param.second);
+            string id;
+            while (getline(ss, id, ',')) {
+              batch_indexes.push_back(std::stoi(id));
+            }
+          }
+        }
+        std::cout << "Parse client's request finished" << std::endl;
+        LOG(INFO) << "Parse client's request finished";
+
+        // send batch indexes to passive parties
+        std::string batch_indexes_str;
+        serialize_int_array(batch_indexes, batch_indexes_str);
+        for (int i = 0; i < party.party_num; i++) {
+          if (i != party.party_id) {
+            party.send_long_message(i, batch_indexes_str);
+          }
+        }
+        std::cout << "Broadcast client's batch requests to other parties" << std::endl;
+        LOG(INFO) << "Broadcast client's batch requests to other parties";
+
+        // retrieve batch samples and encode (notice to use cur_batch_size
+        // instead of default batch size to avoid unexpected batch)
+        EncodedNumber* predicted_labels = new EncodedNumber[sample_num];
+        std::vector< std::vector<double> > batch_samples;
+        for (int i = 0; i < sample_num; i++) {
+          batch_samples.push_back(party.getter_local_data()[batch_indexes[i]]);
+        }
+        saved_forest_model_.predict(const_cast<Party &>(party), batch_samples, sample_num, predicted_labels);
+
+        // step 3: active party aggregates and call collaborative decryption
+        EncodedNumber* decrypted_labels = new EncodedNumber[sample_num];
+        party.collaborative_decrypt(predicted_labels,
+                                    decrypted_labels,
+                                    sample_num,
+                                    ACTIVE_PARTY_ID);
+        std::cout << "Collaboratively decryption finished" << std::endl;
+        LOG(INFO) << "Collaboratively decryption finished";
+
+        // step 4: active party computes the logistic function and compare the accuracy
+        std::vector<double> labels;
+        std::vector< std::vector<double> > probabilities;
+        for (int i = 0; i < sample_num; i++) {
+          double t;
+          decrypted_labels[i].decode(t);
+          std::vector<double> prob;
+          if (saved_forest_model_.forest_trees[0].type == falcon::CLASSIFICATION) {
+            // TODO: record the detailed probability, here assume 1.0
+            for (int k = 0; k < saved_forest_model_.forest_trees[0].class_num; k++) {
+              if (t == k) {
+                prob.push_back(CERTAIN_PROBABILITY);
+              } else {
+                prob.push_back(ZERO_PROBABILITY);
+              }
+            }
+            probabilities.push_back(prob);
+          } else {
+            prob.push_back(CERTAIN_PROBABILITY);
+            probabilities.push_back(prob);
+          }
+        }
+        std::cout << "Compute prediction finished" << std::endl;
+        LOG(INFO) << "Compute prediction finished";
+        delete [] predicted_labels;
+        delete [] decrypted_labels;
+        google::FlushLogFiles(google::INFO);
+
+        // assemble response
+        res << "The batch prediction results are as follows.\n";
+        res << "Predicted sample num: " << NumberToString(sample_num) << "\n";
+        for (int i = 0; i < sample_num; i++) {
+          res << "\t sample " << NumberToString(i) << "'s label: " << NumberToString(labels[i]) << ". ";
+          res << "probabilities: [";
+          for (int j = 0; j < probabilities[0].size(); j++) {
+            if (j != probabilities[0].size() - 1) {
+              res << NumberToString(probabilities[i][j]) << ", ";
+            } else {
+              res << NumberToString(probabilities[i][j]) << "]\n";
+            }
+          }
+        }
+      });
+
+  std::cout << "Try this example with:" << std::endl;
+  std::cout << " curl http://localhost:50051/inference" << std::endl;
+
+  // convert endpoint to ip and port
+  std::vector<std::string> ip_port;
+  stringstream ss(endpoint);
+  string str;
+  while (getline(ss, str, ',')) {
+    ip_port.push_back(str);
+  }
+
+  served::net::server server(ip_port[0], ip_port[1], mux);
+  server.run(10); // Run with a pool of 10 threads.
 }
 
 void run_passive_server_rf(const std::string& saved_model_file,
-    const Party& party) {
+                           const Party& party) {
   ForestModel saved_forest_model;
   std::string saved_model_string;
   load_pb_model_string(saved_model_string, saved_model_file);
@@ -215,53 +164,24 @@ void run_passive_server_rf(const std::string& saved_model_file,
     // retrieve batch samples and encode (notice to use cur_batch_size
     // instead of default batch size to avoid unexpected batch)
     int cur_batch_size = batch_indexes.size();
+    EncodedNumber *predicted_labels = new EncodedNumber[cur_batch_size];
     std::vector< std::vector<double> > batch_samples;
     for (int i = 0; i < cur_batch_size; i++) {
       batch_samples.push_back(party.getter_local_data()[batch_indexes[i]]);
     }
+    saved_forest_model.predict(const_cast<Party &>(party), batch_samples, cur_batch_size, predicted_labels);
 
-    // init predicted forest labels to record the predictions, the first dimension
-    // is the number of trees in the forest, and the second dimension is the number
-    // of the samples in the predicted dataset
-    EncodedNumber** predicted_forest_labels = new EncodedNumber*[saved_forest_model.tree_size];
-    EncodedNumber** decrypted_predicted_forest_labels = new EncodedNumber*[saved_forest_model.tree_size];
-    for (int tree_id = 0; tree_id < saved_forest_model.tree_size; tree_id++) {
-      predicted_forest_labels[tree_id] = new EncodedNumber[cur_batch_size];
-      decrypted_predicted_forest_labels[tree_id] = new EncodedNumber[cur_batch_size];
-    }
-
-    // compute predictions
-    for (int tree_id = 0; tree_id < saved_forest_model.tree_size; tree_id++) {
-      // compute predictions for each tree in the forest
-      saved_forest_model.forest_trees[tree_id].predict(const_cast<Party &>(party),
-          batch_samples,
-          cur_batch_size,
-          predicted_forest_labels[tree_id]);
-      // decrypt the predicted labels and compute the accuracy
-      party.collaborative_decrypt(predicted_forest_labels[tree_id],
-          decrypted_predicted_forest_labels[tree_id],
-          cur_batch_size, ACTIVE_PARTY_ID);
-    }
-
-//    // decode decrypted predicted labels
-//    std::vector< std::vector<double> > decoded_predicted_forest_labels (
-//        n_estimator, std::vector<double>(cur_batch_size));
-//    for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
-//      for (int i = 0; i < cur_batch_size; i++) {
-//        decrypted_predicted_forest_labels[tree_id][i].decode(decoded_predicted_forest_labels[tree_id][i]);
-//      }
-//    }
-
+    // step 3: active party aggregates and call collaborative decryption
+    EncodedNumber* decrypted_labels = new EncodedNumber[cur_batch_size];
+    party.collaborative_decrypt(predicted_labels,
+                                decrypted_labels,
+                                cur_batch_size,
+                                ACTIVE_PARTY_ID);
     std::cout << "Collaboratively decryption finished" << std::endl;
     LOG(INFO) << "Collaboratively decryption finished";
 
-    // free memory
-    for (int tree_id = 0; tree_id < saved_forest_model.tree_size; tree_id++) {
-      delete [] predicted_forest_labels[tree_id];
-      delete [] decrypted_predicted_forest_labels[tree_id];
-    }
-    delete [] predicted_forest_labels;
-    delete [] decrypted_predicted_forest_labels;
+    delete [] predicted_labels;
+    delete [] decrypted_labels;
 
     google::FlushLogFiles(google::INFO);
   }

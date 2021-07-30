@@ -48,9 +48,8 @@ enum SpdzTreeCompType{ PRUNING_CHECK, COMPUTE_LABEL, FIND_BEST_SPLIT,
 // refers the maximum number of splits considered in a tree
 #define MAX_GLOBAL_SPLIT_NUM 6000
 
-// for inference service
-#define DEFAULT_INFERENCE_ENDPOINT "localhost:50051"
-#define IS_INFERENCE false
+  // for inference service
+  #define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
 
 // for DEBUG
 // to display intermediate information

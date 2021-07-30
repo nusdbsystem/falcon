@@ -93,6 +93,29 @@ RUN mkdir ~/temp && \
     hash -r && \
     cmake --version
 
+# Install grpc server
+WORKDIR /opt
+RUN git clone --recurse-submodules -b v1.33.1 https://github.com/grpc/grpc && \
+    cd grpc && \
+    mkdir -p cmake/build
+
+# Prepare grpc server dependencies
+WORKDIR /opt/grpc
+RUN export MY_INSTALL_DIR=$HOME/.local && \
+    mkdir -p $MY_INSTALL_DIR && \
+    export PATH="$PATH:$MY_INSTALL_DIR/bin" && \
+    bash -xc "\
+    pushd cmake/build; \
+    cmake -DgRPC_INSTALL=ON \
+          -DgRPC_BUILD_TESTS=OFF \
+          -DCMAKE_INSTALL_PREFIX=$MY_INSTALL_DIR \
+          ../..; \
+    make -j; \
+    make install; \
+    popd; \
+    pwd; \
+    "
+
 # Install glog library
 WORKDIR /opt
 RUN git clone https://github.com/google/glog.git && \
@@ -130,16 +153,6 @@ RUN cd third_party/MP-SPDZ && \
     ./compile.py Programs/Source/logistic_regression.mpc && \
     ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
 
-# Install served library
-WORKDIR /opt/falcon
-RUN cd third_party/served && \
-    cd served && \
-    mkdir cmake.build && \
-    cd cmake.build && \
-    cmake ../ && \
-    make && \
-    make install
-
 # Install Go 1.14
 RUN wget -q https://golang.org/dl/go1.14.13.linux-amd64.tar.gz -O go114.tar.gz && \
     tar xzf go114.tar.gz -C /usr/local
@@ -156,6 +169,11 @@ RUN cp ~/.local/bin/protoc /usr/bin/ && \
     SRC_DIR=v0/ && \
     DST_DIR=../message && \
     protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/*.proto
+
+WORKDIR /opt/falcon/src/executor/include/proto
+RUN SRC_DIR=v0/inference/ && \
+    DST_DIR=../message/inference/ && \
+    protoc -I=$SRC_DIR --cpp_out=$DST_DIR --grpc_out=$DST_DIR --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin $SRC_DIR/lr_grpc.proto
 
 WORKDIR /opt/falcon
 RUN export PATH="$PATH:$HOME/.local/bin" && \
