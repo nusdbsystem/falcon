@@ -13,6 +13,7 @@
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_builder.h"
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
+#include <falcon/algorithm/vertical/tree/gbdt_builder.h>
 #include "falcon/inference/server/inference_server.h"
 
 #include <glog/logging.h>
