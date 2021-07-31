@@ -110,38 +110,7 @@ mkdir ~/temp && \
 ```
 
 
-## 5. Install grpc server
-
-```bash
-cd /opt
-git clone --recurse-submodules -b v1.33.1 https://github.com/grpc/grpc && \
-    cd grpc && \
-    mkdir -p cmake/build
-```
-
-
-## 6. Prepare grpc server dependencies
-
-```bash
-cd /opt/grpc
-export MY_INSTALL_DIR=$HOME/.local && \
-    mkdir -p $MY_INSTALL_DIR && \
-    export PATH="$PATH:$MY_INSTALL_DIR/bin" && \
-    bash -xc "\
-    pushd cmake/build; \
-    cmake -DgRPC_INSTALL=ON \
-          -DgRPC_BUILD_TESTS=OFF \
-          -DCMAKE_INSTALL_PREFIX=$MY_INSTALL_DIR \
-          ../..; \
-    make -j; \
-    make install; \
-    popd; \
-    pwd; \
-    "
-```
-
-
-## 7. Install glog library
+## 5. Install glog library
 
 ```bash
 cd /opt
@@ -151,7 +120,7 @@ git clone https://github.com/google/glog.git && \
     cmake --build build
 ```
 
-## 8. Ln gtest library
+## 6. Ln gtest library
 
 ```bash
 cd /usr/src/googletest/googletest && \
@@ -167,7 +136,7 @@ cd /usr/src/googletest/googletest && \
     ln -s /usr/lib/libgtest_main.a /usr/local/lib/googletest/libgtest_main.a
 ```
 
-## 9. Install third_party threshold partially homomorphic encryption library
+## 7. Install third_party threshold partially homomorphic encryption library
 
 ```bash
 
@@ -178,7 +147,7 @@ cd third_party/libhcs && \
     make install
 ```
 
-## 10. Install third_party MP-SPDZ library
+## 8. Install third_party MP-SPDZ library
 
 ```bash
 cd /opt/falcon
@@ -191,8 +160,19 @@ cd third_party/MP-SPDZ && \
     ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
 ```
 
+## 9. Install served library
 
-## 11. Install Go 1.14
+```bash
+cd /opt/falcon
+cd third_party/served && \
+    mkdir cmake.build && \
+    cd cmake.build && \
+    cmake ../ && \
+    make && \
+    make install
+```
+
+## 10. Install Go 1.14
 
 ```bash
 cd /opt/falcon
@@ -201,7 +181,7 @@ wget -q https://golang.org/dl/go1.14.13.linux-amd64.tar.gz -O go114.tar.gz && \
 export PATH=$PATH:/usr/local/go/bin
 ```
 
-## 12. Set environment variables.
+## 11. Set environment variables.
 
 ```bash
 export GOROOT=/usr/local/go
@@ -221,16 +201,7 @@ cp ~/.local/bin/protoc /usr/bin/ && \
     protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/*.proto
 ```
 
-
-```bash
-cd /opt/falcon/src/executor/include/proto
-SRC_DIR=v0/inference/ && \
-    DST_DIR=../message/inference/ && \
-    protoc -I=$SRC_DIR --cpp_out=$DST_DIR --grpc_out=$DST_DIR --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin $SRC_DIR/lr_grpc.proto
-```
-
-
-## 14. build 
+## 15. build
 ```bash
 cd /opt/falcon
 export PATH="$PATH:$HOME/.local/bin" && \
@@ -242,5 +213,5 @@ export PATH="$PATH:$HOME/.local/bin" && \
 
 ## 15. back to working directory 
 ```bash
-/opt
+cd /opt
 ```

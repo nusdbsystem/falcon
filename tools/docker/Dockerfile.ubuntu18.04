@@ -133,7 +133,6 @@ RUN cd third_party/MP-SPDZ && \
 # Install served library
 WORKDIR /opt/falcon
 RUN cd third_party/served && \
-    cd served && \
     mkdir cmake.build && \
     cd cmake.build && \
     cmake ../ && \
