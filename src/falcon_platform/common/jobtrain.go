@@ -106,6 +106,11 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
 			GenerateTreeParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == RandomForestAlgName {
+		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+
+		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+			GenerateRFParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	} else {
 		return errors.New("algorithm name can not be detected")
 	}
@@ -190,7 +195,7 @@ func GenerateLrParams(cfg map[string]interface{}) string {
 	out, err := proto.Marshal(&lrp)
 	if err != nil {
 		// if error, means parser object wrong,
-		log.Fatalln("Failed to encode GenerateLrparams:", err)
+		log.Fatalln("Failed to encode LogisticRegressionParams:", err)
 	}
 
 	return string(out)
@@ -210,7 +215,7 @@ func GenerateTreeParams(cfg map[string]interface{}) string {
 		panic("GenerateTreeParams error in doing Unmarshal")
 	}
 
-	lrp := DecisionTreeParams{
+	dtp := DecisionTreeParams{
 		TreeType:            res.TreeType,
 		Criterion:           res.Criterion,
 		SplitStrategy:       res.SplitStrategy,
@@ -225,9 +230,52 @@ func GenerateTreeParams(cfg map[string]interface{}) string {
 		DpBudget:            res.DpBudget,
 	}
 
-	out, err := proto.Marshal(&lrp)
+	out, err := proto.Marshal(&dtp)
 	if err != nil {
-		log.Fatalln("Failed to encode GenerateLrparams:", err)
+		log.Fatalln("Failed to encode DecisionTreeParams:", err)
+	}
+
+	return string(out)
+}
+
+func GenerateRFParams(cfg map[string]interface{}) string {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateRFParams error in doing Marshal")
+	}
+
+	res := RandomForest{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateRFParams error in doing Unmarshal")
+	}
+
+	dtp := DecisionTreeParams{
+		TreeType:            res.TreeType,
+		Criterion:           res.Criterion,
+		SplitStrategy:       res.SplitStrategy,
+		ClassNum:            res.ClassNum,
+		MaxDepth:            res.MaxDepth,
+		MaxBins:             res.MaxBins,
+		MinSamplesSplit:     res.MinSamplesSplit,
+		MinSamplesLeaf:      res.MinSamplesLeaf,
+		MaxLeafNodes:        res.MaxLeafNodes,
+		MinImpurityDecrease: res.MinImpurityDecrease,
+		MinImpuritySplit:    res.MinImpuritySplit,
+		DpBudget:            res.DpBudget,
+	}
+
+	rfp := RandomForestParams{
+		NEstimator: res.NEstimator,
+		SampleRate: res.SampleRate,
+		DtParam:    &dtp,
+	}
+
+	out, err := proto.Marshal(&rfp)
+	if err != nil {
+		log.Fatalln("Failed to encode RandomForestParams:", err)
 	}
 
 	return string(out)

@@ -117,6 +117,7 @@ const (
 const (
 	LogisticRegressAlgName = "logistic_regression"
 	DecisionTreeAlgName    = "decision_tree"
+	RandomForestAlgName    = "random_forest"
 )
 
 // Content type
