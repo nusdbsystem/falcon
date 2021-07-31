@@ -64,7 +64,7 @@ enum SpdzTreeCompType{ PRUNING_CHECK, COMPUTE_LABEL, FIND_BEST_SPLIT,
 
 enum FLSetting { HORIZONTAL_FL, VERTICAL_FL };
 enum PartyType { ACTIVE_PARTY, PASSIVE_PARTY };
-enum AlgorithmName { LR, DT, RF };
+enum AlgorithmName { LR, DT, RF , GBDT};
 enum DatasetType { TRAIN, TEST, VALIDATE };
 }  // namespace falcon
 

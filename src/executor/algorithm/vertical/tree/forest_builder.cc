@@ -254,9 +254,6 @@ void train_random_forest(Party party, const std::string& params_str,
   LOG(INFO) << "params.dt_param.min_impurity_split = " << params.dt_param.min_impurity_split;
   LOG(INFO) << "params.dt_param.dp_budget = " << params.dt_param.dp_budget;
 
-  std::cout << "Init decision tree model" << std::endl;
-  LOG(INFO) << "Init decision tree model";
-
   RandomForestBuilder random_forest_builder(params,
       training_data,
       testing_data,
@@ -265,23 +262,22 @@ void train_random_forest(Party party, const std::string& params_str,
       training_accuracy,
       testing_accuracy);
 
-  LOG(INFO) << "Init random forest model finished";
-  std::cout << "Init random forest model finished" << std::endl;
+  LOG(INFO) << "Init random forest model builder finished";
+  std::cout << "Init random forest model builder finished" << std::endl;
   google::FlushLogFiles(google::INFO);
 
   random_forest_builder.train(party);
   random_forest_builder.eval(party, falcon::TRAIN);
   random_forest_builder.eval(party, falcon::TEST);
 
-  std::vector<TreeModel> forest_trees;
-  for (int i = 0; i < random_forest_builder.n_estimator; i++) {
-    forest_trees.push_back(random_forest_builder.tree_builders[i].tree);
-  }
-  // save_rf_model(random_forest_builder.forest_model, model_save_file);
   std::string pb_rf_model_string;
   serialize_random_forest_model(random_forest_builder.forest_model, pb_rf_model_string);
   save_pb_model_string(pb_rf_model_string, model_save_file);
   save_training_report(random_forest_builder.getter_training_accuracy(),
       random_forest_builder.getter_testing_accuracy(),
       model_report_file);
+
+  LOG(INFO) << "Trained model and report saved";
+  std::cout << "Trained model and report saved" << std::endl;
+  google::FlushLogFiles(google::INFO);
 }

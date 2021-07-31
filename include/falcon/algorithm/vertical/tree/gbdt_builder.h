@@ -65,6 +65,32 @@ class GbdtBuilder : public ModelBuilder {
               std::vector<double> m_testing_labels,
               double m_training_accuracy = 0.0,
               double m_testing_accuracy = 0.0);
+
+  /**
+ * build each tree of gbdt model
+ *
+ * @param party
+ */
+  void train(Party party);
+
+  /**
+   * evaluate the accuracy on the dataset
+   * @param party
+   * @param eval_type
+   * @param report_save_path
+*/
+  void eval(Party party, falcon::DatasetType eval_type,
+            const std::string& report_save_path = std::string());
 };
+
+/**
+ * train a gbdt model
+ * @param party: initialized party object
+ * @param params: GbdtParams serialized string
+ * @param model_save_file: saved model file
+ * @param model_report_file: saved report file
+ */
+void train_gbdt(Party party, const std::string& params_str,
+    const std::string& model_save_file, const std::string& model_report_file);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_BUILDER_H_

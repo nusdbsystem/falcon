@@ -73,7 +73,6 @@ class RandomForestBuilder : public ModelBuilder {
    * build each tree of random forest
    *
    * @param party
-   * @param sample_rate
    */
   void train(Party party);
 

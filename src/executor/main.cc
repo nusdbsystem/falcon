@@ -132,8 +132,6 @@ int main(int argc, char *argv[]) {
   if (is_inference) {
     LOG(INFO) << "Execute inference logic\n";
     // invoke creating endpoint for inference requests
-    // TODO: there is a problem when using grpc server with spdz_logistic_function_computation
-    // TODO: now alleviate the problem by not including during training (need to check later)
     if (party_type == falcon::ACTIVE_PARTY) {
       run_active_server(inference_endpoint, model_save_file, party, parsed_algorithm_name);
     } else {
@@ -151,6 +149,9 @@ int main(int argc, char *argv[]) {
       case falcon::RF:
         train_random_forest(party, algorithm_params, model_save_file, model_report_file);
         break;
+      case falcon::GBDT:
+        train_gbdt(party, algorithm_params, model_save_file, model_report_file);
+        break;
       default:
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
         break;
@@ -165,5 +166,6 @@ falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
   if ("logistic_regression" == name) output = falcon::LR;
   if ("decision_tree" == name) output = falcon::DT;
   if ("random_forest" == name) output = falcon::RF;
+  if ("gbdt" == name) output = falcon::GBDT;
   return output;
 }

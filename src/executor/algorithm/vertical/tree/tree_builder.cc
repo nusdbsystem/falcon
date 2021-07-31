@@ -1394,4 +1394,8 @@ void train_decision_tree(Party party, const std::string& params_str,
   save_training_report(decision_tree_builder.getter_training_accuracy(),
       decision_tree_builder.getter_testing_accuracy(),
       model_report_file);
+
+  LOG(INFO) << "Trained model and report saved";
+  std::cout << "Trained model and report saved" << std::endl;
+  google::FlushLogFiles(google::INFO);
 }
