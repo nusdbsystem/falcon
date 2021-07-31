@@ -93,6 +93,24 @@ RUN mkdir ~/temp && \
     hash -r && \
     cmake --version
 
+# Install protobuf v3.14.0
+RUN cd ~/temp && \
+    pwd && \
+    wget https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protobuf-all-3.14.0.tar.gz && \
+    tar -xzvf protobuf-all-3.14.0.tar.gz && \
+    cd protobuf-3.14.0 && \
+    ./configure && \
+    make && \
+    make install && \
+    ldconfig && \
+    protoc --version && \
+    cd cmake && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    make install
+
 # Install glog library
 WORKDIR /opt
 RUN git clone https://github.com/google/glog.git && \
@@ -149,15 +167,16 @@ ENV GOPATH /gopath
 ENV PATH $GOROOT/bin:$GOPATH/bin:$PATH
 ENV PATH /root/.local/bin:$PATH
 
-# Replace protoc version
-RUN cp ~/.local/bin/protoc /usr/bin/ && \
-    cd /opt/falcon/src/executor/include/proto && \
+# Compile protobuf messages
+RUN cd /opt/falcon/src/executor/include/proto && \
     SRC_DIR=v0/ && \
     DST_DIR=../message && \
     protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/*.proto
 
+# Build falcon
 WORKDIR /opt/falcon
 RUN export PATH="$PATH:$HOME/.local/bin" && \
+    export PATH="$PATH:/usr/local/bin" && \
     mkdir build && \
     cmake -Bbuild -H. && \
     cd build/ && \

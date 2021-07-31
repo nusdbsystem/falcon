@@ -110,7 +110,28 @@ mkdir ~/temp && \
 ```
 
 
-## 5. Install glog library
+## 5. Install protobuf v3.14.0
+```bash
+cd ~/temp && \
+    pwd && \
+    wget https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protobuf-all-3.14.0.tar.gz && \
+    tar -xzvf protobuf-all-3.14.0.tar.gz && \
+    cd protobuf-3.14.0 && \
+    ./configure && \
+    make && \
+    make install && \
+    ldconfig && \
+    protoc --version && \
+    cd cmake && \ 
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    make install
+```
+
+
+## 6. Install glog library
 
 ```bash
 cd /opt
@@ -120,7 +141,7 @@ git clone https://github.com/google/glog.git && \
     cmake --build build
 ```
 
-## 6. Ln gtest library
+## 7. Ln gtest library
 
 ```bash
 cd /usr/src/googletest/googletest && \
@@ -136,7 +157,7 @@ cd /usr/src/googletest/googletest && \
     ln -s /usr/lib/libgtest_main.a /usr/local/lib/googletest/libgtest_main.a
 ```
 
-## 7. Install third_party threshold partially homomorphic encryption library
+## 8. Install third_party threshold partially homomorphic encryption library
 
 ```bash
 
@@ -147,7 +168,7 @@ cd third_party/libhcs && \
     make install
 ```
 
-## 8. Install third_party MP-SPDZ library
+## 9. Install third_party MP-SPDZ library
 
 ```bash
 cd /opt/falcon
@@ -160,7 +181,7 @@ cd third_party/MP-SPDZ && \
     ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
 ```
 
-## 9. Install served library
+## 10. Install served library
 
 ```bash
 cd /opt/falcon
@@ -172,7 +193,7 @@ cd third_party/served && \
     make install
 ```
 
-## 10. Install Go 1.14
+## 11. Install Go 1.14
 
 ```bash
 cd /opt/falcon
@@ -181,7 +202,7 @@ wget -q https://golang.org/dl/go1.14.13.linux-amd64.tar.gz -O go114.tar.gz && \
 export PATH=$PATH:/usr/local/go/bin
 ```
 
-## 11. Set environment variables.
+## 12. Set environment variables.
 
 ```bash
 export GOROOT=/usr/local/go
@@ -191,17 +212,16 @@ export PATH=/root/.local/bin:$PATH
 ```
 
 
-## 13. Replace protoc version
+## 13. Compile protobuf messages
 
 ```bash
-cp ~/.local/bin/protoc /usr/bin/ && \
     cd /opt/falcon/src/executor/include/proto && \
     SRC_DIR=v0/ && \
     DST_DIR=../message && \
     protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/*.proto
 ```
 
-## 15. build
+## 14. build
 ```bash
 cd /opt/falcon
 export PATH="$PATH:$HOME/.local/bin" && \
