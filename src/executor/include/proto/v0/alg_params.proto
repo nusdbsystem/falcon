@@ -70,3 +70,20 @@ message RandomForestParams {
     DecisionTreeParams dt_param = 3;
 }
 
+// This message denotes the gradient boosting decision tree builder parameters
+message GbdtParams {
+    // number of estimators (note that the number of total trees in the model
+    // does not necessarily equal to the number of estimators for classification)
+    int32 n_estimator = 1;
+    // loss function to be optimized
+    string loss = 2;
+    // learning rate shrinks the contribution of each tree
+    double learning_rate = 3;
+    // the fraction of samples to be used for fitting individual base learners
+    // default 1.0, reserved here for future usage
+    double subsample = 4;
+    // decision tree builder params (note that the tree type here may be changed
+    // when building the gbdt model as they are all regression trees in gbdt)
+    DecisionTreeParams dt_param = 5;
+}
+

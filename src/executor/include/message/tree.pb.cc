@@ -51,6 +51,10 @@ class ForestModelDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ForestModel> _instance;
 } _ForestModel_default_instance_;
+class GbdtModelDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<GbdtModel> _instance;
+} _GbdtModel_default_instance_;
 }  // namespace v0
 }  // namespace falcon
 }  // namespace dbsytem
@@ -97,6 +101,20 @@ static void InitDefaultsscc_info_ForestModel_tree_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ForestModel_tree_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ForestModel_tree_2eproto}, {
+      &scc_info_TreeModel_tree_2eproto.base,}};
+
+static void InitDefaultsscc_info_GbdtModel_tree_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::com::nus::dbsytem::falcon::v0::_GbdtModel_default_instance_;
+    new (ptr) ::com::nus::dbsytem::falcon::v0::GbdtModel();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GbdtModel_tree_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_GbdtModel_tree_2eproto}, {
       &scc_info_TreeModel_tree_2eproto.base,}};
 
 static void InitDefaultsscc_info_Node_tree_2eproto() {
@@ -154,7 +172,7 @@ static void InitDefaultsscc_info_TreeModel_tree_2eproto() {
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_TreeModel_tree_2eproto}, {
       &scc_info_Node_tree_2eproto.base,}};
 
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_tree_2eproto[7];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_tree_2eproto[8];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_tree_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_tree_2eproto = nullptr;
 
@@ -235,6 +253,16 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_tree_2eproto::offsets[] PROTOB
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::ForestModel, tree_size_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::ForestModel, tree_type_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::ForestModel, trees_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, tree_size_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, tree_type_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, n_estimator_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, class_num_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, trees_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::com::nus::dbsytem::falcon::v0::EncryptedStatPerSplit)},
@@ -244,6 +272,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 38, -1, sizeof(::com::nus::dbsytem::falcon::v0::Node)},
   { 56, -1, sizeof(::com::nus::dbsytem::falcon::v0::TreeModel)},
   { 68, -1, sizeof(::com::nus::dbsytem::falcon::v0::ForestModel)},
+  { 76, -1, sizeof(::com::nus::dbsytem::falcon::v0::GbdtModel)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -254,6 +283,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_Node_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_TreeModel_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_ForestModel_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_GbdtModel_default_instance_),
 };
 
 const char descriptor_table_protodef_tree_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -300,15 +330,20 @@ const char descriptor_table_protodef_tree_2eproto[] PROTOBUF_SECTION_VARIABLE(pr
   "num\030\006 \001(\005\022\020\n\010capacity\030\007 \001(\005\"h\n\013ForestMod"
   "el\022\021\n\ttree_size\030\001 \001(\005\022\021\n\ttree_type\030\002 \001(\005"
   "\0223\n\005trees\030\003 \003(\0132$.com.nus.dbsytem.falcon"
-  ".v0.TreeModelP\000b\006proto3"
+  ".v0.TreeModel\"\216\001\n\tGbdtModel\022\021\n\ttree_size"
+  "\030\001 \001(\005\022\021\n\ttree_type\030\002 \001(\005\022\023\n\013n_estimator"
+  "\030\003 \001(\005\022\021\n\tclass_num\030\004 \001(\005\0223\n\005trees\030\005 \003(\013"
+  "2$.com.nus.dbsytem.falcon.v0.TreeModelP\000"
+  "b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_tree_2eproto_deps[1] = {
   &::descriptor_table_common_2eproto,
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_tree_2eproto_sccs[7] = {
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_tree_2eproto_sccs[8] = {
   &scc_info_EncryptedStatPerSplit_tree_2eproto.base,
   &scc_info_EncryptedStatistics_tree_2eproto.base,
   &scc_info_ForestModel_tree_2eproto.base,
+  &scc_info_GbdtModel_tree_2eproto.base,
   &scc_info_Node_tree_2eproto.base,
   &scc_info_NodeUpdateInfo_tree_2eproto.base,
   &scc_info_SplitInfo_tree_2eproto.base,
@@ -316,10 +351,10 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_tre
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_tree_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_tree_2eproto = {
-  false, false, descriptor_table_protodef_tree_2eproto, "tree.proto", 1743,
-  &descriptor_table_tree_2eproto_once, descriptor_table_tree_2eproto_sccs, descriptor_table_tree_2eproto_deps, 7, 1,
+  false, false, descriptor_table_protodef_tree_2eproto, "tree.proto", 1888,
+  &descriptor_table_tree_2eproto_once, descriptor_table_tree_2eproto_sccs, descriptor_table_tree_2eproto_deps, 8, 1,
   schemas, file_default_instances, TableStruct_tree_2eproto::offsets,
-  file_level_metadata_tree_2eproto, 7, file_level_enum_descriptors_tree_2eproto, file_level_service_descriptors_tree_2eproto,
+  file_level_metadata_tree_2eproto, 8, file_level_enum_descriptors_tree_2eproto, file_level_service_descriptors_tree_2eproto,
 };
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -2741,6 +2776,314 @@ void ForestModel::InternalSwap(ForestModel* other) {
 }
 
 
+// ===================================================================
+
+class GbdtModel::_Internal {
+ public:
+};
+
+GbdtModel::GbdtModel(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  trees_(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:com.nus.dbsytem.falcon.v0.GbdtModel)
+}
+GbdtModel::GbdtModel(const GbdtModel& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      trees_(from.trees_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&tree_size_, &from.tree_size_,
+    static_cast<size_t>(reinterpret_cast<char*>(&class_num_) -
+    reinterpret_cast<char*>(&tree_size_)) + sizeof(class_num_));
+  // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.GbdtModel)
+}
+
+void GbdtModel::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GbdtModel_tree_2eproto.base);
+  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+      reinterpret_cast<char*>(&tree_size_) - reinterpret_cast<char*>(this)),
+      0, static_cast<size_t>(reinterpret_cast<char*>(&class_num_) -
+      reinterpret_cast<char*>(&tree_size_)) + sizeof(class_num_));
+}
+
+GbdtModel::~GbdtModel() {
+  // @@protoc_insertion_point(destructor:com.nus.dbsytem.falcon.v0.GbdtModel)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void GbdtModel::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void GbdtModel::ArenaDtor(void* object) {
+  GbdtModel* _this = reinterpret_cast< GbdtModel* >(object);
+  (void)_this;
+}
+void GbdtModel::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void GbdtModel::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const GbdtModel& GbdtModel::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_GbdtModel_tree_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void GbdtModel::Clear() {
+// @@protoc_insertion_point(message_clear_start:com.nus.dbsytem.falcon.v0.GbdtModel)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  trees_.Clear();
+  ::memset(&tree_size_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&class_num_) -
+      reinterpret_cast<char*>(&tree_size_)) + sizeof(class_num_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* GbdtModel::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // int32 tree_size = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          tree_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int32 tree_type = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          tree_type_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int32 n_estimator = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          n_estimator_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int32 class_num = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          class_num_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_trees(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<42>(ptr));
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* GbdtModel::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:com.nus.dbsytem.falcon.v0.GbdtModel)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // int32 tree_size = 1;
+  if (this->tree_size() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_tree_size(), target);
+  }
+
+  // int32 tree_type = 2;
+  if (this->tree_type() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_tree_type(), target);
+  }
+
+  // int32 n_estimator = 3;
+  if (this->n_estimator() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_n_estimator(), target);
+  }
+
+  // int32 class_num = 4;
+  if (this->class_num() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_class_num(), target);
+  }
+
+  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 5;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_trees_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(5, this->_internal_trees(i), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsytem.falcon.v0.GbdtModel)
+  return target;
+}
+
+size_t GbdtModel::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:com.nus.dbsytem.falcon.v0.GbdtModel)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 5;
+  total_size += 1UL * this->_internal_trees_size();
+  for (const auto& msg : this->trees_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // int32 tree_size = 1;
+  if (this->tree_size() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_tree_size());
+  }
+
+  // int32 tree_type = 2;
+  if (this->tree_type() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_tree_type());
+  }
+
+  // int32 n_estimator = 3;
+  if (this->n_estimator() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_n_estimator());
+  }
+
+  // int32 class_num = 4;
+  if (this->class_num() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_class_num());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void GbdtModel::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:com.nus.dbsytem.falcon.v0.GbdtModel)
+  GOOGLE_DCHECK_NE(&from, this);
+  const GbdtModel* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<GbdtModel>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:com.nus.dbsytem.falcon.v0.GbdtModel)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:com.nus.dbsytem.falcon.v0.GbdtModel)
+    MergeFrom(*source);
+  }
+}
+
+void GbdtModel::MergeFrom(const GbdtModel& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:com.nus.dbsytem.falcon.v0.GbdtModel)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  trees_.MergeFrom(from.trees_);
+  if (from.tree_size() != 0) {
+    _internal_set_tree_size(from._internal_tree_size());
+  }
+  if (from.tree_type() != 0) {
+    _internal_set_tree_type(from._internal_tree_type());
+  }
+  if (from.n_estimator() != 0) {
+    _internal_set_n_estimator(from._internal_n_estimator());
+  }
+  if (from.class_num() != 0) {
+    _internal_set_class_num(from._internal_class_num());
+  }
+}
+
+void GbdtModel::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:com.nus.dbsytem.falcon.v0.GbdtModel)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void GbdtModel::CopyFrom(const GbdtModel& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:com.nus.dbsytem.falcon.v0.GbdtModel)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GbdtModel::IsInitialized() const {
+  return true;
+}
+
+void GbdtModel::InternalSwap(GbdtModel* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  trees_.InternalSwap(&other->trees_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(GbdtModel, class_num_)
+      + sizeof(GbdtModel::class_num_)
+      - PROTOBUF_FIELD_OFFSET(GbdtModel, tree_size_)>(
+          reinterpret_cast<char*>(&tree_size_),
+          reinterpret_cast<char*>(&other->tree_size_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata GbdtModel::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace v0
 }  // namespace falcon
@@ -2768,6 +3111,9 @@ template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::TreeModel* Arena::
 }
 template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::ForestModel* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::ForestModel >(Arena* arena) {
   return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::ForestModel >(arena);
+}
+template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::GbdtModel* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::GbdtModel >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::GbdtModel >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 
