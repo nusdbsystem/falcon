@@ -226,6 +226,64 @@ void DecisionTreeBuilder::train(Party party) {
   google::FlushLogFiles(google::INFO);
 }
 
+void DecisionTreeBuilder::train(Party party, EncodedNumber *encrypted_labels) {
+  /// To avoid each tree node disclose which samples are on available,
+  /// we use an encrypted mask vector to protect the information
+  /// while ensure that the training can still be processed.
+  /// Note that for the root node, all the samples are available and every
+  /// party can initialize an encrypted mask vector with [1]
+  /// for the labels, the format should be encrypted (with size class_num * sample_num),
+  /// and is known to other parties as well (should be sent before calling this train method)
+
+  std::cout << "************* Training Start *************" << std::endl;
+  LOG(INFO) << "************* Training Start *************";
+  const clock_t training_start_time = clock();
+
+  // pre-compute label helper and feature helper
+  precompute_label_helper(party.party_type);
+  precompute_feature_helpers();
+
+  int sample_num = training_data.size();
+  int label_size = class_num * sample_num;
+  std::vector<int> available_feature_ids;
+  for (int i = 0; i < local_feature_num; i++) {
+    available_feature_ids.push_back(i);
+  }
+  EncodedNumber * sample_mask_iv = new EncodedNumber[sample_num];
+
+  // retrieve phe pub key
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  // as the samples are available at the beginning of the training, init with 1
+  EncodedNumber tmp;
+  tmp.set_integer(phe_pub_key->n[0], 1);
+  // init encrypted mask vector on the root node
+  for (int i = 0; i < sample_num; i++) {
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sample_mask_iv[i], tmp);
+  }
+
+  // init the root node info
+  tree.nodes[0].depth = 0;
+  EncodedNumber max_impurity;
+  max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
+  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, max_impurity);
+
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+  // recursively build the tree
+  build_node(party, 0, available_feature_ids, sample_mask_iv, encrypted_labels);
+  LOG(INFO) << "tree capacity = " << tree.capacity;
+
+  delete [] sample_mask_iv;
+  djcs_t_free_public_key(phe_pub_key);
+
+  const clock_t training_finish_time = clock();
+  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  LOG(INFO) << "Training time = " << training_consumed_time;
+  LOG(INFO) << "************* Training Finished *************";
+  google::FlushLogFiles(google::INFO);
+}
+
 void DecisionTreeBuilder::build_node(Party &party,
     int node_index,
     std::vector<int> available_feature_ids,

@@ -22,6 +22,8 @@ class GbdtModel {
   int n_estimator;
   // number of classes in the model, 1 for regression
   int class_num;
+  // shrinkage (learning rate)
+  double learning_rate;
   // vector of tree models
   std::vector<TreeModel> gbdt_trees;
 
@@ -30,7 +32,8 @@ class GbdtModel {
   GbdtModel(int m_tree_size,
       std::string m_tree_type,
       int m_n_estimator,
-      int m_class_num);
+      int m_class_num,
+      double m_learning_rate);
   ~GbdtModel();
 
   /**

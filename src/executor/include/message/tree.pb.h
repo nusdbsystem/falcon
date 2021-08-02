@@ -1680,13 +1680,14 @@ class GbdtModel PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kTreesFieldNumber = 5,
+    kTreesFieldNumber = 6,
     kTreeSizeFieldNumber = 1,
     kTreeTypeFieldNumber = 2,
     kNEstimatorFieldNumber = 3,
     kClassNumFieldNumber = 4,
+    kLearningRateFieldNumber = 5,
   };
-  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 5;
+  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
   int trees_size() const;
   private:
   int _internal_trees_size() const;
@@ -1740,6 +1741,15 @@ class GbdtModel PROTOBUF_FINAL :
   void _internal_set_class_num(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
+  // double learning_rate = 5;
+  void clear_learning_rate();
+  double learning_rate() const;
+  void set_learning_rate(double value);
+  private:
+  double _internal_learning_rate() const;
+  void _internal_set_learning_rate(double value);
+  public:
+
   // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.GbdtModel)
  private:
   class _Internal;
@@ -1752,6 +1762,7 @@ class GbdtModel PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int32 tree_type_;
   ::PROTOBUF_NAMESPACE_ID::int32 n_estimator_;
   ::PROTOBUF_NAMESPACE_ID::int32 class_num_;
+  double learning_rate_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_tree_2eproto;
 };
@@ -3113,7 +3124,27 @@ inline void GbdtModel::set_class_num(::PROTOBUF_NAMESPACE_ID::int32 value) {
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.GbdtModel.class_num)
 }
 
-// repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 5;
+// double learning_rate = 5;
+inline void GbdtModel::clear_learning_rate() {
+  learning_rate_ = 0;
+}
+inline double GbdtModel::_internal_learning_rate() const {
+  return learning_rate_;
+}
+inline double GbdtModel::learning_rate() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.GbdtModel.learning_rate)
+  return _internal_learning_rate();
+}
+inline void GbdtModel::_internal_set_learning_rate(double value) {
+  
+  learning_rate_ = value;
+}
+inline void GbdtModel::set_learning_rate(double value) {
+  _internal_set_learning_rate(value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.GbdtModel.learning_rate)
+}
+
+// repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
 inline int GbdtModel::_internal_trees_size() const {
   return trees_.size();
 }

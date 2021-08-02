@@ -262,6 +262,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_tree_2eproto::offsets[] PROTOB
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, tree_type_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, n_estimator_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, class_num_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, learning_rate_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, trees_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -330,11 +331,11 @@ const char descriptor_table_protodef_tree_2eproto[] PROTOBUF_SECTION_VARIABLE(pr
   "num\030\006 \001(\005\022\020\n\010capacity\030\007 \001(\005\"h\n\013ForestMod"
   "el\022\021\n\ttree_size\030\001 \001(\005\022\021\n\ttree_type\030\002 \001(\005"
   "\0223\n\005trees\030\003 \003(\0132$.com.nus.dbsytem.falcon"
-  ".v0.TreeModel\"\216\001\n\tGbdtModel\022\021\n\ttree_size"
+  ".v0.TreeModel\"\245\001\n\tGbdtModel\022\021\n\ttree_size"
   "\030\001 \001(\005\022\021\n\ttree_type\030\002 \001(\005\022\023\n\013n_estimator"
-  "\030\003 \001(\005\022\021\n\tclass_num\030\004 \001(\005\0223\n\005trees\030\005 \003(\013"
-  "2$.com.nus.dbsytem.falcon.v0.TreeModelP\000"
-  "b\006proto3"
+  "\030\003 \001(\005\022\021\n\tclass_num\030\004 \001(\005\022\025\n\rlearning_ra"
+  "te\030\005 \001(\001\0223\n\005trees\030\006 \003(\0132$.com.nus.dbsyte"
+  "m.falcon.v0.TreeModelP\000b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_tree_2eproto_deps[1] = {
   &::descriptor_table_common_2eproto,
@@ -351,7 +352,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_tre
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_tree_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_tree_2eproto = {
-  false, false, descriptor_table_protodef_tree_2eproto, "tree.proto", 1888,
+  false, false, descriptor_table_protodef_tree_2eproto, "tree.proto", 1911,
   &descriptor_table_tree_2eproto_once, descriptor_table_tree_2eproto_sccs, descriptor_table_tree_2eproto_deps, 8, 1,
   schemas, file_default_instances, TableStruct_tree_2eproto::offsets,
   file_level_metadata_tree_2eproto, 8, file_level_enum_descriptors_tree_2eproto, file_level_service_descriptors_tree_2eproto,
@@ -2794,8 +2795,8 @@ GbdtModel::GbdtModel(const GbdtModel& from)
       trees_(from.trees_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::memcpy(&tree_size_, &from.tree_size_,
-    static_cast<size_t>(reinterpret_cast<char*>(&class_num_) -
-    reinterpret_cast<char*>(&tree_size_)) + sizeof(class_num_));
+    static_cast<size_t>(reinterpret_cast<char*>(&learning_rate_) -
+    reinterpret_cast<char*>(&tree_size_)) + sizeof(learning_rate_));
   // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.GbdtModel)
 }
 
@@ -2803,8 +2804,8 @@ void GbdtModel::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GbdtModel_tree_2eproto.base);
   ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
       reinterpret_cast<char*>(&tree_size_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&class_num_) -
-      reinterpret_cast<char*>(&tree_size_)) + sizeof(class_num_));
+      0, static_cast<size_t>(reinterpret_cast<char*>(&learning_rate_) -
+      reinterpret_cast<char*>(&tree_size_)) + sizeof(learning_rate_));
 }
 
 GbdtModel::~GbdtModel() {
@@ -2840,8 +2841,8 @@ void GbdtModel::Clear() {
 
   trees_.Clear();
   ::memset(&tree_size_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&class_num_) -
-      reinterpret_cast<char*>(&tree_size_)) + sizeof(class_num_));
+      reinterpret_cast<char*>(&learning_rate_) -
+      reinterpret_cast<char*>(&tree_size_)) + sizeof(learning_rate_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2880,16 +2881,23 @@ const char* GbdtModel::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 5;
+      // double learning_rate = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 41)) {
+          learning_rate_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(_internal_add_trees(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<42>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<50>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -2944,12 +2952,18 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_class_num(), target);
   }
 
-  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 5;
+  // double learning_rate = 5;
+  if (!(this->learning_rate() <= 0 && this->learning_rate() >= 0)) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(5, this->_internal_learning_rate(), target);
+  }
+
+  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_trees_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(5, this->_internal_trees(i), target, stream);
+      InternalWriteMessage(6, this->_internal_trees(i), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2968,7 +2982,7 @@ size_t GbdtModel::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 5;
+  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
   total_size += 1UL * this->_internal_trees_size();
   for (const auto& msg : this->trees_) {
     total_size +=
@@ -3001,6 +3015,11 @@ size_t GbdtModel::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_class_num());
+  }
+
+  // double learning_rate = 5;
+  if (!(this->learning_rate() <= 0 && this->learning_rate() >= 0)) {
+    total_size += 1 + 8;
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -3047,6 +3066,9 @@ void GbdtModel::MergeFrom(const GbdtModel& from) {
   if (from.class_num() != 0) {
     _internal_set_class_num(from._internal_class_num());
   }
+  if (!(from.learning_rate() <= 0 && from.learning_rate() >= 0)) {
+    _internal_set_learning_rate(from._internal_learning_rate());
+  }
 }
 
 void GbdtModel::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -3072,8 +3094,8 @@ void GbdtModel::InternalSwap(GbdtModel* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   trees_.InternalSwap(&other->trees_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GbdtModel, class_num_)
-      + sizeof(GbdtModel::class_num_)
+      PROTOBUF_FIELD_OFFSET(GbdtModel, learning_rate_)
+      + sizeof(GbdtModel::learning_rate_)
       - PROTOBUF_FIELD_OFFSET(GbdtModel, tree_size_)>(
           reinterpret_cast<char*>(&tree_size_),
           reinterpret_cast<char*>(&other->tree_size_));

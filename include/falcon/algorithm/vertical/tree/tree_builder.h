@@ -137,6 +137,14 @@ class DecisionTreeBuilder : public ModelBuilder {
   void train(Party party);
 
   /**
+   * build the decision tree model given encrypted labels (mainly called
+   * in secure gbdt training) such that other steps can be reused
+   * @param party
+   * @param encrypted_labels: provide encrypted labels
+   */
+  void train(Party party, EncodedNumber* encrypted_labels);
+
+  /**
    * iteratively build tree node
    * @param party
    * @param node_index

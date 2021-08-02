@@ -53,7 +53,7 @@ GbdtBuilder::GbdtBuilder(GbdtParams gbdt_params,
     tree_size = n_estimator;
   }
   gbdt_model = GbdtModel(tree_size, dt_param.tree_type,
-      n_estimator, dt_param.class_num);
+      n_estimator, dt_param.class_num, learning_rate);
   tree_builders.reserve(tree_size);
   local_feature_num = training_data[0].size();
 }
