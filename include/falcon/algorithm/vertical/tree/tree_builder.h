@@ -134,7 +134,7 @@ class DecisionTreeBuilder : public ModelBuilder {
    * build the decision tree model
    * @param party
    */
-  void train(Party party);
+  void train(Party party) override;
 
   /**
    * build the decision tree model given encrypted labels (mainly called
@@ -217,7 +217,7 @@ class DecisionTreeBuilder : public ModelBuilder {
  */
   void eval(Party party,
       falcon::DatasetType eval_type,
-      const std::string& report_save_path = std::string());
+      const std::string& report_save_path = std::string()) override;
 };
 
 /**
