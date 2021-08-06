@@ -15,26 +15,46 @@
 class GbdtModel {
  public:
   // number of trees in the model
-  int tree_size;
+  int tree_size{};
   // type of the tree, 'classification' or 'regression'
   falcon::TreeType tree_type;
   // number of estimator for the gbdt model
-  int n_estimator;
+  int n_estimator{};
   // number of classes in the model, 1 for regression
-  int class_num;
+  int class_num{};
   // shrinkage (learning rate)
-  double learning_rate;
+  double learning_rate{};
+  // dummy predictors, for the initial prediction
+  // if tree_size == n_estimator, only one predictor, otherwise,
+  // multi-class classification, with class_num predictors
+  std::vector<double> dummy_predictors;
   // vector of tree models
   std::vector<TreeModel> gbdt_trees;
 
  public:
-  GbdtModel();
+  /**
+   * default constructor
+   */
+  GbdtModel() = default;
+
+  /**
+   * constructor
+   * @param m_tree_size
+   * @param m_tree_type
+   * @param m_n_estimator
+   * @param m_class_num
+   * @param m_learning_rate
+   */
   GbdtModel(int m_tree_size,
       std::string m_tree_type,
       int m_n_estimator,
       int m_class_num,
       double m_learning_rate);
-  ~GbdtModel();
+
+  /**
+   * default destructor
+   */
+  ~GbdtModel() = default;
 
   /**
    * copy constructor
@@ -61,6 +81,32 @@ class GbdtModel {
                std::vector< std::vector<double> > predicted_samples,
                int predicted_sample_size,
                EncodedNumber* predicted_labels);
+
+  /**
+    * given the gbdt model, predict on samples
+    * @param party
+    * @param predicted_samples
+    * @param predicted_sample_size
+    * @param predicted_labels
+    * @return predicted labels (encrypted)
+    */
+  void predict_regression(Party& party,
+                          std::vector< std::vector<double> > predicted_samples,
+                          int predicted_sample_size,
+                          EncodedNumber* predicted_labels);
+
+  /**
+  * given the gbdt model, predict on samples
+  * @param party
+  * @param predicted_samples
+  * @param predicted_sample_size
+  * @param predicted_labels
+  * @return predicted labels (encrypted)
+  */
+  void predict_classification(Party& party,
+                              std::vector< std::vector<double> > predicted_samples,
+                              int predicted_sample_size,
+                              EncodedNumber* predicted_labels);
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_MODEL_H_

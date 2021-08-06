@@ -7,6 +7,7 @@
 
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/gbdt_model.h>
+#include <falcon/common.h>
 
 // number of estimators (note that the number of total trees in the model
 // does not necessarily equal to the number of estimators for classification)
@@ -71,7 +72,36 @@ class GbdtBuilder : public ModelBuilder {
  *
  * @param party
  */
-  void train(Party party);
+  void train(Party party) override;
+
+  /**
+   * train gbdt regression task
+   *
+   * @param party
+   */
+  void train_regression_task(Party party);
+
+  /**
+   * train gbdt classification task
+   *
+   * @param party
+   */
+  void train_classification_task(Party party);
+
+  /**
+   * compute the encrypted square residual via spdz
+   *
+   * @param party: the participating party
+   * @param residuals: the encrypted residual vector
+   * @param squared_residuals: the returned encrypted residual square vector
+   * @param size: the size of the residual vector
+   * @param phe_precision: the precision of each element in encrypted residual
+   */
+  void square_encrypted_residual(Party party,
+                                 EncodedNumber *residuals,
+                                 EncodedNumber *squared_residuals,
+                                 int size,
+                                 int phe_precision);
 
   /**
    * evaluate the accuracy on the dataset
@@ -80,7 +110,7 @@ class GbdtBuilder : public ModelBuilder {
    * @param report_save_path
 */
   void eval(Party party, falcon::DatasetType eval_type,
-            const std::string& report_save_path = std::string());
+            const std::string& report_save_path = std::string()) override;
 };
 
 /**

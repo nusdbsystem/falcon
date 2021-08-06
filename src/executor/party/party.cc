@@ -354,7 +354,7 @@ void Party::split_train_test_data(
     std::vector<double>& training_labels,
     std::vector<double>& testing_labels) const {
   LOG(INFO) << "Split local data and labels into training and testing dataset.";
-  int training_data_size = sample_num * split_percentage;
+  int training_data_size = (int) (sample_num * split_percentage);
   LOG(INFO) << "Split percentage for train-test = " << split_percentage;
   LOG(INFO) << "training_data_size = " << training_data_size;
 
@@ -668,6 +668,65 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
   }
 
   delete[] encrypted_shares;
+}
+
+void Party::broadcast_encoded_number_array(EncodedNumber *vec,
+                                           int size, int req_party_id) const {
+  if (party_id == req_party_id) {
+    // serialize the encoded number vector and send to other parties
+    std::string vec_str;
+    serialize_encoded_number_array(vec, size, vec_str);
+    for (int id = 0; id < party_num; id++) {
+      if (id != party_id) {
+        send_long_message(id, vec_str);
+      }
+    }
+  } else {
+    // receive the message from req_party_id and set to vec
+    std::string recv_vec_str;
+    recv_long_message(req_party_id, recv_vec_str);
+    deserialize_encoded_number_array(vec, size, recv_vec_str);
+  }
+}
+
+void Party::truncate_ciphers_precision(EncodedNumber *ciphers, int size,
+                                       int req_party_id, int dest_precision) {
+  // check if the cipher precision is higher than the dest_precision
+  // otherwise, no need to truncate the precision
+  int src_precision = abs(ciphers[0].getter_exponent());
+  if (src_precision == dest_precision) {
+    LOG(INFO) << "src precision is the same as dest_precision, do nothing";
+    return;
+  }
+  if (src_precision < dest_precision) {
+    LOG(ERROR) << "cannot increase ciphertext precision";
+    exit(1);
+  }
+  // step 1. broadcast the ciphers from req_party_id
+  // broadcast_encoded_number_array(ciphers, size, req_party_id);
+  // step 2. convert the ciphers into secret shares given src_precision
+  std::vector<double> ciphers_shares;
+  ciphers_to_secret_shares(ciphers,
+                           ciphers_shares,
+                           size,
+                           req_party_id,
+                           src_precision);
+  google::FlushLogFiles(google::INFO);
+  // step 3. convert the secret shares into ciphers given dest_precision
+  EncodedNumber *dest_ciphers = new EncodedNumber[size];
+  secret_shares_to_ciphers(dest_ciphers,
+                           ciphers_shares,
+                           size,
+                           req_party_id,
+                           dest_precision);
+  google::FlushLogFiles(google::INFO);
+  // step 4. inplace ciphers by dest_ciphers
+  for (int i = 0; i < size; i++) {
+    ciphers[i] = dest_ciphers[i];
+  }
+  google::FlushLogFiles(google::INFO);
+  LOG(INFO) << "truncate the ciphers precision finished";
+  delete [] dest_ciphers;
 }
 
 Party::~Party() {

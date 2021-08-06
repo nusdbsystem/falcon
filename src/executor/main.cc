@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "Parse algorithm name and run the program";
   std::cout << "Parse algorithm name and run the program" << std::endl;
 
+  // algorithm_name = "gbdt";
   falcon::AlgorithmName parsed_algorithm_name = parse_algorithm_name(algorithm_name);
 
   if (is_inference) {

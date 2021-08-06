@@ -21,7 +21,9 @@
 struct DecisionTreeParams {
   // type of the tree, 'classification' or 'regression'
   std::string tree_type;
-  // the function to measure the quality of a split 'gini' or 'entropy'
+  // the function to measure the quality of a split
+  // for classification, 'gini' or 'entropy'
+  // for regression, criterion is 'mse'
   std::string criterion;
   // the strategy used to choose a split at each node, 'best' or 'random'
   std::string split_strategy;
@@ -49,7 +51,9 @@ class DecisionTreeBuilder : public ModelBuilder {
  public:
   // type of the tree, 'classification' or 'regression'
   falcon::TreeType tree_type;
-  // the function to measure the quality of a split 'gini' or 'entropy'
+  // the function to measure the quality of a split
+  // for classification, 'gini' or 'entropy'
+  // for regression, criterion is 'mse'
   std::string criterion;
   // the strategy used to choose a split at each node, 'best' or 'random'
   std::string split_strategy;

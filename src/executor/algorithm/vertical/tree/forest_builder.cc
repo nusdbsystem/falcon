@@ -156,7 +156,7 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
     // decode decrypted predicted labels
     for (int i = 0; i < dataset_size; i++) {
       double x;
-      predicted_labels[i].decode(x);
+      decrypted_labels[i].decode(x);
       predictions.push_back(x);
     }
 

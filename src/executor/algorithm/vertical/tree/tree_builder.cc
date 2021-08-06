@@ -8,6 +8,7 @@
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
+#include <falcon/utils/pb_converter/alg_params_converter.h>
 
 #include <map>
 #include <stack>
@@ -198,7 +199,7 @@ void DecisionTreeBuilder::train(Party party) {
   } else {
     // if not active party, receive the encrypted label info
     std::string recv_result_str;
-    party.recv_long_message(0, recv_result_str);
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_result_str);
     deserialize_encoded_number_array(encrypted_labels, label_size, recv_result_str);
   }
   LOG(INFO) << "Finish broadcasting the encrypted label info";
@@ -902,7 +903,7 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party,
       party.ciphers_to_secret_shares(label_info, shares1, 1,
           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
       party.ciphers_to_secret_shares(encrypted_sample_num_aux, shares2, 1,
-          ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+          ACTIVE_PARTY_ID, 0);
       private_values.push_back(shares1[0]);
       private_values.push_back(shares2[0]);
       delete [] label_info;
@@ -920,7 +921,7 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party,
       party.ciphers_to_secret_shares(label_info, shares1, 1,
           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
       party.ciphers_to_secret_shares(encrypted_sample_num_aux, shares2, 1,
-          ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+          ACTIVE_PARTY_ID, 0);
       private_values.push_back(shares1[0]);
       private_values.push_back(shares2[0]);
       delete [] label_info;
@@ -1315,10 +1316,15 @@ void spdz_tree_computation(int party_num,
   google::FlushLogFiles(google::INFO);
 
   // send data to spdz parties
+  std::cout << "party_id = " << party_id << std::endl;
+  LOG(INFO) << "party_id = " << party_id;
   if (party_id == ACTIVE_PARTY_ID) {
     // the active party sends computation id for spdz computation
     std::vector<int> computation_id;
     computation_id.push_back(tree_comp_type);
+    std::cout << "tree_comp_type = " << tree_comp_type << std::endl;
+    LOG(INFO) << "tree_comp_type = " << tree_comp_type;
+    google::FlushLogFiles(google::INFO);
     send_public_values(computation_id, mpc_sockets, party_num);
     // the active party sends tree type and class num to spdz parties
     for (int i = 0; i < public_value_size; i++) {
@@ -1328,6 +1334,8 @@ void spdz_tree_computation(int party_num,
     }
   }
   // all the parties send private shares
+  std::cout << "private value size = " << private_value_size << std::endl;
+  LOG(INFO) << "private value size = " << private_value_size;
   for (int i = 0; i < private_value_size; i++) {
     vector<double> x;
     x.push_back(private_values[i]);
@@ -1357,6 +1365,18 @@ void spdz_tree_computation(int party_num,
       return_values.push_back(best_split_index[0]);
       return_values.push_back(best_left_impurity[0]);
       return_values.push_back(best_right_impurity[0]);
+      res->set_value(return_values);
+      break;
+    }
+    case falcon::GBDT_SQUARE_LABEL: {
+      LOG(INFO) << "SPDZ tree computation type compute squared residuals";
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+      res->set_value(return_values);
+      break;
+    }
+    case falcon::RF_LABEL_MODE: {
+      LOG(INFO) << "SPDZ tree computation type find random forest mode label";
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, 1);
       res->set_value(return_values);
       break;
     }
@@ -1396,7 +1416,7 @@ void train_decision_tree(Party party, const std::string& params_str,
   params.min_impurity_decrease = 0.01;
   params.min_impurity_split = 0.001;
   params.dp_budget = 0.1;
-//  deserialize_dt_params(params, params_str);
+  deserialize_dt_params(params, params_str);
   int weight_size = party.getter_feature_num();
   double training_accuracy = 0.0;
   double testing_accuracy = 0.0;
