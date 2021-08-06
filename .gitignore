@@ -72,6 +72,8 @@ data/dataset/breast_cancer_data/client0/report.txt
 data/dataset/breast_cancer_data/client1/report.txt
 data/dataset/breast_cancer_data/client2/report.txt
 
+data/dataset/energy_prediction_data/
+
 ##############
 # gtest folder
 ##############

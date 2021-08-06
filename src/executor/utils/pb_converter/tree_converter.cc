@@ -711,6 +711,9 @@ void serialize_gbdt_model(GbdtModel gbdt_model, std::string & output_str) {
   pb_gbdt.set_n_estimator(gbdt_model.n_estimator);
   pb_gbdt.set_class_num(gbdt_model.class_num);
   pb_gbdt.set_learning_rate(gbdt_model.learning_rate);
+  for (int i = 0; i < gbdt_model.dummy_predictors.size(); i++) {
+    pb_gbdt.add_dummy_predictors(gbdt_model.dummy_predictors[i]);
+  }
   for (int t = 0; t < gbdt_model.tree_size; t++) {
     com::nus::dbsytem::falcon::v0::TreeModel *pb_tree = pb_gbdt.add_trees();
     pb_tree->set_tree_type(gbdt_model.gbdt_trees[t].type);
@@ -797,6 +800,9 @@ void deserialize_gbdt_model(GbdtModel& gbdt_model, std::string input_str) {
   gbdt_model.n_estimator = deserialized_gbdt.n_estimator();
   gbdt_model.class_num = deserialized_gbdt.class_num();
   gbdt_model.learning_rate = deserialized_gbdt.learning_rate();
+  for (int i = 0; i < deserialized_gbdt.dummy_predictors_size(); i++) {
+    gbdt_model.dummy_predictors.emplace_back(deserialized_gbdt.dummy_predictors(i));
+  }
   for (int t = 0; t < gbdt_model.tree_size; t++) {
     TreeModel tree;
     tree.type = (falcon::TreeType) deserialized_gbdt.trees(t).tree_type();

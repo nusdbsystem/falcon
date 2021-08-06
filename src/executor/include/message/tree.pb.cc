@@ -263,6 +263,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_tree_2eproto::offsets[] PROTOB
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, n_estimator_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, class_num_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, learning_rate_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, dummy_predictors_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtModel, trees_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -331,11 +332,12 @@ const char descriptor_table_protodef_tree_2eproto[] PROTOBUF_SECTION_VARIABLE(pr
   "num\030\006 \001(\005\022\020\n\010capacity\030\007 \001(\005\"h\n\013ForestMod"
   "el\022\021\n\ttree_size\030\001 \001(\005\022\021\n\ttree_type\030\002 \001(\005"
   "\0223\n\005trees\030\003 \003(\0132$.com.nus.dbsytem.falcon"
-  ".v0.TreeModel\"\245\001\n\tGbdtModel\022\021\n\ttree_size"
+  ".v0.TreeModel\"\277\001\n\tGbdtModel\022\021\n\ttree_size"
   "\030\001 \001(\005\022\021\n\ttree_type\030\002 \001(\005\022\023\n\013n_estimator"
   "\030\003 \001(\005\022\021\n\tclass_num\030\004 \001(\005\022\025\n\rlearning_ra"
-  "te\030\005 \001(\001\0223\n\005trees\030\006 \003(\0132$.com.nus.dbsyte"
-  "m.falcon.v0.TreeModelP\000b\006proto3"
+  "te\030\005 \001(\001\022\030\n\020dummy_predictors\030\006 \003(\001\0223\n\005tr"
+  "ees\030\007 \003(\0132$.com.nus.dbsytem.falcon.v0.Tr"
+  "eeModelP\000b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_tree_2eproto_deps[1] = {
   &::descriptor_table_common_2eproto,
@@ -352,7 +354,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_tre
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_tree_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_tree_2eproto = {
-  false, false, descriptor_table_protodef_tree_2eproto, "tree.proto", 1911,
+  false, false, descriptor_table_protodef_tree_2eproto, "tree.proto", 1937,
   &descriptor_table_tree_2eproto_once, descriptor_table_tree_2eproto_sccs, descriptor_table_tree_2eproto_deps, 8, 1,
   schemas, file_default_instances, TableStruct_tree_2eproto::offsets,
   file_level_metadata_tree_2eproto, 8, file_level_enum_descriptors_tree_2eproto, file_level_service_descriptors_tree_2eproto,
@@ -2785,6 +2787,7 @@ class GbdtModel::_Internal {
 
 GbdtModel::GbdtModel(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  dummy_predictors_(arena),
   trees_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
@@ -2792,6 +2795,7 @@ GbdtModel::GbdtModel(::PROTOBUF_NAMESPACE_ID::Arena* arena)
 }
 GbdtModel::GbdtModel(const GbdtModel& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
+      dummy_predictors_(from.dummy_predictors_),
       trees_(from.trees_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::memcpy(&tree_size_, &from.tree_size_,
@@ -2839,6 +2843,7 @@ void GbdtModel::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  dummy_predictors_.Clear();
   trees_.Clear();
   ::memset(&tree_size_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&learning_rate_) -
@@ -2888,16 +2893,26 @@ const char* GbdtModel::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::
           ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
-      // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
+      // repeated double dummy_predictors = 6;
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedDoubleParser(_internal_mutable_dummy_predictors(), ptr, ctx);
+          CHK_(ptr);
+        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 49) {
+          _internal_add_dummy_predictors(::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr));
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(_internal_add_trees(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<50>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<58>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -2958,12 +2973,17 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(5, this->_internal_learning_rate(), target);
   }
 
-  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
+  // repeated double dummy_predictors = 6;
+  if (this->_internal_dummy_predictors_size() > 0) {
+    target = stream->WriteFixedPacked(6, _internal_dummy_predictors(), target);
+  }
+
+  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 7;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_trees_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(6, this->_internal_trees(i), target, stream);
+      InternalWriteMessage(7, this->_internal_trees(i), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2982,7 +3002,22 @@ size_t GbdtModel::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
+  // repeated double dummy_predictors = 6;
+  {
+    unsigned int count = static_cast<unsigned int>(this->_internal_dummy_predictors_size());
+    size_t data_size = 8UL * count;
+    if (data_size > 0) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
+    }
+    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
+    _dummy_predictors_cached_byte_size_.store(cached_size,
+                                    std::memory_order_relaxed);
+    total_size += data_size;
+  }
+
+  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 7;
   total_size += 1UL * this->_internal_trees_size();
   for (const auto& msg : this->trees_) {
     total_size +=
@@ -3053,6 +3088,7 @@ void GbdtModel::MergeFrom(const GbdtModel& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  dummy_predictors_.MergeFrom(from.dummy_predictors_);
   trees_.MergeFrom(from.trees_);
   if (from.tree_size() != 0) {
     _internal_set_tree_size(from._internal_tree_size());
@@ -3092,6 +3128,7 @@ bool GbdtModel::IsInitialized() const {
 void GbdtModel::InternalSwap(GbdtModel* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  dummy_predictors_.InternalSwap(&other->dummy_predictors_);
   trees_.InternalSwap(&other->trees_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(GbdtModel, learning_rate_)

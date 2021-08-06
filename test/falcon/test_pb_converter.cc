@@ -933,6 +933,7 @@ TEST(PB_Converter, GbdtModel) {
   gbdt_model.tree_type = falcon::CLASSIFICATION;
   gbdt_model.n_estimator = 3;
   gbdt_model.class_num = 2;
+  gbdt_model.dummy_predictors.emplace_back(0.1);
   gbdt_model.learning_rate = 0.1;
   int n_estimator = 3;
   mpz_t v_n;
@@ -995,6 +996,10 @@ TEST(PB_Converter, GbdtModel) {
   EXPECT_EQ(gbdt_model.n_estimator, deserialized_gbdt_model.n_estimator);
   EXPECT_EQ(gbdt_model.class_num, deserialized_gbdt_model.class_num);
   EXPECT_EQ(gbdt_model.learning_rate, deserialized_gbdt_model.learning_rate);
+  for (int i = 0; i < gbdt_model.dummy_predictors.size(); i++) {
+    EXPECT_EQ(gbdt_model.dummy_predictors[i],
+              deserialized_gbdt_model.dummy_predictors[i]);
+  }
   for (int t = 0; t < deserialized_gbdt_model.tree_size; t++) {
     EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].type,
               tree.type);

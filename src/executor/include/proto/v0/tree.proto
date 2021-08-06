@@ -76,5 +76,6 @@ message GbdtModel {
     int32 n_estimator = 3;          // the number of estimator for gbdt model
     int32 class_num = 4;            // the number of classes, 1 for regression
     double learning_rate = 5;       // the shrinkage rate during the training
-    repeated TreeModel trees = 6;   // the stored trees
+    repeated double dummy_predictors = 6; // the dummy predictors for the trees
+    repeated TreeModel trees = 7;   // the stored trees
 }

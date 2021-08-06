@@ -1680,14 +1680,37 @@ class GbdtModel PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kTreesFieldNumber = 6,
+    kDummyPredictorsFieldNumber = 6,
+    kTreesFieldNumber = 7,
     kTreeSizeFieldNumber = 1,
     kTreeTypeFieldNumber = 2,
     kNEstimatorFieldNumber = 3,
     kClassNumFieldNumber = 4,
     kLearningRateFieldNumber = 5,
   };
-  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
+  // repeated double dummy_predictors = 6;
+  int dummy_predictors_size() const;
+  private:
+  int _internal_dummy_predictors_size() const;
+  public:
+  void clear_dummy_predictors();
+  private:
+  double _internal_dummy_predictors(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >&
+      _internal_dummy_predictors() const;
+  void _internal_add_dummy_predictors(double value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >*
+      _internal_mutable_dummy_predictors();
+  public:
+  double dummy_predictors(int index) const;
+  void set_dummy_predictors(int index, double value);
+  void add_dummy_predictors(double value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >&
+      dummy_predictors() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >*
+      mutable_dummy_predictors();
+
+  // repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 7;
   int trees_size() const;
   private:
   int _internal_trees_size() const;
@@ -1757,6 +1780,8 @@ class GbdtModel PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< double > dummy_predictors_;
+  mutable std::atomic<int> _dummy_predictors_cached_byte_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::TreeModel > trees_;
   ::PROTOBUF_NAMESPACE_ID::int32 tree_size_;
   ::PROTOBUF_NAMESPACE_ID::int32 tree_type_;
@@ -3144,7 +3169,54 @@ inline void GbdtModel::set_learning_rate(double value) {
   // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.GbdtModel.learning_rate)
 }
 
-// repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 6;
+// repeated double dummy_predictors = 6;
+inline int GbdtModel::_internal_dummy_predictors_size() const {
+  return dummy_predictors_.size();
+}
+inline int GbdtModel::dummy_predictors_size() const {
+  return _internal_dummy_predictors_size();
+}
+inline void GbdtModel::clear_dummy_predictors() {
+  dummy_predictors_.Clear();
+}
+inline double GbdtModel::_internal_dummy_predictors(int index) const {
+  return dummy_predictors_.Get(index);
+}
+inline double GbdtModel::dummy_predictors(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.GbdtModel.dummy_predictors)
+  return _internal_dummy_predictors(index);
+}
+inline void GbdtModel::set_dummy_predictors(int index, double value) {
+  dummy_predictors_.Set(index, value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.GbdtModel.dummy_predictors)
+}
+inline void GbdtModel::_internal_add_dummy_predictors(double value) {
+  dummy_predictors_.Add(value);
+}
+inline void GbdtModel::add_dummy_predictors(double value) {
+  _internal_add_dummy_predictors(value);
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.GbdtModel.dummy_predictors)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >&
+GbdtModel::_internal_dummy_predictors() const {
+  return dummy_predictors_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >&
+GbdtModel::dummy_predictors() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.GbdtModel.dummy_predictors)
+  return _internal_dummy_predictors();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >*
+GbdtModel::_internal_mutable_dummy_predictors() {
+  return &dummy_predictors_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >*
+GbdtModel::mutable_dummy_predictors() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.GbdtModel.dummy_predictors)
+  return _internal_mutable_dummy_predictors();
+}
+
+// repeated .com.nus.dbsytem.falcon.v0.TreeModel trees = 7;
 inline int GbdtModel::_internal_trees_size() const {
   return trees_.size();
 }
