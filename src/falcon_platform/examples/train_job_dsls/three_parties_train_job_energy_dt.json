@@ -1,0 +1,70 @@
+{
+  "job_name": "credit_card_training",
+  "job_info": "this is the job_decs",
+  "job_fl_type": "vertical",
+  "existing_key": 0,
+  "party_nums": 3,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "127.0.0.1:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/energy_prediction_data/client0",
+        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/energy_prediction_data/client0",
+        "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/energy_prediction_data/client0"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "127.0.0.1:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/energy_prediction_data/client1",
+        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/energy_prediction_data/client1",
+        "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/energy_prediction_data/client1"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "127.0.0.1:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/energy_prediction_data/client2",
+        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/energy_prediction_data/client2",
+        "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/energy_prediction_data/client2"
+      }
+    }
+  ],
+  "tasks": {
+    "model_training": {
+      "mpc_algorithm_name": "vfl_decision_tree",
+      "algorithm_name": "decision_tree",
+      "input_configs": {
+        "data_input": {
+          "data": "client.txt",
+          "key": "phe_keys"
+        },
+        "algorithm_config": {
+          "tree_type": "regression",
+          "criterion": "mse",
+          "split_strategy": "best",
+          "class_num": 2,
+          "max_depth": 3,
+          "max_bins": 8,
+          "min_samples_split": 5,
+          "min_samples_leaf": 5,
+          "max_leaf_nodes": 16,
+          "min_impurity_decrease": 0.1,
+          "min_impurity_split": 0.001,
+          "dp_budget": 0.1
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    }
+  }
+}

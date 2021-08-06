@@ -72,7 +72,17 @@ data/dataset/breast_cancer_data/client0/report.txt
 data/dataset/breast_cancer_data/client1/report.txt
 data/dataset/breast_cancer_data/client2/report.txt
 
-data/dataset/energy_prediction_data/
+data/dataset/energy_prediction_data/client0/phe_keys
+data/dataset/energy_prediction_data/client1/phe_keys
+data/dataset/energy_prediction_data/client2/phe_keys
+
+data/dataset/energy_prediction_data/client0/saved_model.pb
+data/dataset/energy_prediction_data/client1/saved_model.pb
+data/dataset/energy_prediction_data/client2/saved_model.pb
+
+data/dataset/energy_prediction_data/client0/report.txt
+data/dataset/energy_prediction_data/client1/report.txt
+data/dataset/energy_prediction_data/client2/report.txt
 
 ##############
 # gtest folder
