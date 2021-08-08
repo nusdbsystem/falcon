@@ -460,9 +460,12 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
   int deserialized_node_index = 1;
   int deserialized_split_num = 3;
   int deserialized_classes_num = 2;
-  EncodedNumber *deserialized_left_sample_nums;
-  EncodedNumber *deserialized_right_sample_nums;
-  EncodedNumber ** deserialized_encrypted_statistics;
+  EncodedNumber *deserialized_left_sample_nums = new EncodedNumber[3];
+  EncodedNumber *deserialized_right_sample_nums = new EncodedNumber[3];
+  EncodedNumber ** deserialized_encrypted_statistics = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    deserialized_encrypted_statistics[i] = new EncodedNumber[2*2];
+  }
 
   deserialize_encrypted_statistics(deserialized_client_id, deserialized_node_index,
       deserialized_split_num, deserialized_classes_num,

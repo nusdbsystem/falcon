@@ -353,7 +353,7 @@ void train_gbdt(Party party, const std::string& params_str,
 
   GbdtParams params;
   // currently for testing
-  params.n_estimator = 2;
+  params.n_estimator = 8;
   params.learning_rate = 0.1;
   params.subsample = 1.0;
   params.loss = "ls";
@@ -361,7 +361,7 @@ void train_gbdt(Party party, const std::string& params_str,
   params.dt_param.criterion = "mse";
   params.dt_param.split_strategy = "best";
   params.dt_param.class_num = 2;
-  params.dt_param.max_depth = 1;
+  params.dt_param.max_depth = 3;
   params.dt_param.max_bins = 8;
   params.dt_param.min_samples_split = 5;
   params.dt_param.min_samples_leaf = 5;

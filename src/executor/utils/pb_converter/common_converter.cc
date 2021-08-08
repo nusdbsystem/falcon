@@ -15,6 +15,7 @@ void serialize_int_array(std::vector<int> vec, std::string& output_message) {
     int_array.add_int_item(vec[i]);
   }
   int_array.SerializeToString(&output_message);
+  int_array.Clear();
 }
 
 void deserialize_int_array(std::vector<int>& vec, const std::string& input_message) {
@@ -50,6 +51,7 @@ void serialize_encoded_number(EncodedNumber number, std::string& output_message)
   mpz_clear(g_value);
   free(n_str_c);
   free(value_str_c);
+  encoded_number.Clear();
 }
 
 void deserialize_encoded_number(EncodedNumber& number, const std::string& input_message) {
@@ -98,6 +100,7 @@ void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::
     free(value_str_c);
   }
   encoded_number_array.SerializeToString(&output_message);
+  encoded_number_array.Clear();
 }
 
 void deserialize_encoded_number_array(EncodedNumber* number_array, int size, const std::string& input_message) {

@@ -1,8 +1,8 @@
 {
-  "job_name": "energy prediction",
+  "job_name": "energy dataset",
   "job_info": "this is the job_decs",
   "job_fl_type": "vertical",
-  "existing_key": 0,
+  "existing_key": 1,
   "party_nums": 3,
   "task_num": 1,
   "party_info": [
@@ -50,7 +50,7 @@
           "n_estimator": 8,
           "sample_rate": 0.8,
           "tree_type": "regression",
-          "criterion": "gini",
+          "criterion": "mse",
           "split_strategy": "best",
           "class_num": 2,
           "max_depth": 3,

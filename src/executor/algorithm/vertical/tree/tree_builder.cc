@@ -21,6 +21,8 @@
 #include <glog/logging.h>
 #include <Networking/ssl_sockets.h>
 #include <falcon/utils/math/math_ops.h>
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/message_lite.h>
 
 DecisionTreeBuilder::DecisionTreeBuilder() {}
 
@@ -62,7 +64,7 @@ DecisionTreeBuilder::DecisionTreeBuilder(DecisionTreeParams params,
   // init feature types to continuous by default
   // NOTE: here should use the training_data instead of m_training_data
   //        because the m_training_data is already moved
-  local_feature_num = training_data[0].size();
+  local_feature_num = (int) training_data[0].size();
   for (int i = 0; i < local_feature_num; i++) {
     feature_types.push_back(falcon::CONTINUOUS);
   }
@@ -372,28 +374,27 @@ void DecisionTreeBuilder::build_node(Party &party,
   global_left_branch_sample_nums = new EncodedNumber[MAX_GLOBAL_SPLIT_NUM];
   global_right_branch_sample_nums = new EncodedNumber[MAX_GLOBAL_SPLIT_NUM];
 
+  // compute local encrypted statistics
+  if (local_splits_num != 0) {
+    encrypted_statistics = new EncodedNumber*[local_splits_num];
+    for (int i = 0; i < local_splits_num; i++) {
+      // here 2 * class_num refers to left branch and right branch
+      encrypted_statistics[i] = new EncodedNumber[2 * class_num];
+    }
+    encrypted_left_branch_sample_nums = new EncodedNumber[local_splits_num];
+    encrypted_right_branch_sample_nums = new EncodedNumber[local_splits_num];
+    // call compute function
+    compute_encrypted_statistics(party, node_index,
+                                 available_feature_ids,
+                                 sample_mask_iv,
+                                 encrypted_statistics,
+                                 encrypted_labels,
+                                 encrypted_left_branch_sample_nums,
+                                 encrypted_right_branch_sample_nums);
+  }
+  LOG(INFO) << "Finish computing local statistics";
 
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    // compute local encrypted statistics
-    if (local_splits_num != 0) {
-      encrypted_statistics = new EncodedNumber*[local_splits_num];
-      for (int i = 0; i < local_splits_num; i++) {
-        // here 2 * class_num refers to left branch and right branch
-        encrypted_statistics[i] = new EncodedNumber[2 * class_num];
-      }
-      encrypted_left_branch_sample_nums = new EncodedNumber[local_splits_num];
-      encrypted_right_branch_sample_nums = new EncodedNumber[local_splits_num];
-      // call compute function
-      compute_encrypted_statistics(party, node_index,
-          available_feature_ids,
-          sample_mask_iv,
-          encrypted_statistics,
-          encrypted_labels,
-          encrypted_left_branch_sample_nums,
-          encrypted_right_branch_sample_nums);
-    }
-    LOG(INFO) << "Finish computing local statistics";
-
     // pack self
     if (local_splits_num == 0) {
       party_split_nums.push_back(0);
@@ -411,24 +412,31 @@ void DecisionTreeBuilder::build_node(Party &party,
 
     // receive from the other clients of the encrypted statistics
     for (int i = 0; i < party.party_num; i++) {
-      std::string recv_encrypted_statistics_str;
+      std::string recv_encrypted_statistics_str, recv_local_split_num_str;
       if (i != party.party_id) {
+        party.recv_long_message(i, recv_local_split_num_str);
         party.recv_long_message(i, recv_encrypted_statistics_str);
         int recv_party_id, recv_node_index, recv_split_num, recv_classes_num;
-        EncodedNumber **recv_encrypted_statistics;
-        EncodedNumber *recv_left_sample_nums;
-        EncodedNumber *recv_right_sample_nums;
-        deserialize_encrypted_statistics(recv_party_id, recv_node_index,
-            recv_split_num, recv_classes_num,
-            recv_left_sample_nums, recv_right_sample_nums,
-            recv_encrypted_statistics,
-            recv_encrypted_statistics_str);
-
+        recv_split_num = std::stoi(recv_local_split_num_str);
         // pack the encrypted statistics
         if (recv_split_num == 0) {
           party_split_nums.push_back(0);
           continue;
-        } else {
+        }
+
+        if (recv_split_num != 0) {
+          EncodedNumber **recv_encrypted_statistics = new EncodedNumber*[recv_split_num];
+          for (int s = 0; s < recv_split_num; s++) {
+            recv_encrypted_statistics[s] = new EncodedNumber[2 * class_num];
+          }
+          EncodedNumber *recv_left_sample_nums = new EncodedNumber[recv_split_num];
+          EncodedNumber *recv_right_sample_nums = new EncodedNumber[recv_split_num];
+          deserialize_encrypted_statistics(recv_party_id, recv_node_index,
+                                           recv_split_num, recv_classes_num,
+                                           recv_left_sample_nums, recv_right_sample_nums,
+                                           recv_encrypted_statistics,
+                                           recv_encrypted_statistics_str);
+
           party_split_nums.push_back(recv_split_num);
           for (int j = 0; j < recv_split_num; j++) {
             global_left_branch_sample_nums[global_split_num + j] = recv_left_sample_nums[j];
@@ -438,14 +446,14 @@ void DecisionTreeBuilder::build_node(Party &party,
             }
           }
           global_split_num += recv_split_num;
-        }
 
-        delete [] recv_left_sample_nums;
-        delete [] recv_right_sample_nums;
-        for (int xx = 0; xx < recv_split_num; xx++) {
-          delete [] recv_encrypted_statistics[xx];
+          delete [] recv_left_sample_nums;
+          delete [] recv_right_sample_nums;
+          for (int xx = 0; xx < recv_split_num; xx++) {
+            delete [] recv_encrypted_statistics[xx];
+          }
+          delete [] recv_encrypted_statistics;
         }
-        delete [] recv_encrypted_statistics;
       }
     }
     LOG(INFO) << "The global_split_num = " << global_split_num;
@@ -461,42 +469,20 @@ void DecisionTreeBuilder::build_node(Party &party,
   }
 
   if (party.party_type == falcon::PASSIVE_PARTY) {
-    if (local_splits_num == 0) {
-      LOG(INFO) << "Local feature used up";
-      std::string s;
-      serialize_encrypted_statistics(party.party_id, node_index,
-          local_splits_num, class_num,
-          encrypted_left_branch_sample_nums,
-          encrypted_right_branch_sample_nums,
-          encrypted_statistics, s);
-      party.send_long_message(ACTIVE_PARTY_ID, s);
-    } else {
-      encrypted_statistics = new EncodedNumber*[local_splits_num];
-      for (int i = 0; i < local_splits_num; i++) {
-        encrypted_statistics[i] = new EncodedNumber[2 * class_num];
-      }
-      encrypted_left_branch_sample_nums = new EncodedNumber[local_splits_num];
-      encrypted_right_branch_sample_nums = new EncodedNumber[local_splits_num];
+    // first send local split num
+    LOG(INFO) << "Local split num = " << local_splits_num;
+    std::string local_split_num_str = std::to_string(local_splits_num);
+    party.send_long_message(ACTIVE_PARTY_ID, local_split_num_str);
+    // then send the encrypted statistics
+    std::string encrypted_statistics_str;
+    serialize_encrypted_statistics(party.party_id, node_index,
+                                   local_splits_num, class_num,
+                                   encrypted_left_branch_sample_nums,
+                                   encrypted_right_branch_sample_nums,
+                                   encrypted_statistics, encrypted_statistics_str);
+    party.send_long_message(ACTIVE_PARTY_ID, encrypted_statistics_str);
 
-      // call compute function
-      compute_encrypted_statistics(party, node_index,
-          available_feature_ids,
-          sample_mask_iv,
-          encrypted_statistics,
-          encrypted_labels,
-          encrypted_left_branch_sample_nums,
-          encrypted_right_branch_sample_nums);
-      LOG(INFO) << "Finish computing local statistics";
-      // send encrypted statistics to the super client
-      std::string s;
-      serialize_encrypted_statistics(party.party_id, node_index,
-          local_splits_num, class_num,
-          encrypted_left_branch_sample_nums,
-          encrypted_right_branch_sample_nums,
-          encrypted_statistics, s);
-      party.send_long_message(ACTIVE_PARTY_ID, s);
-    }
-
+    // recv the split info from active party
     std::string recv_split_info_str;
     party.recv_long_message(0, recv_split_info_str);
     deserialize_split_info(global_split_num, party_split_nums, recv_split_info_str);
@@ -1376,7 +1362,9 @@ void spdz_tree_computation(int party_num,
     }
     case falcon::RF_LABEL_MODE: {
       LOG(INFO) << "SPDZ tree computation type find random forest mode label";
-      std::vector<double> return_values = receive_result(mpc_sockets, party_num, 1);
+      // public_values[1] denotes the number of predicted samples for computing mode
+      LOG(INFO) << "public_values[1], i.e., #predicted sample size = " << public_values[1];
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, public_values[1]);
       res->set_value(return_values);
       break;
     }

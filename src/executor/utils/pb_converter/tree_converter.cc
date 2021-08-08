@@ -97,6 +97,7 @@ void serialize_encrypted_statistics(int client_id,
     }
   }
   pb_encrypted_statistics.SerializeToString(&output_str);
+  pb_encrypted_statistics.Clear();
 }
 
 
@@ -123,12 +124,6 @@ void deserialize_encrypted_statistics(int & client_id,
   classes_num = deserialized_encrypted_statistics.classes_num();
 
   if (split_num != 0) {
-    left_sample_nums = new EncodedNumber[split_num];
-    right_sample_nums = new EncodedNumber[split_num];
-    encrypted_statistics = new EncodedNumber*[split_num];
-    for (int i = 0; i < split_num; i++) {
-      encrypted_statistics[i] = new EncodedNumber[2 * classes_num];
-    }
     // has encrypted statistics
     for (int i = 0; i < deserialized_encrypted_statistics.left_sample_nums_of_splits_size(); i++) {
       com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber pb_number =
@@ -290,6 +285,7 @@ void serialize_update_info(int source_party_id,
   free(value_str_left_c);
   free(n_str_right_c);
   free(value_str_right_c);
+  pb_update_info.Clear();
 }
 
 
@@ -395,6 +391,7 @@ void serialize_split_info(int global_split_num,
     pb_split_info.add_split_num_vec(client_split_nums[i]);
   }
   pb_split_info.SerializeToString(&output_str);
+  pb_split_info.Clear();
 }
 
 
@@ -485,6 +482,7 @@ void serialize_tree_model(TreeModel tree_model, std::string & output_str) {
   }
 
   pb_tree.SerializeToString(&output_str);
+  pb_tree.Clear();
 }
 
 
@@ -629,6 +627,7 @@ void serialize_random_forest_model(ForestModel forest_model, std::string & outpu
   }
 
   pb_forest.SerializeToString(&output_str);
+  pb_forest.Clear();
 }
 
 void deserialize_random_forest_model(ForestModel& forest_model, std::string input_str) {
@@ -785,6 +784,7 @@ void serialize_gbdt_model(GbdtModel gbdt_model, std::string & output_str) {
   }
 
   pb_gbdt.SerializeToString(&output_str);
+  pb_gbdt.Clear();
 }
 
 void deserialize_gbdt_model(GbdtModel& gbdt_model, std::string input_str) {

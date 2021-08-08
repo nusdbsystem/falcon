@@ -24,6 +24,7 @@ void serialize_lr_params(LogisticRegressionParams lr_params, std::string& output
   logistic_regression_params.set_differential_privacy_budget(lr_params.dp_budget);
   logistic_regression_params.set_fit_bias(lr_params.fit_bias);
   logistic_regression_params.SerializeToString(&output_message);
+  logistic_regression_params.Clear();
 }
 
 void deserialize_lr_params(LogisticRegressionParams& lr_params, const std::string& input_message) {
@@ -62,6 +63,7 @@ void serialize_dt_params(DecisionTreeParams dt_params, std::string& output_messa
   decision_tree_params.set_min_impurity_split(dt_params.min_impurity_split);
   decision_tree_params.set_dp_budget(dt_params.dp_budget);
   decision_tree_params.SerializeToString(&output_message);
+  decision_tree_params.Clear();
 }
 
 void deserialize_dt_params(DecisionTreeParams& dt_params, const std::string& input_message) {
@@ -104,6 +106,7 @@ void serialize_rf_params(RandomForestParams rf_params, std::string& output_messa
   decision_tree_params->set_dp_budget(rf_params.dt_param.dp_budget);
   random_forest_params.set_allocated_dt_param(decision_tree_params);
   random_forest_params.SerializeToString(&output_message);
+  random_forest_params.Clear();
 }
 
 void deserialize_rf_params(RandomForestParams& rf_params, const std::string& input_message) {
@@ -150,6 +153,7 @@ void serialize_gbdt_params(GbdtParams gbdt_params, std::string& output_message) 
   decision_tree_params->set_dp_budget(gbdt_params.dt_param.dp_budget);
   gradient_boosting_params.set_allocated_dt_param(decision_tree_params);
   gradient_boosting_params.SerializeToString(&output_message);
+  gradient_boosting_params.Clear();
 }
 
 void deserialize_gbdt_params(GbdtParams& gbdt_params, const std::string& input_message) {

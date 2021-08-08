@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <unistd.h>
 #include <boost/program_options.hpp>
 
 #include "falcon/network/Comm.hpp"
@@ -159,6 +160,7 @@ int main(int argc, char *argv[]) {
     }
     std::cout << "Finish algorithm " << std::endl;
   }
+  // sleep(15);
   return EXIT_SUCCESS;
 }
 

@@ -5,6 +5,7 @@
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
+#include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/math/math_ops.h>
 
 #include <glog/logging.h>
@@ -164,7 +165,12 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
     if (tree_builders[0].tree_type == falcon::CLASSIFICATION) {
       int correct_num = 0;
       for (int i = 0; i < dataset_size; i++) {
-        if (predictions[i] == cur_test_dataset_labels[i]) {
+        // LOG(INFO) << "prediction[" << i << "] = " << predictions[i] <<
+        // ", ground truth label[" << i << "] = " << cur_test_dataset_labels[i];
+        // the decoded label is returned from mpc program, and there is a
+        // precision loss, so here check the precision less than a threshold
+        // TODO: check how to return an integer from mpc properly
+        if (abs(abs(cur_test_dataset_labels[i] - abs(predictions[i]))) < ROUNDED_PRECISION) {
           correct_num += 1;
         }
       }
@@ -192,6 +198,7 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
 
   // free memory
   delete [] predicted_labels;
+  delete [] decrypted_labels;
 
   const clock_t testing_finish_time = clock();
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
@@ -222,7 +229,7 @@ void train_random_forest(Party party, const std::string& params_str,
   params.dt_param.min_impurity_decrease = 0.01;
   params.dt_param.min_impurity_split = 0.001;
   params.dt_param.dp_budget = 0.1;
-//  deserialize_rf_params(params, params_str);
+  deserialize_rf_params(params, params_str);
   int weight_size = party.getter_feature_num();
   double training_accuracy = 0.0;
   double testing_accuracy = 0.0;
