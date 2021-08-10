@@ -298,14 +298,146 @@ void GbdtBuilder::train_classification_task(Party party) {
       delete [] residuals;
       delete [] squared_residuals;
       delete [] flatten_residuals;
-      google::FlushLogFiles(google::INFO);
     }
     delete [] raw_predictions;
     delete [] encrypted_true_labels;
   }
 
-  if (dt_param.class_num > 2) {
+  // multi-class classification
+  if (gbdt_model.class_num > 2) {
+    // step 1
+    // init the dummy estimator and compute raw_predictions: for multi-class
+    // classification, using the log(odds) for the raw_predictions of each tree
+    EncodedNumber *raw_predictions = new EncodedNumber[sample_size * gbdt_model.class_num];
+    // init loss function, for regression loss, class num is set to 1
+    MultinomialDeviance multinomial_deviance(gbdt_model.tree_type, gbdt_model.class_num);
+    // get the initial encrypted raw_predictions, all parties obtain raw_predictions
+    multinomial_deviance.get_init_raw_predictions(party, raw_predictions,
+                                                  sample_size * gbdt_model.class_num,
+                                               training_data, training_labels);
+    // add the dummy mean prediction to the gbdt_model
+    for (int i = 0; i < gbdt_model.class_num; i++) {
+      gbdt_model.dummy_predictors.emplace_back(multinomial_deviance.dummy_predictions[i]);
+    }
+    // init the encrypted labels, only the active party can init,
+    // for multi-class classification, init one-hot labels for each class
+    EncodedNumber *encrypted_true_labels = new EncodedNumber[sample_size * gbdt_model.class_num];
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      double positive_class = 1.0;
+      double negative_class = 0.0;
+      for (int c = 0; c < gbdt_model.class_num; c++) {
+        // compute one hot label vector
+        std::vector<double> one_hot_labels;
+        for (int i = 0; i < sample_size; i++) {
+          if ((int) training_labels[i] == c) {
+            one_hot_labels.push_back(positive_class);
+          } else {
+            one_hot_labels.push_back(negative_class);
+          }
+        }
+        for (int i = 0; i < sample_size; i++) {
+          int index = c * sample_size + i;
+          encrypted_true_labels[index].set_double(phe_pub_key->n[0], one_hot_labels[i]);
+          djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+                             encrypted_true_labels[index],
+                             encrypted_true_labels[index]);
+        }
+      }
+    }
+    // active party broadcasts the encrypted true labels
+    party.broadcast_encoded_number_array(encrypted_true_labels,
+                                         sample_size * gbdt_model.class_num, ACTIVE_PARTY_ID);
 
+    // iteratively train the regression trees, tree_size = n_estimator * class_num
+    LOG(INFO) << "tree_size = " << gbdt_model.tree_size;
+    LOG(INFO) << "n_estimator = " << gbdt_model.n_estimator;
+    LOG(INFO) << "class_num = " << gbdt_model.class_num;
+    for (int tree_id = 0; tree_id < gbdt_model.n_estimator; tree_id++) {
+      LOG(INFO) << "------------- build the " << tree_id << "-th tree -------------";
+      // step 2
+      // compute the encrypted residual, i.e., negative gradient
+      EncodedNumber *residuals = new EncodedNumber[sample_size * gbdt_model.class_num];
+      multinomial_deviance.negative_gradient(party,
+                                             encrypted_true_labels,
+                                             raw_predictions,
+                                             residuals,
+                                             sample_size * gbdt_model.class_num);
+      LOG(INFO) << "negative gradient computed finished";
+      EncodedNumber *squared_residuals = new EncodedNumber[sample_size * gbdt_model.class_num];
+      square_encrypted_residual(party,
+                                residuals,
+                                squared_residuals,
+                                sample_size * gbdt_model.class_num,
+                                PHE_FIXED_POINT_PRECISION);
+
+      // build a tree for each class
+      for (int c = 0; c < gbdt_model.class_num; c++) {
+        LOG(INFO) << "----- build the " << tree_id << "-th tree ----- with class " << c;
+        // this is the tree id in the gbdt_model.trees
+        int read_tree_id = tree_id * gbdt_model.class_num + c;
+        // flatten the residuals and squared_residuals into one vector for calling
+        // the train_with_encrypted_labels in cart_tree.h
+        EncodedNumber *flatten_residuals = new
+            EncodedNumber[REGRESSION_TREE_CLASS_NUM * sample_size];
+        for (int i = 0; i < sample_size; i++) {
+          int real_sample_id = c * sample_size + i;
+          flatten_residuals[i] = residuals[real_sample_id];
+          flatten_residuals[sample_size + i] = squared_residuals[real_sample_id];
+        }
+        LOG(INFO) << "compute squared residuals finished";
+
+        // step 3
+        // init a tree builder and train the model with flatten_residuals
+        // check gbdt task type, note that the gbdt type can be classification, but
+        // all the trained decision trees are regression trees
+        DecisionTreeParams classification_dt_params = dt_param;
+        classification_dt_params.tree_type = "regression";
+        classification_dt_params.class_num = REGRESSION_TREE_CLASS_NUM;
+        tree_builders.emplace_back(classification_dt_params,
+                                   training_data, testing_data,
+                                   training_labels, testing_labels,
+                                   training_accuracy, testing_accuracy);
+        tree_builders[read_tree_id].train(party, flatten_residuals);
+        LOG(INFO) << "tree builder = " << read_tree_id << " train finished";
+        google::FlushLogFiles(google::INFO);
+        // step 4
+        // after training the model, update the terminal regions,
+        // note that we need to copy the read_tree_raw_predictions and
+        // read_tree_encrypted_truth_labels for this real_tree_id from the
+        // original raw_predictions and encrypted_truth_labels before update terminal regions
+        EncodedNumber *real_tree_encrypted_truth_labels = new EncodedNumber[sample_size];
+        EncodedNumber *real_tree_raw_predictions = new EncodedNumber[sample_size];
+        EncodedNumber *real_tree_residuals = new EncodedNumber[sample_size];
+        for (int i = 0; i < sample_size; i++) {
+          int real_sample_id = c * sample_size + i;
+          real_tree_encrypted_truth_labels[i] = encrypted_true_labels[real_sample_id];
+          real_tree_raw_predictions[i] = raw_predictions[real_sample_id];
+          real_tree_residuals[i] = residuals[real_sample_id];
+        }
+        multinomial_deviance.update_terminal_regions(party, tree_builders[read_tree_id],
+                                                     real_tree_encrypted_truth_labels,
+                                                     real_tree_residuals, real_tree_raw_predictions,
+                                                     sample_size, learning_rate, 0);
+        // after update terminal regions, also update the raw_predictions
+        // for the next iteration usage, the other two vectors can be discarded
+        for (int i = 0; i < sample_size; i++) {
+          int real_sample_id = c * sample_size + i;
+          raw_predictions[real_sample_id] = real_tree_raw_predictions[i];
+        }
+        LOG(INFO) << "update terminal regions and raw predictions finished";
+        google::FlushLogFiles(google::INFO);
+        // save the trained regression tree model to gbdt_model
+        gbdt_model.gbdt_trees.emplace_back(tree_builders[read_tree_id].tree);
+        delete [] flatten_residuals;
+        delete [] real_tree_encrypted_truth_labels;
+        delete [] real_tree_raw_predictions;
+        delete [] real_tree_residuals;
+      }
+      delete [] residuals;
+      delete [] squared_residuals;
+    }
+    delete [] raw_predictions;
+    delete [] encrypted_true_labels;
   }
 
   // free retrieved public key

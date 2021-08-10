@@ -15,15 +15,15 @@
 class GbdtModel {
  public:
   // number of trees in the model
-  int tree_size{};
+  int tree_size;
   // type of the tree, 'classification' or 'regression'
   falcon::TreeType tree_type;
   // number of estimator for the gbdt model
-  int n_estimator{};
+  int n_estimator;
   // number of classes in the model, 1 for regression
-  int class_num{};
+  int class_num;
   // shrinkage (learning rate)
-  double learning_rate{};
+  double learning_rate;
   // dummy predictors, for the initial prediction
   // if tree_size == n_estimator, only one predictor, otherwise,
   // multi-class classification, with class_num predictors

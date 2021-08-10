@@ -342,6 +342,9 @@ class BinomialDeviance : public ClassificationLossFunction {
 // This class defines the MultinomialDeviance loss function for classification
 class MultinomialDeviance : public ClassificationLossFunction {
  public:
+  // init dummy predictions
+  std::vector<double> dummy_predictions;
+
  public:
   /**
    * default constructor
