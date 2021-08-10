@@ -84,16 +84,17 @@ class GbdtModel {
 
   /**
     * given the gbdt model, predict on samples
+    * if regression or binary classification
     * @param party
     * @param predicted_samples
     * @param predicted_sample_size
     * @param predicted_labels
     * @return predicted labels (encrypted)
     */
-  void predict_regression(Party& party,
-                          std::vector< std::vector<double> > predicted_samples,
-                          int predicted_sample_size,
-                          EncodedNumber* predicted_labels);
+  void predict_single_estimator(Party& party,
+                                std::vector< std::vector<double> > predicted_samples,
+                                int predicted_sample_size,
+                                EncodedNumber* predicted_labels);
 
   /**
   * given the gbdt model, predict on samples
@@ -103,7 +104,7 @@ class GbdtModel {
   * @param predicted_labels
   * @return predicted labels (encrypted)
   */
-  void predict_classification(Party& party,
+  void predict_multi_estimator(Party& party,
                               std::vector< std::vector<double> > predicted_samples,
                               int predicted_sample_size,
                               EncodedNumber* predicted_labels);

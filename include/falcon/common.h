@@ -40,8 +40,16 @@ namespace falcon {
 enum TreeNodeType{ INTERNAL, LEAF };
 enum TreeFeatureType{ CONTINUOUS, CATEGORICAL };
 enum TreeType{ CLASSIFICATION, REGRESSION };
-enum SpdzTreeCompType{ PRUNING_CHECK, COMPUTE_LABEL, FIND_BEST_SPLIT,
-    GBDT_SQUARE_LABEL, GBDT_SOFTMAX, RF_LABEL_MODE };
+enum SpdzTreeCompType{
+  PRUNING_CHECK, // check if the node satisfies pruning conditions
+  COMPUTE_LABEL, // when a leaf node reaches, compute its label
+  FIND_BEST_SPLIT, // find the best split for a decision tree node
+  GBDT_SQUARE_LABEL, // compute the square label for gbdt models
+  GBDT_SOFTMAX, // compute the softmax predictions for each estimator
+  RF_LABEL_MODE, // compute the mode of the predicted labels of the trees
+  GBDT_EXPIT,  // compute the negative gradient for binomial deviance loss
+  GBDT_UPDATE_TERMINAL_REGION // compute the terminal region labels
+};
 #define REGRESSION_TREE_CLASS_NUM 2
 #define SPDZ_PORT_TREE 18000
 #define MAX_IMPURITY 100000.0

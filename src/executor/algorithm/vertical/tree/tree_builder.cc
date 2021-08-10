@@ -1368,6 +1368,20 @@ void spdz_tree_computation(int party_num,
       res->set_value(return_values);
       break;
     }
+    case falcon::GBDT_EXPIT: {
+      LOG(INFO) << "SPDZ tree computation type compute expit(raw_predictions)";
+      // public_values[0] denotes the number of samples
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, public_values[0]);
+      res->set_value(return_values);
+      break;
+    }
+    case falcon::GBDT_UPDATE_TERMINAL_REGION: {
+      LOG(INFO) << "SPDZ tree computation type compute terminal region new labels";
+      // public_values[1] denotes the number of leaf nodes
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, public_values[1]);
+      res->set_value(return_values);
+      break;
+    }
     default:
       LOG(INFO) << "SPDZ tree computation type is not found.";
       exit(1);

@@ -61,8 +61,8 @@ class LossFunction {
    * after training each tree of the gbdt model, update the leaves' labels
    * in the tree, refer to sklearn _gb_losses.py for the details
    * @param party: the participating party
-   * @param tree_model: the current decision tree model
-   * @param data: the data used to update, usually the training data
+   * @param tree_builder: the current tree builder
+   * @param ground_truth_labels: the encrypted ground truth labels
    * @param residuals: the encrypted residual for this tree
    * @param raw_predictions: the encrypted raw_predictions for this tree
    * @param size: the size of the predicting samples
@@ -72,8 +72,8 @@ class LossFunction {
    * @param estimator_index: the index of the estimator
    */
   virtual void update_terminal_regions(Party party,
-                                       TreeModel tree_model,
-                                       std::vector<std::vector<double>> data,
+                                       DecisionTreeBuilder &decision_tree_builder,
+                                       EncodedNumber *ground_truth_labels,
                                        EncodedNumber* residuals,
                                        EncodedNumber* raw_predictions,
                                        int size,
@@ -146,7 +146,8 @@ class ClassificationLossFunction : public LossFunction {
   virtual void raw_predictions_to_probas(Party party,
                                         EncodedNumber* raw_predictions,
                                         EncodedNumber* probas,
-                                        int size) = 0;
+                                        int size,
+                                        int phe_precision) = 0;
 
   /**
    * compute the prediction labels based on the raw predictions
@@ -158,7 +159,8 @@ class ClassificationLossFunction : public LossFunction {
   virtual void raw_predictions_to_decision(Party party,
                                            EncodedNumber* raw_predictions,
                                            EncodedNumber* decisions,
-                                           int size) = 0;
+                                           int size,
+                                           int phe_precision) = 0;
 };
 
 // This class defines the LeastSqureError loss function for regression
@@ -202,8 +204,8 @@ class LeastSquareError : public RegressionLossFunction {
    * after training each tree of the gbdt model, update the leaves' labels
    * in the tree, refer to sklearn _gb_losses.py for the details
    * @param party: the participating party
-   * @param tree_model: the current decision tree model
-   * @param data: the data used to update, usually the training data
+   * @param tree_builder: the current tree builder
+   * @param ground_truth_labels: the encrypted ground truth labels
    * @param residuals: the encrypted residual for this tree
    * @param raw_predictions: the encrypted raw_predictions for this tree
    * @param size: the size of the predicting samples
@@ -213,8 +215,8 @@ class LeastSquareError : public RegressionLossFunction {
    * @param estimator_index: the index of the estimator
    */
   void update_terminal_regions(Party party,
-                               TreeModel tree_model,
-                               std::vector<std::vector<double>> data,
+                               DecisionTreeBuilder &decision_tree_builder,
+                               EncodedNumber *ground_truth_labels,
                                EncodedNumber* residuals,
                                EncodedNumber* raw_predictions,
                                int size,
@@ -238,6 +240,10 @@ class LeastSquareError : public RegressionLossFunction {
 
 // This class defines the BinomialDeviance loss function for classification
 class BinomialDeviance : public ClassificationLossFunction {
+ public:
+  // init dummy prediction
+  double dummy_prediction = 0.0;
+
  public:
   /**
    * default constructor
@@ -273,8 +279,8 @@ class BinomialDeviance : public ClassificationLossFunction {
    * after training each tree of the gbdt model, update the leaves' labels
    * in the tree, refer to sklearn _gb_losses.py for the details
    * @param party: the participating party
-   * @param tree_model: the current decision tree model
-   * @param data: the data used to update, usually the training data
+   * @param tree_builder: the current tree builder
+   * @param ground_truth_labels: the encrypted ground truth labels
    * @param residuals: the encrypted residual for this tree
    * @param raw_predictions: the encrypted raw_predictions for this tree
    * @param size: the size of the predicting samples
@@ -284,8 +290,8 @@ class BinomialDeviance : public ClassificationLossFunction {
    * @param estimator_index: the index of the estimator
    */
   void update_terminal_regions(Party party,
-                               TreeModel tree_model,
-                               std::vector<std::vector<double>> data,
+                               DecisionTreeBuilder &decision_tree_builder,
+                               EncodedNumber *ground_truth_labels,
                                EncodedNumber* residuals,
                                EncodedNumber* raw_predictions,
                                int size,
@@ -316,7 +322,8 @@ class BinomialDeviance : public ClassificationLossFunction {
   void raw_predictions_to_probas(Party party,
                                  EncodedNumber* raw_predictions,
                                  EncodedNumber* probas,
-                                 int size) override;
+                                 int size,
+                                 int phe_precision) override;
 
   /**
    * compute the prediction labels based on the raw predictions
@@ -328,7 +335,8 @@ class BinomialDeviance : public ClassificationLossFunction {
   void raw_predictions_to_decision(Party party,
                                    EncodedNumber* raw_predictions,
                                    EncodedNumber* decisions,
-                                   int size) override;
+                                   int size,
+                                   int phe_precision) override;
 };
 
 // This class defines the MultinomialDeviance loss function for classification
@@ -369,8 +377,8 @@ class MultinomialDeviance : public ClassificationLossFunction {
    * after training each tree of the gbdt model, update the leaves' labels
    * in the tree, refer to sklearn _gb_losses.py for the details
    * @param party: the participating party
-   * @param tree_model: the current decision tree model
-   * @param data: the data used to update, usually the training data
+   * @param tree_builder: the current tree builder
+   * @param ground_truth_labels: the encrypted ground truth labels
    * @param residuals: the encrypted residual for this tree
    * @param raw_predictions: the encrypted raw_predictions for this tree
    * @param size: the size of the predicting samples
@@ -380,8 +388,8 @@ class MultinomialDeviance : public ClassificationLossFunction {
    * @param estimator_index: the index of the estimator
    */
   void update_terminal_regions(Party party,
-                               TreeModel tree_model,
-                               std::vector<std::vector<double>> data,
+                               DecisionTreeBuilder &decision_tree_builder,
+                               EncodedNumber *ground_truth_labels,
                                EncodedNumber* residuals,
                                EncodedNumber* raw_predictions,
                                int size,
@@ -412,7 +420,8 @@ class MultinomialDeviance : public ClassificationLossFunction {
   void raw_predictions_to_probas(Party party,
                                  EncodedNumber* raw_predictions,
                                  EncodedNumber* probas,
-                                 int size) override;
+                                 int size,
+                                 int phe_precision) override;
 
   /**
    * compute the prediction labels based on the raw predictions
@@ -424,7 +433,38 @@ class MultinomialDeviance : public ClassificationLossFunction {
   void raw_predictions_to_decision(Party party,
                                    EncodedNumber* raw_predictions,
                                    EncodedNumber* decisions,
-                                   int size) override;
+                                   int size,
+                                   int phe_precision) override;
 };
+
+/**
+ * after building a tree model, update the raw predictions
+ * @param party: the participating party
+ * @param tree_builder: the current tree builder
+ * @param raw_predictions: the encrypted raw predictions, to be returned
+ * @param size: the size of the predicting samples
+ * @param learning_rate: the learning rate for raw predictions update
+ */
+void update_raw_predictions_with_learning_rate(Party party,
+                                               DecisionTreeBuilder &decision_tree_builder,
+                                               EncodedNumber* raw_predictions,
+                                               int size,
+                                               double learning_rate);
+
+/**
+ * compute the expit of the raw_predictions
+ * @param party: the participating party
+ * @param raw_predictions: the encrypted raw predictions
+ * @param expit_raw_predictions: the encrypted expit raw predictions, to be returned
+ * @param size: the size of the predicting samples
+ * @param class_num: the number of classes
+ * @param phe_precision: the precision of the ciphertext
+ */
+void compute_raw_predictions_expit(Party party,
+                                   EncodedNumber* raw_predictions,
+                                   EncodedNumber* expit_raw_predictions,
+                                   int size,
+                                   int class_num,
+                                   int phe_precision);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_LOSS_H_
