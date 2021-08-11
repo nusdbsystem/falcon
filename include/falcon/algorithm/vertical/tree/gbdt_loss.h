@@ -470,4 +470,43 @@ void compute_raw_predictions_expit(Party party,
                                    int class_num,
                                    int phe_precision);
 
+/**
+ * compute the softmax of the raw predictions
+ * @param party: the participating party
+ * @param raw_predictions: the encrypted raw predictions
+ * @param softmax_raw_predictions: the encrypted softmax raw predictions, to be returned
+ * @param sample_size: the size of the predicting samples
+ * @param class_num: the number of classes
+ * @param phe_precision: the precision of the ciphertext
+ */
+void compute_raw_predictions_softmax(Party party,
+                                     EncodedNumber* raw_predictions,
+                                     EncodedNumber* softmax_raw_predictions,
+                                     int sample_size,
+                                     int class_num,
+                                     int phe_precision);
+
+/**
+   * after training each tree of the gbdt model, update the leaves' labels
+   * in the tree, refer to sklearn _gb_losses.py for the details
+   * @param party: the participating party
+   * @param tree_builder: the current tree builder
+   * @param ground_truth_labels: the encrypted ground truth labels
+   * @param residuals: the encrypted residual for this tree
+   * @param raw_predictions: the encrypted raw_predictions for this tree
+   * @param size: the size of the predicting samples
+   * @param learning_rate: the shrinkage rate in the gbdt params, when multiply
+   *    learning_rate, need to truncate the result precision before adding to
+   *    the original raw_predictions
+   * @param class_num: the class num for the update
+ */
+void update_terminal_regions_for_classification(Party party,
+                                                DecisionTreeBuilder &decision_tree_builder,
+                                                EncodedNumber *ground_truth_labels,
+                                                EncodedNumber* residuals,
+                                                EncodedNumber* raw_predictions,
+                                                int sample_size,
+                                                double learning_rate,
+                                                int class_num);
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_LOSS_H_

@@ -1360,6 +1360,12 @@ void spdz_tree_computation(int party_num,
       res->set_value(return_values);
       break;
     }
+    case falcon::GBDT_SOFTMAX: {
+      LOG(INFO) << "SPDZ tree computation type compute softmax results";
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+      res->set_value(return_values);
+      break;
+    }
     case falcon::RF_LABEL_MODE: {
       LOG(INFO) << "SPDZ tree computation type find random forest mode label";
       // public_values[1] denotes the number of predicted samples for computing mode

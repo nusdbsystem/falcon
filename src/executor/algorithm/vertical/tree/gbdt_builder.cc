@@ -400,6 +400,7 @@ void GbdtBuilder::train_classification_task(Party party) {
         tree_builders[read_tree_id].train(party, flatten_residuals);
         LOG(INFO) << "tree builder = " << read_tree_id << " train finished";
         google::FlushLogFiles(google::INFO);
+
         // step 4
         // after training the model, update the terminal regions,
         // note that we need to copy the read_tree_raw_predictions and
