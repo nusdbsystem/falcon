@@ -565,7 +565,7 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
           std::vector<double> predictions_per_sample;
           for (int c = 0; c < gbdt_model.class_num; c++) {
             LOG(INFO) << "prediction " << i << ": class num " << c << " = " << predictions[c * dataset_size + i];
-            predictions_per_sample.push_back(c * dataset_size + i);
+            predictions_per_sample.push_back(predictions[c * dataset_size + i]);
           }
           // find argmax class label
           double prediction_decision = argmax(predictions_per_sample);
