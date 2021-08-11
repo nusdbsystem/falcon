@@ -286,7 +286,7 @@ MultinomialDeviance::MultinomialDeviance(falcon::TreeType m_tree_type,
                                          int m_class_num) :
                                          ClassificationLossFunction(m_tree_type,
                                                                     m_class_num) {
-  if (m_class_num < 2) {
+  if (m_class_num <= 2) {
     LOG(ERROR) << "multi-class classification class num should > 2.";
     exit(1);
   }

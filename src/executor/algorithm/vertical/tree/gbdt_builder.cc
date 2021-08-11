@@ -210,6 +210,9 @@ void GbdtBuilder::train_classification_task(Party party) {
                   "loss function.";
     exit(1);
   }
+  LOG(INFO) << "Begin train a gbdt classification task";
+  LOG(INFO) << "gbdt_model.class_num = " << gbdt_model.class_num;
+  google::FlushLogFiles(google::INFO);
   // retrieve phe pub key
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
@@ -315,14 +318,14 @@ void GbdtBuilder::train_classification_task(Party party) {
     multinomial_deviance.get_init_raw_predictions(party, raw_predictions,
                                                   sample_size * gbdt_model.class_num,
                                                training_data, training_labels);
-    // add the dummy mean prediction to the gbdt_model
-    for (int i = 0; i < gbdt_model.class_num; i++) {
-      gbdt_model.dummy_predictors.emplace_back(multinomial_deviance.dummy_predictions[i]);
-    }
     // init the encrypted labels, only the active party can init,
     // for multi-class classification, init one-hot labels for each class
     EncodedNumber *encrypted_true_labels = new EncodedNumber[sample_size * gbdt_model.class_num];
     if (party.party_type == falcon::ACTIVE_PARTY) {
+      // add the dummy mean prediction to the gbdt_model
+      for (int i = 0; i < gbdt_model.class_num; i++) {
+        gbdt_model.dummy_predictors.emplace_back(multinomial_deviance.dummy_predictions[i]);
+      }
       double positive_class = 1.0;
       double negative_class = 0.0;
       for (int c = 0; c < gbdt_model.class_num; c++) {
@@ -352,6 +355,7 @@ void GbdtBuilder::train_classification_task(Party party) {
     LOG(INFO) << "tree_size = " << gbdt_model.tree_size;
     LOG(INFO) << "n_estimator = " << gbdt_model.n_estimator;
     LOG(INFO) << "class_num = " << gbdt_model.class_num;
+    google::FlushLogFiles(google::INFO);
     for (int tree_id = 0; tree_id < gbdt_model.n_estimator; tree_id++) {
       LOG(INFO) << "------------- build the " << tree_id << "-th tree -------------";
       // step 2
@@ -372,7 +376,7 @@ void GbdtBuilder::train_classification_task(Party party) {
 
       // build a tree for each class
       for (int c = 0; c < gbdt_model.class_num; c++) {
-        LOG(INFO) << "----- build the " << tree_id << "-th tree ----- with class " << c;
+        LOG(INFO) << "------ build the " << tree_id << "-th tree ------ with class ------" << c;
         // this is the tree id in the gbdt_model.trees
         int read_tree_id = tree_id * gbdt_model.class_num + c;
         // flatten the residuals and squared_residuals into one vector for calling
@@ -517,21 +521,25 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
 
   // compute predictions
   // now the predicted labels are computed by mpc, thus it is already the final label
-  EncodedNumber* predicted_labels = new EncodedNumber[dataset_size];
+  int prediction_result_size = dataset_size;
+  if (gbdt_model.tree_type == falcon::CLASSIFICATION && gbdt_model.class_num > 2) {
+    prediction_result_size = dataset_size * gbdt_model.class_num;
+  }
+  EncodedNumber* predicted_labels = new EncodedNumber[prediction_result_size];
   gbdt_model.predict(party, cur_test_dataset, dataset_size, predicted_labels);
 
   // step 3: active party aggregates and call collaborative decryption
-  EncodedNumber* decrypted_labels = new EncodedNumber[dataset_size];
+  EncodedNumber* decrypted_labels = new EncodedNumber[prediction_result_size];
   party.collaborative_decrypt(predicted_labels,
                               decrypted_labels,
-                              dataset_size,
+                              prediction_result_size,
                               ACTIVE_PARTY_ID);
 
   // calculate accuracy by the active party
   std::vector<double> predictions;
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // decode decrypted predicted labels
-    for (int i = 0; i < dataset_size; i++) {
+    for (int i = 0; i < prediction_result_size; i++) {
       double x;
       decrypted_labels[i].decode(x);
       predictions.push_back(x);
@@ -542,11 +550,26 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
       int correct_num = 0;
       if (gbdt_model.class_num == 2) {
         // binary classification
-        for (int i = 0; i < dataset_size; i++) {
+        for (int i = 0; i < prediction_result_size; i++) {
           LOG(INFO) << "before predictions[" << i << "] = " << predictions[i];
           predictions[i] = (predictions[i] > LOGREG_THRES) ? 1.0 : 0.0;
           LOG(INFO) << "after predictions[" << i << "] = " << predictions[i];
           if (predictions[i] == cur_test_dataset_labels[i]) {
+            correct_num += 1;
+          }
+        }
+      }
+      if (gbdt_model.class_num > 2) {
+        // multi-class classification
+        for (int i = 0; i < dataset_size; i++) {
+          std::vector<double> predictions_per_sample;
+          for (int c = 0; c < gbdt_model.class_num; c++) {
+            LOG(INFO) << "prediction " << i << ": class num " << c << " = " << predictions[c * dataset_size + i];
+            predictions_per_sample.push_back(c * dataset_size + i);
+          }
+          // find argmax class label
+          double prediction_decision = argmax(predictions_per_sample);
+          if (prediction_decision == cur_test_dataset_labels[i]) {
             correct_num += 1;
           }
         }
