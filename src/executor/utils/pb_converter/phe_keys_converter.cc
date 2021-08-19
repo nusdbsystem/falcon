@@ -40,6 +40,7 @@ void serialize_phe_keys(djcs_t_public_key* phe_pub_key,
   free(g_str_c);
   free(delta_str_c);
   free(si_str_c);
+  phe_keys.Clear();
 }
 
 void deserialize_phe_keys(djcs_t_public_key* phe_pub_key,

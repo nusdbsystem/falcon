@@ -97,6 +97,7 @@ void serialize_encrypted_statistics(int client_id,
     }
   }
   pb_encrypted_statistics.SerializeToString(&output_str);
+  pb_encrypted_statistics.Clear();
 }
 
 
@@ -123,12 +124,6 @@ void deserialize_encrypted_statistics(int & client_id,
   classes_num = deserialized_encrypted_statistics.classes_num();
 
   if (split_num != 0) {
-    left_sample_nums = new EncodedNumber[split_num];
-    right_sample_nums = new EncodedNumber[split_num];
-    encrypted_statistics = new EncodedNumber*[split_num];
-    for (int i = 0; i < split_num; i++) {
-      encrypted_statistics[i] = new EncodedNumber[2 * classes_num];
-    }
     // has encrypted statistics
     for (int i = 0; i < deserialized_encrypted_statistics.left_sample_nums_of_splits_size(); i++) {
       com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber pb_number =
@@ -290,6 +285,7 @@ void serialize_update_info(int source_party_id,
   free(value_str_left_c);
   free(n_str_right_c);
   free(value_str_right_c);
+  pb_update_info.Clear();
 }
 
 
@@ -395,6 +391,7 @@ void serialize_split_info(int global_split_num,
     pb_split_info.add_split_num_vec(client_split_nums[i]);
   }
   pb_split_info.SerializeToString(&output_str);
+  pb_split_info.Clear();
 }
 
 
@@ -485,6 +482,7 @@ void serialize_tree_model(TreeModel tree_model, std::string & output_str) {
   }
 
   pb_tree.SerializeToString(&output_str);
+  pb_tree.Clear();
 }
 
 
@@ -629,6 +627,7 @@ void serialize_random_forest_model(ForestModel forest_model, std::string & outpu
   }
 
   pb_forest.SerializeToString(&output_str);
+  pb_forest.Clear();
 }
 
 void deserialize_random_forest_model(ForestModel& forest_model, std::string input_str) {
@@ -701,5 +700,166 @@ void deserialize_random_forest_model(ForestModel& forest_model, std::string inpu
     }
 
     forest_model.forest_trees.push_back(tree);
+  }
+}
+
+void serialize_gbdt_model(GbdtModel gbdt_model, std::string & output_str) {
+  com::nus::dbsytem::falcon::v0::GbdtModel pb_gbdt;
+  pb_gbdt.set_tree_size(gbdt_model.tree_size);
+  pb_gbdt.set_tree_type(gbdt_model.tree_type);
+  pb_gbdt.set_n_estimator(gbdt_model.n_estimator);
+  pb_gbdt.set_class_num(gbdt_model.class_num);
+  pb_gbdt.set_learning_rate(gbdt_model.learning_rate);
+  for (int i = 0; i < gbdt_model.dummy_predictors.size(); i++) {
+    pb_gbdt.add_dummy_predictors(gbdt_model.dummy_predictors[i]);
+  }
+  for (int t = 0; t < gbdt_model.tree_size; t++) {
+    com::nus::dbsytem::falcon::v0::TreeModel *pb_tree = pb_gbdt.add_trees();
+    pb_tree->set_tree_type(gbdt_model.gbdt_trees[t].type);
+    pb_tree->set_class_num(gbdt_model.gbdt_trees[t].class_num);
+    pb_tree->set_max_depth(gbdt_model.gbdt_trees[t].max_depth);
+    pb_tree->set_internal_node_num(gbdt_model.gbdt_trees[t].internal_node_num);
+    pb_tree->set_total_node_num(gbdt_model.gbdt_trees[t].total_node_num);
+    pb_tree->set_capacity(gbdt_model.gbdt_trees[t].capacity);
+    for (int i = 0; i < gbdt_model.gbdt_trees[t].capacity; i++) {
+      com::nus::dbsytem::falcon::v0::Node *pb_node = pb_tree->add_nodes();
+      pb_node->set_node_type(gbdt_model.gbdt_trees[t].nodes[i].node_type);
+      pb_node->set_depth(gbdt_model.gbdt_trees[t].nodes[i].depth);
+      pb_node->set_is_self_feature(gbdt_model.gbdt_trees[t].nodes[i].is_self_feature);
+      pb_node->set_best_party_id(gbdt_model.gbdt_trees[t].nodes[i].best_party_id);
+      pb_node->set_best_feature_id(gbdt_model.gbdt_trees[t].nodes[i].best_feature_id);
+      pb_node->set_best_split_id(gbdt_model.gbdt_trees[t].nodes[i].best_split_id);
+      pb_node->set_split_threshold(gbdt_model.gbdt_trees[t].nodes[i].split_threshold);
+      pb_node->set_node_sample_num(gbdt_model.gbdt_trees[t].nodes[i].node_sample_num);
+      pb_node->set_left_child(gbdt_model.gbdt_trees[t].nodes[i].left_child);
+      pb_node->set_right_child(gbdt_model.gbdt_trees[t].nodes[i].right_child);
+
+      for (int j : gbdt_model.gbdt_trees[t].nodes[i].node_sample_distribution) {
+        pb_node->add_node_sample_distribution(j);
+      }
+
+      auto *pb_impurity = new com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber;
+      auto *pb_label = new com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber;
+
+      char * n_str_impurity_c, * value_str_impurity_c, * n_str_label_c, * value_str_label_c;
+      mpz_t g_n_impurity, g_value_impurity, g_n_label, g_value_label;
+      mpz_init(g_n_impurity);
+      mpz_init(g_value_impurity);
+      mpz_init(g_n_label);
+      mpz_init(g_value_label);
+      gbdt_model.gbdt_trees[t].nodes[i].impurity.getter_n(g_n_impurity);
+      gbdt_model.gbdt_trees[t].nodes[i].impurity.getter_value(g_value_impurity);
+      gbdt_model.gbdt_trees[t].nodes[i].label.getter_n(g_n_label);
+      gbdt_model.gbdt_trees[t].nodes[i].label.getter_value(g_value_label);
+
+      n_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_impurity);
+      value_str_impurity_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_impurity);
+      n_str_label_c = mpz_get_str(NULL, PHE_STR_BASE, g_n_label);
+      value_str_label_c = mpz_get_str(NULL, PHE_STR_BASE, g_value_label);
+
+      std::string n_str_impurity(n_str_impurity_c), value_str_impurity(value_str_impurity_c);
+      pb_impurity->set_n(n_str_impurity);
+      pb_impurity->set_value(value_str_impurity);
+      pb_impurity->set_exponent(gbdt_model.gbdt_trees[t].nodes[i].impurity.getter_exponent());
+      pb_impurity->set_type(gbdt_model.gbdt_trees[t].nodes[i].impurity.getter_type());
+
+      std::string n_str_label(n_str_label_c), value_str_label(value_str_label_c);
+      pb_label->set_n(n_str_label);
+      pb_label->set_value(value_str_label);
+      pb_label->set_exponent(gbdt_model.gbdt_trees[t].nodes[i].label.getter_exponent());
+      pb_label->set_type(gbdt_model.gbdt_trees[t].nodes[i].label.getter_type());
+
+      pb_node->set_allocated_impurity(pb_impurity);
+      pb_node->set_allocated_label(pb_label);
+
+      mpz_clear(g_n_impurity);
+      mpz_clear(g_value_impurity);
+      mpz_clear(g_n_label);
+      mpz_clear(g_value_label);
+      free(n_str_impurity_c);
+      free(value_str_impurity_c);
+      free(n_str_label_c);
+      free(value_str_label_c);
+    }
+  }
+
+  pb_gbdt.SerializeToString(&output_str);
+  pb_gbdt.Clear();
+}
+
+void deserialize_gbdt_model(GbdtModel& gbdt_model, std::string input_str) {
+  com::nus::dbsytem::falcon::v0::GbdtModel deserialized_gbdt;
+  google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
+  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
+  if (!deserialized_gbdt.ParseFromCodedStream(&inputStream)) {
+    LOG(ERROR) << "Failed to parse PB_RandomForest from string";
+    return;
+  }
+  gbdt_model.tree_size = deserialized_gbdt.tree_size();
+  gbdt_model.tree_type = (falcon::TreeType) deserialized_gbdt.tree_type();
+  gbdt_model.n_estimator = deserialized_gbdt.n_estimator();
+  gbdt_model.class_num = deserialized_gbdt.class_num();
+  gbdt_model.learning_rate = deserialized_gbdt.learning_rate();
+  for (int i = 0; i < deserialized_gbdt.dummy_predictors_size(); i++) {
+    gbdt_model.dummy_predictors.emplace_back(deserialized_gbdt.dummy_predictors(i));
+  }
+  for (int t = 0; t < gbdt_model.tree_size; t++) {
+    TreeModel tree;
+    tree.type = (falcon::TreeType) deserialized_gbdt.trees(t).tree_type();
+    tree.class_num = deserialized_gbdt.trees(t).class_num();
+    tree.max_depth = deserialized_gbdt.trees(t).max_depth();
+    tree.internal_node_num = deserialized_gbdt.trees(t).internal_node_num();
+    tree.total_node_num = deserialized_gbdt.trees(t).total_node_num();
+    tree.capacity = deserialized_gbdt.trees(t).capacity();
+    tree.nodes = new Node[tree.capacity];
+    for (int i = 0; i < tree.capacity; i++) {
+      const com::nus::dbsytem::falcon::v0::Node& deserialized_node_i = deserialized_gbdt.trees(t).nodes(i);
+      tree.nodes[i].node_type = (falcon::TreeNodeType) deserialized_node_i.node_type();
+      tree.nodes[i].depth = deserialized_node_i.depth();
+      tree.nodes[i].is_self_feature = deserialized_node_i.is_self_feature();
+      tree.nodes[i].best_party_id = deserialized_node_i.best_party_id();
+      tree.nodes[i].best_feature_id = deserialized_node_i.best_feature_id();
+      tree.nodes[i].best_split_id = deserialized_node_i.best_split_id();
+      tree.nodes[i].split_threshold = deserialized_node_i.split_threshold();
+      tree.nodes[i].node_sample_num = deserialized_node_i.node_sample_num();
+      tree.nodes[i].left_child = deserialized_node_i.left_child();
+      tree.nodes[i].right_child = deserialized_node_i.right_child();
+      for (int j = 0; j < deserialized_node_i.node_sample_distribution_size(); j++) {
+        tree.nodes[i].node_sample_distribution.push_back(deserialized_node_i.node_sample_distribution(j));
+      }
+
+      const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& pb_impurity =
+          deserialized_node_i.impurity();
+      const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& pb_label =
+          deserialized_node_i.label();
+
+      mpz_t g_n_impurity, g_value_impurity, g_n_label, g_value_label;
+      mpz_init(g_n_impurity);
+      mpz_init(g_value_impurity);
+      mpz_init(g_n_label);
+      mpz_init(g_value_label);
+      mpz_set_str(g_n_impurity, pb_impurity.n().c_str(), PHE_STR_BASE);
+      mpz_set_str(g_value_impurity, pb_impurity.value().c_str(), PHE_STR_BASE);
+      mpz_set_str(g_n_label, pb_label.n().c_str(), PHE_STR_BASE);
+      mpz_set_str(g_value_label, pb_label.value().c_str(), PHE_STR_BASE);
+      tree.nodes[i].impurity.setter_n(g_n_impurity);
+      tree.nodes[i].impurity.setter_value(g_value_impurity);
+      tree.nodes[i].impurity.setter_exponent(pb_impurity.exponent());
+      EncodedNumberType type_impurity = (EncodedNumberType) pb_impurity.type();
+      tree.nodes[i].impurity.setter_type(type_impurity);
+
+      tree.nodes[i].label.setter_n(g_n_label);
+      tree.nodes[i].label.setter_value(g_value_label);
+      tree.nodes[i].label.setter_exponent(pb_label.exponent());
+      EncodedNumberType type_label = (EncodedNumberType) pb_label.type();
+      tree.nodes[i].label.setter_type(type_label);
+
+      mpz_clear(g_n_impurity);
+      mpz_clear(g_value_impurity);
+      mpz_clear(g_n_label);
+      mpz_clear(g_value_label);
+    }
+
+    gbdt_model.gbdt_trees.push_back(tree);
   }
 }

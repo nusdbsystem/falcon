@@ -21,7 +21,9 @@
 struct DecisionTreeParams {
   // type of the tree, 'classification' or 'regression'
   std::string tree_type;
-  // the function to measure the quality of a split 'gini' or 'entropy'
+  // the function to measure the quality of a split
+  // for classification, 'gini' or 'entropy'
+  // for regression, criterion is 'mse'
   std::string criterion;
   // the strategy used to choose a split at each node, 'best' or 'random'
   std::string split_strategy;
@@ -49,7 +51,9 @@ class DecisionTreeBuilder : public ModelBuilder {
  public:
   // type of the tree, 'classification' or 'regression'
   falcon::TreeType tree_type;
-  // the function to measure the quality of a split 'gini' or 'entropy'
+  // the function to measure the quality of a split
+  // for classification, 'gini' or 'entropy'
+  // for regression, criterion is 'mse'
   std::string criterion;
   // the strategy used to choose a split at each node, 'best' or 'random'
   std::string split_strategy;
@@ -134,7 +138,15 @@ class DecisionTreeBuilder : public ModelBuilder {
    * build the decision tree model
    * @param party
    */
-  void train(Party party);
+  void train(Party party) override;
+
+  /**
+   * build the decision tree model given encrypted labels (mainly called
+   * in secure gbdt training) such that other steps can be reused
+   * @param party
+   * @param encrypted_labels: provide encrypted labels
+   */
+  void train(Party party, EncodedNumber* encrypted_labels);
 
   /**
    * iteratively build tree node
@@ -209,7 +221,7 @@ class DecisionTreeBuilder : public ModelBuilder {
  */
   void eval(Party party,
       falcon::DatasetType eval_type,
-      const std::string& report_save_path = std::string());
+      const std::string& report_save_path = std::string()) override;
 };
 
 /**

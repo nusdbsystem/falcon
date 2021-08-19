@@ -371,6 +371,47 @@ TEST(PB_Converter, RandomForestParams) {
   EXPECT_TRUE(rf_params.dt_param.split_strategy == deserialized_rf_params.dt_param.split_strategy);
 }
 
+TEST(PB_Converter, GbdtParams) {
+  GbdtParams gbdt_params;
+  gbdt_params.n_estimator = 8;
+  gbdt_params.loss = "exponential";
+  gbdt_params.learning_rate = 1.0;
+  gbdt_params.subsample = 1.0;
+  gbdt_params.dt_param.class_num = 2;
+  gbdt_params.dt_param.max_depth = 5;
+  gbdt_params.dt_param.max_bins = 8;
+  gbdt_params.dt_param.min_samples_split = 5;
+  gbdt_params.dt_param.min_samples_leaf = 5;
+  gbdt_params.dt_param.max_leaf_nodes = 16;
+  gbdt_params.dt_param.min_impurity_decrease = 0.01;
+  gbdt_params.dt_param.min_impurity_split = 0.001;
+  gbdt_params.dt_param.tree_type = "classification";
+  gbdt_params.dt_param.criterion = "gini";
+  gbdt_params.dt_param.split_strategy = "best";
+  gbdt_params.dt_param.dp_budget = 0;
+  std::string output_message;
+  serialize_gbdt_params(gbdt_params, output_message);
+
+  GbdtParams deserialized_gbdt_params;
+  deserialize_gbdt_params(deserialized_gbdt_params, output_message);
+  EXPECT_EQ(gbdt_params.n_estimator, deserialized_gbdt_params.n_estimator);
+  EXPECT_TRUE(gbdt_params.loss == deserialized_gbdt_params.loss);
+  EXPECT_EQ(gbdt_params.learning_rate, deserialized_gbdt_params.learning_rate);
+  EXPECT_EQ(gbdt_params.subsample, deserialized_gbdt_params.subsample);
+  EXPECT_EQ(gbdt_params.dt_param.class_num, deserialized_gbdt_params.dt_param.class_num);
+  EXPECT_EQ(gbdt_params.dt_param.max_depth, deserialized_gbdt_params.dt_param.max_depth);
+  EXPECT_EQ(gbdt_params.dt_param.max_bins, deserialized_gbdt_params.dt_param.max_bins);
+  EXPECT_EQ(gbdt_params.dt_param.min_samples_split, deserialized_gbdt_params.dt_param.min_samples_split);
+  EXPECT_EQ(gbdt_params.dt_param.min_samples_leaf, deserialized_gbdt_params.dt_param.min_samples_leaf);
+  EXPECT_EQ(gbdt_params.dt_param.max_leaf_nodes, deserialized_gbdt_params.dt_param.max_leaf_nodes);
+  EXPECT_EQ(gbdt_params.dt_param.min_impurity_decrease, deserialized_gbdt_params.dt_param.min_impurity_decrease);
+  EXPECT_EQ(gbdt_params.dt_param.min_impurity_split, deserialized_gbdt_params.dt_param.min_impurity_split);
+  EXPECT_EQ(gbdt_params.dt_param.dp_budget, deserialized_gbdt_params.dt_param.dp_budget);
+  EXPECT_TRUE(gbdt_params.dt_param.tree_type == deserialized_gbdt_params.dt_param.tree_type);
+  EXPECT_TRUE(gbdt_params.dt_param.criterion == deserialized_gbdt_params.dt_param.criterion);
+  EXPECT_TRUE(gbdt_params.dt_param.split_strategy == deserialized_gbdt_params.dt_param.split_strategy);
+}
+
 TEST(PB_Converter, TreeEncryptedStatistics) {
   int client_id = 0;
   int node_index = 1;
@@ -419,9 +460,12 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
   int deserialized_node_index = 1;
   int deserialized_split_num = 3;
   int deserialized_classes_num = 2;
-  EncodedNumber *deserialized_left_sample_nums;
-  EncodedNumber *deserialized_right_sample_nums;
-  EncodedNumber ** deserialized_encrypted_statistics;
+  EncodedNumber *deserialized_left_sample_nums = new EncodedNumber[3];
+  EncodedNumber *deserialized_right_sample_nums = new EncodedNumber[3];
+  EncodedNumber ** deserialized_encrypted_statistics = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    deserialized_encrypted_statistics[i] = new EncodedNumber[2*2];
+  }
 
   deserialize_encrypted_statistics(deserialized_client_id, deserialized_node_index,
       deserialized_split_num, deserialized_classes_num,
@@ -851,6 +895,155 @@ TEST(PB_Converter, RandomForestModel) {
 
       EncodedNumber deserialized_impurity = deserialized_forest_model.forest_trees[t].nodes[i].impurity;
       EncodedNumber deserialized_label = deserialized_forest_model.forest_trees[t].nodes[i].label;
+      mpz_t deserialized_impurity_n, deserialized_impurity_value;
+      mpz_t deserialized_label_n, deserialized_label_value;
+      mpz_init(deserialized_impurity_n);
+      mpz_init(deserialized_impurity_value);
+      mpz_init(deserialized_label_n);
+      mpz_init(deserialized_label_value);
+
+      deserialized_impurity.getter_n(deserialized_impurity_n);
+      deserialized_impurity.getter_value(deserialized_impurity_value);
+      int n_cmp = mpz_cmp(v_n, deserialized_impurity_n);
+      int value_cmp = mpz_cmp(v_value, deserialized_impurity_value);
+      EXPECT_EQ(0, n_cmp);
+      EXPECT_EQ(0, value_cmp);
+      EXPECT_EQ(v_exponent, deserialized_impurity.getter_exponent());
+      EXPECT_EQ(v_type, deserialized_impurity.getter_type());
+
+      deserialized_label.getter_n(deserialized_label_n);
+      deserialized_label.getter_value(deserialized_label_value);
+      n_cmp = mpz_cmp(v_n, deserialized_label_n);
+      value_cmp = mpz_cmp(v_value, deserialized_label_value);
+      EXPECT_EQ(0, n_cmp);
+      EXPECT_EQ(0, value_cmp);
+      EXPECT_EQ(v_exponent, deserialized_label.getter_exponent());
+      EXPECT_EQ(v_type, deserialized_label.getter_type());
+
+      mpz_clear(deserialized_impurity_n);
+      mpz_clear(deserialized_impurity_value);
+      mpz_clear(deserialized_label_n);
+      mpz_clear(deserialized_label_value);
+    }
+  }
+  mpz_clear(v_n);
+  mpz_clear(v_value);
+}
+
+TEST(PB_Converter, GbdtModel) {
+  GbdtModel gbdt_model;
+  gbdt_model.tree_size = 6;
+  gbdt_model.tree_type = falcon::CLASSIFICATION;
+  gbdt_model.n_estimator = 3;
+  gbdt_model.class_num = 2;
+  gbdt_model.dummy_predictors.emplace_back(0.1);
+  gbdt_model.learning_rate = 0.1;
+  int n_estimator = 3;
+  mpz_t v_n;
+  mpz_t v_value;
+  mpz_init(v_n);
+  mpz_init(v_value);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
+  int v_exponent = -8;
+  EncodedNumberType v_type = Ciphertext;
+  TreeModel tree;
+  tree.type = falcon::CLASSIFICATION;
+  tree.class_num = 2;
+  tree.max_depth = 2;
+  tree.internal_node_num = 3;
+  tree.total_node_num = 7;
+  tree.capacity = 7;
+  tree.nodes = new Node[tree.capacity];
+  for (int i = 0; i < tree.capacity; i++) {
+    if (i < 7) {
+      tree.nodes[i].node_type = falcon::INTERNAL;
+    } else {
+      tree.nodes[i].node_type = falcon::LEAF;
+    }
+    tree.nodes[i].depth = 1;
+    tree.nodes[i].is_self_feature = 1;
+    tree.nodes[i].best_party_id = 0;
+    tree.nodes[i].best_feature_id = 1;
+    tree.nodes[i].best_split_id = 2;
+    tree.nodes[i].split_threshold = 0.25;
+    tree.nodes[i].node_sample_num = 1000;
+    tree.nodes[i].node_sample_distribution.push_back(200);
+    tree.nodes[i].node_sample_distribution.push_back(300);
+    tree.nodes[i].node_sample_distribution.push_back(500);
+    tree.nodes[i].left_child = 2 * i + 1;
+    tree.nodes[i].right_child = 2 * i + 2;
+    EncodedNumber impurity, label;
+    impurity.setter_n(v_n);
+    impurity.setter_value(v_value);
+    impurity.setter_exponent(v_exponent);
+    impurity.setter_type(v_type);
+    label.setter_n(v_n);
+    label.setter_value(v_value);
+    label.setter_exponent(v_exponent);
+    label.setter_type(v_type);
+    tree.nodes[i].impurity = impurity;
+    tree.nodes[i].label = label;
+  }
+  for (int t = 0; t < gbdt_model.tree_size; t++) {
+    gbdt_model.gbdt_trees.push_back(tree);
+  }
+
+  std::string out_message;
+  serialize_gbdt_model(gbdt_model, out_message);
+
+  GbdtModel deserialized_gbdt_model;
+  deserialize_gbdt_model(deserialized_gbdt_model, out_message);
+  EXPECT_EQ(gbdt_model.tree_size, deserialized_gbdt_model.tree_size);
+  EXPECT_EQ(gbdt_model.tree_type, deserialized_gbdt_model.tree_type);
+  EXPECT_EQ(gbdt_model.n_estimator, deserialized_gbdt_model.n_estimator);
+  EXPECT_EQ(gbdt_model.class_num, deserialized_gbdt_model.class_num);
+  EXPECT_EQ(gbdt_model.learning_rate, deserialized_gbdt_model.learning_rate);
+  for (int i = 0; i < gbdt_model.dummy_predictors.size(); i++) {
+    EXPECT_EQ(gbdt_model.dummy_predictors[i],
+              deserialized_gbdt_model.dummy_predictors[i]);
+  }
+  for (int t = 0; t < deserialized_gbdt_model.tree_size; t++) {
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].type,
+              tree.type);
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].class_num,
+              tree.class_num);
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].max_depth,
+              tree.max_depth);
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].internal_node_num,
+              tree.internal_node_num);
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].total_node_num,
+              tree.total_node_num);
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].capacity,
+              tree.capacity);
+    for (int i = 0; i < tree.capacity; i++) {
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].node_type,
+                tree.nodes[i].node_type);
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].depth,
+                tree.nodes[i].depth);
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].is_self_feature,
+                tree.nodes[i].is_self_feature);
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].best_party_id,
+                tree.nodes[i].best_party_id);
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].best_feature_id,
+                tree.nodes[i].best_feature_id);
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].best_split_id,
+                tree.nodes[i].best_split_id);
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].split_threshold,
+                tree.nodes[i].split_threshold);
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].node_sample_num,
+                tree.nodes[i].node_sample_num);
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].left_child,
+                tree.nodes[i].left_child);
+      EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].right_child,
+                tree.nodes[i].right_child);
+      for (int j = 0; j < tree.nodes[i].node_sample_distribution.size(); j++) {
+        EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].node_sample_distribution[j],
+                  tree.nodes[i].node_sample_distribution[j]);
+      }
+
+      EncodedNumber deserialized_impurity = deserialized_gbdt_model.gbdt_trees[t].nodes[i].impurity;
+      EncodedNumber deserialized_label = deserialized_gbdt_model.gbdt_trees[t].nodes[i].label;
       mpz_t deserialized_impurity_n, deserialized_impurity_value;
       mpz_t deserialized_label_n, deserialized_label_value;
       mpz_init(deserialized_impurity_n);

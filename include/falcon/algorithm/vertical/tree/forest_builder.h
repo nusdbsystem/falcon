@@ -73,9 +73,8 @@ class RandomForestBuilder : public ModelBuilder {
    * build each tree of random forest
    *
    * @param party
-   * @param sample_rate
    */
-  void train(Party party);
+  void train(Party party) override;
 
   /**
    * evaluate the accuracy on the dataset
@@ -84,7 +83,7 @@ class RandomForestBuilder : public ModelBuilder {
    * @param report_save_path
 */
   void eval(Party party, falcon::DatasetType eval_type,
-      const std::string& report_save_path = std::string());
+      const std::string& report_save_path = std::string()) override;
 };
 
 /**

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <unistd.h>
 #include <boost/program_options.hpp>
 
 #include "falcon/network/Comm.hpp"
@@ -13,6 +14,7 @@
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_builder.h"
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
+#include <falcon/algorithm/vertical/tree/gbdt_builder.h>
 #include "falcon/inference/server/inference_server.h"
 
 #include <glog/logging.h>
@@ -126,13 +128,12 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "Parse algorithm name and run the program";
   std::cout << "Parse algorithm name and run the program" << std::endl;
 
+  // algorithm_name = "gbdt";
   falcon::AlgorithmName parsed_algorithm_name = parse_algorithm_name(algorithm_name);
 
   if (is_inference) {
     LOG(INFO) << "Execute inference logic\n";
     // invoke creating endpoint for inference requests
-    // TODO: there is a problem when using grpc server with spdz_logistic_function_computation
-    // TODO: now alleviate the problem by not including during training (need to check later)
     if (party_type == falcon::ACTIVE_PARTY) {
       run_active_server(inference_endpoint, model_save_file, party, parsed_algorithm_name);
     } else {
@@ -150,12 +151,16 @@ int main(int argc, char *argv[]) {
       case falcon::RF:
         train_random_forest(party, algorithm_params, model_save_file, model_report_file);
         break;
+      case falcon::GBDT:
+        train_gbdt(party, algorithm_params, model_save_file, model_report_file);
+        break;
       default:
         train_logistic_regression(party, algorithm_params, model_save_file, model_report_file);
         break;
     }
     std::cout << "Finish algorithm " << std::endl;
   }
+  // sleep(15);
   return EXIT_SUCCESS;
 }
 
@@ -164,5 +169,6 @@ falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
   if ("logistic_regression" == name) output = falcon::LR;
   if ("decision_tree" == name) output = falcon::DT;
   if ("random_forest" == name) output = falcon::RF;
+  if ("gbdt" == name) output = falcon::GBDT;
   return output;
 }

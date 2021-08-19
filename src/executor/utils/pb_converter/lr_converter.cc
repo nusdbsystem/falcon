@@ -38,6 +38,7 @@ void serialize_lr_model(LogisticRegressionModel lr_model, std::string & output_s
     free(value_str_c);
   }
   pb_lr_model.SerializeToString(&output_str);
+  pb_lr_model.Clear();
 }
 
 void deserialize_lr_model(LogisticRegressionModel& lr_model, std::string input_str) {

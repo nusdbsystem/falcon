@@ -69,27 +69,32 @@ void ForestModel::predict(Party &party,
         predicted_sample_size,
         predicted_forest_labels[tree_id]);
   }
-  int cipher_precision = 0 - predicted_forest_labels[0][0].getter_exponent();
+  int cipher_precision = abs(predicted_forest_labels[0][0].getter_exponent());
+  LOG(INFO) << "cipher_precision = " << cipher_precision;
+  std::cout << "cipher_precision = " << cipher_precision << std::endl;
 
   // if classification, needs to communicate with mpc
   // otherwise, compute average of the prediction
   if (tree_type == falcon::REGRESSION) {
-    for (int i = 0; i < predicted_sample_size; i++) {
-      EncodedNumber *aggregation = new EncodedNumber[1];
-      aggregation[0].set_double(phe_pub_key->n[0], 0.0, cipher_precision);
-      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-                         aggregation[0], aggregation[0]);
-      // aggregate the predicted labels for sample i
-      for (int tree_id = 0; tree_id < tree_size; tree_id++) {
-        djcs_t_aux_ee_add(phe_pub_key, aggregation[0],
-                          aggregation[0], predicted_forest_labels[tree_id][i]);
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      for (int i = 0; i < predicted_sample_size; i++) {
+        EncodedNumber *aggregation = new EncodedNumber[1];
+        aggregation[0].set_double(phe_pub_key->n[0], 0.0, cipher_precision);
+        djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+                           aggregation[0], aggregation[0]);
+        // aggregate the predicted labels for sample i
+        for (int tree_id = 0; tree_id < tree_size; tree_id++) {
+          djcs_t_aux_ee_add(phe_pub_key, aggregation[0],
+                            aggregation[0], predicted_forest_labels[tree_id][i]);
+        }
+        // compute average of the aggregation
+        EncodedNumber enc_tree_size;
+        enc_tree_size.set_double(phe_pub_key->n[0], (1.0 / tree_size), cipher_precision);
+        djcs_t_aux_ep_mul(phe_pub_key, predicted_labels[i], aggregation[0], enc_tree_size);
+        delete[] aggregation;
       }
-      // compute average of the aggregation
-      EncodedNumber enc_tree_size;
-      enc_tree_size.set_integer(phe_pub_key->n[0], tree_size);
-      djcs_t_aux_ep_mul(phe_pub_key, predicted_labels[i], aggregation[0], enc_tree_size);
-      delete[] aggregation;
     }
+    party.broadcast_encoded_number_array(predicted_labels, predicted_sample_size, ACTIVE_PARTY_ID);
   } else {
     std::vector<int> public_values;
     std::vector<double> private_values;
@@ -109,7 +114,7 @@ void ForestModel::predict(Party &party,
       forest_label_secret_shares.push_back(tree_label_secret_shares);
     }
     // pack to private values for sending to mpc parties
-    for (int tree_id; tree_id < tree_size; tree_id++) {
+    for (int tree_id = 0; tree_id < tree_size; tree_id++) {
       for (int i = 0; i < predicted_sample_size; i++) {
         private_values.push_back(forest_label_secret_shares[tree_id][i]);
       }
@@ -150,5 +155,4 @@ void ForestModel::predict(Party &party,
     delete [] predicted_forest_labels[tree_id];
   }
   delete [] predicted_forest_labels;
-
 }

@@ -190,7 +190,8 @@ void TreeModel::predict(Party &party,
   // for each sample
   for (int i = 0; i < predicted_sample_size; i++) {
     // compute binary vector for the current sample
-    std::vector<int> binary_vector = comp_predict_vector(predicted_samples[i], node_index_2_leaf_index_map);
+    std::vector<int> binary_vector = comp_predict_vector(predicted_samples[i],
+                                                         node_index_2_leaf_index_map);
     EncodedNumber *encoded_binary_vector = new EncodedNumber[binary_vector.size()];
     EncodedNumber *updated_label_vector = new EncodedNumber[binary_vector.size()];
 

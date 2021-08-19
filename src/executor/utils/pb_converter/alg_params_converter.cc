@@ -24,6 +24,7 @@ void serialize_lr_params(LogisticRegressionParams lr_params, std::string& output
   logistic_regression_params.set_differential_privacy_budget(lr_params.dp_budget);
   logistic_regression_params.set_fit_bias(lr_params.fit_bias);
   logistic_regression_params.SerializeToString(&output_message);
+  logistic_regression_params.Clear();
 }
 
 void deserialize_lr_params(LogisticRegressionParams& lr_params, const std::string& input_message) {
@@ -62,6 +63,7 @@ void serialize_dt_params(DecisionTreeParams dt_params, std::string& output_messa
   decision_tree_params.set_min_impurity_split(dt_params.min_impurity_split);
   decision_tree_params.set_dp_budget(dt_params.dp_budget);
   decision_tree_params.SerializeToString(&output_message);
+  decision_tree_params.Clear();
 }
 
 void deserialize_dt_params(DecisionTreeParams& dt_params, const std::string& input_message) {
@@ -104,6 +106,7 @@ void serialize_rf_params(RandomForestParams rf_params, std::string& output_messa
   decision_tree_params->set_dp_budget(rf_params.dt_param.dp_budget);
   random_forest_params.set_allocated_dt_param(decision_tree_params);
   random_forest_params.SerializeToString(&output_message);
+  random_forest_params.Clear();
 }
 
 void deserialize_rf_params(RandomForestParams& rf_params, const std::string& input_message) {
@@ -126,4 +129,53 @@ void deserialize_rf_params(RandomForestParams& rf_params, const std::string& inp
   rf_params.dt_param.min_impurity_decrease = random_forest_params.dt_param().min_impurity_decrease();
   rf_params.dt_param.min_impurity_split = random_forest_params.dt_param().min_impurity_split();
   rf_params.dt_param.dp_budget = random_forest_params.dt_param().dp_budget();
+}
+
+void serialize_gbdt_params(GbdtParams gbdt_params, std::string& output_message) {
+  com::nus::dbsytem::falcon::v0::GbdtParams gradient_boosting_params;
+  gradient_boosting_params.set_n_estimator(gbdt_params.n_estimator);
+  gradient_boosting_params.set_loss(gbdt_params.loss);
+  gradient_boosting_params.set_learning_rate(gbdt_params.learning_rate);
+  gradient_boosting_params.set_subsample(gbdt_params.subsample);
+  com::nus::dbsytem::falcon::v0::DecisionTreeParams *decision_tree_params =
+      new com::nus::dbsytem::falcon::v0::DecisionTreeParams;
+  decision_tree_params->set_tree_type(gbdt_params.dt_param.tree_type);
+  decision_tree_params->set_criterion(gbdt_params.dt_param.criterion);
+  decision_tree_params->set_split_strategy(gbdt_params.dt_param.split_strategy);
+  decision_tree_params->set_class_num(gbdt_params.dt_param.class_num);
+  decision_tree_params->set_max_depth(gbdt_params.dt_param.max_depth);
+  decision_tree_params->set_max_bins(gbdt_params.dt_param.max_bins);
+  decision_tree_params->set_min_samples_split(gbdt_params.dt_param.min_samples_split);
+  decision_tree_params->set_min_samples_leaf(gbdt_params.dt_param.min_samples_leaf);
+  decision_tree_params->set_max_leaf_nodes(gbdt_params.dt_param.max_leaf_nodes);
+  decision_tree_params->set_min_impurity_decrease(gbdt_params.dt_param.min_impurity_decrease);
+  decision_tree_params->set_min_impurity_split(gbdt_params.dt_param.min_impurity_split);
+  decision_tree_params->set_dp_budget(gbdt_params.dt_param.dp_budget);
+  gradient_boosting_params.set_allocated_dt_param(decision_tree_params);
+  gradient_boosting_params.SerializeToString(&output_message);
+  gradient_boosting_params.Clear();
+}
+
+void deserialize_gbdt_params(GbdtParams& gbdt_params, const std::string& input_message) {
+  com::nus::dbsytem::falcon::v0::GbdtParams gradient_boosting_params;
+  if (!gradient_boosting_params.ParseFromString(input_message)) {
+    LOG(ERROR) << "Deserialize gradient boosting decision tree params message failed.";
+    return;
+  }
+  gbdt_params.n_estimator = gradient_boosting_params.n_estimator();
+  gbdt_params.loss = gradient_boosting_params.loss();
+  gbdt_params.learning_rate = gradient_boosting_params.learning_rate();
+  gbdt_params.subsample = gradient_boosting_params.subsample();
+  gbdt_params.dt_param.tree_type = gradient_boosting_params.dt_param().tree_type();
+  gbdt_params.dt_param.criterion = gradient_boosting_params.dt_param().criterion();
+  gbdt_params.dt_param.split_strategy = gradient_boosting_params.dt_param().split_strategy();
+  gbdt_params.dt_param.class_num = gradient_boosting_params.dt_param().class_num();
+  gbdt_params.dt_param.max_depth = gradient_boosting_params.dt_param().max_depth();
+  gbdt_params.dt_param.max_bins = gradient_boosting_params.dt_param().max_bins();
+  gbdt_params.dt_param.min_samples_split = gradient_boosting_params.dt_param().min_samples_split();
+  gbdt_params.dt_param.min_samples_leaf = gradient_boosting_params.dt_param().min_samples_leaf();
+  gbdt_params.dt_param.max_leaf_nodes = gradient_boosting_params.dt_param().max_leaf_nodes();
+  gbdt_params.dt_param.min_impurity_decrease = gradient_boosting_params.dt_param().min_impurity_decrease();
+  gbdt_params.dt_param.min_impurity_split = gradient_boosting_params.dt_param().min_impurity_split();
+  gbdt_params.dt_param.dp_budget = gradient_boosting_params.dt_param().dp_budget();
 }

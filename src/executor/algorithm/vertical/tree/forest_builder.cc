@@ -5,6 +5,7 @@
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
+#include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/math/math_ops.h>
 
 #include <glog/logging.h>
@@ -156,7 +157,7 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
     // decode decrypted predicted labels
     for (int i = 0; i < dataset_size; i++) {
       double x;
-      predicted_labels[i].decode(x);
+      decrypted_labels[i].decode(x);
       predictions.push_back(x);
     }
 
@@ -164,7 +165,12 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
     if (tree_builders[0].tree_type == falcon::CLASSIFICATION) {
       int correct_num = 0;
       for (int i = 0; i < dataset_size; i++) {
-        if (predictions[i] == cur_test_dataset_labels[i]) {
+        // LOG(INFO) << "prediction[" << i << "] = " << predictions[i] <<
+        // ", ground truth label[" << i << "] = " << cur_test_dataset_labels[i];
+        // the decoded label is returned from mpc program, and there is a
+        // precision loss, so here check the precision less than a threshold
+        // TODO: check how to return an integer from mpc properly
+        if (abs(abs(cur_test_dataset_labels[i] - abs(predictions[i]))) < ROUNDED_PRECISION) {
           correct_num += 1;
         }
       }
@@ -192,6 +198,7 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
 
   // free memory
   delete [] predicted_labels;
+  delete [] decrypted_labels;
 
   const clock_t testing_finish_time = clock();
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
@@ -222,7 +229,7 @@ void train_random_forest(Party party, const std::string& params_str,
   params.dt_param.min_impurity_decrease = 0.01;
   params.dt_param.min_impurity_split = 0.001;
   params.dt_param.dp_budget = 0.1;
-//  deserialize_rf_params(params, params_str);
+  deserialize_rf_params(params, params_str);
   int weight_size = party.getter_feature_num();
   double training_accuracy = 0.0;
   double testing_accuracy = 0.0;
@@ -254,9 +261,6 @@ void train_random_forest(Party party, const std::string& params_str,
   LOG(INFO) << "params.dt_param.min_impurity_split = " << params.dt_param.min_impurity_split;
   LOG(INFO) << "params.dt_param.dp_budget = " << params.dt_param.dp_budget;
 
-  std::cout << "Init decision tree model" << std::endl;
-  LOG(INFO) << "Init decision tree model";
-
   RandomForestBuilder random_forest_builder(params,
       training_data,
       testing_data,
@@ -265,23 +269,22 @@ void train_random_forest(Party party, const std::string& params_str,
       training_accuracy,
       testing_accuracy);
 
-  LOG(INFO) << "Init random forest model finished";
-  std::cout << "Init random forest model finished" << std::endl;
+  LOG(INFO) << "Init random forest model builder finished";
+  std::cout << "Init random forest model builder finished" << std::endl;
   google::FlushLogFiles(google::INFO);
 
   random_forest_builder.train(party);
   random_forest_builder.eval(party, falcon::TRAIN);
   random_forest_builder.eval(party, falcon::TEST);
 
-  std::vector<TreeModel> forest_trees;
-  for (int i = 0; i < random_forest_builder.n_estimator; i++) {
-    forest_trees.push_back(random_forest_builder.tree_builders[i].tree);
-  }
-  // save_rf_model(random_forest_builder.forest_model, model_save_file);
   std::string pb_rf_model_string;
   serialize_random_forest_model(random_forest_builder.forest_model, pb_rf_model_string);
   save_pb_model_string(pb_rf_model_string, model_save_file);
   save_training_report(random_forest_builder.getter_training_accuracy(),
       random_forest_builder.getter_testing_accuracy(),
       model_report_file);
+
+  LOG(INFO) << "Trained model and report saved";
+  std::cout << "Trained model and report saved" << std::endl;
+  google::FlushLogFiles(google::INFO);
 }

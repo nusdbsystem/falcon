@@ -89,8 +89,8 @@ void run_active_server_lr(const std::string& endpoint,
           double t;
           decrypted_labels[i].decode(t);
           std::vector<double> prob;
-          prob.push_back(t);
           prob.push_back(1 - t);
+          prob.push_back(t);
           t = t >= LOGREG_THRES ? CERTAIN_PROBABILITY : ZERO_PROBABILITY;
           // std::cout << "label = " << t << std::endl;
           labels.push_back(t);
@@ -119,13 +119,13 @@ void run_active_server_lr(const std::string& endpoint,
       });
 
   std::cout << "Try this example with:" << std::endl;
-  std::cout << " curl http://localhost:50051/inference" << std::endl;
+  std::cout << " curl http://localhost:8123/inference" << std::endl;
 
   // convert endpoint to ip and port
   std::vector<std::string> ip_port;
   stringstream ss(endpoint);
   string str;
-  while (getline(ss, str, ',')) {
+  while (getline(ss, str, ':')) {
     ip_port.push_back(str);
   }
 

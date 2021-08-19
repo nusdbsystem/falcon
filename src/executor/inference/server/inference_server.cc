@@ -16,6 +16,7 @@
 #include <falcon/inference/server/lr_inference_service.h>
 #include <falcon/inference/server/dt_inference_service.h>
 #include <falcon/inference/server/rf_inference_service.h>
+#include <falcon/inference/server/gbdt_inference_service.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/lr_converter.h>
 
@@ -35,6 +36,9 @@ void run_active_server(const std::string& endpoint,
     case falcon::RF:
       run_active_server_rf(endpoint, saved_model_file, party);
       break;
+    case falcon::GBDT:
+      run_active_server_gbdt(endpoint, saved_model_file, party);
+      break;
     default:
       run_active_server_lr(endpoint, saved_model_file, party);
       break;
@@ -53,6 +57,9 @@ void run_passive_server(const std::string& saved_model_file,
       break;
     case falcon::RF:
       run_passive_server_rf(saved_model_file, party);
+      break;
+    case falcon::GBDT:
+      run_passive_server_gbdt(saved_model_file, party);
       break;
     default:
       run_passive_server_lr(saved_model_file, party);

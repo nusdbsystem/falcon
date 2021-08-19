@@ -19,6 +19,7 @@ void serialize_model_publish_request(int model_id,
   pb_request.set_initiator_party_id(initiator_party_id);
 
   pb_request.SerializeToString(&output_message);
+  pb_request.Clear();
 }
 
 void deserialize_model_publish_request(int & model_id,
@@ -50,6 +51,7 @@ void serialize_model_publish_response(int model_id,
   pb_response.set_error_msg(error_msg);
 
   pb_response.SerializeToString(&output_message);
+  pb_response.Clear();
 }
 
 void deserialize_model_publish_response(int & model_id,

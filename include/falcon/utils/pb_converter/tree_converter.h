@@ -11,6 +11,7 @@
 #include <falcon/algorithm/vertical/tree/tree_model.h>
 #include <falcon/algorithm/vertical/tree/node.h>
 #include <falcon/algorithm/vertical/tree/forest_model.h>
+#include <falcon/algorithm/vertical/tree/gbdt_model.h>
 
 /**
  * pb serialize encrypted statistics
@@ -154,5 +155,21 @@ void serialize_random_forest_model(ForestModel forest_model, std::string & outpu
  * @param input_str
  */
 void deserialize_random_forest_model(ForestModel& forest_model, std::string input_str);
+
+/**
+ * serialize a gbdt model to string
+ *
+ * @param gbdt_model
+ * @param output_str
+ */
+void serialize_gbdt_model(GbdtModel gbdt_model, std::string & output_str);
+
+/**
+ * deserialize an input string to a gbdt model
+ *
+ * @param gbdt_model
+ * @param input_str
+ */
+void deserialize_gbdt_model(GbdtModel& gbdt_model, std::string input_str);
 
 #endif //FALCON_INCLUDE_FALCON_UTILS_PB_CONVERTER_TREE_CONVERTER_H_

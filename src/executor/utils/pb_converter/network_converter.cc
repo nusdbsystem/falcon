@@ -25,6 +25,7 @@ void serialize_network_configs(std::vector<std::string> ips,
     }
   }
   network_config.SerializeToString(&output_message);
+  network_config.Clear();
 }
 
 void deserialize_network_configs(std::vector<std::string>& ips,

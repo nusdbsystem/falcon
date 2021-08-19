@@ -89,6 +89,7 @@ void run_active_server_rf(const std::string& endpoint,
         for (int i = 0; i < sample_num; i++) {
           double t;
           decrypted_labels[i].decode(t);
+          labels.push_back(t);
           std::vector<double> prob;
           if (saved_forest_model_.forest_trees[0].type == falcon::CLASSIFICATION) {
             // TODO: record the detailed probability, here assume 1.0
@@ -128,13 +129,13 @@ void run_active_server_rf(const std::string& endpoint,
       });
 
   std::cout << "Try this example with:" << std::endl;
-  std::cout << " curl http://localhost:50051/inference" << std::endl;
+  std::cout << " curl http://localhost:8123/inference" << std::endl;
 
   // convert endpoint to ip and port
   std::vector<std::string> ip_port;
   stringstream ss(endpoint);
   string str;
-  while (getline(ss, str, ',')) {
+  while (getline(ss, str, ':')) {
     ip_port.push_back(str);
   }
 

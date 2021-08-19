@@ -813,7 +813,6 @@ void train_logistic_regression(Party party, std::string params_str,
   log_reg_model_builder.eval(party, falcon::TEST, model_report_file);
 
   // save model and report
-  EncodedNumber* model_weights = new EncodedNumber[weight_size];
   std::string pb_lr_model_string;
   serialize_lr_model(log_reg_model_builder.log_reg_model, pb_lr_model_string);
   save_pb_model_string(pb_lr_model_string, model_save_file);
@@ -822,7 +821,9 @@ void train_logistic_regression(Party party, std::string params_str,
   //    log_reg_model.getter_testing_accuracy(),
   //    model_report_file);
 
-  delete[] model_weights;
+  LOG(INFO) << "Trained model and report saved";
+  std::cout << "Trained model and report saved" << std::endl;
+  google::FlushLogFiles(google::INFO);
 }
 
 // for DEBUG
