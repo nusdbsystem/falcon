@@ -76,7 +76,8 @@ void send_public_values(std::vector<T> values, vector<ssl_socket*>& sockets, int
 
   if (std::is_same<T, int>::value) {
     for (int i = 0; i < size; i++) {
-      parameters[i].assign(values[i]);
+      parameters[i] = gfpvar(values[i]);
+      // parameters[i].assign(&values[i]);
       parameters[i].pack(os);
     }
   } else {
@@ -131,7 +132,8 @@ void send_private_inputs(const std::vector<T>& inputs, vector<ssl_socket*>& sock
   // Map inputs into gfp
   vector<gfp> input_values_gfp(size);
   for (int i = 0; i < size; i++) {
-    input_values_gfp[i].assign(long_shares[i]);
+    bigint::tmp = long_shares[i];
+    input_values_gfp[i] = gfpvar(bigint::tmp);
   }
 
   // call sending values
