@@ -12,30 +12,31 @@ type InferenceWorker struct {
 	base.WorkerBase
 }
 
-func InitInferenceWorker(masterAddr, workerAddr string, PartyID string) *InferenceWorker {
+func InitInferenceWorker(masterAddr, workerAddr string, PartyID common.PartyIdType, WorkerID common.WorkerIdType, DistributedRole uint) *InferenceWorker {
 	wk := InferenceWorker{}
 	wk.InitWorkerBase(workerAddr, common.InferenceWorker)
 	wk.MasterAddr = masterAddr
-	wk.WorkerID = PartyID
+	wk.PartyID = PartyID
 
 	return &wk
 }
 
 func (wk *InferenceWorker) Run() {
 
-	// 0 thread: start event Loop
-
-	go wk.HeartBeatLoop()
+	go func() {
+		defer logger.HandleErrors()
+		wk.HeartBeatLoop()
+	}()
 
 	rpcSvc := rpc.NewServer()
 
 	err := rpcSvc.Register(&wk)
 	if err != nil {
-		logger.Log.Fatalf("%s: start Error \n", wk.Name)
+		logger.Log.Fatalf("[%s]: start Error \n", wk.Name)
 	}
 
-	logger.Log.Printf("%s from PartyID %s: register to masterAddr = %s \n", wk.Name, wk.WorkerID, wk.MasterAddr)
-	wk.Register(wk.MasterAddr)
+	logger.Log.Printf("[%s] from PartyID %d: register to masterAddr = %s \n", wk.Name, wk.PartyID, wk.MasterAddr)
+	wk.RegisterToMaster(wk.MasterAddr)
 
 	// start rpc server blocking...
 	wk.StartRPCServer(rpcSvc, true)

@@ -3,17 +3,16 @@ package master
 import (
 	"context"
 	"falcon_platform/cache"
-	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"falcon_platform/utils"
-	"strconv"
-	"strings"
+	"fmt"
 	"sync"
 	"time"
 )
 
+// master dispatch job to multiple workers, and wait until worker finish
 func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 	// checking if the IP of worker match the dslOjb
@@ -22,7 +21,12 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	master.Unlock()
 
 	master.Lock()
-	logger.Log.Println("[Dispatch]: All worker found: ", master.workers, " required IP: ", dslOjb.PartyAddrList, "Ip matched !!")
+	var SerializedWorker []string
+	for _, worker := range master.workers {
+		tmp := fmt.Sprintf("WorkerAddr=%s, PartyID=%d, WorkerID=%d", worker.Addr, worker.PartyID, worker.WorkerID)
+		SerializedWorker = append(SerializedWorker, tmp)
+	}
+	logger.Log.Println("[Master.Dispatcher]: All worker found:", SerializedWorker)
 	master.Unlock()
 
 	// 1. generate config (MpcIp) for each party-server's mpc task
@@ -35,54 +39,51 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 	wg := sync.WaitGroup{}
 
-	// 1. generate MpcIP for each party-server's mpc task
-	mpcPort, MpcIP := generateMPCCfg(dslOjb)
-
-	// 2. generate config (ip, ports) for each party-server's train task
-	netCfg := generateNetworkCfg(dslOjb)
-
 	ctx, dispatchDone := context.WithCancel(context.Background())
 	defer func() {
 		//cancel runtimeStatusMonitor threads
 		dispatchDone()
 	}()
 
-	go master.runtimeStatusMonitor(ctx)
+	go func() {
+		defer logger.HandleErrors()
+		master.runtimeStatusMonitor(ctx)
+	}()
 
-	// 3.1 combine the config to generate dslObj instance, and assign it to each worker
-	master.DispatchDslObj(dslOjb, netCfg, MpcIP, mpcPort, &wg)
-	if ok := master.keepExecuting(); !ok {
+	// 3.1 generate dslObj instance, and assign it to each worker
+	master.dispatchDslObj(&wg, dslOjb)
+	if ok := master.isSuccessful(); !ok {
 		return
 	}
 
-	// 3.2 Run pre_processing, if has this task
+	// 3.2 Run pre_processing if there is the task
 	if dslOjb.Tasks.PreProcessing.AlgorithmName != "" {
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.PreProcessing.MpcAlgorithmName)
-		if ok := master.keepExecuting(); !ok {
+		if ok := master.isSuccessful(); !ok {
 			return
 		}
 
 		// Run pre_processing
 		master.dispatchPreProcessingTask(&wg)
-		if ok := master.keepExecuting(); !ok {
+		if ok := master.isSuccessful(); !ok {
 			return
 		}
 	}
 
-	// 3.3 Run model_training if has this task
+	// 3.3 Run model_training if there is the task
 	if dslOjb.Tasks.ModelTraining.AlgorithmName != "" {
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.ModelTraining.MpcAlgorithmName)
-		if ok := master.keepExecuting(); !ok {
+		if ok := master.isSuccessful(); !ok {
 			return
 		}
 
 		// Run model_training
 		master.dispatchModelTrainingTask(&wg)
-		if ok := master.keepExecuting(); !ok {
+		if ok := master.isSuccessful(); !ok {
 			return
 		}
 	}
@@ -90,46 +91,16 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	// 3.5 more tasks later? add later
 
 	report := master.dispatchRetrieveModelReport()
-	logger.Log.Println("[Dispatch]: report is", report)
+	logger.Log.Println("[Master.Dispatcher]: report is", report)
 	if report != "" {
 		// write to disk
 		filename := "/opt/falcon/src/falcon_platform/web/build/static/media/model_report"
 		err := utils.WriteFile(report, filename)
 		if err != nil {
-			logger.Log.Printf("[Dispatch]: write model report to disk error: %s \n", err.Error())
+			logger.Log.Printf("[Master.Dispatcher]: write model report to disk error: %s \n", err.Error())
 		}
 	}
 
-}
-
-func generateMPCCfg(dslOjb *cache.DslObj) (uint, string) {
-	mpcPort := client.GetFreePort(common.CoordAddr)
-	mpcPint, _ := strconv.Atoi(mpcPort)
-	var MpcIP string
-	for i, addr := range dslOjb.PartyAddrList {
-		// all mpc process use only party-0's (active party) ip.
-		if dslOjb.PartyInfoList[i].PartyType == common.ActiveParty {
-			MpcIP = strings.Split(addr, ":")[0]
-		}
-	}
-	return uint(mpcPint), MpcIP
-}
-
-func generateNetworkCfg(dslOjb *cache.DslObj) string {
-	// generate network config for each party,
-	var portArray [][]int32
-	for i := 0; i < len(dslOjb.PartyAddrList); i++ {
-		var ports []int32
-		//generate n ports
-		for i := 0; i < len(dslOjb.PartyAddrList); i++ {
-			port := client.GetFreePort(common.CoordAddr)
-			pint, _ := strconv.Atoi(port)
-			ports = append(ports, int32(pint))
-		}
-		portArray = append(portArray, ports)
-	}
-	netCfg := common.GenerateNetworkConfig(dslOjb.PartyAddrList, portArray)
-	return netCfg
 }
 
 func (master *Master) runtimeStatusMonitor(ctx context.Context) {
@@ -154,7 +125,7 @@ func (master *Master) runtimeStatusMonitor(ctx context.Context) {
 					master.jobStatusLock.Unlock()
 					// kill all workers.
 					logger.Log.Printf("[Scheduler]: One worker failed %s in calling %s, "+
-						"kill other workers\n", status.WorkerUrl, status.RpcCallMethod)
+						"kill other workers\n", status.WorkerAddr, status.RpcCallMethod)
 					master.jobStatusLog = entity.MarshalStatus(status)
 					master.killWorkers()
 				}
@@ -165,8 +136,8 @@ func (master *Master) runtimeStatusMonitor(ctx context.Context) {
 	}
 }
 
-func (master *Master) keepExecuting() bool {
-	// if current task has error, return false which will tell dispatcher to skip the following tasks, and return
+// if current task has error, return false which will tell dispatcher to skip the following tasks, and return
+func (master *Master) isSuccessful() bool {
 	master.jobStatusLock.Lock()
 	if master.jobStatus == common.JobKilled || master.jobStatus == common.JobFailed {
 		master.jobStatusLock.Unlock()

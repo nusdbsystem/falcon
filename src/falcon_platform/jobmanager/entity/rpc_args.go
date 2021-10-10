@@ -6,7 +6,10 @@ import (
 	"encoding/json"
 	"falcon_platform/common"
 	"falcon_platform/logger"
+	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
 )
 
 // parsed from DslObj, sent to each worker with all related information
@@ -23,22 +26,32 @@ type DslObj4SingleParty struct {
 	PartyInfo common.PartyInfo
 
 	// Proto file for falconMl task communication
-	NetWorkFile string
+	ExecutorPairNetworkCfg string
 
-	// This 2 for mpc
-	// all mpc process share's party-0's ip
-	MpcIP string
-	// all mpc process use the same port
-	MpcPort uint
+	// distributed training information
+	DistributedTask common.DistributedTask
+
+	// Proto file for distributed falconMl task communication
+	DistributedExecutorPairNetworkCfg string
+
+	// This is for mpc
+
+	// mpc accepts a file defined as falcon/data/networks/mpc_executor.txt, mpc_mpc_ports_inputs.txt
+	// this is the content of the file, each worker will write it to local disk
+	MpcPairNetworkCfg string
+
+	MpcExecutorNetworkCfg string
 }
 
-// RegisterArgs is the argument passed when a worker registers with the master.
+// WorkerInfo is the argument passed when a worker registers with the master.
 // the worker's UNIX-domain socket name, i.e. its RPC addr
-type RegisterArgs struct {
+type WorkerInfo struct {
 	// this is worker addr
-	WorkerAddr string
+	Addr string
 	// the same as the ID of the party
-	WorkerID string
+	PartyID common.PartyIdType
+	// the same as the ID of the party
+	WorkerID common.WorkerIdType
 }
 
 type ShutdownReply struct {
@@ -48,7 +61,7 @@ type ShutdownReply struct {
 type DoTaskReply struct {
 	// base info of this rpc call
 	RpcCallMethod string
-	WorkerUrl     string
+	WorkerAddr    string
 
 	// indicate if the job has error
 	RuntimeError bool
@@ -82,6 +95,31 @@ func MarshalStatus(trainStatuses *DoTaskReply) string {
 func argTypeRegister() {
 	gob.Register([]interface{}{})
 	gob.Register(map[string]interface{}{})
+}
+
+func EncodeWorkerInfo(args *WorkerInfo) string {
+	encodedStr := args.Addr + // 0,1
+		":" +
+		fmt.Sprintf("%d", args.PartyID) + // 2
+		":" +
+		fmt.Sprintf("%d", args.WorkerID) // 3
+
+	return encodedStr
+}
+
+func DecodeWorkerInfo(encodedStr string) *WorkerInfo {
+
+	workerTmpList := strings.Split(encodedStr, ":")
+
+	tmpAddr := workerTmpList[0] + ":" + workerTmpList[1]
+	tmpPartyID, _ := strconv.Atoi(workerTmpList[2])
+	tmpWorkerID, _ := strconv.Atoi(workerTmpList[3])
+
+	args := new(WorkerInfo)
+	args.Addr = tmpAddr
+	args.PartyID = common.PartyIdType(tmpPartyID)
+	args.WorkerID = common.WorkerIdType(tmpWorkerID)
+	return args
 }
 
 func EncodeDslObj4SingleParty(args *DslObj4SingleParty) []byte {

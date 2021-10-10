@@ -1,3 +1,4 @@
+// implement the abstract class of Worker with interface + struct
 package base
 
 import (
@@ -39,8 +40,14 @@ type WorkerBase struct {
 	// each worker has only one master addr
 	MasterAddr string
 
+	// each worker has onw ID
+	WorkerID common.WorkerIdType
+
 	// each worker is linked to the PartyID
-	WorkerID string
+	PartyID common.PartyIdType
+
+	// DistributedRole=1 worker, DistributedRole=0 parameter sever
+	DistributedRole uint
 
 	// each worker store full job information,
 	DslObj entity.DslObj4SingleParty
@@ -50,9 +57,6 @@ func (w *WorkerBase) RunWorker(worker Worker) {
 	logger.Log.Println("[WorkerBase]: RunWorker called")
 
 	worker.Run()
-
-	logger.Log.Printf("%s: RunWorker exit", w.Name)
-
 }
 
 func (w *WorkerBase) InitWorkerBase(workerAddr, name string) {
@@ -80,14 +84,15 @@ func (w *WorkerBase) ReceiveJobInfo(arg string, rep *entity.DoTaskReply) error {
 	return nil
 }
 
-func (w *WorkerBase) Register(MasterAddr string) {
-	// call the master's register method to tell master i'm(worker) ready,
-	args := new(entity.RegisterArgs)
-	args.WorkerAddr = w.Addr
-	args.WorkerID = w.WorkerID
+// call the master's register method to tell master i'm(worker) ready,
+func (w *WorkerBase) RegisterToMaster(MasterAddr string) {
+	worker := new(entity.WorkerInfo)
+	worker.Addr = w.Addr
+	worker.PartyID = w.PartyID
+	worker.WorkerID = w.WorkerID
 
-	logger.Log.Printf("[WorkerBase]: call Master.RegisterWorker to register WorkerAddr: %s \n", args.WorkerAddr)
-	ok := client.Call(MasterAddr, w.Network, "Master.RegisterWorker", args, new(struct{}))
+	logger.Log.Printf("[WorkerBase]: call Master.RegisterWorker to register WorkerAddr: %s \n", worker.Addr)
+	ok := client.Call(MasterAddr, w.Network, "Master.RegisterWorker", worker, new(struct{}))
 	// if not register successfully, close
 	if ok == false {
 		logger.Log.Fatalf("[WorkerBase]: Register RPC %s, register error\n", MasterAddr)
@@ -101,13 +106,11 @@ func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
 	logger.Log.Printf("[WorkerBase]: Shutdown called, %s: Shutdown %s\n", w.Name, w.Addr)
 
 	// when worker is about exit, shutdown mpc if any.
-	w.MpcTm.ResourceClear()
+	w.MpcTm.DeleteResources()
 
 	// shutdown worker's hear-beat
 	w.Clear()
-	if w.Tm == nil {
-		logger.Log.Println("[WorkerBase] Worker.ResourceManager must be init")
-	} else {
+	if w.Tm != nil {
 		w.Tm.DeleteResources()
 	}
 
@@ -118,7 +121,10 @@ func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
 	return nil
 }
 
+// hearbeat loop
 func (w *WorkerBase) HeartBeatLoop() {
+
+	// wait for 5 second before counting down
 	time.Sleep(time.Second * 5)
 
 	//define a label and break to that label
@@ -152,10 +158,8 @@ loop:
 	}
 }
 
+// called by master to reset worker base time
 func (w *WorkerBase) ResetTime(_ *struct{}, _ *struct{}) error {
-
-	// called by master to reset worker base time
-	//logger.Log.Println("[WorkerBase]: ResetTime called")
 	w.reset()
 	return nil
 }
