@@ -9,18 +9,19 @@ import (
 // parsed from TranJob object, add PartyAddrList and JobId
 type DslObj struct {
 
-	// party-urls [ip+port..]
+	// party-addr [ip+port..]
 	PartyAddrList []string
 	// train job_id, or inference jobId, index of the job in db,
 	JobId uint
 
 	// those are the same as TranJob object
-	JobName       string // party-urls [ip+port..]
-	JobFlType     string
-	ExistingKey   uint
-	PartyNums     uint
-	PartyInfoList []common.PartyInfo
-	Tasks         common.Tasks
+	JobName         string // party-urls [ip+port..]
+	JobFlType       string
+	ExistingKey     uint
+	PartyNums       uint
+	DistributedTask common.DistributedTask
+	PartyInfoList   []common.PartyInfo
+	Tasks           common.Tasks
 }
 
 func argTypeRegister() {
