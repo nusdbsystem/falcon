@@ -8,6 +8,16 @@ message IntArray {
     repeated int32 int_item = 1;
 }
 
+// This message is used when transmitting the training labels and testing labels
+message DoubleArray {
+    repeated double item = 1;
+}
+
+// This message is used when transmitting the training data and testing data
+message DoubleMatrix {
+    repeated DoubleArray array = 1;
+}
+
 // This message is used to serialize an EncodedNumber value
 message FixedPointEncodedNumber{
     // maximum value

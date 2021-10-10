@@ -32,10 +32,6 @@ class RandomForestParamsDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<RandomForestParams> _instance;
 } _RandomForestParams_default_instance_;
-class GbdtParamsDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<GbdtParams> _instance;
-} _GbdtParams_default_instance_;
 }  // namespace v0
 }  // namespace falcon
 }  // namespace dbsytem
@@ -53,20 +49,6 @@ static void InitDefaultsscc_info_DecisionTreeParams_alg_5fparams_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DecisionTreeParams_alg_5fparams_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_DecisionTreeParams_alg_5fparams_2eproto}, {}};
-
-static void InitDefaultsscc_info_GbdtParams_alg_5fparams_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::com::nus::dbsytem::falcon::v0::_GbdtParams_default_instance_;
-    new (ptr) ::com::nus::dbsytem::falcon::v0::GbdtParams();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GbdtParams_alg_5fparams_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_GbdtParams_alg_5fparams_2eproto}, {
-      &scc_info_DecisionTreeParams_alg_5fparams_2eproto.base,}};
 
 static void InitDefaultsscc_info_LogisticRegressionParams_alg_5fparams_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -95,7 +77,7 @@ static void InitDefaultsscc_info_RandomForestParams_alg_5fparams_2eproto() {
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_RandomForestParams_alg_5fparams_2eproto}, {
       &scc_info_DecisionTreeParams_alg_5fparams_2eproto.base,}};
 
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_alg_5fparams_2eproto[4];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_alg_5fparams_2eproto[3];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_alg_5fparams_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_alg_5fparams_2eproto = nullptr;
 
@@ -143,29 +125,17 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_alg_5fparams_2eproto::offsets[
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::RandomForestParams, n_estimator_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::RandomForestParams, sample_rate_),
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::RandomForestParams, dt_param_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtParams, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtParams, n_estimator_),
-  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtParams, loss_),
-  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtParams, learning_rate_),
-  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtParams, subsample_),
-  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::GbdtParams, dt_param_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::com::nus::dbsytem::falcon::v0::LogisticRegressionParams)},
   { 18, -1, sizeof(::com::nus::dbsytem::falcon::v0::DecisionTreeParams)},
   { 35, -1, sizeof(::com::nus::dbsytem::falcon::v0::RandomForestParams)},
-  { 43, -1, sizeof(::com::nus::dbsytem::falcon::v0::GbdtParams)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_LogisticRegressionParams_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_DecisionTreeParams_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_RandomForestParams_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_GbdtParams_default_instance_),
 };
 
 const char descriptor_table_protodef_alg_5fparams_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -188,26 +158,21 @@ const char descriptor_table_protodef_alg_5fparams_2eproto[] PROTOBUF_SECTION_VAR
   "udget\030\014 \001(\001\"\177\n\022RandomForestParams\022\023\n\013n_e"
   "stimator\030\001 \001(\005\022\023\n\013sample_rate\030\002 \001(\001\022\?\n\010d"
   "t_param\030\003 \001(\0132-.com.nus.dbsytem.falcon.v"
-  "0.DecisionTreeParams\"\232\001\n\nGbdtParams\022\023\n\013n"
-  "_estimator\030\001 \001(\005\022\014\n\004loss\030\002 \001(\t\022\025\n\rlearni"
-  "ng_rate\030\003 \001(\001\022\021\n\tsubsample\030\004 \001(\001\022\?\n\010dt_p"
-  "aram\030\005 \001(\0132-.com.nus.dbsytem.falcon.v0.D"
-  "ecisionTreeParamsB\tZ\007/commonb\006proto3"
+  "0.DecisionTreeParamsB\005Z\003/v0b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_alg_5fparams_2eproto_deps[1] = {
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_alg_5fparams_2eproto_sccs[4] = {
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_alg_5fparams_2eproto_sccs[3] = {
   &scc_info_DecisionTreeParams_alg_5fparams_2eproto.base,
-  &scc_info_GbdtParams_alg_5fparams_2eproto.base,
   &scc_info_LogisticRegressionParams_alg_5fparams_2eproto.base,
   &scc_info_RandomForestParams_alg_5fparams_2eproto.base,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_alg_5fparams_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_alg_5fparams_2eproto = {
-  false, false, descriptor_table_protodef_alg_5fparams_2eproto, "alg_params.proto", 956,
-  &descriptor_table_alg_5fparams_2eproto_once, descriptor_table_alg_5fparams_2eproto_sccs, descriptor_table_alg_5fparams_2eproto_deps, 4, 0,
+  false, false, descriptor_table_protodef_alg_5fparams_2eproto, "alg_params.proto", 795,
+  &descriptor_table_alg_5fparams_2eproto_once, descriptor_table_alg_5fparams_2eproto_sccs, descriptor_table_alg_5fparams_2eproto_deps, 3, 0,
   schemas, file_default_instances, TableStruct_alg_5fparams_2eproto::offsets,
-  file_level_metadata_alg_5fparams_2eproto, 4, file_level_enum_descriptors_alg_5fparams_2eproto, file_level_service_descriptors_alg_5fparams_2eproto,
+  file_level_metadata_alg_5fparams_2eproto, 3, file_level_enum_descriptors_alg_5fparams_2eproto, file_level_service_descriptors_alg_5fparams_2eproto,
 };
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -1514,333 +1479,6 @@ void RandomForestParams::InternalSwap(RandomForestParams* other) {
 }
 
 
-// ===================================================================
-
-class GbdtParams::_Internal {
- public:
-  static const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams& dt_param(const GbdtParams* msg);
-};
-
-const ::com::nus::dbsytem::falcon::v0::DecisionTreeParams&
-GbdtParams::_Internal::dt_param(const GbdtParams* msg) {
-  return *msg->dt_param_;
-}
-GbdtParams::GbdtParams(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:com.nus.dbsytem.falcon.v0.GbdtParams)
-}
-GbdtParams::GbdtParams(const GbdtParams& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  loss_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_loss().empty()) {
-    loss_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_loss(), 
-      GetArena());
-  }
-  if (from._internal_has_dt_param()) {
-    dt_param_ = new ::com::nus::dbsytem::falcon::v0::DecisionTreeParams(*from.dt_param_);
-  } else {
-    dt_param_ = nullptr;
-  }
-  ::memcpy(&learning_rate_, &from.learning_rate_,
-    static_cast<size_t>(reinterpret_cast<char*>(&n_estimator_) -
-    reinterpret_cast<char*>(&learning_rate_)) + sizeof(n_estimator_));
-  // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.GbdtParams)
-}
-
-void GbdtParams::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GbdtParams_alg_5fparams_2eproto.base);
-  loss_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-      reinterpret_cast<char*>(&dt_param_) - reinterpret_cast<char*>(this)),
-      0, static_cast<size_t>(reinterpret_cast<char*>(&n_estimator_) -
-      reinterpret_cast<char*>(&dt_param_)) + sizeof(n_estimator_));
-}
-
-GbdtParams::~GbdtParams() {
-  // @@protoc_insertion_point(destructor:com.nus.dbsytem.falcon.v0.GbdtParams)
-  SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-void GbdtParams::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  loss_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (this != internal_default_instance()) delete dt_param_;
-}
-
-void GbdtParams::ArenaDtor(void* object) {
-  GbdtParams* _this = reinterpret_cast< GbdtParams* >(object);
-  (void)_this;
-}
-void GbdtParams::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
-void GbdtParams::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
-}
-const GbdtParams& GbdtParams::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_GbdtParams_alg_5fparams_2eproto.base);
-  return *internal_default_instance();
-}
-
-
-void GbdtParams::Clear() {
-// @@protoc_insertion_point(message_clear_start:com.nus.dbsytem.falcon.v0.GbdtParams)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  loss_.ClearToEmpty();
-  if (GetArena() == nullptr && dt_param_ != nullptr) {
-    delete dt_param_;
-  }
-  dt_param_ = nullptr;
-  ::memset(&learning_rate_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&n_estimator_) -
-      reinterpret_cast<char*>(&learning_rate_)) + sizeof(n_estimator_));
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-const char* GbdtParams::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
-    switch (tag >> 3) {
-      // int32 n_estimator = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          n_estimator_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // string loss = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
-          auto str = _internal_mutable_loss();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "com.nus.dbsytem.falcon.v0.GbdtParams.loss"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // double learning_rate = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 25)) {
-          learning_rate_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
-          ptr += sizeof(double);
-        } else goto handle_unusual;
-        continue;
-      // double subsample = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 33)) {
-          subsample_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
-          ptr += sizeof(double);
-        } else goto handle_unusual;
-        continue;
-      // .com.nus.dbsytem.falcon.v0.DecisionTreeParams dt_param = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
-          ptr = ctx->ParseMessage(_internal_mutable_dt_param(), ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
-    }  // switch
-  }  // while
-success:
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto success;
-#undef CHK_
-}
-
-::PROTOBUF_NAMESPACE_ID::uint8* GbdtParams::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:com.nus.dbsytem.falcon.v0.GbdtParams)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  // int32 n_estimator = 1;
-  if (this->n_estimator() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_n_estimator(), target);
-  }
-
-  // string loss = 2;
-  if (this->loss().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_loss().data(), static_cast<int>(this->_internal_loss().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "com.nus.dbsytem.falcon.v0.GbdtParams.loss");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_loss(), target);
-  }
-
-  // double learning_rate = 3;
-  if (!(this->learning_rate() <= 0 && this->learning_rate() >= 0)) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(3, this->_internal_learning_rate(), target);
-  }
-
-  // double subsample = 4;
-  if (!(this->subsample() <= 0 && this->subsample() >= 0)) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(4, this->_internal_subsample(), target);
-  }
-
-  // .com.nus.dbsytem.falcon.v0.DecisionTreeParams dt_param = 5;
-  if (this->has_dt_param()) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        5, _Internal::dt_param(this), target, stream);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsytem.falcon.v0.GbdtParams)
-  return target;
-}
-
-size_t GbdtParams::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:com.nus.dbsytem.falcon.v0.GbdtParams)
-  size_t total_size = 0;
-
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // string loss = 2;
-  if (this->loss().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_loss());
-  }
-
-  // .com.nus.dbsytem.falcon.v0.DecisionTreeParams dt_param = 5;
-  if (this->has_dt_param()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *dt_param_);
-  }
-
-  // double learning_rate = 3;
-  if (!(this->learning_rate() <= 0 && this->learning_rate() >= 0)) {
-    total_size += 1 + 8;
-  }
-
-  // double subsample = 4;
-  if (!(this->subsample() <= 0 && this->subsample() >= 0)) {
-    total_size += 1 + 8;
-  }
-
-  // int32 n_estimator = 1;
-  if (this->n_estimator() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_n_estimator());
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
-}
-
-void GbdtParams::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:com.nus.dbsytem.falcon.v0.GbdtParams)
-  GOOGLE_DCHECK_NE(&from, this);
-  const GbdtParams* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<GbdtParams>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:com.nus.dbsytem.falcon.v0.GbdtParams)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:com.nus.dbsytem.falcon.v0.GbdtParams)
-    MergeFrom(*source);
-  }
-}
-
-void GbdtParams::MergeFrom(const GbdtParams& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:com.nus.dbsytem.falcon.v0.GbdtParams)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (from.loss().size() > 0) {
-    _internal_set_loss(from._internal_loss());
-  }
-  if (from.has_dt_param()) {
-    _internal_mutable_dt_param()->::com::nus::dbsytem::falcon::v0::DecisionTreeParams::MergeFrom(from._internal_dt_param());
-  }
-  if (!(from.learning_rate() <= 0 && from.learning_rate() >= 0)) {
-    _internal_set_learning_rate(from._internal_learning_rate());
-  }
-  if (!(from.subsample() <= 0 && from.subsample() >= 0)) {
-    _internal_set_subsample(from._internal_subsample());
-  }
-  if (from.n_estimator() != 0) {
-    _internal_set_n_estimator(from._internal_n_estimator());
-  }
-}
-
-void GbdtParams::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:com.nus.dbsytem.falcon.v0.GbdtParams)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-void GbdtParams::CopyFrom(const GbdtParams& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:com.nus.dbsytem.falcon.v0.GbdtParams)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool GbdtParams::IsInitialized() const {
-  return true;
-}
-
-void GbdtParams::InternalSwap(GbdtParams* other) {
-  using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  loss_.Swap(&other->loss_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GbdtParams, n_estimator_)
-      + sizeof(GbdtParams::n_estimator_)
-      - PROTOBUF_FIELD_OFFSET(GbdtParams, dt_param_)>(
-          reinterpret_cast<char*>(&dt_param_),
-          reinterpret_cast<char*>(&other->dt_param_));
-}
-
-::PROTOBUF_NAMESPACE_ID::Metadata GbdtParams::GetMetadata() const {
-  return GetMetadataStatic();
-}
-
-
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace v0
 }  // namespace falcon
@@ -1856,9 +1494,6 @@ template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::DecisionTreeParams
 }
 template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::RandomForestParams* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::RandomForestParams >(Arena* arena) {
   return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::RandomForestParams >(arena);
-}
-template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::GbdtParams* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::GbdtParams >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::GbdtParams >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

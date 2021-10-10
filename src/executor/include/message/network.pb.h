@@ -194,7 +194,8 @@ class NetworkConfig PROTOBUF_FINAL :
 
   enum : int {
     kIpsFieldNumber = 1,
-    kPortArraysFieldNumber = 2,
+    kExecutorExecutorPortArraysFieldNumber = 2,
+    kExecutorMpcPortArrayFieldNumber = 3,
   };
   // repeated string ips = 1;
   int ips_size() const;
@@ -220,23 +221,41 @@ class NetworkConfig PROTOBUF_FINAL :
   std::string* _internal_add_ips();
   public:
 
-  // repeated .com.nus.dbsytem.falcon.v0.PortArray port_arrays = 2;
-  int port_arrays_size() const;
+  // repeated .com.nus.dbsytem.falcon.v0.PortArray executor_executor_port_arrays = 2;
+  int executor_executor_port_arrays_size() const;
   private:
-  int _internal_port_arrays_size() const;
+  int _internal_executor_executor_port_arrays_size() const;
   public:
-  void clear_port_arrays();
-  ::com::nus::dbsytem::falcon::v0::PortArray* mutable_port_arrays(int index);
+  void clear_executor_executor_port_arrays();
+  ::com::nus::dbsytem::falcon::v0::PortArray* mutable_executor_executor_port_arrays(int index);
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::PortArray >*
-      mutable_port_arrays();
+      mutable_executor_executor_port_arrays();
   private:
-  const ::com::nus::dbsytem::falcon::v0::PortArray& _internal_port_arrays(int index) const;
-  ::com::nus::dbsytem::falcon::v0::PortArray* _internal_add_port_arrays();
+  const ::com::nus::dbsytem::falcon::v0::PortArray& _internal_executor_executor_port_arrays(int index) const;
+  ::com::nus::dbsytem::falcon::v0::PortArray* _internal_add_executor_executor_port_arrays();
   public:
-  const ::com::nus::dbsytem::falcon::v0::PortArray& port_arrays(int index) const;
-  ::com::nus::dbsytem::falcon::v0::PortArray* add_port_arrays();
+  const ::com::nus::dbsytem::falcon::v0::PortArray& executor_executor_port_arrays(int index) const;
+  ::com::nus::dbsytem::falcon::v0::PortArray* add_executor_executor_port_arrays();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::PortArray >&
-      port_arrays() const;
+      executor_executor_port_arrays() const;
+
+  // .com.nus.dbsytem.falcon.v0.PortArray executor_mpc_port_array = 3;
+  bool has_executor_mpc_port_array() const;
+  private:
+  bool _internal_has_executor_mpc_port_array() const;
+  public:
+  void clear_executor_mpc_port_array();
+  const ::com::nus::dbsytem::falcon::v0::PortArray& executor_mpc_port_array() const;
+  ::com::nus::dbsytem::falcon::v0::PortArray* release_executor_mpc_port_array();
+  ::com::nus::dbsytem::falcon::v0::PortArray* mutable_executor_mpc_port_array();
+  void set_allocated_executor_mpc_port_array(::com::nus::dbsytem::falcon::v0::PortArray* executor_mpc_port_array);
+  private:
+  const ::com::nus::dbsytem::falcon::v0::PortArray& _internal_executor_mpc_port_array() const;
+  ::com::nus::dbsytem::falcon::v0::PortArray* _internal_mutable_executor_mpc_port_array();
+  public:
+  void unsafe_arena_set_allocated_executor_mpc_port_array(
+      ::com::nus::dbsytem::falcon::v0::PortArray* executor_mpc_port_array);
+  ::com::nus::dbsytem::falcon::v0::PortArray* unsafe_arena_release_executor_mpc_port_array();
 
   // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.NetworkConfig)
  private:
@@ -246,7 +265,8 @@ class NetworkConfig PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> ips_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::PortArray > port_arrays_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::PortArray > executor_executor_port_arrays_;
+  ::com::nus::dbsytem::falcon::v0::PortArray* executor_mpc_port_array_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_network_2eproto;
 };
@@ -485,43 +505,126 @@ NetworkConfig::mutable_ips() {
   return &ips_;
 }
 
-// repeated .com.nus.dbsytem.falcon.v0.PortArray port_arrays = 2;
-inline int NetworkConfig::_internal_port_arrays_size() const {
-  return port_arrays_.size();
+// repeated .com.nus.dbsytem.falcon.v0.PortArray executor_executor_port_arrays = 2;
+inline int NetworkConfig::_internal_executor_executor_port_arrays_size() const {
+  return executor_executor_port_arrays_.size();
 }
-inline int NetworkConfig::port_arrays_size() const {
-  return _internal_port_arrays_size();
+inline int NetworkConfig::executor_executor_port_arrays_size() const {
+  return _internal_executor_executor_port_arrays_size();
 }
-inline void NetworkConfig::clear_port_arrays() {
-  port_arrays_.Clear();
+inline void NetworkConfig::clear_executor_executor_port_arrays() {
+  executor_executor_port_arrays_.Clear();
 }
-inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::mutable_port_arrays(int index) {
-  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.NetworkConfig.port_arrays)
-  return port_arrays_.Mutable(index);
+inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::mutable_executor_executor_port_arrays(int index) {
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_executor_port_arrays)
+  return executor_executor_port_arrays_.Mutable(index);
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::PortArray >*
-NetworkConfig::mutable_port_arrays() {
-  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.NetworkConfig.port_arrays)
-  return &port_arrays_;
+NetworkConfig::mutable_executor_executor_port_arrays() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_executor_port_arrays)
+  return &executor_executor_port_arrays_;
 }
-inline const ::com::nus::dbsytem::falcon::v0::PortArray& NetworkConfig::_internal_port_arrays(int index) const {
-  return port_arrays_.Get(index);
+inline const ::com::nus::dbsytem::falcon::v0::PortArray& NetworkConfig::_internal_executor_executor_port_arrays(int index) const {
+  return executor_executor_port_arrays_.Get(index);
 }
-inline const ::com::nus::dbsytem::falcon::v0::PortArray& NetworkConfig::port_arrays(int index) const {
-  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.NetworkConfig.port_arrays)
-  return _internal_port_arrays(index);
+inline const ::com::nus::dbsytem::falcon::v0::PortArray& NetworkConfig::executor_executor_port_arrays(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_executor_port_arrays)
+  return _internal_executor_executor_port_arrays(index);
 }
-inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::_internal_add_port_arrays() {
-  return port_arrays_.Add();
+inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::_internal_add_executor_executor_port_arrays() {
+  return executor_executor_port_arrays_.Add();
 }
-inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::add_port_arrays() {
-  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.NetworkConfig.port_arrays)
-  return _internal_add_port_arrays();
+inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::add_executor_executor_port_arrays() {
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_executor_port_arrays)
+  return _internal_add_executor_executor_port_arrays();
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::PortArray >&
-NetworkConfig::port_arrays() const {
-  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.NetworkConfig.port_arrays)
-  return port_arrays_;
+NetworkConfig::executor_executor_port_arrays() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_executor_port_arrays)
+  return executor_executor_port_arrays_;
+}
+
+// .com.nus.dbsytem.falcon.v0.PortArray executor_mpc_port_array = 3;
+inline bool NetworkConfig::_internal_has_executor_mpc_port_array() const {
+  return this != internal_default_instance() && executor_mpc_port_array_ != nullptr;
+}
+inline bool NetworkConfig::has_executor_mpc_port_array() const {
+  return _internal_has_executor_mpc_port_array();
+}
+inline void NetworkConfig::clear_executor_mpc_port_array() {
+  if (GetArena() == nullptr && executor_mpc_port_array_ != nullptr) {
+    delete executor_mpc_port_array_;
+  }
+  executor_mpc_port_array_ = nullptr;
+}
+inline const ::com::nus::dbsytem::falcon::v0::PortArray& NetworkConfig::_internal_executor_mpc_port_array() const {
+  const ::com::nus::dbsytem::falcon::v0::PortArray* p = executor_mpc_port_array_;
+  return p != nullptr ? *p : reinterpret_cast<const ::com::nus::dbsytem::falcon::v0::PortArray&>(
+      ::com::nus::dbsytem::falcon::v0::_PortArray_default_instance_);
+}
+inline const ::com::nus::dbsytem::falcon::v0::PortArray& NetworkConfig::executor_mpc_port_array() const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_mpc_port_array)
+  return _internal_executor_mpc_port_array();
+}
+inline void NetworkConfig::unsafe_arena_set_allocated_executor_mpc_port_array(
+    ::com::nus::dbsytem::falcon::v0::PortArray* executor_mpc_port_array) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(executor_mpc_port_array_);
+  }
+  executor_mpc_port_array_ = executor_mpc_port_array;
+  if (executor_mpc_port_array) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_mpc_port_array)
+}
+inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::release_executor_mpc_port_array() {
+  
+  ::com::nus::dbsytem::falcon::v0::PortArray* temp = executor_mpc_port_array_;
+  executor_mpc_port_array_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::unsafe_arena_release_executor_mpc_port_array() {
+  // @@protoc_insertion_point(field_release:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_mpc_port_array)
+  
+  ::com::nus::dbsytem::falcon::v0::PortArray* temp = executor_mpc_port_array_;
+  executor_mpc_port_array_ = nullptr;
+  return temp;
+}
+inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::_internal_mutable_executor_mpc_port_array() {
+  
+  if (executor_mpc_port_array_ == nullptr) {
+    auto* p = CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::PortArray>(GetArena());
+    executor_mpc_port_array_ = p;
+  }
+  return executor_mpc_port_array_;
+}
+inline ::com::nus::dbsytem::falcon::v0::PortArray* NetworkConfig::mutable_executor_mpc_port_array() {
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_mpc_port_array)
+  return _internal_mutable_executor_mpc_port_array();
+}
+inline void NetworkConfig::set_allocated_executor_mpc_port_array(::com::nus::dbsytem::falcon::v0::PortArray* executor_mpc_port_array) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete executor_mpc_port_array_;
+  }
+  if (executor_mpc_port_array) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(executor_mpc_port_array);
+    if (message_arena != submessage_arena) {
+      executor_mpc_port_array = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, executor_mpc_port_array, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  executor_mpc_port_array_ = executor_mpc_port_array;
+  // @@protoc_insertion_point(field_set_allocated:com.nus.dbsytem.falcon.v0.NetworkConfig.executor_mpc_port_array)
 }
 
 // -------------------------------------------------------------------

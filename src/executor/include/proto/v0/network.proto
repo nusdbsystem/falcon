@@ -1,17 +1,19 @@
 syntax = "proto3";
 
 package com.nus.dbsytem.falcon.v0;
-option go_package = "/common";
+option go_package = "/v0";
 
 message NetworkConfig {
   // ips of different parties
   repeated string ips = 1;
-  // an array of PortArray
-  repeated PortArray port_arrays = 2;
+  // an array of executor to executor PortArray
+  repeated PortArray executor_executor_port_arrays = 2;
+  // PortArray for executor to mpc ports
+  PortArray executor_mpc_port_array = 3;
 }
 
 message PortArray {
   // ports of each part
-  repeated  int32 ports = 1;
+  repeated int32 ports = 1;
 }
 

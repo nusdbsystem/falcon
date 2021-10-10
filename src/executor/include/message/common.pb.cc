@@ -14,6 +14,7 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
+extern PROTOBUF_INTERNAL_EXPORT_common_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DoubleArray_common_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_common_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_FixedPointEncodedNumber_common_2eproto;
 namespace com {
 namespace nus {
@@ -24,6 +25,14 @@ class IntArrayDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<IntArray> _instance;
 } _IntArray_default_instance_;
+class DoubleArrayDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<DoubleArray> _instance;
+} _DoubleArray_default_instance_;
+class DoubleMatrixDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<DoubleMatrix> _instance;
+} _DoubleMatrix_default_instance_;
 class FixedPointEncodedNumberDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<FixedPointEncodedNumber> _instance;
@@ -37,6 +46,33 @@ class EncodedNumberArrayDefaultTypeInternal {
 }  // namespace dbsytem
 }  // namespace nus
 }  // namespace com
+static void InitDefaultsscc_info_DoubleArray_common_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::com::nus::dbsytem::falcon::v0::_DoubleArray_default_instance_;
+    new (ptr) ::com::nus::dbsytem::falcon::v0::DoubleArray();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DoubleArray_common_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_DoubleArray_common_2eproto}, {}};
+
+static void InitDefaultsscc_info_DoubleMatrix_common_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::com::nus::dbsytem::falcon::v0::_DoubleMatrix_default_instance_;
+    new (ptr) ::com::nus::dbsytem::falcon::v0::DoubleMatrix();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_DoubleMatrix_common_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_DoubleMatrix_common_2eproto}, {
+      &scc_info_DoubleArray_common_2eproto.base,}};
+
 static void InitDefaultsscc_info_EncodedNumberArray_common_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
@@ -77,7 +113,7 @@ static void InitDefaultsscc_info_IntArray_common_2eproto() {
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_IntArray_common_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_IntArray_common_2eproto}, {}};
 
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_common_2eproto[3];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_common_2eproto[5];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_common_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_common_2eproto = nullptr;
 
@@ -88,6 +124,18 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_common_2eproto::offsets[] PROT
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::IntArray, int_item_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::DoubleArray, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::DoubleArray, item_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::DoubleMatrix, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::DoubleMatrix, array_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -106,38 +154,47 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_common_2eproto::offsets[] PROT
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::com::nus::dbsytem::falcon::v0::IntArray)},
-  { 6, -1, sizeof(::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber)},
-  { 15, -1, sizeof(::com::nus::dbsytem::falcon::v0::EncodedNumberArray)},
+  { 6, -1, sizeof(::com::nus::dbsytem::falcon::v0::DoubleArray)},
+  { 12, -1, sizeof(::com::nus::dbsytem::falcon::v0::DoubleMatrix)},
+  { 18, -1, sizeof(::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber)},
+  { 27, -1, sizeof(::com::nus::dbsytem::falcon::v0::EncodedNumberArray)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_IntArray_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_DoubleArray_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_DoubleMatrix_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_FixedPointEncodedNumber_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::com::nus::dbsytem::falcon::v0::_EncodedNumberArray_default_instance_),
 };
 
 const char descriptor_table_protodef_common_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\014common.proto\022\031com.nus.dbsytem.falcon.v"
-  "0\"\034\n\010IntArray\022\020\n\010int_item\030\001 \003(\005\"S\n\027Fixed"
-  "PointEncodedNumber\022\t\n\001n\030\001 \001(\t\022\r\n\005value\030\002"
-  " \001(\t\022\020\n\010exponent\030\003 \001(\005\022\014\n\004type\030\004 \001(\005\"`\n\022"
-  "EncodedNumberArray\022J\n\016encoded_number\030\001 \003"
-  "(\01322.com.nus.dbsytem.falcon.v0.FixedPoin"
-  "tEncodedNumberb\006proto3"
+  "0\"\034\n\010IntArray\022\020\n\010int_item\030\001 \003(\005\"\033\n\013Doubl"
+  "eArray\022\014\n\004item\030\001 \003(\001\"E\n\014DoubleMatrix\0225\n\005"
+  "array\030\001 \003(\0132&.com.nus.dbsytem.falcon.v0."
+  "DoubleArray\"S\n\027FixedPointEncodedNumber\022\t"
+  "\n\001n\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\022\020\n\010exponent\030\003 \001"
+  "(\005\022\014\n\004type\030\004 \001(\005\"`\n\022EncodedNumberArray\022J"
+  "\n\016encoded_number\030\001 \003(\01322.com.nus.dbsytem"
+  ".falcon.v0.FixedPointEncodedNumberb\006prot"
+  "o3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_common_2eproto_deps[1] = {
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_common_2eproto_sccs[3] = {
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_common_2eproto_sccs[5] = {
+  &scc_info_DoubleArray_common_2eproto.base,
+  &scc_info_DoubleMatrix_common_2eproto.base,
   &scc_info_EncodedNumberArray_common_2eproto.base,
   &scc_info_FixedPointEncodedNumber_common_2eproto.base,
   &scc_info_IntArray_common_2eproto.base,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_common_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_common_2eproto = {
-  false, false, descriptor_table_protodef_common_2eproto, "common.proto", 262,
-  &descriptor_table_common_2eproto_once, descriptor_table_common_2eproto_sccs, descriptor_table_common_2eproto_deps, 3, 0,
+  false, false, descriptor_table_protodef_common_2eproto, "common.proto", 362,
+  &descriptor_table_common_2eproto_once, descriptor_table_common_2eproto_sccs, descriptor_table_common_2eproto_deps, 5, 0,
   schemas, file_default_instances, TableStruct_common_2eproto::offsets,
-  file_level_metadata_common_2eproto, 3, file_level_enum_descriptors_common_2eproto, file_level_service_descriptors_common_2eproto,
+  file_level_metadata_common_2eproto, 5, file_level_enum_descriptors_common_2eproto, file_level_service_descriptors_common_2eproto,
 };
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -350,6 +407,408 @@ void IntArray::InternalSwap(IntArray* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata IntArray::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class DoubleArray::_Internal {
+ public:
+};
+
+DoubleArray::DoubleArray(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  item_(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:com.nus.dbsytem.falcon.v0.DoubleArray)
+}
+DoubleArray::DoubleArray(const DoubleArray& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      item_(from.item_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.DoubleArray)
+}
+
+void DoubleArray::SharedCtor() {
+}
+
+DoubleArray::~DoubleArray() {
+  // @@protoc_insertion_point(destructor:com.nus.dbsytem.falcon.v0.DoubleArray)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void DoubleArray::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void DoubleArray::ArenaDtor(void* object) {
+  DoubleArray* _this = reinterpret_cast< DoubleArray* >(object);
+  (void)_this;
+}
+void DoubleArray::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void DoubleArray::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const DoubleArray& DoubleArray::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_DoubleArray_common_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void DoubleArray::Clear() {
+// @@protoc_insertion_point(message_clear_start:com.nus.dbsytem.falcon.v0.DoubleArray)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  item_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* DoubleArray::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // repeated double item = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedDoubleParser(_internal_mutable_item(), ptr, ctx);
+          CHK_(ptr);
+        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 9) {
+          _internal_add_item(::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr));
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* DoubleArray::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:com.nus.dbsytem.falcon.v0.DoubleArray)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // repeated double item = 1;
+  if (this->_internal_item_size() > 0) {
+    target = stream->WriteFixedPacked(1, _internal_item(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsytem.falcon.v0.DoubleArray)
+  return target;
+}
+
+size_t DoubleArray::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:com.nus.dbsytem.falcon.v0.DoubleArray)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated double item = 1;
+  {
+    unsigned int count = static_cast<unsigned int>(this->_internal_item_size());
+    size_t data_size = 8UL * count;
+    if (data_size > 0) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
+    }
+    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
+    _item_cached_byte_size_.store(cached_size,
+                                    std::memory_order_relaxed);
+    total_size += data_size;
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void DoubleArray::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:com.nus.dbsytem.falcon.v0.DoubleArray)
+  GOOGLE_DCHECK_NE(&from, this);
+  const DoubleArray* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DoubleArray>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:com.nus.dbsytem.falcon.v0.DoubleArray)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:com.nus.dbsytem.falcon.v0.DoubleArray)
+    MergeFrom(*source);
+  }
+}
+
+void DoubleArray::MergeFrom(const DoubleArray& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:com.nus.dbsytem.falcon.v0.DoubleArray)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  item_.MergeFrom(from.item_);
+}
+
+void DoubleArray::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:com.nus.dbsytem.falcon.v0.DoubleArray)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DoubleArray::CopyFrom(const DoubleArray& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:com.nus.dbsytem.falcon.v0.DoubleArray)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DoubleArray::IsInitialized() const {
+  return true;
+}
+
+void DoubleArray::InternalSwap(DoubleArray* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  item_.InternalSwap(&other->item_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata DoubleArray::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class DoubleMatrix::_Internal {
+ public:
+};
+
+DoubleMatrix::DoubleMatrix(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  array_(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+}
+DoubleMatrix::DoubleMatrix(const DoubleMatrix& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      array_(from.array_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+}
+
+void DoubleMatrix::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_DoubleMatrix_common_2eproto.base);
+}
+
+DoubleMatrix::~DoubleMatrix() {
+  // @@protoc_insertion_point(destructor:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void DoubleMatrix::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void DoubleMatrix::ArenaDtor(void* object) {
+  DoubleMatrix* _this = reinterpret_cast< DoubleMatrix* >(object);
+  (void)_this;
+}
+void DoubleMatrix::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void DoubleMatrix::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const DoubleMatrix& DoubleMatrix::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_DoubleMatrix_common_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void DoubleMatrix::Clear() {
+// @@protoc_insertion_point(message_clear_start:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  array_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* DoubleMatrix::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // repeated .com.nus.dbsytem.falcon.v0.DoubleArray array = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_array(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* DoubleMatrix::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // repeated .com.nus.dbsytem.falcon.v0.DoubleArray array = 1;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_array_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, this->_internal_array(i), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+  return target;
+}
+
+size_t DoubleMatrix::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .com.nus.dbsytem.falcon.v0.DoubleArray array = 1;
+  total_size += 1UL * this->_internal_array_size();
+  for (const auto& msg : this->array_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void DoubleMatrix::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+  GOOGLE_DCHECK_NE(&from, this);
+  const DoubleMatrix* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DoubleMatrix>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+    MergeFrom(*source);
+  }
+}
+
+void DoubleMatrix::MergeFrom(const DoubleMatrix& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  array_.MergeFrom(from.array_);
+}
+
+void DoubleMatrix::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void DoubleMatrix::CopyFrom(const DoubleMatrix& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool DoubleMatrix::IsInitialized() const {
+  return true;
+}
+
+void DoubleMatrix::InternalSwap(DoubleMatrix* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  array_.InternalSwap(&other->array_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata DoubleMatrix::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -869,6 +1328,12 @@ void EncodedNumberArray::InternalSwap(EncodedNumberArray* other) {
 PROTOBUF_NAMESPACE_OPEN
 template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::IntArray* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::IntArray >(Arena* arena) {
   return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::IntArray >(arena);
+}
+template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::DoubleArray* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::DoubleArray >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::DoubleArray >(arena);
+}
+template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::DoubleMatrix* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::DoubleMatrix >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::DoubleMatrix >(arena);
 }
 template<> PROTOBUF_NOINLINE ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Arena::CreateMaybeMessage< ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber >(Arena* arena) {
   return Arena::CreateMessageInternal< ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber >(arena);
