@@ -17,6 +17,7 @@
 #include <thread>
 #include <future>
 #include <iomanip>      // std::setprecision
+#include <utility>
 
 #include <glog/logging.h>
 #include <Networking/ssl_sockets.h>
@@ -62,7 +63,6 @@ void LogisticRegressionBuilder::init_encrypted_weights(const Party &party, int p
   LOG(INFO) << "Init encrypted local weights.";
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
-
   std::random_device rd;
   std::mt19937 mt(rd());
   // initialization of weights
@@ -82,6 +82,9 @@ void LogisticRegressionBuilder::init_encrypted_weights(const Party &party, int p
     t.set_double(phe_pub_key->n[0], v, precision);
     djcs_t_aux_encrypt(phe_pub_key, party.phe_random, log_reg_model.local_weights[i], t);
   }
+
+  LOG(INFO) << "[init_encrypted_weights]: predicted_labels precision is: " << 0 - log_reg_model.local_weights[0].getter_exponent();
+  std::cout << "[init_encrypted_weights]: predicted_labels precision is: " << 0 - log_reg_model.local_weights[0].getter_exponent() << std::endl;
 
   djcs_t_free_public_key(phe_pub_key);
 }
@@ -123,144 +126,40 @@ std::vector<int> LogisticRegressionBuilder::select_batch_idx(
   return batch_indexes;
 }
 
-void LogisticRegressionBuilder::compute_batch_phe_aggregation(const Party &party,
-    std::vector<int> batch_indexes,
-    falcon::DatasetType dataset_type,
+void LogisticRegressionBuilder::backward_computation(
+    const Party& party,
+    const std::vector<std::vector<double> >& batch_samples,
+    EncodedNumber* predicted_labels,
+    const std::vector<int>& batch_indexes,
     int precision,
-    EncodedNumber *batch_phe_aggregation) {
-  // retrieve phe pub key and phe random
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  party.getter_phe_pub_key(phe_pub_key);
+    EncodedNumber* encrypted_gradients) {
 
-  // retrieve batch samples and encode (notice to use cur_batch_size
-  // instead of default batch size to avoid unexpected batch)
-  int cur_batch_size = batch_indexes.size();
-  std::vector<std::vector<double>> batch_samples;
-  for (int i = 0; i < cur_batch_size; i++) {
-    // NOTE: here is a function to calculate the inner product between
-    // sample feature values and encrypted weights,
-    // so needs to differentiate the dataset
-    if (dataset_type == falcon::TRAIN) {
-      batch_samples.push_back(training_data[batch_indexes[i]]);
-    } else if (dataset_type == falcon::TEST) {
-      batch_samples.push_back(testing_data[batch_indexes[i]]);
-    } else {
-      LOG(INFO) << "Not supported yet, reserved";
-    }
-  }
-  EncodedNumber** encoded_batch_samples = new EncodedNumber*[cur_batch_size];
-  for (int i = 0; i < cur_batch_size; i++) {
-    encoded_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
-  }
-  for (int i = 0; i < cur_batch_size; i++) {
-    for (int j = 0; j < log_reg_model.weight_size; j++) {
-      encoded_batch_samples[i][j].set_double(phe_pub_key->n[0],
-                                             batch_samples[i][j], precision);
-    }
-  }
-
-  // compute local homomorphic aggregation
-  EncodedNumber* local_batch_phe_aggregation = new EncodedNumber[cur_batch_size];
-  djcs_t_aux_matrix_mult(phe_pub_key, party.phe_random,
-      local_batch_phe_aggregation, log_reg_model.local_weights,
-      encoded_batch_samples, cur_batch_size, log_reg_model.weight_size);
-
-  // every party sends the local aggregation to the active party
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    // copy self local aggregation results
-    for (int i = 0; i < cur_batch_size; i++) {
-      // each element (i) in local_batch_phe_aggregation is [W].Xi,
-      // Xi is a part of feature vector in example i
-      batch_phe_aggregation[i] = local_batch_phe_aggregation[i];
-    }
-
-    // 1. active party receive serialized string from other parties
-    // deserialize and sum to batch_phe_aggregation
-    for (int id = 0; id < party.party_num; id++) {
-      if (id != party.party_id) {
-        EncodedNumber* recv_batch_phe_aggregation =
-            new EncodedNumber[cur_batch_size];
-        std::string recv_local_aggregation_str;
-        party.recv_long_message(id, recv_local_aggregation_str);
-        deserialize_encoded_number_array(recv_batch_phe_aggregation,
-                                         cur_batch_size,
-                                         recv_local_aggregation_str);
-        // homomorphic addition of the received aggregations
-        // After addition, each element (i) in batch_phe_aggregation is
-        // [W1].Xi1+[W2].Xi2+...+[Wn].Xin Xin is example i's n-th feature,
-        // W1 is first element in weigh vector
-        for (int i = 0; i < cur_batch_size; i++) {
-          djcs_t_aux_ee_add(phe_pub_key, batch_phe_aggregation[i],
-                            batch_phe_aggregation[i],
-                            recv_batch_phe_aggregation[i]);
-        }
-        delete[] recv_batch_phe_aggregation;
-      }
-    }
-
-    // 2. active party serialize and send the aggregated
-    // batch_phe_aggregation to other parties
-    std::string global_aggregation_str;
-    serialize_encoded_number_array(batch_phe_aggregation, cur_batch_size,
-                                   global_aggregation_str);
-    for (int id = 0; id < party.party_num; id++) {
-      if (id != party.party_id) {
-        party.send_long_message(id, global_aggregation_str);
-      }
-    }
-  } else {
-    // if it's passive party, it will not do the aggregation,
-    // 1. it just serialize local batch aggregation and send to active party
-    std::string local_aggregation_str;
-    serialize_encoded_number_array(local_batch_phe_aggregation, cur_batch_size,
-                                   local_aggregation_str);
-    party.send_long_message(ACTIVE_PARTY_ID, local_aggregation_str);
-
-    // 2. passive party receive the global batch aggregation
-    // from the active party
-    std::string recv_global_aggregation_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_global_aggregation_str);
-    deserialize_encoded_number_array(batch_phe_aggregation, cur_batch_size,
-                                     recv_global_aggregation_str);
-  }
-
-  djcs_t_free_public_key(phe_pub_key);
-  for (int i = 0; i < cur_batch_size; i++) {
-    delete[] encoded_batch_samples[i];
-  }
-  delete[] encoded_batch_samples;
-  delete[] local_batch_phe_aggregation;
-}
-
-void LogisticRegressionBuilder::update_encrypted_weights(Party& party,
-    std::vector<double> batch_logistic_shares,
-    std::vector<double> truncated_weight_shares,
-    std::vector<int> batch_indexes,
-    int precision) {
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
   // convert batch loss shares back to encrypted losses
-  int cur_batch_size = batch_indexes.size();
-  EncodedNumber* encrypted_batch_losses = new EncodedNumber[cur_batch_size];
-  // active party receive all shares from other party and do the aggregation,
-  // and board-cast it to other party.
-  party.secret_shares_to_ciphers(encrypted_batch_losses, batch_logistic_shares,
-                                 cur_batch_size, ACTIVE_PARTY_ID, precision);
+  int cur_batch_size = (int) batch_indexes.size();
+  auto* encrypted_batch_losses = new EncodedNumber[cur_batch_size];
 
   // compute [f_t - y_t], i.e., [batch_losses]=[batch_outputs]-[batch_labels]
   // and broadcast active party use the label to calculate loss,
   // and sent it to other parties
   if (party.party_type == falcon::ACTIVE_PARTY) {
     std::vector<double> batch_labels;
-    for (int i = 0; i < cur_batch_size; i++) {
-      batch_labels.push_back(training_labels[batch_indexes[i]]);
+    for (int index: batch_indexes) {
+      batch_labels.push_back(training_labels[index]);
     }
-    EncodedNumber* encrypted_ground_truth_labels =
+    auto* encrypted_ground_truth_labels =
         new EncodedNumber[cur_batch_size];
     for (int i = 0; i < cur_batch_size; i++) {
       // init "0-y_t"
+      LOG(INFO) << "[backward_computation]: ground truth precision is: " << precision;
+      std::cout << "[backward_computation]: ground truth precision is: " << precision << std::endl;
+
+      LOG(INFO) << "[backward_computation]: predicted_labels precision is: " << 0 - predicted_labels->getter_exponent();
+      std::cout << "[backward_computation]: predicted_labels precision is: " << 0 - predicted_labels->getter_exponent() << std::endl;
+
       encrypted_ground_truth_labels[i].set_double(
           phe_pub_key->n[0], 0 - batch_labels[i], precision);
       // encrypt [0-y_t]
@@ -269,7 +168,7 @@ void LogisticRegressionBuilder::update_encrypted_weights(Party& party,
                          encrypted_ground_truth_labels[i]);
       // compute phe addition [f_t - y_t]
       djcs_t_aux_ee_add(phe_pub_key, encrypted_batch_losses[i],
-                        encrypted_batch_losses[i],
+                        predicted_labels[i],
                         encrypted_ground_truth_labels[i]);
     }
     std::string encrypted_batch_losses_str;
@@ -295,18 +194,18 @@ void LogisticRegressionBuilder::update_encrypted_weights(Party& party,
     LOG(INFO) << "Finish receive encrypted loss from the active party";
   }
 
-  std::vector<std::vector<double>> batch_samples;
-  for (int i = 0; i < cur_batch_size; i++) {
-    batch_samples.push_back(training_data[batch_indexes[i]]);
-  }
-  EncodedNumber** encoded_batch_samples = new EncodedNumber*[cur_batch_size];
+  // after calculate loss, compute [loss_i]*x_{ij}
+  auto encoded_batch_samples = new EncodedNumber*[cur_batch_size];
   for (int i = 0; i < cur_batch_size; i++) {
     encoded_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
   }
 
   // update formula: [w_j]=[w_j]-lr*(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}} +
   // reg? lr*(1/|B|) is the same for all sample values, thus can be initialized
-  double lr_batch = learning_rate / cur_batch_size;
+  // TODO: replace cur_batch_size with this->batch_size
+  // if distributed train, ps only aggregate the encrypted parameters if divide
+  // this->batch_size here; if not distributed train, cur_batch_size = this->batch_size
+  double lr_batch = learning_rate / this->batch_size;
   for (int i = 0; i < cur_batch_size; i++) {
     for (int j = 0; j < log_reg_model.weight_size; j++) {
       // std::cout << "The " << i << "-th sample's " << j <<
@@ -317,24 +216,22 @@ void LogisticRegressionBuilder::update_encrypted_weights(Party& party,
     }
   }
 
+  // calculate gradients
   // if not with_regularization, no need to convert truncated weights;
   // otherwise, need to convert truncated weights to ciphers for the update
   if (!with_regularization) {
     // update each local weight j
     for (int j = 0; j < log_reg_model.weight_size; j++) {
-      EncodedNumber inner_product;
-      EncodedNumber* batch_feature_j = new EncodedNumber[cur_batch_size];
+      EncodedNumber gradient;
+      auto* batch_feature_j = new EncodedNumber[cur_batch_size];
       for (int i = 0; i < cur_batch_size; i++) {
         batch_feature_j[i] = encoded_batch_samples[i][j];
       }
-      djcs_t_aux_inner_product(phe_pub_key, party.phe_random, inner_product,
+      djcs_t_aux_inner_product(phe_pub_key, party.phe_random, gradient,
                                encrypted_batch_losses, batch_feature_j,
                                cur_batch_size);
-      // update the j-th weight in local_weight vector
-      // need to make sure that the exponents of inner_product
-      // and local weights are the same
-      djcs_t_aux_ee_add(phe_pub_key,log_reg_model.local_weights[j],
-          log_reg_model.local_weights[j], inner_product);
+      encrypted_gradients[j] = gradient;
+
       delete [] batch_feature_j;
     }
   } else {
@@ -351,21 +248,40 @@ void LogisticRegressionBuilder::update_encrypted_weights(Party& party,
   delete[] encoded_batch_samples;
 }
 
-void LogisticRegressionBuilder::train(Party party) {
-  std::cout << "************* Training Start *************" << std::endl;
-  LOG(INFO) << "************* Training Start *************";
-  const clock_t training_start_time = clock();
+void LogisticRegressionBuilder::update_encrypted_weights(
+        Party& party,
+        EncodedNumber* encrypted_gradients) const  {
 
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  // update the j-th weight in local_weight vector
+  // need to make sure that the exponents of inner_product
+  // and local weights are the same
+  for (int j = 0; j < log_reg_model.weight_size; j++) {
+      djcs_t_aux_ee_add(phe_pub_key,log_reg_model.local_weights[j],
+                        log_reg_model.local_weights[j], encrypted_gradients[j]);
+  }
+  djcs_t_free_public_key(phe_pub_key);
+
+}
+
+void LogisticRegressionBuilder::train(Party party) {
   /// The training stage consists of the following steps
-  /// 1. init encrypted local weights, "local_weights" = [w1],[w2],...[wn]
+  /// 1. each party init encrypted local weights, "local_weights" = [w1],[w2],...[wn]
   /// 2. iterative computation
   ///   2.1 randomly select a batch of indexes for current iteration
+  ///       2.1.1. For active party:
+  ///          a) randomly select a batch of indexes
+  ///          b) serialize it and send to other parties
+  ///        2.1.2. For passive party:
+  ///           a) receive recv_batch_indexes_str from active parties
   ///   2.2 compute homomorphic aggregation on the batch samples:
-  ///         eg, the party select m examples and have n features
-  ///         "local_batch_phe_aggregation"(m*1) = { [w1]x11+[w2]x12+...+[wn]x1n,
-  ///                                                [w1]x21+[w2]x22+...+[wn]x2n,
-  ///                                                         ....
-  ///                                                [w1]xm1+[w2]xm2+...+[wn]xmn,}
+  ///       eg, the party select m examples and have n features
+  ///       "local_batch_phe_aggregation"(m*1) = { [w1]x11+[w2]x12+...+[wn]x1n,
+  ///                                             [w1]x21+[w2]x22+...+[wn]x2n,
+  ///                                                      ....
+  ///                                             [w1]xm1+[w2]xm2+...+[wn]xmn,}
   ///       2.2.1. For active party:
   ///          a) receive batch_phe_aggregation string from other parties
   ///          b) add the received batch_phe_aggregation with current batch_phe_aggregation
@@ -408,10 +324,17 @@ void LogisticRegressionBuilder::train(Party party) {
   ///          c) update the local weight using [w_j]=[w_j]-lr*(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}}
   /// 3. decrypt weights ciphertext
 
+  std::cout << "************* Training Start *************" << std::endl;
+  LOG(INFO) << "************* Training Start *************";
+  const clock_t training_start_time = clock();
+
   if (optimizer != "sgd") {
     LOG(ERROR) << "The " << optimizer << " optimizer does not supported";
     return;
   }
+
+  LOG(INFO) << "[train]: mpc_port_array_size after: " << party.executor_mpc_ports.size() <<" --------";
+  std::cout << "[train]: mpc_port_array_size after: " << party.executor_mpc_ports.size() << std::endl;
 
   // step 1: init encrypted local weights
   // (here use 3 * precision for consistence in the following)
@@ -420,10 +343,11 @@ void LogisticRegressionBuilder::train(Party party) {
   init_encrypted_weights(party, encrypted_weights_precision);
 
   // record training data ids in data_indexes for iteratively batch selection
-  std::vector<int> data_indexes;
+  std::vector<int> train_data_indexes;
   for (int i = 0; i < training_data.size(); i++) {
-    data_indexes.push_back(i);
+    train_data_indexes.push_back(i);
   }
+  LOG(INFO) << "Init encrypted local weights success";
 
   google::FlushLogFiles(google::INFO);
 
@@ -432,64 +356,91 @@ void LogisticRegressionBuilder::train(Party party) {
 
   // step 2: iteratively computation
   for (int iter = 0; iter < max_iteration; iter++) {
-    LOG(INFO) << "-------- Iteration " << iter << " --------";
-    std::cout << "-------- Iteration " << iter << " --------" << std::endl;
+    LOG(INFO) << "-------- Iteration " << iter << ", --------";
+    std::cout << "-------- Iteration " << iter << ", --------" << std::endl;
     const clock_t iter_start_time = clock();
 
-    // step 2.1: randomly select a batch of samples
-    std::vector<int> batch_indexes = select_batch_idx(party, data_indexes);
-    int cur_batch_size = batch_indexes.size();
+    // select batch_index
+    std::vector< int> batch_indexes = select_batch_idx(party, train_data_indexes);
+    LOG(INFO) << "-------- Iteration " << iter << ", select_batch_idx success" << " --------";
+    std::cout << "-------- Iteration " << iter << ", select_batch_idx success" <<" --------" << std::endl;
+    // get training data with selected batch_index
+    std::vector<std::vector<double> > batch_samples;
+    for (int index : batch_indexes) {
+      batch_samples.push_back(training_data[index]);
+    }
 
-    // std::cout << "step 2.1 success" << std::endl;
+    std::cout << "batch_samples " << std::setprecision(17) << batch_samples[0][0] << std::endl;
+    LOG(INFO) << "batch_samples " << std::setprecision(17) << batch_samples[0][0] ;
 
-    // step 2.2: homomorphic batch aggregation
-    // (the precision should be 3 * prec now)
-    EncodedNumber* encrypted_batch_aggregation =
-        new EncodedNumber[cur_batch_size];
-    compute_batch_phe_aggregation(party, batch_indexes, falcon::TRAIN,
-                                  plaintext_samples_precision,
-                                  encrypted_batch_aggregation);
+    // encode the training data
+    int cur_sample_size = batch_samples.size();
+    EncodedNumber** encoded_batch_samples = new EncodedNumber*[cur_sample_size];
+    for (int i = 0; i < cur_sample_size; i++) {
+      encoded_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
+    }
+    log_reg_model.encode_samples(party, batch_samples, encoded_batch_samples);
 
-    // std::cout << "step 2.2 success" << std::endl;
+    double v;
+    encoded_batch_samples[0][0].decode(v);
+    std::cout << "encoded_batch_samples " << std::setprecision(17) << v << std::endl;
+    LOG(INFO) << "encoded_batch_samples " << std::setprecision(17) << v;
 
-    // step 2.3: convert the encrypted batch aggregation into secret shares
-    // in order to do the exponential calculation
-    int encrypted_batch_aggregation_precision =
-        encrypted_weights_precision + plaintext_samples_precision;
-    std::vector<double> batch_aggregation_shares;
-    party.ciphers_to_secret_shares(
-        encrypted_batch_aggregation, batch_aggregation_shares, cur_batch_size,
-        ACTIVE_PARTY_ID, encrypted_batch_aggregation_precision);
+    LOG(INFO) << "-------- Iteration " << iter << ", encode training data success" << " --------";
+    std::cout << "-------- Iteration " << iter << ", encode training data success" <<" --------" << std::endl;
 
-    // std::cout << "step 2.3 success" << std::endl;
+    LOG(INFO) << "[deserialize_network_configs]: mpc_port_array_size after: " << party.executor_mpc_ports.size() <<" --------";
+    std::cout << "[deserialize_network_configs]: mpc_port_array_size after: " << party.executor_mpc_ports.size() << std::endl;
 
-    // step 2.4: communicate with spdz parties and receive results
-    // the spdz_logistic_function_computation will do the 1/(1+e^(wx)) operation
-    std::promise<std::vector<double>> promise_values;
-    std::future<std::vector<double>> future_values =
-        promise_values.get_future();
-    std::thread spdz_thread(spdz_logistic_function_computation, party.party_num,
-                            party.party_id, SPDZ_PORT_BASE, SPDZ_PLAYER_PATH,
-                            party.host_names, batch_aggregation_shares,
-                            cur_batch_size, &promise_values);
-    std::vector<double> batch_logistic_shares = future_values.get();
-    // main thread wait spdz_thread to finish
-    spdz_thread.join();
+    // compute predicted label
+    auto *predicted_labels = new EncodedNumber[batch_indexes.size()];
+    // 4 * fixed precision
+    // weight * xj => encrypted_weights_precision + plaintext_samples_precision
+    int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
+    log_reg_model.forward_computation(
+        party,
+        cur_sample_size,
+        encoded_batch_samples,
+        encrypted_batch_aggregation_precision,
+        predicted_labels);
 
-    // std::cout << "step 2.4 success" << std::endl;
+    LOG(INFO) << "-------- Iteration " << iter << ", forward computation success" << " --------";
+    std::cout << "-------- Iteration " << iter << ", forward computation success" <<" --------" << std::endl;
+
+    LOG(INFO) << "The precision of predicted_labels is: " << 0 - predicted_labels[0].getter_exponent();
+    std::cout << "The precision of predicted_labels is: " << 0 - predicted_labels[0].getter_exponent() << std::endl;
 
     // step 2.5: update encrypted local weights
     // TODO: currently does not support with_regularization
     std::vector<double> truncated_weights_shares;
+
+    google::FlushLogFiles(google::INFO);
+
+    auto encrypted_gradients = new EncodedNumber[log_reg_model.weight_size];
     // need to make sure that update_precision * 2 = encrypted_weights_precision
     int update_precision = encrypted_weights_precision / 2;
-    update_encrypted_weights(party, batch_logistic_shares,
-                             truncated_weights_shares, batch_indexes,
-                             update_precision);
+    LOG(INFO) << "Update_precision is: " << update_precision;
+    std::cout << "Update_precision is: " << update_precision << std::endl;
+
+    backward_computation(
+        party,
+        batch_samples,
+        predicted_labels,
+        batch_indexes,
+        update_precision,
+        encrypted_gradients);
+
+    google::FlushLogFiles(google::INFO);
+
+    LOG(INFO) << "-------- Iteration " << iter << ", backward computation success" << " --------";
+    std::cout << "-------- Iteration " << iter << ", backward computation success" <<" --------" << std::endl;
+
+    update_encrypted_weights(party, encrypted_gradients);
+
+    LOG(INFO) << "-------- Iteration " << iter << ", update_encrypted_weights computation success" << " --------";
+    std::cout << "-------- Iteration " << iter << ", update_encrypted_weights computation success" <<" --------" << std::endl;
 
     // std::cout << "step 2.5 success" << std::endl;
-
-    delete[] encrypted_batch_aggregation;
 
     const clock_t iter_finish_time = clock();
     double iter_consumed_time =
@@ -535,6 +486,13 @@ void LogisticRegressionBuilder::train(Party party) {
     }
 #endif
 
+    delete [] predicted_labels;
+    delete [] encrypted_gradients;
+    for (int i = 0; i < cur_sample_size; i++) {
+      delete [] encoded_batch_samples[i];
+    }
+    delete [] encoded_batch_samples;
+
     google::FlushLogFiles(google::INFO);
   }
 
@@ -546,18 +504,190 @@ void LogisticRegressionBuilder::train(Party party) {
   google::FlushLogFiles(google::INFO);
 }
 
-void LogisticRegressionBuilder::eval(Party party, falcon::DatasetType eval_type,
+void LogisticRegressionBuilder::distributed_train(
+    const Party& party,
+    const Worker& worker) {
+  std::cout << "************* Distributed Training Start *************" << std::endl;
+  LOG(INFO) << "************* Distributed Training Start *************";
+  const clock_t training_start_time = clock();
+  // (here use 3 * precision for consistence in the following)
+  int encrypted_weights_precision = 3 * PHE_FIXED_POINT_PRECISION;
+  int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
+
+  if (optimizer != "sgd") {
+      LOG(ERROR) << "The " << optimizer << " optimizer does not supported";
+      return;
+  }
+  google::FlushLogFiles(google::INFO);
+
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+
+  for (int iter = 0; iter < max_iteration; iter++) {
+    LOG(INFO) << "-------- Worker Iteration " << iter << ", --------";
+    std::cout << "-------- Worker Iteration " << iter << ", --------" << std::endl;
+
+    // step 1.1: receive weight from master, and assign to current log_reg_model.local_weights
+    std::string weight_str;
+    worker.recv_long_message_from_ps(weight_str);
+
+    LOG(INFO) << "-------- Worker Iteration " << iter << ", worker.receive weight success" << " --------";
+    std::cout << "-------- Worker Iteration " << iter << ", worker.receive weight success" <<" --------" << std::endl;
+
+    auto* deserialized_weight = new EncodedNumber[log_reg_model.weight_size];
+    deserialize_encoded_number_array(deserialized_weight, log_reg_model.weight_size, weight_str);
+    for (int i = 0; i < log_reg_model.weight_size; i++) {
+      this->log_reg_model.local_weights[i] = deserialized_weight[i];
+    }
+
+    // step 1.2: receive sample id from master, and assign batch_size to current log_reg_model.batch_size
+    std::string mini_batch_indexes_str;
+    worker.recv_long_message_from_ps(mini_batch_indexes_str);
+    std::vector<int> mini_batch_indexes;
+    deserialize_int_array(mini_batch_indexes, mini_batch_indexes_str);
+    // here should not record the current batch size in this->batch_size
+    // this->batch_size = mini_batch_indexes.size();
+
+    LOG(INFO) << "-------- Worker Iteration " << iter << ", worker.receive sample id success, batch size" << mini_batch_indexes.size() <<" --------";
+    std::cout << "-------- Worker Iteration " << iter << ", worker.receive sample id success, batch size" << mini_batch_indexes.size() <<" --------" << std::endl;
+
+    const clock_t iter_start_time = clock();
+
+    // step 2.1: activate party send batch_indexes to other party, while other party receive them.
+    // in distributed training, passive party use the index sent by active party instead of the one sent by ps
+    // so overwrite mini_batch_indexes
+    // mini_batch_indexes = select_batch_idx(party, mini_batch_indexes);
+
+    LOG(INFO) << "-------- Worker Iteration " << iter << ", worker.consensus on batch ids" <<" --------";
+    std::cout << "-------- Worker Iteration " << iter << ", worker.consensus on batch ids" <<" --------" << std::endl;
+
+    std::cout << "-------- Worker Iteration "<< iter << "Party " <<party.party_type << " using mini_batch_indexes:"
+    << " --------" << std::endl;
+    print_vector(mini_batch_indexes);
+
+    // get training data with selected batch_index
+    std::vector<std::vector<double> > mini_batch_samples;
+    for (int index : mini_batch_indexes) {
+      mini_batch_samples.push_back(training_data[index]);
+    }
+
+    // encode the training data
+    int cur_sample_size = (int) mini_batch_samples.size();
+    auto** encoded_mini_batch_samples = new EncodedNumber*[cur_sample_size];
+    for (int i = 0; i < cur_sample_size; i++) {
+      encoded_mini_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
+    }
+    log_reg_model.encode_samples(party, mini_batch_samples, encoded_mini_batch_samples);
+
+    LOG(INFO) << "-------- Worker Iteration " << iter << ", worker.encode_samples success" <<" --------";
+    std::cout << "-------- Worker Iteration " << iter << ", worker.encode_samples success" <<" --------" << std::endl;
+
+    auto *predicted_labels = new EncodedNumber[cur_sample_size];
+    // compute predicted label
+    int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
+
+    log_reg_model.forward_computation(
+        party,
+        cur_sample_size,
+        encoded_mini_batch_samples,
+        encrypted_batch_aggregation_precision,
+        predicted_labels);
+
+    LOG(INFO) << "-------- Worker Iteration " << iter << ", forward computation success" << " --------";
+    std::cout << "-------- Worker Iteration " << iter << ", forward computation success" <<" --------" << std::endl;
+
+    auto encrypted_gradients = new EncodedNumber[log_reg_model.weight_size];
+    // need to make sure that update_precision * 2 = encrypted_weights_precision
+    int update_precision = encrypted_weights_precision / 2;
+    backward_computation(party,
+        mini_batch_samples,
+        predicted_labels,
+        mini_batch_indexes,
+        update_precision,
+        encrypted_gradients);
+
+    LOG(INFO) << "-------- Worker Iteration " << iter << ", backward computation success" << " --------";
+    std::cout << "-------- Worker Iteration " << iter << ", backward computation success" <<" --------" << std::endl;
+
+    // step 2.5: send encrypted gradients to ps, ps will update weight
+    std::string encrypted_gradients_str;
+    serialize_encoded_number_array(encrypted_gradients, log_reg_model.weight_size, encrypted_gradients_str);
+    worker.send_long_message_to_ps(encrypted_gradients_str);
+
+    LOG(INFO) << "-------- Worker Iteration " << iter << ", send gradients to ps success" << " --------";
+    std::cout << "-------- Worker Iteration " << iter << ", send gradients to ps success" <<" --------" << std::endl;
+
+    const clock_t iter_finish_time = clock();
+    double iter_consumed_time =
+            double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+    LOG(INFO) << "-------- The " << iter
+              << "-th iteration consumed time = " << iter_consumed_time
+              << " --------";
+    std::cout << "-------- The " << iter
+              << "-th iteration consumed time = " << iter_consumed_time
+              << " --------" << std::endl;
+
+#if DEBUG
+    // intermediate information display
+    // (including the training loss and weights)
+    // whether to print loss+weights and/or evaluation report
+    // based on iter, DEBUG, and PRINT_EVERY
+    bool display_info = false;
+    if (iter == 0) {
+      // display info on the 0-th iter
+      // display_info = true;
+    } else if ((iter + 1) % PRINT_EVERY == 0) {
+      // in debug mode print every PRINT_EVERY (default 500) iters
+      display_info = true;
+      // in DEBUG mode, set PRINT_EVERY to 1 to
+      // print out evaluation report for every iteration
+    }
+
+    if (display_info) {
+      double training_loss = 0.0;
+      loss_computation(party, falcon::TRAIN, training_loss);
+      LOG(INFO) << "DEBUG INFO: The " << iter
+                << "-th iteration training loss = " << std::setprecision(17)
+                << training_loss;
+      std::cout << "DEBUG INFO: The " << iter
+                << "-th iteration training loss = " << std::setprecision(17)
+                << training_loss << std::endl;
+      display_weights(party);
+      // print evaluation report
+      if (iter != (max_iteration - 1)) {
+          // but do not duplicate print for last iter
+          eval(party, falcon::TRAIN, std::string());
+      }
+    }
+#endif
+
+    delete [] deserialized_weight;
+    for (int i = 0; i < cur_sample_size; i++) {
+      delete [] encoded_mini_batch_samples[i];
+    }
+    delete [] predicted_labels;
+    delete [] encoded_mini_batch_samples;
+    delete [] encrypted_gradients;
+  }
+
+  const clock_t training_finish_time = clock();
+  double training_consumed_time =
+          double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  LOG(INFO) << "Distributed Training time = " << training_consumed_time;
+  LOG(INFO) << "************* Distributed Training Finished *************";
+  google::FlushLogFiles(google::INFO);
+}
+
+void LogisticRegressionBuilder::eval(Party party,
+    falcon::DatasetType eval_type,
     const std::string& report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
   const clock_t testing_start_time = clock();
 
-  // Classification Metrics object for performance metrics
-  ClassificationMetrics ClfMetrics;
-
   /// the testing workflow is as follows:
   ///     step 1: init test data
-  ///     step 2: the parties call the model.predict function to compute predicted labelss
+  ///     step 2: the parties call the model.predict function to compute predicted labels
   ///     step 3: active party aggregates and call collaborative decryption
   ///     step 4: active party computes the logistic function and compare the clf metrics
 
@@ -571,13 +701,13 @@ void LogisticRegressionBuilder::eval(Party party, falcon::DatasetType eval_type,
   std::vector<std::vector<double>> cur_test_dataset =
       (eval_type == falcon::TRAIN) ? training_data : testing_data;
 
-  // step 2: every party computes partial phe summation and sends to active party
-  //         now the predicted labels are computed by mpc, thus it is already the probability
-  EncodedNumber* predicted_labels = new EncodedNumber[dataset_size];
-  log_reg_model.predict(party, cur_test_dataset, dataset_size, predicted_labels);
+  // step 2: every party do the prediction, since all examples are required to
+  // computed, there is no need communications of data index between different parties
+  auto* predicted_labels = new EncodedNumber[dataset_size];
+  log_reg_model.predict(party, cur_test_dataset, predicted_labels);
 
   // step 3: active party aggregates and call collaborative decryption
-  EncodedNumber* decrypted_labels = new EncodedNumber[dataset_size];
+  auto* decrypted_labels = new EncodedNumber[dataset_size];
   party.collaborative_decrypt(predicted_labels,
       decrypted_labels,
       dataset_size,
@@ -588,53 +718,7 @@ void LogisticRegressionBuilder::eval(Party party, falcon::DatasetType eval_type,
   // step 4: active party computes the logistic function
   // and compare the clf metrics
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    if (metric == "acc") {
-      // the output is a vector of integers (predicted classes)
-      int pred_class;
-      std::vector<int> pred_classes;
-
-      for (int i = 0; i < dataset_size; i++) {
-        double est_prob;  // estimated probability
-        // prediction and label classes
-        // for binary classifier, positive and negative classes
-        int positive_class = 1;
-        int negative_class = 0;
-        // decoded t score is already the probability
-        // logistic function is a sigmoid function (S-shaped)
-        // logistic function outputs a double between 0 and 1
-        decrypted_labels[i].decode(est_prob);
-        // Logistic Regresison Model make its prediction
-        pred_class =
-            (est_prob >= LOGREG_THRES) ? positive_class : negative_class;
-        pred_classes.push_back(pred_class);
-        // LOG(INFO) << "sample " << i << "'s est_prob = " << est_prob << ", and predicted class = " << pred_class;
-      }
-      if (eval_type == falcon::TRAIN) {
-        ClfMetrics.compute_metrics(pred_classes, training_labels);
-      }
-      if (eval_type == falcon::TEST) {
-        ClfMetrics.compute_metrics(pred_classes, testing_labels);
-      }
-
-      // write results to report
-      std::ofstream outfile;
-      if (!report_save_path.empty()) {
-        outfile.open(report_save_path, std::ios_base::app);
-        if (outfile) {
-          outfile << "******** Evaluation Report on " << dataset_str
-                  << " ********\n";
-        }
-      }
-      LOG(INFO) << "Classification Confusion Matrix on " << dataset_str
-                << " is:\n";
-      ClfMetrics.pretty_print_cm(outfile);
-      LOG(INFO) << "Classification Report on " << dataset_str << " is:\n";
-      ClfMetrics.classification_report(outfile);
-      outfile.close();
-    } else {
-      LOG(ERROR) << "The " << metric << " metric is not supported";
-      return;
-    }
+    eval_matrix_computation_and_save(decrypted_labels, dataset_size, eval_type, report_save_path);
   }
 
   // free memory
@@ -650,6 +734,139 @@ void LogisticRegressionBuilder::eval(Party party, falcon::DatasetType eval_type,
             << " Finished *************";
   google::FlushLogFiles(google::INFO);
 }
+
+void LogisticRegressionBuilder::distributed_eval(
+    const Party &party,
+    const Worker &worker,
+    falcon::DatasetType eval_type){
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
+
+  // step 1: retrieve current test data
+  std::vector<std::vector<double> > cur_test_dataset =
+      (eval_type == falcon::TRAIN) ? this->training_data : this->testing_data;
+
+  std::cout << "current dataset size = " << cur_test_dataset.size() << std::endl;
+  LOG(INFO) << "current dataset size = " << cur_test_dataset.size();
+  google::FlushLogFiles(google::INFO);
+
+  // 2. each worker receive mini_batch_indexes_str from ps
+  std::vector<int> mini_batch_indexes;
+  // if (party.party_type == falcon::ACTIVE_PARTY) {
+  std::string mini_batch_indexes_str;
+  worker.recv_long_message_from_ps(mini_batch_indexes_str);
+  deserialize_int_array(mini_batch_indexes, mini_batch_indexes_str);
+  // }
+//  // 2. sync the batch index
+//  mini_batch_indexes = select_batch_idx(party, mini_batch_indexes);
+
+  std::cout << "current mini batch size = " << mini_batch_indexes.size() << std::endl;
+  LOG(INFO) << "current mini batch size = " << mini_batch_indexes.size();
+  google::FlushLogFiles(google::INFO);
+
+  std::vector<std::vector<double>> cur_used_samples;
+  for (const auto index: mini_batch_indexes){
+    cur_used_samples.push_back(cur_test_dataset[index]);
+  }
+
+  // 3: compute prediction result
+  int cur_used_samples_size = (int) cur_used_samples.size();
+
+  std::cout << "cur_used_samples_size = " << cur_used_samples_size << std::endl;
+  LOG(INFO) << "cur_used_samples_size = " << cur_used_samples_size;
+  google::FlushLogFiles(google::INFO);
+
+  auto* predicted_labels = new EncodedNumber[cur_used_samples_size];
+  log_reg_model.predict(party, cur_used_samples, predicted_labels);
+
+  std::cout << "predict on mini batch samples finished" << std::endl;
+  LOG(INFO) << "predict on mini batch samples finished";
+  google::FlushLogFiles(google::INFO);
+
+  // 4: active party aggregates and call collaborative decryption
+  auto* decrypted_labels = new EncodedNumber[cur_used_samples_size];
+  party.collaborative_decrypt(predicted_labels,
+                              decrypted_labels,
+                              cur_used_samples_size,
+                              ACTIVE_PARTY_ID);
+
+  // std::cout << "Print predicted class" << std::endl;
+
+  std::cout << "decrypt the predicted labels finished" << std::endl;
+  LOG(INFO) << "decrypt the predicted labels finished";
+  google::FlushLogFiles(google::INFO);
+
+  // 5: ACTIVE_PARTY send to ps
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::string decrypted_predict_label_str;
+    serialize_encoded_number_array(decrypted_labels, cur_used_samples_size, decrypted_predict_label_str);
+    worker.send_long_message_to_ps(decrypted_predict_label_str);
+  }
+
+  // 6: free resources
+  delete [] predicted_labels;
+  delete [] decrypted_labels;
+}
+
+void LogisticRegressionBuilder::eval_matrix_computation_and_save(
+    EncodedNumber* decrypted_labels,
+    int sample_number,
+    falcon::DatasetType eval_type,
+    const std::string& report_save_path){
+
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  // Classification Metrics object for performance metrics
+  ClassificationMetrics ClfMetrics;
+
+  if (metric == "acc") {
+    // the output is a vector of integers (predicted classes)
+    int pred_class;
+    std::vector<int> pred_classes;
+
+    for (int i = 0; i < sample_number; i++) {
+      double est_prob;  // estimated probability
+      // prediction and label classes
+      // for binary classifier, positive and negative classes
+      int positive_class = 1;
+      int negative_class = 0;
+      // decoded t score is already the probability
+      // logistic function is a sigmoid function (S-shaped)
+      // logistic function outputs a double between 0 and 1
+      decrypted_labels[i].decode(est_prob);
+      // Logistic Regresison Model make its prediction
+      pred_class =
+          (est_prob >= LOGREG_THRES) ? positive_class : negative_class;
+      pred_classes.push_back(pred_class);
+      // LOG(INFO) << "sample " << i << "'s est_prob = " << est_prob << ", and predicted class = " << pred_class;
+    }
+    if (eval_type == falcon::TRAIN) {
+      ClfMetrics.compute_metrics(pred_classes, training_labels);
+    }
+    if (eval_type == falcon::TEST) {
+      ClfMetrics.compute_metrics(pred_classes, testing_labels);
+    }
+
+    // write results to report
+    std::ofstream outfile;
+    if (!report_save_path.empty()) {
+      outfile.open(report_save_path, std::ios_base::app);
+      if (outfile) {
+        outfile << "******** Evaluation Report on " << dataset_str
+                << " ********\n";
+      }
+    }
+    LOG(INFO) << "Classification Confusion Matrix on " << dataset_str
+              << " is:\n";
+    ClfMetrics.pretty_print_cm(outfile);
+    LOG(INFO) << "Classification Report on " << dataset_str << " is:\n";
+    ClfMetrics.classification_report(outfile);
+    outfile.close();
+  } else {
+    LOG(ERROR) << "The " << metric << " metric is not supported";
+    return;
+  }
+}
+
 
 void LogisticRegressionBuilder::loss_computation(Party party, falcon::DatasetType dataset_type, double &loss) {
   std::string dataset_str = (dataset_type == falcon::TRAIN ? "training dataset" : "testing dataset");
@@ -667,18 +884,30 @@ void LogisticRegressionBuilder::loss_computation(Party party, falcon::DatasetTyp
 
   // step 2: every party computes partial phe summation
   // and sends to active party
-  std::vector<int> indexes;
+  std::vector<std::vector<double>> batch_samples;
   for (int i = 0; i < dataset_size; i++) {
-    indexes.push_back(i);
+    batch_samples.push_back(cur_test_dataset[i]);
   }
   // homomorphic aggregation (the precision should be 4 * prec now)
   int plaintext_precision = PHE_FIXED_POINT_PRECISION;
-  EncodedNumber* encrypted_aggregation = new EncodedNumber[dataset_size];
-  compute_batch_phe_aggregation(party, indexes, dataset_type,
-                                plaintext_precision, encrypted_aggregation);
+  auto* encrypted_aggregation = new EncodedNumber[dataset_size];
+
+  // encode examples
+  EncodedNumber** encoded_batch_samples;
+  int cur_sample_size = batch_samples.size();
+  encoded_batch_samples = new EncodedNumber*[cur_sample_size];
+  for (int i = 0; i < cur_sample_size; i++) {
+    encoded_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
+  }
+  log_reg_model.encode_samples( party, batch_samples, encoded_batch_samples);
+
+  log_reg_model.compute_batch_phe_aggregation(party,
+      batch_samples.size(),
+      encoded_batch_samples,
+      plaintext_precision, encrypted_aggregation);
 
   // step 3: active party aggregates and call collaborative decryption
-  EncodedNumber* decrypted_aggregation = new EncodedNumber[dataset_size];
+  auto* decrypted_aggregation = new EncodedNumber[dataset_size];
   party.collaborative_decrypt(encrypted_aggregation, decrypted_aggregation,
                               dataset_size, ACTIVE_PARTY_ID);
 
@@ -715,6 +944,11 @@ void LogisticRegressionBuilder::loss_computation(Party party, falcon::DatasetTyp
   delete[] encrypted_aggregation;
   delete[] decrypted_aggregation;
 
+  for (int i = 0; i < cur_sample_size; i++) {
+    delete [] encoded_batch_samples[i];
+  }
+  delete [] encoded_batch_samples;
+
   const clock_t testing_finish_time = clock();
   double testing_consumed_time =
       double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
@@ -725,11 +959,19 @@ void LogisticRegressionBuilder::loss_computation(Party party, falcon::DatasetTyp
 
 // initializes the LogisticRegressionBuilder instance
 // and run .train() .eval() methods, then save model
-void train_logistic_regression(Party party, std::string params_str,
-                               std::string model_save_file,
-                               std::string model_report_file) {
+void train_logistic_regression(
+    Party* party,
+    const std::string& params_str,
+    const std::string& model_save_file,
+    const std::string& model_report_file,
+    int is_distributed_train, Worker* worker) {
+
+  LOG(INFO) << "[train_logistic_regression]: mpc_port_array_size after: " << party->executor_mpc_ports.size() <<" --------";
+  std::cout << "[train_logistic_regression]: mpc_port_array_size after: " << party->executor_mpc_ports.size() << std::endl;
+
   LOG(INFO) << "Run train_logistic_regression";
   std::cout << "Run train_logistic_regression" << std::endl;
+  std::cout << "is_distributed_train is " << is_distributed_train <<std::endl;
 
   LogisticRegressionParams params;
   deserialize_lr_params(params, params_str);
@@ -753,34 +995,74 @@ void train_logistic_regression(Party party, std::string params_str,
   std::vector<std::vector<double>> testing_data;
   std::vector<double> training_labels;
   std::vector<double> testing_labels;
-  double split_percentage = SPLIT_TRAIN_TEST_RATIO;
-  party.split_train_test_data(split_percentage, training_data, testing_data,
-                              training_labels, testing_labels);
 
-  int weight_size = party.getter_feature_num();
-  LOG(INFO) << "original weight_size = " << weight_size << std::endl;
-  // retrieve the fit_bias term
-  bool m_fit_bias = params.fit_bias;
+  // weight size is different if fit_bias is true on active party
+  int weight_size;
 
-  // if this is active party, and fit_bias is true
-  // fit_bias or fit_intercept, for whether to plus the
-  // constant _bias_ or _intercept_ term
-  if ((party.party_type == falcon::ACTIVE_PARTY) && m_fit_bias) {
-    LOG(INFO) << "will insert x1=1 to features\n";
-    // insert x1=1 to front of the features
-    double x1 = 1.0;
-    for (int i = 0; i < training_data.size(); i++) {
-      training_data[i].insert(training_data[i].begin(), x1);
+  google::FlushLogFiles(google::INFO);
+
+  // if not distributed train, then the party split the data
+  // otherwise, the party/worker receive the data and phe keys from ps
+  if (is_distributed_train == 0) {
+    double split_percentage = SPLIT_TRAIN_TEST_RATIO;
+    party->split_train_test_data(split_percentage, training_data, testing_data,
+                                 training_labels, testing_labels);
+    weight_size = party->getter_feature_num();
+    LOG(INFO) << "original weight_size = " << weight_size << std::endl;
+
+    // retrieve the fit_bias term
+    bool m_fit_bias = params.fit_bias;
+    // if this is active party, and fit_bias is true
+    // fit_bias or fit_intercept, for whether to plus the
+    // constant _bias_ or _intercept_ term
+    if ((party->party_type == falcon::ACTIVE_PARTY) && m_fit_bias) {
+      LOG(INFO) << "will insert x1=1 to features\n";
+      // insert x1=1 to front of the features
+      double x1 = 1.0;
+      for (int i = 0; i < training_data.size(); i++) {
+        training_data[i].insert(training_data[i].begin(), x1);
+      }
+      for (int i = 0; i < testing_data.size(); i++) {
+        testing_data[i].insert(testing_data[i].begin(), x1);
+      }
+      // update the new feature_num for the active party
+      // also update the weight_size value +1
+      // before passing weight_size to LogisticRegression instance below
+      party->setter_feature_num(++weight_size);
+      LOG(INFO) << "updated weight_size = " << weight_size << std::endl;
+      LOG(INFO) << "party getter feature_num = " << party->getter_feature_num() << std::endl;
     }
-    for (int i = 0; i < testing_data.size(); i++) {
-      testing_data[i].insert(testing_data[i].begin(), x1);
+  } else {
+    // here should receive the train/test data/labels from ps
+    std::string recv_training_data_str, recv_testing_data_str;
+    std::string recv_training_labels_str, recv_testing_labels_str;
+    worker->recv_long_message_from_ps(recv_training_data_str);
+    worker->recv_long_message_from_ps(recv_testing_data_str);
+    deserialize_double_matrix(training_data, recv_training_data_str);
+    deserialize_double_matrix(testing_data, recv_testing_data_str);
+    if (party->party_type == falcon::ACTIVE_PARTY) {
+      worker->recv_long_message_from_ps(recv_training_labels_str);
+      worker->recv_long_message_from_ps(recv_testing_labels_str);
+      deserialize_double_array(training_labels, recv_training_labels_str);
+      deserialize_double_array(testing_labels, recv_testing_labels_str);
     }
-    // update the new feature_num for the active party
-    // also update the weight_size value +1
-    // before passing weight_size to LogisticRegression instance below
-    party.setter_feature_num(++weight_size);
-    LOG(INFO) << "updated weight_size = " << weight_size << std::endl;
-    LOG(INFO) << "party getter feature_num = " << party.getter_feature_num() << std::endl;
+    // also, receive the phe keys from ps
+    // and set these to the party
+    std::string recv_phe_keys_str;
+    LOG(INFO) << "begin to receive phe keys from ps ";
+    std::cout << "begin to receive phe keys from ps " << std::endl;
+    google::FlushLogFiles(google::INFO);
+
+    worker->recv_long_message_from_ps(recv_phe_keys_str);
+
+    LOG(INFO) << "received phe keys from ps: " << recv_phe_keys_str;
+    std::cout << "received phe keys from ps " << recv_phe_keys_str << std::endl;
+    google::FlushLogFiles(google::INFO);
+
+    party->load_phe_key_string(recv_phe_keys_str);
+    // set the weight size and party feature num
+    party->setter_feature_num((int) training_data[0].size());
+    weight_size = party->getter_feature_num();
   }
 
   LOG(INFO) << "training_data.size() = " << training_data.size() << std::endl;
@@ -808,22 +1090,30 @@ void train_logistic_regression(Party party, std::string params_str,
   LOG(INFO) << "Init logistic regression model success";
   std::cout << "Init logistic regression model success" << std::endl;
 
-  log_reg_model_builder.train(party);
-  log_reg_model_builder.eval(party, falcon::TRAIN, model_report_file);
-  log_reg_model_builder.eval(party, falcon::TEST, model_report_file);
-
-  // save model and report
-  std::string pb_lr_model_string;
-  serialize_lr_model(log_reg_model_builder.log_reg_model, pb_lr_model_string);
-  save_pb_model_string(pb_lr_model_string, model_save_file);
-  // save_lr_model(log_reg_model_builder.log_reg_model, model_save_file);
-  // save_training_report(log_reg_model.getter_training_accuracy(),
-  //    log_reg_model.getter_testing_accuracy(),
-  //    model_report_file);
-
-  LOG(INFO) << "Trained model and report saved";
-  std::cout << "Trained model and report saved" << std::endl;
   google::FlushLogFiles(google::INFO);
+
+  if (is_distributed_train == 0){
+    LOG(INFO) << "[train_logistic_regression]: mpc_port_array_size before train: " << party->executor_mpc_ports.size() <<" --------";
+    std::cout << "[train_logistic_regression]: mpc_port_array_size before train: " << party->executor_mpc_ports.size() << std::endl;
+    log_reg_model_builder.train(*party);
+    log_reg_model_builder.eval(*party, falcon::TRAIN, model_report_file);
+    log_reg_model_builder.eval(*party, falcon::TEST, model_report_file);
+    // save model and report
+    auto* model_weights = new EncodedNumber[weight_size];
+    std::string pb_lr_model_string;
+    serialize_lr_model(log_reg_model_builder.log_reg_model, pb_lr_model_string);
+    save_pb_model_string(pb_lr_model_string, model_save_file);
+    // save_lr_model(log_reg_model_builder.log_reg_model, model_save_file);
+    // save_training_report(log_reg_model.getter_training_accuracy(),
+    //    log_reg_model.getter_testing_accuracy(),
+    //    model_report_file);
+    delete[] model_weights;
+  } else {
+    log_reg_model_builder.distributed_train(*party, *worker);
+    // in is_distributed_train, parameter server will save the model.
+    log_reg_model_builder.distributed_eval(*party, *worker, falcon::TRAIN);
+    log_reg_model_builder.distributed_eval(*party, *worker, falcon::TEST);
+  }
 }
 
 // for DEBUG
@@ -831,7 +1121,7 @@ void LogisticRegressionBuilder::display_weights(Party party) {
   std::cout << "display local weights" << std::endl;
   LOG(INFO) << "display local weights";
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    EncodedNumber* decrypted_local_weights = new EncodedNumber[log_reg_model.weight_size];
+    auto* decrypted_local_weights = new EncodedNumber[log_reg_model.weight_size];
     for (int i = 0; i < party.party_num; i++) {
       if (i != party.party_id) {
         std::string weight_str;
@@ -860,8 +1150,8 @@ void LogisticRegressionBuilder::display_weights(Party party) {
     party.recv_long_message(ACTIVE_PARTY_ID, recv_size_str);
     party.recv_long_message(ACTIVE_PARTY_ID, recv_weight_str);
     int weight_num = std::stoi(recv_size_str);
-    EncodedNumber* received_party_weights = new EncodedNumber[weight_num];
-    EncodedNumber* decrypted_party_weights = new EncodedNumber[weight_num];
+    auto* received_party_weights = new EncodedNumber[weight_num];
+    auto* decrypted_party_weights = new EncodedNumber[weight_num];
     deserialize_encoded_number_array(received_party_weights, weight_num,
                                      recv_weight_str);
     party.collaborative_decrypt(received_party_weights, decrypted_party_weights,
@@ -875,7 +1165,7 @@ void LogisticRegressionBuilder::display_weights(Party party) {
 // print one ciphertext for debug
 void LogisticRegressionBuilder::display_one_ciphertext(Party party, EncodedNumber *number) {
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    EncodedNumber* decrypted_number = new EncodedNumber[1];
+    auto* decrypted_number = new EncodedNumber[1];
     for (int i = 0; i < party.party_num; i++) {
       if (i != party.party_id) {
         std::string ciphertext_str;
@@ -892,8 +1182,8 @@ void LogisticRegressionBuilder::display_one_ciphertext(Party party, EncodedNumbe
   } else {
     std::string recv_ciphertext_str;
     party.recv_long_message(ACTIVE_PARTY_ID, recv_ciphertext_str);
-    EncodedNumber* recv_ciphertext = new EncodedNumber[1];
-    EncodedNumber* decrypted_ciphertext = new EncodedNumber[1];
+    auto* recv_ciphertext = new EncodedNumber[1];
+    auto* decrypted_ciphertext = new EncodedNumber[1];
     deserialize_encoded_number_array(recv_ciphertext, 1, recv_ciphertext_str);
     party.collaborative_decrypt(recv_ciphertext, decrypted_ciphertext, 1,
                                 ACTIVE_PARTY_ID);
@@ -901,3 +1191,4 @@ void LogisticRegressionBuilder::display_one_ciphertext(Party party, EncodedNumbe
     delete[] decrypted_ciphertext;
   }
 }
+

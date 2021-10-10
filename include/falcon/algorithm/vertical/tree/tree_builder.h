@@ -149,6 +149,12 @@ class DecisionTreeBuilder : public ModelBuilder {
   void train(Party party, EncodedNumber* encrypted_labels);
 
   /**
+   * build the decision tree model
+   * @param party
+  */
+  void distributed_train(const Party& party, const Worker& worker) override;
+
+  /**
    * iteratively build tree node
    * @param party
    * @param node_index
@@ -240,7 +246,7 @@ class DecisionTreeBuilder : public ModelBuilder {
     */
 void spdz_tree_computation(int party_num,
     int party_id,
-    int mpc_tree_port_base,
+    std::vector<int> mpc_tree_port_bases,
     std::vector<std::string> party_host_names,
     int public_value_size,
     const std::vector<int>& public_values,

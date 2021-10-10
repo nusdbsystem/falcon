@@ -77,6 +77,14 @@ class RandomForestBuilder : public ModelBuilder {
   void train(Party party) override;
 
   /**
+   * build each tree of random forest
+   *
+   * @param party
+   * @param sample_rate
+   */
+  void distributed_train(const Party& party, const Worker& worker) override;
+
+  /**
    * evaluate the accuracy on the dataset
    * @param party
    * @param eval_type

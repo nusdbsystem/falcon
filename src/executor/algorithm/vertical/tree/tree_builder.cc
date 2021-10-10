@@ -540,7 +540,7 @@ void DecisionTreeBuilder::build_node(Party &party,
   std::thread spdz_pruning_check_thread(spdz_tree_computation,
       party.party_num,
       party.party_id,
-      SPDZ_PORT_TREE,
+      party.executor_mpc_ports,
       party.host_names,
       public_values.size(),
       public_values,
@@ -822,7 +822,7 @@ bool DecisionTreeBuilder::check_pruning_conditions(Party &party,
   std::thread spdz_pruning_check_thread(spdz_tree_computation,
       party.party_num,
       party.party_id,
-      SPDZ_PORT_TREE,
+      party.executor_mpc_ports,
       party.host_names,
       public_values.size(),
       public_values,
@@ -923,7 +923,7 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party,
   std::thread spdz_pruning_check_thread(spdz_tree_computation,
       party.party_num,
       party.party_id,
-      SPDZ_PORT_TREE,
+      party.executor_mpc_ports,
       party.host_names,
       public_values.size(),
       public_values,
@@ -1240,9 +1240,11 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type,
   google::FlushLogFiles(google::INFO);
 }
 
+void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &worker) {}
+
 void spdz_tree_computation(int party_num,
     int party_id,
-    int mpc_tree_port_base,
+    std::vector<int> mpc_tree_port_bases,
     std::vector<std::string> party_host_names,
     int public_value_size,
     const std::vector<int>& public_values,
@@ -1270,7 +1272,7 @@ void spdz_tree_computation(int party_num,
   std::cout << "party_num = " << party_num << std::endl;
   for (int i = 0; i < party_num; i++)
   {
-    set_up_client_socket(plain_sockets[i], party_host_names[i].c_str(), mpc_tree_port_base + i);
+    set_up_client_socket(plain_sockets[i], party_host_names[i].c_str(), mpc_tree_port_bases[i] + i);
     send(plain_sockets[i], (octet*) &party_id, sizeof(int));
     mpc_sockets[i] = new ssl_socket(io_service, ctx, plain_sockets[i],
                                     "P" + to_string(i), "C" + to_string(party_id), true);
@@ -1279,7 +1281,7 @@ void spdz_tree_computation(int party_num,
       specification.Receive(mpc_sockets[0]);
     }
     LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
-                 " sockets = " << mpc_sockets[i] << ", port_num = " << mpc_tree_port_base + i << ".";
+                 " sockets = " << mpc_sockets[i] << ", port_num = " << mpc_tree_port_bases[i] + i << ".";
   }
   LOG(INFO) << "Finish setup socket connections to spdz engines.";
   std::cout << "Finish setup socket connections to spdz engines." << std::endl;

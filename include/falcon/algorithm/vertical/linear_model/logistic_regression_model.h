@@ -7,6 +7,7 @@
 
 #include <falcon/common.h>
 #include <falcon/party/party.h>
+#include "falcon/distributed/worker.h"
 
 #include <thread>
 #include <future>
@@ -44,18 +45,79 @@ class LogisticRegressionModel {
  * @param predicted_labels
  * @return predicted labels (encrypted)
  */
-  void predict(Party& party,
-      std::vector< std::vector<double> > predicted_samples,
-      int predicted_sample_size,
-      EncodedNumber* predicted_labels);
+  void predict(const Party &party,
+      const std::vector<std::vector<double> >& predicted_samples,
+      EncodedNumber *predicted_labels) const ;
+
+  /**
+   * forward calculate of the network，output predicted_labels
+   *
+   * @param party: initialized party object
+   * @param data_indexes: used training data indexes
+   * @param batch_logistic_shares: secret shares of batch losses
+   * @param encrypted_weights_precision: precision
+   * @param plaintext_samples_precision: precision
+   */
+  void forward_computation(
+      const Party& party,
+      int cur_batch_size,
+      EncodedNumber** encoded_batch_samples,
+      int& encrypted_batch_aggregation_precision,
+      EncodedNumber *predicted_labels) const;
+
+  /**
+   * compute phe aggregation for a batch of samples
+   *
+   * @param party: initialized party object
+   * @param batch_indexes: selected batch indexes
+   * @param dataset_type: denote the dataset type
+   * @param precision: the fixed point precision of encoded plaintext samples
+   * @param batch_aggregation: returned phe aggregation for the batch
+   */
+  void compute_batch_phe_aggregation(
+      const Party &party,
+      int cur_batch_size,
+      EncodedNumber** encoded_batch_samples,
+      int precision,
+      EncodedNumber *encrypted_batch_aggregation) const;
+
+  /**
+   * encode data samples,
+   *
+   * @param party: initialized party object
+   * @param used_samples: used data_samples
+   * @param encoded_samples: result value
+   */
+  void encode_samples(
+      const Party &party,
+      const std::vector<std::vector<double>>& used_samples,
+      EncodedNumber** encoded_samples) const;
+
 };
 
+
 /**
- * spdz computation with thread
+  * retrieve result by collaborative decrypting and compute labels and probabilities
+  *
+  * @param party: initialized party object
+  * @param sample_size: size of samples
+  * @param predicted_labels: predicted_labels
+  * @param labels: return value
+  * @param probabilities: return value
+  */
+void retrieve_prediction_result(
+    int sample_size,
+    EncodedNumber *decrypted_labels,
+    std::vector<double>* labels,
+    std::vector< std::vector<double> >* probabilities);
+
+/**
+ * spdz computation with thread,
+ * the spdz_logistic_function_computation will do the 1/(1+e^(wx)) operation
  *
  * @param party_num: number of parties
  * @param party_id: current party id
- * @param mpc_port_base: port base of the spdz parties
+ * @param mpc_port_bases: port bases of the spdz parties
  * @param mpc_player_path: player data path of the spdz parties
  * @param party_host_names: spdz parties host names (ips)
  * @param batch_aggregation_shares: the batch shares
@@ -64,7 +126,7 @@ class LogisticRegressionModel {
  */
 void spdz_logistic_function_computation(int party_num,
     int party_id,
-    int mpc_port_base,
+    std::vector<int> mpc_port_bases,
     std::string mpc_player_path,
     std::vector<std::string> party_host_names,
     std::vector<double> batch_aggregation_shares,
