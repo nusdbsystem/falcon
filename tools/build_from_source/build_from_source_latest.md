@@ -212,16 +212,27 @@ export PATH=/root/.local/bin:$PATH
 ```
 
 
-## 13. Compile protobuf messages
+## 13. Replace protoc version
 
 ```bash
+cp ~/.local/bin/protoc /usr/bin/ && \
     cd /opt/falcon/src/executor/include/proto && \
     SRC_DIR=v0/ && \
     DST_DIR=../message && \
     protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/*.proto
 ```
 
-## 14. build
+## 14. Generate proto
+```bash
+ cp ~/.local/bin/protoc /usr/bin/ && \
+    cd /opt/falcon/src/executor/include/proto && \
+    SRC_DIR=v0/ && \
+    DST_DIR=../message && \
+    protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/*.proto
+```
+
+
+## 15. build 
 ```bash
 cd /opt/falcon
 export PATH="$PATH:$HOME/.local/bin" && \
@@ -231,7 +242,7 @@ export PATH="$PATH:$HOME/.local/bin" && \
     make
 ```
 
-## 15. back to working directory 
+## 16. back to working directory 
 ```bash
 cd /opt
 ```
