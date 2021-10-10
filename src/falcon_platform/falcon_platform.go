@@ -10,58 +10,67 @@ import (
 	"falcon_platform/partyserver"
 	"falcon_platform/resourcemanager"
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
+	"math/rand"
 )
 
+//	logPath (outside, LogPath):  …/falcon_logs or ./logs  store logs
+//	TaskRunTimeLogs(inner) = logPath /runtimeLogs/serviceName
+//	logFile (inner)= TaskRunTimeLogs-algorithmName
+//	workerLogFile(inner) = logFile /worker
+
 func init() {
+
+	// handle error firstly
+	defer logger.HandleErrors()
 
 	// priority: env >  user provided > default value
 	runtime.GOMAXPROCS(4)
 
 	// before init the envs, load the meta envs, in which
-	// 1. Env will indicate which deploy model to use, prod devDocker or dev
-	// 2. ServiceName will indicate which service to run
+	// 1. Deployment will indicate which deploy method to use, localthread, docker or k8s
+	// 2. ServiceName will indicate which service to run, coordServer, partyServer, master or worker
 	// 3. LogPath will indicate where the log will be stored
 	// use os to get the env, since initLogger is before initEnv
-	common.Env = os.Getenv("ENV")
+	common.Deployment = os.Getenv("ENV")
+	if len(common.Deployment) == 0 {
+		// default to thread
+		common.Deployment = common.LocalThread
+	}
 	common.ServiceName = os.Getenv("SERVICE_NAME")
 	common.LogPath = os.Getenv("LOG_PATH")
 
-	fmt.Println("Currently, the Env model is: ", common.Env)
+	fmt.Println("Currently, the Deployment method is: ", common.Deployment)
 	fmt.Println("Currently, the ServiceName is: ", common.ServiceName)
 	fmt.Println("Currently, the LogPath is: ", common.LogPath)
 
 	initLogger()
 
-	// according to the running service (coord / partyserver/ master / worker) and deploy model(dev / prod / devDocker)
+	// according to the running service (coord / partyserver/ master / worker) and deploy model(thread / k8s / Docker)
 	// this will assign value to some global variables
 	initEnv(common.ServiceName)
-
 }
 
 func initLogger() {
-	var runtimeLogPath string
 
-	// in dev, we have a logPath to store everything,
-	// but in production, the coordinator and party server are
-	// separated at different machines or clusters, we use docker,
-	if common.Env == common.DevEnv {
-		runtimeLogPath = common.LogPath
-	} else if common.Env == common.K8sEnv {
-		// the log is fixed to ./log, which is the path inside the docker
-		runtimeLogPath = "./logs"
-	}
+	//if common.Deployment == common.Docker {
+	//	var absLogPath []rune
+	//	absLogPath = []rune(common.LogPath)
+	//	if absLogPath[0] == '.' {
+	//		absLogPath = absLogPath[1:]
+	//	}
+	//	common.LogPath = string(absLogPath)
+	//}
 
-	fmt.Println("[initLogger] runtimeLogPath:", runtimeLogPath)
-
-	// create nested dirs if necessary
-	err := os.MkdirAll(runtimeLogPath, os.ModePerm)
+	// create nested dirs
+	err := os.MkdirAll(common.LogPath, os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("[initLogger] runtimeLogPath Error", err)
+		//time.Sleep(5 * time.Minute)
 	}
 
 	// Use layout string for time format.
@@ -70,30 +79,37 @@ func initLogger() {
 	rawTime := time.Now()
 
 	var logFileName string
-	logFileName = runtimeLogPath + "/" + common.ServiceName + "-" + rawTime.Format(layout) + ".log"
+	rand.Seed(time.Now().UnixNano())
+	logFileName = common.LogPath + "/" + common.ServiceName + "-" + rawTime.Format(layout) + "-" +fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
+	fmt.Println("Logs will be written to ", logFileName)
 
 	logger.Log, logger.LogFile = logger.GetLogger(logFileName)
 }
 
 func initEnv(svcName string) {
 
-	common.FalconExecutorImage = common.GetEnv(
+	common.IsDebug = common.GetEnv("IS_DEBUG", "debug-off")
+	common.TestImgName = common.GetEnv(
+		"TEST_IMG_NAME",
+		"redis:5.0.3-alpine3.8")
+
+	common.FalconDockerImgName = common.GetEnv(
 		"FALCON_WORKER_IMAGE",
-		"nailidocker/falcon_executor:latest")
+		"falcon-dist-train:latest")
 
 	switch svcName {
-	case "coord":
+	case common.CoordinatorRole:
 		// find the cluster port, call internally
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 		common.CoordAddr = common.CoordIP + ":" + common.CoordPort
-		common.CoordBasePath = common.GetEnv("COORD_SERVER_BASEPATH", "./dev_test")
+		common.CoordBasePath = common.GetEnv("COORD_SERVER_BASEPATH", "./falcon_logs")
 		// coord http server number of consumers
 		common.NbConsumers = common.GetEnv("N_CONSUMER", "3")
 		// get the env for Job DB in Coord server
 		common.JobDatabase = common.GetEnv("JOB_DATABASE", "sqlite3")
 		// get the env needed for different db type
-		if common.JobDatabase == common.DBsqlite3 {
+		if common.JobDatabase == common.DBSqlite3 {
 			common.JobDbSqliteDb = common.GetEnv("JOB_DB_SQLITE_DB", "falcon.db")
 		} else if common.JobDatabase == common.DBMySQL {
 			common.JobDbHost = common.GetEnv("JOB_DB_HOST", "localhost")
@@ -103,24 +119,23 @@ func initEnv(svcName string) {
 			common.JobDbMysqlOptions = common.GetEnv("JOB_DB_MYSQL_OPTIONS", "?parseTime=true")
 			common.JobDbMysqlPort = common.GetEnv("MYSQL_CLUSTER_PORT", "3306")
 		}
-		// env for prod
-		if common.Env == common.K8sEnv {
-			// find the cluster port, call internally
 
+		if common.Deployment == common.K8S {
+			// find the cluster port, call internally
 			common.JobDbMysqlNodePort = common.GetEnv("MYSQL_NODE_PORT", "30001")
 
+			// coord needs redis information
 			common.RedisHost = common.GetEnv("REDIS_HOST", "localhost")
 			common.RedisPwd = common.GetEnv("REDIS_PWD", "falcon")
-			// coord needs redis information
 			common.RedisPort = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
 			common.RedisNodePort = common.GetEnv("REDIS_NODE_PORT", "30003")
 			common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 		}
 		if len(common.ServiceName) == 0 {
 			logger.Log.Println("Error: Input Error, ServiceName not provided, is either 'coord' or 'partyserver' ")
-			os.Exit(1)
+			time.Sleep(5 * time.Minute)
 		}
-	case "partyserver":
+	case common.PartyServerRole:
 		// party server needs coord IP+port,lis port
 		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
@@ -129,8 +144,16 @@ func initEnv(svcName string) {
 		common.CoordAddr = common.CoordIP + ":" + common.CoordPort
 		// run partyserver requires to get a new partyserver port
 		common.PartyServerPort = common.GetEnv("PARTY_SERVER_NODE_PORT", "")
-		common.PartyID = common.GetEnv("PARTY_ID", "")
-		common.PartyServerBasePath = common.GetEnv("PARTY_SERVER_BASEPATH", "./dev_test")
+		partyId, err := strconv.Atoi(common.GetEnv("PARTY_ID", ""))
+		common.PartyID = common.PartyIdType(partyId)
+		if err != nil {
+			logger.Log.Println("Error: Input Error, PARTY_ID must be integer")
+			time.Sleep(5 * time.Minute)
+		}
+
+		// This should be the absolute path /falcon_logs
+		//common.PartyServerBasePath = common.GetEnv("PARTY_SERVER_BASEPATH", "")
+
 		// get the MPC exe path
 		common.MpcExePath = common.GetEnv(
 			"MPC_EXE_PATH",
@@ -139,25 +162,54 @@ func initEnv(svcName string) {
 		common.FLEnginePath = common.GetEnv(
 			"FL_ENGINE_PATH",
 			"/opt/falcon/build/src/executor/falcon")
+
+		tmp := strings.Split(common.MpcExePath, "/")
+		basePath := tmp[:len(tmp)-1]
+		basePath = append(basePath, common.MpcExecutorPortFilePrefix)
+		common.MpcExecutorPortFileBasePath = strings.Join(basePath, "/")
+		logger.Log.Println("common.MpcExecutorPortFileBasePath is", common.MpcExecutorPortFileBasePath)
+
 		if common.CoordIP == "" || common.PartyServerIP == "" || common.PartyServerPort == "" {
 			logger.Log.Println("Error: Input Error, either CoordIP or PartyServerIP or PartyServerPort not provided")
-			os.Exit(1)
+			time.Sleep(5 * time.Minute)
 		}
-	case common.Master:
+
+		common.PartyServerClusterIPs = strings.Split(
+			common.GetEnv("PARTY_SERVER_CLUSTER_IPS", ""),
+			" ")
+
+		common.PartyServerClusterLabels = strings.Split(
+			common.GetEnv("PARTY_SERVER_CLUSTER_LABEL", ""),
+			" ")
+
+		logger.Log.Println("common.PartyServerClusterIPs is", common.PartyServerClusterIPs)
+		logger.Log.Println("common.PartyServerClusterIPs is", common.PartyServerClusterLabels)
+
+		if len(common.PartyServerClusterIPs) != len(common.PartyServerClusterLabels) {
+			logger.Log.Println("Error: Input Error, " +
+				"size of PartyServerClusterIPs and size of PartyServerClusterLabels are not match")
+			time.Sleep(5 * time.Minute)
+		}
+
+	//////////////////////////////////////////////////////////////////////////
+	//			start tasks, called internally 	, and in k8s or docker      	//
+	// 	      master and worker are isolate process, this is the entry      //
+	//////////////////////////////////////////////////////////////////////////
+	case common.JobManagerMasterRole:
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 
 		// master needs dslqueue item, task type
-		common.MasterDslObj = common.GetEnv("ITEM_KEY", "")
+		common.MasterDslObjKey = common.GetEnv("ITEM_KEY", "")
 		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 
-		if common.Env == common.DevEnv {
-			// master communicate coord with IP+port in dev
+		if common.Deployment == common.LocalThread {
+			// master communicate coord with IP+port in local thread
 
 			logger.Log.Println("CoordUrl: ", common.CoordIP+":"+common.CoordPort)
 			common.CoordAddr = common.CoordIP + ":" + common.CoordPort
 
-		} else if common.Env == common.K8sEnv {
+		} else if common.Deployment == common.K8S {
 
 			// master needs redis information
 			common.RedisHost = common.GetEnv("REDIS_HOST", "localhost")
@@ -165,11 +217,11 @@ func initEnv(svcName string) {
 			common.RedisPort = common.GetEnv("REDIS_CLUSTER_PORT", "30002")
 			common.RedisNodePort = common.GetEnv("REDIS_NODE_PORT", "30003")
 
-			// prod using k8
+			// k8
 			common.CoordK8sSvcName = common.GetEnv("COORD_SVC_NAME", "")
 			common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 
-			// master communicate coord with IP+port in dev, with name+port in prod
+			// master communicate coord with IP+port in local thread, with name+port in k8s
 			logger.Log.Println("CoordK8sSvcName: ", common.CoordK8sSvcName+":"+common.CoordPort)
 
 			common.CoordAddr = common.CoordK8sSvcName + ":" + common.CoordPort
@@ -177,20 +229,27 @@ func initEnv(svcName string) {
 
 		if common.CoordAddr == "" {
 			logger.Log.Println("Error: Input Error, CoordAddr not provided")
-			os.Exit(1)
+			time.Sleep(5 * time.Minute)
 		}
 	case common.TrainWorker:
-		// this will be executed only in production, in dev, the common.WorkerType==""
+		// this will be executed only in k8s or docker, in local thread, the common.WorkerType==""
 
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
 		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
 		common.TaskDataOutput = common.GetEnv("TASK_DATA_OUTPUT", "")
 		common.TaskRuntimeLogs = common.GetEnv("RUN_TIME_LOGS", "")
 
-		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
+		//common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
 		common.WorkerAddr = common.GetEnv("WORKER_ADDR", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
-		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
+
+		workerId, _ := strconv.Atoi(common.GetEnv("WORKER_ID", ""))
+		common.WorkerID = common.WorkerIdType(workerId)
+
+		partyId, _ := strconv.Atoi(common.GetEnv("PARTY_ID", ""))
+		common.PartyID = common.PartyIdType(partyId)
+
+		common.DistributedRole, _ = strconv.Atoi(common.GetEnv("DISTRIBUTED_ROLE", ""))
 
 		// get the MPC exe path
 		common.MpcExePath = common.GetEnv(
@@ -200,23 +259,35 @@ func initEnv(svcName string) {
 		common.FLEnginePath = common.GetEnv(
 			"FL_ENGINE_PATH",
 			"/opt/falcon/build/src/executor/falcon")
+
+		tmp := strings.Split(common.MpcExePath, "/")
+		basePath := tmp[:len(tmp)-1]
+		basePath = append(basePath, common.MpcExecutorPortFilePrefix)
+		common.MpcExecutorPortFileBasePath = strings.Join(basePath, "/")
+		logger.Log.Println("common.MpcExecutorPortFileBasePath is", common.MpcExecutorPortFileBasePath)
 
 		if common.MasterAddr == "" || common.WorkerAddr == "" {
 			logger.Log.Println("Error: Input Error, either MasterAddr or WorkerAddr  not provided")
-			os.Exit(1)
+			time.Sleep(5 * time.Minute)
 		}
+
+		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
+
 	case common.InferenceWorker:
+		// this will be executed only in k8s or docker, in local thread, the common.WorkerType==""
+
 		common.TaskDataPath = common.GetEnv("TASK_DATA_PATH", "")
 		common.TaskModelPath = common.GetEnv("TASK_MODEL_PATH", "")
 		common.TaskDataOutput = common.GetEnv("TASK_DATA_OUTPUT", "")
 		common.TaskRuntimeLogs = common.GetEnv("RUN_TIME_LOGS", "")
 
-		// this will be executed only in production, in dev, the common.WorkerType==""
-
-		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
+		//common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
 		common.WorkerAddr = common.GetEnv("WORKER_ADDR", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
-		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
+
+		workerId, _ := strconv.Atoi(common.GetEnv("WORKER_ID", ""))
+		common.WorkerID = common.WorkerIdType(workerId)
+		common.DistributedRole, _ = strconv.Atoi(common.GetEnv("DISTRIBUTED_ROLE", ""))
 
 		// get the MPC exe path
 		common.MpcExePath = common.GetEnv(
@@ -227,10 +298,18 @@ func initEnv(svcName string) {
 			"FL_ENGINE_PATH",
 			"/opt/falcon/build/src/executor/falcon")
 
+		tmp := strings.Split(common.MpcExePath, "/")
+		basePath := tmp[:len(tmp)-1]
+		basePath = append(basePath, common.MpcExecutorPortFilePrefix)
+		common.MpcExecutorPortFileBasePath = strings.Join(basePath, "/")
+		logger.Log.Println("common.MpcExecutorPortFileBasePath is", common.MpcExecutorPortFileBasePath)
+
 		if common.MasterAddr == "" || common.WorkerAddr == "" {
 			logger.Log.Println("Error: Input Error, either MasterAddr or WorkerAddr not provided")
-			os.Exit(1)
+			time.Sleep(5 * time.Minute)
 		}
+
+		common.WorkerK8sSvcName = common.GetEnv("EXECUTOR_NAME", "")
 	}
 }
 
@@ -239,6 +318,7 @@ func main() {
 	// For convenience,
 	// this is the main common entry of 4 services,
 	// use different environment to select which service to run
+	// catch global error at main
 
 	// 1. ServiceName=coord to run coord server
 	// 2. ServiceName=partyserver to run party server
@@ -246,59 +326,73 @@ func main() {
 	// 4. ServiceName=TrainWorker to run TrainWorker server
 	// 5. ServiceName=InferenceWorker to run InferenceWorker server
 
-	defer logger.HandleErrors()
-
+	// close log second
 	defer func() {
+		logger.Log.Println("Main close logFile")
 		_ = logger.LogFile.Close()
 	}()
+	// handle error firstly
+	defer logger.HandleErrors()
 
 	switch common.ServiceName {
-	case "coord":
-		logger.Log.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
+	case common.CoordinatorRole:
+		logger.Log.Println("Launch falcon_platform, Service is ", common.ServiceName)
 		nConsumer, _ := strconv.Atoi(common.NbConsumers)
+		coordserver.RunCoordServer(nConsumer)
 
-		coordserver.SetupCoordServer(nConsumer)
-	case "partyserver":
+	case common.PartyServerRole:
 		// start work in remote machine automatically
-		logger.Log.Println("Launch falcon_platform, the common.ServiceName", common.ServiceName)
-		partyserver.SetupPartyServer()
+		logger.Log.Println("Launch falcon_platform, Service is ", common.ServiceName)
+		partyserver.RunPartyServer()
 
 	//////////////////////////////////////////////////////////////////////////
-	//			start tasks, called internally 	, and in production      	//
+	//			start tasks, called internally 	, and in k8s or docker      //
 	// 	      master and worker are isolate process, this is the entry      //
 	//////////////////////////////////////////////////////////////////////////
 
-	//those 3 is only called internally
-	case common.Master:
+	//those 3 is only called inside cluster,
+	case common.JobManagerMasterRole:
 		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 		// this should be the service name, defined at runtime,
 		masterAddr := common.MasterAddr
-		dslOjb := cache.Deserialize(cache.InitRedisClient().Get(common.MasterDslObj))
+		dslOjb := cache.Deserialize(cache.InitRedisClient().Get(common.MasterDslObjKey))
 		workerType := common.WorkerType
-		jobmanager.SetupMaster(masterAddr, dslOjb, workerType)
+		jobmanager.ManageJobLifeCycle(masterAddr, dslOjb, workerType)
 		// kill the related service after finish training or prediction.
 		km := resourcemanager.InitK8sManager(true, "")
-		km.DeleteService(common.WorkerK8sSvcName)
+		km.DeleteResource(common.WorkerK8sSvcName)
 
 	case common.TrainWorker:
 		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 		// init the train worker with addresses of master and worker, also the partyID
 		// this is the entry of prod model, in prod, only use NativeProcessMngr right now
-		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr, common.PartyID)
+		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr, common.PartyID,
+			common.WorkerID, uint(common.DistributedRole))
+
 		wk.RunWorker(wk)
-		// once  worker is killed by master, clear the resources.
-		km := resourcemanager.InitK8sManager(true, "")
-		km.DeleteService(common.WorkerK8sSvcName)
+
+		if common.Deployment == common.K8S {
+			// once  worker is killed by master, clear the resources.
+			km := resourcemanager.InitK8sManager(true, "")
+			km.DeleteResource(common.WorkerK8sSvcName)
+		}
 
 	case common.InferenceWorker:
 		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 		// init the train worker with addresses of master and worker, also the partyID
 		// this is the entry of prod model, in prod, only use NativeProcessMngr right now
-		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr, common.PartyID)
+		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr, common.PartyID,
+			common.WorkerID, uint(common.DistributedRole))
+
 		wk.RunWorker(wk)
+
+		if common.Deployment == common.K8S {
+			// once worker is killed by master, clear the resources.
+			km := resourcemanager.InitK8sManager(true, "")
+			km.DeleteResource(common.WorkerK8sSvcName)
+		}
 	}
 
-	// once worker is killed by master, clear the resources.
-	km := resourcemanager.InitK8sManager(true, "")
-	km.DeleteService(common.WorkerK8sSvcName)
+	time.Sleep(time.Minute * 60)
+
 }
