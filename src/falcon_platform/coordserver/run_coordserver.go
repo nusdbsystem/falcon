@@ -17,8 +17,7 @@ import (
 	"github.com/gorilla/handlers"
 )
 
-func SetupCoordServer(nConsumer int) {
-	defer logger.HandleErrors()
+func RunCoordServer(nConsumer int) {
 
 	// set up views
 	view.LoadTemplates("./coordserver/view/templates/*.html")
@@ -29,7 +28,7 @@ func SetupCoordServer(nConsumer int) {
 	// Set up Database
 	logger.Log.Println("[coordinator server]: Init DataBase...")
 	controller.CreateTables()
-	if common.Env == common.K8sEnv {
+	if common.Deployment == common.K8S {
 		controller.CreateSysPorts()
 	}
 
@@ -42,9 +41,16 @@ func SetupCoordServer(nConsumer int) {
 	// multi-thread consumer
 	for i := 0; i < nConsumer; i++ {
 
-		go Driver.Consume(i)
+		go func(i int) {
+			defer logger.HandleErrors()
+			Driver.Consume(i)
+		}(i)
+
 	}
-	go Driver.MonitorConsumers()
+	go func() {
+		defer logger.HandleErrors()
+		Driver.MonitorConsumers()
+	}()
 
 	// for logging and tracing
 	http_logger := log.New(os.Stdout, "[http] ", log.LstdFlags)
@@ -78,6 +84,7 @@ func SetupCoordServer(nConsumer int) {
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 
 	go func() {
+		defer logger.HandleErrors()
 		<-quit
 
 		logger.Log.Println("[coordinator server]: Stop multi consumers")
@@ -98,8 +105,8 @@ func SetupCoordServer(nConsumer int) {
 
 		server.SetKeepAlivesEnabled(false)
 		if err := server.Shutdown(ctx); err != nil {
+			logger.Log.Println("[coordinator server]: Could not gracefully shutDown the server: ", err)
 			http_logger.Fatalf("Could not gracefully shutdown the server: %v\n", err)
-			logger.Log.Fatal("[coordinator server]: Could not gracefully shutDown the server: ", err)
 		}
 		close(done)
 	}()
@@ -113,8 +120,8 @@ func SetupCoordServer(nConsumer int) {
 	// ErrServerClosed is returned by the Server's Serve, ServeTLS, ListenAndServe, and ListenAndServeTLS methods
 	// after a call to Shutdown or Close
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Log.Printf("[coordinator server]: Could not listen on ", common.CoordAddr, " err: ", err, "\n")
 		http_logger.Fatalf("Could not listen on %s: %v\n", common.CoordAddr, err)
-		logger.Log.Fatal("[coordinator server]: Could not listen on ", common.CoordAddr, " err: ", err, "\n")
 	}
 
 	<-done

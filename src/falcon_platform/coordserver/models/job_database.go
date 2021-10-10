@@ -56,9 +56,9 @@ func InitJobDB() *JobDB {
 		)
 		jobDB.addr = mysqlUrl
 		jobDB.dia = mysql.Open(jobDB.addr)
-	} else if jobDB.engine == common.DBsqlite3 {
-		// for quick dev test, save the sqlite3 db in timestamped dev_test
-		// if use outside of dev_test, make sure to reset the db file
+	} else if jobDB.engine == common.DBSqlite3 {
+		// for quick dev test, save the sqlite3 db in timestamped falcon_logs
+		// if use outside of falcon_logs, make sure to reset the db file
 		jobDB.addr = path.Join(common.CoordBasePath, common.JobDbSqliteDb)
 		jobDB.dia = sqlite.Open(jobDB.addr)
 	}

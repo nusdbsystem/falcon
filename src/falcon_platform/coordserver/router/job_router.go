@@ -18,7 +18,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type JobSubmitRes struct {
+type JobSubmitReply struct {
 	JobId   uint   `json:"job_id"`
 	JobName string `json:"job_name"`
 	UserId  uint   `json:"user_id"`
@@ -26,7 +26,7 @@ type JobSubmitRes struct {
 	Status  string `json:"status"`
 }
 
-type JobStatusRes struct {
+type JobStatusReply struct {
 	JobId  uint   `json:"job_id"`
 	Status string `json:"status"`
 }
@@ -35,7 +35,7 @@ type JobIdGet struct {
 	JobId string `json:"job_id"`
 }
 
-type JobModelReportRes struct {
+type JobModelReportReply struct {
 	JobId                uint   `json:"job_id"`
 	EvaluationReportPath string `json:"evaluation_report_path"`
 }
@@ -92,7 +92,7 @@ func SubmitTrainJob(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 
 	// 4. return to client
 
-	resIns := JobSubmitRes{
+	resIns := JobSubmitReply{
 		JobId,
 		JobName,
 		UserId,
@@ -112,14 +112,14 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// read the query parameters with gorilla mux
 	params := mux.Vars(r)
 	jobId, _ := strconv.Atoi(params["jobId"])
-	var jr JobStatusRes
+	var jr JobStatusReply
 	status, e := controller.JobStatusQuery(uint(jobId), ctx)
 	if e != nil {
 		exceptions.HandleHttpError(w, r, http.StatusBadRequest, e.Error())
 		return
 	}
 	if status == common.JobFailed || status == common.JobKilled || status == common.JobSuccessful {
-		jr = JobStatusRes{
+		jr = JobStatusReply{
 			JobId:  uint(jobId),
 			Status: "Job already stopped with status: " + status,
 		}
@@ -129,7 +129,7 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 			exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
-		jr = JobStatusRes{
+		jr = JobStatusReply{
 			JobId:  uint(jobId),
 			Status: common.JobKilled,
 		}
@@ -196,7 +196,7 @@ func JobStatusQuery(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 		return
 	}
 
-	jr := JobStatusRes{
+	jr := JobStatusReply{
 		JobId:  uint(jobId),
 		Status: status,
 	}
@@ -220,7 +220,7 @@ func JobTrainingReportRetrieve(w http.ResponseWriter, r *http.Request, ctx *enti
 
 	_, _ = w.Write([]byte(reportStr))
 
-	//res := JobModelReportRes{
+	//res := JobModelReportReply{
 	//	JobId:                uint(jobId),
 	//	EvaluationReportPath: filename,
 	//}

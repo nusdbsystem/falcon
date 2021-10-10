@@ -17,7 +17,7 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 	string, // Status
 ) {
 
-	logger.Log.Println("HTTP server: in SubmitJob, put to the JobDslQueue")
+	//logger.Log.Println("HTTP server: in SubmitJob, put to the JobDslQueue")
 
 	// generate.sh item pushed to the dslqueue
 
@@ -62,10 +62,12 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 	dslOjb.JobFlType = job.JobFlType
 	dslOjb.ExistingKey = job.ExistingKey
 	dslOjb.PartyNums = job.PartyNums
+	dslOjb.DistributedTask = job.DistributedTask
 	dslOjb.PartyInfoList = job.PartyInfoList
 	dslOjb.Tasks = job.Tasks
 
 	go func() {
+		defer logger.HandleErrors()
 		cache.JobDslQueue.Push(dslOjb)
 	}()
 

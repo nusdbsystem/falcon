@@ -98,7 +98,11 @@ func UpdateInference(w http.ResponseWriter, r *http.Request, ctx *entity.Context
 
 	if status == true {
 		logger.Log.Println("[UpdateInference]: CreateInference return true, now delete previous running jobs, inferenceIds", InferenceIds)
-		go controller.UpdateInference(newInfId, InferenceIds, ctx)
+		go func() {
+			defer logger.HandleErrors()
+			controller.UpdateInference(newInfId, InferenceIds, ctx)
+		}()
+
 	} else {
 		logger.Log.Println("[UpdateInference]: CreateInference return false")
 		panic("Unable to update")
