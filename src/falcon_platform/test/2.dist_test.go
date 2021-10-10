@@ -1,15 +1,15 @@
 package test
 
 import (
-	"falcon_platform/resourcemanager"
 	"fmt"
+	"os"
 	"testing"
+	"time"
 )
 
 func TestDist(t *testing.T) {
 
-	res, _ := resourcemanager.GetFreePort4K8s()
-	res2, _ := resourcemanager.GetFreePorts(3)
-	fmt.Println(res, res2)
-
+	path, _ := os.Getwd()
+	currentTime := time.Now().Unix()
+	fmt.Println(path, fmt.Sprintf("%d", currentTime))
 }

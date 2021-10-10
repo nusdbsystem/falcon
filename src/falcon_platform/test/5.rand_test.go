@@ -2,15 +2,11 @@ package test
 
 import (
 	"encoding/json"
-	"falcon_platform/common"
 	"falcon_platform/exceptions"
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"fmt"
-	"log"
 	"testing"
-
-	"google.golang.org/protobuf/proto"
 )
 
 func TestRandomFunc(t *testing.T) {
@@ -46,33 +42,6 @@ func unjsonSlice() {
 }
 
 func TestRandomFunc2(t *testing.T) {
-
-	p := common.NetworkConfig{
-		IPs:        []string{"1", "123", "123", "3"},
-		PortArrays: []*common.PortArray{},
-	}
-
-	p1 := &common.PortArray{Ports: []int32{1, 2, 34, 5}}
-	p2 := &common.PortArray{Ports: []int32{1, 2, 34, 5}}
-	p3 := &common.PortArray{Ports: []int32{1, 2, 34, 5}}
-
-	p.PortArrays = append(p.PortArrays, p1)
-	p.PortArrays = append(p.PortArrays, p2)
-	p.PortArrays = append(p.PortArrays, p3)
-
-	out, err := proto.Marshal(&p)
-	if err != nil {
-		log.Fatalln("Failed to encode addr book:", err)
-	}
-	fmt.Println(string(out))
-
-	px := &common.NetworkConfig{}
-	if err := proto.Unmarshal(out, px); err != nil {
-		log.Fatalln("Failed to parse addr book:", err)
-	}
-
-	fmt.Println(px)
-
 }
 
 func TestErrors(t *testing.T) {
@@ -80,5 +49,9 @@ func TestErrors(t *testing.T) {
 	if exceptions.CallingError().Error() == exceptions.CallingErr {
 		fmt.Println("asdf")
 	}
+
+}
+
+func TestFIndIp(t *testing.T) {
 
 }
