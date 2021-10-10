@@ -8,9 +8,7 @@
 #include <unistd.h>
 #include <boost/program_options.hpp>
 
-#include "falcon/network/Comm.hpp"
 #include "falcon/party/party.h"
-#include "falcon/operator/mpc/spdz_connector.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_builder.h"
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
@@ -19,10 +17,12 @@
 #include "falcon/distributed/worker.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_ps.h"
 #include "falcon/utils/base64.h"
+#include <chrono>
 
 #include <glog/logging.h>
 
 using namespace boost;
+using namespace std::chrono;
 
 falcon::AlgorithmName parse_algorithm_name(const std::string& name);
 
@@ -143,6 +143,8 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "inference_endpoint: " << inference_endpoint;
 
   try {
+    auto start_time = high_resolution_clock::now();
+
     Party party(party_id, party_num,
                 static_cast<falcon::PartyType>(party_type),
                 static_cast<falcon::FLSetting>(fl_setting),
@@ -317,6 +319,14 @@ int main(int argc, char *argv[]) {
       }
       delete worker;
     }
+
+    // After function call
+    auto stop_time = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop_time - start_time);
+    cout << "Time taken by main func: "
+    << duration.count() << " microseconds" << endl;
+    LOG(INFO) << "Time taken by main func: "
+    << duration.count() << " microseconds" << model_report_file;
 
     return EXIT_SUCCESS;
   }
