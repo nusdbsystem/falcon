@@ -1,3 +1,7 @@
+# checkout branch for test code
+echo "---------------git checkout branch--------"
+git fetch
+git checkout -b distributed-train-lr origin/distributed-train-lr
 
 # pull latest code
 echo "---------------git pull code--------"

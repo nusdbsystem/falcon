@@ -237,27 +237,6 @@ class Party {
   void truncate_ciphers_precision(EncodedNumber *ciphers, int size,
                                   int req_party_id, int dest_precision);
 
-  /**
-   * broadcast an encoded vector to other parties
-   *
-   * @param vec: the encoded vector to be broadcast
-   * @param size: the size of the vector
-   * @param req_party_id: the party who has the vector to be broadcast
-   */
-  void broadcast_encoded_number_array(EncodedNumber *vec,
-                                      int size, int req_party_id) const;
-
-  /**
-   * truncate the ciphertext precision to a lower one
-   *
-   * @param ciphers: the ciphertexts to be truncated precision
-   * @param size: the size of the vector
-   * @param req_party_id: the party who has the ciphertexts
-   * @param dest_precision: the destination precision
-   */
-  void truncate_ciphers_precision(EncodedNumber *ciphers, int size,
-                                  int req_party_id, int dest_precision);
-
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }
 
