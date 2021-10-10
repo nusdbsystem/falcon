@@ -37,6 +37,10 @@
       }
     }
   ],
+  "distributed_task": {
+    "enable": 0,
+    "worker_number": 2
+  },
   "tasks": {
     "model_training": {
       "mpc_algorithm_name": "logistic_regression",
@@ -48,7 +52,7 @@
         },
         "algorithm_config": {
           "batch_size": 8,
-          "max_iteration": 2,
+          "max_iteration": 200,
           "convergence_threshold": 0.0001,
           "with_regularization": false,
           "alpha": 0.1,
@@ -59,7 +63,7 @@
           "multi_class": "ovr",
           "metric": "acc",
           "differential_privacy_budget": 0.1,
-          "fit_bias": true
+          "fit_bias": false
         }
       },
       "output_configs": {

@@ -8,11 +8,12 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--b')
     parser.add_argument('-c', '--c')
     args = parser.parse_args()
-    print("Args is : ", args.a, args.b, args.c)
+    print("Args is : logfile", args.a, "b :",  args.b, "c :", args.c)
+
 
     try:
-        for i in range(3):
-            print("-----------Python PreProcessing Counting down-----------", i)
-            time.sleep(2)
+        fo = open(args.a + "/texts", "w")
+        fo.write("This is worker, workerID" + str(args.b) + ", " + args.c)
+        fo.close()
     except:
-        print("Error Happens")
+        print("This is wrong")
