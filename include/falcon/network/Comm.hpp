@@ -151,7 +151,7 @@ public:
 		serverSocket(ioService), clientSocket(ioService)
 	{
 		this->me = me;
-		this->other = other;
+		this->other = std::move(other);
 		this->role = role;
 	};
 	int join(int sleepBetweenAttempts = 500, int timeout = 5000, bool first = true) override;
@@ -163,7 +163,8 @@ public:
 
     virtual ~CommPartyTCPSynced();
 
-private:
+public:
+    bool is_connect = false;
 	boost::asio::io_service& ioServiceServer;
 	boost::asio::io_service& ioServiceClient;
 	tcp::acceptor acceptor_;
