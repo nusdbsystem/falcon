@@ -38,11 +38,11 @@ echo "PARTY_COUNT = ${PARTY_COUNT}"
 for (( c=0; c<$PARTY_COUNT; c++ ))
 do
   echo "Terminate Party $c..."
-  kill -9 $(cat dev_test/Party-$c.pid)
+  kill -9 $(cat falcon_logs/Party-$c.pid)
 done
 
 echo "Terminate Coordinator..."
-kill -9 $(cat dev_test/Coord.pid)
+kill -9 $(cat falcon_logs/Coord.pid)
 
 # just in case, kill after grep for keyword
 # The grep filters that based on your search string,

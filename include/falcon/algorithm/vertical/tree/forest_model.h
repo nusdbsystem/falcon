@@ -48,7 +48,7 @@ class ForestModel {
  * @return predicted labels (encrypted)
  */
   void predict(Party& party,
-               std::vector< std::vector<double> > predicted_samples,
+               const std::vector< std::vector<double> >& predicted_samples,
                int predicted_sample_size,
                EncodedNumber* predicted_labels);
 };

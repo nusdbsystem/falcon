@@ -47,6 +47,8 @@ set(SOURCE_FILES
         include/message/alg_params.pb.cc
         include/message/network.pb.h
         include/message/network.pb.cc
+        include/message/ps_network.pb.h
+        include/message/ps_network.pb.cc
         include/message/tree.pb.h
         include/message/tree.pb.cc
         include/message/lr.pb.h
@@ -94,7 +96,13 @@ set(SOURCE_FILES
         ../../include/falcon/algorithm/vertical/tree/gbdt_loss.h
         algorithm/vertical/tree/gbdt_loss.cc
         ../../include/falcon/inference/server/gbdt_inference_service.h
-        inference/server/gbdt_inference_service.cc)
+        inference/server/gbdt_inference_service.cc
+        ../../include/falcon/distributed/parameter_server_base.h
+        ../../include/falcon/distributed/worker.h
+        distributed/worker.cc
+        distributed/parameter_server_base.cc
+        ../../include/falcon/algorithm/vertical/linear_model/logistic_regression_ps.h
+        algorithm/vertical/linear_model/logistic_regression_ps.cc)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
@@ -103,13 +111,13 @@ set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
 add_library(executor ${SOURCE_FILES})
 
 # Need to Revise protobuf version to 3.14 that is compatible with grpc;
-#include(FindProtobuf)
-#find_package(Protobuf REQUIRED)
+include(FindProtobuf)
+find_package(Protobuf REQUIRED)
 
 # Find Protobuf installation
 # Looks for protobuf-config.cmake file installed by Protobuf's cmake installation.
-set(protobuf_MODULE_COMPATIBLE TRUE)
-find_package(Protobuf CONFIG REQUIRED)
+#set(protobuf_MODULE_COMPATIBLE TRUE)
+#find_package(Protobuf CONFIG REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 message(STATUS "Using protobuf ${Protobuf_VERSION}")
 
@@ -139,6 +147,7 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SERVED_PKG REQUIRED IMPORTED_TARGET served)
 
+# Add include directories to the target executor.
 target_include_directories(executor PUBLIC
         ${Boost_INCLUDE_DIRS}
         ${FALCON_INCLUDE_DIR}
@@ -172,8 +181,10 @@ target_link_libraries(executor
 
 #find_package (glog 0.4.0 REQUIRED)
 
+# Add directories in which the linker will look for libraries.
 link_directories(/usr/local/lib /usr/ssl/lib ${SPDZ_HOME}/local/lib)
 
+# Add include directories to the build.
 include_directories(
         ${Boost_INCLUDE_DIRS}
         ${PROJECT_SOURCE_DIR}/include/

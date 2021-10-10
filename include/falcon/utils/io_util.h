@@ -7,6 +7,7 @@
 
 #include <glog/logging.h>
 
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -65,6 +66,20 @@ std::string NumberToString ( T Number )
   std::ostringstream ss;
   ss << Number;
   return ss.str();
+}
+
+/**
+ * print a vector
+ * @tparam T
+ * @return
+ */
+template <typename T>
+inline void print_vector(const std::vector<T>& vec){
+  std::cout << "[ ";
+  for( const auto& ele: vec){
+    std::cout << ele <<" ";
+  }
+  std::cout << "]" << std::endl;
 }
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_IO_UTIL_H_

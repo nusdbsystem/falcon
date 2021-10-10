@@ -141,3 +141,6 @@ ENV/
 
 # For mac
 .DS_Store
+
+# proto message
+src/executor/include/message/*

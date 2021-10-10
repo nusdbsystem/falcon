@@ -4,7 +4,6 @@ import "gorm.io/gorm"
 
 func (jobDB *JobDB) GetPorts() []uint {
 	/**
-	 * @Author
 	 * @Description fetch all records
 	 * @Date 4:43 下午 6/12/20
 	 * @Param

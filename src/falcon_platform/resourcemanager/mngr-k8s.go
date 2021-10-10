@@ -17,6 +17,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
+	"sync"
 )
 
 type K8sManager struct {
@@ -51,7 +52,25 @@ func InitK8sManager(inCluster bool, kubeconfig string) *K8sManager {
 
 }
 
-func (km *K8sManager) CreateResources(filename string) {
+func (mngr *K8sManager) ResourceMonitor(
+	resource interface{},
+	isClearCtx context.Context,
+	isReleaseCtx context.Context) {
+	// add later if needs
+}
+
+func (km *K8sManager) CreateResource(
+	incmd interface{}, // command line to be executed
+	isClearCtx context.Context, // control if clear resource or not
+	isReleaseCtx context.Context, // control if release resource or not
+	mux *sync.Mutex, // lock
+	TotResources *int, // store number of sub-processes
+	TaskStatus *string, // store task status
+	runTimeErrorLog *string, // store task error logs
+) {
+
+	// this is yaml file used to create k8s container
+	filename := incmd.(string)
 
 	// 1. read file as bytes
 	b, err := ioutil.ReadFile(filename)
@@ -127,22 +146,25 @@ func (km *K8sManager) CreateResources(filename string) {
 	}
 }
 
-func (km *K8sManager) UpdateYaml(command string) {
+// update k8s yaml file
+func (km *K8sManager) UpdateConfig(config interface{}) {
+	command := config.(string)
 	e := ExecuteBash(command)
 	if e != nil {
-		panic("K8sManager: MasterError " + e.Error())
+		panic("K8sManager: Error " + e.Error())
 	}
 }
 
-func (km *K8sManager) DeleteService(svcName string) {
+// delete k8s svc
+func (km *K8sManager) DeleteResource(resource interface{}) {
+	svcName := resource.(string)
 	logger.Log.Printf("K8sManager: deleting svc %s...\n", svcName)
 
 	client, _ := kubernetes.NewForConfig(km.k8sConfig)
 
 	err := client.CoreV1().Services("default").Delete(context.TODO(), svcName, metav1.DeleteOptions{})
-
 	if err != nil {
 		logger.Log.Printf("K8sManager: delete svc %s error %s \n", svcName, err)
-
 	}
+
 }

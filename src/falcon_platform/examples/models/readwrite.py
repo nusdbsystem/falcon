@@ -26,9 +26,9 @@ if __name__ == '__main__':
     except Exception as e:
         print(e)
 
-    for i in range(6):
-        print("Python PreProcessing Counting down", i)
-        time.sleep(2)
+    while True:
+        print("Python PreProcessing Counting down")
+        time.sleep(3)
 
 # /Users/nailixing/Test/falcon_demon_12_11/p1/data/f1
 # /Users/nailixing/Test/falcon_demon_12_11/p1/model/o1

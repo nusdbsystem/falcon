@@ -1,23 +1,30 @@
 package router
 
 import (
+	"encoding/json"
 	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/coordserver/controller"
 	"falcon_platform/coordserver/entity"
-	"fmt"
 	"net/http"
 	"strconv"
 )
 
 func AssignPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
-	port := controller.AssignPort(ctx)
+	query := r.URL.Query()
 
-	portStr := fmt.Sprintf("%d", port)
+	portNum := query.Get("portNum")
 
-	_, _ = w.Write([]byte(portStr))
+	portArray := controller.AssignPort(ctx, portNum)
 
+	data, err := json.Marshal(portArray)
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, _ = w.Write(data)
 }
 
 func AddPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
@@ -28,5 +35,4 @@ func AddPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	Port, _ := strconv.Atoi(port)
 
 	controller.AddPort(uint(Port), ctx)
-
 }

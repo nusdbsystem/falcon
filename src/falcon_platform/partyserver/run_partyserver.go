@@ -6,6 +6,7 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/logger"
 	"falcon_platform/partyserver/router"
+	"falcon_platform/resourcemanager"
 	"log"
 	"net/http"
 	"os"
@@ -16,8 +17,7 @@ import (
 	"github.com/gorilla/handlers"
 )
 
-func SetupPartyServer() {
-	defer logger.HandleErrors()
+func RunPartyServer() {
 
 	// set up HTTP server routes
 	r := router.NewRouter()
@@ -51,37 +51,35 @@ func SetupPartyServer() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 
 	go func() {
+		defer logger.HandleErrors()
+
 		<-quit
 
 		http_logger.Println("HTTP Server is shutting down...")
 
-		logger.Log.Println("SetupPartyServer: call client.PartyServerDelete")
-		if err := client.PartyServerDelete(common.CoordAddr, common.PartyServerIP); err != nil {
-			http_logger.Printf("Cannot Delete PartyServer for Coordinator: %v\n", err)
-		}
+		logger.Log.Println("RunPartyServer: call client.PartyServerDelete")
+		//client.PartyServerDelete(common.CoordAddr, common.PartyServerIP)
+
+		logger.Log.Println("RunPartyServer: delete all docker containers")
+		dockerSdk := new(resourcemanager.DockerSdkMngr)
+		dockerSdk.DeleteAll()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
 		server.SetKeepAlivesEnabled(false)
 		if err := server.Shutdown(ctx); err != nil {
+			logger.Log.Println("RunPartyServer: Could not gracefully shutDown the server: ", err)
 			http_logger.Fatalf("Could not gracefully shutdown the server: %v\n", err)
-			logger.Log.Fatal("SetupPartyServer: Could not gracefully shutDown the server: ", err)
 		}
 		close(done)
 	}()
 
-	logger.Log.Printf("SetupPartyServer: connecting to Coordinator %s to AddPort\n", common.CoordAddr)
-	err := client.AddPort(common.CoordAddr, common.PartyServerPort)
-	if err != nil {
-		panic("SetupPartyServer: failed to AddPort on Coordinator, " + err.Error())
-	}
+	logger.Log.Printf("RunPartyServer: connecting to Coordinator %s to AddPort\n", common.CoordAddr)
+	client.AddPort(common.CoordAddr, common.PartyServerPort)
 
-	logger.Log.Println("SetupPartyServer: PartyServerAdd ", common.PartyServerIP)
-	err = client.PartyServerAdd(common.CoordAddr, common.PartyServerIP, common.PartyServerPort)
-	if err != nil {
-		panic("SetupPartyServer: PartyServerAdd error, " + err.Error())
-	}
+	logger.Log.Println("RunPartyServer: PartyServerAdd ", common.PartyServerIP)
+	client.PartyServerAdd(common.CoordAddr, common.PartyServerIP, common.PartyServerPort)
 
 	http_logger.Printf("[party server %v] is ready to handle requests at IP: %v, Port: %v\n",
 		common.PartyID,
@@ -96,12 +94,9 @@ func SetupPartyServer() {
 	// ErrServerClosed is returned by the Server's Serve, ServeTLS, ListenAndServe, and ListenAndServeTLS methods
 	// after a call to Shutdown or Close
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		http_logger.Fatalf("Could not listen on %s:%s: %v\n",
-			common.PartyServerIP,
-			common.PartyServerPort,
-			err)
-		logger.Log.Fatal("[party server]: Could not listen on ", common.PartyServerIP,
+		logger.Log.Printf("[party server]: Could not listen on ", common.PartyServerIP,
 			common.PartyServerPort, " err: ", err, "\n")
+		http_logger.Fatalf("Could not listen on %s:%s: %v\n", common.PartyServerIP, common.PartyServerPort, err)
 	}
 
 	<-done

@@ -9,6 +9,7 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/network_converter.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
+#include <falcon/utils/base64.h>
 #include <glog/logging.h>
 
 #include <cstdlib>
@@ -24,9 +25,7 @@
 Party::Party() {}
 
 Party::Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
-             falcon::FLSetting m_fl_setting, const std::string& m_network_file,
-             const std::string& m_data_file, bool m_use_existing_key,
-             const std::string& m_key_file) {
+             falcon::FLSetting m_fl_setting, const std::string& m_data_file) {
   // copy params
   party_id = m_party_id;
   party_num = m_party_num;
@@ -42,7 +41,6 @@ Party::Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
   LOG(INFO) << "local_data is reading dataset from: " << m_data_file;
   LOG(INFO) << "sample_num = " << sample_num;
 
-
   // if this is active party, slice the last column as labels
   if (party_type == falcon::ACTIVE_PARTY) {
     for (int i = 0; i < sample_num; i++) {
@@ -52,143 +50,7 @@ Party::Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
     LOG(INFO) << "Active party last column is label, so feature_num-1\n";
     --feature_num;
   }
-
   LOG(INFO) << "feature_num = " << feature_num;
-
-  // TODO: the logic for NETWORK_CONFIG_PROTO 0/1 seems to have
-  // a number of overlaps, probably can refactor
-  if (NETWORK_CONFIG_PROTO == 0) {
-    // read network config file
-    ConfigFile config_file(m_network_file);
-    std::string port_string, ip_string;
-    std::vector<int> ports(party_num);
-    std::vector<std::string> ips(party_num);
-    for (int i = 0; i < party_num; i++) {
-      port_string = "party_" + to_string(i) + "_port";
-      ip_string = "party_" + to_string(i) + "_ip";
-      // get parties ips and ports
-      ports[i] = stoi(config_file.Value("", port_string));
-      ips[i] = config_file.Value("", ip_string);
-    }
-
-    LOG(INFO) << "Establish network communications with other parties";
-
-    // establish communication connections
-    SocketPartyData me, other;
-    for (int i = 0; i < party_num; ++i) {
-      if (i < party_id) {
-        // this party will be the receiver in the protocol
-        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]),
-                             ports[party_id] + i);
-        other = SocketPartyData(boost_ip::address::from_string(ips[i]),
-                                ports[i] + party_id - 1);
-        shared_ptr<CommParty> channel =
-            make_shared<CommPartyTCPSynced>(io_service, me, other);
-
-        // connect to the other party and add channel
-        channel->join(500, 5000);
-        LOG(INFO) << "Communication channel established with party " << i
-                  << ", port is " << ports[party_id] + i << ".";
-        channels.push_back(std::move(channel));
-      } else if (i > party_id) {
-        // this party will be the sender in the protocol
-        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]),
-                             ports[party_id] + i - 1);
-        other = SocketPartyData(boost_ip::address::from_string(ips[i]),
-                                ports[i] + party_id);
-        shared_ptr<CommParty> channel =
-            make_shared<CommPartyTCPSynced>(io_service, me, other);
-
-        // connect to the other party and add channel
-        channel->join(500, 5000);
-        LOG(INFO) << "Communication channel established with party " << i
-                  << ", port is " << ports[party_id] + i << ".";
-        channels.push_back(std::move(channel));
-      } else {
-        // self communication
-        shared_ptr<CommParty> channel = nullptr;
-        channels.push_back(std::move(channel));
-      }
-    }
-
-    host_names = ips;
-  } else {
-    // read network config proto from coordinator
-    std::vector<std::string> ips;
-    std::vector<std::vector<int> > port_arrays;
-    deserialize_network_configs(ips, port_arrays, m_network_file);
-
-    LOG(INFO) << "Establish network communications with other parties";
-
-    for (int i = 0; i < ips.size(); i++) {
-      LOG(INFO) << "ips[" << i << "] = " << ips[i];
-      for (int j = 0; j < port_arrays[i].size(); j++) {
-        LOG(INFO) << "port_array[" << i << "][" << j
-                  << "] = " << port_arrays[i][j];
-      }
-    }
-
-    // establish communication connections
-    SocketPartyData me, other;
-    for (int i = 0; i < party_num; ++i) {
-      if (i < party_id) {
-        // this party will be the receiver in the protocol
-        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]),
-                             port_arrays[party_id][i]);
-        other = SocketPartyData(boost_ip::address::from_string(ips[i]),
-                                port_arrays[i][party_id]);
-        shared_ptr<CommParty> channel =
-            make_shared<CommPartyTCPSynced>(io_service, me, other);
-
-        // connect to the other party and add channel
-        channel->join(500, 5000);
-        LOG(INFO) << "Communication channel established with party " << i
-                  << ", port is " << port_arrays[party_id][i] << ".";
-        channels.push_back(std::move(channel));
-      } else if (i > party_id) {
-        // this party will be the sender in the protocol
-        me = SocketPartyData(boost_ip::address::from_string(ips[party_id]),
-                             port_arrays[party_id][i]);
-        other = SocketPartyData(boost_ip::address::from_string(ips[i]),
-                                port_arrays[i][party_id]);
-        shared_ptr<CommParty> channel =
-            make_shared<CommPartyTCPSynced>(io_service, me, other);
-
-        // connect to the other party and add channel
-        channel->join(500, 5000);
-        LOG(INFO) << "Communication channel established with party " << i
-                  << ", port is " << port_arrays[party_id][i] << ".";
-        channels.push_back(std::move(channel));
-      } else {
-        // self communication
-        shared_ptr<CommParty> channel = nullptr;
-        channels.push_back(std::move(channel));
-      }
-    }
-    host_names = ips;
-  }
-
-  LOG(INFO) << "Init threshold partially homomorphic encryption keys";
-  google::FlushLogFiles(google::INFO);
-
-  // init phe keys: if use existing key, read key file
-  // otherwise, generate keys and broadcast to others
-  phe_random = hcs_init_random();
-  phe_pub_key = djcs_t_init_public_key();
-  phe_auth_server = djcs_t_init_auth_server();
-  if (m_use_existing_key) {
-    init_with_key_file(m_key_file);
-  } else {
-    // the active party generates new phe keys and send to passive parties
-    init_with_new_phe_keys(PHE_EPSILON, PHE_KEY_SIZE, party_num);
-    std::string phe_keys_str;
-    // LOG(INFO) << "create keys succeed";
-    serialize_phe_keys(phe_pub_key, phe_auth_server, phe_keys_str);
-    // LOG(INFO) << "serialize keys succeed";
-    write_key_to_file(phe_keys_str, m_key_file);
-    // LOG(INFO) << "write keys succeed";
-    // google::FlushLogFiles(google::INFO);
-  }
 }
 
 Party::Party(const Party& party) {
@@ -199,6 +61,7 @@ Party::Party(const Party& party) {
   fl_setting = party.fl_setting;
   channels = party.channels;
   host_names = party.host_names;
+  executor_mpc_ports = party.executor_mpc_ports;
 
   // copy private variables
   feature_num = party.getter_feature_num();
@@ -230,6 +93,7 @@ Party& Party::operator=(const Party& party) {
   fl_setting = party.fl_setting;
   channels = party.channels;
   host_names = party.host_names;
+  executor_mpc_ports = party.executor_mpc_ports;
 
   // copy private variables
   feature_num = party.getter_feature_num();
@@ -254,19 +118,172 @@ Party& Party::operator=(const Party& party) {
   return *this;
 }
 
+void Party::init_network_channels(const std::string &m_network_file) {
+  std::vector<std::string> ips;
+  std::vector<std::vector<int> > port_arrays;
+
+  if (NETWORK_CONFIG_PROTO == 0) {
+    // read network config file
+    ConfigFile config_file(m_network_file);
+    std::string port_string, ip_string;
+    std::vector<int> ports(party_num);
+    for (int i = 0; i < party_num; i++) {
+      port_string = "party_" + to_string(i) + "_port";
+      ip_string = "party_" + to_string(i) + "_ip";
+      // get parties ips and ports
+      ports[i] = stoi(config_file.Value("", port_string));
+      ips.push_back(config_file.Value("", ip_string));
+    }
+    // generate port_arrays for communication between parties
+    for (int i = 0; i < party_num; ++i) {
+      std::vector<int> tmp_ports;
+      if (i <= party_id) {
+        tmp_ports.push_back(ports[party_id] + i);
+        tmp_ports.push_back(ports[i] + party_id - 1);
+      }else if (i > party_id){
+        tmp_ports.push_back(ports[party_id] + i - 1);
+        tmp_ports.push_back(ports[i] + party_id);
+      }
+      port_arrays.push_back(tmp_ports);
+    }
+  } else {
+    // read network config proto from coordinator
+//    // decode the network base64 string to pb string
+//    vector<BYTE> network_file_byte = base64_decode(m_network_file);
+//    std::string network_pb_string(network_file_byte.begin(), network_file_byte.end());
+    deserialize_network_configs(ips, port_arrays, executor_mpc_ports, m_network_file);
+
+    LOG(INFO) << "[deserialize_network_configs]: mpc_port_array_size after: " << executor_mpc_ports.size() <<" --------";
+    std::cout << "[deserialize_network_configs]: mpc_port_array_size after: " << executor_mpc_ports.size() << ", and ips are " << ips.size()  << std::endl;
+
+    LOG(INFO) << "[deserialize_network_configs]: size of ip address is: " << ips.size() <<" --------";
+
+    for (int i = 0; i < ips.size(); i++) {
+      std::cout << "ips[" << i << "] = " << ips[i] << std::endl;
+      LOG(INFO) << "ips[" << i << "] = " << ips[i];
+      for (int j = 0; j < port_arrays[i].size(); j++) {
+        LOG(INFO) << "port_array[" << i << "][" << j
+                  << "] = " << port_arrays[i][j];
+        std::cout << "port_array[" << i << "][" << j
+                  << "] = " << port_arrays[i][j] << std::endl;
+      }
+    }
+  }
+
+  host_names = ips;
+
+  // establish communication connections
+  std::cout << "Establish network communications with other parties" << std::endl;
+  LOG(INFO) << "Establish network communications with other parties";
+  google::FlushLogFiles(google::INFO);
+  SocketPartyData me, other;
+  for (int i = 0; i < party_num; ++i) {
+    if (i != party_id) {
+      me = SocketPartyData(boost_ip::address::from_string(ips[party_id]),
+                           port_arrays[party_id][i]);
+      other = SocketPartyData(boost_ip::address::from_string(ips[i]),
+                              port_arrays[i][party_id]);
+
+      std::cout << "My party id is: " << party_id << ", I am listening party " << i
+                << " on port " << port_arrays[party_id][i] << std::endl;
+      LOG(INFO) << "My party id is: " << party_id << ", I am listening party " << i
+                << " on port " << port_arrays[party_id][i];
+      google::FlushLogFiles(google::INFO);
+
+      shared_ptr<CommParty> channel =
+          make_shared<CommPartyTCPSynced>(io_service, me, other);
+
+      std::cout << "The other party's port I will send data to is: " <<
+                port_arrays[i][party_id] << std::endl;
+      LOG(INFO) << "The other party's port I will send data to is: " <<
+                port_arrays[i][party_id];
+      google::FlushLogFiles(google::INFO);
+
+      // connect to the other party and add channel
+      channel->join(500, 5000);
+      LOG(INFO) << "Communication channel established with party " << i
+                << ", port is " << port_arrays[party_id][i] << ".";
+      std::cout << "Communication channel established with party " << i
+                << ", port is " << port_arrays[party_id][i] << "." << std::endl;
+      channels.push_back(std::move(channel));
+      google::FlushLogFiles(google::INFO);
+    } else {
+      // self communication
+      shared_ptr<CommParty> channel = nullptr;
+      channels.push_back(std::move(channel));
+    }
+  }
+}
+
+void Party::init_phe_keys(bool m_use_existing_key, const std::string &m_key_file) {
+  LOG(INFO) << "Init threshold partially homomorphic encryption keys";
+  std::cout << "Init threshold partially homomorphic encryption keys" << std::endl;
+  google::FlushLogFiles(google::INFO);
+  // init phe keys: if use existing key, read key file
+  // otherwise, generate keys and broadcast to others
+  phe_random = hcs_init_random();
+  phe_pub_key = djcs_t_init_public_key();
+  phe_auth_server = djcs_t_init_auth_server();
+  std::cout << "Initialize phe keys success" << std::endl;
+  std::cout << "m_use_existing_key = " << m_use_existing_key << std::endl;
+  LOG(INFO) << "Initialize phe keys success";
+  LOG(INFO) << "m_use_existing_key = " << m_use_existing_key;
+  google::FlushLogFiles(google::INFO);
+  if (m_use_existing_key) {
+    init_with_key_file(m_key_file);
+  } else {
+    // the active party generates new phe keys and send to passive parties
+    std::cout << "init with new phe keys begin" << std::endl;
+    LOG(INFO) << "init with new phe keys begin";
+    google::FlushLogFiles(google::INFO);
+    init_with_new_phe_keys(PHE_EPSILON, PHE_KEY_SIZE, party_num);
+    std::cout << "init with new phe keys success" << std::endl;
+    LOG(INFO) << "init with new phe keys success";
+    google::FlushLogFiles(google::INFO);
+    std::string phe_keys_str;
+    // LOG(INFO) << "create keys succeed";
+    serialize_phe_keys(phe_pub_key, phe_auth_server, phe_keys_str);
+    std::cout << "serialize phe keys success" << std::endl;
+    LOG(INFO) << "serialize phe keys success";
+    google::FlushLogFiles(google::INFO);
+    // LOG(INFO) << "serialize keys succeed";
+    write_key_to_file(phe_keys_str, m_key_file);
+    std::cout << "write phe keys success" << std::endl;
+    LOG(INFO) << "write phe keys success";
+    // LOG(INFO) << "write keys succeed";
+    google::FlushLogFiles(google::INFO);
+  }
+}
+
 void Party::init_with_new_phe_keys(int epsilon, int phe_key_size,
                                    int required_party_num) {
   LOG(INFO) << "party type = " << party_type;
+  google::FlushLogFiles(google::INFO);
+  std::cout << "party type = " << party_type << std::endl;
   if (party_type == falcon::ACTIVE_PARTY) {
+    LOG(INFO) << "active party begins to generate phe keys";
+    google::FlushLogFiles(google::INFO);
+    std::cout << "active party begins to generate phe keys" << std::endl;
+
     // generate phe keys
     hcs_random* random = hcs_init_random();
     djcs_t_public_key* pub_key = djcs_t_init_public_key();
     djcs_t_private_key* priv_key = djcs_t_init_private_key();
+
+    LOG(INFO) << "step 1";
+    google::FlushLogFiles(google::INFO);
+    std::cout << "step 1" << std::endl;
+
     djcs_t_auth_server** auth_server =
         (djcs_t_auth_server**)malloc(party_num * sizeof(djcs_t_auth_server*));
     mpz_t* si = (mpz_t*)malloc(party_num * sizeof(mpz_t));
     djcs_t_generate_key_pair(pub_key, priv_key, random, epsilon, phe_key_size,
                              party_num, required_party_num);
+
+    LOG(INFO) << "step 2";
+    google::FlushLogFiles(google::INFO);
+    std::cout << "step 2" << std::endl;
+
     mpz_t* coeff = djcs_t_init_polynomial(priv_key, random);
     for (int i = 0; i < party_num; i++) {
       mpz_init(si[i]);
@@ -277,6 +294,8 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size,
 
     // serialize phe keys and send to passive parties
     LOG(INFO) << "party id = " << party_id;
+    google::FlushLogFiles(google::INFO);
+    std::cout << "party id = " << party_id << std::endl;
     for (int i = 0; i < party_num; i++) {
       if (i == party_id) {
         djcs_t_public_key_copy(pub_key, phe_pub_key);
@@ -289,8 +308,6 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size,
         send_long_message(i, phe_keys_message_i);
       }
     }
-
-    google::FlushLogFiles(google::INFO);
 
     // free memory
     hcs_free_random(random);
@@ -305,21 +322,45 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size,
 
     djcs_t_free_private_key(priv_key);
 
+    LOG(INFO) << "free succeed";
+    google::FlushLogFiles(google::INFO);
+    std::cout << "free succeed" << std::endl;
     // LOG(INFO) << "free succeed";
     // google::FlushLogFiles(google::INFO);
   } else {
     // for passive parties, receive the phe keys message from the active party
     // and set its own keys with the received message
     // TODO: now active party id is 0 by design, could abstract as a variable
+    LOG(INFO) << "receive serialized keys from the active party";
+    google::FlushLogFiles(google::INFO);
+    std::cout << "receive serialized keys from the active party" << std::endl;
+
     std::string recv_phe_keys_message;
     recv_long_message(0, recv_phe_keys_message);
     deserialize_phe_keys(phe_pub_key, phe_auth_server, recv_phe_keys_message);
+
+    LOG(INFO) << "deserialize the phe keys";
+    google::FlushLogFiles(google::INFO);
+    std::cout << "deserialize the phe keys" << std::endl;
   }
 }
 
 void Party::init_with_key_file(const std::string& key_file) {
   // read key file as string
   std::string phe_keys_str = read_key_file(key_file);
+  deserialize_phe_keys(phe_pub_key, phe_auth_server, phe_keys_str);
+}
+
+std::string Party::export_phe_key_string() {
+  std::string phe_keys_str;
+  serialize_phe_keys(phe_pub_key, phe_auth_server, phe_keys_str);
+  return phe_keys_str;
+}
+
+void Party::load_phe_key_string(const std::string &phe_keys_str) {
+  phe_random = hcs_init_random();
+  phe_pub_key = djcs_t_init_public_key();
+  phe_auth_server = djcs_t_init_auth_server();
   deserialize_phe_keys(phe_pub_key, phe_auth_server, phe_keys_str);
 }
 
@@ -517,11 +558,11 @@ void Party::collaborative_decrypt(EncodedNumber* src_ciphers,
 void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
                                      std::vector<double>& secret_shares,
                                      int size, int req_party_id,
-                                     int phe_precision) {
+                                     int phe_precision) const {
   // each party generates a random vector with size values
   // (the request party will add the summation to the share)
   // ui randomly chooses ri belongs to Zq and encrypts it as [ri]
-  EncodedNumber* encrypted_shares = new EncodedNumber[size];
+  auto* encrypted_shares = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {
     // TODO: check how to replace with spdz random values
     if (phe_precision != 0) {
@@ -540,7 +581,7 @@ void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
   }
 
   // request party aggregate the shares and invoke collaborative decryption
-  EncodedNumber* aggregated_shares = new EncodedNumber[size];
+  auto* aggregated_shares = new EncodedNumber[size];
   if (party_id == req_party_id) {
     for (int i = 0; i < size; i++) {
       aggregated_shares[i] = encrypted_shares[i];
@@ -553,7 +594,7 @@ void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
       if (id != party_id) {
         std::string recv_encrypted_shares_str;
         recv_long_message(id, recv_encrypted_shares_str);
-        EncodedNumber* recv_encrypted_shares = new EncodedNumber[size];
+        auto* recv_encrypted_shares = new EncodedNumber[size];
         deserialize_encoded_number_array(recv_encrypted_shares, size,
                                          recv_encrypted_shares_str);
         for (int i = 0; i < size; i++) {
@@ -587,7 +628,7 @@ void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
                                      recv_aggregated_shares_str);
   }
   // collaborative decrypt the aggregated shares, clients jointly decrypt [e]
-  EncodedNumber* decrypted_sum = new EncodedNumber[size];
+  auto* decrypted_sum = new EncodedNumber[size];
   collaborative_decrypt(aggregated_shares, decrypted_sum, size, req_party_id);
   // if request party, add the decoded results to the secret shares
   // u1 sets [x]1 = e − r1 mod q
@@ -613,11 +654,14 @@ void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
 void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
                                      std::vector<double> secret_shares,
                                      int size, int req_party_id,
-                                     int phe_precision) {
+                                     int phe_precision) const {
+  LOG(INFO) << "[secret_shares_to_ciphers]: enter secret shares to ciphers func" << " --------";
+  std::cout << "[secret_shares_to_ciphers]: enter secret shares to ciphers func" << std::endl;
+
   // encode and encrypt the secret shares
   // and send to req_party, who aggregates
   // and send back to the other parties
-  EncodedNumber* encrypted_shares = new EncodedNumber[size];
+  auto* encrypted_shares = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {
     encrypted_shares[i].set_double(phe_pub_key->n[0], secret_shares[i],
                                    phe_precision);
@@ -625,17 +669,30 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
                        encrypted_shares[i]);
   }
 
+  LOG(INFO) << "[secret_shares_to_ciphers]: step 1" << " --------";
+  std::cout << "[secret_shares_to_ciphers]: step 1" << std::endl;
+
+  LOG(INFO) << "[secret_shares_to_ciphers]: party_id = " << party_id << ", req_party_id = " << req_party_id;
+  std::cout << "[secret_shares_to_ciphers]: party_id = " << party_id << ", req_party_id = " << req_party_id << std::endl;
+
+  LOG(INFO) << "[secret_shares_to_ciphers]: size = " << size << " --------";
+  std::cout << "[secret_shares_to_ciphers]: size = " << size << std::endl;
+
   if (party_id == req_party_id) {
     // copy local encrypted_shares to dest_ciphers
     for (int i = 0; i < size; i++) {
       dest_ciphers[i] = encrypted_shares[i];
     }
+
+    LOG(INFO) << "[secret_shares_to_ciphers]: step 2" << " --------";
+    std::cout << "[secret_shares_to_ciphers]: step 2" << std::endl;
+
     // receive from other parties and aggregate encrypted shares
     for (int id = 0; id < party_num; id++) {
       if (id != party_id) {
         std::string recv_encrypted_shares_str;
         recv_long_message(id, recv_encrypted_shares_str);
-        EncodedNumber* recv_encrypted_shares = new EncodedNumber[size];
+        auto* recv_encrypted_shares = new EncodedNumber[size];
         deserialize_encoded_number_array(recv_encrypted_shares, size,
                                          recv_encrypted_shares_str);
         // homomorphic aggregation
@@ -646,6 +703,10 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
         delete[] recv_encrypted_shares;
       }
     }
+
+    LOG(INFO) << "[secret_shares_to_ciphers]: step 3" << " --------";
+    std::cout << "[secret_shares_to_ciphers]: step 3" << std::endl;
+
     // serialize dest_ciphers and broadcast
     std::string dest_ciphers_str;
     serialize_encoded_number_array(dest_ciphers, size, dest_ciphers_str);
@@ -654,6 +715,9 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
         send_long_message(id, dest_ciphers_str);
       }
     }
+
+    LOG(INFO) << "[secret_shares_to_ciphers]: step 4" << " --------";
+    std::cout << "[secret_shares_to_ciphers]: step 4" << std::endl;
   } else {
     // serialize and send to req_party
     std::string encrypted_shares_str;
@@ -713,7 +777,7 @@ void Party::truncate_ciphers_precision(EncodedNumber *ciphers, int size,
                            src_precision);
   google::FlushLogFiles(google::INFO);
   // step 3. convert the secret shares into ciphers given dest_precision
-  EncodedNumber *dest_ciphers = new EncodedNumber[size];
+  auto *dest_ciphers = new EncodedNumber[size];
   secret_shares_to_ciphers(dest_ciphers,
                            ciphers_shares,
                            size,
@@ -728,6 +792,7 @@ void Party::truncate_ciphers_precision(EncodedNumber *ciphers, int size,
   LOG(INFO) << "truncate the ciphers precision finished";
   delete [] dest_ciphers;
 }
+
 
 Party::~Party() {
   // if does not reset channels[i] to nullptr,

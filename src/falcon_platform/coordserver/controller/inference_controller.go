@@ -100,7 +100,7 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 
 	go func() {
 		defer logger.HandleErrors()
-		jobmanager.SetupJobManager(dslOjb, common.InferenceWorker)
+		jobmanager.RunJobManager(dslOjb, common.InferenceWorker)
 	}()
 
 	return true, inference.ID

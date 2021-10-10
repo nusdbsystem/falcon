@@ -1,13 +1,14 @@
 package common
 
 import (
+	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
+	"falcon_platform/common/proto/v0"
 	"falcon_platform/logger"
+	"google.golang.org/protobuf/proto"
 	"log"
 	"strings"
-
-	"google.golang.org/protobuf/proto"
 )
 
 // TODO: make the train job field consistent with wyc executor flags!
@@ -16,27 +17,33 @@ import (
 
 // TranJob object parsed from dsl file
 type TrainJob struct {
-	JobName       string      `json:"job_name"`
-	JobInfo       string      `json:"job_info"` // job's description
-	JobFlType     string      `json:"job_fl_type"`
-	ExistingKey   uint        `json:"existing_key"`
-	PartyNums     uint        `json:"party_nums,uint"`
-	TaskNum       uint        `json:"task_num,uint"`
-	PartyInfoList []PartyInfo `json:"party_info"`
-	Tasks         Tasks       `json:"tasks"`
+	JobName         string          `json:"job_name"`
+	JobInfo         string          `json:"job_info"` // job's description
+	JobFlType       string          `json:"job_fl_type"`
+	ExistingKey     uint            `json:"existing_key"`
+	PartyNums       uint            `json:"party_nums,uint"`
+	TaskNum         uint            `json:"task_num,uint"`
+	PartyInfoList   []PartyInfo     `json:"party_info"`
+	DistributedTask DistributedTask `json:"distributed_task"`
+	Tasks           Tasks           `json:"tasks"`
 }
 
 type PartyInfo struct {
-	ID         uint      `json:"id"`
-	Addr       string    `json:"addr"`
-	PartyType  string    `json:"party_type"`
-	PartyPaths PartyPath `json:"path"`
+	ID         PartyIdType `json:"id"`
+	Addr       string      `json:"addr"`
+	PartyType  string      `json:"party_type"`
+	PartyPaths PartyPath   `json:"path"`
 }
 
 type PartyPath struct {
 	DataInput  string `json:"data_input"`
 	DataOutput string `json:"data_output"`
 	ModelPath  string `json:"model_path"`
+}
+
+type DistributedTask struct {
+	Enable       int `json:"enable"`
+	WorkerNumber int `json:"worker_number"`
 }
 
 type Tasks struct {
@@ -87,7 +94,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 		return marshalErr
 	}
 
-	logger.Log.Println("Searching Algorithms...")
+	//logger.Log.Println("Searching Algorithms...")
 
 	// if there is PreProcessing, serialize it
 	if jobInfo.Tasks.PreProcessing.AlgorithmName != "" {
@@ -152,14 +159,14 @@ func trainJobVerify(jobInfo *TrainJob) error {
 }
 
 func ParseAddress(pInfo []PartyInfo) []string {
-	var Addrs []string
+	var Addresses []string
 
 	for _, v := range pInfo {
 
 		// list of Urlesses
-		Addrs = append(Addrs, v.Addr)
+		Addresses = append(Addresses, v.Addr)
 	}
-	return Addrs
+	return Addresses
 }
 
 func GenerateLrParams(cfg map[string]interface{}) string {
@@ -176,7 +183,7 @@ func GenerateLrParams(cfg map[string]interface{}) string {
 		panic("GenerateLrParams error in doing Unmarshal")
 	}
 
-	lrp := LogisticRegressionParams{
+	lrp := v0.LogisticRegressionParams{
 		BatchSize:                 res.BatchSize,
 		MaxIteration:              res.MaxIteration,
 		ConvergeThreshold:         res.ConvergeThreshold,
@@ -197,8 +204,7 @@ func GenerateLrParams(cfg map[string]interface{}) string {
 		// if error, means parser object wrong,
 		log.Fatalln("Failed to encode LogisticRegressionParams:", err)
 	}
-
-	return string(out)
+	return b64.StdEncoding.EncodeToString(out)
 }
 
 func GenerateTreeParams(cfg map[string]interface{}) string {
@@ -215,7 +221,7 @@ func GenerateTreeParams(cfg map[string]interface{}) string {
 		panic("GenerateTreeParams error in doing Unmarshal")
 	}
 
-	dtp := DecisionTreeParams{
+	dtp := v0.DecisionTreeParams{
 		TreeType:            res.TreeType,
 		Criterion:           res.Criterion,
 		SplitStrategy:       res.SplitStrategy,
@@ -252,7 +258,7 @@ func GenerateRFParams(cfg map[string]interface{}) string {
 		panic("GenerateRFParams error in doing Unmarshal")
 	}
 
-	dtp := DecisionTreeParams{
+	dtp := v0.DecisionTreeParams{
 		TreeType:            res.TreeType,
 		Criterion:           res.Criterion,
 		SplitStrategy:       res.SplitStrategy,
@@ -267,7 +273,7 @@ func GenerateRFParams(cfg map[string]interface{}) string {
 		DpBudget:            res.DpBudget,
 	}
 
-	rfp := RandomForestParams{
+	rfp := v0.RandomForestParams{
 		NEstimator: res.NEstimator,
 		SampleRate: res.SampleRate,
 		DtParam:    &dtp,
@@ -278,40 +284,84 @@ func GenerateRFParams(cfg map[string]interface{}) string {
 		log.Fatalln("Failed to encode RandomForestParams:", err)
 	}
 
-	return string(out)
+	return b64.StdEncoding.EncodeToString(out)
+
 }
 
 func GeneratePreProcessparams(cfg map[string]interface{}) string {
 	return ""
 }
 
-func GenerateNetworkConfig(Urls []string, portArray [][]int32) string {
+// executorPortArray : 2-dim array, r1 demote receiver 1's port,
+//	   [ [na, r2, r3],
+//		 [r1, na, r3 ],
+//		 [r1, r2, na ] ]
+// mpcPortArray: each party's mpc port
+func GenerateNetworkConfig(mIps []string, executorPortArray [][]int32, mpcPortArray []int32) string {
 
-	//logger.Log.Println("Scheduler: Assigned IP and ports are: ", Urls, portArray)
+	//logger.Log.Println("Scheduler: Assigned IP and ports are: ", Addresses, portArray)
 
-	partyNums := len(Urls)
+	partyNums := len(mIps)
 	var IPs []string
-	for _, v := range Urls {
+	for _, v := range mIps {
 		IPs = append(IPs, strings.Split(v, ":")[0])
 	}
 
-	cfg := NetworkConfig{
-		Ips:        IPs,
-		PortArrays: []*PortArray{},
+	cfg := v0.NetworkConfig{
+		Ips:                        IPs,
+		ExecutorExecutorPortArrays: []*v0.PortArray{},
+		ExecutorMpcPortArray:       nil,
 	}
 
 	// for each IP Url
 	for i := 0; i < partyNums; i++ {
-		p := &PortArray{Ports: portArray[i]}
-		cfg.PortArrays = append(cfg.PortArrays, p)
+		p := &v0.PortArray{Ports: executorPortArray[i]}
+		cfg.ExecutorExecutorPortArrays = append(cfg.ExecutorExecutorPortArrays, p)
 	}
+
+	// each executor knows other mpc's port
+	cfg.ExecutorMpcPortArray = &v0.PortArray{Ports: mpcPortArray}
 
 	out, err := proto.Marshal(&cfg)
 	if err != nil {
 		logger.Log.Println("Generate NetworkCfg failed ", err)
 		panic(err)
 	}
+	return b64.StdEncoding.EncodeToString(out)
 
-	return string(out)
+}
 
+func GenerateDistributedNetworkConfig(psIp string, psPort []int32, workerIps []string, workerPorts []int32) string {
+
+	// each port corresponding to one worker
+	var psWorkers []*v0.PS
+	for i := 0; i < len(psPort); i++ {
+		ps := v0.PS{
+			PsIp:   psIp,
+			PsPort: psPort[i],
+		}
+		psWorkers = append(psWorkers, &ps)
+	}
+
+	//  worker address
+	var workers []*v0.Worker
+	for i := 0; i < len(workerIps); i++ {
+		worker := v0.Worker{
+			WorkerIp:   workerIps[i],
+			WorkerPort: workerPorts[i]}
+		workers = append(workers, &worker)
+	}
+	//  network config
+	psCfg := v0.PSNetworkConfig{
+		Ps:      psWorkers,
+		Workers: workers,
+	}
+
+	out, err := proto.Marshal(&psCfg)
+	if err != nil {
+		logger.Log.Println("Generate Distributed NetworkCfg failed ", err)
+		panic(err)
+	}
+
+	return b64.StdEncoding.EncodeToString(out)
 }

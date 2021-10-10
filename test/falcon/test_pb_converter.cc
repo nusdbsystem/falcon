@@ -137,6 +137,52 @@ TEST(PB_Converter, IntArray) {
   }
 }
 
+TEST(PB_Converter, DoubleArray) {
+  // generate double array
+  std::vector<double> vec;
+  vec.push_back(3.0);
+  vec.push_back(1.0);
+  vec.push_back(4.0);
+  vec.push_back(5.0);
+  vec.push_back(2.0);
+  std::string output_message;
+  serialize_double_array(vec, output_message);
+
+  std::vector<double> deserialized_vec;
+  deserialize_double_array(deserialized_vec, output_message);
+
+  // check equality
+  for (int i = 0; i < 5; i++) {
+    EXPECT_EQ(vec[i], deserialized_vec[i]);
+  }
+}
+
+TEST(PB_Converter, DoubleMatrix) {
+  // generate double matrix
+  std::vector< std::vector<double> > mat;
+  for (int i = 0; i < 3; i++) {
+    std::vector<double> vec;
+    vec.push_back(3.0);
+    vec.push_back(1.0);
+    vec.push_back(4.0);
+    vec.push_back(5.0);
+    vec.push_back(2.0);
+    mat.push_back(vec);
+  }
+  std::string output_message;
+  serialize_double_matrix(mat, output_message);
+
+  std::vector< std::vector<double> > deserialized_mat;
+  deserialize_double_matrix(deserialized_mat, output_message);
+
+  // check equality
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 5; j++) {
+      EXPECT_EQ(mat[i][j], deserialized_mat[i][j]);
+    }
+  }
+}
+
 TEST(PB_Converter, FixedPointEncodedNumber) {
   mpz_t v_n;
   mpz_t v_value;
@@ -1082,30 +1128,62 @@ TEST(PB_Converter, GbdtModel) {
 TEST(PB_Converter, NetworkConfig) {
   // serialization
   std::vector<std::string> ip_addresses, deserialized_ip_addresses;
-  std::vector< std::vector<int> > parties_port_nums, deserialized_parties_port_nums;
+  std::vector< std::vector<int> > executors_executors_port_nums, deserialized_executors_executors_port_nums;
+  std::vector<int> executor_mpc_port_nums, deserialized_executor_mpc_port_nums;
   for (int i = 0; i < 3; i++) {
     ip_addresses.emplace_back("127.0.0.1");
     std::vector<int> ports;
     for (int j = 0; j < 3; j++) {
       ports.push_back(9000 + i * 20 + j);
     }
-    parties_port_nums.push_back(ports);
+    executors_executors_port_nums.push_back(ports);
+    executor_mpc_port_nums.push_back(10000 + i * 50);
   }
   std::string output_message;
   serialize_network_configs(ip_addresses,
-      parties_port_nums,
-      output_message);
+                            executors_executors_port_nums,
+                            executor_mpc_port_nums,
+                            output_message);
 
   // deserialzation
   deserialize_network_configs(deserialized_ip_addresses,
-      deserialized_parties_port_nums,
-      output_message);
+                              deserialized_executors_executors_port_nums,
+                              deserialized_executor_mpc_port_nums,
+                              output_message);
   for (int i = 0; i < 3; i++) {
     EXPECT_TRUE(ip_addresses[i] == deserialized_ip_addresses[i]);
     for (int j = 0; j < 3; j++) {
-      EXPECT_EQ(parties_port_nums[i][j], deserialized_parties_port_nums[i][j]);
+      EXPECT_EQ(executors_executors_port_nums[i][j], deserialized_executors_executors_port_nums[i][j]);
     }
+    EXPECT_EQ(executor_mpc_port_nums[i], deserialized_executor_mpc_port_nums[i]);
   }
 }
 
+TEST(PB_Converter, PSNetworkConfig) {
+  // serialization
+  std::vector<std::string> worker_ips, deserialized_worker_ips;
+  std::vector<std::string> ps_ips, deserialized_ps_ips;
+  std::vector<int> worker_ports, deserialized_worker_ports;
+  std::vector<int> ps_ports, deserialized_ps_ports;
+  for (int i = 0; i < 3; i++) {
+    worker_ips.emplace_back("127.0.0.1");
+    worker_ports.emplace_back(9000 + i * 10);
+    ps_ips.emplace_back("127.0.0.1");
+    ps_ports.emplace_back(8000 + i * 20);
+  }
+  std::string output_message;
+  serialize_ps_network_configs(worker_ips, worker_ports,
+                               ps_ips, ps_ports, output_message);
+
+  // deserialzation
+  deserialize_ps_network_configs(deserialized_worker_ips, deserialized_worker_ports,
+                                 deserialized_ps_ips, deserialized_ps_ports,
+                                 output_message);
+  for (int i = 0; i < 3; i++) {
+    EXPECT_TRUE(worker_ips[i] == deserialized_worker_ips[i]);
+    EXPECT_TRUE(ps_ips[i] == deserialized_ps_ips[i]);
+    EXPECT_EQ(worker_ports[i], deserialized_worker_ports[i]);
+    EXPECT_EQ(ps_ports[i], deserialized_ps_ports[i]);
+  }
+}
 

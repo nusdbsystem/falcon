@@ -14,13 +14,13 @@ fi
 source config_coord.properties
 
 # if Coordinator server base path is not supplied in the config.properties
-# then use "./dev_test"
+# then use "./falcon_logs"
 if [ $COORD_SERVER_BASEPATH ];then
 	echo "COORD_SERVER_BASEPATH provided: $COORD_SERVER_BASEPATH"
 else
    # create new group of sub-folders with each run
    TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-   DEV_TEST_OUTDIR=./dev_test/Coord_${TIMESTAMP}
+   DEV_TEST_OUTDIR=./falcon_logs/Coord_${TIMESTAMP}
 
 	 export COORD_SERVER_BASEPATH=$DEV_TEST_OUTDIR
    echo "COORD_SERVER_BASEPATH NOT provided, will use ${COORD_SERVER_BASEPATH}"
@@ -34,7 +34,7 @@ export ENV="local"
 export SERVICE_NAME="coord"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
-export LOG_PATH=$COORD_SERVER_BASEPATH/falcon-log
+export LOG_PATH=$COORD_SERVER_BASEPATH/falcon_logs
 export JOB_DATABASE=$JOB_DATABASE
 export N_CONSUMER=$N_CONSUMER
 
@@ -56,7 +56,7 @@ make $makeOS
 ./bin/falcon_platform > $COORD_SERVER_BASEPATH/Coord-console.log 2>&1 &
 
 # store the process id in basepath
-echo $! > ./dev_test/Coord.pid
+echo $! > ./falcon_logs/Coord.pid
 
 echo "===== Done with Coordinator ====="
 echo

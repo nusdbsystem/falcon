@@ -75,6 +75,12 @@ class GbdtBuilder : public ModelBuilder {
   void train(Party party) override;
 
   /**
+   * build the decision tree model
+   * @param party
+  */
+  void distributed_train(const Party& party, const Worker& worker) override;
+
+  /**
    * train gbdt regression task
    *
    * @param party

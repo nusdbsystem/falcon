@@ -14,7 +14,7 @@ std::vector<ssl_socket*> setup_sockets(int n_parties,
     int my_party_id,
     std::string player_data_path,
     std::vector<std::string> host_names,
-    int port_base) {
+    const std::vector<int>& port_bases) {
   // setup connections from this party to each spdz party socket
   vector<int> plain_sockets(n_parties);
   std::vector<ssl_socket*> sockets(n_parties);
@@ -24,7 +24,7 @@ std::vector<ssl_socket*> setup_sockets(int n_parties,
   octetStream specification;
   for (int i = 0; i < n_parties; i++)
   {
-    set_up_client_socket(plain_sockets[i], host_names[i].c_str(), port_base + i);
+    set_up_client_socket(plain_sockets[i], host_names[i].c_str(), port_bases[i] + i);
     send(plain_sockets[i], (octet*) &my_party_id, sizeof(int));
     sockets[i] = new ssl_socket(io_service, ctx, plain_sockets[i],
                                 "P" + to_string(i), "C" + to_string(my_party_id), true);
@@ -33,7 +33,7 @@ std::vector<ssl_socket*> setup_sockets(int n_parties,
       specification.Receive(sockets[0]);
     }
     LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
-                                                          " sockets = " << sockets[i] << ", port_num = " << port_base + i << ".";
+                                                          " sockets = " << sockets[i] << ", port_num = " << port_bases[i] + i << ".";
   }
   LOG(INFO) << "Finish setup socket connections to spdz engines.";
 
@@ -59,7 +59,7 @@ void setup_sockets(int n_parties,
     int my_party_id,
     std::string player_data_path,
     std::vector<std::string> host_names,
-    int port_base,
+    const std::vector<int>& port_bases,
     std::vector<ssl_socket*>& sockets) {
   // setup connections from this party to each spdz party socket
   vector<int> plain_sockets(n_parties);
@@ -70,7 +70,7 @@ void setup_sockets(int n_parties,
   octetStream specification;
   for (int i = 0; i < n_parties; i++)
   {
-    set_up_client_socket(plain_sockets[i], host_names[i].c_str(), port_base + i);
+    set_up_client_socket(plain_sockets[i], host_names[i].c_str(), port_bases[i] + i);
     send(plain_sockets[i], (octet*) &my_party_id, sizeof(int));
     sockets[i] = new ssl_socket(io_service, ctx, plain_sockets[i],
                                 "P" + to_string(i), "C" + to_string(my_party_id), true);
@@ -79,7 +79,7 @@ void setup_sockets(int n_parties,
       specification.Receive(sockets[0]);
     }
     LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
-                                                          " sockets = " << sockets[i] << ", port_num = " << port_base + i << ".";
+                                                          " sockets = " << sockets[i] << ", port_num = " << port_bases[i] + i << ".";
   }
   LOG(INFO) << "Finish setup socket connections to spdz engines.";
   int type = specification.get<int>();

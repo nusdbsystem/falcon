@@ -28,7 +28,6 @@
 
 #include "falcon/network/Comm.hpp"
 
-
 /*****************************************/
 /* SocketPartyData						 */
 /*****************************************/
@@ -64,71 +63,68 @@ size_t CommParty::readWithSizeIntoVector(vector<byte> & targetVector) {
 /*****************************************/
 /* CommPartyTCPSynced                    */
 /*****************************************/
-
 int CommPartyTCPSynced::join(int sleepBetweenAttempts, int timeout, bool first) {
-	int     totalSleep = 0;
-	bool    isAccepted  = (role == 1);//false;
-	bool    isConnected = (role == 0); //false;
-	// establish connections
-	while (!isConnected || !isAccepted) {
-		try {
-			if (!isConnected) {
-				tcp::resolver resolver(ioServiceClient);
-				tcp::resolver::query query(other.getIpAddress().to_string(), to_string(other.getPort()));
-				tcp::resolver::iterator endpointIterator = resolver.resolve(query);
-				boost::asio::connect(clientSocket, endpointIterator);
-				isConnected = true;
-			}
-		}
-		catch (const boost::system::system_error& ex)
-		{
-			if (totalSleep > timeout)
-			{
-				cerr << "Failed to connect after timeout, aborting!";
-				throw ex;
-			}
-			cout << "Failed to connect. sleeping for " << sleepBetweenAttempts <<
-				" milliseconds, " << ex.what() << endl;
-			this_thread::sleep_for(chrono::milliseconds(sleepBetweenAttempts));
-			totalSleep += sleepBetweenAttempts;
-		}
-		if (!isAccepted) {
-			boost::system::error_code ec;
-			cout << "accepting..." << endl;
-			acceptor_.accept(serverSocket, ec);
-			isAccepted = true;
-		}
-	}
-	setSocketOptions();
-	return 0;
+  int     totalSleep = 0;
+  bool    isAccepted  = (role == 1);//false;
+  bool    isConnected = (role == 0); //false;
+  // establish connections
+  while (!isConnected || !isAccepted) {
+    try {
+      if (!isConnected) {
+        tcp::resolver resolver(ioServiceClient);
+        tcp::resolver::query query(other.getIpAddress().to_string(), to_string(other.getPort()));
+        tcp::resolver::iterator endpointIterator = resolver.resolve(query);
+        boost::asio::connect(clientSocket, endpointIterator);
+        isConnected = true;
+      }
+    }
+    catch (const boost::system::system_error& ex)
+    {
+      if (totalSleep > timeout)
+      {
+        cerr << "Failed to connect after timeout, aborting!";
+        throw ex;
+      }
+      cout << "Failed to connect. sleeping for " << sleepBetweenAttempts <<
+      " milliseconds, " << ex.what() << endl;
+      this_thread::sleep_for(chrono::milliseconds(sleepBetweenAttempts));
+      totalSleep += sleepBetweenAttempts;
+    }
+    if (!isAccepted) {
+      boost::system::error_code ec;
+      cout << "accepting..." << endl;
+      acceptor_.accept(serverSocket, ec);
+      isAccepted = true;
+    }
+  }
+  setSocketOptions();
+  return 0;
 }
 
 void CommPartyTCPSynced::setSocketOptions() {
-	boost::asio::ip::tcp::no_delay option(true);
-	if (role != 1)
-		serverSocket.set_option(option);
-	if (role != 0)
-		clientSocket.set_option(option);
-	
+  boost::asio::ip::tcp::no_delay option(true);
+  if (role != 1)
+    serverSocket.set_option(option);
+  if (role != 0)
+    clientSocket.set_option(option);
 }
 
 size_t CommPartyTCPSynced::write(const byte* data, int size, int peer, int protocol) {
-	boost::system::error_code ec;
-	bytesOut += size;
-	return boost::asio::write(socketForWrite(),
-		boost::asio::buffer(data, size),
-		boost::asio::transfer_all(), ec);
+  boost::system::error_code ec;
+  bytesOut += size;
+  return boost::asio::write(socketForWrite(),
+                            boost::asio::buffer(data, size),
+                            boost::asio::transfer_all(), ec);
 }
 
 CommPartyTCPSynced::~CommPartyTCPSynced() {
-	if (role != 1) {
-      acceptor_.close();
-    }
-	if (role != 1) {
-      serverSocket.close();
-    }
-	if (role != 0){
-      clientSocket.close();
-    }
+  if (role != 1) {
+    acceptor_.close();
+  }
+  if (role != 1) {
+    serverSocket.close();
+  }
+  if (role != 0){
+    clientSocket.close();
+  }
 }
-

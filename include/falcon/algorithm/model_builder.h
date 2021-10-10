@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 #include <falcon/party/party.h>
+#include <falcon/distributed/worker.h>
 
 class ModelBuilder {
  protected:
@@ -57,6 +58,8 @@ class ModelBuilder {
    * @param party
    */
   virtual void train(Party party) = 0;
+
+  virtual void distributed_train(const Party& party, const Worker& worker) = 0;
 
   /**
      * evaluate the accuracy on a dataset

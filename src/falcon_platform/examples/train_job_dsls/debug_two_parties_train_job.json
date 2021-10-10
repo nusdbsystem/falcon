@@ -7,26 +7,30 @@
   "task_num": 1,
   "party_info": [
     {
-      "id": 1,
-      "addr": "127.0.0.1:30006",
+      "id": 0,
+      "addr": "127.0.0.1:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0",
-        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client0",
-        "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
+        "data_input": "/Users/nailixing/Downloads/falconExp/data",
+        "data_output": "/Users/nailixing/Downloads/falconExp/dataoutput",
+        "model_path": "/Users/nailixing/Downloads/falconExp/model"
       }
     },
     {
-      "id": 2,
-      "addr": "127.0.0.1:30007",
+      "id": 1,
+      "addr": "127.0.0.1:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1",
-        "data_output": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data/client1",
-        "model_path": "/home/wuyuncheng/Documents/falcon/data/dataset/bank_marketing_data"
+        "data_input": "/Users/nailixing/Downloads/falconExp/data",
+        "data_output": "/Users/nailixing/Downloads/falconExp/dataoutput",
+        "model_path": "/Users/nailixing/Downloads/falconExp/model"
       }
     }
   ],
+  "distributed_task": {
+    "enable": 1,
+    "worker_number": 2
+  },
   "tasks": {
     "pre_processing": {
       "mpc_algorithm_name": "preprocessing",

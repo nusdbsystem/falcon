@@ -16,15 +16,17 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string) (mast
 	// 3. rpc server, used to get requests from worker, stopped by master.StopRPCServer
 	// 4. scheduling process, call finish to stop above threads
 
-	master = newMaster(masterAddr, len(dslOjb.PartyAddrList))
+	master = newMaster(masterAddr, dslOjb.PartyNums)
 	master.workerType = workerType
 	master.reset()
 
 	// thread 1, heartBeat
-	go master.heartBeat()
+	go func() {
+		defer logger.HandleErrors()
+		master.heartBeat()
+	}()
 
 	rpcServer := rpc.NewServer()
-	logger.Log.Println("[master_rpc/RunMaster] rpcServer ready, now register with master")
 	err := rpcServer.Register(master)
 	// NOTE the rpc native Register() method will produce warning in console:
 	// rpc.Register: method ...; needs exactly three
@@ -35,24 +37,30 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string) (mast
 		return
 	}
 
-	logger.Log.Println("[master_rpc/RunMaster] rpcServer registered with master")
-
 	// thread 2
-	go master.forwardRegistrations(dslOjb)
+	go func() {
+		defer logger.HandleErrors()
+		master.forwardRegistrations()
+	}()
 
 	// thread 3
 	// launch a rpc server thread to process the requests.
 	master.StartRPCServer(rpcServer, false)
 
+	// define 3 functions, called in master.run
 	dispatcher := func() {
 		master.dispatch(dslOjb)
 	}
+	finish := func() {
+		// stop master after finishing the job
+		master.StopRPCServer(master.Addr, "Master.Shutdown")
+		// stop other related threads
+		// close heartBeat and forwardRegistrations
+		master.Clear()
+	}
 
 	var updateStatus func(jsonString string)
-	var finish func()
-
 	if workerType == common.TrainWorker {
-
 		updateStatus = func(jsonString string) {
 			// call coordinator to update status
 			client.JobUpdateResInfo(common.CoordAddr, "", jsonString, "", dslOjb.JobId)
@@ -62,46 +70,35 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string) (mast
 			client.JobUpdateStatus(common.CoordAddr, jobStatus, dslOjb.JobId)
 			client.ModelUpdate(common.CoordAddr, 1, dslOjb.JobId)
 		}
-
-		finish = func() {
-			// stop master after finishing the job
-			master.StopRPCServer(master.Addr, "Master.Shutdown")
-			// stop other related threads
-			// close heartBeat and forwardRegistrations
-			master.Clear()
-		}
-
 	} else if workerType == common.InferenceWorker {
-
 		updateStatus = func(jsonString string) {
 			client.InferenceUpdateStatus(common.CoordAddr, master.jobStatus, dslOjb.JobId)
-		}
-
-		finish = func() {
-			// stop both master after finishing the job
-			master.StopRPCServer(master.Addr, "Master.Shutdown")
-			// stop other related threads
-			// close heartBeat and forwardRegistrations
-			master.Clear()
 		}
 	}
 
 	// set time out, no worker comes within 1 min, stop master
-	time.AfterFunc(1*time.Minute, func() {
+	time.AfterFunc(10*time.Minute, func() {
+		master.Lock()
 		if len(master.workers) < master.workerNum {
-
 			logger.Log.Printf("Master: Wait for 1 Min, No enough worker come, stop, required %d, got %d ",
 				master.workerNum,
 				len(master.workers),
 			)
+			master.Unlock()
 
 			finish()
+		} else {
+			master.Unlock()
 		}
+
 	})
 
 	// thread 4
 	// launch a thread to process then do the scheduling.
-	go master.run(dispatcher, updateStatus, finish)
+	go func() {
+		defer logger.HandleErrors()
+		master.run(dispatcher, updateStatus, finish)
+	}()
 
 	return
 }

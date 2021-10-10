@@ -1,13 +1,18 @@
+// Those are communications between components of the platform, server and client must be correct
+// each post and get has retry 5 time, if still fail, throw the error, catch it at main.
 package client
 
 import (
+	"encoding/json"
 	"falcon_platform/common"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"strings"
 )
 
-func PartyServerAdd(ServerAddr, partyserverAddr, partyserverPort string) error {
+// add partyServer's address to
+func PartyServerAdd(ServerAddr, partyserverAddr, partyserverPort string) {
 	data := url.Values{
 		common.PartyServerAddrKey: {partyserverAddr},
 		common.PartyServerPortKey: {partyserverPort},
@@ -15,34 +20,65 @@ func PartyServerAdd(ServerAddr, partyserverAddr, partyserverPort string) error {
 
 	reqUrl := ServerAddr + common.PartyServerAdd
 
-	e := PostForm(reqUrl, data)
-	return e
-
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'PartyServerAdd' Error, %s\n", err))
+	}
 }
 
-func PartyServerDelete(ServerAddr, partyserverAddr string) error {
+func PartyServerDelete(ServerAddr, partyserverAddr string) {
 	data := url.Values{common.PartyServerAddrKey: {partyserverAddr}}
 
 	reqUrl := ServerAddr + common.PartyServerDelete
 
-	err := PostForm(reqUrl, data)
-
-	return err
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'PartyServerDelete' Error, %s\n", err))
+	}
 }
 
-func SetupWorker(ServerAddr string, masterAddr string, workerType string, jobId, dataPath, modelPath, dataOutput string) {
+func RunWorker(ServerAddr string, masterAddr string,
+	workerType string,
+	jobId string,
+	dataPath, modelPath, dataOutput string,
+	workerGroupNum, partyNum int,
+) []byte {
 	data := url.Values{
-		common.MasterAddrKey:   {masterAddr},
-		common.TaskTypeKey:     {workerType},
-		common.JobId:           {jobId},
-		common.TrainDataPath:   {dataPath},
-		common.ModelPath:       {modelPath},
-		common.TrainDataOutput: {dataOutput},
+		common.MasterAddrKey:    {masterAddr},
+		common.TaskTypeKey:      {workerType},
+		common.JobId:            {jobId},
+		common.TrainDataPath:    {dataPath},
+		common.ModelPath:        {modelPath},
+		common.TrainDataOutput:  {dataOutput},
+		common.WorkerGroupNum:   {fmt.Sprintf("%d", workerGroupNum)},
+		common.TotalPartyNumber: {fmt.Sprintf("%d", partyNum)},
 	}
 
-	reqUrl := ServerAddr + common.SetupWorker
-
-	_ = PostForm(reqUrl, data)
+	reqUrl := ServerAddr + common.RunWorker
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'RunWorker' Error, %s\n", err))
+	}
+	resStr, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(fmt.Sprintf("[Client]: Read 'RunWorker'reply' Error, %s\n", err))
+	}
+	return resStr
 }
 
 func JobUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
@@ -53,7 +89,15 @@ func JobUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 
 	reqUrl := ServerAddr + common.UpdateTrainJobMaster
 
-	_ = PostForm(reqUrl, data)
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'JobUpdateMaster' Error, %s\n", err))
+	}
 }
 
 func InferenceUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
@@ -64,7 +108,15 @@ func InferenceUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 
 	reqUrl := ServerAddr + common.UpdateInferenceJobMaster
 
-	_ = PostForm(reqUrl, data)
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'InferenceUpdateMaster' Error, %s\n", err))
+	}
 }
 
 func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jobId uint) {
@@ -77,7 +129,15 @@ func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jo
 
 	reqUrl := ServerAddr + common.UpdateJobResInfo
 
-	_ = PostForm(reqUrl, data)
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'JobUpdateResInfo' Error, %s\n", err))
+	}
 }
 
 func JobUpdateStatus(ServerAddr string, status string, jobId uint) {
@@ -88,7 +148,15 @@ func JobUpdateStatus(ServerAddr string, status string, jobId uint) {
 
 	reqUrl := ServerAddr + common.UpdateJobStatus
 
-	_ = PostForm(reqUrl, data)
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'JobUpdateStatus' Error, %s\n", err))
+	}
 }
 
 func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
@@ -99,7 +167,15 @@ func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 
 	reqUrl := ServerAddr + common.ModelUpdate
 
-	_ = PostForm(reqUrl, data)
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'ModelUpdate' Error, %s\n", err))
+	}
 }
 
 func InferenceUpdateStatus(ServerAddr string, status string, jobId uint) {
@@ -110,61 +186,74 @@ func InferenceUpdateStatus(ServerAddr string, status string, jobId uint) {
 
 	reqUrl := ServerAddr + common.InferenceStatusUpdate
 
-	_ = PostForm(reqUrl, data)
-}
-
-////////////////////////////////////
-/////////// Get  ////////////
-////////////////////////////////////
-func JobGetStatus(ServerAddr string, jobId uint) uint {
-
-	data := url.Values{
-		common.JobId: {fmt.Sprintf("%d", jobId)}}
-
-	reqUrl := ServerAddr + common.UpdateJobStatus
-
-	_ = PostForm(reqUrl, data)
-	return 1
-}
-
-func GetFreePort(ServerAddr string) string {
-
-	reqUrl := "http://" + strings.TrimSpace(ServerAddr+common.AssignPort)
-	port := Get(reqUrl)
-
-	return port
-}
-
-func GetExistPort(ServerAddr, PartyServerIP string) string {
-	params := url.Values{}
-	params.Set(common.PartyServerAddrKey, PartyServerIP)
-
-	rawUrl := "http://" + strings.TrimSpace(ServerAddr) + common.GetPartyServerPort
-
-	reqURL, err := url.ParseRequestURI(rawUrl)
-	if err != nil {
-		fmt.Printf("url.ParseRequestURI() error: :%v\n", err)
-		return err.Error()
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'InferenceUpdateStatus' Error, %s\n", err))
 	}
-
-	//3.整合请求URL和参数
-	//Encode方法将请求参数编码为url编码格式("bar=baz&foo=quux")，编码时会以键进行排序。
-	reqURL.RawQuery = params.Encode()
-
-	//4.发送HTTP请求
-	//说明: reqURL.String() String将URL重构为一个合法URL字符串。
-
-	port := Get(reqURL.String())
-
-	return port
 }
 
-func AddPort(ServerAddr, port string) error {
+func AddPort(ServerAddr, port string) {
 
 	data := url.Values{common.AddPort: {port}}
 
 	reqUrl := ServerAddr + common.AddPort
 
-	e := PostForm(reqUrl, data)
-	return e
+	resp, err := PostForm(reqUrl, data)
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'AddPort' Error, %s\n", err))
+	}
+}
+
+////////////////////////////////////
+/////////// Get  ////////////
+////////////////////////////////////
+func GetFreePort(ServerAddr string, portNum int) []common.PortType {
+
+	params := url.Values{}
+
+	reqUrl := "http://" + strings.TrimSpace(ServerAddr+"/"+common.AssignPort)
+	Url, err := url.Parse(reqUrl)
+
+	if err != nil {
+		panic(err)
+	}
+	params.Set("portNum", fmt.Sprintf("%d", portNum))
+
+	Url.RawQuery = params.Encode()
+	urlStr := Url.String()
+
+	resp, err := Get(urlStr)
+
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
+	if err != nil || resp.StatusCode != 200 {
+		panic(fmt.Sprintf("[Client]: Requesting 'AssignPort' Error, %s\n", err))
+	}
+	resStr, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		panic(fmt.Sprintf("[Client]: Read 'AssignPort'reply' Error, %s\n", err))
+	}
+
+	var sli = make([]common.PortType, portNum)
+
+	err = json.Unmarshal(resStr, &sli)
+	if err != nil {
+		panic(fmt.Sprintf("[Client]: Read 'AssignPort'reply' Error, %s\n", err))
+	}
+
+	return sli
 }

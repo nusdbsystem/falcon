@@ -78,7 +78,7 @@ To terminate the platform, call:
 bash scripts/dev_terminate_all.sh --partyCount <PARTY_COUNT>
 ```
 
-The console outputs are captured in `src/falcon_platform/dev_test/` folder:
+The console outputs are captured in `src/falcon_platform/falcon_logs/` folder:
 - `Coord_TIMESTAMP/Coord-console.log`
 - `Party-0_TIMESTAMP/Party-0-console.log`
 - `Party-1_TIMESTAMP/Party-1-console.log`
@@ -117,15 +117,15 @@ The console outputs are captured in `src/falcon_platform/dev_test/` folder:
 
 2. submit job:
 
-    ```bash
-    # python3 coordinator_client.py -url <ip url of coordinator>:30004 -method submit -path ./examples/train_job_dsls/job.json
-    # Simple test without datasets.
-    python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/two_parties_train_job.json
-    # UCI tele-marketing bank dataset
-    python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_banktele.json
-    # UCI breast cancer dataset
-    python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_breastcancer.json
-    ```
+   ```bash
+   # python3 coordinator_client.py -url <ip url of coordinator>:30004 -method submit -path ./examples/train_job_dsls/job.json
+   # Simple test without datasets.
+   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/debug_two_parties_train_job.json
+   # UCI tele-marketing bank dataset
+   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_banktele.json
+   # UCI breast cancer dataset
+   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_breastcancer.json
+   ```
 
 3. kill job:
 
@@ -153,18 +153,18 @@ curl -i http://127.0.0.1:30004/api/submit-train-job  \
 curl -i http://127.0.0.1:30004/api/submit-train-job \
      -H "Content-Type: multipart/form-data" \
      -X POST \
-     -F train-job-file=@'./falcon_platform/examples/train_job_dsls/two_parties_train_job.json'
+     -F train-job-file=@'./falcon_platform/examples/train_job_dsls/debug_two_parties_train_job.json'
 ```
 
 ## check the log
 
 1.  log is at folder `$LOG_PATH/runtime_logs/` , 
     platform setup log is at `$LOG_PATH/logs/` ,
-    db is at     `dev_test/coord/falcon.db` 
+    db is at     `falcon_logs/coord/falcon.db` 
     
 The folder architecture is:
 ```bash
-    dev_test/
+    falcon_logs/
     ├── coord
     │   ├── falcon.db
     │   └── runtime_logs

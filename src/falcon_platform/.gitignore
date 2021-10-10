@@ -19,17 +19,17 @@ coordinator_server
 # sqlite3 db
 falcon.db
 
-# dev_test
-.dev_test
-dev_test/*
-dev_test_notes/
+# falcon_logs
+.falcon_logs
+falcon_logs/*
+falcon_logs_notes/
 *.pid
 .logs/*
 
 # git check go.sum and go.mod
 # reference: https://github.com/golang/go/wiki/Modules#should-i-commit-my-gosum-file-as-well-as-my-gomod-file
-!go.sum
-!go.mod
+go.mod
+go.sum
 
 # frontend
 !web/build/

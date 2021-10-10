@@ -71,7 +71,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::NetworkConfig, ips_),
-  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::NetworkConfig, port_arrays_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::NetworkConfig, executor_executor_port_arrays_),
+  PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::NetworkConfig, executor_mpc_port_array_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::com::nus::dbsytem::falcon::v0::PortArray, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -81,7 +82,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::com::nus::dbsytem::falcon::v0::NetworkConfig)},
-  { 7, -1, sizeof(::com::nus::dbsytem::falcon::v0::PortArray)},
+  { 8, -1, sizeof(::com::nus::dbsytem::falcon::v0::PortArray)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -91,10 +92,12 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\rnetwork.proto\022\031com.nus.dbsytem.falcon."
-  "v0\"W\n\rNetworkConfig\022\013\n\003ips\030\001 \003(\t\0229\n\013port"
-  "_arrays\030\002 \003(\0132$.com.nus.dbsytem.falcon.v"
-  "0.PortArray\"\032\n\tPortArray\022\r\n\005ports\030\001 \003(\005B"
-  "\tZ\007/commonb\006proto3"
+  "v0\"\260\001\n\rNetworkConfig\022\013\n\003ips\030\001 \003(\t\022K\n\035exe"
+  "cutor_executor_port_arrays\030\002 \003(\0132$.com.n"
+  "us.dbsytem.falcon.v0.PortArray\022E\n\027execut"
+  "or_mpc_port_array\030\003 \001(\0132$.com.nus.dbsyte"
+  "m.falcon.v0.PortArray\"\032\n\tPortArray\022\r\n\005po"
+  "rts\030\001 \003(\005B\005Z\003/v0b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_network_2eproto_deps[1] = {
 };
@@ -104,7 +107,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_net
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_network_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto = {
-  false, false, descriptor_table_protodef_network_2eproto, "network.proto", 178,
+  false, false, descriptor_table_protodef_network_2eproto, "network.proto", 264,
   &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_sccs, descriptor_table_network_2eproto_deps, 2, 0,
   schemas, file_default_instances, TableStruct_network_2eproto::offsets,
   file_level_metadata_network_2eproto, 2, file_level_enum_descriptors_network_2eproto, file_level_service_descriptors_network_2eproto,
@@ -122,12 +125,17 @@ namespace v0 {
 
 class NetworkConfig::_Internal {
  public:
+  static const ::com::nus::dbsytem::falcon::v0::PortArray& executor_mpc_port_array(const NetworkConfig* msg);
 };
 
+const ::com::nus::dbsytem::falcon::v0::PortArray&
+NetworkConfig::_Internal::executor_mpc_port_array(const NetworkConfig* msg) {
+  return *msg->executor_mpc_port_array_;
+}
 NetworkConfig::NetworkConfig(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
   ips_(arena),
-  port_arrays_(arena) {
+  executor_executor_port_arrays_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:com.nus.dbsytem.falcon.v0.NetworkConfig)
@@ -135,13 +143,19 @@ NetworkConfig::NetworkConfig(::PROTOBUF_NAMESPACE_ID::Arena* arena)
 NetworkConfig::NetworkConfig(const NetworkConfig& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       ips_(from.ips_),
-      port_arrays_(from.port_arrays_) {
+      executor_executor_port_arrays_(from.executor_executor_port_arrays_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_executor_mpc_port_array()) {
+    executor_mpc_port_array_ = new ::com::nus::dbsytem::falcon::v0::PortArray(*from.executor_mpc_port_array_);
+  } else {
+    executor_mpc_port_array_ = nullptr;
+  }
   // @@protoc_insertion_point(copy_constructor:com.nus.dbsytem.falcon.v0.NetworkConfig)
 }
 
 void NetworkConfig::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_NetworkConfig_network_2eproto.base);
+  executor_mpc_port_array_ = nullptr;
 }
 
 NetworkConfig::~NetworkConfig() {
@@ -152,6 +166,7 @@ NetworkConfig::~NetworkConfig() {
 
 void NetworkConfig::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete executor_mpc_port_array_;
 }
 
 void NetworkConfig::ArenaDtor(void* object) {
@@ -176,7 +191,11 @@ void NetworkConfig::Clear() {
   (void) cached_has_bits;
 
   ips_.Clear();
-  port_arrays_.Clear();
+  executor_executor_port_arrays_.Clear();
+  if (GetArena() == nullptr && executor_mpc_port_array_ != nullptr) {
+    delete executor_mpc_port_array_;
+  }
+  executor_mpc_port_array_ = nullptr;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -201,16 +220,23 @@ const char* NetworkConfig::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
         } else goto handle_unusual;
         continue;
-      // repeated .com.nus.dbsytem.falcon.v0.PortArray port_arrays = 2;
+      // repeated .com.nus.dbsytem.falcon.v0.PortArray executor_executor_port_arrays = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
-            ptr = ctx->ParseMessage(_internal_add_port_arrays(), ptr);
+            ptr = ctx->ParseMessage(_internal_add_executor_executor_port_arrays(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
+        } else goto handle_unusual;
+        continue;
+      // .com.nus.dbsytem.falcon.v0.PortArray executor_mpc_port_array = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_executor_mpc_port_array(), ptr);
+          CHK_(ptr);
         } else goto handle_unusual;
         continue;
       default: {
@@ -251,12 +277,20 @@ failure:
     target = stream->WriteString(1, s, target);
   }
 
-  // repeated .com.nus.dbsytem.falcon.v0.PortArray port_arrays = 2;
+  // repeated .com.nus.dbsytem.falcon.v0.PortArray executor_executor_port_arrays = 2;
   for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_port_arrays_size()); i < n; i++) {
+      n = static_cast<unsigned int>(this->_internal_executor_executor_port_arrays_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, this->_internal_port_arrays(i), target, stream);
+      InternalWriteMessage(2, this->_internal_executor_executor_port_arrays(i), target, stream);
+  }
+
+  // .com.nus.dbsytem.falcon.v0.PortArray executor_mpc_port_array = 3;
+  if (this->has_executor_mpc_port_array()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        3, _Internal::executor_mpc_port_array(this), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -283,11 +317,18 @@ size_t NetworkConfig::ByteSizeLong() const {
       ips_.Get(i));
   }
 
-  // repeated .com.nus.dbsytem.falcon.v0.PortArray port_arrays = 2;
-  total_size += 1UL * this->_internal_port_arrays_size();
-  for (const auto& msg : this->port_arrays_) {
+  // repeated .com.nus.dbsytem.falcon.v0.PortArray executor_executor_port_arrays = 2;
+  total_size += 1UL * this->_internal_executor_executor_port_arrays_size();
+  for (const auto& msg : this->executor_executor_port_arrays_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // .com.nus.dbsytem.falcon.v0.PortArray executor_mpc_port_array = 3;
+  if (this->has_executor_mpc_port_array()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *executor_mpc_port_array_);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -322,7 +363,10 @@ void NetworkConfig::MergeFrom(const NetworkConfig& from) {
   (void) cached_has_bits;
 
   ips_.MergeFrom(from.ips_);
-  port_arrays_.MergeFrom(from.port_arrays_);
+  executor_executor_port_arrays_.MergeFrom(from.executor_executor_port_arrays_);
+  if (from.has_executor_mpc_port_array()) {
+    _internal_mutable_executor_mpc_port_array()->::com::nus::dbsytem::falcon::v0::PortArray::MergeFrom(from._internal_executor_mpc_port_array());
+  }
 }
 
 void NetworkConfig::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -347,7 +391,8 @@ void NetworkConfig::InternalSwap(NetworkConfig* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   ips_.InternalSwap(&other->ips_);
-  port_arrays_.InternalSwap(&other->port_arrays_);
+  executor_executor_port_arrays_.InternalSwap(&other->executor_executor_port_arrays_);
+  swap(executor_mpc_port_array_, other->executor_mpc_port_array_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata NetworkConfig::GetMetadata() const {

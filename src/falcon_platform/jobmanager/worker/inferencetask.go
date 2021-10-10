@@ -2,7 +2,6 @@ package worker
 
 import (
 	"falcon_platform/logger"
-	"os/exec"
 )
 
 func (wk *InferenceWorker) CreateInference(_ string) {
@@ -10,11 +9,11 @@ func (wk *InferenceWorker) CreateInference(_ string) {
 
 	logger.Log.Println("InferenceWorker: CreateService")
 
-	cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
+	//cmd := exec.Command("python3", "/go/preprocessing.py", "-a=1", "-b=2")
 
 	// 2 thread will ready from isStop channel, only one is running at the any time
 
-	wk.Tm.CreateResources(cmd)
+	//wk.Tm.CreateResources(cmd)
 
 }
 

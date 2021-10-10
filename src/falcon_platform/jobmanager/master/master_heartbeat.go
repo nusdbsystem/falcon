@@ -14,7 +14,7 @@ loop:
 		select {
 		case <-master.Ctx.Done():
 
-			logger.Log.Println("Master: Thread-1 heartBeatLoop exit")
+			logger.Log.Println("[Master.Heartbeat] Thread-1 heartBeatLoop exit")
 			break loop
 
 		default:
@@ -30,12 +30,12 @@ loop:
 				master.Lock()
 				elapseTime := time.Now().UnixNano() - master.lastSendTime
 
-				//fmt.Printf("Master: CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
+				//fmt.Printf("[Master.Heartbeat] CountDown:....... %d \n", int(elapseTime/int64(time.Millisecond)))
 
 				if int(elapseTime/int64(time.Millisecond)) >= master.heartbeatTimeout {
 
 					master.Unlock()
-					//fmt.Println("Master: Timeout, server send heart beat to worker")
+					//fmt.Println("[Master.Heartbeat] Timeout, server send heart beat to worker")
 					master.broadcastHeartbeat()
 
 				} else {
@@ -57,7 +57,7 @@ func (master *Master) broadcastHeartbeat() {
 	for _, worker := range master.workers {
 		ok := client.Call(worker.Addr, master.Network, master.workerType+".ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
-			logger.Log.Printf("Master: RPC %s send heartbeat error\n", worker.Addr)
+			logger.Log.Printf("[Master.Heartbeat] RPC %s send heartbeat error\n", worker.Addr)
 		}
 	}
 }

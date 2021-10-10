@@ -22,6 +22,7 @@ type Driver struct {
 	curConsumers  int
 }
 
+// Init driver
 func Init(nConsumer int) *Driver {
 	// n worker
 	ds := new(Driver)
@@ -36,6 +37,7 @@ func Init(nConsumer int) *Driver {
 	return ds
 }
 
+// Driver listen to the queue, and fetch item and call jobManager to start the task
 func (ds *Driver) Consume(consumerId int) {
 	defer func() {
 		err := recover()
@@ -65,11 +67,11 @@ loop:
 
 				models.JobUpdateStatus(dslOjb.JobId, common.JobRunning)
 
-				// Launching the master
-				go func() {
+				// Launching the jobManager to allocate the job
+				go func(dslOjb cache.DslObj) {
 					defer logger.HandleErrors()
-					jobmanager.SetupJobManager(dslOjb, common.TrainWorker)
-				}()
+					jobmanager.RunJobManager(&dslOjb, common.TrainWorker)
+				}(*dslOjb)
 			}
 
 		}
@@ -78,10 +80,12 @@ loop:
 	logger.Log.Println("Consumer stopped")
 }
 
+// Stop the consumer
 func (ds *Driver) StopConsumer() {
 	ds.isStop <- true
 }
 
+// Monitor if need to stop driver.consume loop
 func (ds *Driver) MonitorConsumers() {
 
 loop:
@@ -95,7 +99,10 @@ loop:
 		default:
 			ds.Lock()
 			if ds.curConsumers < ds.nConsumer {
-				go ds.Consume(ds.curConsumers + 1)
+				go func(curConsumers int) {
+					defer logger.HandleErrors()
+					ds.Consume(curConsumers)
+				}(ds.curConsumers + 1)
 				ds.curConsumers += 1
 			}
 			ds.Unlock()

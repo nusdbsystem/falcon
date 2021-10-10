@@ -10,6 +10,9 @@
 #include <falcon/algorithm/vertical/linear_model/logistic_regression_model.h>
 #include <falcon/party/party.h>
 #include <falcon/common.h>
+#include <falcon/distributed/worker.h>
+#include <falcon/utils/io_util.h>
+
 
 #include <future>
 #include <string>
@@ -133,36 +136,32 @@ class LogisticRegressionBuilder : public ModelBuilder {
   std::vector<int> select_batch_idx(const Party& party,
                                     std::vector<int> data_indexes);
 
+
   /**
-   * compute phe aggregation for a batch of samples
+   * after receiving batch loss shares and truncated weight shares
+   * from spdz parties, compute encrypted gradient
    *
    * @param party: initialized party object
+   * @param batch_logistic_shares: secret shares of batch losses
    * @param batch_indexes: selected batch indexes
-   * @param dataset_type: denote the dataset type
-   * @param precision: the fixed point precision of encoded plaintext samples
-   * @param batch_aggregation: returned phe aggregation for the batch
+   * @param precision: precision for the batch samples and shares
    */
-  void compute_batch_phe_aggregation(const Party& party,
-                                     std::vector<int> batch_indexes,
-                                     falcon::DatasetType dataset_type,
-                                     int precision,
-                                     EncodedNumber* batch_phe_aggregation);
+  void backward_computation(
+      const Party& party,
+      const std::vector<std::vector<double> >& batch_samples,
+      EncodedNumber* predicted_labels,
+      const std::vector<int>& batch_indexes,
+      int precision,
+      EncodedNumber* encrypted_gradients);
 
   /**
    * after receiving batch loss shares and truncated weight shares
    * from spdz parties, update the encrypted local weights
    *
    * @param party: initialized party object
-   * @param batch_logistic_shares: secret shares of batch losses
-   * @param truncated_weight_shares: truncated global weights
-   *   if with regularization
-   * @param batch_indexes: selected batch indexes
-   * @param precision: precision for the batch samples and shares
-   */
-  void update_encrypted_weights(Party& party,
-                                std::vector<double> batch_logistic_shares,
-                                std::vector<double> truncated_weight_shares,
-                                std::vector<int> batch_indexes, int precision);
+   * @param encrypted_gradients: encrypted gradients
+  */
+  void update_encrypted_weights(Party& party, EncodedNumber* encrypted_gradients) const;
 
   /**
    * train a logistic regression model
@@ -170,6 +169,14 @@ class LogisticRegressionBuilder : public ModelBuilder {
    * @param party: initialized party object
    */
   void train(Party party) override;
+
+  /**
+   * train a logistic regression model
+   *
+   * @param party: initialized party object
+   * @param worker: worker instance for distributed training
+   */
+  void distributed_train(const Party& party, const Worker& worker) override;
 
   /**
    * evaluate a logistic regression model
@@ -182,7 +189,36 @@ class LogisticRegressionBuilder : public ModelBuilder {
    */
   void eval(Party party,
       falcon::DatasetType eval_type,
-      const std::string& report_save_path = std::string());
+      const std::string& report_save_path = std::string()) override;
+
+  /**
+   * logistic regression model eval
+   *
+   * @param party: initialized party object
+   * @param eval_type: falcon::DatasetType, TRAIN for training data and TEST for
+   *   testing data will output both a pretty_print of confusion matrix
+   *   as well as a classification metrics report
+   * @param report_save_path: save the report into path
+  */
+  void distributed_eval(
+      const Party &party,
+      const Worker &worker,
+      falcon::DatasetType eval_type);
+
+  /**
+   * evaluate a logistic regression model
+   *
+   * @param decrypted_labels: predicted labels
+   * @param eval_type: falcon::DatasetType, TRAIN for training data and TEST for
+   *   testing data will output both a pretty_print of confusion matrix
+   *   as well as a classification metrics report
+   * @param report_save_path: save the report into path
+   */
+  void eval_matrix_computation_and_save(
+      EncodedNumber* decrypted_labels,
+      int sample_number,
+      falcon::DatasetType eval_type,
+      const std::string& report_save_path);
 
   /**
    * compute the loss of the dataset in each iteration
@@ -218,9 +254,15 @@ class LogisticRegressionBuilder : public ModelBuilder {
  * @param params: LogisticRegressionParams serialized string
  * @param model_save_file: saved model file
  * @param model_report_file: saved report file
+ * @param is_distributed_train: 1: use distributed train
+ * @param worker: worker instance, used when is_distributed_train=1
  */
-void train_logistic_regression(Party party, std::string params,
-                               std::string model_save_file,
-                               std::string model_report_file);
+void train_logistic_regression(
+    Party* party,
+    const std::string& params,
+    const std::string& model_save_file,
+    const std::string& model_report_file,
+    int is_distributed_train=0, Worker* worker=nullptr);
+
 
 #endif  // FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_H_

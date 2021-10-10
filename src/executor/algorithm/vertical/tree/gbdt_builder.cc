@@ -76,6 +76,8 @@ void GbdtBuilder::train(Party party) {
   google::FlushLogFiles(google::INFO);
 }
 
+void GbdtBuilder::distributed_train(const Party &party, const Worker &worker) {}
+
 void GbdtBuilder::train_regression_task(Party party) {
   /// For regression, build the trees as follows:
   ///   1. init a dummy estimator with mean, compute raw_predictions as mean
@@ -488,7 +490,7 @@ void GbdtBuilder::square_encrypted_residual(Party party,
   std::thread spdz_pruning_check_thread(spdz_tree_computation,
                                         party.party_num,
                                         party.party_id,
-                                        SPDZ_PORT_TREE,
+                                        party.executor_mpc_ports,
                                         party.host_names,
                                         public_values.size(),
                                         public_values,

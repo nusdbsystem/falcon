@@ -41,7 +41,7 @@ ForestModel& ForestModel::operator=(const ForestModel &forest_model) {
 }
 
 void ForestModel::predict(Party &party,
-                          std::vector<std::vector<double> > predicted_samples,
+                          const std::vector<std::vector<double> >& predicted_samples,
                           int predicted_sample_size,
                           EncodedNumber *predicted_labels) {
   /// the prediction workflow is as follows:
@@ -56,7 +56,7 @@ void ForestModel::predict(Party &party,
   // init predicted forest labels to record the predictions, the first dimension
   // is the number of trees in the forest, and the second dimension is the number
   // of the samples in the predicted dataset
-  EncodedNumber** predicted_forest_labels = new EncodedNumber*[tree_size];
+  auto** predicted_forest_labels = new EncodedNumber*[tree_size];
   for (int tree_id = 0; tree_id < tree_size; tree_id++) {
     predicted_forest_labels[tree_id] = new EncodedNumber[predicted_sample_size];
   }
@@ -78,7 +78,7 @@ void ForestModel::predict(Party &party,
   if (tree_type == falcon::REGRESSION) {
     if (party.party_type == falcon::ACTIVE_PARTY) {
       for (int i = 0; i < predicted_sample_size; i++) {
-        EncodedNumber *aggregation = new EncodedNumber[1];
+        auto *aggregation = new EncodedNumber[1];
         aggregation[0].set_double(phe_pub_key->n[0], 0.0, cipher_precision);
         djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
                            aggregation[0], aggregation[0]);
@@ -130,7 +130,7 @@ void ForestModel::predict(Party &party,
     std::thread spdz_pruning_check_thread(spdz_tree_computation,
                                           party.party_num,
                                           party.party_id,
-                                          SPDZ_PORT_TREE,
+                                          party.executor_mpc_ports,
                                           party.host_names,
                                           public_values.size(),
                                           public_values,

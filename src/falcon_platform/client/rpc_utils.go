@@ -9,7 +9,6 @@ import (
 
 func Call(address string, network string, rpcname string, args interface{}, reply interface{}) bool {
 	/**
-	 * @Author
 	 * @Description if connection error, retry, otherwise, return false
 	 * @Date 3:01 下午 13/12/20
 	 * @Param

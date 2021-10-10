@@ -36,15 +36,16 @@ echo "PARTY_ID = ${PARTY_ID}"
 source config_partyserver.properties
 
 # if Party server base path is not supplied in the config.properties
-# then use dev_test/
+# then use falcon_logs/
 if [ $PARTY_SERVER_BASEPATH ];then
 	echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"
+	export PARTY_SERVER_BASEPATH=$PARTY_SERVER_BASEPATH
 else
    # create new group of sub-folders with each run
    TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-   DEV_TEST_OUTDIR=./dev_test/Party-${PARTY_ID}_${TIMESTAMP}
+   DEV_TEST_OUTDIR=./falcon_logs/Party-${PARTY_ID}_${TIMESTAMP}
 
-	export PARTY_SERVER_BASEPATH=$DEV_TEST_OUTDIR
+	 export PARTY_SERVER_BASEPATH=$DEV_TEST_OUTDIR
    echo "PARTY_SERVER_BASEPATH NOT provided, will use ${PARTY_SERVER_BASEPATH}"
 fi
 
@@ -67,7 +68,7 @@ export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export PARTY_SERVER_IP=$PARTY_SERVER_IP
-export LOG_PATH=$PARTY_SERVER_BASEPATH/falcon-log
+export LOG_PATH=$PARTY_SERVER_BASEPATH/falcon_logs
 
 # increment coordinator server port by partyserver ID
 # party ID can be 0, so needs to add extra 1
@@ -97,7 +98,7 @@ make $makeOS
 ./bin/falcon_platform > $PARTY_SERVER_BASEPATH/Party-${PARTY_ID}-console.log 2>&1 &
 
 # store the process id in basepath
-echo $! > ./dev_test/Party-${PARTY_ID}.pid
+echo $! > ./falcon_logs/Party-${PARTY_ID}.pid
 
 echo "===== Done with Party-${PARTY_ID} ====="
 echo

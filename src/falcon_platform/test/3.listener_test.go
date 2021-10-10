@@ -7,5 +7,5 @@ import (
 
 func TestWorker(t *testing.T) {
 
-	partyserver.SetupPartyServer()
+	partyserver.RunPartyServer()
 }

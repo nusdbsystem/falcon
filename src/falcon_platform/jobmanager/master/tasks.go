@@ -6,94 +6,138 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
-	"strings"
 	"sync"
 )
 
-func (master *Master) DispatchDslObj(
-	dslOjb *cache.DslObj,
-	netCfg string,
-	MpcIP string,
-	mpcPort uint,
-	wg *sync.WaitGroup,
-) {
+/**
+ * @Description Dispatch dsl information to each worker, each worker requires different information
+ * @Date 下午2:33 25/08/21
+ * @Param dslObj dslObj
+ * @return
+ **/
+func (master *Master) dispatchDslObj(wg *sync.WaitGroup, dslObj *cache.DslObj) {
 
-	for i, addr := range dslOjb.PartyAddrList {
-		dslObj := new(entity.DslObj4SingleParty)
+	// for each party's resources, send dslObj
+	for partyIndex, LaunchResourceReply := range master.RequiredResource {
 
-		// get ip of one party-server, url = ip:port
-		partyIP := strings.Split(addr, ":")[0]
+		partyID := LaunchResourceReply.PartyID
 
-		// those are the same as TranJob object or DslObj
-		dslObj.JobFlType = dslOjb.JobFlType
-		dslObj.ExistingKey = dslOjb.ExistingKey
-		dslObj.PartyNums = dslOjb.PartyNums
-		dslObj.Tasks = dslOjb.Tasks
+		dslObj4sp := new(entity.DslObj4SingleParty)
 
-		// store only this party's information, contains PartyType used in traintask
-		dslObj.PartyInfo = dslOjb.PartyInfoList[i]
-		// Proto file for falconMl task communication
-		dslObj.NetWorkFile = netCfg
+		// all worker in same party share those vars
+		dslObj4sp.JobFlType = dslObj.JobFlType
+		dslObj4sp.ExistingKey = dslObj.ExistingKey
+		dslObj4sp.PartyNums = dslObj.PartyNums
+		dslObj4sp.Tasks = dslObj.Tasks
 
-		// used to launch semi-party
-		dslObj.MpcIP = MpcIP
-		dslObj.MpcPort = mpcPort
+		// store only this party's information, contains PartyType used in train task
+		dslObj4sp.PartyInfo = dslObj.PartyInfoList[partyIndex]
+		dslObj4sp.DistributedTask = dslObj.DistributedTask
 
-		// a list of master.workers, eg: [127.0.0.1:30009:0 127.0.0.1:30010:1 127.0.0.1:30011:2]
-		master.Lock()
-		for _, worker := range master.workers {
-
-			// match using IP (if the IPs are from different devices)
-			// practically for single-machine and multiple terminals, the IP will be the same
-			// thus, needs to match the wd worker with the PartyServer info
-			// check for wd worker's partyID == dslObj.partyID
-			if worker.IP == partyIP && worker.ID == dslObj.PartyInfo.ID {
-				logger.Log.Println("[Dispatch]: task 1. Dispatch registered worker=", worker.Addr,
-					"with the JobInfo - dslObj.PartyInfo = ", dslObj.PartyInfo)
-
-				wg.Add(1)
-				// execute the task
-				// append will allocate new memory inside the func stack
-				// so must pass addr of slice to func. such that multi goroutines can update the original slices.
-				args := entity.EncodeDslObj4SingleParty(dslObj)
-				go master.dispatchTask(worker.Addr, string(args), "ReceiveJobInfo", wg)
-			}
+		// all workers in same party use the same disNetCfg
+		var disNetCfg string
+		if dslObj.DistributedTask.Enable == 1 {
+			disNetCfg = master.ExtractedResource.distributedNetworkCfg[partyID]
 		}
-		master.Unlock()
+		dslObj4sp.DistributedExecutorPairNetworkCfg = disNetCfg
+
+		// each worker in same party have following individual vars
+		for workerID, ResourceSVC := range LaunchResourceReply.ResourceSVCs {
+			// get worker address
+			workerAddr := ResourceSVC.ToAddr(ResourceSVC.WorkerPort)
+			dslObj4sp.ExecutorPairNetworkCfg = master.ExtractedResource.executorPairNetworkCfg[workerID]
+			dslObj4sp.MpcPairNetworkCfg = master.ExtractedResource.mpcPairNetworkCfg[workerID]
+			if ResourceSVC.DistributedRole != common.DistributedParameterServer {
+				dslObj4sp.MpcExecutorNetworkCfg = master.ExtractedResource.mpcExecutorNetworkCfg[workerID][partyIndex]
+			} else {
+				dslObj4sp.MpcExecutorNetworkCfg = "0"
+			}
+
+			// encode object and send to the worker
+			args := entity.EncodeDslObj4SingleParty(dslObj4sp)
+
+			logger.Log.Println("[Master.Dispatch]: task 1. Dispatch registered worker=", workerAddr,
+				"with the JobInfo - dslObj4sp.PartyInfo = ", dslObj4sp.PartyInfo)
+			wg.Add(1)
+			// dispatch dslObj to the worker
+			go func(addr string, args []byte) {
+				defer logger.HandleErrors()
+				master.dispatchTask(addr, string(args), "ReceiveJobInfo", wg)
+			}(workerAddr, args)
+		}
 	}
 	wg.Wait()
 }
 
+/**
+ * @Description dispatch mpc task to each worker, worker decide to accept or not
+ * @Date 下午2:49 25/08/21
+ * @Param mpcAlgoName, Algorithm name for running mpc, different algorithm use different mpc
+ * @return
+ **/
 func (master *Master) dispatchMpcTask(wg *sync.WaitGroup, mpcAlgoName string) {
 	master.Lock()
 	for _, worker := range master.workers {
 		wg.Add(1)
-		go master.dispatchTask(worker.Addr, mpcAlgoName, "RunMpc", wg)
+		go func(addr string) {
+			defer logger.HandleErrors()
+			master.dispatchTask(addr, mpcAlgoName, "RunMpc", wg)
+		}(worker.Addr)
+
 	}
 	master.Unlock()
 	wg.Wait()
 }
 
+/**
+ * @Description dispatch PreProcessing Task, worker decide to accept or not
+ * @Date 下午2:50 25/08/21
+ * @return
+ **/
 func (master *Master) dispatchPreProcessingTask(wg *sync.WaitGroup) {
 	master.Lock()
 	for _, worker := range master.workers {
 		wg.Add(1)
-		go master.dispatchTask(worker.Addr, common.PreProcSubTask, "DoTask", wg)
+		go func(addr string) {
+			defer logger.HandleErrors()
+			master.dispatchTask(addr, common.PreProcSubTask, "DoTask", wg)
+		}(worker.Addr)
+
 	}
 	master.Unlock()
 	wg.Wait()
 }
 
+/**
+ * @Description dispatch Model TrainingTask, worker decide to accept or not
+ * @Date 下午2:51 25/08/21
+ * @Param
+ * @Param
+ * @Param
+ * @return
+ **/
 func (master *Master) dispatchModelTrainingTask(wg *sync.WaitGroup) {
 	master.Lock()
 	for _, worker := range master.workers {
 		wg.Add(1)
-		go master.dispatchTask(worker.Addr, common.ModelTrainSubTask, "DoTask", wg)
+		go func(addr string) {
+			defer logger.HandleErrors()
+			master.dispatchTask(addr, common.ModelTrainSubTask, "DoTask", wg)
+		}(worker.Addr)
 	}
+
 	master.Unlock()
 	wg.Wait()
 }
 
+/**
+ * @Description dispatch Retrieve Model Report, worker decide to accept or not
+ * @Date 下午2:51 25/08/21
+ * @Param
+ * @Param
+ * @Param
+ * @return
+ **/
 func (master *Master) dispatchRetrieveModelReport() string {
 
 	var report string
@@ -102,11 +146,11 @@ func (master *Master) dispatchRetrieveModelReport() string {
 		var rep entity.RetrieveModelReportReply
 		ok := client.Call(worker.Addr, master.Network, master.workerType+".RetrieveModelReport", "", &rep)
 		if !ok {
-			logger.Log.Printf("[Dispatch]: Master calling %s.RetrieveModelReport error\n", worker.Addr)
+			logger.Log.Printf("[Master.Dispatch]: Master calling %s.RetrieveModelReport error\n", worker.Addr)
 			return ""
 		}
 		if rep.RuntimeError == true {
-			logger.Log.Printf("[Dispatch]: Worker return error msg when calling %s.RetrieveModelReport: %s\n",
+			logger.Log.Printf("[Master.Dispatch]: Worker return error msg when calling %s.RetrieveModelReport: %s\n",
 				worker.Addr, rep.TaskMsg.RuntimeMsg)
 			return ""
 		}
@@ -120,18 +164,26 @@ func (master *Master) dispatchRetrieveModelReport() string {
 	return ""
 }
 
-func (master *Master) dispatchTask(workerUrl string, args string, rpcCallMethod string, wg *sync.WaitGroup) {
+/**
+ * @Description worker decide to accept or not
+ * @Date 下午2:51 25/08/21
+ * @Param workerAddr worker Address
+ * @Param args encoded args to rpc call
+ * @Param rpcCallMethod method to call
+ * @return
+ **/
+func (master *Master) dispatchTask(workerAddr string, args string, rpcCallMethod string, wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
 	var rep entity.DoTaskReply
-	rep.WorkerUrl = workerUrl
+	rep.WorkerAddr = workerAddr
 	rep.RpcCallMethod = rpcCallMethod
 
-	ok := client.Call(workerUrl, master.Network, master.workerType+"."+rpcCallMethod, args, &rep)
+	ok := client.Call(workerAddr, master.Network, master.workerType+"."+rpcCallMethod, args, &rep)
 
 	if !ok {
-		logger.Log.Printf("[Dispatch]: Master calling %s.%s error\n", workerUrl, rpcCallMethod)
+		logger.Log.Printf("[Master.Dispatch]: Master calling %s.%s error\n", workerAddr, rpcCallMethod)
 		rep.RpcCallError = true
 		rep.TaskMsg.RpcCallMsg = "RpcCallError, one worker is probably terminated"
 

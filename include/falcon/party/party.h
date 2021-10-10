@@ -31,6 +31,8 @@ class Party {
   boost::asio::io_service io_service;
   // host names of other parties
   std::vector<std::string> host_names;
+  // port array of mpc engines
+  std::vector<int> executor_mpc_ports;
   // random generator of PHE
   hcs_random* phe_random;
 
@@ -61,15 +63,11 @@ class Party {
    * @param m_party_num: total party number
    * @param m_party_type: party type (active or passive)
    * @param m_fl_setting: federated learning setting
-   * @param m_network_file: parties network configuration
+   * @param ps_network_file: network configuration for distributed training
    * @param m_data_file: local dataset file
-   * @param m_use_existing_key: whether use existing phe key
-   * @param m_key_file: if true above, provide phe key file
    */
   Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
-        falcon::FLSetting m_fl_setting, const std::string& m_network_file,
-        const std::string& m_data_file, bool m_use_existing_key,
-        const std::string& m_key_file);
+        falcon::FLSetting m_fl_setting, const std::string& m_data_file);
 
   /**
    * copy constructor
@@ -89,6 +87,21 @@ class Party {
   ~Party();
 
   /**
+   * initialize the network communication channels among parties
+   *
+   * @param m_network_file: parties network configuration
+   */
+  void init_network_channels(const std::string& m_network_file);
+
+  /**
+   * initialize the phe keys
+   *
+   * @param m_use_existing_key: whether use existing phe key
+   * @param m_key_file: if true above, provide phe key file
+   */
+  void init_phe_keys(bool m_use_existing_key, const std::string& m_key_file);
+
+  /**
    * when not use existing key file, generate and init with new keys
    *
    * @param epsilon: djcs_t cryptosystem level, default 1
@@ -104,6 +117,20 @@ class Party {
    * @param key_file: file that stores the pb serialized phe keys
    */
   void init_with_key_file(const std::string& key_file);
+
+  /**
+   * export the phe key string for transmission
+   *
+   * @return serialized phe key string
+   */
+  std::string export_phe_key_string();
+
+  /**
+   * given the serialized phe key string, load and init party's keys
+   *
+   * @param phe_keys_str: serialized phe key string
+   */
+  void load_phe_key_string(const std::string& phe_keys_str);
 
   /**
    * send message via channel commParty
@@ -140,15 +167,6 @@ class Party {
    */
   void recv_long_message(int id, std::string& message) const;
 
-  /**
-   * split local data and labels into train-test
-   *
-   * @param split_percentage: percentage of training data
-   * @param training_data: split training dataset
-   * @param testing_data: split testing dataset
-   * @param training_labels: split training labels for active party
-   * @param testing_labels: split testing labels for active party
-   */
   void split_train_test_data(double split_percentage,
                              std::vector<std::vector<double> >& training_data,
                              std::vector<std::vector<double> >& testing_data,
@@ -183,7 +201,7 @@ class Party {
    */
   void ciphers_to_secret_shares(EncodedNumber* src_ciphers,
                                 std::vector<double>& secret_shares, int size,
-                                int req_party_id, int phe_precision);
+                                int req_party_id, int phe_precision) const;
 
   /**
    * convert secret shares back to ciphertext vector
@@ -196,7 +214,7 @@ class Party {
    */
   void secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
                                 std::vector<double> secret_shares, int size,
-                                int req_party_id, int phe_precision);
+                                int req_party_id, int phe_precision) const;
 
   /**
    * broadcast an encoded vector to other parties

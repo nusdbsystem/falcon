@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"time"
 )
 
 var Log *log.Logger
@@ -25,8 +26,8 @@ func GetLogger(fileName string) (*log.Logger, *os.File) {
 	fileAndStdoutWriter := io.MultiWriter(writers...)
 
 	// use log.Llongfile to display full path
-	// logger := log.New(fileAndStdoutWriter, "", log.Ldate|log.Ltime|log.Lshortfile)
-	logger := log.New(fileAndStdoutWriter, "[log] ", log.LstdFlags|log.Llongfile)
+	logger := log.New(fileAndStdoutWriter, "", log.LstdFlags|log.Lshortfile)
+	//logger := log.New(fileAndStdoutWriter, "[log] ", log.LstdFlags|log.Llongfile)
 
 	return logger, f
 
@@ -34,17 +35,15 @@ func GetLogger(fileName string) (*log.Logger, *os.File) {
 
 func HandleErrors() {
 	// cache global unexpected error
-	err := recover()
-	if err != nil {
-
-		Log.Printf("[Error]\t")
-		Log.Println("HandleErrors: Catching error ...")
+	if err := recover(); err != nil {
 		var buf [4096]byte
 		n := runtime.Stack(buf[:], false)
-		Log.Println(err)
-		Log.Printf("==> %s\n", string(buf[:n]))
-		//os.Exit(1)
-	}
+		Log.Println(
+			"\n[HandleErrors]: Error msg:", err,
+			"\n\tTraceBack: ", string(buf[:n]),
+			"\nExist Falcon Platform")
+		//os.Exit(0)
+		time.Sleep(time.Minute * 10)
 
-	//Do.Println("HandleErrors: exit current thread")
+	}
 }

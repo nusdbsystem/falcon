@@ -24,7 +24,7 @@ ENV PYTHONUNBUFFERED 1
 COPY bin/falcon_platform ./falcon_platform
 
 COPY test/testggg.go ./testggg.go
-COPY falcon_ml/readwrite.py ./readwrite.py
+COPY examples/models/readwrite.py ./readwrite.py
 
 RUN mkdir /go/trainDataOutput && mkdir /go/trainModels && mkdir /go/trainData
 
@@ -32,4 +32,4 @@ ADD deploy ./deploy
 ADD scripts ./scripts
 RUN chmod -R 777 ./deploy && chmod -R 777 ./scripts
 
-CMD while true; sleep 3; do echo hello; done
+#CMD while true; sleep 60; do echo hello; done

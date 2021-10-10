@@ -3,7 +3,6 @@
 //
 
 #include <falcon/utils/io_util.h>
-
 #include <iterator>
 
 std::vector<std::vector<double> > read_dataset(const std::string& data_file,

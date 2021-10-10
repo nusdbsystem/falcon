@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package com.nus.dbsytem.falcon.v0;
+option go_package = "/v0";
+
+// one ps and many workers,
+message PSNetworkConfig {
+  // an array of followers
+  repeated Worker workers = 1;
+  // ps information, ps need multiple port where each is corresponding to one worker
+  repeated PS ps = 2;
+}
+
+// ps will read those and send message to the worker address
+message Worker {
+  // ip of follower
+  string worker_ip = 1;
+  // port of follower
+  int32 worker_port = 2;
+}
+
+// other workers will send requests to this address
+message PS {
+  // ip of parameter server
+  string ps_ip = 1;
+  // port of parameter server
+  int32 ps_port = 2;
+}

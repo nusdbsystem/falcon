@@ -46,7 +46,7 @@ struct TableStruct_common_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[3]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[5]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -58,6 +58,12 @@ namespace nus {
 namespace dbsytem {
 namespace falcon {
 namespace v0 {
+class DoubleArray;
+class DoubleArrayDefaultTypeInternal;
+extern DoubleArrayDefaultTypeInternal _DoubleArray_default_instance_;
+class DoubleMatrix;
+class DoubleMatrixDefaultTypeInternal;
+extern DoubleMatrixDefaultTypeInternal _DoubleMatrix_default_instance_;
 class EncodedNumberArray;
 class EncodedNumberArrayDefaultTypeInternal;
 extern EncodedNumberArrayDefaultTypeInternal _EncodedNumberArray_default_instance_;
@@ -73,6 +79,8 @@ extern IntArrayDefaultTypeInternal _IntArray_default_instance_;
 }  // namespace nus
 }  // namespace com
 PROTOBUF_NAMESPACE_OPEN
+template<> ::com::nus::dbsytem::falcon::v0::DoubleArray* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::DoubleArray>(Arena*);
+template<> ::com::nus::dbsytem::falcon::v0::DoubleMatrix* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::DoubleMatrix>(Arena*);
 template<> ::com::nus::dbsytem::falcon::v0::EncodedNumberArray* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::EncodedNumberArray>(Arena*);
 template<> ::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber>(Arena*);
 template<> ::com::nus::dbsytem::falcon::v0::IntArray* Arena::CreateMaybeMessage<::com::nus::dbsytem::falcon::v0::IntArray>(Arena*);
@@ -235,6 +243,301 @@ class IntArray PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class DoubleArray PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.DoubleArray) */ {
+ public:
+  inline DoubleArray() : DoubleArray(nullptr) {}
+  virtual ~DoubleArray();
+
+  DoubleArray(const DoubleArray& from);
+  DoubleArray(DoubleArray&& from) noexcept
+    : DoubleArray() {
+    *this = ::std::move(from);
+  }
+
+  inline DoubleArray& operator=(const DoubleArray& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DoubleArray& operator=(DoubleArray&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DoubleArray& default_instance();
+
+  static inline const DoubleArray* internal_default_instance() {
+    return reinterpret_cast<const DoubleArray*>(
+               &_DoubleArray_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  friend void swap(DoubleArray& a, DoubleArray& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DoubleArray* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DoubleArray* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DoubleArray* New() const final {
+    return CreateMaybeMessage<DoubleArray>(nullptr);
+  }
+
+  DoubleArray* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DoubleArray>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DoubleArray& from);
+  void MergeFrom(const DoubleArray& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DoubleArray* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "com.nus.dbsytem.falcon.v0.DoubleArray";
+  }
+  protected:
+  explicit DoubleArray(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_common_2eproto);
+    return ::descriptor_table_common_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kItemFieldNumber = 1,
+  };
+  // repeated double item = 1;
+  int item_size() const;
+  private:
+  int _internal_item_size() const;
+  public:
+  void clear_item();
+  private:
+  double _internal_item(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >&
+      _internal_item() const;
+  void _internal_add_item(double value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >*
+      _internal_mutable_item();
+  public:
+  double item(int index) const;
+  void set_item(int index, double value);
+  void add_item(double value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >&
+      item() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >*
+      mutable_item();
+
+  // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.DoubleArray)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< double > item_;
+  mutable std::atomic<int> _item_cached_byte_size_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_common_2eproto;
+};
+// -------------------------------------------------------------------
+
+class DoubleMatrix PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.DoubleMatrix) */ {
+ public:
+  inline DoubleMatrix() : DoubleMatrix(nullptr) {}
+  virtual ~DoubleMatrix();
+
+  DoubleMatrix(const DoubleMatrix& from);
+  DoubleMatrix(DoubleMatrix&& from) noexcept
+    : DoubleMatrix() {
+    *this = ::std::move(from);
+  }
+
+  inline DoubleMatrix& operator=(const DoubleMatrix& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DoubleMatrix& operator=(DoubleMatrix&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DoubleMatrix& default_instance();
+
+  static inline const DoubleMatrix* internal_default_instance() {
+    return reinterpret_cast<const DoubleMatrix*>(
+               &_DoubleMatrix_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  friend void swap(DoubleMatrix& a, DoubleMatrix& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DoubleMatrix* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DoubleMatrix* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DoubleMatrix* New() const final {
+    return CreateMaybeMessage<DoubleMatrix>(nullptr);
+  }
+
+  DoubleMatrix* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DoubleMatrix>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DoubleMatrix& from);
+  void MergeFrom(const DoubleMatrix& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DoubleMatrix* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "com.nus.dbsytem.falcon.v0.DoubleMatrix";
+  }
+  protected:
+  explicit DoubleMatrix(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_common_2eproto);
+    return ::descriptor_table_common_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kArrayFieldNumber = 1,
+  };
+  // repeated .com.nus.dbsytem.falcon.v0.DoubleArray array = 1;
+  int array_size() const;
+  private:
+  int _internal_array_size() const;
+  public:
+  void clear_array();
+  ::com::nus::dbsytem::falcon::v0::DoubleArray* mutable_array(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::DoubleArray >*
+      mutable_array();
+  private:
+  const ::com::nus::dbsytem::falcon::v0::DoubleArray& _internal_array(int index) const;
+  ::com::nus::dbsytem::falcon::v0::DoubleArray* _internal_add_array();
+  public:
+  const ::com::nus::dbsytem::falcon::v0::DoubleArray& array(int index) const;
+  ::com::nus::dbsytem::falcon::v0::DoubleArray* add_array();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::DoubleArray >&
+      array() const;
+
+  // @@protoc_insertion_point(class_scope:com.nus.dbsytem.falcon.v0.DoubleMatrix)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::DoubleArray > array_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_common_2eproto;
+};
+// -------------------------------------------------------------------
+
 class FixedPointEncodedNumber PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:com.nus.dbsytem.falcon.v0.FixedPointEncodedNumber) */ {
  public:
@@ -276,7 +579,7 @@ class FixedPointEncodedNumber PROTOBUF_FINAL :
                &_FixedPointEncodedNumber_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    3;
 
   friend void swap(FixedPointEncodedNumber& a, FixedPointEncodedNumber& b) {
     a.Swap(&b);
@@ -459,7 +762,7 @@ class EncodedNumberArray PROTOBUF_FINAL :
                &_EncodedNumberArray_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    4;
 
   friend void swap(EncodedNumberArray& a, EncodedNumberArray& b) {
     a.Swap(&b);
@@ -617,6 +920,100 @@ inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::int32 >*
 IntArray::mutable_int_item() {
   // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.IntArray.int_item)
   return _internal_mutable_int_item();
+}
+
+// -------------------------------------------------------------------
+
+// DoubleArray
+
+// repeated double item = 1;
+inline int DoubleArray::_internal_item_size() const {
+  return item_.size();
+}
+inline int DoubleArray::item_size() const {
+  return _internal_item_size();
+}
+inline void DoubleArray::clear_item() {
+  item_.Clear();
+}
+inline double DoubleArray::_internal_item(int index) const {
+  return item_.Get(index);
+}
+inline double DoubleArray::item(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.DoubleArray.item)
+  return _internal_item(index);
+}
+inline void DoubleArray::set_item(int index, double value) {
+  item_.Set(index, value);
+  // @@protoc_insertion_point(field_set:com.nus.dbsytem.falcon.v0.DoubleArray.item)
+}
+inline void DoubleArray::_internal_add_item(double value) {
+  item_.Add(value);
+}
+inline void DoubleArray::add_item(double value) {
+  _internal_add_item(value);
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.DoubleArray.item)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >&
+DoubleArray::_internal_item() const {
+  return item_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >&
+DoubleArray::item() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.DoubleArray.item)
+  return _internal_item();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >*
+DoubleArray::_internal_mutable_item() {
+  return &item_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< double >*
+DoubleArray::mutable_item() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.DoubleArray.item)
+  return _internal_mutable_item();
+}
+
+// -------------------------------------------------------------------
+
+// DoubleMatrix
+
+// repeated .com.nus.dbsytem.falcon.v0.DoubleArray array = 1;
+inline int DoubleMatrix::_internal_array_size() const {
+  return array_.size();
+}
+inline int DoubleMatrix::array_size() const {
+  return _internal_array_size();
+}
+inline void DoubleMatrix::clear_array() {
+  array_.Clear();
+}
+inline ::com::nus::dbsytem::falcon::v0::DoubleArray* DoubleMatrix::mutable_array(int index) {
+  // @@protoc_insertion_point(field_mutable:com.nus.dbsytem.falcon.v0.DoubleMatrix.array)
+  return array_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::DoubleArray >*
+DoubleMatrix::mutable_array() {
+  // @@protoc_insertion_point(field_mutable_list:com.nus.dbsytem.falcon.v0.DoubleMatrix.array)
+  return &array_;
+}
+inline const ::com::nus::dbsytem::falcon::v0::DoubleArray& DoubleMatrix::_internal_array(int index) const {
+  return array_.Get(index);
+}
+inline const ::com::nus::dbsytem::falcon::v0::DoubleArray& DoubleMatrix::array(int index) const {
+  // @@protoc_insertion_point(field_get:com.nus.dbsytem.falcon.v0.DoubleMatrix.array)
+  return _internal_array(index);
+}
+inline ::com::nus::dbsytem::falcon::v0::DoubleArray* DoubleMatrix::_internal_add_array() {
+  return array_.Add();
+}
+inline ::com::nus::dbsytem::falcon::v0::DoubleArray* DoubleMatrix::add_array() {
+  // @@protoc_insertion_point(field_add:com.nus.dbsytem.falcon.v0.DoubleMatrix.array)
+  return _internal_add_array();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::com::nus::dbsytem::falcon::v0::DoubleArray >&
+DoubleMatrix::array() const {
+  // @@protoc_insertion_point(field_list:com.nus.dbsytem.falcon.v0.DoubleMatrix.array)
+  return array_;
 }
 
 // -------------------------------------------------------------------
@@ -831,6 +1228,10 @@ EncodedNumberArray::encoded_number() const {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

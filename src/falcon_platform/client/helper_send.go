@@ -2,43 +2,41 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
 	"falcon_platform/logger"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 )
 
-func Get(url string) string {
+const nTimes int = 5   // retry times
+const interval int = 1 // wait seconds
 
-	//logger.Log.Println("send get requests to ", url)
+func Get(url string) (*http.Response, error) {
 
-	resp, err := http.Get(url)
+	curTime := nTimes
 
-	if err != nil {
-		logger.Log.Println(err)
-		panic(err)
+	var err error
+	var resp *http.Response
+
+	for {
+		if curTime < 0 {
+			return resp, err
+		}
+
+		resp, err = http.Get(url)
+
+		if err != nil {
+			logger.Log.Printf("Get Requests, Error: %s; retry after %d seconds\n", err, interval)
+			time.Sleep(time.Second * time.Duration(interval))
+			curTime--
+		} else {
+			break
+		}
 	}
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		logger.Log.Println(err)
-		panic(err)
-	}
-
-	if resp.StatusCode > 200 && resp.StatusCode <= 299 {
-		logger.Log.Println("Get request Error ", resp.StatusCode, string(body))
-		panic(err)
-	}
-
-	return string(body)
+	return resp, nil
 }
 
-func PostForm(addr string, data map[string][]string) error {
+func PostForm(addr string, data map[string][]string) (*http.Response, error) {
 	/*
 
 		eg:
@@ -50,60 +48,73 @@ func PostForm(addr string, data map[string][]string) error {
 	*/
 	url := "http://" + strings.TrimSpace(addr)
 
-	logger.Log.Printf("Sending post request to url: %q", url)
-
-	NTimes := 20
-	interval := 1 // seconds
+	curTime := nTimes
 
 	var err error
 	var resp *http.Response
 
 	for {
-		if NTimes < 0 {
-			return err
+		if curTime < 0 {
+			return resp, err
 		}
 
 		resp, err = http.PostForm(url, data)
 
 		if err != nil {
-			logger.Log.Printf("Post Requests Error: %s; retry after %d seconds\n", err, interval)
+			logger.Log.Printf("Post Requests, Error: %s; retry after %d seconds\n", err, interval)
 			time.Sleep(time.Second * time.Duration(interval))
-			NTimes--
+			curTime--
 		} else {
 			break
 		}
 	}
-
-	var res map[string]interface{}
-
-	_ = json.NewDecoder(resp.Body).Decode(&res)
-
-	return nil
+	return resp, nil
 }
 
-func PostJson(url string, js string) {
+func PostJson(url string, js string) (*http.Response, error) {
 	/*
 		eg:
 			url: "http://localhost:9089/submit"
-			var js string =`{"Name":"naili","Age":123}`
+
+			map -> string
+			values := map[string]string{"username": username, "password": password}
+			js, _ := json.Marshal(values)
+
+			struct -> string
+			user := &User{Name: "Frank"}
+			jsb, _ := json.Marshal(user)
+			js = string(jsb)
 	*/
+
 	url = strings.TrimSpace(url)
 	var jsonStr = []byte(js)
+
+	curTime := nTimes
+
+	var err error
+	var resp *http.Response
+
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		panic("connection errro")
+		logger.Log.Printf("Post Requests Error: %s \n", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-
 	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
 
-	logger.Log.Println("response Status:", resp.Status)
-	logger.Log.Println("response Headers:", resp.Header)
-	body, _ := ioutil.ReadAll(resp.Body)
-	logger.Log.Println("response Body:", string(body))
+	for {
+		if curTime < 0 {
+			return resp, err
+		}
+		resp, err = client.Do(req)
+
+		if err != nil {
+			logger.Log.Printf("Post Requests Error: %s; retry after %d seconds\n", err, interval)
+			time.Sleep(time.Second * time.Duration(interval))
+			curTime--
+		} else {
+
+			break
+		}
+	}
+	return resp, nil
 }

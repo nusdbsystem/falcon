@@ -33,14 +33,14 @@
  * @param my_party_id: current party id
  * @param player_data_path: ssl related key path
  * @param host_names: ip addresses of the spdz parties
- * @param port_base: port for the spdz program
+ * @param port_bases: ports for the spdz program
  * @return socket vector
  */
 std::vector<ssl_socket*> setup_sockets(int n_parties,
     int my_party_id,
     std::string player_data_path,
     std::vector<std::string> host_names,
-    int port_base);
+    const std::vector<int>& port_bases);
 
 /**
  * setup sockets to communicate with spdz parties
@@ -49,14 +49,14 @@ std::vector<ssl_socket*> setup_sockets(int n_parties,
  * @param my_party_id: current party id
  * @param player_data_path: ssl related key path
  * @param host_names: ip addresses of the spdz parties
- * @param port_base: port for the spdz program
+ * @param port_base: ports for the spdz program
  * @param returned socket vector
  */
 void setup_sockets(int n_parties,
     int my_party_id,
     std::string player_data_path,
     std::vector<std::string> host_names,
-    int port_base,
+    const std::vector<int>& port_bases,
     std::vector<ssl_socket*>& sockets);
 
 /**
