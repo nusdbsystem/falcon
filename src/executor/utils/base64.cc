@@ -3,6 +3,7 @@
 //
 
 #include <falcon/utils/base64.h>
+#include <vector>
 
 static const std::string base64_chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -94,4 +95,11 @@ std::vector<BYTE> base64_decode(std::string const& encoded_string) {
   }
 
   return ret;
+}
+
+std::string base64_decode_to_pb_string(const std::string& b64_pb_string) {
+  // decode the algorithm_params base64 string to pb string
+  std::vector<BYTE> b64_pb_string_byte = base64_decode(b64_pb_string);
+  std::string pb_string(b64_pb_string_byte.begin(), b64_pb_string_byte.end());
+  return pb_string;
 }
