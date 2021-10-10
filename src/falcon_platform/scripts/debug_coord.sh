@@ -1,5 +1,6 @@
 #!/bin/bash
 
+clear
 # exit on error
 set -e
 
@@ -14,13 +15,13 @@ fi
 source config_coord.properties
 
 # if Coordinator server base path is not supplied in the config.properties
-# then use "./dev_test"
+# then use "./falcon_logs"
 if [ $COORD_SERVER_BASEPATH ];then
 	echo "COORD_SERVER_BASEPATH provided: $COORD_SERVER_BASEPATH"
 else
    # create new group of sub-folders with each run
    TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-   DEV_TEST_OUTDIR=./dev_test/Coord_${TIMESTAMP}
+   DEV_TEST_OUTDIR=/opt/falcon/src/falcon_platform/falcon_logs/Coord_${TIMESTAMP}
 
 	 export COORD_SERVER_BASEPATH=$DEV_TEST_OUTDIR
    echo "COORD_SERVER_BASEPATH NOT provided, will use ${COORD_SERVER_BASEPATH}"
@@ -30,11 +31,11 @@ fi
 # first create COORD_SERVER_BASEPATH/ if not already exists
 mkdir -p $COORD_SERVER_BASEPATH
 
-export ENV="local"
+export IS_DEBUG="debug-off"
 export SERVICE_NAME="coord"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
-export LOG_PATH=$COORD_SERVER_BASEPATH/falcon-log
+export LOG_PATH=$COORD_SERVER_BASEPATH
 export JOB_DATABASE=$JOB_DATABASE
 export N_CONSUMER=$N_CONSUMER
 
@@ -55,7 +56,7 @@ make $makeOS
 ./bin/falcon_platform
 
 # store the process id in basepath
-echo $! > ./dev_test/Coord.pid
+echo $! > ./falcon_logs/Coord.pid
 
 echo "===== Done with Coordinator ====="
 echo

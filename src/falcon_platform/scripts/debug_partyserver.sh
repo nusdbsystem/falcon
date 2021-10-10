@@ -1,5 +1,6 @@
 #!/bin/bash
 
+clear
 # exit on error
 set -e
 
@@ -35,39 +36,24 @@ echo "PARTY_ID = ${PARTY_ID}"
 # the config_.properties files, such as paths IP and Ports
 source config_partyserver.properties
 
-# if Party server base path is not supplied in the config.properties
-# then use dev_test/
-if [ $PARTY_SERVER_BASEPATH ];then
-	echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"
-else
-   # create new group of sub-folders with each run
-   TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-   DEV_TEST_OUTDIR=./dev_test/Party-${PARTY_ID}_${TIMESTAMP}
+# store log to current falcon_logs
+mkdir -p ./falcon_logs
 
-	export PARTY_SERVER_BASEPATH=$DEV_TEST_OUTDIR
-   echo "PARTY_SERVER_BASEPATH NOT provided, will use ${PARTY_SERVER_BASEPATH}"
-fi
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
+DEV_LOG_PATH=/opt/falcon/src/falcon_platform/falcon_logs/Party-${PARTY_ID}_${TIMESTAMP}
 
-# setup party X folders
-echo "creating folders for party-$PARTY_ID"
-
-# set up the folder/sub-folders inside PARTY_SERVER_BASEPATH
-# first create PARTY_SERVER_BASEPATH/ if not already exists
-mkdir -p $PARTY_SERVER_BASEPATH
-
-# TODO: later find a way to populate these subdirs
-# based on {Coord, PartyServer}BasePath
-# mkdir $DEV_TEST_OUTDIR/logs
-# mkdir $DEV_TEST_OUTDIR/data_input
-# mkdir $DEV_TEST_OUTDIR/data_output
-# mkdir $DEV_TEST_OUTDIR/trained_models
-
-export ENV="local"
+# decide which deployment the partyServer will use to spawn worker
+#export ENV="subprocess"
+export ENV="docker"
+#export IS_DEBUG="debug-on"
+export IS_DEBUG="debug-off"
 export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export PARTY_SERVER_IP=$PARTY_SERVER_IP
-export LOG_PATH=$PARTY_SERVER_BASEPATH/falcon-log
+export PARTY_SERVER_CLUSTER_IPS=$PARTY_SERVER_CLUSTER_IPS
+export PARTY_SERVER_CLUSTER_LABEL=$PARTY_SERVER_CLUSTER_LABEL
+export LOG_PATH=$DEV_LOG_PATH
 
 # increment coordinator server port by partyserver ID
 # party ID can be 0, so needs to add extra 1
@@ -96,7 +82,7 @@ make $makeOS
 ./bin/falcon_platform
 
 # store the process id in basepath
-echo $! > ./dev_test/Party-${PARTY_ID}.pid
+echo $! > ./falcon_logs/Party-${PARTY_ID}.pid
 
 echo "===== Done with Party-${PARTY_ID} ====="
 echo
