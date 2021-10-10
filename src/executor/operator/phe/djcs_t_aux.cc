@@ -8,6 +8,7 @@
 #include <cstdlib>
 
 #include <glog/logging.h>
+#include <iostream>
 
 void djcs_t_aux_encrypt(djcs_t_public_key* pk,
     hcs_random* hr,
@@ -264,18 +265,35 @@ void djcs_t_aux_matrix_mult(djcs_t_public_key* pk,
   mpz_t t1, t2;
   mpz_init(t1);
   mpz_init(t2);
+
+  LOG(INFO) << "[djcs_t_aux_matrix_mult]: mpz_init success" << " --------";
+  std::cout << "[djcs_t_aux_matrix_mult]: mpz_init success" << std::endl;
+
   // the first element of both array is used to store the public key
   ciphers[0].getter_n(t1);
+
+  LOG(INFO) << "[djcs_t_aux_matrix_mult]: ciphers getter success" << " --------";
+  std::cout << "[djcs_t_aux_matrix_mult]: ciphers getter success" << std::endl;
+
   plains[0][0].getter_n(t2);
+
+  LOG(INFO) << "[djcs_t_aux_matrix_mult]: getter_n success" << " --------";
+  std::cout << "[djcs_t_aux_matrix_mult]: getter_n success" << std::endl;
 
   if (mpz_cmp(t1, t2) != 0) {
     LOG(ERROR) << "The vector and the matrix are not with the same public key.";
     exit(1);
   }
 
+  LOG(INFO) << "[djcs_t_aux_matrix_mult]: mpz_cmp success" << " --------";
+  std::cout << "[djcs_t_aux_matrix_mult]: mpz_cmp success" << std::endl;
+
   for (int i = 0; i < row_size; i++) {
     djcs_t_aux_inner_product(pk, hr, res[i], ciphers, plains[i], column_size);
   }
+  LOG(INFO) << "[djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success" << " --------";
+  std::cout << "[djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success" << std::endl;
+
 
   mpz_clear(t1);
   mpz_clear(t2);
