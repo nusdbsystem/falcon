@@ -9,5 +9,5 @@ protoc -I=<INPUT FOLDER> --go_out=<OUTPUT FOLDER> INPUT_FILE
 for example:
 
 ```bash
-protoc -I=./falcon/src/executor/include/proto/v0/ --go_out=./falcon/src/falcon_platform/common ./falcon/src/executor/include/proto/v0/alg_params.proto
+protoc -I=./falcon/src/executor/include/proto/v0/ --go_out=./falcon/src/falcon_platform/common/proto ./falcon/src/executor/include/proto/v0/alg_params.proto
 ```

@@ -6,14 +6,14 @@ import (
 )
 
 type InferenceJob struct {
-	JobName    		string      						`json:"job_name"`
-	JobId      		uint      							`json:"job_id"`
-	DataInfo 		[]InferenceDataInfo 		`json:"party_info"`
+	JobName  string              `json:"job_name"`
+	JobId    uint                `json:"job_id"`
+	DataInfo []InferenceDataInfo `json:"party_info"`
 }
 
 type InferenceDataInfo struct {
-	ID         				uint      `json:"id"`
-	InferenceDataPath 		string 	  `json:"production_data_path"`
+	ID                PartyIdType `json:"id"`
+	InferenceDataPath string      `json:"production_data_path"`
 }
 
 func ParseInferenceJob(contents string, jobInfo *InferenceJob) error {
