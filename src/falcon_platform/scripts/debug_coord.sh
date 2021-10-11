@@ -18,6 +18,7 @@ source config_coord.properties
 # then use "./falcon_logs"
 if [ $COORD_SERVER_BASEPATH ];then
 	echo "COORD_SERVER_BASEPATH provided: $COORD_SERVER_BASEPATH"
+	COORD_SERVER_BASEPATH=$COORD_SERVER_BASEPATH/falcon_logs/Coord_${TIMESTAMP}
 else
    # create new group of sub-folders with each run
    TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss

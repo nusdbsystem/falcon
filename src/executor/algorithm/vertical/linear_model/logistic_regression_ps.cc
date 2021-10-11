@@ -115,6 +115,9 @@ std::vector<int> LRParameterServer::partition_examples(std::vector<int> batch_in
 
   int mini_batch_size = int(batch_indexes.size()/this->worker_channels.size());
 
+  std::cout << "ps worker size = " << this->worker_channels.size() << std::endl;
+  std::cout << "mini batch size = " << mini_batch_size << std::endl;
+
   std::vector<int> message_sizes;
 
   // deterministic partition given the batch indexes
@@ -124,6 +127,7 @@ std::vector<int> LRParameterServer::partition_examples(std::vector<int> batch_in
     // generate mini-batch for this worker
     std::vector<int>::const_iterator first1 = batch_indexes.begin() + index;
     std::vector<int>::const_iterator last1  = batch_indexes.begin() + index + mini_batch_size;
+
     if (wk_index == this->worker_channels.size() - 1){
       last1  = batch_indexes.end();
     }
@@ -140,6 +144,11 @@ std::vector<int> LRParameterServer::partition_examples(std::vector<int> batch_in
     this->send_long_message_to_worker(wk_index, mini_batch_indexes_str);
     // update index
     index += mini_batch_size;
+  }
+
+  for (int i = 0; i < message_sizes.size(); i++) {
+    std::cout << "message_sizes[" << i << "] = " << message_sizes[i] << std::endl;
+    LOG(INFO) << "message_sizes[" << i << "] = " << message_sizes[i];
   }
   std::cout << "Broadcast client's batch requests to other workers" << std::endl;
   LOG(INFO) << "Broadcast client's batch requests to other workers";
@@ -316,6 +325,14 @@ void LRParameterServer::distributed_predict(
 
   // step 1: partition sample ids, every ps partition in the same way
   std::vector<int> message_sizes = this->partition_examples(cur_test_data_indexes);
+
+  std::cout << "cur_test_data_indexes.size = " << cur_test_data_indexes.size() << std::endl;
+  LOG(INFO) << "cur_test_data_indexes.size = " << cur_test_data_indexes.size();
+
+  for (int i = 0; i < message_sizes.size(); i++) {
+    std::cout << "message_sizes[" << i << "] = " << message_sizes[i] << std::endl;
+    LOG(INFO) << "message_sizes[" << i << "] = " << message_sizes[i];
+  }
 
   // step 2: if active party, wait worker finish execution
   if (party.party_type == falcon::ACTIVE_PARTY) {

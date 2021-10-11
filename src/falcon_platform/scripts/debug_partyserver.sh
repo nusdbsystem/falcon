@@ -36,11 +36,22 @@ echo "PARTY_ID = ${PARTY_ID}"
 # the config_.properties files, such as paths IP and Ports
 source config_partyserver.properties
 
+# if Party server base path is not supplied in the config.properties
+# then use falcon_logs/
+if [ $PARTY_SERVER_BASEPATH ];then
+	echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"
+	DEV_LOG_PATH=$PARTY_SERVER_BASEPATH/falcon_logs/Party-${PARTY_ID}_${TIMESTAMP}
+else
+   # create new group of sub-folders with each run
+   TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
+	 DEV_LOG_PATH=/opt/falcon/src/falcon_platform/falcon_logs/Party-${PARTY_ID}_${TIMESTAMP}
+   echo "PARTY_SERVER_BASEPATH NOT provided, will use ${PARTY_SERVER_BASEPATH}"
+fi
+
 # store log to current falcon_logs
 mkdir -p ./falcon_logs
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
-DEV_LOG_PATH=/opt/falcon/src/falcon_platform/falcon_logs/Party-${PARTY_ID}_${TIMESTAMP}
 
 # decide which deployment the partyServer will use to spawn worker
 #export ENV="subprocess"

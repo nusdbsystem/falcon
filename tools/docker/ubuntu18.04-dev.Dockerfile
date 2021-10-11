@@ -162,7 +162,7 @@ RUN git config --global http.sslVerify false
 WORKDIR /opt
 RUN git clone git@github.com:NLGithubWP/falcon.git && \
     cd falcon && \
-    git checkout add-dist-train-lr && \
+    git checkout distributed-train-lr && \
     cd third_party/ && \
     git submodule update --init --recursive
 
