@@ -124,7 +124,7 @@ std::vector<int> LRParameterServer::partition_examples(std::vector<int> batch_in
     // generate mini-batch for this worker
     std::vector<int>::const_iterator first1 = batch_indexes.begin() + index;
     std::vector<int>::const_iterator last1  = batch_indexes.begin() + index + mini_batch_size;
-    if (wk_index==this->worker_channels.size()-1){
+    if (wk_index == this->worker_channels.size() - 1){
       last1  = batch_indexes.end();
     }
     std::vector<int> mini_batch_indexes(first1, last1);
@@ -139,7 +139,7 @@ std::vector<int> LRParameterServer::partition_examples(std::vector<int> batch_in
     // send to worker
     this->send_long_message_to_worker(wk_index, mini_batch_indexes_str);
     // update index
-    index = mini_batch_size;
+    index += mini_batch_size;
   }
   std::cout << "Broadcast client's batch requests to other workers" << std::endl;
   LOG(INFO) << "Broadcast client's batch requests to other workers";
