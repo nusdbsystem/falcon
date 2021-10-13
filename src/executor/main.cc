@@ -17,6 +17,7 @@
 #include "falcon/distributed/worker.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_ps.h"
 #include "falcon/utils/base64.h"
+#include <falcon/utils/logger/logger.h>
 #include <chrono>
 
 #include <glog/logging.h>
@@ -25,6 +26,7 @@ using namespace boost;
 using namespace std::chrono;
 
 falcon::AlgorithmName parse_algorithm_name(const std::string& name);
+void print_arguments(const boost::program_options::variables_map& vm);
 
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
@@ -72,75 +74,25 @@ int main(int argc, char *argv[]) {
         ("distributed-train-network-file", po::value<string>(&distributed_network_file), "ps network file")
         ("worker-id", po::value<int>(&worker_id), "worker id")
         ("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0");
-
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
     po::notify(vm);
-
     if (vm.count("help")) {
       std::cout << "Usage: options_description [options]\n";
       std::cout << description;
       return 0;
     }
-
-    std::cout << "parse parameters correct" << std::endl;
-
-    std::cout << "party-id: " << vm["party-id"].as<int>() << std::endl;
-    std::cout << "party-num: " << vm["party-num"].as<int>() << std::endl;
-    std::cout << "party-type: " << vm["party-type"].as<int>() << std::endl;
-    std::cout << "fl-setting: " << vm["fl-setting"].as<int>() << std::endl;
-    std::cout << "existing-key: " << vm["existing-key"].as<int>() << std::endl;
-    std::cout << "network-file: " << vm["network-file"].as< std::string >() << std::endl;
-    std::cout << "log-file: " << vm["log-file"].as< std::string >() << std::endl;
-    std::cout << "data-input-file: " << vm["data-input-file"].as< std::string >() << std::endl;
-    std::cout << "data-output-file: " << vm["data-output-file"].as< std::string >() << std::endl;
-    std::cout << "key-file: " << vm["key-file"].as< std::string >() << std::endl;
-    std::cout << "algorithm-name: " << vm["algorithm-name"].as< std::string >() << std::endl;
-    std::cout << "algorithm-params: " << vm["algorithm-params"].as< std::string >() << std::endl;
-    std::cout << "model-save-file: " << vm["model-save-file"].as< std::string >() << std::endl;
-    std::cout << "model-report-file: " << vm["model-report-file"].as< std::string >() << std::endl;
-    std::cout << "is-inference: " << vm["is-inference"].as<int>() << std::endl;
-    std::cout << "inference-endpoint: " << vm["inference-endpoint"].as< std::string >() << std::endl;
-    std::cout << "is-distributed: " << vm["is-distributed"].as< int >() << std::endl;
-    std::cout << "distributed-train-network-file: " << vm["distributed-train-network-file"].as< std::string >() << std::endl;
-    std::cout << "worker-id: " << vm["worker-id"].as< int >() << std::endl;
-    std::cout << "distributed-role: " << vm["distributed-role"].as< int >() << std::endl;
+    // init glog file given the received log file name
+    FLAGS_log_dir = log_file;
+    LOG(INFO) << "Init log file.";
+    // print the received arguments
+    print_arguments(vm);
   }
   catch(std::exception& e)
   {
     cout << e.what() << "\n";
     return 1;
   }
-
-  FLAGS_log_dir = log_file;
-  LOG(INFO) << "Init log file.";
-
-  LOG(INFO) << "party_id: " << party_id;
-  LOG(INFO) << "party_num: " << party_num;
-  LOG(INFO) << "party_type: " << party_type;
-  LOG(INFO) << "fl_setting: " << fl_setting;
-  LOG(INFO) << "use_existing_key: " << use_existing_key;
-  LOG(INFO) << "network_file: " << network_file;
-  LOG(INFO) << "log_file: " << log_file;
-  LOG(INFO) << "data_input_file: " << data_input_file;
-  LOG(INFO) << "data_output_file: " << data_output_file;
-  LOG(INFO) << "key_file: " << key_file;
-  LOG(INFO) << "algorithm_name: " << algorithm_name;
-  LOG(INFO) << "algorithm_params: " << algorithm_params;
-  LOG(INFO) << "model_save_file: " << model_save_file;
-  LOG(INFO) << "model_report_file: " << model_report_file;
-
-  LOG(INFO) << "is_distributed: " << is_distributed;
-  LOG(INFO) << "distributed_network_file: " << distributed_network_file;
-  LOG(INFO) << "worker_id: " << worker_id;
-  LOG(INFO) << "distributed_role: " << distributed_role;
-
-  // TODO: should be read from the coordinator
-  is_inference = 0;
-  inference_endpoint = DEFAULT_INFERENCE_ENDPOINT;
-
-  LOG(INFO) << "is_inference: " << is_inference;
-  LOG(INFO) << "inference_endpoint: " << inference_endpoint;
 
   try {
     auto start_time = high_resolution_clock::now();
@@ -150,9 +102,7 @@ int main(int argc, char *argv[]) {
                 static_cast<falcon::FLSetting>(fl_setting),
                 data_input_file);
 
-    LOG(INFO) << "Parse algorithm name and run the program";
-    std::cout << "Parse algorithm name and run the program" << std::endl;
-
+    log_info("Parse algorithm name and run the program");
     falcon::AlgorithmName parsed_algorithm_name = parse_algorithm_name(algorithm_name);
 
     // decode the base64 string to pb string, assume that only accept config string from coordinator
@@ -167,7 +117,7 @@ int main(int argc, char *argv[]) {
       party.init_network_channels(network_config_pb_str);
       party.init_phe_keys(use_existing_key, key_file);
       if (is_inference) {
-        LOG(INFO) << "Execute inference logic\n";
+        log_info("Execute inference logic");
         // invoke creating endpoint for inference requests
         if (party_type == falcon::ACTIVE_PARTY) {
           run_inference_server(inference_endpoint,
@@ -180,7 +130,7 @@ int main(int argc, char *argv[]) {
           run_passive_server(model_save_file, party, parsed_algorithm_name);
         }
       } else {
-        LOG(INFO) << "Execute training logic\n";
+        log_info("Execute training logic");
         switch(parsed_algorithm_name) {
           case falcon::LR:
             train_logistic_regression(&party, algorithm_params_pb_str, model_save_file, model_report_file);
@@ -198,15 +148,15 @@ int main(int argc, char *argv[]) {
             train_logistic_regression(&party, algorithm_params_pb_str, model_save_file, model_report_file);
             break;
         }
-        std::cout << "Finish algorithm " << std::endl;
+        log_info("-------- Finish algorithm --------");
       }
     }
 
     // if distributed train or inference, and distributed_role = parameter server
     if (is_distributed == 1 && distributed_role == 0){
-      LOG(INFO) << "Execute as parameter server\n";
+      log_info("Execute as parameter server");
       if (is_inference) {
-        LOG(INFO) << "Execute distributed inference logic\n";
+        log_info("Execute distributed inference logic");
         // if parameter server, for inference, does not init channels with passive ps
         // party.init_network_channels(network_config_pb_str);
         party.init_phe_keys(use_existing_key, key_file);
@@ -219,10 +169,10 @@ int main(int argc, char *argv[]) {
                                is_distributed,
                                ps_network_config_pb_str);
         } else{
-          LOG(INFO) << "Passive Party doesn't run parameter server in distributed inference\n";
+          log_info("Passive Party doesn't run parameter server in distributed inference");
         }
       } else{
-        LOG(INFO) << "Execute distributed training logic\n";
+        log_info("Execute distributed training logic");
         // if parameter server, init the party itself network channels and phe keys
         party.init_network_channels(network_config_pb_str);
         party.init_phe_keys(use_existing_key, key_file);
@@ -235,10 +185,13 @@ int main(int argc, char *argv[]) {
                                        model_report_file);
             break;
           case falcon::DT:
-            LOG(ERROR) << "Type " << "falcon::DT" << " not implemented";
+            log_error("Type falcon::DT not implemented");
             exit(1);
           case falcon::RF:
-            LOG(ERROR) << "Type " << "falcon::RF" << " not implemented";
+            log_error("Type falcon::RF not implemented");
+            exit(1);
+          case falcon::GBDT:
+            log_error("Type falcon::GBDT not implemented");
             exit(1);
           default:
             launch_lr_parameter_server(&party, algorithm_params_pb_str,ps_network_config_pb_str,
@@ -246,7 +199,7 @@ int main(int argc, char *argv[]) {
             break;
         }
       }
-      LOG(INFO) << "Parameter Server are running\n";
+      log_info("Parameter Server are running");
     }
 
     // if distributed train or inference, and distributed_role = worker
@@ -260,7 +213,7 @@ int main(int argc, char *argv[]) {
       auto worker = new Worker(ps_network_config_pb_str, worker_id);
 
       if (is_inference) {
-        LOG(INFO) << "Execute distributed inference logic\n";
+        log_info("Execute distributed inference logic");
         if (party_type == falcon::ACTIVE_PARTY) {
           // receive batch index from ps
           while (true) {
@@ -284,9 +237,9 @@ int main(int argc, char *argv[]) {
           run_passive_server(model_save_file, party, parsed_algorithm_name);
         }
       }else{
-        LOG(INFO) << "Execute distributed training logic\n";
+        log_info("Execute distributed training logic");
         if (distributed_role==1){
-          LOG(INFO) << "Execute as worker\n";
+          log_info("Execute as worker");
           switch(parsed_algorithm_name) {
             case falcon::LR:
               train_logistic_regression(&party,
@@ -297,13 +250,13 @@ int main(int argc, char *argv[]) {
                                         worker);
               break;
             case falcon::DT:
-              LOG(ERROR) << "Type " << "falcon::DT" << " not implemented";
+              log_error("Type falcon::DT not implemented");
               exit(1);
             case falcon::RF:
-              LOG(ERROR) << "Type " << "falcon::RF" << " not implemented";
+              log_error("Type falcon::RF not implemented");
               exit(1);
             case falcon::GBDT:
-              LOG(ERROR) << "Type " << "falcon::RF" << " not implemented";
+              log_error("Type falcon::GBDT not implemented");
               exit(1);
             default:
               train_logistic_regression(&party,
@@ -314,7 +267,7 @@ int main(int argc, char *argv[]) {
                                         worker);
               break;
           }
-          std::cout << "Finish distributed training algorithm " << std::endl;
+          log_info("Finish distributed training algorithm");
         }
       }
       delete worker;
@@ -323,11 +276,7 @@ int main(int argc, char *argv[]) {
     // After function call
     auto stop_time = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop_time - start_time);
-    cout << "Time taken by main func: "
-    << duration.count() << " microseconds" << endl;
-    LOG(INFO) << "Time taken by main func: "
-    << duration.count() << " microseconds" << model_report_file;
-
+    log_info("Time taken by main func: " + std::to_string(duration.count()) + " microseconds");
     return EXIT_SUCCESS;
   }
   catch(std::exception& e)
@@ -344,4 +293,26 @@ falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
   if ("random_forest" == name) output = falcon::RF;
   if ("gbdt" == name) output = falcon::GBDT;
   return output;
+}
+
+void print_arguments(const boost::program_options::variables_map& vm) {
+  log_info("-------- parse parameters correct --------");
+  log_info("party-id: " + std::to_string(vm["party-id"].as<int>()));
+  log_info("party-num: " + std::to_string(vm["party-num"].as<int>()));
+  log_info("fl-setting: " + std::to_string(vm["fl-setting"].as<int>()));
+  log_info("existing-key: " + std::to_string(vm["existing-key"].as<int>()));
+  log_info("network-file: " + vm["network-file"].as< std::string >());
+  log_info("log-file: " + vm["log-file"].as< std::string >());
+  log_info("data-input-file: " + vm["data-input-file"].as< std::string >());
+  log_info("data-output-file: " + vm["data-output-file"].as< std::string >());
+  log_info("key-file: " + vm["key-file"].as< std::string >());
+  log_info("algorithm-name: " + vm["algorithm-name"].as< std::string >());
+  log_info("model-save-file: " + vm["model-save-file"].as< std::string >());
+  log_info("model-report-file: " + vm["model-report-file"].as< std::string >());
+  log_info("is-inference: " + std::to_string(vm["is-inference"].as<int>()));
+  log_info("inference-endpoint: " + vm["inference-endpoint"].as< std::string >());
+  log_info("is-distributed: " + std::to_string(vm["is-distributed"].as< int >()));
+  log_info("distributed-train-network-file: " + vm["distributed-train-network-file"].as< std::string >());
+  log_info("worker-id: " + std::to_string(vm["worker-id"].as< int >()));
+  log_info("distributed-role: " + std::to_string(vm["distributed-role"].as< int >()));
 }

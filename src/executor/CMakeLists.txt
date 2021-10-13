@@ -103,7 +103,9 @@ set(SOURCE_FILES
         distributed/worker.cc
         distributed/parameter_server_base.cc
         ../../include/falcon/algorithm/vertical/linear_model/logistic_regression_ps.h
-        algorithm/vertical/linear_model/logistic_regression_ps.cc)
+        algorithm/vertical/linear_model/logistic_regression_ps.cc
+        ../../include/falcon/utils/logger/logger.h
+        utils/logger/logger.cc)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
