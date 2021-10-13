@@ -5,6 +5,7 @@
 #include "falcon/distributed/parameter_server_base.h"
 #include <falcon/utils/pb_converter/network_converter.h>
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 
 
 ParameterServer::ParameterServer(const std::string& ps_network_config_pb_str){
@@ -18,25 +19,23 @@ ParameterServer::ParameterServer(const std::string& ps_network_config_pb_str){
             worker_ips,worker_ports,
             ps_ips, ps_ports,
             ps_network_config_pb_str);
-    LOG(INFO) << "Establish network communications with workers";
+    log_info("Establish network communications with workers");
     // establish communication connections between workers and parameter server
     // current party instance is created at parameter server, build channel with workers
     for (int wk_index = 0; wk_index < worker_ips.size(); wk_index++){
-        SocketPartyData me_ps, other_worker;
-        me_ps = SocketPartyData(boost_ip::address::from_string(ps_ips[wk_index]),
+      SocketPartyData me_ps, other_worker;
+      me_ps = SocketPartyData(boost_ip::address::from_string(ps_ips[wk_index]),
                                 ps_ports[wk_index]);
-        other_worker = SocketPartyData(boost_ip::address::from_string(worker_ips[wk_index]),
+      other_worker = SocketPartyData(boost_ip::address::from_string(worker_ips[wk_index]),
                                        worker_ports[wk_index]);
-        shared_ptr<CommParty> tmp_channel = make_shared<CommPartyTCPSynced>(io_service, me_ps, other_worker);
+      shared_ptr<CommParty> tmp_channel = make_shared<CommPartyTCPSynced>(io_service, me_ps, other_worker);
 
-        // connect to the other party and add channel
-        tmp_channel->join(500, 5000);
-        worker_channels.push_back(tmp_channel);
+      // connect to the other party and add channel
+      tmp_channel->join(500, 5000);
+      worker_channels.push_back(tmp_channel);
 
-        LOG(INFO) << "Communication channel established with worker index " << wk_index << ", ip is " << worker_ips[wk_index]
-                  << ", port is " << worker_ports[wk_index] << ".";
-        std::cout << "Communication channel established with worker index " << wk_index << ", ip is " << worker_ips[wk_index]
-                  << ", port is " << worker_ports[wk_index] << "." << std::endl;
+      log_info("Communication channel established with worker index " + std::to_string(wk_index) + ", ip is " + worker_ips[wk_index]
+                  + ", port is " + std::to_string(worker_ports[wk_index]);
     }
 }
 
