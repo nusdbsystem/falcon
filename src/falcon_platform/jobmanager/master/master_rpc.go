@@ -77,10 +77,10 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string) (mast
 	}
 
 	// set time out, no worker comes within 1 min, stop master
-	time.AfterFunc(10*time.Minute, func() {
+	time.AfterFunc(100*time.Minute, func() {
 		master.Lock()
 		if len(master.workers) < master.workerNum {
-			logger.Log.Printf("Master: Wait for 1 Min, No enough worker come, stop, required %d, got %d ",
+			logger.Log.Printf("Master: Wait for 100 Min, No enough worker come, stop, required %d, got %d ",
 				master.workerNum,
 				len(master.workers),
 			)

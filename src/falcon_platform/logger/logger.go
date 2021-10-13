@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"time"
 )
 
 var Log *log.Logger
@@ -43,7 +42,6 @@ func HandleErrors() {
 			"\n\tTraceBack: ", string(buf[:n]),
 			"\nExist Falcon Platform")
 		//os.Exit(0)
-		time.Sleep(time.Minute * 10)
-
+		//time.Sleep(time.Minute * 10)
 	}
 }

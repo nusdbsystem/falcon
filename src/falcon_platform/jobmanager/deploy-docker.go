@@ -123,7 +123,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 	}
 
 	var absLogPath []rune
-	absLogPath = []rune(common.TaskRuntimeLogs)
+	absLogPath = []rune(common.LogPath)
 	if absLogPath[0] == '.' {
 		absLogPath = absLogPath[1:]
 	}
@@ -147,17 +147,8 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 		dockerCmd = exec.Command(
 			"docker", "service", "create",
 			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
-			"--net", "host",
+			"--network", "host",
 			"--replicas", "1",
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.WorkerPort, resourceSVC.WorkerPort),
-			"-p", fmt.Sprintf("%d-%d:%d-%d",
-				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort),
-				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort)),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.MpcMpcPort, resourceSVC.MpcMpcPort),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.MpcExecutorPort+common.PortType(common.PartyID), resourceSVC.MpcExecutorPort+common.PortType(common.PartyID)),
 			"--mount", "type=bind,"+
 				fmt.Sprintf("source=%s", dataPath)+
 				fmt.Sprintf(",destination=%s", common.DataPathContainer),
@@ -170,18 +161,22 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"--mount", "type=bind,"+
 				fmt.Sprintf("source=%s", string(absLogPath))+
 				fmt.Sprintf(",destination=%s", string(absLogPath)),
-			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
-			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
-			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
-			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
+			"--env", fmt.Sprintf("ENV=%s", common.Docker),
+			"--env", fmt.Sprintf("SERVICE_NAME=%s", workerType),
+			"--env", fmt.Sprintf("LOG_PATH=%s", common.LogPath),
 			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
 			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
 			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
+			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
+			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
+			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
+			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
+			"--env", fmt.Sprintf("PARTY_ID=%s", fmt.Sprintf("%d", common.PartyID)),
+			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
+			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
 			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
 			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
-			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
-			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
-			"--constraint", fmt.Sprintf("node.labels.%s", nodeLabel),
+			"--constraint", fmt.Sprintf("node.labels.name==%s", nodeLabel),
 			usedImage,
 		)
 
@@ -195,19 +190,8 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 		dockerCmd = exec.Command(
 			"docker", "service", "create",
 			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
-			"--net", "host",
+			"--network", "host",
 			"--replicas", "1",
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.WorkerPort, resourceSVC.WorkerPort),
-			"-p", fmt.Sprintf("%d-%d:%d-%d",
-				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort),
-				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort)),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.MpcMpcPort, resourceSVC.MpcMpcPort),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.MpcExecutorPort+common.PortType(common.PartyID), resourceSVC.MpcExecutorPort+common.PortType(common.PartyID)),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.ExecutorPSPort, resourceSVC.ExecutorPSPort),
 			"--mount", "type=bind,"+
 				fmt.Sprintf("source=%s", dataPath)+
 				fmt.Sprintf(",destination=%s", common.DataPathContainer),
@@ -220,18 +204,22 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"--mount", "type=bind,"+
 				fmt.Sprintf("source=%s", string(absLogPath))+
 				fmt.Sprintf(",destination=%s", string(absLogPath)),
-			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
-			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
-			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
-			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
+			"--env", fmt.Sprintf("ENV=%s", common.LocalThread),
+			"--env", fmt.Sprintf("SERVICE_NAME=%s", workerType),
+			"--env", fmt.Sprintf("LOG_PATH=%s", common.LogPath),
 			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
 			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
 			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
+			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
+			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
+			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
+			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
+			"--env", fmt.Sprintf("PARTY_ID=%s", fmt.Sprintf("%d", common.PartyID)),
+			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
+			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
 			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
 			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
-			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
-			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
-			"--constraint", fmt.Sprintf("node.labels.%s", nodeLabel),
+			"--constraint", fmt.Sprintf("node.labels.name==%s", nodeLabel),
 			usedImage,
 		)
 
@@ -245,14 +233,8 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 		dockerCmd = exec.Command(
 			"docker", "service", "create",
 			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
-			"--net", "host",
+			"--network", "host",
 			"--replicas", "1",
-			"-p", fmt.Sprintf("%d-%d:%d-%d",
-				utils.MinV(resourceSVC.PsPsPorts), utils.MaxV(resourceSVC.PsPsPorts),
-				utils.MinV(resourceSVC.PsPsPorts), utils.MaxV(resourceSVC.PsPsPorts)),
-			"-p", fmt.Sprintf("%d-%d:%d-%d",
-				utils.MinV(resourceSVC.PsExecutorPorts), utils.MaxV(resourceSVC.PsExecutorPorts),
-				utils.MinV(resourceSVC.PsExecutorPorts), utils.MaxV(resourceSVC.PsExecutorPorts)),
 			"--mount", "type=bind,"+
 				fmt.Sprintf("source=%s", dataPath)+
 				fmt.Sprintf(",destination=%s", common.DataPathContainer),
@@ -265,18 +247,22 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"--mount", "type=bind,"+
 				fmt.Sprintf("source=%s", string(absLogPath))+
 				fmt.Sprintf(",destination=%s", string(absLogPath)),
-			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
-			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
-			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
-			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
+			"--env", fmt.Sprintf("ENV=%s", common.LocalThread),
+			"--env", fmt.Sprintf("SERVICE_NAME=%s", workerType),
+			"--env", fmt.Sprintf("LOG_PATH=%s", common.LogPath),
 			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
 			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
 			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
+			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
+			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
+			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
+			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
+			"--env", fmt.Sprintf("PARTY_ID=%s", fmt.Sprintf("%d", common.PartyID)),
+			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
+			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
 			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
 			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
-			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
-			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
-			"--constraint", fmt.Sprintf("node.labels.%s", nodeLabel),
+			"--constraint", fmt.Sprintf("node.labels.name==%s", nodeLabel),
 			usedImage,
 		)
 

@@ -68,7 +68,7 @@ func RunWorker(masterAddr, workerType,
 
 		} else if common.Deployment == common.Docker {
 			nodeLabel := common.PartyServerClusterLabels[nodeID]
-			jobmanager.DeployWorkerDockerContainer(masterAddr, workerType, jobId, dataPath, modelPath,
+			jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
 				dataOutput, resourceSVC, common.CentralizedWorker, nodeLabel)
 
 		} else if common.Deployment == common.K8S {
@@ -107,7 +107,7 @@ func RunWorker(masterAddr, workerType,
 		// 1 worker is for serving parameter server
 		if common.Deployment == common.Docker {
 			nodeLabel := common.PartyServerClusterLabels[nodeID]
-			jobmanager.DeployWorkerDockerContainer(masterAddr, workerType, jobId, dataPath, modelPath,
+			jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
 				dataOutput, resourceSVC, common.DistributedParameterServer, nodeLabel)
 
 		} else {
@@ -142,7 +142,7 @@ func RunWorker(masterAddr, workerType,
 
 			if common.Deployment == common.Docker {
 				nodeLabel := common.PartyServerClusterLabels[nodeID]
-				jobmanager.DeployWorkerDockerContainer(masterAddr, workerType, jobId, dataPath, modelPath,
+				jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
 					dataOutput, resourceSVC, common.DistributedWorker, nodeLabel)
 
 			} else {

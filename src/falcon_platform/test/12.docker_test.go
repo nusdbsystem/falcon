@@ -98,6 +98,19 @@ func TestNetworkCfg(t *testing.T) {
 	fmt.Println(cfg.ExecutorMpcPortArray)
 }
 
+func TestPSNetworkCfg(t *testing.T) {
+	a := "Cg8KCTEyNy4wLjAuMRCKrAEKDwoJMTI3LjAuMC4xEI+sARIPCgkxMjcuMC4wLjEQgqwBEg8KCTEyNy4wLjAuMRCDrAE="
+
+	res, _ := base64.StdEncoding.DecodeString(a)
+
+	cfg := v0.PSNetworkConfig{}
+
+	_ = proto.Unmarshal(res, &cfg)
+
+	fmt.Println(cfg.Ps)
+	fmt.Println(cfg.Workers)
+}
+
 func TestPortRequest(t *testing.T) {
 
 	common.CoordAddr = "127.0.0.1:30004"

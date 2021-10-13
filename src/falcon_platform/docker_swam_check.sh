@@ -1,0 +1,1 @@
+docker node ps $(docker node ls -q) --filter desired-state=Running | uniq

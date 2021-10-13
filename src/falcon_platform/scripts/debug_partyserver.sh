@@ -38,11 +38,11 @@ source config_partyserver.properties
 
 # if Party server base path is not supplied in the config.properties
 # then use falcon_logs/
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
 if [ $PARTY_SERVER_BASEPATH ];then
 	echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"
 	USED_LOG_PATH=$PARTY_SERVER_BASEPATH/falcon_logs/Party-${PARTY_ID}_${TIMESTAMP}
 else
-   TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
 	 USED_LOG_PATH=/opt/falcon/src/falcon_platform/falcon_logs/Party-${PARTY_ID}_${TIMESTAMP}
    echo "PARTY_SERVER_BASEPATH NOT provided, will LOG TO ${USED_LOG_PATH}"
 fi

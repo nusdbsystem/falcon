@@ -6,7 +6,7 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/logger"
 	"falcon_platform/partyserver/router"
-	"falcon_platform/resourcemanager"
+	// "falcon_platform/resourcemanager"
 	"log"
 	"net/http"
 	"os"
@@ -61,8 +61,8 @@ func RunPartyServer() {
 		//client.PartyServerDelete(common.CoordAddr, common.PartyServerIP)
 
 		logger.Log.Println("RunPartyServer: delete all docker containers")
-		dockerSdk := new(resourcemanager.DockerSdkMngr)
-		dockerSdk.DeleteAll()
+		// 		dockerSdk := new(resourcemanager.DockerSdkMngr)
+		// 		dockerSdk.DeleteAll()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()

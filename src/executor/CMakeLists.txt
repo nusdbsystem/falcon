@@ -8,7 +8,8 @@ set(CMAKE_CXX_STANDARD 11)
 # -g option gives more information
 # -fno-omit-frame-pointer gets nicer stack traces in error messages
 # -fno-common to make global variables protected by ASAN
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address -g -fno-common -fno-omit-frame-pointer")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options -fsanitize=address -g -fno-common -fno-omit-frame-pointer")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -lboost_program_options")
 
 set(SOURCE_FILES
         ../../include/falcon/network/Comm.hpp

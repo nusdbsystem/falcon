@@ -365,3 +365,29 @@ func GenerateDistributedNetworkConfig(psIp string, psPort []int32, workerIps []s
 
 	return b64.StdEncoding.EncodeToString(out)
 }
+
+func RetrieveDistributedNetworkConfig(a string) {
+
+	res, _ := b64.StdEncoding.DecodeString(a)
+
+	cfg := v0.PSNetworkConfig{}
+
+	_ = proto.Unmarshal(res, &cfg)
+
+	logger.Log.Println("[RetrieveDistributedNetworkConfig]: cfg.Ps", cfg.Ps)
+	logger.Log.Println("[RetrieveDistributedNetworkConfig]: cfg.Workers", cfg.Workers)
+
+}
+
+func RetrieveNetworkConfig(a string) {
+	res, _ := b64.StdEncoding.DecodeString(a)
+
+	cfg := v0.NetworkConfig{}
+
+	_ = proto.Unmarshal(res, &cfg)
+
+	logger.Log.Println("[RetrieveNetworkConfig]: cfg.Ips", cfg.Ips)
+	logger.Log.Println("[RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays", cfg.ExecutorExecutorPortArrays)
+	logger.Log.Println("[RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray", cfg.ExecutorMpcPortArray)
+
+}
