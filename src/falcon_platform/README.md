@@ -1,5 +1,5 @@
 <!-- ![Alt text](https://github.com/lemonviv/falcon/blob/dev/src/falcon_platform/photos/db.png) -->
-![Falcon Platform Architecture](./imgs/Falcon_Sys_Archi_Dec21version.jpg)
+![Falcon Platform Architecture](../../img/falcon_platform/Falcon_Sys_Archi_Dec21version.jpg)
 
 # Falcon Platform (Coordinator+PartyServers)
 

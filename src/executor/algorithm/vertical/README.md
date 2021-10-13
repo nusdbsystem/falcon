@@ -9,7 +9,7 @@ Currently we focus on cross-silo collaboration in VFL.
 
 ## Basic Technique
 
-![VFL_Overview](../img/VFL_overview.png)
+![VFL_Overview](../../../../img/executor/VFL_overview.png)
 
 The parties have the same sample ids
 - but with different features
