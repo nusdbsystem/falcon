@@ -8,6 +8,7 @@
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <falcon/algorithm/vertical/linear_model/logistic_regression_builder.h>
+#include <falcon/utils/logger/logger.h>
 #include <iostream>
 #include <thread>
 #include <utility>
@@ -115,11 +116,10 @@ std::vector<int> LRParameterServer::partition_examples(std::vector<int> batch_in
 
   int mini_batch_size = int(batch_indexes.size()/this->worker_channels.size());
 
-  std::cout << "ps worker size = " << this->worker_channels.size() << std::endl;
-  std::cout << "mini batch size = " << mini_batch_size << std::endl;
+  log_info("ps worker size = " + std::to_string(this->worker_channels.size()));
+  log_info("mini batch size = " + std::to_string(mini_batch_size));
 
   std::vector<int> message_sizes;
-
   // deterministic partition given the batch indexes
   int index = 0;
   for(int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++){
@@ -147,11 +147,9 @@ std::vector<int> LRParameterServer::partition_examples(std::vector<int> batch_in
   }
 
   for (int i = 0; i < message_sizes.size(); i++) {
-    std::cout << "message_sizes[" << i << "] = " << message_sizes[i] << std::endl;
-    LOG(INFO) << "message_sizes[" << i << "] = " << message_sizes[i];
+    log_info("message_sizes[" + std::to_string(i) + "] = " + std::to_string(message_sizes[i]));
   }
-  std::cout << "Broadcast client's batch requests to other workers" << std::endl;
-  LOG(INFO) << "Broadcast client's batch requests to other workers";
+  log_info("Broadcast client's batch requests to other workers");
 
   return message_sizes;
 
@@ -242,44 +240,28 @@ void LRParameterServer::distributed_train(){
     training_data_indexes.push_back(i);
   }
 
-  std::cout << "Current channel size is " << this->worker_channels.size() <<std::endl;
+  log_info("current channel size = " + std::to_string(this->worker_channels.size()));
 
   for (int iter = 0; iter < this->alg_builder.max_iteration; iter++) {
-    LOG(INFO) << "--------PS Iteration " << iter << " --------";
-    std::cout << "--------PS Iteration " << iter << " --------" << std::endl;
-     // step 2: broadcast weight
-     this->broadcast_encrypted_weights();
-
-     LOG(INFO) << "--------PS Iteration " << iter << ", ps broadcast_encrypted_weights successful" <<" --------";
-     std::cout << "--------PS Iteration " << iter << ", ps broadcast_encrypted_weights successful" <<" --------" << std::endl;
-
-     // step 3: randomly select a batch of samples from training data
-     // active ps select batch idx and broadcast to passive ps
-     std::vector<int> batch_indexes = this->select_batch_idx(training_data_indexes);
-
-     LOG(INFO) << "--------PS Iteration " << iter << ", ps select_batch_idx successful" <<" --------";
-     std::cout << "--------PS Iteration " << iter << ", ps select_batch_idx successful" <<" --------" << std::endl;
-
-     // step 4: partition sample ids, since the partition method is deterministic
-     // all ps can do this step in its own cluster and broadcast to its own workers
-     this->partition_examples(batch_indexes);
-
-     LOG(INFO) << "--------PS Iteration " << iter << ", ps partition_examples successful" <<" --------";
-     std::cout << "--------PS Iteration " << iter << ", ps partition_examples successful" <<" --------" << std::endl;
-
-     // step 5: wait worker finish execution
-     auto encoded_message = this->wait_worker_complete();
-     cout << "LRParameterServer received all loss * X_{ij} from falcon_worker" << endl;
-
-     LOG(INFO) << "--------PS Iteration " << iter << ", LRParameterServer received all loss * X_{ij} from falcon_worker successful" <<" --------";
-     std::cout << "--------PS Iteration " << iter << ", LRParameterServer received all loss * X_{ij} from falcon_worker successful" <<" --------" << std::endl;
-
-     // step 6: receive loss, and update weight
-     this->update_encrypted_weights(encoded_message);
-
-     LOG(INFO) << "--------PS Iteration " << iter << ", ps update_encrypted_weights successful" <<" --------";
-     std::cout << "--------PS Iteration " << iter << ", ps update_encrypted_weights successful" <<" --------" << std::endl;
-
+    log_info("--------PS Iteration " + std::to_string(iter) + " --------");
+    // step 2: broadcast weight
+    this->broadcast_encrypted_weights();
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps broadcast_encrypted_weights successful --------");
+    // step 3: randomly select a batch of samples from training data
+    // active ps select batch idx and broadcast to passive ps
+    std::vector<int> batch_indexes = this->select_batch_idx(training_data_indexes);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps select_batch_idx successful --------");
+    // step 4: partition sample ids, since the partition method is deterministic
+    // all ps can do this step in its own cluster and broadcast to its own workers
+    this->partition_examples(batch_indexes);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps partition_examples successful --------");
+    // step 5: wait worker finish execution
+    auto encoded_message = this->wait_worker_complete();
+    log_info("LRParameterServer received all loss * X_{ij} from falcon_worker");
+    log_info("--------PS Iteration " + std::to_string(iter) + ", LRParameterServer received all loss * X_{ij} from falcon_worker successful --------");
+    // step 6: receive loss, and update weight
+    this->update_encrypted_weights(encoded_message);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps update_encrypted_weights successful --------");
   }
 }
 
@@ -288,7 +270,7 @@ void LRParameterServer::distributed_eval(
     const std::string& report_save_path) {
 
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
-  LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
+  log_info("************* Evaluation on " + dataset_str + " Start *************");
 
   // step 1: init test data
   int dataset_size =
@@ -321,17 +303,14 @@ void LRParameterServer::distributed_predict(
     const std::vector<int>& cur_test_data_indexes,
     EncodedNumber* decrypted_labels) {
 
-  std::cout << "Current channel size is " << this->worker_channels.size() <<std::endl;
+  log_info("current channel size = " + std::to_string(this->worker_channels.size()));
 
   // step 1: partition sample ids, every ps partition in the same way
   std::vector<int> message_sizes = this->partition_examples(cur_test_data_indexes);
 
-  std::cout << "cur_test_data_indexes.size = " << cur_test_data_indexes.size() << std::endl;
-  LOG(INFO) << "cur_test_data_indexes.size = " << cur_test_data_indexes.size();
-
+  log_info("cur_test_data_indexes.size = " + std::to_string(cur_test_data_indexes.size()));
   for (int i = 0; i < message_sizes.size(); i++) {
-    std::cout << "message_sizes[" << i << "] = " << message_sizes[i] << std::endl;
-    LOG(INFO) << "message_sizes[" << i << "] = " << message_sizes[i];
+    log_info("message_sizes[" + std::to_string(i) + "] = " + std::to_string(message_sizes[i]));
   }
 
   // step 2: if active party, wait worker finish execution
@@ -375,8 +354,7 @@ void launch_lr_parameter_server(
   LogisticRegressionParams params;
   deserialize_lr_params(params, params_pb_str);
 
-  std::cout << "deserialize lr params on ps success" << std::endl;
-  LOG(INFO) << "deserialize lr params on ps success";
+  log_info("deserialize lr params on ps success");
   google::FlushLogFiles(google::INFO);
 
   int weight_size = party->getter_feature_num();
@@ -397,46 +375,30 @@ void launch_lr_parameter_server(
       training_labels,
       testing_labels);
 
-  std::cout << "PS Init logistic regression model";
-  std::cout << "params.batch_size = " << params.batch_size;
-  std::cout << "params.max_iteration = " << params.max_iteration;
-  std::cout << "params.converge_threshold = " << params.converge_threshold;
-  std::cout << "params.with_regularization = " << params.with_regularization;
-  std::cout << "params.alpha = " << params.alpha;
-  std::cout << "params.learning_rate = " << params.learning_rate;
-  std::cout << "params.decay = " << params.decay;
-  std::cout << "params.penalty = " << params.penalty;
-  std::cout << "params.optimizer = " << params.optimizer;
-  std::cout << "params.multi_class = " << params.multi_class;
-  std::cout << "params.metric = " << params.metric;
-  std::cout << "params.dp_budget = " << params.dp_budget;
-
-  LOG(INFO) << "PS Init logistic regression model";
-  LOG(INFO) << "params.batch_size = " << params.batch_size;
-  LOG(INFO) << "params.max_iteration = " << params.max_iteration;
-  LOG(INFO) << "params.converge_threshold = " << params.converge_threshold;
-  LOG(INFO) << "params.with_regularization = " << params.with_regularization;
-  LOG(INFO) << "params.alpha = " << params.alpha;
-  LOG(INFO) << "params.learning_rate = " << params.learning_rate;
-  LOG(INFO) << "params.decay = " << params.decay;
-  LOG(INFO) << "params.penalty = " << params.penalty;
-  LOG(INFO) << "params.optimizer = " << params.optimizer;
-  LOG(INFO) << "params.multi_class = " << params.multi_class;
-  LOG(INFO) << "params.metric = " << params.metric;
-  LOG(INFO) << "params.dp_budget = " << params.dp_budget;
-
-  std::cout << "PS Init logistic regression model" << std::endl;
-  LOG(INFO) << "PS Init logistic regression model";
+  log_info("PS Init logistic regression model");
+  log_info("params.batch_size = " + std::to_string(params.batch_size));
+  log_info("params.max_iteration = " + std::to_string(params.max_iteration));
+  log_info("params.converge_threshold = " + std::to_string(params.converge_threshold));
+  log_info("params.with_regularization = " + std::to_string(params.with_regularization));
+  log_info("params.alpha = " + std::to_string(params.alpha));
+  log_info("params.learning_rate = " + std::to_string(params.learning_rate));
+  log_info("params.decay = " + std::to_string(params.decay));
+  log_info("params.penalty = " + params.penalty);
+  log_info("params.optimizer = " + params.optimizer);
+  log_info("params.multi_class = " + params.multi_class);
+  log_info("params.metric = " + params.metric);
+  log_info("params.dp_budget = " + std::to_string(params.dp_budget));
+  log_info("params.fit_bias = " + std::to_string(params.fit_bias));
 
   // in distributed train, fit bias should be handled here
-  LOG(INFO) << "original weight_size = " << weight_size << std::endl;
+  log_info("original weight_size = " + std::to_string(weight_size));
   // retrieve the fit_bias term
   bool m_fit_bias = params.fit_bias;
   // if this is active party, and fit_bias is true
   // fit_bias or fit_intercept, for whether to plus the
   // constant _bias_ or _intercept_ term
   if ((party->party_type == falcon::ACTIVE_PARTY) && m_fit_bias) {
-    LOG(INFO) << "will insert x1=1 to features\n";
+    log_info("will insert x1=1 to features");
     // insert x1=1 to front of the features
     double x1 = 1.0;
     for (int i = 0; i < training_data.size(); i++) {
@@ -449,8 +411,8 @@ void launch_lr_parameter_server(
     // also update the weight_size value +1
     // before passing weight_size to LogisticRegression instance below
     party->setter_feature_num(++weight_size);
-    LOG(INFO) << "updated weight_size = " << weight_size << std::endl;
-    LOG(INFO) << "party getter feature_num = " << party->getter_feature_num() << std::endl;
+    log_info("updated weight_size = " + std::to_string(weight_size));
+    log_info("party getter feature_num = " + std::to_string(party->getter_feature_num()));
   }
 
   // init log_reg_model instance
@@ -464,8 +426,7 @@ void launch_lr_parameter_server(
       training_accuracy,
       testing_accuracy);
 
-  LOG(INFO) << "Init logistic regression model success";
-  std::cout << "Init logistic regression model success" << std::endl;
+  log_info("Init logistic regression model");
 
   auto ps = new LRParameterServer(*log_reg_model_builder, *party, ps_network_config_pb_str);
 

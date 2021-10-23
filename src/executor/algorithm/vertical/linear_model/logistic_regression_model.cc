@@ -6,6 +6,7 @@
 #include <falcon/algorithm/vertical/linear_model/logistic_regression_model.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/operator/mpc/spdz_connector.h>
+#include <falcon/utils/logger/logger.h>
 
 #include <cmath>
 #include <glog/logging.h>
@@ -89,17 +90,13 @@ void LogisticRegressionModel::forward_computation(
   // every party computes partial phe summation and sends to active party
   auto encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
 
-  LOG(INFO) << "[forward_computation]: mpc_port_array_size after: " << party.executor_mpc_ports.size() <<" --------";
-  std::cout << "[forward_computation]: mpc_port_array_size after: " << party.executor_mpc_ports.size() << std::endl;
-
   compute_batch_phe_aggregation(party,
       cur_batch_size,
       encoded_batch_samples,
       PHE_FIXED_POINT_PRECISION,
       encrypted_batch_aggregation);
 
-  LOG(INFO) << "[forward_computation]: batch phe aggregation success" << " --------";
-  std::cout << "[forward_computation]: batch phe aggregation success" << std::endl;
+  log_info("[forward_computation]: batch phe aggregation success");
 
   // std::cout << "step 2.1 success" << std::endl;
 
@@ -114,16 +111,7 @@ void LogisticRegressionModel::forward_computation(
       ACTIVE_PARTY_ID,
       encrypted_batch_aggregation_precision);
 
-  LOG(INFO) << "[forward_computation]: ciphers_to_secret_shares success" << " --------";
-  std::cout << "[forward_computation]: ciphers_to_secret_shares success" << std::endl;
-
-  // std::cout << "step 2.2 success" << std::endl;
-  LOG(INFO) << "[spdz_logistic_function_computation]: length:" << party.executor_mpc_ports.size();
-  std::cout <<  "[spdz_logistic_function_computation]: length:" << party.executor_mpc_ports.size() << std::endl;
-  for (int i = 0; i < party.party_num; i++) {
-    LOG(INFO) << "[spdz_logistic_function_computation]: base:" << party.executor_mpc_ports[i]  << "mpc_port_bases[i] + i: "<< party.executor_mpc_ports[i] + i;
-    std::cout <<  "[spdz_logistic_function_computation]: base:" << party.executor_mpc_ports[i]  << "mpc_port_bases[i] + i: "<< party.executor_mpc_ports[i] + i << std::endl;
-  }
+  log_info("[forward_computation]: ciphers_to_secret_shares success");
 
   // step 2.3: communicate with spdz parties and receive results
   // the spdz_logistic_function_computation will do the 1/(1+e^(wx)) operation
@@ -144,8 +132,7 @@ void LogisticRegressionModel::forward_computation(
   // main thread wait spdz_thread to finish
   spdz_thread.join();
 
-  LOG(INFO) << "[forward_computation]: call spdz_logistic_function_computation to do  1/(1+e^(wx)) operation success" << " --------";
-  std::cout << "[forward_computation]: call spdz_logistic_function_computation to do  1/(1+e^(wx)) operation success" << std::endl;
+  log_info("[forward_computation]: call spdz_logistic_function_computation to do 1/(1+e^(wx)) operation success");
 
   // active party receive all shares from other party and do the aggregation,
   // and board-cast predicted labels to other party.
@@ -156,11 +143,8 @@ void LogisticRegressionModel::forward_computation(
                                  cur_batch_size,
                                  ACTIVE_PARTY_ID,
                                  update_precision);
-  LOG(INFO) << "[forward_computation]: secret_shares_to_ciphers success" << " --------";
-  std::cout << "[forward_computation]: secret_shares_to_ciphers success" << std::endl;
-
-  // std::cout << "step 2.3 success" << std::endl;
-  std::cout << "step 2:forward_computation success" << std::endl;
+  log_info("[forward_computation]: secret_shares_to_ciphers success");
+  log_info("step 2: forward_computation success");
 
   delete[] encrypted_batch_aggregation;
 }
@@ -176,8 +160,7 @@ void LogisticRegressionModel::compute_batch_phe_aggregation(
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
-  LOG(INFO) << "[LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success" << " --------";
-  std::cout << "[LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success" << std::endl;
+  log_info("[LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success");
 
   // each party compute local homomorphic aggregation
   auto* local_batch_phe_aggregation = new EncodedNumber[cur_batch_size];
@@ -185,9 +168,8 @@ void LogisticRegressionModel::compute_batch_phe_aggregation(
                          local_batch_phe_aggregation, local_weights,
                          encoded_batch_samples, cur_batch_size, weight_size);
 
-  LOG(INFO) << "[LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success" << " --------";
-  std::cout << "[LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success" << std::endl;
-  google::FlushLogFiles(google::INFO);
+  log_info("[LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success");
+
   // every party sends the local aggregation to the active party
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // copy self local aggregation results
@@ -208,16 +190,14 @@ void LogisticRegressionModel::compute_batch_phe_aggregation(
           party.recv_long_message(id, recv_local_aggregation_str);
         } catch (const boost::system::system_error& ex)
         {
-          cout << "Failed to receive. " << ex.what() << endl;
+          std::cout << "Failed to receive. " << ex.what() << std::endl;
         } catch (const std::string& exs) {
-          cout << "String error. " << exs << endl;
+          log_info("String error. " + exs);
         } catch (...) {
-          cout << "Other errors. " << endl;
+          log_info("Other errors. ");
         }
-
-        LOG(INFO) << "[LogisticRegressionModel.compute_batch_phe_aggregation]: active party recv_long_message from " << id <<" success" << " --------";
-        std::cout << "[LogisticRegressionModel.compute_batch_phe_aggregation]: active party recv_long_message from " << id <<" success" << std::endl;
-
+        log_info("[LogisticRegressionModel.compute_batch_phe_aggregation]: "
+                 "active party recv_long_message from " + std::to_string(id) + " success");
         deserialize_encoded_number_array(recv_batch_phe_aggregation,
                                          cur_batch_size,
                                          recv_local_aggregation_str);
@@ -233,10 +213,8 @@ void LogisticRegressionModel::compute_batch_phe_aggregation(
         delete[] recv_batch_phe_aggregation;
       }
     }
-
-    LOG(INFO) << "[LogisticRegressionModel.compute_batch_phe_aggregation]: active party do djcs_t_aux_ee_add success" << " --------";
-    std::cout << "[LogisticRegressionModel.compute_batch_phe_aggregation]: active party do djcs_t_aux_ee_add success" << std::endl;
-
+    log_info("[LogisticRegressionModel.compute_batch_phe_aggregation]: "
+             "active party do djcs_t_aux_ee_add success");
     // 2. active party serialize and send the aggregated
     // batch_phe_aggregation to other parties
     std::string global_aggregation_str;
@@ -247,8 +225,8 @@ void LogisticRegressionModel::compute_batch_phe_aggregation(
         party.send_long_message(id, global_aggregation_str);
       }
     }
-    LOG(INFO) << "[LogisticRegressionModel.compute_batch_phe_aggregation]: active party send_long_message success" << " --------";
-    std::cout << "[LogisticRegressionModel.compute_batch_phe_aggregation]: active party send_long_message success" << std::endl;
+    log_info("[LogisticRegressionModel.compute_batch_phe_aggregation]: "
+             "active party send_long_message success");
   } else {
     // if it's passive party, it will not do the aggregation,
     // 1. it just serializes local batch aggregation and send to active party
@@ -259,27 +237,25 @@ void LogisticRegressionModel::compute_batch_phe_aggregation(
       party.send_long_message(ACTIVE_PARTY_ID, local_aggregation_str);
     } catch (const boost::system::system_error& ex)
     {
-      cout << "Failed to receive. " << ex.what() << endl;
+      std::cout << "Failed to receive. " << ex.what() << std::endl;
     } catch (const std::string& exs) {
-      cout << "String error. " << exs << endl;
+      log_info("String error. " + exs);
     } catch (...) {
-      cout << "Other errors. " << endl;
+      log_info("Other errors. ");
     }
-
-    LOG(INFO) << "[LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success" << " --------";
-    std::cout << "[LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success" << std::endl;
+    log_info("[LogisticRegressionModel.compute_batch_phe_aggregation]: "
+             "passive party send_long_message success");
     // 2. passive party receive the global batch aggregation
     // from the active party
     std::string recv_global_aggregation_str;
     party.recv_long_message(ACTIVE_PARTY_ID, recv_global_aggregation_str);
     deserialize_encoded_number_array(encrypted_batch_aggregation, cur_batch_size,
                                      recv_global_aggregation_str);
-    LOG(INFO) << "[LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success" << " --------";
-    std::cout << "[LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success" << std::endl;
+    log_info("[LogisticRegressionModel.compute_batch_phe_aggregation]:"
+             " passive party deserialize_encoded_number_array success");
   }
 
   djcs_t_free_public_key(phe_pub_key);
-
   delete[] local_batch_phe_aggregation;
 }
 
@@ -327,8 +303,7 @@ void retrieve_prediction_result(
     (*labels).push_back(t);
     (*probabilities).push_back(prob);
   }
-  std::cout << "Compute prediction finished" << std::endl;
-  LOG(INFO) << "Compute prediction finished";
+  log_info("Compute prediction finished");
 }
 
 void spdz_logistic_function_computation(int party_num,
@@ -349,12 +324,13 @@ void spdz_logistic_function_computation(int party_num,
   // std::cout << "correct init ctx" << std::endl;
   ssl_service io_service;
   octetStream specification;
-  std::cout << "begin connect to spdz parties" << std::endl;
-  std::cout << "party_num = " << party_num << std::endl;
+  log_info("begin connect to spdz parties");
+  log_info("party_num = " + std::to_string(party_num));
   for (int i = 0; i < party_num; i++)
   {
-    LOG(INFO) << "[spdz_logistic_function_computation]: base:" << mpc_port_bases[i]  << "mpc_port_bases[i] + i: "<< mpc_port_bases[i] + i;
-    std::cout <<  "[spdz_logistic_function_computation]: base:" << mpc_port_bases[i]  << "mpc_port_bases[i] + i: "<< mpc_port_bases[i] + i << std::endl;
+    log_info("[spdz_logistic_function_computation]: "
+             "base:" + std::to_string(mpc_port_bases[i])
+             + ", mpc_port_bases[i] + i: " + std::to_string(mpc_port_bases[i] + i));
 
     set_up_client_socket(plain_sockets[i], party_host_names[i].c_str(), mpc_port_bases[i] + i);
     send(plain_sockets[i], (octet*) &party_id, sizeof(int));
@@ -367,8 +343,7 @@ void spdz_logistic_function_computation(int party_num,
     LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
                                                           " sockets = " << mpc_sockets[i] << ", port_num = " << mpc_port_bases[i] + i << ".";
   }
-  LOG(INFO) << "Finish setup socket connections to spdz engines.";
-  std::cout << "Finish setup socket connections to spdz engines." << std::endl;
+  log_info("Finish setup socket connections to spdz engines.");
   int type = specification.get<int>();
   switch (type)
   {
@@ -382,10 +357,9 @@ void spdz_logistic_function_computation(int party_num,
       LOG(ERROR) << "Type " << type << " not implemented";
       exit(1);
   }
-  LOG(INFO) << "Finish initializing gfp field.";
+  log_info("Finish initializing gfp field.");
   // std::cout << "Finish initializing gfp field." << std::endl;
   // std::cout << "batch aggregation size = " << batch_aggregation_shares.size() << std::endl;
-  google::FlushLogFiles(google::INFO);
 
   // send data to spdz parties
   if (party_id == ACTIVE_PARTY_ID) {

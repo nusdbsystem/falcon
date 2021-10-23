@@ -136,11 +136,6 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# PyCharm
-.idea/
-
-# For mac
-.DS_Store
-
-# proto message
-src/executor/include/message/*
+# generated proto message
+src/executor/include/message/*.cc
+src/executor/include/message/*.h
