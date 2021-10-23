@@ -117,7 +117,7 @@ std::vector<int> LRParameterServer::partition_examples(std::vector<int> batch_in
   int mini_batch_size = int(batch_indexes.size()/this->worker_channels.size());
 
   log_info("ps worker size = " + std::to_string(this->worker_channels.size()));
-  log_info("mini batch size = " + std::to_string(mini_batch_size);
+  log_info("mini batch size = " + std::to_string(mini_batch_size));
 
   std::vector<int> message_sizes;
   // deterministic partition given the batch indexes
@@ -310,7 +310,7 @@ void LRParameterServer::distributed_predict(
 
   log_info("cur_test_data_indexes.size = " + std::to_string(cur_test_data_indexes.size()));
   for (int i = 0; i < message_sizes.size(); i++) {
-    log_info("message_sizes[" + std::to_string(i) + "] = " + std::to_string(message_sizes[i]);
+    log_info("message_sizes[" + std::to_string(i) + "] = " + std::to_string(message_sizes[i]));
   }
 
   // step 2: if active party, wait worker finish execution

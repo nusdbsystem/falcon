@@ -35,7 +35,7 @@ ParameterServer::ParameterServer(const std::string& ps_network_config_pb_str){
       worker_channels.push_back(tmp_channel);
 
       log_info("Communication channel established with worker index " + std::to_string(wk_index) + ", ip is " + worker_ips[wk_index]
-                  + ", port is " + std::to_string(worker_ports[wk_index]);
+                  + ", port is " + std::to_string(worker_ports[wk_index]));
     }
 }
 
