@@ -105,7 +105,17 @@ set(SOURCE_FILES
         ../../include/falcon/algorithm/vertical/linear_model/logistic_regression_ps.h
         algorithm/vertical/linear_model/logistic_regression_ps.cc
         ../../include/falcon/utils/logger/logger.h
-        utils/logger/logger.cc)
+        utils/logger/logger.cc
+        ../../include/falcon/algorithm/vertical/linear_model/linear_regression_builder.h
+        ../../include/falcon/algorithm/vertical/linear_model/linear_regression_model.h
+        ../../include/falcon/inference/interpretability/lime/lime.h
+        ../../include/falcon/utils/pb_converter/interpretability_converter.h
+        algorithm/vertical/linear_model/linear_regression_builder.cc
+        algorithm/vertical/linear_model/linear_regression_model.cc
+        inference/interpretability/lime/lime.cc
+        utils/pb_converter/interpretability_converter.cc
+        include/message/interpretability.pb.h
+        include/message/interpretability.pb.cc)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")

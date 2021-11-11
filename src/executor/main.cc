@@ -31,9 +31,9 @@ void print_arguments(const boost::program_options::variables_map& vm);
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
 
-  int party_id, party_num, party_type, fl_setting, use_existing_key;
+  int party_id, party_num, party_type, fl_setting, use_existing_key, is_interpretability;
   std::string network_file, log_file, data_input_file, data_output_file, key_file, model_save_file, model_report_file;
-  std::string algorithm_name, algorithm_params;
+  std::string algorithm_name, algorithm_params, interpretable_method;
 
   // for distributed training
   int is_distributed = 0;
@@ -73,7 +73,11 @@ int main(int argc, char *argv[]) {
         ("is-distributed", po::value<int>(&is_distributed), "is distributed")
         ("distributed-train-network-file", po::value<string>(&distributed_network_file), "ps network file")
         ("worker-id", po::value<int>(&worker_id), "worker id")
-        ("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0");
+        ("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0")
+        ("is-interpretability", po::value<int>(&is_interpretability),
+         "whether needs interpretability")
+        ("interpretable_method", po::value<std::string>(&interpretable_method),
+         "applied interpretable method, default is lime");
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
     po::notify(vm);

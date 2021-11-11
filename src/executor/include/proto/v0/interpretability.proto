@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package com.nus.dbsytem.falcon.v0;
+option go_package = "/common";
+
+import public "common.proto";
+
+// This message denotes the lime interpretability params
+message LimeParams {
+    // whether use precompute strategy
+    bool is_precompute = 1;
+    // number of instances in the precompute stage
+    int32 precompute_instance_num = 2;
+    // precompute saved file, to record the sampled instances and predictions
+    string precompute_save_file = 3;
+    // type of model task, 'regression' or 'classification'
+    string model_type = 4;
+    // number of classes in classification, set to 1 if regression
+    int32 class_num = 5;
+    // if true, all non-categorical features will be discretized into quartiles
+    bool discretize_continuous = 6;
+    // only matters if discretize_continuous is true, options are 'quartile',
+    // 'decide', 'entropy', etc.
+    string discretizer = 7;
+    // categorical feature ids
+    repeated int32 categorical_features = 8;
+    // kernel, similarity kernel that takes euclidean distances and kernel width
+    // as input and outputs weights in (0,1). If not specified, default is exponential kernel
+    string kernel = 9;
+    // width for the kernel
+    double kernel_width = 10;
+    // feature selection method, reserved, options are 'forward_selection', 'lasso_path',
+    // 'none' or 'auto', etc.
+    string feature_selection = 11;
+    // whether sample around the predicting instance
+    bool sample_around_instance = 12;
+    // sampling method, 'gaussian' or 'lhs'
+    string sampling_method = 13;
+    // the number of sampled instances for explaining the prediction
+    int32 sample_instance_num = 14;
+    // feature num at each party
+    int32 local_feature_num = 15;
+    // feature num for the explanation
+    int32 explained_feature_num = 16;
+    // interpretable method, 'linear_regression', 'decision_tree', etc.
+    string interpretable_method = 17;
+    // params for the interpretable method, given base64 encoded string,
+    // deserialize based on the interpretable method
+    string interpretable_method_params = 18;
+}

@@ -8,7 +8,7 @@
 #include <glog/logging.h>
 #include <google/protobuf/io/coded_stream.h>
 
-void serialize_lr_params(LogisticRegressionParams lr_params, std::string& output_message) {
+void serialize_lr_params(const LogisticRegressionParams& lr_params, std::string& output_message) {
   com::nus::dbsytem::falcon::v0::LogisticRegressionParams logistic_regression_params;
   logistic_regression_params.set_batch_size(lr_params.batch_size);
   logistic_regression_params.set_max_iteration(lr_params.max_iteration);
@@ -46,6 +46,44 @@ void deserialize_lr_params(LogisticRegressionParams& lr_params, const std::strin
   lr_params.metric = logistic_regression_params.metric();
   lr_params.dp_budget = logistic_regression_params.differential_privacy_budget();
   lr_params.fit_bias = logistic_regression_params.fit_bias();
+}
+
+void serialize_lir_params(const LinearRegressionParams& lir_params, std::string& output_message) {
+  com::nus::dbsytem::falcon::v0::LinearRegressionParams linear_regression_params;
+  linear_regression_params.set_batch_size(lir_params.batch_size);
+  linear_regression_params.set_max_iteration(lir_params.max_iteration);
+  linear_regression_params.set_converge_threshold(lir_params.converge_threshold);
+  linear_regression_params.set_with_regularization(lir_params.with_regularization);
+  linear_regression_params.set_alpha(lir_params.alpha);
+  linear_regression_params.set_learning_rate(lir_params.learning_rate);
+  linear_regression_params.set_decay(lir_params.decay);
+  linear_regression_params.set_penalty(lir_params.penalty);
+  linear_regression_params.set_optimizer(lir_params.optimizer);
+  linear_regression_params.set_metric(lir_params.metric);
+  linear_regression_params.set_differential_privacy_budget(lir_params.dp_budget);
+  linear_regression_params.set_fit_bias(lir_params.fit_bias);
+  linear_regression_params.SerializeToString(&output_message);
+  linear_regression_params.Clear();
+}
+
+void deserialize_lir_params(LinearRegressionParams& lir_params, const std::string& input_message) {
+  com::nus::dbsytem::falcon::v0::LinearRegressionParams linear_regression_params;
+  if (!linear_regression_params.ParseFromString(input_message)) {
+    LOG(ERROR) << "Deserialize linear regression params message failed.";
+    return;
+  }
+  lir_params.batch_size = linear_regression_params.batch_size();
+  lir_params.max_iteration = linear_regression_params.max_iteration();
+  lir_params.converge_threshold = linear_regression_params.converge_threshold();
+  lir_params.with_regularization = linear_regression_params.with_regularization();
+  lir_params.alpha = linear_regression_params.alpha();
+  lir_params.learning_rate = linear_regression_params.learning_rate();
+  lir_params.decay = linear_regression_params.decay();
+  lir_params.penalty = linear_regression_params.penalty();
+  lir_params.optimizer = linear_regression_params.optimizer();
+  lir_params.metric = linear_regression_params.metric();
+  lir_params.dp_budget = linear_regression_params.differential_privacy_budget();
+  lir_params.fit_bias = linear_regression_params.fit_bias();
 }
 
 void serialize_dt_params(DecisionTreeParams dt_params, std::string& output_message) {

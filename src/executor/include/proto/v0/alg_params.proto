@@ -32,6 +32,34 @@ message LogisticRegressionParams {
     bool fit_bias = 13;
 }
 
+// This message denotes the linear regression parameters
+message LinearRegressionParams {
+    // batch size in each iteration
+    int32 batch_size = 1;
+    // maximum number of iterations for training
+    int32 max_iteration = 2;
+    // tolerance of convergence
+    double converge_threshold = 3;
+    // whether use regularization or not
+    bool with_regularization = 4;
+    // regularization parameter
+    double alpha = 5;
+    // learning rate for parameter updating
+    double learning_rate = 6;
+    // decay rate for learning rate, following lr = lr0 / (1 + decay*t), t is #iteration
+    double decay = 7;
+    // penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
+    string penalty = 8;
+    // optimization method, default 'sgd', currently support 'sgd'
+    string optimizer = 9;
+    // evaluation metric for training and testing, 'mse'
+    string metric = 10;
+    // differential privacy budget
+    double differential_privacy_budget = 11;
+    // whether to fit the bias the term
+    bool fit_bias = 12;
+}
+
 // This message denotes the decision tree builder parameters
 message DecisionTreeParams {
     // type of the tree, 'classification' or 'regression'

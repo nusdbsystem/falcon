@@ -7,6 +7,7 @@
 
 #include <string>
 #include <falcon/algorithm/vertical/linear_model/logistic_regression_builder.h>
+#include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/algorithm/vertical/tree/gbdt_builder.h>
@@ -17,7 +18,7 @@
  * @param lr_params: LogisticRegressionParams to be serialized
  * @param output_message: serialized string
  */
-void serialize_lr_params(LogisticRegressionParams lr_params, std::string& output_message);
+void serialize_lr_params(const LogisticRegressionParams& lr_params, std::string& output_message);
 
 /**
  * deserialize logistic regression param struct from an input string
@@ -26,6 +27,22 @@ void serialize_lr_params(LogisticRegressionParams lr_params, std::string& output
  * @param input_message: serialized string
  */
 void deserialize_lr_params(LogisticRegressionParams& lr_params, const std::string& input_message);
+
+/**
+ * serialize the linear regression param struct to string
+ *
+ * @param lr_params: LinearRegressionParams to be serialized
+ * @param output_message: serialized string
+ */
+void serialize_lir_params(const LinearRegressionParams& lir_params, std::string& output_message);
+
+/**
+ * deserialize linear regression param struct from an input string
+ *
+ * @param lr_params: deserialized LinearRegressionParams
+ * @param input_message: serialized string
+ */
+void deserialize_lir_params(LinearRegressionParams& lir_params, const std::string& input_message);
 
 /**
  * serialize the decision tree param struct to string

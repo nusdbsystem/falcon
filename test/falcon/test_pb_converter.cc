@@ -13,6 +13,8 @@
 #include <falcon/utils/pb_converter/network_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/pb_converter/lr_converter.h>
+#include <falcon/utils/pb_converter/interpretability_converter.h>
+
 
 TEST(PB_Converter, ModelPublishRequest) {
   int model_id = 1;
@@ -345,6 +347,41 @@ TEST(PB_Converter, LogisticRegressionModel) {
   }
   mpz_clear(v_n);
   mpz_clear(v_value);
+}
+
+TEST(PB_Converter, LinearRegressionParams) {
+  LinearRegressionParams lir_params;
+  lir_params.batch_size = 32;
+  lir_params.max_iteration = 100;
+  lir_params.converge_threshold = 1e-3;
+  lir_params.with_regularization = false;
+  lir_params.alpha = 0.5;
+  lir_params.learning_rate = 0.1;
+  lir_params.decay = 0.8;
+  lir_params.penalty = "l2";
+  lir_params.optimizer = "sgd";
+  lir_params.metric = "acc";
+  lir_params.dp_budget = 0;
+  lir_params.fit_bias = true;
+  std::string output_message;
+  serialize_lir_params(lir_params, output_message);
+
+  LinearRegressionParams deserialized_lir_params;
+  deserialize_lir_params(deserialized_lir_params, output_message);
+  EXPECT_EQ(lir_params.batch_size, deserialized_lir_params.batch_size);
+  EXPECT_EQ(lir_params.max_iteration, deserialized_lir_params.max_iteration);
+  EXPECT_EQ(lir_params.converge_threshold, deserialized_lir_params.converge_threshold);
+  EXPECT_EQ(lir_params.with_regularization, deserialized_lir_params.with_regularization);
+  // std::cout << "deserialized_lr_params.with_regularization = " << deserialized_lr_params.with_regularization << std::endl;
+  EXPECT_EQ(lir_params.alpha, deserialized_lir_params.alpha);
+  EXPECT_EQ(lir_params.learning_rate, deserialized_lir_params.learning_rate);
+  EXPECT_EQ(lir_params.decay, deserialized_lir_params.decay);
+  EXPECT_EQ(lir_params.dp_budget, deserialized_lir_params.dp_budget);
+  EXPECT_EQ(lir_params.fit_bias, deserialized_lir_params.fit_bias);
+  // std::cout << "deserialized_lr_params.fit_bias = " << deserialized_lr_params.fit_bias << std::endl;
+  EXPECT_TRUE(lir_params.penalty == deserialized_lir_params.penalty);
+  EXPECT_TRUE(lir_params.optimizer == deserialized_lir_params.optimizer);
+  EXPECT_TRUE(lir_params.metric == deserialized_lir_params.metric);
 }
 
 TEST(PB_Converter, DecisionTreeParams) {
@@ -1187,3 +1224,46 @@ TEST(PB_Converter, PSNetworkConfig) {
   }
 }
 
+TEST(PB_Converter, LimeParams) {
+  LimeParams lime_params;
+  lime_params.is_precompute = true;
+  lime_params.precompute_save_file = "tmp.txt";
+  lime_params.model_type = "classification";
+  lime_params.class_num = 2;
+  lime_params.discretize_continuous = false;
+  lime_params.discretizer = "quartile";
+  lime_params.kernel = "exponential";
+  for (int i = 0; i < 5; i++) {
+    lime_params.categorical_features.push_back(i);
+  }
+  lime_params.kernel_width = 2.0;
+  lime_params.feature_selection = "lasso_path";
+  lime_params.sample_around_instance = false;
+  lime_params.sampling_method = "gaussian";
+  lime_params.local_feature_num = 5;
+  lime_params.explained_feature_num = 5;
+  lime_params.interpretable_method = "ridge";
+  lime_params.interpretable_method_params = "test";
+  std::string output_message;
+  serialize_lime_params(lime_params, output_message);
+  LimeParams output_lime_params;
+  deserialize_lime_params(output_lime_params, output_message);
+  EXPECT_EQ(lime_params.is_precompute, output_lime_params.is_precompute);
+  EXPECT_TRUE(lime_params.precompute_save_file == output_lime_params.precompute_save_file);
+  EXPECT_TRUE(lime_params.model_type == output_lime_params.model_type);
+  EXPECT_EQ(lime_params.class_num, output_lime_params.class_num);
+  EXPECT_EQ(lime_params.discretize_continuous, output_lime_params.discretize_continuous);
+  EXPECT_TRUE(lime_params.discretizer == output_lime_params.discretizer);
+  EXPECT_TRUE(lime_params.kernel == output_lime_params.kernel);
+  for (int i = 0; i < 5; i++) {
+    EXPECT_EQ(lime_params.categorical_features[i], output_lime_params.categorical_features[i]);
+  }
+  EXPECT_EQ(lime_params.kernel_width, output_lime_params.kernel_width);
+  EXPECT_TRUE(lime_params.feature_selection == output_lime_params.feature_selection);
+  EXPECT_EQ(lime_params.sample_around_instance, output_lime_params.sample_around_instance);
+  EXPECT_TRUE(lime_params.sampling_method == output_lime_params.sampling_method);
+  EXPECT_EQ(lime_params.local_feature_num, output_lime_params.local_feature_num);
+  EXPECT_EQ(lime_params.explained_feature_num, output_lime_params.explained_feature_num);
+  EXPECT_TRUE(lime_params.interpretable_method == output_lime_params.interpretable_method);
+  EXPECT_TRUE(lime_params.interpretable_method_params == output_lime_params.interpretable_method_params);
+}
