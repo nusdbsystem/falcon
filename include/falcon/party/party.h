@@ -244,7 +244,7 @@ class Party {
    * @param dest_precision: the destination precision
    */
   void truncate_ciphers_precision(EncodedNumber *ciphers, int size,
-                                  int req_party_id, int dest_precision);
+                                  int req_party_id, int dest_precision) const;
 
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }

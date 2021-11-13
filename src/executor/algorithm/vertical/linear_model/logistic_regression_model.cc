@@ -46,7 +46,7 @@ void LogisticRegressionModel::predict(
   for (int i = 0; i < cur_sample_size; i++) {
     encoded_batch_samples[i] = new EncodedNumber[cur_sample_size];
   }
-  encode_samples( party, predicted_samples, encoded_batch_samples);
+  encode_samples(party, predicted_samples, encoded_batch_samples);
 
   int ciphertext_precision = 0 - local_weights[0].getter_exponent();
   int plaintext_precision = 0 - encoded_batch_samples[0][0].getter_exponent();
@@ -58,12 +58,10 @@ void LogisticRegressionModel::predict(
       encrypted_batch_aggregation_precision,
       predicted_labels);
 
-  int cur_batch_size = predicted_samples.size();
-  for (int i = 0; i < cur_batch_size; i++) {
+  for (int i = 0; i < cur_sample_size; i++) {
     delete[] encoded_batch_samples[i];
   }
   delete[] encoded_batch_samples;
-
 }
 
 void LogisticRegressionModel::forward_computation(
@@ -141,9 +139,7 @@ void retrieve_prediction_result(
     int sample_size,
     EncodedNumber* decrypted_labels,
     std::vector<double>* labels,
-    std::vector< std::vector<double> >* probabilities){
-
-
+    std::vector< std::vector<double> >* probabilities) {
   for (int i = 0; i < sample_size; i++) {
     double t;
     decrypted_labels[i].decode(t);

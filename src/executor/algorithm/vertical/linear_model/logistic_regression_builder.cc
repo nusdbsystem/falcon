@@ -85,52 +85,8 @@ void LogisticRegressionBuilder::backward_computation(
   // convert batch loss shares back to encrypted losses
   int cur_batch_size = (int) batch_indexes.size();
   auto* encrypted_batch_losses = new EncodedNumber[cur_batch_size];
-
-  // compute [f_t - y_t], i.e., [batch_losses]=[batch_outputs]-[batch_labels]
-  // and broadcast active party use the label to calculate loss,
-  // and sent it to other parties
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    std::vector<double> batch_labels;
-    for (int index: batch_indexes) {
-      batch_labels.push_back(training_labels[index]);
-    }
-    auto* encrypted_ground_truth_labels =
-        new EncodedNumber[cur_batch_size];
-    for (int i = 0; i < cur_batch_size; i++) {
-      // init "0-y_t"
-      log_info("[backward_computation]: ground truth precision is: " + std::to_string(precision));
-      log_info("[backward_computation]: predicted_labels precision"
-               " is: " + std::to_string(abs(predicted_labels->getter_exponent())));
-
-      encrypted_ground_truth_labels[i].set_double(
-          phe_pub_key->n[0], 0 - batch_labels[i], precision);
-      // encrypt [0-y_t]
-      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-                         encrypted_ground_truth_labels[i],
-                         encrypted_ground_truth_labels[i]);
-      // compute phe addition [f_t - y_t]
-      djcs_t_aux_ee_add(phe_pub_key, encrypted_batch_losses[i],
-                        predicted_labels[i],
-                        encrypted_ground_truth_labels[i]);
-    }
-    std::string encrypted_batch_losses_str;
-    serialize_encoded_number_array(encrypted_batch_losses, cur_batch_size,
-                                   encrypted_batch_losses_str);
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        party.send_long_message(i, encrypted_batch_losses_str);
-      }
-    }
-    delete[] encrypted_ground_truth_labels;
-    log_info("Finish compute encrypted loss and send to other parties");
-  } else {
-    // passive party receive encrypted loss vector
-    std::string recv_encrypted_batch_losses_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_encrypted_batch_losses_str);
-    deserialize_encoded_number_array(encrypted_batch_losses, cur_batch_size,
-                                     recv_encrypted_batch_losses_str);
-    log_info("Finish receive encrypted loss from the active party");
-  }
+  compute_encrypted_residual(party, batch_indexes, training_labels,
+                             precision, predicted_labels, encrypted_batch_losses);
 
   // after calculate loss, compute [loss_i]*x_{ij}
   auto encoded_batch_samples = new EncodedNumber*[cur_batch_size];
@@ -140,7 +96,6 @@ void LogisticRegressionBuilder::backward_computation(
 
   // update formula: [w_j]=[w_j]-lr*(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}} +
   // reg? lr*(1/|B|) is the same for all sample values, thus can be initialized
-  // TODO: replace cur_batch_size with this->batch_size
   // if distributed train, ps only aggregate the encrypted parameters if divide
   // this->batch_size here; if not distributed train, cur_batch_size = this->batch_size
   double lr_batch = learning_rate / this->batch_size;
@@ -305,7 +260,7 @@ void LogisticRegressionBuilder::train(Party party) {
 
     // encode the training data
     int cur_sample_size = (int) batch_samples.size();
-    EncodedNumber** encoded_batch_samples = new EncodedNumber*[cur_sample_size];
+    auto** encoded_batch_samples = new EncodedNumber*[cur_sample_size];
     for (int i = 0; i < cur_sample_size; i++) {
       encoded_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
     }

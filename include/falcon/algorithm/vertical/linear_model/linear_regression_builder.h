@@ -106,6 +106,32 @@ class LinearRegressionBuilder : public ModelBuilder {
   ~LinearRegressionBuilder();
 
   /**
+   * after receiving batch loss shares and truncated weight shares
+   * from spdz parties, compute encrypted gradient
+   *
+   * @param party: initialized party object
+   * @param batch_logistic_shares: secret shares of batch losses
+   * @param batch_indexes: selected batch indexes
+   * @param precision: precision for the batch samples and shares
+   */
+  void backward_computation(
+      const Party& party,
+      const std::vector<std::vector<double> >& batch_samples,
+      EncodedNumber* predicted_labels,
+      const std::vector<int>& batch_indexes,
+      int precision,
+      EncodedNumber* encrypted_gradients);
+
+  /**
+   * after receiving batch loss shares and truncated weight shares
+   * from spdz parties, update the encrypted local weights
+   *
+   * @param party: initialized party object
+   * @param encrypted_gradients: encrypted gradients
+  */
+  void update_encrypted_weights(Party& party, EncodedNumber* encrypted_gradients) const;
+
+  /**
    * train a logistic regression model
    *
    * @param party: initialized party object

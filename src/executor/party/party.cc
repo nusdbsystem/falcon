@@ -754,7 +754,7 @@ void Party::broadcast_encoded_number_array(EncodedNumber *vec,
 }
 
 void Party::truncate_ciphers_precision(EncodedNumber *ciphers, int size,
-                                       int req_party_id, int dest_precision) {
+                                       int req_party_id, int dest_precision) const {
   // check if the cipher precision is higher than the dest_precision
   // otherwise, no need to truncate the precision
   int src_precision = abs(ciphers[0].getter_exponent());

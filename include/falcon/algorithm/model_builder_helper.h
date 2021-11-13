@@ -64,4 +64,23 @@ void split_dataset(Party* party,
                    std::vector<double>& testing_labels,
                    double split_percentage = SPLIT_TRAIN_TEST_RATIO);
 
+/**
+ * compute the encrypted residual, given the encrypted predicted labels,
+ * and the ground truth plaintext labels, the active party broadcast the
+ * result to all parties after computation
+ *
+ * @param party: initialized party object
+ * @param batch_indexes: the batch indexes
+ * @param training_labels: the original training data labels
+ * @param precision: the ciphertext precision
+ * @param predicted_labels: the encrypted predicted labels
+ * @param encrypted_batch_losses: return, computed encrypted batch loss
+ */
+void compute_encrypted_residual(const Party& party,
+                                const std::vector<int>& batch_indexes,
+                                const std::vector<double>& training_labels,
+                                int precision,
+                                EncodedNumber* predicted_labels,
+                                EncodedNumber* encrypted_batch_losses);
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BUILDER_HELPER_H_

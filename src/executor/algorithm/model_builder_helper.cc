@@ -120,3 +120,47 @@ void split_dataset(Party* party,
     log_info("party getter feature_num = " + std::to_string(party->getter_feature_num()));
   }
 }
+
+void compute_encrypted_residual(const Party& party,
+                                const std::vector<int>& batch_indexes,
+                                const std::vector<double>& training_labels,
+                                int precision,
+                                EncodedNumber* predicted_labels,
+                                EncodedNumber* encrypted_batch_losses) {
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  // convert batch loss shares back to encrypted losses
+  int cur_batch_size = (int) batch_indexes.size();
+  // compute [f_t - y_t], i.e., [batch_losses]=[batch_outputs]-[batch_labels]
+  // and broadcast active party use the label to calculate loss,
+  // and sent it to other parties
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::vector<double> batch_labels;
+    for (int index: batch_indexes) {
+      batch_labels.push_back(training_labels[index]);
+    }
+    auto* encrypted_ground_truth_labels = new EncodedNumber[cur_batch_size];
+    for (int i = 0; i < cur_batch_size; i++) {
+      // init "0-y_t"
+      encrypted_ground_truth_labels[i].set_double(
+          phe_pub_key->n[0], 0 - batch_labels[i], precision);
+      // encrypt [0-y_t]
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+                         encrypted_ground_truth_labels[i],
+                         encrypted_ground_truth_labels[i]);
+      // compute phe addition [f_t - y_t]
+      djcs_t_aux_ee_add(phe_pub_key, encrypted_batch_losses[i],
+                        predicted_labels[i],
+                        encrypted_ground_truth_labels[i]);
+    }
+    delete[] encrypted_ground_truth_labels;
+  }
+  party.broadcast_encoded_number_array(encrypted_batch_losses,
+                                       cur_batch_size, ACTIVE_PARTY_ID);
+  log_info("Finish compute encrypted loss and sync up with all parties");
+
+  djcs_t_free_public_key(phe_pub_key);
+  delete [] encrypted_batch_losses;
+}
