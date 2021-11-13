@@ -7,6 +7,8 @@
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/math/math_ops.h>
+#include <falcon/utils/logger/logger.h>
+#include <falcon/utils/logger/log_alg_params.h>
 
 #include <glog/logging.h>
 
@@ -231,7 +233,11 @@ void train_random_forest(Party party, const std::string& params_str,
   params.dt_param.min_impurity_decrease = 0.01;
   params.dt_param.min_impurity_split = 0.001;
   params.dt_param.dp_budget = 0.1;
+
+  LOG(INFO) << "Init random forest model builder";
   deserialize_rf_params(params, params_str);
+  log_random_forest_params(params);
+
   int weight_size = party.getter_feature_num();
   double training_accuracy = 0.0;
   double testing_accuracy = 0.0;
@@ -246,22 +252,6 @@ void train_random_forest(Party party, const std::string& params_str,
       testing_data,
       training_labels,
       testing_labels);
-
-  LOG(INFO) << "Init random forest model builder";
-  LOG(INFO) << "params.n_estimator = " << params.n_estimator;
-  LOG(INFO) << "params.sample_rate = " << params.sample_rate;
-  LOG(INFO) << "params.dt_param.tree_type = " << params.dt_param.tree_type;
-  LOG(INFO) << "params.dt_param.criterion = " << params.dt_param.criterion;
-  LOG(INFO) << "params.dt_param.split_strategy = " << params.dt_param.split_strategy;
-  LOG(INFO) << "params.dt_param.class_num = " << params.dt_param.class_num;
-  LOG(INFO) << "params.dt_param.max_depth = " << params.dt_param.max_depth;
-  LOG(INFO) << "params.dt_param.max_bins = " << params.dt_param.max_bins;
-  LOG(INFO) << "params.dt_param.min_samples_split = " << params.dt_param.min_samples_split;
-  LOG(INFO) << "params.dt_param.min_samples_leaf = " << params.dt_param.min_samples_leaf;
-  LOG(INFO) << "params.dt_param.max_leaf_nodes = " << params.dt_param.max_leaf_nodes;
-  LOG(INFO) << "params.dt_param.min_impurity_decrease = " << params.dt_param.min_impurity_decrease;
-  LOG(INFO) << "params.dt_param.min_impurity_split = " << params.dt_param.min_impurity_split;
-  LOG(INFO) << "params.dt_param.dp_budget = " << params.dt_param.dp_budget;
 
   RandomForestBuilder random_forest_builder(params,
       training_data,

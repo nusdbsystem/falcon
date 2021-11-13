@@ -9,6 +9,8 @@
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/math/math_ops.h>
 #include <falcon/model/model_io.h>
+#include <falcon/utils/logger/log_alg_params.h>
+#include <falcon/utils/logger/logger.h>
 
 #include <glog/logging.h>
 
@@ -649,22 +651,7 @@ void train_gbdt(Party party, const std::string& params_str,
                               testing_labels);
 
   LOG(INFO) << "Init gbdt model builder";
-  LOG(INFO) << "params.n_estimator = " << params.n_estimator;
-  LOG(INFO) << "params.loss = " << params.loss;
-  LOG(INFO) << "params.learning_rate = " << params.learning_rate;
-  LOG(INFO) << "params.subsample = " << params.subsample;
-  LOG(INFO) << "params.dt_param.tree_type = " << params.dt_param.tree_type;
-  LOG(INFO) << "params.dt_param.criterion = " << params.dt_param.criterion;
-  LOG(INFO) << "params.dt_param.split_strategy = " << params.dt_param.split_strategy;
-  LOG(INFO) << "params.dt_param.class_num = " << params.dt_param.class_num;
-  LOG(INFO) << "params.dt_param.max_depth = " << params.dt_param.max_depth;
-  LOG(INFO) << "params.dt_param.max_bins = " << params.dt_param.max_bins;
-  LOG(INFO) << "params.dt_param.min_samples_split = " << params.dt_param.min_samples_split;
-  LOG(INFO) << "params.dt_param.min_samples_leaf = " << params.dt_param.min_samples_leaf;
-  LOG(INFO) << "params.dt_param.max_leaf_nodes = " << params.dt_param.max_leaf_nodes;
-  LOG(INFO) << "params.dt_param.min_impurity_decrease = " << params.dt_param.min_impurity_decrease;
-  LOG(INFO) << "params.dt_param.min_impurity_split = " << params.dt_param.min_impurity_split;
-  LOG(INFO) << "params.dt_param.dp_budget = " << params.dt_param.dp_budget;
+  log_gbdt_params(params);
 
   GbdtBuilder gbdt_builder(params,
       training_data,

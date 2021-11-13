@@ -45,4 +45,23 @@ void init_encrypted_random_numbers(const Party& party,
                             int precision = PHE_FIXED_POINT_PRECISION);
 
 
+/**
+ * split the training data and testing data according to the fit_bias flag
+ *
+ * @param party: initialized party object
+ * @param fit_bias: whether enable bias term
+ * @param training_data: returned training data
+ * @param testing_data: returned testing data
+ * @param training_labels: returned training labels
+ * @param testing_labels: returned testing labels
+ * @param split_percentage: the split percentage of the data
+ */
+void split_dataset(Party* party,
+                   bool fit_bias,
+                   std::vector<std::vector<double> >& training_data,
+                   std::vector<std::vector<double> >& testing_data,
+                   std::vector<double>& training_labels,
+                   std::vector<double>& testing_labels,
+                   double split_percentage = SPLIT_TRAIN_TEST_RATIO);
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BUILDER_HELPER_H_

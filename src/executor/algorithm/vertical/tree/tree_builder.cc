@@ -9,6 +9,8 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/pb_converter/alg_params_converter.h>
+#include <falcon/utils/logger/log_alg_params.h>
+#include <falcon/utils/logger/logger.h>
 
 #include <map>
 #include <stack>
@@ -1426,7 +1428,11 @@ void train_decision_tree(Party party, const std::string& params_str,
   params.min_impurity_decrease = 0.01;
   params.min_impurity_split = 0.001;
   params.dp_budget = 0.1;
+
+  LOG(INFO) << "Init decision tree model builder";
   deserialize_dt_params(params, params_str);
+  log_decision_tree_params(params);
+
   int weight_size = party.getter_feature_num();
   double training_accuracy = 0.0;
   double testing_accuracy = 0.0;
@@ -1442,19 +1448,7 @@ void train_decision_tree(Party party, const std::string& params_str,
                               training_labels,
                               testing_labels);
 
-  LOG(INFO) << "Init decision tree model builder";
-  LOG(INFO) << "params.tree_type = " << params.tree_type;
-  LOG(INFO) << "params.criterion = " << params.criterion;
-  LOG(INFO) << "params.split_strategy = " << params.split_strategy;
-  LOG(INFO) << "params.class_num = " << params.class_num;
-  LOG(INFO) << "params.max_depth = " << params.max_depth;
-  LOG(INFO) << "params.max_bins = " << params.max_bins;
-  LOG(INFO) << "params.min_samples_split = " << params.min_samples_split;
-  LOG(INFO) << "params.min_samples_leaf = " << params.min_samples_leaf;
-  LOG(INFO) << "params.max_leaf_nodes = " << params.max_leaf_nodes;
-  LOG(INFO) << "params.min_impurity_decrease = " << params.min_impurity_decrease;
-  LOG(INFO) << "params.min_impurity_split = " << params.min_impurity_split;
-  LOG(INFO) << "params.dp_budget = " << params.dp_budget;
+
 
   std::cout << "Init decision tree model" << std::endl;
   LOG(INFO) << "Init decision tree model";

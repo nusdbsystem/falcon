@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-void serialize_lr_model(LogisticRegressionModel lr_model, std::string & output_str) {
+void serialize_lr_model(LinearModel lr_model, std::string & output_str) {
   com::nus::dbsytem::falcon::v0::LrModel pb_lr_model;
   pb_lr_model.set_weight_size(lr_model.weight_size);
   for (int i = 0; i < lr_model.weight_size; i++) {
@@ -41,7 +41,7 @@ void serialize_lr_model(LogisticRegressionModel lr_model, std::string & output_s
   pb_lr_model.Clear();
 }
 
-void deserialize_lr_model(LogisticRegressionModel& lr_model, std::string input_str) {
+void deserialize_lr_model(LinearModel& lr_model, std::string input_str) {
   com::nus::dbsytem::falcon::v0::LrModel deserialized_lr_model;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);

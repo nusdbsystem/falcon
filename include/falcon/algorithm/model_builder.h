@@ -59,6 +59,12 @@ class ModelBuilder {
    */
   virtual void train(Party party) = 0;
 
+  /**
+   * distributed train method
+   *
+   * @param party
+   * @param worker
+   */
   virtual void distributed_train(const Party& party, const Worker& worker) = 0;
 
   /**

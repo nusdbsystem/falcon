@@ -13,6 +13,7 @@
 #include <falcon/common.h>
 #include <falcon/model/model_io.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/utils/logger/log_alg_params.h>
 
 #include <ctime>
 #include <random>
@@ -25,7 +26,7 @@
 #include <Networking/ssl_sockets.h>
 
 
-LogisticRegressionBuilder::LogisticRegressionBuilder() {}
+LogisticRegressionBuilder::LogisticRegressionBuilder() = default;
 
 LogisticRegressionBuilder::LogisticRegressionBuilder(LogisticRegressionParams lr_params,
     int m_weight_size,
@@ -851,26 +852,12 @@ void train_logistic_regression(
     const std::string& model_save_file,
     const std::string& model_report_file,
     int is_distributed_train, Worker* worker) {
-
   log_info("Run train_logistic_regression");
   log_info("is_distributed_train = " + std::to_string(is_distributed_train));
 
   LogisticRegressionParams params;
   deserialize_lr_params(params, params_str);
-
-  log_info("params.batch_size = " + std::to_string(params.batch_size));
-  log_info("params.max_iteration = " + std::to_string(params.max_iteration));
-  log_info("params.converge_threshold = " + std::to_string(params.converge_threshold));
-  log_info("params.with_regularization = " + std::to_string(params.with_regularization));
-  log_info("params.alpha = " + std::to_string(params.alpha));
-  log_info("params.learning_rate = " + std::to_string(params.learning_rate));
-  log_info("params.decay = " + std::to_string(params.decay));
-  log_info("params.penalty = " + params.penalty);
-  log_info("params.optimizer = " + params.optimizer);
-  log_info("params.multi_class = " + params.multi_class);
-  log_info("params.metric = " + params.metric);
-  log_info("params.dp_budget = " + std::to_string(params.dp_budget));
-  log_info("params.fit_bias = " + std::to_string(params.fit_bias));
+  log_logistic_regression_params(params);
 
   // split train test data for party and populate the vectors
   std::vector<std::vector<double>> training_data;
@@ -878,38 +865,12 @@ void train_logistic_regression(
   std::vector<double> training_labels;
   std::vector<double> testing_labels;
 
-  // weight size is different if fit_bias is true on active party
-  int weight_size;
   // if not distributed train, then the party split the data
   // otherwise, the party/worker receive the data and phe keys from ps
   if (is_distributed_train == 0) {
     double split_percentage = SPLIT_TRAIN_TEST_RATIO;
-    party->split_train_test_data(split_percentage, training_data, testing_data,
-                                 training_labels, testing_labels);
-    weight_size = party->getter_feature_num();
-    log_info("original weight_size = " + std::to_string(weight_size));
-    // retrieve the fit_bias term
-    bool m_fit_bias = params.fit_bias;
-    // if this is active party, and fit_bias is true
-    // fit_bias or fit_intercept, for whether to plus the
-    // constant _bias_ or _intercept_ term
-    if ((party->party_type == falcon::ACTIVE_PARTY) && m_fit_bias) {
-      log_info("will insert x1=1 to features");
-      // insert x1=1 to front of the features
-      double x1 = 1.0;
-      for (int i = 0; i < training_data.size(); i++) {
-        training_data[i].insert(training_data[i].begin(), x1);
-      }
-      for (int i = 0; i < testing_data.size(); i++) {
-        testing_data[i].insert(testing_data[i].begin(), x1);
-      }
-      // update the new feature_num for the active party
-      // also update the weight_size value +1
-      // before passing weight_size to LogisticRegression instance below
-      party->setter_feature_num(++weight_size);
-      log_info("updated weight_size = " + std::to_string(weight_size));
-      log_info("party getter feature_num = " + std::to_string(party->getter_feature_num()));
-    }
+    split_dataset(party, params.fit_bias, training_data, testing_data,
+                  training_labels, testing_labels, split_percentage);
   } else {
     // here should receive the train/test data/labels from ps
     std::string recv_training_data_str, recv_testing_data_str;
@@ -936,7 +897,6 @@ void train_logistic_regression(
     party->load_phe_key_string(recv_phe_keys_str);
     // set the weight size and party feature num
     party->setter_feature_num((int) training_data[0].size());
-    weight_size = party->getter_feature_num();
   }
 
   log_info("training_data.size() = " + std::to_string(training_data.size()));
@@ -945,9 +905,10 @@ void train_logistic_regression(
   log_info("testing_data[0].size() = " + std::to_string(testing_data[0].size()));
   log_info("training_labels.size() = " + std::to_string(training_labels.size()));
   log_info("testing_labels.size() = " + std::to_string(testing_labels.size()));
-
   log_info("Init logistic regression model");
 
+  // weight size is different if fit_bias is true on active party
+  int weight_size = party->getter_feature_num();
   double training_accuracy = 0.0;
   double testing_accuracy = 0.0;
   LogisticRegressionBuilder log_reg_model_builder(params,

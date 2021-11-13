@@ -119,9 +119,12 @@ void run_active_server(const Party& party,
     EncodedNumber* decrypted_labels) {
 
   switch(algorithm_name) {
-    case falcon::LR:
+    case falcon::LOG_REG:
       run_active_server_lr(party, saved_model_file, batch_indexes, decrypted_labels);
       break;
+//    case falcon::LINEAR_REG:
+//      // TODO: add implementation
+//      break;
 //    case falcon::DT:
 //      run_active_server_dt(endpoint, saved_model_file, party);
 //      break;
@@ -141,9 +144,12 @@ void run_passive_server(const std::string& saved_model_file,
     const Party& party,
     falcon::AlgorithmName algorithm_name) {
   switch(algorithm_name) {
-    case falcon::LR:
+    case falcon::LOG_REG:
       run_passive_server_lr(saved_model_file, party);
       break;
+//    case falcon::LINEAR_REG:
+//      // TODO: add implementation
+//      break;
     case falcon::DT:
       run_passive_server_dt(saved_model_file, party);
       break;

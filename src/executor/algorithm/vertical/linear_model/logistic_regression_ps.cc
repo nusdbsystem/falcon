@@ -9,6 +9,8 @@
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <falcon/algorithm/vertical/linear_model/logistic_regression_builder.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/utils/logger/log_alg_params.h>
+#include <falcon/algorithm/model_builder_helper.h>
 #include <iostream>
 #include <thread>
 #include <utility>
@@ -353,11 +355,11 @@ void launch_lr_parameter_server(
 
   LogisticRegressionParams params;
   deserialize_lr_params(params, params_pb_str);
-
   log_info("deserialize lr params on ps success");
+  log_info("PS Init logistic regression model");
+  log_logistic_regression_params(params);
   google::FlushLogFiles(google::INFO);
 
-  int weight_size = party->getter_feature_num();
   double training_accuracy = 0.0;
   double testing_accuracy = 0.0;
 
@@ -369,51 +371,11 @@ void launch_lr_parameter_server(
   // ps split the train and test data, after splitting, the ps on all parties
   // have the train and test data, later ps will broadcast the split info to workers
   double split_percentage = SPLIT_TRAIN_TEST_RATIO;
-  party->split_train_test_data(split_percentage,
-      training_data,
-      testing_data,
-      training_labels,
-      testing_labels);
-
-  log_info("PS Init logistic regression model");
-  log_info("params.batch_size = " + std::to_string(params.batch_size));
-  log_info("params.max_iteration = " + std::to_string(params.max_iteration));
-  log_info("params.converge_threshold = " + std::to_string(params.converge_threshold));
-  log_info("params.with_regularization = " + std::to_string(params.with_regularization));
-  log_info("params.alpha = " + std::to_string(params.alpha));
-  log_info("params.learning_rate = " + std::to_string(params.learning_rate));
-  log_info("params.decay = " + std::to_string(params.decay));
-  log_info("params.penalty = " + params.penalty);
-  log_info("params.optimizer = " + params.optimizer);
-  log_info("params.multi_class = " + params.multi_class);
-  log_info("params.metric = " + params.metric);
-  log_info("params.dp_budget = " + std::to_string(params.dp_budget));
-  log_info("params.fit_bias = " + std::to_string(params.fit_bias));
-
   // in distributed train, fit bias should be handled here
-  log_info("original weight_size = " + std::to_string(weight_size));
-  // retrieve the fit_bias term
-  bool m_fit_bias = params.fit_bias;
-  // if this is active party, and fit_bias is true
-  // fit_bias or fit_intercept, for whether to plus the
-  // constant _bias_ or _intercept_ term
-  if ((party->party_type == falcon::ACTIVE_PARTY) && m_fit_bias) {
-    log_info("will insert x1=1 to features");
-    // insert x1=1 to front of the features
-    double x1 = 1.0;
-    for (int i = 0; i < training_data.size(); i++) {
-      training_data[i].insert(training_data[i].begin(), x1);
-    }
-    for (int i = 0; i < testing_data.size(); i++) {
-      testing_data[i].insert(testing_data[i].begin(), x1);
-    }
-    // update the new feature_num for the active party
-    // also update the weight_size value +1
-    // before passing weight_size to LogisticRegression instance below
-    party->setter_feature_num(++weight_size);
-    log_info("updated weight_size = " + std::to_string(weight_size));
-    log_info("party getter feature_num = " + std::to_string(party->getter_feature_num()));
-  }
+  split_dataset(party, params.fit_bias, training_data, testing_data,
+                training_labels, testing_labels, split_percentage);
+  // weight size is different if fit_bias is true on active party
+  int weight_size = party->getter_feature_num();
 
   // init log_reg_model instance
   auto log_reg_model_builder = new LogisticRegressionBuilder (
@@ -435,8 +397,6 @@ void launch_lr_parameter_server(
   // accordingly, workers have to receive and deserialize these
   ps->broadcast_train_test_data(training_data, testing_data, training_labels, testing_labels);
   ps->broadcast_phe_keys();
-
-  google::FlushLogFiles(google::INFO);
 
   // start to train the task in a distributed way
   ps->distributed_train();

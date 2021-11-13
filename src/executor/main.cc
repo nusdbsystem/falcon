@@ -10,6 +10,7 @@
 
 #include "falcon/party/party.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_builder.h"
+#include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/algorithm/vertical/tree/gbdt_builder.h>
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
 
   int party_id, party_num, party_type, fl_setting, use_existing_key, is_interpretability;
   std::string network_file, log_file, data_input_file, data_output_file, key_file, model_save_file, model_report_file;
-  std::string algorithm_name, algorithm_params, interpretable_method;
+  std::string algorithm_name, algorithm_params, interpretable_method, interpretability_params;
 
   // for distributed training
   int is_distributed = 0;
@@ -76,8 +77,10 @@ int main(int argc, char *argv[]) {
         ("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0")
         ("is-interpretability", po::value<int>(&is_interpretability),
          "whether needs interpretability")
-        ("interpretable_method", po::value<std::string>(&interpretable_method),
-         "applied interpretable method, default is lime");
+        ("interpretable-method", po::value<std::string>(&interpretable_method),
+         "applied interpretable method, default is lime")
+        ("interpretability-params", po::value<std::string>(&interpretability_params),
+            "the parameters of the specified interpretable method");
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
     po::notify(vm);
@@ -136,8 +139,11 @@ int main(int argc, char *argv[]) {
       } else {
         log_info("Execute training logic");
         switch(parsed_algorithm_name) {
-          case falcon::LR:
+          case falcon::LOG_REG:
             train_logistic_regression(&party, algorithm_params_pb_str, model_save_file, model_report_file);
+            break;
+          case falcon::LINEAR_REG:
+            train_linear_regression(&party, algorithm_params_pb_str, model_save_file, model_report_file);
             break;
           case falcon::DT:
             train_decision_tree(party, algorithm_params_pb_str, model_save_file, model_report_file);
@@ -181,13 +187,16 @@ int main(int argc, char *argv[]) {
         party.init_network_channels(network_config_pb_str);
         party.init_phe_keys(use_existing_key, key_file);
         switch(parsed_algorithm_name) {
-          case falcon::LR:
+          case falcon::LOG_REG:
             launch_lr_parameter_server(&party,
                                        algorithm_params_pb_str,
                                        ps_network_config_pb_str,
                                        model_save_file,
                                        model_report_file);
             break;
+          case falcon::LINEAR_REG:
+            log_error("Type falcon::LINEAR_REG not implemented");
+            exit(1);
           case falcon::DT:
             log_error("Type falcon::DT not implemented");
             exit(1);
@@ -245,7 +254,7 @@ int main(int argc, char *argv[]) {
         if (distributed_role==1){
           log_info("Execute as worker");
           switch(parsed_algorithm_name) {
-            case falcon::LR:
+            case falcon::LOG_REG:
               train_logistic_regression(&party,
                                         algorithm_params_pb_str,
                                         model_save_file,
@@ -253,6 +262,9 @@ int main(int argc, char *argv[]) {
                                         is_distributed,
                                         worker);
               break;
+            case falcon::LINEAR_REG:
+              log_error("Type falcon::LINEAR_REG not implemented");
+              exit(1);
             case falcon::DT:
               log_error("Type falcon::DT not implemented");
               exit(1);
@@ -291,8 +303,9 @@ int main(int argc, char *argv[]) {
 }
 
 falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
-  falcon::AlgorithmName output = falcon::LR;
-  if ("logistic_regression" == name) output = falcon::LR;
+  falcon::AlgorithmName output = falcon::LOG_REG;
+  if ("logistic_regression" == name) output = falcon::LOG_REG;
+  if ("linear_regression" == name) output = falcon::LINEAR_REG;
   if ("decision_tree" == name) output = falcon::DT;
   if ("random_forest" == name) output = falcon::RF;
   if ("gbdt" == name) output = falcon::GBDT;
@@ -319,4 +332,7 @@ void print_arguments(const boost::program_options::variables_map& vm) {
   log_info("distributed-train-network-file: " + vm["distributed-train-network-file"].as< std::string >());
   log_info("worker-id: " + std::to_string(vm["worker-id"].as< int >()));
   log_info("distributed-role: " + std::to_string(vm["distributed-role"].as< int >()));
+  log_info("is-interpretability: " + std::to_string(vm["is-interpretability"].as< int >()));
+  log_info("interpretable-method: " + vm["interpretable-method"].as< std::string >());
+  log_info("interpretability-params: " + vm["interpretability-params"].as< std::string >());
 }

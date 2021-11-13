@@ -86,3 +86,37 @@ void init_encrypted_random_numbers(const Party& party,
   }
   djcs_t_free_public_key(phe_pub_key);
 }
+
+void split_dataset(Party* party,
+                   bool fit_bias,
+                   std::vector<std::vector<double> >& training_data,
+                   std::vector<std::vector<double> >& testing_data,
+                   std::vector<double>& training_labels,
+                   std::vector<double>& testing_labels,
+                   double split_percentage) {
+  party->split_train_test_data(split_percentage, training_data, testing_data,
+                               training_labels, testing_labels);
+  int weight_size = party->getter_feature_num();
+  log_info("original weight_size = " + std::to_string(weight_size));
+  // retrieve the fit_bias term
+  // if this is active party, and fit_bias is true
+  // fit_bias or fit_intercept, for whether to plus the
+  // constant _bias_ or _intercept_ term
+  if ((party->party_type == falcon::ACTIVE_PARTY) && fit_bias) {
+    log_info("fit_bias = TRUE, will insert x1=1 to features");
+    // insert x1=1 to front of the features
+    double x1 = BIAS_VALUE;
+    for (int i = 0; i < training_data.size(); i++) {
+      training_data[i].insert(training_data[i].begin(), x1);
+    }
+    for (int i = 0; i < testing_data.size(); i++) {
+      testing_data[i].insert(testing_data[i].begin(), x1);
+    }
+    // update the new feature_num for the active party
+    // also update the weight_size value +1
+    // before passing weight_size to LogisticRegression instance below
+    party->setter_feature_num(++weight_size);
+    log_info("updated weight_size = " + std::to_string(weight_size));
+    log_info("party getter feature_num = " + std::to_string(party->getter_feature_num()));
+  }
+}

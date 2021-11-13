@@ -240,7 +240,7 @@ class LogisticRegressionBuilder : public ModelBuilder {
  * train a logistic regression model
  *
  * @param party: initialized party object
- * @param params: LogisticRegressionParams serialized string
+ * @param params_str: LogisticRegressionParams serialized string
  * @param model_save_file: saved model file
  * @param model_report_file: saved report file
  * @param is_distributed_train: 1: use distributed train
@@ -248,7 +248,7 @@ class LogisticRegressionBuilder : public ModelBuilder {
  */
 void train_logistic_regression(
     Party* party,
-    const std::string& params,
+    const std::string& params_str,
     const std::string& model_save_file,
     const std::string& model_report_file,
     int is_distributed_train=0, Worker* worker=nullptr);

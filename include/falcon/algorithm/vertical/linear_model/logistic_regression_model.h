@@ -42,7 +42,7 @@ class LogisticRegressionModel : public LinearModel {
  */
   void predict(const Party &party,
       const std::vector<std::vector<double> >& predicted_samples,
-      EncodedNumber *predicted_labels) const ;
+      EncodedNumber *predicted_labels) const;
 
   /**
    * forward calculate of the network，output predicted_labels

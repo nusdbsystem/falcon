@@ -23,7 +23,7 @@ namespace falcon {
   #define ROUNDED_PRECISION 1e-3
   #define NETWORK_CONFIG_PROTO 1
 
-  /** for Logistic Regression */
+  /** for linear models */
   #define SPDZ_PORT_BASE 14000
   #define RANDOM_SEED 42
   #define SPLIT_TRAIN_TEST_RATIO 0.8
@@ -35,6 +35,8 @@ namespace falcon {
   // sklearn default one-initialized
   #define WEIGHTS_INIT_MIN 0.0
   #define WEIGHTS_INIT_MAX 0.0
+  // bias term value
+  #define BIAS_VALUE 1.0
 
   /** for Decision Tree */
   enum TreeNodeType{ INTERNAL, LEAF };
@@ -72,7 +74,7 @@ namespace falcon {
 
   enum FLSetting { HORIZONTAL_FL, VERTICAL_FL };
   enum PartyType { ACTIVE_PARTY, PASSIVE_PARTY };
-  enum AlgorithmName { LR, DT, RF , GBDT};
+  enum AlgorithmName { LOG_REG, LINEAR_REG, DT, RF , GBDT};
   enum DatasetType { TRAIN, TEST, VALIDATE };
 }  // namespace falcon
 

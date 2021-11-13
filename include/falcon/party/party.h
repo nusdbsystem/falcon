@@ -167,6 +167,15 @@ class Party {
    */
   void recv_long_message(int id, std::string& message) const;
 
+  /**
+   * split the dataset into training and testing dataset
+   *
+   * @param split_percentage: #training_data ratio
+   * @param training_data: returned training data
+   * @param testing_data: returned testing data
+   * @param training_labels: returned training labels
+   * @param testing_labels: returned testing labels
+   */
   void split_train_test_data(double split_percentage,
                              std::vector<std::vector<double> >& training_data,
                              std::vector<std::vector<double> >& testing_data,
