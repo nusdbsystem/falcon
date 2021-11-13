@@ -8,6 +8,10 @@
 #include <string>
 #include <vector>
 
+#include <falcon/common.h>
+#include <falcon/party/party.h>
+#include <falcon/operator/phe/fixed_point_encoder.h>
+
 struct LimeParams {
   // whether use precompute strategy
   bool is_precompute;
@@ -49,6 +53,45 @@ struct LimeParams {
   // params for the interpretable method, given base64 encoded string,
   // deserialize based on the interpretable method
   std::string interpretable_method_params;
+};
+
+class LimeExplainer {
+ public:
+  // the lime params for the interpretability
+  LimeParams params;
+
+ public:
+  /**
+   * pre-compute the model predictions given the model type and model saved file
+   *
+   * @param party: the participating party
+   * @param selected_samples: the samples randomly generated in the whole region
+   * @param algorithm_name: the model name, e.g., RF, GBDT
+   * @param model_saved_file: the file that saves the model
+   */
+  void precompute_predictions(
+      const Party& party,
+      const std::vector<std::vector<double>>& selected_samples,
+      const falcon::AlgorithmName& algorithm_name,
+      const std::string& model_saved_file);
+
+  /**
+   * sample a set of samples given the number of sample
+   *
+   * @param party: the participating party
+   * @param sample_around_instance: whether sample around instance
+   * @param data_row: if above is true, give the predicting sample
+   * @param sample_instance_num: the number of samples needed to generate
+   * @param sampling_method: the sampling method for generating the samples
+   * @return
+   */
+  std::vector<std::vector<double>> generate_random_samples(
+      const Party& party,
+      bool sample_around_instance = false,
+      const std::vector<double>& data_row = std::vector<double>(),
+      int sample_instance_num = 5000,
+      const std::string& sampling_method = "gaussian");
+
 };
 
 #endif //FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_H_
