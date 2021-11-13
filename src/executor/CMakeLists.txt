@@ -115,7 +115,7 @@ set(SOURCE_FILES
         inference/interpretability/lime/lime.cc
         utils/pb_converter/interpretability_converter.cc
         include/message/interpretability.pb.h
-        include/message/interpretability.pb.cc)
+        include/message/interpretability.pb.cc ../../include/falcon/algorithm/vertical/linear_model/linear_model_base.h algorithm/vertical/linear_model/linear_model_base.cc)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")

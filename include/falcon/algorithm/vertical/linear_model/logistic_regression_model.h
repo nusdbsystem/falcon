@@ -6,22 +6,17 @@
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_MODEL_H_
 
 #include <falcon/common.h>
+#include <falcon/algorithm/vertical/linear_model/linear_model_base.h>
 #include <falcon/party/party.h>
 #include "falcon/distributed/worker.h"
 
 #include <thread>
 #include <future>
 
-class LogisticRegressionModel {
- public:
-  // number of weights in the model
-  int weight_size;
-  // model weights vector, encrypted values during training, size equals to weight_size
-  EncodedNumber* local_weights{};
-
+class LogisticRegressionModel : public LinearModel {
  public:
   LogisticRegressionModel();
-  LogisticRegressionModel(int m_weight_size);
+  explicit LogisticRegressionModel(int m_weight_size);
   ~LogisticRegressionModel();
 
   /**
@@ -64,35 +59,6 @@ class LogisticRegressionModel {
       EncodedNumber** encoded_batch_samples,
       int& encrypted_batch_aggregation_precision,
       EncodedNumber *predicted_labels) const;
-
-  /**
-   * compute phe aggregation for a batch of samples
-   *
-   * @param party: initialized party object
-   * @param batch_indexes: selected batch indexes
-   * @param dataset_type: denote the dataset type
-   * @param precision: the fixed point precision of encoded plaintext samples
-   * @param batch_aggregation: returned phe aggregation for the batch
-   */
-  void compute_batch_phe_aggregation(
-      const Party &party,
-      int cur_batch_size,
-      EncodedNumber** encoded_batch_samples,
-      int precision,
-      EncodedNumber *encrypted_batch_aggregation) const;
-
-  /**
-   * encode data samples,
-   *
-   * @param party: initialized party object
-   * @param used_samples: used data_samples
-   * @param encoded_samples: result value
-   */
-  void encode_samples(
-      const Party &party,
-      const std::vector<std::vector<double>>& used_samples,
-      EncodedNumber** encoded_samples) const;
-
 };
 
 
