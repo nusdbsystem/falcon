@@ -127,17 +127,6 @@ class LogisticRegressionBuilder : public ModelBuilder {
                               int precision = PHE_FIXED_POINT_PRECISION);
 
   /**
-   * select batch indexes for each iteration
-   *
-   * @param party: initialized party object
-   * @param data_indexes: the original training data indexes
-   * @return
-   */
-  std::vector<int> select_batch_idx(const Party& party,
-                                    std::vector<int> data_indexes);
-
-
-  /**
    * after receiving batch loss shares and truncated weight shares
    * from spdz parties, compute encrypted gradient
    *
