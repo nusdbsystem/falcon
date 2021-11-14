@@ -132,6 +132,8 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
       encrypted_gradients[j] = common_gradients[j];
     }
   } else {
+    // inspired by https://towardsdatascience.com/intuitions-on-l1-and-l2-regularisation-235f2db4c261
+    auto* regularized_gradients = new EncodedNumber[linear_reg_model.weight_size];
     // if l2 regularization, the other item is { - lr * 2 * \alpha * [w_j] }
     if (penalty == "l2") {
       int common_gradients_precision = abs(common_gradients[0].getter_exponent());
@@ -144,7 +146,6 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
                                   plaintext_precision);
       // first compute the last item of the l2 regularization
       // then, add the second item to the common_gradients
-      auto* regularized_gradients = new EncodedNumber[linear_reg_model.weight_size];
       for (int j = 0; j < linear_reg_model.weight_size; j++) {
         djcs_t_aux_ep_mul(phe_pub_key,
                           regularized_gradients[j],
@@ -155,13 +156,16 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
                           common_gradients[j],
                           regularized_gradients[j]);
       }
-      delete [] regularized_gradients;
     }
 
-    // if l1 regularization
+    // if l1 regularization, the other item has two forms:
+    //    when w_j > 0, it should be { - lr * \alpha }
+    //    when w_j < 0, it should be { lr * \alpha }
+    // we use spdz to check the sign of [local_weights]
     if (penalty == "l1") {
-
+      // TODO: add spdz computation
     }
+    delete [] regularized_gradients;
   }
 
   // truncate the gradient precision to make sure it is consistent with [w_j]
@@ -193,6 +197,90 @@ void LinearRegressionBuilder::update_encrypted_weights(Party &party, EncodedNumb
                       encrypted_gradients[j]);
   }
   djcs_t_free_public_key(phe_pub_key);
+}
+
+void spdz_linear_regression_computation(int party_num,
+                                        int party_id,
+                                        std::vector<int> mpc_port_bases,
+                                        const std::string& mpc_player_path,
+                                        std::vector<std::string> party_host_names,
+                                        const std::vector<double>& global_weights_shares,
+                                        int global_weight_size,
+                                        std::promise<std::vector<double>> *regularized_grad_shares) {
+  // Here put the whole setup socket code together, as using a function call
+  // would result in a problem when deleting the created sockets
+  // setup connections from this party to each spdz party socket
+  std::vector<ssl_socket*> mpc_sockets(party_num);
+  vector<int> plain_sockets(party_num);
+  // ssl_ctx ctx(mpc_player_path, "C" + to_string(party_id));
+  ssl_ctx ctx("C" + to_string(party_id));
+  // std::cout << "correct init ctx" << std::endl;
+  ssl_service io_service;
+  octetStream specification;
+  log_info("begin connect to spdz parties");
+  log_info("party_num = " + std::to_string(party_num));
+  for (int i = 0; i < party_num; i++)
+  {
+    log_info("[spdz_linear_regression_computation]: "
+             "base:" + std::to_string(mpc_port_bases[i])
+             + ", mpc_port_bases[i] + i: " + std::to_string(mpc_port_bases[i] + i));
+
+    set_up_client_socket(plain_sockets[i], party_host_names[i].c_str(), mpc_port_bases[i] + i);
+    send(plain_sockets[i], (octet*) &party_id, sizeof(int));
+    mpc_sockets[i] = new ssl_socket(io_service, ctx, plain_sockets[i],
+                                    "P" + to_string(i), "C" + to_string(party_id), true);
+    if (i == 0){
+      // receive gfp prime
+      specification.Receive(mpc_sockets[0]);
+    }
+    LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
+                                                          " sockets = " << mpc_sockets[i] << ", port_num = " << mpc_port_bases[i] + i << ".";
+  }
+  log_info("Finish setup socket connections to spdz engines.");
+  int type = specification.get<int>();
+  switch (type)
+  {
+    case 'p':
+    {
+      gfp::init_field(specification.get<bigint>());
+      LOG(INFO) << "Using prime " << gfp::pr();
+      break;
+    }
+    default:
+      LOG(ERROR) << "Type " << type << " not implemented";
+      exit(1);
+  }
+  log_info("Finish initializing gfp field.");
+  // std::cout << "Finish initializing gfp field." << std::endl;
+  // std::cout << "batch aggregation size = " << batch_aggregation_shares.size() << std::endl;
+
+  // send data to spdz parties
+  if (party_id == ACTIVE_PARTY_ID) {
+    // send the current array size to the mpc parties
+    std::vector<int> array_size_vec;
+    array_size_vec.push_back(global_weight_size);
+    send_public_values(array_size_vec, mpc_sockets, party_num);
+  }
+
+  // all the parties send private shares
+  for (int i = 0; i < global_weights_shares.size(); i++) {
+    vector<double> x;
+    x.push_back(global_weights_shares[i]);
+    send_private_inputs(x, mpc_sockets, party_num);
+  }
+  // send_private_inputs(batch_aggregation_shares,mpc_sockets, party_num);
+  std::vector<double> return_values = receive_result(mpc_sockets, party_num, global_weight_size);
+  regularized_grad_shares->set_value(return_values);
+
+  for (int i = 0; i < party_num; i++) {
+    close_client_socket(plain_sockets[i]);
+  }
+
+  // free memory and close mpc_sockets
+  for (int i = 0; i < party_num; i++) {
+    delete mpc_sockets[i];
+    mpc_sockets[i] = nullptr;
+  }
 }
 
 void LinearRegressionBuilder::train(Party party) {
@@ -315,11 +403,61 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
 }
 
 void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, const std::string &report_save_path) {
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  log_info("************* Evaluation on " + dataset_str + " Start *************");
+  const clock_t testing_start_time = clock();
+
+  /// the testing workflow is as follows:
+  ///     step 1: init test data
+  ///     step 2: the parties call the model.predict function to compute predicted labels
+  ///     step 3: active party aggregates and call collaborative decryption
+  ///     step 4: active party computes mse metrics
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  // step 1: init test data
+  int dataset_size =
+      (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
+  std::vector<std::vector<double>> cur_test_dataset =
+      (eval_type == falcon::TRAIN) ? training_data : testing_data;
+
+  // step 2: every party do the prediction, since all examples are required to
+  // computed, there is no need communications of data index between different parties
+  auto* predicted_labels = new EncodedNumber[dataset_size];
+  linear_reg_model.predict(party, cur_test_dataset, predicted_labels);
+
+  // step 3: active party aggregates and call collaborative decryption
+  auto* decrypted_labels = new EncodedNumber[dataset_size];
+  party.collaborative_decrypt(predicted_labels,
+                              decrypted_labels,
+                              dataset_size,
+                              ACTIVE_PARTY_ID);
+
+  // std::cout << "Print predicted class" << std::endl;
+
+  // step 4: active party computes the logistic function
+  // and compare the clf metrics
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+//    mean_squared_error(decrypted_labels, dataset_size, eval_type, report_save_path);
+  }
+
+  // free memory
+  djcs_t_free_public_key(phe_pub_key);
+  delete [] predicted_labels;
+  delete [] decrypted_labels;
+
+  const clock_t testing_finish_time = clock();
+  double testing_consumed_time =
+      double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
+  log_info("Evaluation time = " + std::to_string(testing_consumed_time));
+  log_info("************* Evaluation on " + dataset_str + " Finished *************");
 
 }
 
 
-// initializes the LogisticRegressionBuilder instance
+// initializes the LinearRegressionBuilder instance
 // and run .train() .eval() methods, then save model
 void train_linear_regression(
     Party* party,

@@ -161,6 +161,28 @@ class LinearRegressionBuilder : public ModelBuilder {
 };
 
 /**
+ * spdz computation with thread,
+ * the spdz_linear_regression_computation will do the l1 regularization
+ *
+ * @param party_num: number of parties
+ * @param party_id: current party id
+ * @param mpc_port_bases: port bases of the spdz parties
+ * @param mpc_player_path: player data path of the spdz parties
+ * @param party_host_names: spdz parties host names (ips)
+ * @param batch_aggregation_shares: the batch shares
+ * @param cur_batch_size: size of current batch
+ * @param batch_loss_shares: promise structure of the loss shares
+ */
+void spdz_linear_regression_computation(int party_num,
+                                        int party_id,
+                                        std::vector<int> mpc_port_bases,
+                                        const std::string& mpc_player_path,
+                                        std::vector<std::string> party_host_names,
+                                        const std::vector<double>& global_weights_shares,
+                                        int global_weight_size,
+                                        std::promise<std::vector<double>> *regularized_grad_shares);
+
+/**
  * train a linear regression model
  *
  * @param party: initialized party object

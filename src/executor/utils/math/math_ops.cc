@@ -9,21 +9,91 @@
 #include <iostream>  // std::cout
 #include <map>
 #include <numeric>
+#include <falcon/utils/math/math_ops.h>
 
-double mean_squared_error(std::vector<double> a, std::vector<double> b) {
+inline void check_vectors(std::vector<double> a, std::vector<double> b,
+                     const std::vector<double>& weights) {
   if (a.size() != b.size()) {
     LOG(ERROR) << "Mean squared error computation wrong: sizes of the two "
                   "vectors not same";
   }
+  if (!weights.empty() && weights.size() != a.size()) {
+    LOG(ERROR) << "Weights vector size not expected";
+  }
+}
 
+double mean_squared_error(std::vector<double> a, std::vector<double> b,
+                          const std::vector<double>& weights) {
+  check_vectors(a, b, weights);
   int num = a.size();
-  double squared_error = 0.0;
+  double squared_error = 0.0, mean_squared_error = 0.0;
   for (int i = 0; i < num; i++) {
-    squared_error = squared_error + (a[i] - b[i]) * (a[i] - b[i]);
+    if (!weights.empty()) {
+      squared_error = squared_error + weights[i] * (a[i] - b[i]) * (a[i] - b[i]);
+    } else {
+      squared_error = squared_error + (a[i] - b[i]) * (a[i] - b[i]);
+    }
   }
 
-  double mean_squared_error = squared_error / num;
+  if (!weights.empty()) {
+    double weights_sum = std::accumulate(weights.begin(), weights.end(),0.0);
+    // mean_squared_error = squared_error / (num * weights_sum); // do not use num here
+    mean_squared_error = squared_error / weights_sum;
+  } else {
+    mean_squared_error = squared_error / num;
+  }
   return mean_squared_error;
+}
+
+double mean_squared_log_error(std::vector<double> a, std::vector<double> b,
+                              const std::vector<double>& weights) {
+  check_vectors(a, b, weights);
+  int num = a.size();
+  double squared_log_error = 0.0, mean_squared_log_error = 0.0;
+  for (int i = 0; i < num; i++) {
+    a[i] = log1p(a[i]);
+    b[i] = log1p(b[i]);
+  }
+  return mean_squared_error(a, b, weights);
+//  for (int i = 0; i < num; i++) {
+//    // need to make sure value is less than negative 1
+//    double log_error_i = log1p(a[i]) - log1p(b[i]);
+//    if (!weights.empty()) {
+//      squared_log_error = squared_log_error + weights[i] * log_error_i * log_error_i;
+//    } else {
+//      squared_log_error = squared_log_error + log_error_i * log_error_i;
+//    }
+//  }
+//
+//  if (!weights.empty()) {
+//    double weights_sum = std::accumulate(weights.begin(), weights.end(),0.0);
+//    mean_squared_log_error = squared_log_error / (num * weights_sum);
+//  } else {
+//    mean_squared_log_error = squared_log_error / num;
+//  }
+  return mean_squared_log_error;
+}
+
+double median_absolute_error(std::vector<double> a, std::vector<double> b) {
+  check_vectors(a, b, std::vector<double>());
+  int num = a.size();
+  std::vector<double> absolute_errors;
+  absolute_errors.reserve(num);
+  for (int i = 0; i < num; i++) {
+    absolute_errors.push_back(abs(a[i] - b[i]));
+  }
+  return median(absolute_errors);
+}
+
+double max_error(std::vector<double> a, std::vector<double> b) {
+  check_vectors(a, b, std::vector<double>());
+  int num = a.size();
+  std::vector<double> errors;
+  errors.reserve(num);
+  for (int i = 0; i < num; i++) {
+    errors.push_back(abs(a[i] - b[i]));
+  }
+  return *std::max_element(errors.begin(), errors.end());
 }
 
 bool rounded_comparison(double a, double b) {
@@ -108,7 +178,7 @@ double logistic_regression_loss(std::vector<double> pred_probs,
   return loss;
 }
 
-double mode(std::vector<double> inputs) {
+double mode(const std::vector<double>& inputs) {
   // compute the frequency of the values
   std::map<double, int> m;
   for (auto v : inputs) {
@@ -129,6 +199,25 @@ double mode(std::vector<double> inputs) {
     }
   }
   return mode_value;
+}
+
+double median(std::vector<double>& inputs) {
+  int vec_size = (int) inputs.size();
+  double median_value = 0.0;
+  int n = vec_size / 2;
+  nth_element(inputs.begin(), inputs.begin() + n, inputs.end());
+
+  if (vec_size % 2 == 0) {
+    // return the average of the middle two
+    median_value = median_value + inputs[n];
+    nth_element(inputs.begin(), inputs.begin() + n - 1, inputs.end());
+    median_value = median_value + inputs[n-1];
+    median_value /= 2;
+  } else {
+    // return the middle one
+    median_value = inputs[n];
+  }
+  return median_value;
 }
 
 double average(std::vector<double> inputs) {

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <valarray>
 
 /**
  * test cases mirrored in ml_baseline/python's
@@ -203,4 +204,114 @@ TEST(Math_ops, LogisticRegressionLossAdvanced) {
   labels[7] = 1;
   cost = logistic_regression_loss(pred_probs, labels);
   EXPECT_NEAR(cost, 0.4917494284709932, abs_error);
+}
+
+TEST(Math_ops, MSE) {
+  std::vector<double> a, b, weights;
+  a.push_back(3);
+  a.push_back(-0.5);
+  a.push_back(2);
+  a.push_back(7);
+  b.push_back(2.5);
+  b.push_back(0.0);
+  b.push_back(2);
+  b.push_back(8);
+  // error within 10 decimal point
+  double abs_error = 1e-3;
+  double mse = mean_squared_error(a, b);
+  double rmse = sqrt(mse);
+  EXPECT_NEAR(mse, 0.375, abs_error);
+  EXPECT_NEAR(rmse, 0.612, abs_error);
+
+  weights.push_back(0.1);
+  weights.push_back(0.2);
+  weights.push_back(0.3);
+  weights.push_back(0.4);
+  mse = mean_squared_error(a, b, weights);
+  rmse = sqrt(mse);
+  EXPECT_NEAR(mse, 0.475, abs_error);
+  EXPECT_NEAR(rmse, 0.689, abs_error);
+}
+
+TEST(Math_ops, MSLE) {
+  std::vector<double> a, b, weights;
+  a.push_back(3);
+  a.push_back(5);
+  a.push_back(2.5);
+  a.push_back(7);
+  b.push_back(2.5);
+  b.push_back(5);
+  b.push_back(4);
+  b.push_back(8);
+  // error within 10 decimal point
+  double abs_error = 1e-3;
+  double msle = mean_squared_log_error(a, b);
+  double rmsle = sqrt(msle);
+  EXPECT_NEAR(msle, 0.039, abs_error);
+  EXPECT_NEAR(rmsle, 0.199, abs_error);
+
+  weights.push_back(0.1);
+  weights.push_back(0.2);
+  weights.push_back(0.3);
+  weights.push_back(0.4);
+  msle = mean_squared_log_error(a, b, weights);
+  rmsle = sqrt(msle);
+  EXPECT_NEAR(msle, 0.045, abs_error);
+  EXPECT_NEAR(rmsle, 0.213, abs_error);
+}
+
+TEST(Math_ops, MAE) {
+  std::vector<double> a, b, weights;
+  a.push_back(3);
+  a.push_back(-0.5);
+  a.push_back(2);
+  a.push_back(7);
+  b.push_back(2.5);
+  b.push_back(0.0);
+  b.push_back(2);
+  b.push_back(8);
+  // error within 10 decimal point
+  double abs_error = 1e-3;
+  double mae = median_absolute_error(a, b);
+  EXPECT_NEAR(mae, 0.5, abs_error);
+}
+
+TEST(Math_ops, MAXE) {
+  std::vector<double> a, b;
+  a.push_back(3);
+  a.push_back(-0.5);
+  a.push_back(2);
+  a.push_back(7);
+  b.push_back(2.5);
+  b.push_back(0.0);
+  b.push_back(2);
+  b.push_back(8);
+  // error within 10 decimal point
+  double abs_error = 1e-3;
+  double maxe = max_error(a, b);
+  EXPECT_NEAR(maxe, 1.0, abs_error);
+}
+
+TEST(Math_ops, MODE) {
+  std::vector<double> a;
+  a.push_back(1.0);
+  a.push_back(1.0);
+  a.push_back(2.0);
+  a.push_back(3.0);
+  a.push_back(3.0);
+  a.push_back(3.0);
+  double mode_value = mode(a);
+  EXPECT_EQ(mode_value, 3.0);
+}
+
+TEST(Math_ops, Median) {
+  std::vector<double> a;
+  a.push_back(1.0);
+  a.push_back(1.0);
+  a.push_back(2.0);
+  a.push_back(3.0);
+  a.push_back(3.0);
+  a.push_back(3.0);
+  double median_value = median(a);
+  EXPECT_EQ(median_value, 2.5);
 }

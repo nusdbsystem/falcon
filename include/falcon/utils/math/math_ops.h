@@ -6,12 +6,50 @@
 /**
  * given two vectors, compute the mean squared error
  * (i.e., accuracy) in regression
+ * https://peltarion.com/knowledge-center/documentation/glossary
+ *
+ * @param a
+ * @param b
+ * @param weights: if weights vector is given, compute weighted mse
+ * @return
+ */
+double mean_squared_error(std::vector<double> a, std::vector<double> b,
+                          const std::vector<double>& weights = std::vector<double>());
+
+/**
+ * given two vectors, compute the mean squared log error
+ * (i.e., accuracy) in regression
+ *  https://peltarion.com/knowledge-center/documentation/glossary
+ *
+ * @param a
+ * @param b
+ * @param weights: if weights vector is given, compute weighted mse
+ * @return
+ */
+double mean_squared_log_error(std::vector<double> a, std::vector<double> b,
+                              const std::vector<double>& weights = std::vector<double>());
+
+/**
+ * given two vectors, compute the median absolute error
+ * (i.e., accuracy) in regression
+ * https://peltarion.com/knowledge-center/documentation/glossary
  *
  * @param a
  * @param b
  * @return
  */
-double mean_squared_error(std::vector<double> a, std::vector<double> b);
+double median_absolute_error(std::vector<double> a, std::vector<double> b);
+
+/**
+ * given two vectors, compute the max error
+ * (i.e., accuracy) in regression
+ * https://peltarion.com/knowledge-center/documentation/glossary
+ *
+ * @param a
+ * @param b
+ * @return
+ */
+double max_error(std::vector<double> a, std::vector<double> b);
 
 /**
  * given two values, compare whether they are same within some accuracy
@@ -65,7 +103,19 @@ double logistic_regression_loss(std::vector<double> pred_probs,
  * @param inputs
  * @return
  */
-double mode(std::vector<double> inputs);
+double mode(const std::vector<double>& inputs);
+
+/**
+ * find the median value of a vector.
+ *  Given a vector ``V`` of length ``N``, the median of ``V`` is the
+    middle value of a sorted copy of ``V``, ``V_sorted`` - i
+    e., ``V_sorted[(N-1)/2]``, when ``N`` is odd, and the average of the
+    two middle values of ``V_sorted`` when ``N`` is even.
+ *
+ * @param vec
+ * @return
+ */
+double median(std::vector<double>& inputs);
 
 /**
  * compute the average value of a vector
