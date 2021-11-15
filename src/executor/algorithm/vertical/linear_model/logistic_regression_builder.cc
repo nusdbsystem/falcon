@@ -661,7 +661,7 @@ void LogisticRegressionBuilder::eval_matrix_computation_and_save(
 
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   // Classification Metrics object for performance metrics
-  ClassificationMetrics ClfMetrics;
+  ClassificationMetrics clf_metrics;
 
   if (metric == "acc") {
     // the output is a vector of integers (predicted classes)
@@ -685,10 +685,10 @@ void LogisticRegressionBuilder::eval_matrix_computation_and_save(
       // LOG(INFO) << "sample " << i << "'s est_prob = " << est_prob << ", and predicted class = " << pred_class;
     }
     if (eval_type == falcon::TRAIN) {
-      ClfMetrics.compute_metrics(pred_classes, training_labels);
+      clf_metrics.compute_metrics(pred_classes, training_labels);
     }
     if (eval_type == falcon::TEST) {
-      ClfMetrics.compute_metrics(pred_classes, testing_labels);
+      clf_metrics.compute_metrics(pred_classes, testing_labels);
     }
 
     // write results to report
@@ -701,9 +701,9 @@ void LogisticRegressionBuilder::eval_matrix_computation_and_save(
       }
     }
     log_info("Classification Confusion Matrix on " + dataset_str + " is: ");
-    ClfMetrics.pretty_print_cm(outfile);
+    clf_metrics.pretty_print_cm(outfile);
     log_info("Classification Report on " + dataset_str + " is: ");
-    ClfMetrics.classification_report(outfile);
+    clf_metrics.classification_report(outfile);
     outfile.close();
   } else {
     log_error("The " + metric + " metric is not supported");

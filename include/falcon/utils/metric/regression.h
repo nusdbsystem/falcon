@@ -41,9 +41,9 @@ class RegressionMetrics {
    * @param labels: the original labels
    * @param sample_weights: the weights of samples
    */
-  void compute_metrics(std::vector<int> predictions,
-                       std::vector<double> labels,
-                       std::vector<double> sample_weights);
+  void compute_metrics(const std::vector<double>& predictions,
+                       const std::vector<double>& labels,
+                       const std::vector<double>& sample_weights = std::vector<double>());
 
   // print the classifier performance report
   void regression_report(std::ofstream& outfile);

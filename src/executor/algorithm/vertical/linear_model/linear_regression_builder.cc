@@ -14,6 +14,7 @@
 #include <falcon/model/model_io.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/logger/log_alg_params.h>
+#include <falcon/utils/metric/regression.h>
 
 #include <ctime>
 #include <random>
@@ -454,6 +455,48 @@ void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, c
   log_info("Evaluation time = " + std::to_string(testing_consumed_time));
   log_info("************* Evaluation on " + dataset_str + " Finished *************");
 
+}
+
+void LinearRegressionBuilder::eval_predictions_and_save(EncodedNumber *decrypted_labels,
+                                                        int sample_number,
+                                                        falcon::DatasetType eval_type,
+                                                        const std::string &report_save_path) {
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  // assume we only support mse, but rmse, msle, rmsle, mae, maxe are also supported
+  // we print these metrics together for better debug
+  if (metric != "mse") {
+    log_error("The " + metric + " metric is not supported");
+    exit(1);
+  }
+
+  // Regression Metrics for performance evaluation
+  RegressionMetrics reg_metrics;
+  // decode decrypted labels
+  std::vector<double> decoded_predicted_labels;
+  for (int i = 0; i < sample_number; i++) {
+    double decode_pred;
+    decrypted_labels[i].decode(decode_pred);
+    decoded_predicted_labels.push_back(decode_pred);
+  }
+  if (eval_type == falcon::TRAIN) {
+    reg_metrics.compute_metrics(decoded_predicted_labels, training_labels);
+  }
+  if (eval_type == falcon::TEST) {
+    reg_metrics.compute_metrics(decoded_predicted_labels, testing_labels);
+  }
+
+  // write the results to report
+  std::ofstream outfile;
+  if (!report_save_path.empty()) {
+    outfile.open(report_save_path, std::ios_base::app);
+    if (outfile) {
+      outfile << "******** Evaluation Report on " << dataset_str
+              << " ********\n";
+    }
+  }
+  log_info("Regression Report on " + dataset_str + " is: ");
+  reg_metrics.regression_report(outfile);
+  outfile.close();
 }
 
 
