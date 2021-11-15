@@ -165,6 +165,7 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
     // we use spdz to check the sign of [local_weights]
     if (penalty == "l1") {
       // TODO: add spdz computation
+      compute_l1_regularized_grad(party, regularized_gradients);
     }
     delete [] regularized_gradients;
   }
@@ -183,6 +184,148 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
   }
   delete [] encoded_batch_samples;
   delete [] common_gradients;
+}
+
+void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, EncodedNumber *regularized_gradients) {
+  // To compute the sign of each weight in the model, we do the following steps:
+  // 1. active party aggregates the weight size vector of all parties and broadcast
+  // 2. active party organizes a global encrypted weight vector and broadcast
+  // 3. all parties convert the global weight vector into secret shares
+  // 4. all parties connect to spdz parties to compute the sign and receive shares
+  // 5. all parties convert the secret shares into encrypted sign vector
+  // 6. each party picks the corresponding local gradients and multiply the hyper-parameter
+
+  log_info("[compute_l1_regularized_grad]: begin to compute l1 regularized gradients");
+
+  // step 1
+  std::vector<int> party_weight_sizes;
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // first set its own weight size and receive other parties' weight sizes
+    party_weight_sizes.push_back(linear_reg_model.weight_size);
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        std::string recv_weight_size;
+        party.recv_long_message(i, recv_weight_size);
+        party_weight_sizes.push_back(std::stoi(recv_weight_size));
+      }
+    }
+    // then broadcast the vector
+    std::string party_weight_sizes_str;
+    serialize_int_array(party_weight_sizes, party_weight_sizes_str);
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        party.send_long_message(i, party_weight_sizes_str);
+      }
+    }
+  } else {
+    // first send the weight size to active party
+    party.send_long_message(ACTIVE_PARTY_ID, std::to_string(linear_reg_model.weight_size));
+    // then receive and deserialize the party_weight_sizes array
+    std::string recv_party_weight_sizes_str;
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_party_weight_sizes_str);
+    deserialize_int_array(party_weight_sizes, recv_party_weight_sizes_str);
+  }
+
+  log_info("[compute_l1_regularized_grad]: finish aggregate and broadcast weight sizes");
+
+  // step 2
+  int global_weight_size = std::accumulate(party_weight_sizes.begin(), party_weight_sizes.end(), 0);
+  auto* global_weights = new EncodedNumber[global_weight_size];
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // first append its own local weights
+    int global_idx = 0;
+    for (int j = 0; j < linear_reg_model.weight_size; j++) {
+      global_weights[global_idx] = linear_reg_model.local_weights[j];
+      global_idx++;
+    }
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        int recv_weight_size = party_weight_sizes[i];
+        auto* recv_local_weights = new EncodedNumber[recv_weight_size];
+        std::string recv_local_weights_str;
+        party.recv_long_message(i, recv_local_weights_str);
+        deserialize_encoded_number_array(recv_local_weights,
+                                         recv_weight_size, recv_local_weights_str);
+        for (int k = 0; k < recv_weight_size; k++) {
+          global_weights[global_idx] = recv_local_weights[k];
+          global_idx++;
+        }
+        delete [] recv_local_weights;
+      }
+    }
+  } else {
+    // serialize local weights and send to active party
+    std::string local_weights_str;
+    serialize_encoded_number_array(linear_reg_model.local_weights,
+                                   linear_reg_model.weight_size, local_weights_str);
+    party.send_long_message(ACTIVE_PARTY_ID, local_weights_str);
+  }
+  // active party broadcast the global weights vector
+  party.broadcast_encoded_number_array(global_weights, global_weight_size, ACTIVE_PARTY_ID);
+
+  log_info("[compute_l1_regularized_grad]: finish aggregate and broadcast global weights");
+
+  // step 3
+  std::vector<double> global_weights_shares;
+  int phe_precision = abs(global_weights[0].getter_exponent());
+  party.ciphers_to_secret_shares(global_weights, global_weights_shares,
+                                 global_weight_size, ACTIVE_PARTY_ID, phe_precision);
+
+  log_info("[compute_l1_regularized_grad]: finish convert to secret shares");
+
+  // step 4
+  // the spdz_linear_regression_computation will do the extracting sign with *(-1) operation
+  std::promise<std::vector<double>> promise_values;
+  std::future<std::vector<double>> future_values =
+      promise_values.get_future();
+  std::thread spdz_thread(spdz_linear_regression_computation,
+                          party.party_num,
+                          party.party_id,
+                          party.executor_mpc_ports,
+                          SPDZ_PLAYER_PATH,
+                          party.host_names,
+                          global_weights_shares,
+                          global_weight_size,
+                          &promise_values);
+
+  std::vector<double> global_regularized_sign_shares = future_values.get();
+  // main thread wait spdz_thread to finish
+  spdz_thread.join();
+
+  log_info("[compute_l1_regularized_grad]: finish connect to spdz parties and receive result shares");
+
+  // step 5
+  auto* global_regularized_grad = new EncodedNumber[global_weight_size];
+  party.secret_shares_to_ciphers(global_regularized_grad, global_regularized_sign_shares,
+                                 global_weight_size, ACTIVE_PARTY_ID, phe_precision);
+
+  log_info("[compute_l1_regularized_grad]: finish convert regularized gradient shares to ciphers");
+
+  // step 6
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  EncodedNumber regularization_hyper_param;
+  regularization_hyper_param.set_double(phe_pub_key->n[0],
+                                        alpha, 2 * PHE_FIXED_POINT_PRECISION);
+  for (int j = 0; j < global_weight_size; j++) {
+    djcs_t_aux_ep_mul(phe_pub_key, global_regularized_grad[j],
+                      global_regularized_grad[j], regularization_hyper_param);
+  }
+  // assign to local regularized gradients
+  int start_idx = 0;
+  for (int i = 0; i < party.party_id; i++) {
+    start_idx += party_weight_sizes[i];
+  }
+  for (int j = 0; j < linear_reg_model.weight_size; j++) {
+    regularized_gradients[j] = global_regularized_grad[start_idx];
+    start_idx++;
+  }
+
+  log_info("[compute_l1_regularized_grad]: finish assign to local regularized gradients");
+
+  delete [] global_weights;
+  delete [] global_regularized_grad;
+  djcs_t_free_public_key(phe_pub_key);
 }
 
 void LinearRegressionBuilder::update_encrypted_weights(Party &party, EncodedNumber *encrypted_gradients) const {
@@ -366,7 +509,7 @@ void LinearRegressionBuilder::train(Party party) {
     // note: from here should be different from the logistic regression logic
     // update encrypted local weights
     auto encrypted_gradients = new EncodedNumber[linear_reg_model.weight_size];
-    int update_precision = encrypted_weights_precision / 2;
+    int update_precision = encrypted_batch_aggregation_precision;
     backward_computation(
         party,
         batch_samples,
