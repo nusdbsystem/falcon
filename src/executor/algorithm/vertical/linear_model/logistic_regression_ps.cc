@@ -204,22 +204,21 @@ EncodedNumber* LRParameterServer::update_encrypted_weights(
     delete [] tmp;
   }
 
+  // on parameter server, does not need to differentiate regularization
+  // or not, because the regularized gradients is computed on each party
+  // and included into the returned gradients, but may need to tune the
+  // hyper-parameter learning_rate and alpha
   // after aggregating the gradients, update the local weights
-  if (!this->alg_builder.with_regularization) {
-    // update each local weight j
-    for (int j = 0; j < weight_size; j++) {
-      // update the j-th weight in local_weight vector
-      // need to make sure that the exponents of inner_product
-      // and local weights are the same
-      djcs_t_aux_ee_add(
-          phe_pub_key,
-          this->alg_builder.log_reg_model.local_weights[j],
-          this->alg_builder.log_reg_model.local_weights[j],
-          encrypted_aggregated_gradients[j]);
-    }
-  } else {
-    // TODO: handle the update formula when using regularization,
-    // currently only l2
+  // update each local weight j
+  for (int j = 0; j < weight_size; j++) {
+    // update the j-th weight in local_weight vector
+    // need to make sure that the exponents of inner_product
+    // and local weights are the same
+    djcs_t_aux_ee_add(
+        phe_pub_key,
+        this->alg_builder.log_reg_model.local_weights[j],
+        this->alg_builder.log_reg_model.local_weights[j],
+        encrypted_aggregated_gradients[j]);
   }
 
   djcs_t_free_public_key(phe_pub_key);

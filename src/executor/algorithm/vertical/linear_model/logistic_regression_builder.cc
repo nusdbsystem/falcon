@@ -94,8 +94,8 @@ void LogisticRegressionBuilder::backward_computation(
     encoded_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
   }
 
-  // update formula: [w_j]=[w_j]-lr*(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}} +
-  // reg? lr*(1/|B|) is the same for all sample values, thus can be initialized
+  // update formula: [w_j]=[w_j]-lr*{(1/|B|){\sum_{i=1}^{|B|} [loss_i]*x_{ij}} +
+  // 2 * \alpha * [w_j]} lr*(1/|B|) is the same for all sample values, thus can be initialized
   // if distributed train, ps only aggregate the encrypted parameters if divide
   // this->batch_size here; if not distributed train, cur_batch_size = this->batch_size
   double lr_batch = learning_rate / this->batch_size;
@@ -112,33 +112,75 @@ void LogisticRegressionBuilder::backward_computation(
   // calculate gradients
   // if not with_regularization, no need to convert truncated weights;
   // otherwise, need to convert truncated weights to ciphers for the update
-  if (!with_regularization) {
-    // update each local weight j
-    for (int j = 0; j < log_reg_model.weight_size; j++) {
-      EncodedNumber gradient;
-      auto* batch_feature_j = new EncodedNumber[cur_batch_size];
-      for (int i = 0; i < cur_batch_size; i++) {
-        batch_feature_j[i] = encoded_batch_samples[i][j];
-      }
-      djcs_t_aux_inner_product(phe_pub_key, party.phe_random, gradient,
-                               encrypted_batch_losses, batch_feature_j,
-                               cur_batch_size);
-      encrypted_gradients[j] = gradient;
 
-      delete [] batch_feature_j;
+  // compute common gradients
+  auto common_gradients = new EncodedNumber[log_reg_model.weight_size];
+  // update each local weight j
+  for (int j = 0; j < log_reg_model.weight_size; j++) {
+    EncodedNumber gradient;
+    auto* batch_feature_j = new EncodedNumber[cur_batch_size];
+    for (int i = 0; i < cur_batch_size; i++) {
+      batch_feature_j[i] = encoded_batch_samples[i][j];
+    }
+    djcs_t_aux_inner_product(phe_pub_key, party.phe_random, gradient,
+                             encrypted_batch_losses, batch_feature_j,
+                             cur_batch_size);
+    common_gradients[j] = gradient;
+
+    delete [] batch_feature_j;
+  }
+
+  if (!with_regularization) {
+    // if without regularization, directly assign the common gradients
+    for (int j = 0; j < log_reg_model.weight_size; j++) {
+      encrypted_gradients[j] = common_gradients[j];
     }
   } else {
-    // TODO: handle the update formula when using regularization,
-    // currently only l2
+    // currently only support l2, the additional term is (- 2 * lr * \alpha * [w_j])
+    // notice that if using distributed train, then it equals to the ps minus multiple
+    // times of the regularized gradients as each worker does this computation once,
+    // better to tune the learning_rate and alpha to make the training more reasonable
+    if (penalty == "l2") {
+      int common_gradients_precision = abs(common_gradients[0].getter_exponent());
+      double constant = 0 - learning_rate * 2 * alpha;
+      EncodedNumber encoded_constant;
+      encoded_constant.set_double(phe_pub_key->n[0],
+                                  constant,
+                                  common_gradients_precision);
+      // first compute the regularized gradients
+      auto* regularized_gradients = new EncodedNumber[log_reg_model.weight_size];
+      for (int j = 0; j < log_reg_model.weight_size; j++) {
+        djcs_t_aux_ep_mul(phe_pub_key, regularized_gradients[j],
+                          log_reg_model.local_weights[j],
+                          encoded_constant);
+      }
+      // then truncate the regularized gradients to common_gradients_precision
+      party.truncate_ciphers_precision(regularized_gradients,
+                                       log_reg_model.weight_size,
+                                       ACTIVE_PARTY_ID,
+                                       common_gradients_precision);
+      // lastly, add the regularized gradients to common gradients, and assign back
+      for (int j = 0; j < log_reg_model.weight_size; j++) {
+        djcs_t_aux_ee_add(phe_pub_key,
+                          encrypted_gradients[j],
+                          common_gradients[j],
+                          regularized_gradients[j]);
+      }
+      delete [] regularized_gradients;
+    } else {
+      log_error("The penalty " + penalty + " is not supported for logistic regression");
+      exit(1);
+    }
   }
 
   djcs_t_free_public_key(phe_pub_key);
   // hcs_free_random(phe_random);
-  delete[] encrypted_batch_losses;
+  delete [] encrypted_batch_losses;
   for (int i = 0; i < cur_batch_size; i++) {
-    delete[] encoded_batch_samples[i];
+    delete [] encoded_batch_samples[i];
   }
-  delete[] encoded_batch_samples;
+  delete [] encoded_batch_samples;
+  delete [] common_gradients;
 }
 
 void LogisticRegressionBuilder::update_encrypted_weights(
