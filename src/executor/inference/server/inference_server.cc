@@ -72,7 +72,7 @@ void run_inference_server(
         if (is_distributed == 0){
           run_active_server(party, saved_model_file, batch_indexes, algorithm_name, decrypted_labels);
         }else{
-          auto ps = new LRParameterServer(party, distributed_network_config_pb_str);
+          auto ps = new LogRegParameterServer(party, distributed_network_config_pb_str);
           ps->distributed_predict(batch_indexes, decrypted_labels);
         }
 

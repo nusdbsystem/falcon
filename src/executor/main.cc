@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
         party.init_phe_keys(use_existing_key, key_file);
         switch(parsed_algorithm_name) {
           case falcon::LOG_REG:
-            launch_lr_parameter_server(&party,
+            launch_log_reg_parameter_server(&party,
                                        algorithm_params_pb_str,
                                        ps_network_config_pb_str,
                                        model_save_file,
@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
             log_error("Type falcon::GBDT not implemented");
             exit(1);
           default:
-            launch_lr_parameter_server(&party, algorithm_params_pb_str,ps_network_config_pb_str,
+            launch_log_reg_parameter_server(&party, algorithm_params_pb_str,ps_network_config_pb_str,
                                        model_save_file, model_report_file);
             break;
         }
