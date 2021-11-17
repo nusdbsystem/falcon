@@ -17,6 +17,7 @@
 #include "falcon/inference/server/inference_server.h"
 #include "falcon/distributed/worker.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_ps.h"
+#include <falcon/algorithm/vertical/linear_model/linear_regression_ps.h>
 #include "falcon/utils/base64.h"
 #include <falcon/utils/logger/logger.h>
 #include <chrono>
@@ -195,8 +196,12 @@ int main(int argc, char *argv[]) {
                                        model_report_file);
             break;
           case falcon::LINEAR_REG:
-            log_error("Type falcon::LINEAR_REG not implemented");
-            exit(1);
+            launch_linear_reg_parameter_server(&party,
+                                               algorithm_params_pb_str,
+                                               ps_network_config_pb_str,
+                                               model_save_file,
+                                               model_report_file);
+            break;
           case falcon::DT:
             log_error("Type falcon::DT not implemented");
             exit(1);
@@ -263,8 +268,13 @@ int main(int argc, char *argv[]) {
                                         worker);
               break;
             case falcon::LINEAR_REG:
-              log_error("Type falcon::LINEAR_REG not implemented");
-              exit(1);
+              train_linear_regression(&party,
+                                      algorithm_params_pb_str,
+                                      model_save_file,
+                                      model_report_file,
+                                      is_distributed,
+                                      worker);
+              break;
             case falcon::DT:
               log_error("Type falcon::DT not implemented");
               exit(1);

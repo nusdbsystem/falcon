@@ -867,7 +867,32 @@ void train_linear_regression(
     split_dataset(party, params.fit_bias, training_data, testing_data,
                   training_labels, testing_labels, split_percentage);
   } else {
-    // TODO: add distributed train implementation
+    // here should receive the train/test data/labels from ps
+    std::string recv_training_data_str, recv_testing_data_str;
+    std::string recv_training_labels_str, recv_testing_labels_str;
+    worker->recv_long_message_from_ps(recv_training_data_str);
+    worker->recv_long_message_from_ps(recv_testing_data_str);
+    deserialize_double_matrix(training_data, recv_training_data_str);
+    deserialize_double_matrix(testing_data, recv_testing_data_str);
+    if (party->party_type == falcon::ACTIVE_PARTY) {
+      worker->recv_long_message_from_ps(recv_training_labels_str);
+      worker->recv_long_message_from_ps(recv_testing_labels_str);
+      deserialize_double_array(training_labels, recv_training_labels_str);
+      deserialize_double_array(testing_labels, recv_testing_labels_str);
+    }
+    // also, receive the phe keys from ps
+    // and set these to the party
+    std::string recv_phe_keys_str;
+    log_info("begin to receive phe keys from ps ");
+
+    worker->recv_long_message_from_ps(recv_phe_keys_str);
+
+    log_info("received phe keys from ps: " + recv_phe_keys_str);
+
+    party->load_phe_key_string(recv_phe_keys_str);
+    // set the weight size and party feature num
+    party->setter_feature_num((int) training_data[0].size());
+
   }
 
   // weight size is different if fit_bias is true on active party
@@ -898,6 +923,9 @@ void train_linear_regression(
     //    model_report_file);
     delete[] model_weights;
   } else {
-    // TODO: add distributed train implementation
+    linear_reg_builder.distributed_train(*party, *worker);
+    // in is_distributed_train, parameter server will save the model.
+    linear_reg_builder.distributed_eval(*party, *worker, falcon::TRAIN);
+    linear_reg_builder.distributed_eval(*party, *worker, falcon::TEST);
   }
 }
