@@ -172,6 +172,20 @@ class LinearRegressionBuilder : public ModelBuilder {
             const std::string& report_save_path = std::string()) override;
 
   /**
+   * linear regression model eval
+   *
+   * @param party: initialized party object
+   * @param eval_type: falcon::DatasetType, TRAIN for training data and TEST for
+   *   testing data will output both a pretty_print of confusion matrix
+   *   as well as a classification metrics report
+   * @param report_save_path: save the report into path
+   */
+  void distributed_eval(
+      const Party &party,
+      const Worker &worker,
+      falcon::DatasetType eval_type);
+
+  /**
    * evaluate a linear regression model performance
    *
    * @param decrypted_labels: predicted labels
