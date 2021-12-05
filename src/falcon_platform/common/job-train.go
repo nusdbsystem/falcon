@@ -118,6 +118,11 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
 			GenerateRFParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == LinearRegressionAlgName {
+		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+
+		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+			GenerateLinearRegressionParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	} else {
 		return errors.New("algorithm name can not be detected")
 	}
@@ -282,6 +287,44 @@ func GenerateRFParams(cfg map[string]interface{}) string {
 	out, err := proto.Marshal(&rfp)
 	if err != nil {
 		log.Fatalln("Failed to encode RandomForestParams:", err)
+	}
+
+	return b64.StdEncoding.EncodeToString(out)
+
+}
+
+func GenerateLinearRegressionParams(cfg map[string]interface{}) string {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateLinearRegressionParams error in doing Marshal")
+	}
+
+	res := LinearRegression{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateLinearRegressionParams error in doing Unmarshal")
+	}
+
+	dtp := v0.LinearRegressionParams{
+		BatchSize:                 res.BatchSize,
+		MaxIteration:              res.MaxIteration,
+		ConvergeThreshold:         res.ConvergeThreshold,
+		WithRegularization:        res.WithRegularization,
+		Alpha:                     res.Alpha,
+		LearningRate:              res.LearningRate,
+		Decay:                     res.Decay,
+		Penalty:                   res.Penalty,
+		Optimizer:                 res.Optimizer,
+		Metric:                    res.Metric,
+		DifferentialPrivacyBudget: res.DifferentialPrivacyBudget,
+		FitBias:                   res.FitBias,
+	}
+
+	out, err := proto.Marshal(&dtp)
+	if err != nil {
+		log.Fatalln("Failed to encode LinearRegression:", err)
 	}
 
 	return b64.StdEncoding.EncodeToString(out)

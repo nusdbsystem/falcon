@@ -150,9 +150,10 @@ const (
 	HorizontalFl = "horizontal"
 	VerticalFl   = "vertical"
 
-	LogisticRegressAlgName = "logistic_regression"
-	DecisionTreeAlgName    = "decision_tree"
-	RandomForestAlgName    = "random_forest"
+	LogisticRegressAlgName  = "logistic_regression"
+	DecisionTreeAlgName     = "decision_tree"
+	RandomForestAlgName     = "random_forest"
+	LinearRegressionAlgName = "linear_regression"
 )
 
 // Ports used on mpc-executor communication, which is hardcoded in executor now

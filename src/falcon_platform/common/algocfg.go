@@ -91,3 +91,30 @@ type RandomForest struct {
 	// differential privacy (DP) budget, 0 denotes not use DP
 	DpBudget float64 `json:"dp_budget"`
 }
+
+type LinearRegression struct {
+	// batch size in each iteration
+	BatchSize int32 `json:"batch_size"`
+	// maximum number of iterations for training
+	MaxIteration int32 `json:"max_iteration"`
+	// tolerance of convergence
+	ConvergeThreshold float64 `json:"converge_threshold"`
+	// whether use regularization or not
+	WithRegularization bool `json:"with_regularization"`
+	// regularization parameter
+	Alpha float64 `json:"alpha"`
+	// learning rate for parameter updating
+	LearningRate float64 `json:"learning_rate"`
+	// decay rate for learning rate, following lr = lr0 / (1 + decay*t), t is #iteration
+	Decay float64 `json:"decay"`
+	// penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
+	Penalty string `json:"penalty"`
+	// optimization method, default 'sgd', currently support 'sgd'
+	Optimizer string `json:"optimizer"`
+	// evaluation metric for training and testing, 'mse'
+	Metric string `json:"metric"`
+	// differential privacy budget
+	DifferentialPrivacyBudget float64 `json:"differential_privacy_budget"`
+	// whether to fit the bias the term
+	FitBias bool `json:"fit_bias"`
+}

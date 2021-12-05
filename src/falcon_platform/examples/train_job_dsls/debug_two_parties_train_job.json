@@ -50,28 +50,26 @@
       }
     },
     "model_training": {
-      "mpc_algorithm_name": "vfl_decision_tree",
-      "algorithm_name": "random_forest",
+      "mpc_algorithm_name": "linear_regression",
+      "algorithm_name": "linear_regression",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "n_estimator": 8,
-          "sample_rate": 0.8,
-          "tree_type": "classification",
-          "criterion": "gini",
-          "split_strategy": "best",
-          "class_num": 2,
-          "max_depth": 3,
-          "max_bins": 8,
-          "min_samples_split": 5,
-          "min_samples_leaf": 5,
-          "max_leaf_nodes": 16,
-          "min_impurity_decrease": 0.1,
-          "min_impurity_split": 0.001,
-          "dp_budget": 0.1
+          "batch_size": 8,
+          "max_iteration": 1000,
+          "convergence_threshold": 0.0001,
+          "with_regularization": false,
+          "alpha": 0.1,
+          "learning_rate": 0.1,
+          "decay": 0.1,
+          "penalty": "l1",
+          "optimizer": "sgd",
+          "metric": "acc",
+          "differential_privacy_budget": 0.1,
+          "fit_bias": true
         }
       },
       "output_configs": {
