@@ -127,7 +127,7 @@ set(SOURCE_FILES
         ../../include/falcon/algorithm/vertical/linear_model/linear_model_ps.h
         algorithm/vertical/linear_model/linear_model_ps.cc
         ../../include/falcon/algorithm/vertical/linear_model/linear_regression_ps.h
-        algorithm/vertical/linear_model/linear_regression_ps.cc)
+        algorithm/vertical/linear_model/linear_regression_ps.cc ../../include/falcon/inference/interpretability/lime/lime_base.h)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
