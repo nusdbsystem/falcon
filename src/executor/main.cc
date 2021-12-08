@@ -75,13 +75,19 @@ int main(int argc, char *argv[]) {
         ("is-distributed", po::value<int>(&is_distributed), "is distributed")
         ("distributed-train-network-file", po::value<string>(&distributed_network_file), "ps network file")
         ("worker-id", po::value<int>(&worker_id), "worker id")
-        ("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0")
-        ("is-interpretability", po::value<int>(&is_interpretability),
-         "whether needs interpretability")
-        ("interpretable-method", po::value<std::string>(&interpretable_method),
-         "applied interpretable method, default is lime")
-        ("interpretability-params", po::value<std::string>(&interpretability_params),
-            "the parameters of the specified interpretable method");
+        ("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0");
+//        ("is-interpretability", po::value<int>(&is_interpretability),
+//         "whether needs interpretability")
+//        ("interpretable-method", po::value<std::string>(&interpretable_method),
+//         "applied interpretable method, default is lime")
+//        ("interpretability-params", po::value<std::string>(&interpretability_params),
+//            "the parameters of the specified interpretable method");
+
+    // TODO: set here, need to read from coordinator
+    is_interpretability = 1;
+    interpretable_method = "lime";
+    interpretability_params = "none";
+
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
     po::notify(vm);
@@ -342,7 +348,7 @@ void print_arguments(const boost::program_options::variables_map& vm) {
   log_info("distributed-train-network-file: " + vm["distributed-train-network-file"].as< std::string >());
   log_info("worker-id: " + std::to_string(vm["worker-id"].as< int >()));
   log_info("distributed-role: " + std::to_string(vm["distributed-role"].as< int >()));
-  log_info("is-interpretability: " + std::to_string(vm["is-interpretability"].as< int >()));
-  log_info("interpretable-method: " + vm["interpretable-method"].as< std::string >());
-  log_info("interpretability-params: " + vm["interpretability-params"].as< std::string >());
+//  log_info("is-interpretability: " + std::to_string(vm["is-interpretability"].as< int >()));
+//  log_info("interpretable-method: " + vm["interpretable-method"].as< std::string >());
+//  log_info("interpretability-params: " + vm["interpretability-params"].as< std::string >());
 }

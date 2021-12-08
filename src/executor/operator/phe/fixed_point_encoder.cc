@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 
 EncodedNumber::EncodedNumber()
 {
@@ -306,7 +307,9 @@ void fixed_pointed_decode_truncated(double & value, mpz_t res, int exponent, int
     LOG(ERROR) << "Decode mpz_t for double value failed.";
     return;
   }
-
+  gmp_printf("res = %Zd\n", res);
+  log_info("exponent = " + std::to_string(exponent));
+  log_info("truncated_exponent = " + std::to_string(truncated_exponent));
   if (exponent >= truncated_exponent) {
     char *t = mpz_get_str(NULL, PHE_STR_BASE, res);
     long long v = ::atol(t);

@@ -381,7 +381,7 @@ void LogisticRegressionBuilder::train(Party party) {
       std::cout << "DEBUG INFO: The " << iter
                 << "-th iteration training loss = " << std::setprecision(17)
                 << training_loss << std::endl;
-      display_weights(party);
+      log_reg_model.display_weights(party);
       // print evaluation report
       if (iter != (max_iteration - 1)) {
         // but do not duplicate print for last iter
@@ -561,7 +561,7 @@ void LogisticRegressionBuilder::distributed_train(
       std::cout << "DEBUG INFO: The " << iter
                 << "-th iteration training loss = " << std::setprecision(17)
                 << training_loss << std::endl;
-      display_weights(party);
+      log_reg_model.display_weights(party);
       // print evaluation report
       if (iter != (max_iteration - 1)) {
           // but do not duplicate print for last iter
@@ -939,49 +939,49 @@ void train_logistic_regression(
   }
 }
 
-// for DEBUG
-void LogisticRegressionBuilder::display_weights(Party party) {
-  log_info("display local weights");
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    auto* decrypted_local_weights = new EncodedNumber[log_reg_model.weight_size];
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        std::string weight_str;
-        serialize_encoded_number_array(log_reg_model.local_weights,
-            log_reg_model.weight_size, weight_str);
-        std::string size_str = std::to_string(log_reg_model.weight_size);
-        party.send_long_message(i, size_str);
-        party.send_long_message(i, weight_str);
-      }
-    }
-    party.collaborative_decrypt(log_reg_model.local_weights,
-        decrypted_local_weights,
-        log_reg_model.weight_size,
-        ACTIVE_PARTY_ID);
-    for (int i = 0; i < log_reg_model.weight_size; i++) {
-      double weight;
-      decrypted_local_weights[i].decode(weight);
-      std::cout << "local weight[" << i << "] = " << std::setprecision(17)
-                << weight << std::endl;
-      LOG(INFO) << "local weight[" << i << "] = " << std::setprecision(17)
-                << weight;
-    }
-    delete[] decrypted_local_weights;
-  } else {
-    std::string recv_weight_str, recv_size_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_size_str);
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_weight_str);
-    int weight_num = std::stoi(recv_size_str);
-    auto* received_party_weights = new EncodedNumber[weight_num];
-    auto* decrypted_party_weights = new EncodedNumber[weight_num];
-    deserialize_encoded_number_array(received_party_weights, weight_num,
-                                     recv_weight_str);
-    party.collaborative_decrypt(received_party_weights, decrypted_party_weights,
-                                weight_num, ACTIVE_PARTY_ID);
-    delete[] received_party_weights;
-    delete[] decrypted_party_weights;
-  }
-}
+//// for DEBUG
+//void LogisticRegressionBuilder::display_weights(Party party) {
+//  log_info("display local weights");
+//  if (party.party_type == falcon::ACTIVE_PARTY) {
+//    auto* decrypted_local_weights = new EncodedNumber[log_reg_model.weight_size];
+//    for (int i = 0; i < party.party_num; i++) {
+//      if (i != party.party_id) {
+//        std::string weight_str;
+//        serialize_encoded_number_array(log_reg_model.local_weights,
+//            log_reg_model.weight_size, weight_str);
+//        std::string size_str = std::to_string(log_reg_model.weight_size);
+//        party.send_long_message(i, size_str);
+//        party.send_long_message(i, weight_str);
+//      }
+//    }
+//    party.collaborative_decrypt(log_reg_model.local_weights,
+//        decrypted_local_weights,
+//        log_reg_model.weight_size,
+//        ACTIVE_PARTY_ID);
+//    for (int i = 0; i < log_reg_model.weight_size; i++) {
+//      double weight;
+//      decrypted_local_weights[i].decode(weight);
+//      std::cout << "local weight[" << i << "] = " << std::setprecision(17)
+//                << weight << std::endl;
+//      LOG(INFO) << "local weight[" << i << "] = " << std::setprecision(17)
+//                << weight;
+//    }
+//    delete[] decrypted_local_weights;
+//  } else {
+//    std::string recv_weight_str, recv_size_str;
+//    party.recv_long_message(ACTIVE_PARTY_ID, recv_size_str);
+//    party.recv_long_message(ACTIVE_PARTY_ID, recv_weight_str);
+//    int weight_num = std::stoi(recv_size_str);
+//    auto* received_party_weights = new EncodedNumber[weight_num];
+//    auto* decrypted_party_weights = new EncodedNumber[weight_num];
+//    deserialize_encoded_number_array(received_party_weights, weight_num,
+//                                     recv_weight_str);
+//    party.collaborative_decrypt(received_party_weights, decrypted_party_weights,
+//                                weight_num, ACTIVE_PARTY_ID);
+//    delete[] received_party_weights;
+//    delete[] decrypted_party_weights;
+//  }
+//}
 
 // TODO: this is not used currently
 // print one ciphertext for debug

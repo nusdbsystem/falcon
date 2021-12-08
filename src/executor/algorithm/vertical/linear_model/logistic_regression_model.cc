@@ -44,7 +44,7 @@ void LogisticRegressionModel::predict(
   int cur_sample_size = predicted_samples.size();
   encoded_batch_samples = new EncodedNumber*[cur_sample_size];
   for (int i = 0; i < cur_sample_size; i++) {
-    encoded_batch_samples[i] = new EncodedNumber[cur_sample_size];
+    encoded_batch_samples[i] = new EncodedNumber[weight_size];
   }
   encode_samples(party, predicted_samples, encoded_batch_samples);
 

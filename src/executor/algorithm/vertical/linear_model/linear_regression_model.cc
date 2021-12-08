@@ -36,19 +36,24 @@ void LinearRegressionModel::predict(const Party &party,
   int cur_sample_size = (int) predicted_samples.size();
   auto** encoded_batch_samples = new EncodedNumber*[cur_sample_size];
   for (int i = 0; i < cur_sample_size; i++) {
-    encoded_batch_samples[i] = new EncodedNumber[cur_sample_size];
+    encoded_batch_samples[i] = new EncodedNumber[weight_size];
   }
   encode_samples(party, predicted_samples, encoded_batch_samples);
 
   int ciphertext_precision = 0 - local_weights[0].getter_exponent();
   int plaintext_precision = 0 - encoded_batch_samples[0][0].getter_exponent();
   int encrypted_batch_aggregation_precision = ciphertext_precision + plaintext_precision;
+  log_info("ciphertext_precision = " + std::to_string(ciphertext_precision));
+  log_info("plaintext_precision = " + std::to_string(plaintext_precision));
+  log_info("batch_aggregation_precision = " + std::to_string(encrypted_batch_aggregation_precision));
 
   forward_computation(party,
                       cur_sample_size,
                       encoded_batch_samples,
                       encrypted_batch_aggregation_precision,
                       predicted_labels);
+
+  log_info("predicted_labels[0] = " + std::to_string(abs(predicted_labels[0].getter_exponent())));
 
   for (int i = 0; i < cur_sample_size; i++) {
     delete[] encoded_batch_samples[i];
@@ -67,7 +72,7 @@ void LinearRegressionModel::forward_computation(const Party &party,
   compute_batch_phe_aggregation(party,
                                 cur_batch_size,
                                 encoded_batch_samples,
-                                PHE_FIXED_POINT_PRECISION,
+                                encrypted_batch_aggregation_precision,
                                 predicted_labels);
   log_info("[forward_computation]: forward computation success");
 }

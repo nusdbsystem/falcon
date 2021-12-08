@@ -669,14 +669,14 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
                        encrypted_shares[i]);
   }
 
-  LOG(INFO) << "[secret_shares_to_ciphers]: step 1" << " --------";
-  std::cout << "[secret_shares_to_ciphers]: step 1" << std::endl;
-
-  LOG(INFO) << "[secret_shares_to_ciphers]: party_id = " << party_id << ", req_party_id = " << req_party_id;
-  std::cout << "[secret_shares_to_ciphers]: party_id = " << party_id << ", req_party_id = " << req_party_id << std::endl;
-
-  LOG(INFO) << "[secret_shares_to_ciphers]: size = " << size << " --------";
-  std::cout << "[secret_shares_to_ciphers]: size = " << size << std::endl;
+//  LOG(INFO) << "[secret_shares_to_ciphers]: step 1" << " --------";
+//  std::cout << "[secret_shares_to_ciphers]: step 1" << std::endl;
+//
+//  LOG(INFO) << "[secret_shares_to_ciphers]: party_id = " << party_id << ", req_party_id = " << req_party_id;
+//  std::cout << "[secret_shares_to_ciphers]: party_id = " << party_id << ", req_party_id = " << req_party_id << std::endl;
+//
+//  LOG(INFO) << "[secret_shares_to_ciphers]: size = " << size << " --------";
+//  std::cout << "[secret_shares_to_ciphers]: size = " << size << std::endl;
 
   if (party_id == req_party_id) {
     // copy local encrypted_shares to dest_ciphers
@@ -684,8 +684,8 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
       dest_ciphers[i] = encrypted_shares[i];
     }
 
-    LOG(INFO) << "[secret_shares_to_ciphers]: step 2" << " --------";
-    std::cout << "[secret_shares_to_ciphers]: step 2" << std::endl;
+//    LOG(INFO) << "[secret_shares_to_ciphers]: step 2" << " --------";
+//    std::cout << "[secret_shares_to_ciphers]: step 2" << std::endl;
 
     // receive from other parties and aggregate encrypted shares
     for (int id = 0; id < party_num; id++) {
@@ -704,8 +704,8 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
       }
     }
 
-    LOG(INFO) << "[secret_shares_to_ciphers]: step 3" << " --------";
-    std::cout << "[secret_shares_to_ciphers]: step 3" << std::endl;
+//    LOG(INFO) << "[secret_shares_to_ciphers]: step 3" << " --------";
+//    std::cout << "[secret_shares_to_ciphers]: step 3" << std::endl;
 
     // serialize dest_ciphers and broadcast
     std::string dest_ciphers_str;
@@ -716,8 +716,8 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
       }
     }
 
-    LOG(INFO) << "[secret_shares_to_ciphers]: step 4" << " --------";
-    std::cout << "[secret_shares_to_ciphers]: step 4" << std::endl;
+//    LOG(INFO) << "[secret_shares_to_ciphers]: step 4" << " --------";
+//    std::cout << "[secret_shares_to_ciphers]: step 4" << std::endl;
   } else {
     // serialize and send to req_party
     std::string encrypted_shares_str;

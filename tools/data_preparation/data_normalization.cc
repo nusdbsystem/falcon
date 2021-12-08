@@ -14,12 +14,15 @@ using namespace std;
 #define smoother 0.001
 
 int main(int argc, char* argv[]) {
-  if (argc < 2) {
+  // the argv[1] give the file path
+  // the argv[2] denote whether normalize labels, for classification, no, regression, yes
+  if (argc < 3) {
     cout << "Args: file_path" << endl;
     return 0;
   }
 
   auto file = argv[1];
+  auto flag = argv[2];
   ifstream ifs(file);
   string line;
   vector< vector<float> > table;
@@ -44,8 +47,14 @@ int main(int argc, char* argv[]) {
     attributes_min.push_back(INT32_MAX);
   }
 
+  int normalized_attribute = 0;
+  if (flag == 0) {
+    normalized_attribute = n_attributes - 1;
+  } else {
+    normalized_attribute = n_attributes;
+  }
   for (int i = 0; i < n_samples; i++) {
-    for (int j = 0; j < n_attributes - 1; j++) {
+    for (int j = 0; j < normalized_attribute; j++) {
       if (table[i][j] > attributes_max[j]) {
         attributes_max[j] = table[i][j];
       }
@@ -56,7 +65,7 @@ int main(int argc, char* argv[]) {
   }
 
   for (int i = 0; i < n_samples; i++) {
-    for (int j = 0; j < n_attributes - 1; j++) {
+    for (int j = 0; j < normalized_attribute; j++) {
       table[i][j] = (table[i][j] - attributes_min[j] + smoother) / (attributes_max[j] - attributes_min[j] + smoother);
     }
   }

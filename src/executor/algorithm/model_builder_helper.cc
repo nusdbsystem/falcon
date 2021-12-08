@@ -162,5 +162,4 @@ void compute_encrypted_residual(const Party& party,
   log_info("Finish compute encrypted loss and sync up with all parties");
 
   djcs_t_free_public_key(phe_pub_key);
-  delete [] encrypted_batch_losses;
 }

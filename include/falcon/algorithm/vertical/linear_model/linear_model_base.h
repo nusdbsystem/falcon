@@ -66,6 +66,13 @@ class LinearModel {
       const std::vector<std::vector<double>>& used_samples,
       EncodedNumber** encoded_samples,
       int precision = PHE_FIXED_POINT_PRECISION) const;
+
+  /**
+   * print weights during training to view changes
+   *
+   * @param party: initialized party object
+   */
+  void display_weights(Party party);
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BASE_H_

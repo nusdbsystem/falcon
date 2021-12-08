@@ -221,13 +221,6 @@ class LogisticRegressionBuilder : public ModelBuilder {
                         double& loss);
 
   /**
-   * print weights during training to view changes
-   *
-   * @param party: initialized party object
-   */
-  void display_weights(Party party);
-
-  /**
    * print one ciphertext for debug
    *
    * @param party: initialized party object

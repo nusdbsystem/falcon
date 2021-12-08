@@ -11,6 +11,7 @@
 #include <glog/logging.h>
 #include <stack>
 #include <iostream>
+#include <iomanip>
 
 LinearModel::LinearModel() {}
 
@@ -168,4 +169,47 @@ void LinearModel::encode_samples(const Party &party,
   }
 
   djcs_t_free_public_key(phe_pub_key);
+}
+
+void LinearModel::display_weights(Party party) {
+  log_info("display local weights");
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    auto* decrypted_local_weights = new EncodedNumber[weight_size];
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        std::string weight_str;
+        serialize_encoded_number_array(local_weights,
+                                       weight_size, weight_str);
+        std::string size_str = std::to_string(weight_size);
+        party.send_long_message(i, size_str);
+        party.send_long_message(i, weight_str);
+      }
+    }
+    party.collaborative_decrypt(local_weights,
+                                decrypted_local_weights,
+                                weight_size,
+                                ACTIVE_PARTY_ID);
+    for (int i = 0; i < weight_size; i++) {
+      double weight;
+      decrypted_local_weights[i].decode(weight);
+      std::cout << "local weight[" << i << "] = " << std::setprecision(17)
+                << weight << std::endl;
+      LOG(INFO) << "local weight[" << i << "] = " << std::setprecision(17)
+                << weight;
+    }
+    delete[] decrypted_local_weights;
+  } else {
+    std::string recv_weight_str, recv_size_str;
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_size_str);
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_weight_str);
+    int weight_num = std::stoi(recv_size_str);
+    auto* received_party_weights = new EncodedNumber[weight_num];
+    auto* decrypted_party_weights = new EncodedNumber[weight_num];
+    deserialize_encoded_number_array(received_party_weights, weight_num,
+                                     recv_weight_str);
+    party.collaborative_decrypt(received_party_weights, decrypted_party_weights,
+                                weight_num, ACTIVE_PARTY_ID);
+    delete[] received_party_weights;
+    delete[] decrypted_party_weights;
+  }
 }

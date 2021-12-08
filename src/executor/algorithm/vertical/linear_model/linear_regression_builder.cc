@@ -75,21 +75,21 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
 
   // compute the residual [f_t - y_t] of the batch samples
   // for linear regression, here precision should be
-  // (local_weights.precision + sample.precision) = 4 * PHE_FIXED_POINT_PRECISION
+  // (local_weights.precision + sample.precision) = 2 * PHE_FIXED_POINT_PRECISION
   compute_encrypted_residual(party, batch_indexes, training_labels,
                              precision, predicted_labels, encrypted_batch_losses);
 
   // notice that the update formulas are different for different settings
   // (1) without regularization:
   //    [w_j] = [w_j] - lr * { 2/|B| * \sum_{i=1}^{|B|} [loss_i] * x_{ij} },
-  //        where [w_j] precision is: 3 * PHE_FIXED_POINT_PRECISION
+  //        where [w_j] precision is: PHE_FIXED_POINT_PRECISION
   // (2) with l2 regularization:
   //    [w_j] = [w_j] - lr * { 2/|B| * \sum_{i=1}^{|B|} [loss_i] * x_{ij} + 2 * \alpha * [w_j] },
-  //        where [w_j] precision is: 3 * PHE_FIXED_POINT_PRECISION
+  //        where [w_j] precision is: PHE_FIXED_POINT_PRECISION
   // (3) with l1 regularization:
   //    [w_j] = [w_j] - lr * { 2/|B| * \sum_{i=1}^{|B|} [loss_i] * x_{ij} + \alpha} (if w_j > 0)
   //    [w_j] = [w_j] - lr * { 2/|B| * \sum_{i=1}^{|B|} [loss_i] * x_{ij} - \alpha} (if w_j < 0)
-  //        where [w_j] precision is: 3 * PHE_FIXED_POINT_PRECISION, and
+  //        where [w_j] precision is: PHE_FIXED_POINT_PRECISION, and
   //        the conditional check need use spdz computation
 
 
@@ -109,7 +109,7 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
     }
   }
   // compute common_gradients, its precision should be
-  // 2 * precision = 8 * PHE_FIXED_POINT_PRECISION
+  // 2 * precision = 4 * PHE_FIXED_POINT_PRECISION
   auto* common_gradients = new EncodedNumber[linear_reg_model.weight_size];
   for (int j = 0; j < linear_reg_model.weight_size; j++) {
     EncodedNumber gradient;
@@ -164,18 +164,42 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
     //    when w_j < 0, it should be { lr * \alpha }
     // we use spdz to check the sign of [local_weights]
     if (penalty == "l1") {
-      // TODO: add spdz computation
       compute_l1_regularized_grad(party, regularized_gradients);
+      // then, add the second item to the common_gradients
+      int common_gradients_precision = abs(common_gradients[0].getter_exponent());
+      int regularized_gradients_precision = abs(regularized_gradients[0].getter_exponent());
+      int plaintext_precision = common_gradients_precision - regularized_gradients_precision;
+      double constant = learning_rate;
+      EncodedNumber encoded_constant;
+      encoded_constant.set_double(phe_pub_key->n[0],
+                                  constant,
+                                  plaintext_precision);
+      // then, add the second item to the common_gradients
+      for (int j = 0; j < linear_reg_model.weight_size; j++) {
+        djcs_t_aux_ep_mul(phe_pub_key,
+                          regularized_gradients[j],
+                          regularized_gradients[j],
+                          encoded_constant);
+        djcs_t_aux_ee_add(phe_pub_key,
+                          encrypted_gradients[j],
+                          common_gradients[j],
+                          regularized_gradients[j]);
+      }
     }
     delete [] regularized_gradients;
   }
 
+  log_info("abs(linear_reg_model.local_weight[0].getter_exponent) = " + std::to_string(abs(linear_reg_model.local_weights[0].getter_exponent())));
+  log_info("abs(encrypted_gradients[0].getter_exponent) before truncate = " + std::to_string(abs(encrypted_gradients[0].getter_exponent())));
+
   // truncate the gradient precision to make sure it is consistent with [w_j]
   int dest_precision = abs(linear_reg_model.local_weights[0].getter_exponent());
   party.truncate_ciphers_precision(encrypted_gradients,
-                                   cur_batch_size,
+                                   linear_reg_model.weight_size,
                                    ACTIVE_PARTY_ID,
                                    dest_precision);
+
+  log_info("abs(encrypted_gradients[0].getter_exponent) after truncate = " + std::to_string(abs(encrypted_gradients[0].getter_exponent())));
 
   djcs_t_free_public_key(phe_pub_key);
   delete [] encrypted_batch_losses;
@@ -334,6 +358,8 @@ void LinearRegressionBuilder::update_encrypted_weights(Party &party, EncodedNumb
   // update the j-th weight in local_weight vector
   // need to make sure that the exponents of inner_product
   // and local weights are the same
+
+  log_info("weight size = " + std::to_string(linear_reg_model.weight_size));
   for (int j = 0; j < linear_reg_model.weight_size; j++) {
     djcs_t_aux_ee_add(phe_pub_key,
                       linear_reg_model.local_weights[j],
@@ -453,9 +479,9 @@ void LinearRegressionBuilder::train(Party party) {
   }
 
   // step 1: init encrypted local weights
-  // (here use 3 * precision for consistence in the following)
+  // (here use precision for consistence in the following)
   log_info("Init encrypted local weights");
-  int encrypted_weights_precision = 3 * PHE_FIXED_POINT_PRECISION;
+  int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
   init_encrypted_random_numbers(party, linear_reg_model.weight_size,
                                 linear_reg_model.local_weights,
@@ -490,12 +516,12 @@ void LinearRegressionBuilder::train(Party party) {
     for (int i = 0; i < cur_sample_size; i++) {
       encoded_batch_samples[i] = new EncodedNumber[linear_reg_model.weight_size];
     }
-    linear_reg_model.encode_samples(party, batch_samples, encoded_batch_samples);
+    linear_reg_model.encode_samples(party, batch_samples, encoded_batch_samples, plaintext_samples_precision);
     log_info("-------- Iteration " + std::to_string(iter) + ", encode training data success --------");
 
     // compute predicted label
     auto *predicted_labels = new EncodedNumber[batch_indexes.size()];
-    // 4 * fixed precision
+    // 2 * fixed precision
     // weight * xj => encrypted_weights_precision + plaintext_samples_precision
     int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
     linear_reg_model.forward_computation(
@@ -508,14 +534,16 @@ void LinearRegressionBuilder::train(Party party) {
 
     // note: from here should be different from the logistic regression logic
     // update encrypted local weights
+    // here predicted_labels = 2 * PHE_FIXED_POINT_PRECISION
+    // we want the encrypted gradients precision = PHE_FIXED_POINT_PRECISION, such that
+    // we can update them by homomorphic addition in update_encrypted_weights function
     auto encrypted_gradients = new EncodedNumber[linear_reg_model.weight_size];
-    int update_precision = encrypted_batch_aggregation_precision;
     backward_computation(
         party,
         batch_samples,
         predicted_labels,
         batch_indexes,
-        update_precision,
+        encrypted_batch_aggregation_precision,
         encrypted_gradients);
 
     log_info("-------- Iteration " + std::to_string(iter) + ", backward computation success --------");
@@ -546,7 +574,7 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
   log_info("************* Distributed Training Start *************");
   const clock_t training_start_time = clock();
   // (here use 3 * precision for consistence in the following)
-  int encrypted_weights_precision = 3 * PHE_FIXED_POINT_PRECISION;
+  int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
 
   if (optimizer != "sgd") {
@@ -612,7 +640,7 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
     for (int i = 0; i < cur_sample_size; i++) {
       encoded_mini_batch_samples[i] = new EncodedNumber[linear_reg_model.weight_size];
     }
-    linear_reg_model.encode_samples(party, mini_batch_samples, encoded_mini_batch_samples);
+    linear_reg_model.encode_samples(party, mini_batch_samples, encoded_mini_batch_samples, plaintext_samples_precision);
 
     log_info("-------- "
              "Worker Iteration "
@@ -709,6 +737,10 @@ void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, c
   std::vector<std::vector<double>> cur_test_dataset =
       (eval_type == falcon::TRAIN) ? training_data : testing_data;
 
+  log_info("dataset_size = " + std::to_string(dataset_size));
+  // Temporary decrypt for debug
+  linear_reg_model.display_weights(party);
+
   // step 2: every party do the prediction, since all examples are required to
   // computed, there is no need communications of data index between different parties
   auto* predicted_labels = new EncodedNumber[dataset_size];
@@ -723,10 +755,12 @@ void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, c
 
   // std::cout << "Print predicted class" << std::endl;
 
-  // step 4: active party computes the logistic function
-  // and compare the clf metrics
+  // step 4: active party computes the metrics
   if (party.party_type == falcon::ACTIVE_PARTY) {
-//    mean_squared_error(decrypted_labels, dataset_size, eval_type, report_save_path);
+    eval_predictions_and_save(decrypted_labels,
+                              dataset_size,
+                              eval_type,
+                              report_save_path);
   }
 
   // free memory
@@ -811,10 +845,16 @@ void LinearRegressionBuilder::eval_predictions_and_save(EncodedNumber *decrypted
   // Regression Metrics for performance evaluation
   RegressionMetrics reg_metrics;
   // decode decrypted labels
+  mpz_t v;
+  mpz_init(v);
+  decrypted_labels[0].getter_value(v);
+  gmp_printf("decrypted label = %Zd\n", v);
+  mpz_clear(v);
   std::vector<double> decoded_predicted_labels;
   for (int i = 0; i < sample_number; i++) {
     double decode_pred;
     decrypted_labels[i].decode(decode_pred);
+    log_info("sample " + std::to_string(i) + "'s predicted label = " + std::to_string(decode_pred));
     decoded_predicted_labels.push_back(decode_pred);
   }
   if (eval_type == falcon::TRAIN) {
