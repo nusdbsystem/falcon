@@ -64,7 +64,7 @@ LogisticRegressionBuilder::~LogisticRegressionBuilder() = default;
 
 void LogisticRegressionBuilder::init_encrypted_weights(const Party &party, int precision) {
   log_info("Init encrypted local weights");
-  init_encrypted_random_numbers(party, log_reg_model.weight_size,
+  init_encrypted_model_weights(party, log_reg_model.party_weight_sizes,
                                 log_reg_model.local_weights, precision);
   log_info("[init_encrypted_weights]: predicted_labels precision "
            "is: " + std::to_string(abs(log_reg_model.local_weights[0].getter_exponent())));
@@ -269,6 +269,7 @@ void LogisticRegressionBuilder::train(Party party) {
 
   // step 1: init encrypted local weights
   // (here use 3 * precision for consistence in the following)
+  log_reg_model.sync_up_weight_sizes(party);
   int encrypted_weights_precision = 3 * PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
   init_encrypted_weights(party, encrypted_weights_precision);
@@ -278,6 +279,9 @@ void LogisticRegressionBuilder::train(Party party) {
   for (int i = 0; i < training_data.size(); i++) {
     train_data_indexes.push_back(i);
   }
+  std::vector<std::vector<int>> batch_iter_indexes = precompute_iter_batch_idx(batch_size,
+                                                                               max_iteration,
+                                                                               train_data_indexes);
   log_info("Init encrypted local weights success");
 
   // required by spdz connector and mpc computation
@@ -289,7 +293,7 @@ void LogisticRegressionBuilder::train(Party party) {
     const clock_t iter_start_time = clock();
 
     // select batch_index
-    std::vector< int> batch_indexes = select_batch_idx(party, batch_size, train_data_indexes);
+    std::vector< int> batch_indexes = sync_batch_idx(party, batch_size, batch_iter_indexes[iter]);
     log_info("-------- Iteration " + std::to_string(iter) + ", select_batch_idx success --------");
     // get training data with selected batch_index
     std::vector<std::vector<double> > batch_samples;
@@ -411,6 +415,7 @@ void LogisticRegressionBuilder::distributed_train(
   log_info("************* Distributed Training Start *************");
   const clock_t training_start_time = clock();
   // (here use 3 * precision for consistence in the following)
+  log_reg_model.sync_up_weight_sizes(party);
   int encrypted_weights_precision = 3 * PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
 

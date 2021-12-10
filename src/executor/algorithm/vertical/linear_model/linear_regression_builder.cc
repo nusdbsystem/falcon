@@ -192,12 +192,67 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
   log_info("abs(linear_reg_model.local_weight[0].getter_exponent) = " + std::to_string(abs(linear_reg_model.local_weights[0].getter_exponent())));
   log_info("abs(encrypted_gradients[0].getter_exponent) before truncate = " + std::to_string(abs(encrypted_gradients[0].getter_exponent())));
 
-  // truncate the gradient precision to make sure it is consistent with [w_j]
+  // each party need to truncate the gradient precision to make sure it is consistent with [w_j]
+  // let active party aggregate the encrypted gradients and broadcast, and truncate
   int dest_precision = abs(linear_reg_model.local_weights[0].getter_exponent());
-  party.truncate_ciphers_precision(encrypted_gradients,
-                                   linear_reg_model.weight_size,
+  int global_weight_size = std::accumulate(linear_reg_model.party_weight_sizes.begin(), linear_reg_model.party_weight_sizes.end(), 0);
+  auto* global_encrypted_gradients = new EncodedNumber[global_weight_size];
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // first, pack its own encrypted gradients
+    int idx = 0;
+    for (int j = 0; j < linear_reg_model.weight_size; j++) {
+      global_encrypted_gradients[idx] = encrypted_gradients[j];
+      idx += 1;
+    }
+    // second, receive each party's encrypted gradients
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        std::string recv_enc_grad_i_str;
+        party.recv_long_message(i, recv_enc_grad_i_str);
+        auto* recv_enc_grads_i = new EncodedNumber[linear_reg_model.party_weight_sizes[i]];
+        deserialize_encoded_number_array(recv_enc_grads_i, linear_reg_model.party_weight_sizes[i], recv_enc_grad_i_str);
+        for (int j = 0; j < linear_reg_model.party_weight_sizes[i]; j++) {
+          global_encrypted_gradients[idx] = recv_enc_grads_i[j];
+          idx += 1;
+        }
+        delete [] recv_enc_grads_i;
+      }
+    }
+    // third, broadcast this array, such that parties can truncate
+    std::string global_enc_grad_str;
+    serialize_encoded_number_array(global_encrypted_gradients, global_weight_size, global_enc_grad_str);
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        party.send_long_message(i, global_enc_grad_str);
+      }
+    }
+  } else {
+    // first, send encrypted gradients to the active party
+    std::string enc_grad_str;
+    serialize_encoded_number_array(encrypted_gradients, linear_reg_model.weight_size, enc_grad_str);
+    party.send_long_message(ACTIVE_PARTY_ID, enc_grad_str);
+    // second, receive global encrypted gradients array
+    std::string recv_global_enc_grad_str;
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_global_enc_grad_str);
+    deserialize_encoded_number_array(global_encrypted_gradients, global_weight_size, recv_global_enc_grad_str);
+  }
+  party.truncate_ciphers_precision(global_encrypted_gradients,
+                                   global_weight_size,
                                    ACTIVE_PARTY_ID,
                                    dest_precision);
+  // find the corresponding encrypted gradients needed
+  int start_idx_in_global = 0;
+  for (int i = 0; i < party.party_num; i++) {
+    if (i < party.party_id) {
+      start_idx_in_global += linear_reg_model.party_weight_sizes[i];
+    } else {
+      break;
+    }
+  }
+  for (int j = 0; j < linear_reg_model.weight_size; j++) {
+    encrypted_gradients[j] = global_encrypted_gradients[start_idx_in_global];
+    start_idx_in_global += 1;
+  }
 
   log_info("abs(encrypted_gradients[0].getter_exponent) after truncate = " + std::to_string(abs(encrypted_gradients[0].getter_exponent())));
 
@@ -208,6 +263,7 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
   }
   delete [] encoded_batch_samples;
   delete [] common_gradients;
+  delete [] global_encrypted_gradients;
 }
 
 void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, EncodedNumber *regularized_gradients) {
@@ -221,39 +277,8 @@ void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, En
 
   log_info("[compute_l1_regularized_grad]: begin to compute l1 regularized gradients");
 
-  // step 1
-  std::vector<int> party_weight_sizes;
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    // first set its own weight size and receive other parties' weight sizes
-    party_weight_sizes.push_back(linear_reg_model.weight_size);
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        std::string recv_weight_size;
-        party.recv_long_message(i, recv_weight_size);
-        party_weight_sizes.push_back(std::stoi(recv_weight_size));
-      }
-    }
-    // then broadcast the vector
-    std::string party_weight_sizes_str;
-    serialize_int_array(party_weight_sizes, party_weight_sizes_str);
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        party.send_long_message(i, party_weight_sizes_str);
-      }
-    }
-  } else {
-    // first send the weight size to active party
-    party.send_long_message(ACTIVE_PARTY_ID, std::to_string(linear_reg_model.weight_size));
-    // then receive and deserialize the party_weight_sizes array
-    std::string recv_party_weight_sizes_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_party_weight_sizes_str);
-    deserialize_int_array(party_weight_sizes, recv_party_weight_sizes_str);
-  }
-
-  log_info("[compute_l1_regularized_grad]: finish aggregate and broadcast weight sizes");
-
   // step 2
-  int global_weight_size = std::accumulate(party_weight_sizes.begin(), party_weight_sizes.end(), 0);
+  int global_weight_size = std::accumulate(linear_reg_model.party_weight_sizes.begin(), linear_reg_model.party_weight_sizes.end(), 0);
   auto* global_weights = new EncodedNumber[global_weight_size];
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // first append its own local weights
@@ -264,7 +289,7 @@ void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, En
     }
     for (int i = 0; i < party.party_num; i++) {
       if (i != party.party_id) {
-        int recv_weight_size = party_weight_sizes[i];
+        int recv_weight_size = linear_reg_model.party_weight_sizes[i];
         auto* recv_local_weights = new EncodedNumber[recv_weight_size];
         std::string recv_local_weights_str;
         party.recv_long_message(i, recv_local_weights_str);
@@ -338,7 +363,7 @@ void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, En
   // assign to local regularized gradients
   int start_idx = 0;
   for (int i = 0; i < party.party_id; i++) {
-    start_idx += party_weight_sizes[i];
+    start_idx += linear_reg_model.party_weight_sizes[i];
   }
   for (int j = 0; j < linear_reg_model.weight_size; j++) {
     regularized_gradients[j] = global_regularized_grad[start_idx];
@@ -481,18 +506,22 @@ void LinearRegressionBuilder::train(Party party) {
   // step 1: init encrypted local weights
   // (here use precision for consistence in the following)
   log_info("Init encrypted local weights");
+  linear_reg_model.sync_up_weight_sizes(party);
   int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
-  init_encrypted_random_numbers(party, linear_reg_model.weight_size,
-                                linear_reg_model.local_weights,
-                                encrypted_weights_precision);
+  init_encrypted_model_weights(party, linear_reg_model.party_weight_sizes,
+                               linear_reg_model.local_weights,
+                               encrypted_weights_precision);
 
   // record training data ids in data_indexes for iteratively batch selection
   std::vector<int> train_data_indexes;
   for (int i = 0; i < training_data.size(); i++) {
     train_data_indexes.push_back(i);
   }
-
+  log_info("train_data_indexes.size = " + std::to_string(train_data_indexes.size()));
+  std::vector<std::vector<int>> batch_iter_indexes = precompute_iter_batch_idx(batch_size,
+                                                                            max_iteration,
+                                                                            train_data_indexes);
   // required by spdz connector and mpc computation
   bigint::init_thread();
 
@@ -502,7 +531,7 @@ void LinearRegressionBuilder::train(Party party) {
     const clock_t iter_start_time = clock();
 
     // select batch_index
-    std::vector< int> batch_indexes = select_batch_idx(party, batch_size, train_data_indexes);
+    std::vector< int> batch_indexes = sync_batch_idx(party, batch_size, batch_iter_indexes[iter]);
     log_info("-------- Iteration " + std::to_string(iter) + ", select_batch_idx success --------");
     // get training data with selected batch_index
     std::vector<std::vector<double> > batch_samples;
@@ -574,6 +603,7 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
   log_info("************* Distributed Training Start *************");
   const clock_t training_start_time = clock();
   // (here use 3 * precision for consistence in the following)
+  linear_reg_model.sync_up_weight_sizes(party);
   int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
 
@@ -854,14 +884,21 @@ void LinearRegressionBuilder::eval_predictions_and_save(EncodedNumber *decrypted
   for (int i = 0; i < sample_number; i++) {
     double decode_pred;
     decrypted_labels[i].decode(decode_pred);
-    log_info("sample " + std::to_string(i) + "'s predicted label = " + std::to_string(decode_pred));
     decoded_predicted_labels.push_back(decode_pred);
   }
   if (eval_type == falcon::TRAIN) {
     reg_metrics.compute_metrics(decoded_predicted_labels, training_labels);
+    for (int i = 0; i < sample_number; i++) {
+      log_info("sample " + std::to_string(i) + "'s predicted label = " +
+        std::to_string(decoded_predicted_labels[i]) + ", ground truth label = " + std::to_string(training_labels[i]));
+    }
   }
   if (eval_type == falcon::TEST) {
     reg_metrics.compute_metrics(decoded_predicted_labels, testing_labels);
+    for (int i = 0; i < sample_number; i++) {
+      log_info("sample " + std::to_string(i) + "'s predicted label = " +
+          std::to_string(decoded_predicted_labels[i]) + ", ground truth label = " + std::to_string(testing_labels[i]));
+    }
   }
 
   // write the results to report

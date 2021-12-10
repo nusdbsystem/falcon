@@ -413,7 +413,10 @@ void Party::split_train_test_data(
     // using seed, for development:
     std::default_random_engine rng(RANDOM_SEED);
     std::shuffle(std::begin(data_indexes), std::end(data_indexes), rng);
-
+    // print the shuffled data indexes for debug
+    for (int i = 0; i < sample_num; i++) {
+      LOG(INFO) << "shuffled data indexes[" << i << "] = " << data_indexes[i];
+    }
     // select the former training data size as training data,
     // and the latter as testing data
     for (int i = 0; i < sample_num; i++) {

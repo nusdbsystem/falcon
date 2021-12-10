@@ -30,6 +30,7 @@ LinearModel::LinearModel(const LinearModel &linear_model) {
   for (int i = 0; i < weight_size; i++) {
     local_weights[i] = linear_model.local_weights[i];
   }
+  party_weight_sizes = linear_model.party_weight_sizes;
 }
 
 LinearModel &LinearModel::operator=(const LinearModel &linear_model) {
@@ -38,6 +39,7 @@ LinearModel &LinearModel::operator=(const LinearModel &linear_model) {
   for (int i = 0; i < weight_size; i++) {
     local_weights[i] = linear_model.local_weights[i];
   }
+  party_weight_sizes = linear_model.party_weight_sizes;
 }
 
 void LinearModel::compute_batch_phe_aggregation(const Party &party,
@@ -171,45 +173,116 @@ void LinearModel::encode_samples(const Party &party,
   djcs_t_free_public_key(phe_pub_key);
 }
 
-void LinearModel::display_weights(Party party) {
-  log_info("display local weights");
+void LinearModel::sync_up_weight_sizes(const Party &party) {
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    auto* decrypted_local_weights = new EncodedNumber[weight_size];
+    // first set its own weight size and receive other parties' weight sizes
+    party_weight_sizes.push_back(weight_size);
     for (int i = 0; i < party.party_num; i++) {
       if (i != party.party_id) {
-        std::string weight_str;
-        serialize_encoded_number_array(local_weights,
-                                       weight_size, weight_str);
-        std::string size_str = std::to_string(weight_size);
-        party.send_long_message(i, size_str);
-        party.send_long_message(i, weight_str);
+        std::string recv_weight_size;
+        party.recv_long_message(i, recv_weight_size);
+        party_weight_sizes.push_back(std::stoi(recv_weight_size));
       }
     }
-    party.collaborative_decrypt(local_weights,
-                                decrypted_local_weights,
-                                weight_size,
-                                ACTIVE_PARTY_ID);
-    for (int i = 0; i < weight_size; i++) {
-      double weight;
-      decrypted_local_weights[i].decode(weight);
-      std::cout << "local weight[" << i << "] = " << std::setprecision(17)
-                << weight << std::endl;
-      LOG(INFO) << "local weight[" << i << "] = " << std::setprecision(17)
-                << weight;
+    // then broadcast the vector
+    std::string party_weight_sizes_str;
+    serialize_int_array(party_weight_sizes, party_weight_sizes_str);
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        party.send_long_message(i, party_weight_sizes_str);
+      }
     }
-    delete[] decrypted_local_weights;
   } else {
-    std::string recv_weight_str, recv_size_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_size_str);
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_weight_str);
-    int weight_num = std::stoi(recv_size_str);
-    auto* received_party_weights = new EncodedNumber[weight_num];
-    auto* decrypted_party_weights = new EncodedNumber[weight_num];
-    deserialize_encoded_number_array(received_party_weights, weight_num,
-                                     recv_weight_str);
-    party.collaborative_decrypt(received_party_weights, decrypted_party_weights,
-                                weight_num, ACTIVE_PARTY_ID);
-    delete[] received_party_weights;
-    delete[] decrypted_party_weights;
+    // first send the weight size to active party
+    party.send_long_message(ACTIVE_PARTY_ID, std::to_string(weight_size));
+    // then receive and deserialize the party_weight_sizes array
+    std::string recv_party_weight_sizes_str;
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_party_weight_sizes_str);
+    deserialize_int_array(party_weight_sizes, recv_party_weight_sizes_str);
   }
+}
+
+void LinearModel::display_weights(Party party) {
+  log_info("display local weights");
+  for (int i = 0; i < party.party_num; i++) {
+    log_info("party " + std::to_string(i) + "'s weight size = " + std::to_string(party_weight_sizes[i]));
+  }
+  for (int i = 0; i < party.party_num; i++) {
+    log_info("decrypt party " + std::to_string(i) + "'s weights");
+    int party_i_weight_size = party_weight_sizes[i];
+    auto* party_i_local_weights = new EncodedNumber[party_i_weight_size];
+    auto* party_i_decrypted_weights = new EncodedNumber[party_i_weight_size];
+    // broadcast local weights and call decrypt
+    if (i == party.party_id) {
+      log_info("I am party " + std::to_string(i) + ", i am packaging weights");
+      for (int j = 0; j < party_i_weight_size; j++) {
+        party_i_local_weights[j] = local_weights[j];
+      }
+    }
+    mpz_t z1;
+    mpz_init(z1);
+    party_i_local_weights[0].getter_value(z1);
+    gmp_printf("z1 = %Zd\n", z1);
+    mpz_clear(z1);
+    party.broadcast_encoded_number_array(party_i_local_weights, party_i_weight_size, i);
+    mpz_t z2;
+    mpz_init(z2);
+    party_i_local_weights[0].getter_value(z2);
+    gmp_printf("z2 = %Zd\n", z2);
+    mpz_clear(z2);
+    party.collaborative_decrypt(party_i_local_weights, party_i_decrypted_weights,
+                                party_i_weight_size, i);
+    if (i == party.party_id) {
+      for (int j = 0; j < party_i_weight_size; j++) {
+        double weight;
+        party_i_decrypted_weights[j].decode(weight);
+        std::cout << "local weight[" << j << "] = " << std::setprecision(17)
+                  << weight << std::endl;
+        LOG(INFO) << "local weight[" << j << "] = " << std::setprecision(17)
+                  << weight;
+      }
+    }
+    delete [] party_i_local_weights;
+    delete [] party_i_decrypted_weights;
+  }
+
+//  if (party.party_type == falcon::ACTIVE_PARTY) {
+//    auto* decrypted_local_weights = new EncodedNumber[weight_size];
+//    for (int i = 0; i < party.party_num; i++) {
+//      if (i != party.party_id) {
+//        std::string weight_str;
+//        serialize_encoded_number_array(local_weights,
+//                                       weight_size, weight_str);
+//        std::string size_str = std::to_string(weight_size);
+//        party.send_long_message(i, size_str);
+//        party.send_long_message(i, weight_str);
+//      }
+//    }
+//    party.collaborative_decrypt(local_weights,
+//                                decrypted_local_weights,
+//                                weight_size,
+//                                ACTIVE_PARTY_ID);
+//    for (int i = 0; i < weight_size; i++) {
+//      double weight;
+//      decrypted_local_weights[i].decode(weight);
+//      std::cout << "local weight[" << i << "] = " << std::setprecision(17)
+//                << weight << std::endl;
+//      LOG(INFO) << "local weight[" << i << "] = " << std::setprecision(17)
+//                << weight;
+//    }
+//    delete[] decrypted_local_weights;
+//  } else {
+//    std::string recv_weight_str, recv_size_str;
+//    party.recv_long_message(ACTIVE_PARTY_ID, recv_size_str);
+//    party.recv_long_message(ACTIVE_PARTY_ID, recv_weight_str);
+//    int weight_num = std::stoi(recv_size_str);
+//    auto* received_party_weights = new EncodedNumber[weight_num];
+//    auto* decrypted_party_weights = new EncodedNumber[weight_num];
+//    deserialize_encoded_number_array(received_party_weights, weight_num,
+//                                     recv_weight_str);
+//    party.collaborative_decrypt(received_party_weights, decrypted_party_weights,
+//                                weight_num, ACTIVE_PARTY_ID);
+//    delete[] received_party_weights;
+//    delete[] decrypted_party_weights;
+//  }
 }

@@ -18,6 +18,8 @@ class LinearModel {
   int weight_size;
   // model weights vector, encrypted values during training, size equals to weight_size
   EncodedNumber *local_weights{};
+  // parties' weight size vector
+  std::vector<int> party_weight_sizes;
 
  public:
   LinearModel();
@@ -66,6 +68,13 @@ class LinearModel {
       const std::vector<std::vector<double>>& used_samples,
       EncodedNumber** encoded_samples,
       int precision = PHE_FIXED_POINT_PRECISION) const;
+
+  /**
+   * sync up the weight size vector
+   *
+   * @param party: initialized party object
+   */
+  void sync_up_weight_sizes(const Party& party);
 
   /**
    * print weights during training to view changes

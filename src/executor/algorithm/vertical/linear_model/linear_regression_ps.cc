@@ -48,9 +48,9 @@ void LinearRegParameterServer::distributed_train(){
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
 
   // create encrypted weight and store it to alg_builder 's local_weight
-  init_encrypted_random_numbers(party, this->alg_builder.linear_reg_model.weight_size,
-                                this->alg_builder.linear_reg_model.local_weights,
-                                encrypted_weights_precision);
+  init_encrypted_model_weights(party, this->alg_builder.linear_reg_model.party_weight_sizes,
+                         this->alg_builder.linear_reg_model.local_weights,
+                         encrypted_weights_precision);
 
   // record training data ids in training_data_indexes for iteratively batch selection
   std::vector<int> training_data_indexes;

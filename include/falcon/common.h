@@ -25,7 +25,7 @@ namespace falcon {
 
   /** for linear models */
   #define SPDZ_PORT_BASE 14000
-  #define RANDOM_SEED 42
+  #define RANDOM_SEED 51
   #define SPLIT_TRAIN_TEST_RATIO 0.8
   #define ACTIVE_PARTY_ID 0
   // default threshold for LR is 50%

@@ -27,22 +27,34 @@
  * @param data_indexes: the original training data indexes
  * @return
  */
-std::vector<int> select_batch_idx(const Party& party,
-                                  int batch_size,
-                                  std::vector<int> data_indexes);
+std::vector<int> sync_batch_idx(const Party& party,
+                                int batch_size,
+                                std::vector<int> data_indexes);
 
 /**
- * initialize encrypted random numbers
+ * this function pre-compute all the needed batch indexes for each iteration
+ *
+ * @param batch_size: the batch size in the builder
+ * @param max_iter: the maximum number iterations
+ * @param data_indexes: the original training data indexes
+ * @return
+ */
+std::vector<std::vector<int>> precompute_iter_batch_idx(int batch_size,
+                                                        int max_iter,
+                                                        std::vector<int> data_indexes);
+
+/**
+ * initialize encrypted weights for linear models
  *
  * @param party: initialized party object
- * @param vector_size: the number of random values
+ * @param party_weight_sizes: party's weight size vector
  * @param encrypted_vector: the encrypted values returned
  * @param precision: precision for big integer representation EncodedNumber
  */
-void init_encrypted_random_numbers(const Party& party,
-                            int vector_size,
-                            EncodedNumber* encrypted_vector,
-                            int precision = PHE_FIXED_POINT_PRECISION);
+void init_encrypted_model_weights(const Party& party,
+                                  std::vector<int> party_weight_sizes,
+                                  EncodedNumber* encrypted_vector,
+                                  int precision = PHE_FIXED_POINT_PRECISION);
 
 
 /**

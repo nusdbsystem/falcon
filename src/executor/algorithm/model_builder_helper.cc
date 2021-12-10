@@ -25,29 +25,20 @@
 // generate a batch (array) of data indexes according to the shuffle
 // array size is the batch-size
 // called in each new iteration
-std::vector<int> select_batch_idx(const Party& party,
-                                  int batch_size,
-                                  std::vector<int> data_indexes) {
+std::vector<int> sync_batch_idx(const Party& party,
+                                int batch_size,
+                                std::vector<int> cur_batch_indexes) {
   std::vector<int> batch_indexes;
   // if active party, randomly select batch indexes and send to other parties
   // if passive parties, receive batch indexes and return
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    log_info("ACTIVE_PARTY select batch indexes");
-    // NOTE: cannot use a fixed seed here!!
-    // select_batch_idx actually return a batch of indexes
-    // cannot use a fixed seed, otherwise the data indexes are fixed
-    std::random_device rd;
-    std::default_random_engine rng(rd());
-    std::shuffle(std::begin(data_indexes), std::end(data_indexes), rng);
-    for (int i = 0; i < batch_size; i++) {
-      // LOG(INFO) << "data_indexes selected = " << data_indexes[i] << std::endl;
-      batch_indexes.push_back(data_indexes[i]);
-    }
+    log_info("ACTIVE_PARTY sync batch indexes");
     // send to other parties
+    batch_indexes = std::move(cur_batch_indexes);
+    std::string batch_indexes_str;
+    serialize_int_array(batch_indexes, batch_indexes_str);
     for (int i = 0; i < party.party_num; i++) {
       if (i != party.party_id) {
-        std::string batch_indexes_str;
-        serialize_int_array(batch_indexes, batch_indexes_str);
         party.send_long_message(i, batch_indexes_str);
       }
     }
@@ -59,30 +50,74 @@ std::vector<int> select_batch_idx(const Party& party,
   return batch_indexes;
 }
 
-void init_encrypted_random_numbers(const Party& party,
-                                   int vector_size,
-                                   EncodedNumber* encrypted_vector,
-                                   int precision) {
+std::vector<std::vector<int>> precompute_iter_batch_idx(int batch_size,
+                                                        int max_iter,
+                                                        std::vector<int> data_indexes) {
+  std::vector<std::vector<int>> batch_iter_indexes;
+  batch_iter_indexes.reserve(max_iter);
+  std::default_random_engine rng(RANDOM_SEED);
+  // shuffle and assign mini batch index for each iter
+  for (int iter = 0; iter < max_iter; iter++) {
+    log_info("------ batch indexes for iter " + std::to_string(iter) + " ------");
+    // NOTE: cannot use a fixed seed here!!
+    // select_batch_idx actually return a batch of indexes
+    // cannot use a fixed seed, otherwise the data indexes are fixed
+    // std::random_device rd;
+    std::shuffle(std::begin(data_indexes), std::end(data_indexes), rng);
+    std::vector<int> batch_indexes;
+    batch_indexes.reserve(batch_size);
+    for (int i = 0; i < batch_size; i++) {
+      log_info("data_indexes selected = " + std::to_string(data_indexes[i]));
+      batch_indexes.push_back(data_indexes[i]);
+    }
+    batch_iter_indexes.push_back(batch_indexes);
+  }
+  return batch_iter_indexes;
+}
+
+void init_encrypted_model_weights(const Party& party,
+                                  std::vector<int> party_weight_sizes,
+                                  EncodedNumber* encrypted_vector,
+                                  int precision) {
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
-  std::random_device rd;
-  std::mt19937 mt(rd());
+  int global_weight_size = std::accumulate(party_weight_sizes.begin(), party_weight_sizes.end(), 0);
+  double limit = sqrt(2.0 / (double) global_weight_size);
+//  std::random_device rd;
+  std::mt19937 mt(RANDOM_SEED);
   // initialization of weights
   // random initialization with a uniform range
-  std::uniform_real_distribution<double> dist(
-      WEIGHTS_INIT_MIN,
-      WEIGHTS_INIT_MAX
-  );
+  log_info("limit = " + std::to_string(limit));
+  std::uniform_real_distribution<double> dist(-limit, limit);
+  // NOTE: for better compare to baseline that ensure the same randomness
+  std::vector<double> global_weights;
+  global_weights.reserve(global_weight_size);
+  for (int i = 0; i < global_weight_size; i++) {
+    double r = dist(mt);
+    global_weights.push_back(r);
+    log_info("global_weights[" + std::to_string(i) + "] = " + std::to_string(r));
+  }
   // srand(static_cast<unsigned> (time(nullptr)));
-  for (int i = 0; i < vector_size; i++) {
-    // generate random double values within (0, 1],
+  int start_idx = 0;
+  for (int i = 0; i < party.party_num; i++) {
+    if (i < party.party_id) {
+      start_idx += party_weight_sizes[i];
+    } else {
+      break;
+    }
+  }
+  int local_weight_size = party_weight_sizes[party.party_id];
+  for (int i = 0; i < local_weight_size; i++) {
+    // generate random double values within (-limit, limit),
     // init fixed point EncodedNumber,
     // and encrypt with public key
-    double v = dist(mt);
+    double v = global_weights[start_idx];
+    log_info("local_weights[" + std::to_string(i) + "] = " + std::to_string(v));
     // double v = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
     EncodedNumber t;
     t.set_double(phe_pub_key->n[0], v, precision);
     djcs_t_aux_encrypt(phe_pub_key, party.phe_random, encrypted_vector[i], t);
+    start_idx += 1;
   }
   djcs_t_free_public_key(phe_pub_key);
 }
