@@ -70,16 +70,16 @@ class LinearParameterServer : public ParameterServer {
    */
   void broadcast_encrypted_weights(LinearModel linear_model);
 
-  /**
-   * select batch indexes for each iteration
-   *
-   * @param party: initialized party object
-   * @param data_indexes: the original training data indexes. need shuffle so pass by value
-   * @param batch_size: the batch size for each training iteration
-   * @return
-   */
-  std::vector<int> select_batch_idx(std::vector<int> data_indexes,
-                                    int batch_size) const;
+//  /**
+//   * select batch indexes for each iteration
+//   *
+//   * @param party: initialized party object
+//   * @param data_indexes: the original training data indexes. need shuffle so pass by value
+//   * @param batch_size: the batch size for each training iteration
+//   * @return
+//   */
+//  std::vector<int> select_batch_idx(std::vector<int> data_indexes,
+//                                    int batch_size) const;
 
   /**
    * partition examples according to number of workers

@@ -57,6 +57,9 @@ void LinearRegParameterServer::distributed_train(){
   for (int i = 0; i < this->alg_builder.getter_training_data().size(); i++) {
     training_data_indexes.push_back(i);
   }
+  std::vector<std::vector<int>> batch_iter_indexes = precompute_iter_batch_idx(this->alg_builder.batch_size,
+                                                                               this->alg_builder.max_iteration,
+                                                                               training_data_indexes);
 
   log_info("current channel size = " + std::to_string(this->worker_channels.size()));
 
@@ -67,8 +70,9 @@ void LinearRegParameterServer::distributed_train(){
     log_info("--------PS Iteration " + std::to_string(iter) + ", ps broadcast_encrypted_weights successful --------");
     // step 3: randomly select a batch of samples from training data
     // active ps select batch idx and broadcast to passive ps
-    std::vector<int> batch_indexes = this->select_batch_idx(training_data_indexes,
-                                                            this->alg_builder.batch_size);
+    std::vector<int> batch_indexes = sync_batch_idx(this->party,
+                                                    this->alg_builder.batch_size,
+                                                    batch_iter_indexes[iter]);
     log_info("--------PS Iteration " + std::to_string(iter) + ", ps select_batch_idx successful --------");
     // step 4: partition sample ids, since the partition method is deterministic
     // all ps can do this step in its own cluster and broadcast to its own workers

@@ -73,38 +73,38 @@ void LinearParameterServer::broadcast_encrypted_weights(LinearModel linear_model
   }
 }
 
-std::vector<int> LinearParameterServer::select_batch_idx(
-    std::vector<int> training_data_indexes,
-    int batch_size) const {
-  // push to batch_indexes
-  std::vector<int> batch_indexes;
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    //randomly select batch indexes and send to other parties
-    std::random_device rd;
-    std::default_random_engine rng(rd());
-    std::shuffle(std::begin(training_data_indexes), std::end(training_data_indexes), rng);
-
-    batch_indexes.reserve(batch_size);
-    for (int i = 0; i < batch_size; i++) {
-      batch_indexes.push_back(training_data_indexes[i]);
-    }
-
-    // broadcast to other passive ps
-    std::string batch_indexes_str;
-    serialize_int_array(batch_indexes, batch_indexes_str);
-    for (int ps_index = 0; ps_index < party.party_num; ps_index++) {
-      if (ps_index != party.party_id) {
-        party.send_long_message(ps_index, batch_indexes_str);
-      }
-    }
-  } else {
-    std::string recv_batch_indexes_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_batch_indexes_str);
-    deserialize_int_array(batch_indexes, recv_batch_indexes_str);
-  }
-
-  return batch_indexes;
-}
+//std::vector<int> LinearParameterServer::select_batch_idx(
+//    std::vector<int> training_data_indexes,
+//    int batch_size) const {
+//  // push to batch_indexes
+//  std::vector<int> batch_indexes;
+//  if (party.party_type == falcon::ACTIVE_PARTY) {
+//    //randomly select batch indexes and send to other parties
+//    std::random_device rd;
+//    std::default_random_engine rng(rd());
+//    std::shuffle(std::begin(training_data_indexes), std::end(training_data_indexes), rng);
+//
+//    batch_indexes.reserve(batch_size);
+//    for (int i = 0; i < batch_size; i++) {
+//      batch_indexes.push_back(training_data_indexes[i]);
+//    }
+//
+//    // broadcast to other passive ps
+//    std::string batch_indexes_str;
+//    serialize_int_array(batch_indexes, batch_indexes_str);
+//    for (int ps_index = 0; ps_index < party.party_num; ps_index++) {
+//      if (ps_index != party.party_id) {
+//        party.send_long_message(ps_index, batch_indexes_str);
+//      }
+//    }
+//  } else {
+//    std::string recv_batch_indexes_str;
+//    party.recv_long_message(ACTIVE_PARTY_ID, recv_batch_indexes_str);
+//    deserialize_int_array(batch_indexes, recv_batch_indexes_str);
+//  }
+//
+//  return batch_indexes;
+//}
 
 std::vector<int> LinearParameterServer::partition_examples(
     std::vector<int> batch_indexes){
