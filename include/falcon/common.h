@@ -65,7 +65,7 @@ namespace falcon {
   // to display intermediate information
   // turn DEBUG off in the real application
   #define DEBUG true
-  #define PRINT_EVERY 500  // if debug, display info at this frequency
+  #define PRINT_EVERY 20  // if debug, display info at this frequency
   // gtest IO folder
   #define TEST_IO_OUTDIR "/opt/falcon/test/falcon/io"
 

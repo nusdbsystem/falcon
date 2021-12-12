@@ -88,6 +88,7 @@ void init_encrypted_model_weights(const Party& party,
   // initialization of weights
   // random initialization with a uniform range
   log_info("limit = " + std::to_string(limit));
+  google::FlushLogFiles(google::INFO);
   std::uniform_real_distribution<double> dist(-limit, limit);
   // NOTE: for better compare to baseline that ensure the same randomness
   std::vector<double> global_weights;
@@ -154,6 +155,14 @@ void split_dataset(Party* party,
     log_info("updated weight_size = " + std::to_string(weight_size));
     log_info("party getter feature_num = " + std::to_string(party->getter_feature_num()));
   }
+  // for debug
+  log_info("print the first training data before train");
+  for (int j = 0; j < weight_size; j++) {
+    log_info("vec[" + std::to_string(j) + "] = " + std::to_string(training_data[0][j]));
+  }
+  if (party->party_type == falcon::ACTIVE_PARTY) {
+    log_info("first training data label = " + std::to_string(training_labels[0]));
+  }
 }
 
 void compute_encrypted_residual(const Party& party,
@@ -175,6 +184,11 @@ void compute_encrypted_residual(const Party& party,
     std::vector<double> batch_labels;
     for (int index: batch_indexes) {
       batch_labels.push_back(training_labels[index]);
+    }
+    // for debug
+    log_info("print batch labels");
+    for (int i = 0; i < cur_batch_size; i++) {
+      log_info("batch label " + std::to_string(i) + " = " + std::to_string(batch_labels[i]));
     }
     auto* encrypted_ground_truth_labels = new EncodedNumber[cur_batch_size];
     for (int i = 0; i < cur_batch_size; i++) {

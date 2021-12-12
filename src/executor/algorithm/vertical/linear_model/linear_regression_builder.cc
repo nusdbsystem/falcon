@@ -73,11 +73,37 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
   int cur_batch_size = (int) batch_indexes.size();
   auto* encrypted_batch_losses = new EncodedNumber[cur_batch_size];
 
+//  // for debug
+//  auto* decrypted_batch_predictions = new EncodedNumber[cur_batch_size];
+//  party.collaborative_decrypt(predicted_labels, decrypted_batch_predictions,
+//                              cur_batch_size, ACTIVE_PARTY_ID);
+//  if (party.party_type == falcon::ACTIVE_PARTY) {
+//    for (int i = 0; i < cur_batch_size; i++) {
+//      double loss_i;
+//      decrypted_batch_predictions[i].decode(loss_i);
+//      log_info("prediction_[" + std::to_string(i) +"] = " + std::to_string(loss_i));
+//    }
+//  }
+//  delete [] decrypted_batch_predictions;
+
   // compute the residual [f_t - y_t] of the batch samples
   // for linear regression, here precision should be
   // (local_weights.precision + sample.precision) = 2 * PHE_FIXED_POINT_PRECISION
   compute_encrypted_residual(party, batch_indexes, training_labels,
                              precision, predicted_labels, encrypted_batch_losses);
+
+//  // for debug
+//  auto* decrypted_batch_losses = new EncodedNumber[cur_batch_size];
+//  party.collaborative_decrypt(encrypted_batch_losses, decrypted_batch_losses,
+//                              cur_batch_size, ACTIVE_PARTY_ID);
+//  if (party.party_type == falcon::ACTIVE_PARTY) {
+//    for (int i = 0; i < cur_batch_size; i++) {
+//      double loss_i;
+//      decrypted_batch_losses[i].decode(loss_i);
+//      log_info("loss_[" + std::to_string(i) +"] = " + std::to_string(loss_i));
+//    }
+//  }
+//  delete [] decrypted_batch_losses;
 
   // notice that the update formulas are different for different settings
   // (1) without regularization:
@@ -507,6 +533,7 @@ void LinearRegressionBuilder::train(Party party) {
   // (here use precision for consistence in the following)
   log_info("Init encrypted local weights");
   linear_reg_model.sync_up_weight_sizes(party);
+  google::FlushLogFiles(google::INFO);
   int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
   init_encrypted_model_weights(party, linear_reg_model.party_weight_sizes,
@@ -538,6 +565,14 @@ void LinearRegressionBuilder::train(Party party) {
     for (int index : batch_indexes) {
       batch_samples.push_back(training_data[index]);
     }
+//    // for debug
+//    log_info("print batch data");
+//    for (int i = 0; i < batch_samples.size(); i++) {
+//      log_info("print batch data " + std::to_string(i));
+//      for (int j = 0; j < batch_samples[i].size(); j++) {
+//        log_info("vec[" + std::to_string(j) + "] = " + std::to_string(batch_samples[i][j]));
+//      }
+//    }
 
     // encode the training data
     int cur_sample_size = (int) batch_samples.size();
@@ -578,6 +613,11 @@ void LinearRegressionBuilder::train(Party party) {
     log_info("-------- Iteration " + std::to_string(iter) + ", backward computation success --------");
     update_encrypted_weights(party, encrypted_gradients);
     log_info("-------- Iteration " + std::to_string(iter) + ", update_encrypted_weights computation success --------");
+
+    linear_reg_model.display_weights(party);
+    if (iter % PRINT_EVERY == 0) {
+      loss_computation(party, falcon::TRAIN);
+    }
 
     const clock_t iter_finish_time = clock();
     double iter_consumed_time =
@@ -803,6 +843,118 @@ void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, c
       double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
   log_info("Evaluation time = " + std::to_string(testing_consumed_time));
   log_info("************* Evaluation on " + dataset_str + " Finished *************");
+
+}
+
+double LinearRegressionBuilder::loss_computation(const Party& party, falcon::DatasetType dataset_type) {
+  // for weighted regression, refer to https://www.stat.cmu.edu/~cshalizi/350/lectures/18/lecture-18.pdf
+  // if no regularization, L = \sum_{i=1}^B (sw_i * (\hat{y}_i - y_i)^2)
+  // if l2 regularization, L = \sum_{i=1}^B (sw_i * (\hat{y}_i - y_i)^2) +
+  //     \lambda * \sum_{j=1}^{weight_size} (w_j)^2
+  // if l1 regularization, L = \sum_{i=1}^B (sw_i * (\hat{y}_i - y_i)^2) +
+  //     \lambda * \sum_{j=1}^{weight_size} |w_j|
+  std::string dataset_str = (dataset_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  const clock_t testing_start_time = clock();
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  // step 1: init test data
+  int dataset_size = (dataset_type == falcon::TRAIN) ? training_data.size()
+                                                     : testing_data.size();
+  std::vector<std::vector<double>> cur_test_dataset =
+      (dataset_type == falcon::TRAIN) ? training_data : testing_data;
+  std::vector<double> cur_test_labels =
+      (dataset_type == falcon::TRAIN) ? training_labels : testing_labels;
+  // step 2: every party computes partial phe summation
+  // and sends to active party
+  std::vector<std::vector<double>> batch_samples;
+  for (int i = 0; i < dataset_size; i++) {
+    batch_samples.push_back(cur_test_dataset[i]);
+  }
+  // homomorphic aggregation (the precision should be 4 * prec now)
+  int plaintext_precision = PHE_FIXED_POINT_PRECISION;
+  auto* encrypted_aggregation = new EncodedNumber[dataset_size];
+
+  // encode examples
+  EncodedNumber** encoded_batch_samples;
+  int cur_sample_size = (int) batch_samples.size();
+  encoded_batch_samples = new EncodedNumber*[cur_sample_size];
+  for (int i = 0; i < cur_sample_size; i++) {
+    encoded_batch_samples[i] = new EncodedNumber[linear_reg_model.weight_size];
+  }
+  linear_reg_model.encode_samples(party, batch_samples, encoded_batch_samples);
+
+  linear_reg_model.compute_batch_phe_aggregation(party,
+                                                 cur_sample_size,
+                                                 encoded_batch_samples,
+                                                 plaintext_precision,
+                                                 encrypted_aggregation);
+
+  // step 3: active party aggregates and call collaborative decryption
+  auto* decrypted_aggregation = new EncodedNumber[dataset_size];
+  party.collaborative_decrypt(encrypted_aggregation, decrypted_aggregation,
+                              dataset_size, ACTIVE_PARTY_ID);
+
+  // step 4: compute common loss
+  double loss = 0.0;
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::vector<double> predictions;
+    for (int i = 0; i < cur_sample_size; i++) {
+      double pred;
+      decrypted_aggregation[i].decode(pred);
+      predictions.push_back(pred);
+      loss += ((pred - cur_test_labels[i]) * (pred - cur_test_labels[i]));
+    }
+  }
+  // now the loss is the first term in the loss function
+  double regularization_loss = 0.0;
+  if (with_regularization) {
+    // display weights
+    std::vector<double> local_model_weights = linear_reg_model.display_weights(party);
+    double local_regularized_loss = 0.0;
+    for (int j = 0; j < local_model_weights.size(); j++) {
+      if (penalty == "l2") {
+        local_regularized_loss += (local_model_weights[j] * local_model_weights[j]);
+      }
+      if (penalty == "l1") {
+        local_regularized_loss += (std::abs(local_model_weights[j]));
+      }
+    }
+    local_regularized_loss = local_regularized_loss * alpha;
+
+    // every party send this value to the active party
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      regularization_loss = local_regularized_loss;
+      for (int i = 0; i < party.party_num; i++) {
+        if (i != party.party_id) {
+          std::string recv_local_regularization_loss;
+          party.recv_long_message(i, recv_local_regularization_loss);
+          regularization_loss += (std::atof(recv_local_regularization_loss.c_str()));
+        }
+      }
+    } else {
+      party.send_long_message(ACTIVE_PARTY_ID, std::to_string(local_regularized_loss));
+    }
+  }
+  loss += regularization_loss;
+  log_info("The loss on " + dataset_str + " is: " + std::to_string(loss));
+
+  // free memory
+  djcs_t_free_public_key(phe_pub_key);
+  delete[] encrypted_aggregation;
+  delete[] decrypted_aggregation;
+
+  for (int i = 0; i < cur_sample_size; i++) {
+    delete [] encoded_batch_samples[i];
+  }
+  delete [] encoded_batch_samples;
+
+  const clock_t testing_finish_time = clock();
+  double testing_consumed_time =
+      double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
+  log_info("Time for loss computation on " + dataset_str + " = " + std::to_string(testing_consumed_time));
 
 }
 

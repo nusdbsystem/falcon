@@ -172,6 +172,16 @@ class LinearRegressionBuilder : public ModelBuilder {
             const std::string& report_save_path = std::string()) override;
 
   /**
+   * compute the loss of the dataset in each iteration
+   *
+   * @param party: initialized party object
+   * @param dataset_type: falcon::DatasetType,
+   *   TRAIN for training data and TEST for testing data
+   * @param loss: returned loss
+   */
+  double loss_computation(const Party& party, falcon::DatasetType dataset_type);
+
+  /**
    * linear regression model eval
    *
    * @param party: initialized party object

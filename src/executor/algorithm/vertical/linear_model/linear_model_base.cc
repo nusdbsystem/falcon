@@ -202,7 +202,8 @@ void LinearModel::sync_up_weight_sizes(const Party &party) {
   }
 }
 
-void LinearModel::display_weights(Party party) {
+std::vector<double> LinearModel::display_weights(Party party) {
+  std::vector<double> local_model_weights;
   log_info("display local weights");
   for (int i = 0; i < party.party_num; i++) {
     log_info("party " + std::to_string(i) + "'s weight size = " + std::to_string(party_weight_sizes[i]));
@@ -240,12 +241,13 @@ void LinearModel::display_weights(Party party) {
                   << weight << std::endl;
         LOG(INFO) << "local weight[" << j << "] = " << std::setprecision(17)
                   << weight;
+        local_model_weights.push_back(weight);
       }
     }
     delete [] party_i_local_weights;
     delete [] party_i_decrypted_weights;
   }
-
+  return local_model_weights;
 //  if (party.party_type == falcon::ACTIVE_PARTY) {
 //    auto* decrypted_local_weights = new EncodedNumber[weight_size];
 //    for (int i = 0; i < party.party_num; i++) {

@@ -81,7 +81,7 @@ class LinearModel {
    *
    * @param party: initialized party object
    */
-  void display_weights(Party party);
+  std::vector<double> display_weights(Party party);
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BASE_H_
