@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
   cout << "number of samples: " << n_samples << endl
        << "number of attributes (including label): " << n_attributes << endl;
 
-  int n_attr_per_client = n_attributes / num_client;
+  int n_attr_per_client = (n_attributes - 1) / num_client;
+  cout << "n_attr_per_client = " << n_attr_per_client << endl;
 
   std::vector<std::string> files;
   ofstream outs[MAX_CLIENT];
@@ -50,28 +51,44 @@ int main(int argc, char* argv[]) {
   }
 
   int threshold_index[MAX_CLIENT];
-  for (int i = num_client - 1; i >= 0; i--) {
-    int threshold = n_attr_per_client * (num_client - i);
-    if (i == 0) {
-      threshold_index[i] = n_attributes - 1;
+  for (int i = 0; i < num_client; i++) {
+    int threshold;
+    if (i < num_client - 1) {
+      threshold = n_attr_per_client * (i + 1);
     } else {
-      threshold_index[i] = threshold;
+      threshold = n_attributes - 1;
     }
+    threshold_index[i] = threshold;
     cout << "threshold index " << i << " = " << threshold_index[i] << endl;
   }
   threshold_index[num_client] = 0;
-  threshold_index[0] = threshold_index[0] + 1; // include label
+  // threshold_index[0] = threshold_index[0] + 1; // include label
 
   for (auto entry : table) {
-    for (int i = 0; i < n_attributes; ++i) {
-      for (int client_id = num_client - 1; client_id >= 0; client_id --) {
-        if (i < threshold_index[client_id] && i >= threshold_index[client_id + 1]) {
-          double d = std::stod(entry[i]);
-          outs[client_id] << fixed << d;
-          if (i == threshold_index[client_id] - 1) {
+    for (int i = 0; i < n_attributes - 1; ++i) {
+      for (int client_id = 0; client_id < num_client; client_id ++) {
+        if (client_id == 0) {
+          if (i < threshold_index[client_id]) {
+            double d = std::stod(entry[i]);
+            outs[client_id] << fixed << d;
+            outs[client_id] << ",";
+          } else if (i == threshold_index[client_id]) {
+            // insert label
+            double d = std::stod(entry[n_attributes - 1]);
+            outs[client_id] << fixed << d;
             outs[client_id] << endl;
           } else {
-            outs[client_id] << ",";
+            // do nothing
+          }
+        } else {
+          if (i < threshold_index[client_id] && i >= threshold_index[client_id - 1]) {
+            double d = std::stod(entry[i]);
+            outs[client_id] << fixed << d;
+            if (i == threshold_index[client_id] - 1) {
+              outs[client_id] << endl;
+            } else {
+              outs[client_id] << ",";
+            }
           }
         }
       }

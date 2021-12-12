@@ -139,3 +139,5 @@ ENV/
 # generated proto message
 src/executor/include/message/*.cc
 src/executor/include/message/*.h
+
+tools/ml_baseline/python/linearreg_sklearn/mlscratch/
