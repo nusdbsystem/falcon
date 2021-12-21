@@ -223,3 +223,17 @@ double median(std::vector<double>& inputs) {
 double average(std::vector<double> inputs) {
   return std::accumulate(inputs.begin(), inputs.end(), 0.0) / inputs.size();
 }
+
+double square_sum(std::vector<double> a, std::vector<double> b) {
+  double ss = 0.0;
+  if (a.size() != b.size()) {
+    LOG(ERROR) << "Squared sum computation wrong: sizes of the two "
+                  "vectors not same";
+    exit(EXIT_FAILURE);
+  }
+  for (int i = 0; i < (int) a.size(); i++) {
+    double diff = a[i] - b[i];
+    ss += (diff * diff);
+  }
+  return ss;
+}

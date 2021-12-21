@@ -1224,46 +1224,117 @@ TEST(PB_Converter, PSNetworkConfig) {
   }
 }
 
-TEST(PB_Converter, LimeParams) {
-  LimeParams lime_params;
-  lime_params.is_precompute = true;
-  lime_params.precompute_save_file = "tmp.txt";
-  lime_params.model_type = "classification";
-  lime_params.class_num = 2;
-  lime_params.discretize_continuous = false;
-  lime_params.discretizer = "quartile";
-  lime_params.kernel = "exponential";
-  for (int i = 0; i < 5; i++) {
-    lime_params.categorical_features.push_back(i);
-  }
-  lime_params.kernel_width = 2.0;
-  lime_params.feature_selection = "lasso_path";
-  lime_params.sample_around_instance = false;
-  lime_params.sampling_method = "gaussian";
-  lime_params.local_feature_num = 5;
-  lime_params.explained_feature_num = 5;
-  lime_params.interpretable_method = "ridge";
-  lime_params.interpretable_method_params = "test";
+TEST(PB_Converter, LimeCompPredParams) {
+  LimeCompPredictionParams lime_comp_pred_params;
+  lime_comp_pred_params.original_model_name = "logistic_regression";
+  lime_comp_pred_params.original_model_saved_file = "log_reg.txt";
+  lime_comp_pred_params.model_type = "classification";
+  lime_comp_pred_params.class_num = 2;
+  lime_comp_pred_params.explain_instance_idx = 5;
+  lime_comp_pred_params.sample_around_instance = false;
+  lime_comp_pred_params.num_total_samples = 100000;
+  lime_comp_pred_params.sampling_method = "gaussian";
+  lime_comp_pred_params.generated_sample_file = "gen_sample_file.txt";
+  lime_comp_pred_params.computed_prediction_file = "computed_prediction_file.txt";
+
   std::string output_message;
-  serialize_lime_params(lime_params, output_message);
-  LimeParams output_lime_params;
-  deserialize_lime_params(output_lime_params, output_message);
-  EXPECT_EQ(lime_params.is_precompute, output_lime_params.is_precompute);
-  EXPECT_TRUE(lime_params.precompute_save_file == output_lime_params.precompute_save_file);
-  EXPECT_TRUE(lime_params.model_type == output_lime_params.model_type);
-  EXPECT_EQ(lime_params.class_num, output_lime_params.class_num);
-  EXPECT_EQ(lime_params.discretize_continuous, output_lime_params.discretize_continuous);
-  EXPECT_TRUE(lime_params.discretizer == output_lime_params.discretizer);
-  EXPECT_TRUE(lime_params.kernel == output_lime_params.kernel);
-  for (int i = 0; i < 5; i++) {
-    EXPECT_EQ(lime_params.categorical_features[i], output_lime_params.categorical_features[i]);
-  }
-  EXPECT_EQ(lime_params.kernel_width, output_lime_params.kernel_width);
-  EXPECT_TRUE(lime_params.feature_selection == output_lime_params.feature_selection);
-  EXPECT_EQ(lime_params.sample_around_instance, output_lime_params.sample_around_instance);
-  EXPECT_TRUE(lime_params.sampling_method == output_lime_params.sampling_method);
-  EXPECT_EQ(lime_params.local_feature_num, output_lime_params.local_feature_num);
-  EXPECT_EQ(lime_params.explained_feature_num, output_lime_params.explained_feature_num);
-  EXPECT_TRUE(lime_params.interpretable_method == output_lime_params.interpretable_method);
-  EXPECT_TRUE(lime_params.interpretable_method_params == output_lime_params.interpretable_method_params);
+  serialize_lime_comp_pred_params(lime_comp_pred_params, output_message);
+  LimeCompPredictionParams output_lime_comp_pred_params;
+  deserialize_lime_comp_pred_params(output_lime_comp_pred_params, output_message);
+  EXPECT_TRUE(lime_comp_pred_params.original_model_name == output_lime_comp_pred_params.original_model_name);
+  EXPECT_TRUE(lime_comp_pred_params.original_model_saved_file == output_lime_comp_pred_params.original_model_saved_file);
+  EXPECT_TRUE(lime_comp_pred_params.model_type == output_lime_comp_pred_params.model_type);
+  EXPECT_EQ(lime_comp_pred_params.class_num, output_lime_comp_pred_params.class_num);
+  EXPECT_EQ(lime_comp_pred_params.explain_instance_idx, output_lime_comp_pred_params.explain_instance_idx);
+  EXPECT_EQ(lime_comp_pred_params.sample_around_instance, output_lime_comp_pred_params.sample_around_instance);
+  EXPECT_EQ(lime_comp_pred_params.num_total_samples, output_lime_comp_pred_params.num_total_samples);
+  EXPECT_TRUE(lime_comp_pred_params.sampling_method == output_lime_comp_pred_params.sampling_method);
+  EXPECT_TRUE(lime_comp_pred_params.generated_sample_file == output_lime_comp_pred_params.generated_sample_file);
+  EXPECT_TRUE(lime_comp_pred_params.computed_prediction_file == output_lime_comp_pred_params.computed_prediction_file);
+}
+
+TEST(PB_Converter, LimeCompWeiParams) {
+  LimeCompWeightsParams lime_comp_weights_params;
+  lime_comp_weights_params.explain_instance_idx = 5;
+  lime_comp_weights_params.generated_sample_file = "gen_sample_file.txt";
+  lime_comp_weights_params.computed_prediction_file = "computed_prediction_file.txt";
+  lime_comp_weights_params.is_precompute = false;
+  lime_comp_weights_params.num_samples = 5000;
+  lime_comp_weights_params.class_num = 2;
+  lime_comp_weights_params.distance_metric = "euclidean";
+  lime_comp_weights_params.kernel = "exponential";
+  lime_comp_weights_params.kernel_width = 0.75;
+  lime_comp_weights_params.sample_weights_file = "sample_weights_file.txt";
+  lime_comp_weights_params.selected_samples_file = "selected_samples_file.txt";
+  lime_comp_weights_params.selected_predictions_file = "selected_predictions_file.txt";
+
+  std::string output_message;
+  serialize_lime_comp_weights_params(lime_comp_weights_params, output_message);
+  LimeCompWeightsParams output_lime_comp_weights_params;
+  deserialize_lime_comp_weights_params(output_lime_comp_weights_params, output_message);
+
+  EXPECT_EQ(lime_comp_weights_params.explain_instance_idx, output_lime_comp_weights_params.explain_instance_idx);
+  EXPECT_TRUE(lime_comp_weights_params.generated_sample_file == output_lime_comp_weights_params.generated_sample_file);
+  EXPECT_TRUE(lime_comp_weights_params.computed_prediction_file == output_lime_comp_weights_params.computed_prediction_file);
+  EXPECT_EQ(lime_comp_weights_params.is_precompute, output_lime_comp_weights_params.is_precompute);
+  EXPECT_EQ(lime_comp_weights_params.num_samples, output_lime_comp_weights_params.num_samples);
+  EXPECT_EQ(lime_comp_weights_params.class_num, output_lime_comp_weights_params.class_num);
+  EXPECT_TRUE(lime_comp_weights_params.distance_metric == output_lime_comp_weights_params.distance_metric);
+  EXPECT_TRUE(lime_comp_weights_params.kernel == output_lime_comp_weights_params.kernel);
+  EXPECT_EQ(lime_comp_weights_params.kernel_width, output_lime_comp_weights_params.kernel_width);
+  EXPECT_TRUE(lime_comp_weights_params.sample_weights_file == output_lime_comp_weights_params.sample_weights_file);
+  EXPECT_TRUE(lime_comp_weights_params.selected_samples_file == output_lime_comp_weights_params.selected_samples_file);
+  EXPECT_TRUE(lime_comp_weights_params.selected_predictions_file == output_lime_comp_weights_params.selected_predictions_file);
+}
+
+TEST(PB_Converter, LimeFeatureSelectParams) {
+  LimeFeatSelParams lime_feat_sel_params;
+  lime_feat_sel_params.selected_samples_file = "selected_samples_file.txt";
+  lime_feat_sel_params.selected_predictions_file = "selected_predictions_file.txt";
+  lime_feat_sel_params.sample_weights_file = "sample_weights_file.txt";
+  lime_feat_sel_params.num_samples = 5000;
+  lime_feat_sel_params.feature_selection = "pearson";
+  lime_feat_sel_params.num_explained_features = 5;
+  lime_feat_sel_params.selected_features_file = "selected_features_file.txt";
+
+  std::string output_message;
+  serialize_lime_feat_sel_params(lime_feat_sel_params, output_message);
+  LimeFeatSelParams output_lime_feat_sel_params;
+  deserialize_lime_feat_sel_params(output_lime_feat_sel_params, output_message);
+
+  EXPECT_TRUE(lime_feat_sel_params.selected_samples_file == output_lime_feat_sel_params.selected_samples_file);
+  EXPECT_TRUE(lime_feat_sel_params.selected_predictions_file == output_lime_feat_sel_params.selected_predictions_file);
+  EXPECT_TRUE(lime_feat_sel_params.sample_weights_file == output_lime_feat_sel_params.sample_weights_file);
+  EXPECT_EQ(lime_feat_sel_params.num_samples, output_lime_feat_sel_params.num_samples);
+  EXPECT_TRUE(lime_feat_sel_params.feature_selection == output_lime_feat_sel_params.feature_selection);
+  EXPECT_EQ(lime_feat_sel_params.num_explained_features, output_lime_feat_sel_params.num_explained_features);
+  EXPECT_TRUE(lime_feat_sel_params.selected_features_file == output_lime_feat_sel_params.selected_features_file);
+}
+
+TEST(PB_Converter, LimeInterpretParams) {
+  LimeInterpretParams lime_interpret_params;
+  lime_interpret_params.selected_data_file = "selected_data_file.txt";
+  lime_interpret_params.selected_predictions_file = "selected_prediction_file.txt";
+  lime_interpret_params.sample_weights_file = "sample_weights_file.txt";
+  lime_interpret_params.num_samples = 5000;
+  lime_interpret_params.class_num = 2;
+  lime_interpret_params.class_id = 0;
+  lime_interpret_params.interpret_model_name = "linear_regression";
+  lime_interpret_params.interpret_model_param = "pb_linear_regression";
+  lime_interpret_params.explanation_report = "explanation_report.txt";
+
+  std::string output_message;
+  serialize_lime_interpret_params(lime_interpret_params, output_message);
+  LimeInterpretParams output_lime_interpret_params;
+  deserialize_lime_interpret_params(output_lime_interpret_params, output_message);
+
+  EXPECT_TRUE(lime_interpret_params.selected_data_file == output_lime_interpret_params.selected_data_file);
+  EXPECT_TRUE(lime_interpret_params.selected_predictions_file == output_lime_interpret_params.selected_predictions_file);
+  EXPECT_TRUE(lime_interpret_params.sample_weights_file == output_lime_interpret_params.sample_weights_file);
+  EXPECT_EQ(lime_interpret_params.num_samples, output_lime_interpret_params.num_samples);
+  EXPECT_EQ(lime_interpret_params.class_num, output_lime_interpret_params.class_num);
+  EXPECT_EQ(lime_interpret_params.class_id, output_lime_interpret_params.class_id);
+  EXPECT_TRUE(lime_interpret_params.interpret_model_name == output_lime_interpret_params.interpret_model_name);
+  EXPECT_TRUE(lime_interpret_params.interpret_model_param == output_lime_interpret_params.interpret_model_param);
+  EXPECT_TRUE(lime_interpret_params.explanation_report == output_lime_interpret_params.explanation_report);
 }

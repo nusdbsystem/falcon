@@ -15,19 +15,20 @@
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/algorithm/vertical/tree/gbdt_builder.h>
 #include "falcon/inference/server/inference_server.h"
+#include <falcon/inference/interpretability/lime/lime.h>
 #include "falcon/distributed/worker.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_ps.h"
 #include <falcon/algorithm/vertical/linear_model/linear_regression_ps.h>
 #include "falcon/utils/base64.h"
 #include <falcon/utils/logger/logger.h>
-#include <chrono>
+#include <falcon/utils/parser.h>
 
+#include <chrono>
 #include <glog/logging.h>
 
 using namespace boost;
 using namespace std::chrono;
 
-falcon::AlgorithmName parse_algorithm_name(const std::string& name);
 void print_arguments(const boost::program_options::variables_map& vm);
 
 int main(int argc, char *argv[]) {
@@ -160,6 +161,18 @@ int main(int argc, char *argv[]) {
             break;
           case falcon::GBDT:
             train_gbdt(party, algorithm_params, model_save_file, model_report_file);
+            break;
+          case falcon::LIME_COMP_PRED:
+            lime_comp_pred(party, algorithm_params);
+            break;
+          case falcon::LIME_COMP_WEIGHT:
+            lime_comp_weight(party, algorithm_params);
+            break;
+          case falcon::LIME_FEAT_SEL:
+            lime_feat_sel(party, algorithm_params);
+            break;
+          case falcon::LIME_INTERPRET:
+            lime_interpret(party, algorithm_params);
             break;
           default:
             train_logistic_regression(&party, algorithm_params_pb_str, model_save_file, model_report_file);
@@ -316,16 +329,6 @@ int main(int argc, char *argv[]) {
     cout << e.what() << "\n";
     return 1;
   }
-}
-
-falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
-  falcon::AlgorithmName output = falcon::LOG_REG;
-  if ("logistic_regression" == name) output = falcon::LOG_REG;
-  if ("linear_regression" == name) output = falcon::LINEAR_REG;
-  if ("decision_tree" == name) output = falcon::DT;
-  if ("random_forest" == name) output = falcon::RF;
-  if ("gbdt" == name) output = falcon::GBDT;
-  return output;
 }
 
 void print_arguments(const boost::program_options::variables_map& vm) {

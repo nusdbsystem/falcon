@@ -5,46 +5,99 @@ option go_package = "/common";
 
 import public "common.proto";
 
-// This message denotes the lime interpretability params
-message LimeParams {
-    // whether use precompute strategy
-    bool is_precompute = 1;
-    // number of instances in the precompute stage
-    int32 precompute_instance_num = 2;
-    // precompute saved file, to record the sampled instances and predictions
-    string precompute_save_file = 3;
+// This message denotes the LIME interpretability compute predictions parameters
+message LimeCompPredictionParams {
+    // vertical original model name
+    string original_model_name = 1;
+    // vertical original model saved file
+    string original_model_saved_file = 2;
     // type of model task, 'regression' or 'classification'
-    string model_type = 4;
+    string model_type = 3;
     // number of classes in classification, set to 1 if regression
-    int32 class_num = 5;
-    // if true, all non-categorical features will be discretized into quartiles
-    bool discretize_continuous = 6;
-    // only matters if discretize_continuous is true, options are 'quartile',
-    // 'decide', 'entropy', etc.
-    string discretizer = 7;
-    // categorical feature ids
-    repeated int32 categorical_features = 8;
+    int32 class_num = 4;
+    // the instance index for explain
+    int32 explain_instance_idx = 5;
+    // whether sampling around the above instance
+    bool sample_around_instance = 6;
+    // number of total samples to be generated
+    int32 num_total_samples = 7;
+    // the sampling method, now only support "gaussian"
+    string sampling_method = 8;
+    // generated samples save file
+    string generated_sample_file = 9;
+    // prediction save file
+    string computed_prediction_file = 10;
+}
+
+// This message denotes the compute sample weights parameters
+message LimeCompWeightsParams {
+    // the instance index for explain
+    int32 explain_instance_idx = 1;
+    // generated samples save file
+    string generated_sample_file = 2;
+    // prediction save file
+    string computed_prediction_file = 3;
+    // whether it is pre-computed
+    bool is_precompute = 4;
+    // number of samples to be generated or selected
+    int32 num_samples = 5;
+    // number of classes in classification, set to 1 if regression
+    int32 class_num = 6;
+    // the metric for computing the distance, only "euclidean"
+    string distance_metric = 7;
     // kernel, similarity kernel that takes euclidean distances and kernel width
     // as input and outputs weights in (0,1). If not specified, default is exponential kernel
-    string kernel = 9;
+    string kernel = 8;
     // width for the kernel
-    double kernel_width = 10;
-    // feature selection method, reserved, options are 'forward_selection', 'lasso_path',
-    // 'none' or 'auto', etc.
-    string feature_selection = 11;
-    // whether sample around the predicting instance
-    bool sample_around_instance = 12;
-    // sampling method, 'gaussian' or 'lhs'
-    string sampling_method = 13;
-    // the number of sampled instances for explaining the prediction
-    int32 sample_instance_num = 14;
-    // feature num at each party
-    int32 local_feature_num = 15;
-    // feature num for the explanation
-    int32 explained_feature_num = 16;
-    // interpretable method, 'linear_regression', 'decision_tree', etc.
-    string interpretable_method = 17;
-    // params for the interpretable method, given base64 encoded string,
-    // deserialize based on the interpretable method
-    string interpretable_method_params = 18;
+    double kernel_width = 9;
+    // sample weights file to be saved
+    string sample_weights_file = 10;
+    // selected samples to be saved if is_precompute = true
+    string selected_samples_file = 11;
+    // selected predictions to be saved if is_precompute = true
+    string selected_predictions_file = 12;
+}
+
+// This message denotes the LIME feature selection parameters
+message LimeFeatSelParams {
+    // selected samples file
+    string selected_samples_file = 1;
+    // selected predictions file
+    string selected_predictions_file = 2;
+    // the sample weights file
+    string sample_weights_file = 3;
+    // number of samples generated or selected
+    int32 num_samples = 4;
+    // number of classes in classification, set to 1 if regression
+    int32 class_num = 5;
+    // the label id to be explained
+    int32 class_id = 6;
+    // feature selection method, current options are 'pearson', 'lasso_path',
+    string feature_selection = 7;
+    // number of features to be explained in the interpret model
+    int32 num_explained_features = 8;
+    // selected features to be saved
+    string selected_features_file = 9;
+}
+
+// This message denotes the LIME interpret model training parameters
+message LimeInterpretParams {
+    // selected data file, either selected_samples_file or selected_features_file
+    string selected_data_file = 1;
+    // selected predictions saved
+    string selected_predictions_file = 2;
+    // sample weights file saved
+    string sample_weights_file = 3;
+    // number of samples generated or selected
+    int32 num_samples = 4;
+    // number of classes in classification, set to 1 if regression
+    int32 class_num = 5;
+    // the label id to be explained
+    int32 class_id = 6;
+    // interpretable model name, linear_regression or decision_tree
+    string interpret_model_name = 7;
+    // interpretable model params, should be serialized LinearRegressionParams or DecisionTreeParams
+    string interpret_model_param = 8;
+    // explanation report
+    string explanation_report = 9;
 }

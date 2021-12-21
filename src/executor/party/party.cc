@@ -796,6 +796,35 @@ void Party::truncate_ciphers_precision(EncodedNumber *ciphers, int size,
   delete [] dest_ciphers;
 }
 
+std::vector<int> Party::sync_up_int_arr(int v) const {
+  std::vector<int> sync_arr;
+  if (party_type == falcon::ACTIVE_PARTY) {
+    // first set its own weight size and receive other parties' weight sizes
+    sync_arr.push_back(v);
+    for (int i = 0; i < party_num; i++) {
+      if (i != party_id) {
+        std::string recv_weight_size;
+        recv_long_message(i, recv_weight_size);
+        sync_arr.push_back(std::stoi(recv_weight_size));
+      }
+    }
+    // then broadcast the vector
+    std::string party_weight_sizes_str;
+    serialize_int_array(sync_arr, party_weight_sizes_str);
+    for (int i = 0; i < party_num; i++) {
+      if (i != party_id) {
+        send_long_message(i, party_weight_sizes_str);
+      }
+    }
+  } else {
+    // first send the weight size to active party
+    send_long_message(ACTIVE_PARTY_ID, std::to_string(v));
+    // then receive and deserialize the party_weight_sizes array
+    std::string recv_party_weight_sizes_str;
+    recv_long_message(ACTIVE_PARTY_ID, recv_party_weight_sizes_str);
+    deserialize_int_array(sync_arr, recv_party_weight_sizes_str);
+  }
+}
 
 Party::~Party() {
   // if does not reset channels[i] to nullptr,

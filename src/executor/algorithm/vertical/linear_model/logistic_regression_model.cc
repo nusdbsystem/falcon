@@ -64,6 +64,43 @@ void LogisticRegressionModel::predict(
   delete[] encoded_batch_samples;
 }
 
+void LogisticRegressionModel::predict_proba(
+    const Party &party,
+    std::vector<std::vector<double>> predicted_samples,
+    EncodedNumber **predicted_labels) const {
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  // note that currently only support 2-class classification
+  int cur_sample_size = (int) predicted_samples.size();
+  int feature_num = (int) predicted_samples[0].size();
+  if (feature_num + 1 == weight_size) {
+    // previously fit bias, add a bias term to the predicted samples
+    double x1 = BIAS_VALUE;
+    for (int i = 0; i < cur_sample_size; i++) {
+      predicted_samples[i].insert(predicted_samples[i].begin(), x1);
+    }
+  }
+  // compute the positive prediction
+  auto* predicted_labels_pos = new EncodedNumber[cur_sample_size];
+  predict(party, predicted_samples, predicted_labels_pos);
+  int prediction_precision = std::abs(predicted_labels_pos[0].getter_exponent());
+  int negative_one = -1;
+  EncodedNumber pos_one_double, neg_one_int;
+  pos_one_double.set_double(phe_pub_key->n[0], CERTAIN_PROBABILITY, prediction_precision);
+  neg_one_int.set_integer(phe_pub_key->n[0], negative_one);
+  for (int i = 0; i < cur_sample_size; i++) {
+    EncodedNumber label_neg;
+    djcs_t_aux_ep_mul(phe_pub_key, label_neg, predicted_labels_pos[i], neg_one_int);
+    djcs_t_aux_ee_add(phe_pub_key, label_neg, label_neg, pos_one_double);
+    predicted_labels[i][0] = label_neg;
+    predicted_labels[i][1] = predicted_labels_pos[i];
+  }
+
+  djcs_t_free_public_key(phe_pub_key);
+  delete [] predicted_labels_pos;
+}
+
 void LogisticRegressionModel::forward_computation(
     const Party& party,
     int cur_batch_size,

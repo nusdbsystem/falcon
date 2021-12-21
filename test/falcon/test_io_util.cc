@@ -4,6 +4,7 @@
 
 #include <falcon/common.h>
 #include <falcon/utils/io_util.h>
+#include <falcon/operator/phe/fixed_point_encoder.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <gtest/gtest.h>
 
@@ -126,4 +127,121 @@ TEST(IO_Util, ReadWriteKeys) {
   }
   free(si);
   free(phe_auth_server);
+}
+
+TEST(IO_Util, ReadWriteEncodedMatrix) {
+  int row_num = 3, column_num = 2;
+  auto** encoded_data_matrix = new EncodedNumber*[row_num];
+  for (int i = 0; i < row_num; i++) {
+    encoded_data_matrix[i] = new EncodedNumber[column_num];
+  }
+
+  mpz_t v_n;
+  mpz_t v_value;
+  mpz_init(v_n);
+  mpz_init(v_value);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
+  int v_exponent = -8;
+  EncodedNumberType v_type = Ciphertext;
+  for (int i = 0; i < row_num; i++) {
+    for (int j = 0; j < column_num; j++) {
+      encoded_data_matrix[i][j].setter_n(v_n);
+      encoded_data_matrix[i][j].setter_value(v_value);
+      encoded_data_matrix[i][j].setter_exponent(v_exponent);
+      encoded_data_matrix[i][j].setter_type(v_type);
+    }
+  }
+
+  std::string encoded_matrix_file = "encoded_matrix_test_file.txt";
+  write_encoded_number_matrix_to_file(encoded_data_matrix,
+                                      row_num,
+                                      column_num,
+                                      encoded_matrix_file);
+
+  auto** read_encoded_data_matrix = new EncodedNumber*[row_num];
+  for (int i = 0; i < row_num; i++) {
+    read_encoded_data_matrix[i] = new EncodedNumber[column_num];
+  }
+
+  read_encoded_number_matrix_file(read_encoded_data_matrix,
+                                  row_num,
+                                  column_num,
+                                  encoded_matrix_file);
+
+  // compare and check
+  for (int i = 0; i < row_num; i++) {
+    for (int j = 0; j < column_num; j++) {
+      mpz_t deserialized_n, deserialized_value;
+      mpz_init(deserialized_n);
+      mpz_init(deserialized_value);
+      read_encoded_data_matrix[i][j].getter_n(deserialized_n);
+      read_encoded_data_matrix[i][j].getter_value(deserialized_value);
+      int n_cmp = mpz_cmp(v_n, deserialized_n);
+      int value_cmp = mpz_cmp(v_value, deserialized_value);
+      EXPECT_EQ(0, n_cmp);
+      EXPECT_EQ(0, value_cmp);
+      EXPECT_EQ(v_exponent, read_encoded_data_matrix[i][j].getter_exponent());
+      EXPECT_EQ(v_type, read_encoded_data_matrix[i][j].getter_type());
+      mpz_clear(deserialized_n);
+      mpz_clear(deserialized_value);
+    }
+  }
+
+  mpz_clear(v_n);
+  mpz_clear(v_value);
+  for (int i = 0; i < row_num; i++) {
+    delete [] encoded_data_matrix[i];
+    delete [] read_encoded_data_matrix[i];
+  }
+  delete [] encoded_data_matrix;
+  delete [] read_encoded_data_matrix;
+}
+
+TEST(IO_Util, ReadWriteEncodedArray) {
+  int row_num = 3;
+  auto* encoded_data_arr = new EncodedNumber[row_num];
+
+  mpz_t v_n;
+  mpz_t v_value;
+  mpz_init(v_n);
+  mpz_init(v_value);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
+  int v_exponent = -8;
+  EncodedNumberType v_type = Ciphertext;
+  for (int i = 0; i < row_num; i++) {
+    encoded_data_arr[i].setter_n(v_n);
+    encoded_data_arr[i].setter_value(v_value);
+    encoded_data_arr[i].setter_exponent(v_exponent);
+    encoded_data_arr[i].setter_type(v_type);
+  }
+
+  std::string encoded_arr_file = "encoded_array_test_file.txt";
+  write_encoded_number_array_to_file(encoded_data_arr, row_num, encoded_arr_file);
+
+  auto* read_encoded_data_arr = new EncodedNumber[row_num];
+  read_encoded_number_array_file(read_encoded_data_arr, row_num, encoded_arr_file);
+
+  // compare and check
+  for (int i = 0; i < row_num; i++) {
+    mpz_t deserialized_n, deserialized_value;
+    mpz_init(deserialized_n);
+    mpz_init(deserialized_value);
+    read_encoded_data_arr[i].getter_n(deserialized_n);
+    read_encoded_data_arr[i].getter_value(deserialized_value);
+    int n_cmp = mpz_cmp(v_n, deserialized_n);
+    int value_cmp = mpz_cmp(v_value, deserialized_value);
+    EXPECT_EQ(0, n_cmp);
+    EXPECT_EQ(0, value_cmp);
+    EXPECT_EQ(v_exponent, read_encoded_data_arr[i].getter_exponent());
+    EXPECT_EQ(v_type, read_encoded_data_arr[i].getter_type());
+    mpz_clear(deserialized_n);
+    mpz_clear(deserialized_value);
+  }
+
+  mpz_clear(v_n);
+  mpz_clear(v_value);
+  delete [] encoded_data_arr;
+  delete [] read_encoded_data_arr;
 }

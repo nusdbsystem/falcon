@@ -58,6 +58,12 @@ namespace falcon {
   // refers the maximum number of splits considered in a tree
   #define MAX_GLOBAL_SPLIT_NUM 6000
 
+  /** for LIME **/
+  enum SpdzLimeCompType {
+    DIST_WEIGHT, // compute the sqrt distance and kernel weights
+    PEARSON // compute the pearson coefficient
+  };
+
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
 
@@ -74,7 +80,17 @@ namespace falcon {
 
   enum FLSetting { HORIZONTAL_FL, VERTICAL_FL };
   enum PartyType { ACTIVE_PARTY, PASSIVE_PARTY };
-  enum AlgorithmName { LOG_REG, LINEAR_REG, DT, RF , GBDT};
+  enum AlgorithmName {
+    LOG_REG,
+    LINEAR_REG,
+    DT,
+    RF,
+    GBDT,
+    LIME_COMP_PRED,
+    LIME_COMP_WEIGHT,
+    LIME_FEAT_SEL,
+    LIME_INTERPRET
+  };
   enum DatasetType { TRAIN, TEST, VALIDATE };
 }  // namespace falcon
 

@@ -125,4 +125,13 @@ double median(std::vector<double>& inputs);
  */
 double average(std::vector<double> inputs);
 
+/**
+ * compute the square sum of the two vectors
+ *
+ * @param a
+ * @param b
+ * @return
+ */
+double square_sum(std::vector<double> a, std::vector<double> b);
+
 #endif  // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

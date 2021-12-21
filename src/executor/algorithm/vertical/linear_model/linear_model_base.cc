@@ -174,32 +174,8 @@ void LinearModel::encode_samples(const Party &party,
 }
 
 void LinearModel::sync_up_weight_sizes(const Party &party) {
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    // first set its own weight size and receive other parties' weight sizes
-    party_weight_sizes.push_back(weight_size);
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        std::string recv_weight_size;
-        party.recv_long_message(i, recv_weight_size);
-        party_weight_sizes.push_back(std::stoi(recv_weight_size));
-      }
-    }
-    // then broadcast the vector
-    std::string party_weight_sizes_str;
-    serialize_int_array(party_weight_sizes, party_weight_sizes_str);
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        party.send_long_message(i, party_weight_sizes_str);
-      }
-    }
-  } else {
-    // first send the weight size to active party
-    party.send_long_message(ACTIVE_PARTY_ID, std::to_string(weight_size));
-    // then receive and deserialize the party_weight_sizes array
-    std::string recv_party_weight_sizes_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_party_weight_sizes_str);
-    deserialize_int_array(party_weight_sizes, recv_party_weight_sizes_str);
-  }
+  std::vector<int> sync_arr = party.sync_up_int_arr(weight_size);
+  party_weight_sizes = sync_arr;
 }
 
 std::vector<double> LinearModel::display_weights(Party party) {

@@ -5,6 +5,8 @@
 #ifndef FALCON_SRC_EXECUTOR_UTILS_IO_UTIL_H_
 #define FALCON_SRC_EXECUTOR_UTILS_IO_UTIL_H_
 
+#include <falcon/operator/phe/fixed_point_encoder.h>
+
 #include <glog/logging.h>
 
 #include <iostream>
@@ -53,6 +55,62 @@ std::string read_key_file(const std::string& key_file);
  * @param key_file: file to write
  */
 void write_key_to_file(std::string phe_keys_str, const std::string& key_file);
+
+/**
+ * read an encoded number data matrix from the file
+ *
+ * @param data_matrix: the returned encoded numbers
+ * @param row_num: the number of rows
+ * @param column_num: the number of columns
+ * @param encoded_number_file: the file to be read
+ */
+void read_encoded_number_matrix_file(
+    EncodedNumber** data_matrix,
+    int row_num,
+    int column_num,
+    const std::string& encoded_number_file
+);
+
+/**
+ * write an encoded number data matrix to the file
+ *
+ * @param data_matrix: the encoded numbers
+ * @param row_num: the number of rows
+ * @param column_num: the number of columns
+ * @param encoded_number_file: the file to be written
+ */
+void write_encoded_number_matrix_to_file(
+    EncodedNumber** data_matrix,
+    int row_num,
+    int column_num,
+    const std::string& encoded_number_file
+);
+
+/**
+ * read an encoded number data array from the file
+ *
+ * @param data_matrix: the returned encoded numbers
+ * @param row_num: the number of rows
+ * @param encoded_number_file: the file to be read
+ */
+void read_encoded_number_array_file(
+    EncodedNumber* data_arr,
+    int row_num,
+    const std::string& encoded_number_file
+);
+
+/**
+ * write an encoded number data array to the file
+ *
+ * @param data_arr: the encoded numbers
+ * @param row_num: the number of rows
+ * @param encoded_number_file: the file to be written
+ */
+void write_encoded_number_array_to_file(
+    EncodedNumber* data_arr,
+    int row_num,
+    const std::string& encoded_number_file
+);
 
 /**
  * convert a number to string for output

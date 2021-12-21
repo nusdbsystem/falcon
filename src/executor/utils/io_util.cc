@@ -3,6 +3,8 @@
 //
 
 #include <falcon/utils/io_util.h>
+#include <falcon/utils/base64.h>
+#include <falcon/utils/pb_converter/common_converter.h>
 #include <iterator>
 
 std::vector<std::vector<double> > read_dataset(const std::string& data_file,
@@ -99,4 +101,115 @@ void write_key_to_file(std::string phe_keys_str, const std::string& key_file) {
 
   write_outfile << phe_keys_str;
   write_outfile.close();
+}
+
+void read_encoded_number_matrix_file(
+    EncodedNumber** data_matrix,
+    int row_num,
+    int column_num,
+    const std::string& encoded_number_file
+) {
+  std::ifstream encoded_matrix_infile(encoded_number_file);
+  if (!encoded_matrix_infile) {
+    LOG(INFO) << "Open " << encoded_number_file.c_str() << " file error.";
+    exit(EXIT_FAILURE);
+  }
+
+  std::string line;
+  int row_idx = 0;
+  while (std::getline(encoded_matrix_infile, line)) {
+    std::istringstream ss(line);
+    // decode base64 format to pb_string
+    std::string pb_line = base64_decode_to_pb_string(line);
+    // deserialize the line and get an EncodedNumber array
+    auto* encoded_array = new EncodedNumber[column_num];
+    deserialize_encoded_number_array(encoded_array, column_num, pb_line);
+    // copy to data_matrix
+    for (int j = 0; j < column_num; j++) {
+      data_matrix[row_idx][j] = encoded_array[j];
+    }
+    delete [] encoded_array;
+    row_idx++;
+  }
+  encoded_matrix_infile.close();
+}
+
+void write_encoded_number_matrix_to_file(
+    EncodedNumber** data_matrix,
+    int row_num,
+    int column_num,
+    const std::string& encoded_number_file
+) {
+  std::ofstream encoded_matrix_outfile(encoded_number_file);
+  if (!encoded_matrix_outfile) {
+    LOG(INFO) << "Open " << encoded_number_file.c_str() << " file error.";
+    exit(EXIT_FAILURE);
+  }
+
+  for (int i = 0; i < row_num; i++) {
+    std::string line;
+    // serialize encoded array to string and write
+    serialize_encoded_number_array(data_matrix[i], column_num, line);
+    // convert to base64 format
+    std::string b64_line = base64_encode(reinterpret_cast<const BYTE *>(line.c_str()),
+                                         line.size());
+    b64_line += "\n";
+    encoded_matrix_outfile << b64_line;
+  }
+  encoded_matrix_outfile.close();
+}
+
+void read_encoded_number_array_file(
+    EncodedNumber* data_arr,
+    int row_num,
+    const std::string& encoded_number_file
+) {
+  std::ifstream encoded_arr_infile(encoded_number_file);
+  if (!encoded_arr_infile) {
+    LOG(INFO) << "Open " << encoded_number_file.c_str() << " file error.";
+    exit(EXIT_FAILURE);
+  }
+
+  std::string line;
+  int row_idx = 0;
+  while (std::getline(encoded_arr_infile, line)) {
+    std::istringstream ss(line);
+    // decode base64 format to pb_string
+    std::string pb_line = base64_decode_to_pb_string(line);
+    // deserialize the line and get an EncodedNumber array
+    auto* encoded_array = new EncodedNumber[1];
+    deserialize_encoded_number_array(encoded_array, 1, pb_line);
+    // copy to data_matrix
+    data_arr[row_idx] = encoded_array[0];
+    delete [] encoded_array;
+    row_idx++;
+  }
+  encoded_arr_infile.close();
+}
+
+void write_encoded_number_array_to_file(
+    EncodedNumber* data_arr,
+    int row_num,
+    const std::string& encoded_number_file
+) {
+  std::ofstream encoded_arr_outfile(encoded_number_file);
+  if (!encoded_arr_outfile) {
+    LOG(INFO) << "Open " << encoded_number_file.c_str() << " file error.";
+    exit(EXIT_FAILURE);
+  }
+
+  for (int i = 0; i < row_num; i++) {
+    std::string line;
+    // serialize encoded array to string and write
+    auto* encoded_arr = new EncodedNumber[1];
+    encoded_arr[0] = data_arr[i];
+    serialize_encoded_number_array(encoded_arr, 1, line);
+    // convert to base64 format
+    std::string b64_line = base64_encode(reinterpret_cast<const BYTE *>(line.c_str()),
+                                         line.size());
+    b64_line += "\n";
+    encoded_arr_outfile << b64_line;
+    delete [] encoded_arr;
+  }
+  encoded_arr_outfile.close();
 }

@@ -45,6 +45,17 @@ class LogisticRegressionModel : public LinearModel {
       EncodedNumber *predicted_labels) const;
 
   /**
+  * given the logistic regression model, predict on samples with probabilities
+  * @param party
+  * @param predicted_samples
+  * @param predicted_sample_size
+  * @param predicted_labels
+  * @return predicted labels (encrypted)
+  */
+  void predict_proba(const Party &party, std::vector<std::vector<double> > predicted_samples,
+               EncodedNumber **predicted_labels) const;
+
+  /**
    * forward calculate of the network，output predicted_labels
    *
    * @param party: initialized party object

@@ -246,6 +246,14 @@ class Party {
   void truncate_ciphers_precision(EncodedNumber *ciphers, int size,
                                   int req_party_id, int dest_precision) const;
 
+  /**
+   * each party has a int value, sync up to obtain a int array
+   *
+   * @param v: the value to be sync up
+   * @return
+   */
+  std::vector<int> sync_up_int_arr(int v) const;
+
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }
 
