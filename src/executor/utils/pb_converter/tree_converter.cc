@@ -115,7 +115,7 @@ void deserialize_encrypted_statistics(int & client_id,
 
   if (!deserialized_encrypted_statistics.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_EncryptedStatistics from string";
-    return;
+    exit(1);
   }
 
   client_id = deserialized_encrypted_statistics.client_id();
@@ -304,7 +304,7 @@ void deserialize_update_info(int & source_client_id,
 
   if (!deserialized_update_info.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_UpdateInfo from string";
-    return;
+    exit(1);
   }
 
   source_client_id = deserialized_update_info.source_client_id();
@@ -403,7 +403,7 @@ void deserialize_split_info(int & global_split_num,
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_split_info.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_SplitInfo from string";
-    return;
+    exit(1);
   }
   global_split_num = deserialized_split_info.global_split_num();
   for (int i = 0; i < deserialized_split_info.split_num_vec_size(); i++) {
@@ -492,7 +492,7 @@ void deserialize_tree_model(TreeModel& tree_model, std::string input_str) {
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_tree.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_Tree from string";
-    return;
+    exit(1);
   }
   tree_model.type = (falcon::TreeType) deserialized_tree.tree_type();
   tree_model.class_num = deserialized_tree.class_num();
@@ -636,7 +636,7 @@ void deserialize_random_forest_model(ForestModel& forest_model, std::string inpu
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_random_forest.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_RandomForest from string";
-    return;
+    exit(1);
   }
   forest_model.tree_size = deserialized_random_forest.tree_size();
   forest_model.tree_type = (falcon::TreeType) deserialized_random_forest.tree_type();
@@ -793,7 +793,7 @@ void deserialize_gbdt_model(GbdtModel& gbdt_model, std::string input_str) {
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_gbdt.ParseFromCodedStream(&inputStream)) {
     LOG(ERROR) << "Failed to parse PB_RandomForest from string";
-    return;
+    exit(1);
   }
   gbdt_model.tree_size = deserialized_gbdt.tree_size();
   gbdt_model.tree_type = (falcon::TreeType) deserialized_gbdt.tree_type();

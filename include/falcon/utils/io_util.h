@@ -140,4 +140,16 @@ inline void print_vector(const std::vector<T>& vec){
   std::cout << "]" << std::endl;
 }
 
+// print something, easy to use
+template <typename T>
+std::ostream& falcon_print(std::ostream &os, const T &t){
+  return os << t << "\n";
+}
+
+template <typename T, typename... Args>
+std::ostream& falcon_print(std::ostream &os, const T &t, const Args&... rest){
+  os << t << " ";
+  return falcon_print(os, rest...);
+}
+
 #endif //FALCON_SRC_EXECUTOR_UTILS_IO_UTIL_H_

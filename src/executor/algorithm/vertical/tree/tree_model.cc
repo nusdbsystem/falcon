@@ -58,9 +58,11 @@ TreeModel& TreeModel::operator=(const TreeModel &tree) {
 
 std::vector<int> TreeModel::comp_predict_vector(std::vector<double> sample,
     std::map<int, int> node_index_2_leaf_index_map) {
+
   std::vector<int> binary_vector(internal_node_num + 1);
   // traverse the whole tree iteratively, and compute binary_vector
   std::stack<PredictHelper> traverse_prediction_objs;
+  // add root node to stack
   PredictHelper prediction_obj((bool) nodes[0].node_type,
                                (bool) nodes[0].is_self_feature,
                                nodes[0].best_party_id,
@@ -141,6 +143,7 @@ void TreeModel::compute_label_vec_and_index_map(EncodedNumber *label_vector,
     std::map<int, int> &node_index_2_leaf_index_map) {
   int leaf_cur_index = 0;
   for (int i = 0; i < pow(2, max_depth + 1) - 1; i++) {
+    // if the node is leaf node, record its index.
     if (nodes[i].node_type == falcon::LEAF) {
       node_index_2_leaf_index_map.insert(std::make_pair(i, leaf_cur_index));
       // record leaf label vector
@@ -181,7 +184,7 @@ void TreeModel::predict(Party &party,
 
   // step 1: organize the leaf label vector, compute the map
   LOG(INFO) << "Tree internal node num = " << internal_node_num;
-  EncodedNumber* label_vector = new EncodedNumber[internal_node_num + 1];
+  auto* label_vector = new EncodedNumber[internal_node_num + 1];
   std::map<int, int> node_index_2_leaf_index_map;
   compute_label_vec_and_index_map(label_vector, node_index_2_leaf_index_map);
   LOG(INFO) << "Compute label vector and index map finished";
@@ -190,10 +193,13 @@ void TreeModel::predict(Party &party,
   // for each sample
   for (int i = 0; i < predicted_sample_size; i++) {
     // compute binary vector for the current sample
+    // each element in binary_vector is 1 or 0
+    // 1: current leaf node still needs to be checked
+    // 0: current leaf node doesn't need to be checked
     std::vector<int> binary_vector = comp_predict_vector(predicted_samples[i],
                                                          node_index_2_leaf_index_map);
-    EncodedNumber *encoded_binary_vector = new EncodedNumber[binary_vector.size()];
-    EncodedNumber *updated_label_vector = new EncodedNumber[binary_vector.size()];
+    auto *encoded_binary_vector = new EncodedNumber[binary_vector.size()];
+    auto *updated_label_vector = new EncodedNumber[binary_vector.size()];
 
     // update in Robin cycle, from the last client to client 0
     if (party.party_id == party.party_num - 1) {
@@ -230,6 +236,9 @@ void TreeModel::predict(Party &party,
             updated_label_vector[j], encoded_binary_vector[j]);
       }
     }
+
+    // after computing, only one element in updated_label_vector is 1, other is 0,
+    // 1 corresponding to real label.
 
     // aggregate
     if (party.party_type == falcon::ACTIVE_PARTY) {

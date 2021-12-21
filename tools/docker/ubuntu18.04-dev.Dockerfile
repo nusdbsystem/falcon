@@ -181,6 +181,7 @@ RUN cd third_party/MP-SPDZ && \
     bash fast-make.sh && \
     Scripts/setup-clients.sh 3 && \
     ./compile.py Programs/Source/logistic_regression.mpc && \
+    ./compile.py Programs/Source/vfl_decision_tree.mpc && \
     ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
 
 # Install served library
@@ -201,7 +202,8 @@ RUN cd /opt/falcon/src/executor/include/proto && \
 
 # build the falcon executor
 WORKDIR /opt/falcon
-RUN export PATH="$PATH:$HOME/.local/bin" && \
+RUN git pull && \
+    export PATH="$PATH:$HOME/.local/bin" && \
     mkdir build && \
     cmake -Bbuild -H. && \
     cd build/ && \
@@ -246,6 +248,9 @@ ENV PATH /root/.local/bin:$PATH
 
 WORKDIR /opt/falcon/src/falcon_platform
 RUN bash make_platform.sh
+
+WORKDIR /opt/falcon/third_party/MP-SPDZ
+RUN c_rehash Player-Data/
 
 # Define working directory.
 WORKDIR /opt/falcon

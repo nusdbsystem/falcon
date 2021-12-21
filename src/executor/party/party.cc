@@ -473,8 +473,10 @@ void Party::split_train_test_data(
     LOG(INFO) << "saved a copy of testing_data in TEST_IO_OUTDIR\n";
 #endif
 
-  } else {
-    // receive shuffled indexes and split in the same way
+  }
+
+  // receive shuffled indexes and split in the same way
+  else {
     std::string recv_shuffled_indexes_str;
     recv_long_message(0, recv_shuffled_indexes_str);
     deserialize_int_array(data_indexes, recv_shuffled_indexes_str);

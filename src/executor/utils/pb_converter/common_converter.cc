@@ -8,6 +8,7 @@
 #include <glog/logging.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/message_lite.h>
+#include <falcon/utils/logger/logger.h>
 
 void serialize_int_array(std::vector<int> vec, std::string& output_message) {
   com::nus::dbsytem::falcon::v0::IntArray int_array;
@@ -22,7 +23,7 @@ void deserialize_int_array(std::vector<int>& vec, const std::string& input_messa
   com::nus::dbsytem::falcon::v0::IntArray deserialized_int_array;
   if (!deserialized_int_array.ParseFromString(input_message)) {
     LOG(ERROR) << "Deserialize int array message failed.";
-    return;
+    exit(1);
   }
   for (int i = 0; i < deserialized_int_array.int_item_size(); i++) {
     vec.push_back(deserialized_int_array.int_item(i));
@@ -41,7 +42,7 @@ void deserialize_double_array(std::vector<double>& vec, const std::string& input
   com::nus::dbsytem::falcon::v0::DoubleArray deserialized_double_array;
   if (!deserialized_double_array.ParseFromString(input_message)) {
     LOG(ERROR) << "Deserialize double array message failed.";
-    return;
+    exit(1);
   }
   for (int i = 0; i < deserialized_double_array.item_size(); i++) {
     vec.push_back(deserialized_double_array.item(i));
@@ -65,7 +66,7 @@ void deserialize_double_matrix(std::vector< std::vector<double> >& mat, const st
   com::nus::dbsytem::falcon::v0::DoubleMatrix deserialized_double_matrix;
   if (!deserialized_double_matrix.ParseFromString(input_message)) {
     LOG(ERROR) << "Deserialize double matrix message failed.";
-    return;
+    exit(1);
   }
   for (int i = 0; i < deserialized_double_matrix.array_size(); i++) {
     std::vector<double> row;
@@ -106,7 +107,7 @@ void deserialize_encoded_number(EncodedNumber& number, const std::string& input_
   com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber deserialized_encoded_number;
   if (!deserialized_encoded_number.ParseFromString(input_message)) {
     LOG(ERROR) << "Deserialize fixed point encoded number message failed.";
-    return;
+    exit(1);
   }
   mpz_t s_n, s_value;
   mpz_init(s_n);
@@ -157,12 +158,15 @@ void deserialize_encoded_number_array(EncodedNumber* number_array, int size, con
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_encoded_number_array.ParseFromString(input_message)) {
     LOG(ERROR) << "Deserialize encoded number array message failed.";
-    return;
+    exit(1);
   }
 
   if (size != deserialized_encoded_number_array.encoded_number_size()) {
+    log_info("[deserialize_encoded_number_array]: size of deserialized_encoded_number_array: " + std::to_string(deserialized_encoded_number_array.encoded_number_size()));
+    log_info("[deserialize_encoded_number_array]: size: " + std::to_string(size));
+
     LOG(ERROR) << "Deserialized encoded number size is not expected.";
-    return;
+    exit(1);
   }
   // number_array = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {

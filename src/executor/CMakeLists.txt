@@ -54,6 +54,14 @@ set(SOURCE_FILES
         include/message/tree.pb.cc
         include/message/lr.pb.h
         include/message/lr.pb.cc
+        include/message/job.pb.cc
+        include/message/job.pb.h
+        include/message/serving.pb.cc
+        include/message/serving.pb.h
+        include/message/status.pb.cc
+        include/message/status.pb.h
+        include/message/tree.pb.cc
+        include/message/tree.pb.h
         ../../include/falcon/operator/phe/fixed_point_encoder.h
         operator/phe/fixed_point_encoder.cc
         ../../include/falcon/operator/phe/djcs_t_aux.h
@@ -82,6 +90,8 @@ set(SOURCE_FILES
         algorithm/vertical/tree/node.cc
         ../../include/falcon/algorithm/vertical/tree/feature.h
         algorithm/vertical/tree/feature.cc
+        ../../include/falcon/algorithm/vertical/tree/tree_ps.h
+        algorithm/vertical/tree/tree_ps.cc
         ../../include/falcon/algorithm/vertical/tree/tree_model.h
         algorithm/vertical/tree/tree_model.cc
         ../../include/falcon/algorithm/vertical/tree/tree_builder.h

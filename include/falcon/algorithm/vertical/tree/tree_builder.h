@@ -48,6 +48,10 @@ struct DecisionTreeParams {
 };
 
 class DecisionTreeBuilder : public ModelBuilder {
+
+ public:
+  int train_data_size;
+  int test_data_size;
  public:
   // type of the tree, 'classification' or 'regression'
   falcon::TreeType tree_type;
@@ -171,9 +175,10 @@ class DecisionTreeBuilder : public ModelBuilder {
   /**
    * check if this node satisfies the pruning conditions
    * some of the conditions are forwarded to spdz for checking
-   * @param party
-   * @param node_index
+   * @param party: partyId
+   * @param node_index: init to 0, root node
    * @param sample_mask_iv
+   * @param encrypted_labels: [[r1], [r2]] as shown in Figure 2 in paper
    * @return
    */
   bool check_pruning_conditions(Party &party,
@@ -202,7 +207,7 @@ class DecisionTreeBuilder : public ModelBuilder {
      * @param encrypted_left_sample_nums
      * @param encrypted_right_sample_nums
      */
-  void compute_encrypted_statistics(Party &party, int node_index,
+  void compute_encrypted_statistics(const Party &party, int node_index,
       std::vector<int> available_feature_ids,
       EncodedNumber *sample_mask_iv,
       EncodedNumber ** encrypted_statistics,
@@ -224,10 +229,26 @@ class DecisionTreeBuilder : public ModelBuilder {
      * @param party
      * @param eval_type
      * @param report_save_path
- */
+    */
   void eval(Party party,
       falcon::DatasetType eval_type,
       const std::string& report_save_path = std::string()) override;
+
+  /**
+   * distributed eval
+   * @param party
+   * @param worker
+   * @param eval_type train or test
+   */
+  void distributed_eval(Party &party,
+      const Worker &worker,
+      falcon::DatasetType eval_type);
+
+  /**
+   * retrieve_global_best_split
+   */
+  void retrieve_global_best_split(const Worker &worker);
+
 };
 
 /**
@@ -260,9 +281,15 @@ void spdz_tree_computation(int party_num,
  * @param party: initialized party object
  * @param params: DecisionTreeBuilderParam serialized string
  * @param model_save_file: saved model file
- * @param model_report_file: saved report file
+ * @param model_report_filef: saved report file
+ * @param is_distributed_train: 1: use distributed train
+ * @param worker: worker instance, used when is_distributed_train=1
  */
-void train_decision_tree(Party party, const std::string& params_str,
-    const std::string& model_save_file, const std::string& model_report_file);
+void train_decision_tree(
+    Party *party,
+    const std::string& params_str,
+    const std::string& model_save_file,
+    const std::string& model_report_file,
+    int is_distributed_train=0, Worker* worker=nullptr);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_CART_BUILDER_H_

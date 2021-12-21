@@ -1,18 +1,20 @@
 # checkout branch for test code
 echo "---------------git checkout branch--------"
 git fetch
-git checkout -b distributed-train-lr origin/distributed-train-lr
+#git checkout -b distributed-train-lr origin/distributed-train-lr
 
 # pull latest code
 echo "---------------git pull code--------"
-git pull
+git stash
+git pull origin distributed-train-lr
+git stash pop
 
 # make executor
 echo "---------------make executor--------"
 bash make.sh
 
 # make platform
-echo "---------------make platform--------"
+echo "------Programs/Schedules/decision_tree.sch---------make platform--------"
 
 cd ./src/falcon_platform
 

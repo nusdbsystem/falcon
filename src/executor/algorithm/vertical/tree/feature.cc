@@ -73,9 +73,11 @@ std::vector<double> FeatureHelper::compute_distinct_values() {
       distinct_values.push_back(origin_feature_values[sorted_indexes[i]]);
       distinct_value_num++;
     } else {
+      // if this value has been already added, skip
       if (distinct_values[distinct_value_num-1] == origin_feature_values[sorted_indexes[i]]) {
         continue;
       } else {
+        // if his value is not seen , add directly
         distinct_values.push_back(origin_feature_values[sorted_indexes[i]]);
         distinct_value_num++;
       }
@@ -101,7 +103,8 @@ void FeatureHelper::find_splits() {
   /// there are k + 1 bins, and each bin has almost same number samples
 
   /// basically, after sorting the feature values, we compute the size of
-  /// each bin, i.e., n_sample_per_bin = n/(k+1), and samples[0:n_sample_per_bin]
+  /// each bin, n is the sample number
+  /// i.e., n_sample_per_bin = n/(k+1), and samples[0:n_sample_per_bin]
   /// is the first bin, while (value[n_sample_per_bin] + value[n_sample_per_bin+1])/2
   /// is the first split value, etc.
 

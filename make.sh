@@ -15,4 +15,8 @@ export PATH="$PATH:$HOME/.local/bin" && \
     mkdir build && \
     cmake -Bbuild -H. && \
     cd build/ && \
-    make
+    make -j 4
+
+# c_rehash certificate
+cd /opt/falcon/third_party/MP-SPDZ
+c_rehash Player-Data/

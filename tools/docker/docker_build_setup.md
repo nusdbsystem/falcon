@@ -6,7 +6,9 @@ Need to provide the `SSH_PRIVATE_KEY` build argument to the docker build command
 
 ```bash
 # from lemonviv-falcon/tools/docker
-docker build -t falconplatform:latest -f ./Dockerfile.ubuntu18.04 . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa_forGithub)" --no-cache
+docker build -t falcon-dist-train:latest -f ./Dockerfile.ubuntu20.04 . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa_forGithub)" --no-cache
+
+docker build -t falcon-dist-train:latest -f ./ubuntu18.04-dev.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)"
 ```
 
 Useful docker build flags:
@@ -16,5 +18,5 @@ Useful docker build flags:
 
 Run container and execute some cmd
 ```bash
-docker run -i -t falconplatform:latest /bin/bash
+docker run -i -t falcon-dist-train:latest /bin/bash
 ```

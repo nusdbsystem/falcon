@@ -19,17 +19,33 @@
 #include "falcon/distributed/worker.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_ps.h"
 #include <falcon/algorithm/vertical/linear_model/linear_regression_ps.h>
+#include "falcon/algorithm/vertical/tree/tree_ps.h"
 #include "falcon/utils/base64.h"
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/parser.h>
 
 #include <chrono>
 #include <glog/logging.h>
+#include <iostream>
+#include <string>
+#include <exception>
+#include <stdexcept>
 
 using namespace boost;
 using namespace std::chrono;
 
 void print_arguments(const boost::program_options::variables_map& vm);
+
+void handle_eptr(std::exception_ptr eptr) // passing by value is ok
+{
+  try {
+    if (eptr) {
+      std::rethrow_exception(eptr);
+    }
+  } catch(const std::exception& e) {
+    std::cout << "Caught exception \"" << e.what() << "\"\n";
+  }
+}
 
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
@@ -109,8 +125,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-//   algorithm_name = "lime_interpret";
-
+  std::exception_ptr eptr;
   try {
     auto start_time = high_resolution_clock::now();
 
@@ -156,7 +171,7 @@ int main(int argc, char *argv[]) {
             train_linear_regression(&party, algorithm_params_pb_str, model_save_file, model_report_file);
             break;
           case falcon::DT:
-            train_decision_tree(party, algorithm_params_pb_str, model_save_file, model_report_file);
+            train_decision_tree(&party, algorithm_params_pb_str, model_save_file, model_report_file);
             break;
           case falcon::RF:
             train_random_forest(party, algorithm_params_pb_str, model_save_file, model_report_file);
@@ -224,8 +239,12 @@ int main(int argc, char *argv[]) {
                                                model_report_file);
             break;
           case falcon::DT:
-            log_error("Type falcon::DT not implemented");
-            exit(1);
+            launch_dt_parameter_server(&party,
+                                       algorithm_params_pb_str,
+                                       ps_network_config_pb_str,
+                                       model_save_file,
+                                       model_report_file);
+            break;
           case falcon::RF:
             log_error("Type falcon::RF not implemented");
             exit(1);
@@ -362,6 +381,7 @@ int main(int argc, char *argv[]) {
           }
           log_info("Finish distributed training algorithm");
         }
+        log_info("Finish distributed training algorithm");
       }
     }
 
@@ -371,11 +391,10 @@ int main(int argc, char *argv[]) {
     log_info("Time taken by main func: " + std::to_string(duration.count()) + " microseconds");
     return EXIT_SUCCESS;
   }
-  catch(std::exception& e)
-  {
-    cout << e.what() << "\n";
-    return 1;
+  catch(...) {
+    eptr = std::current_exception(); // capture
   }
+  handle_eptr(eptr);
 }
 
 void print_arguments(const boost::program_options::variables_map& vm) {

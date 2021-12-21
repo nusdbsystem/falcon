@@ -14,6 +14,9 @@ class Worker {
   // boost i/o functionality
   boost::asio::io_service io_service;
 
+  // worker id
+  int worker_id;
+
  public:
 
   Worker()=default;

@@ -9,14 +9,17 @@
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/base64.h>
 
-Worker::Worker(const std::string& ps_network_config_pb_str, int worker_id){
-    std::vector<std::string> worker_ips;
-    std::vector< int > worker_ports;
-    std::vector<std::string> ps_ips;
-    std::vector<int> ps_ports;
-//    // 0. decode the network base64 string to pb string
-//    vector<BYTE> ps_network_file_byte = base64_decode(ps_network_file);
-//    std::string ps_network_pb_string(ps_network_file_byte.begin(), ps_network_file_byte.end());
+Worker::Worker(const std::string& ps_network_config_pb_str, int m_worker_id){
+
+  worker_id = m_worker_id;
+
+  std::vector<std::string> worker_ips;
+  std::vector< int > worker_ports;
+  std::vector<std::string> ps_ips;
+  std::vector<int> ps_ports;
+  // 0. decode the network base64 string to pb string
+  // vector<BYTE> ps_network_file_byte = base64_decode(ps_network_file);
+  // std::string ps_network_pb_string(ps_network_file_byte.begin(), ps_network_file_byte.end());
   log_info("begin to deserialize the ps network configs");
   // 1. read network config proto from coordinator
   deserialize_ps_network_configs(
