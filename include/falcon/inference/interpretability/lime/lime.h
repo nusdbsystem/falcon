@@ -301,6 +301,24 @@ class LimeExplainer {
       int num_samples,
       const std::string &interpret_model_name,
       const std::string &interpret_model_param);
+
+  /**
+   * This function trains linear regression model with encrypted predictions,
+   * and encrypted sample_weights.
+   *
+   * @param party: the participating party
+   * @param linear_reg_param_str: linear regression param string
+   * @param train_data: the plaintext train data
+   * @param predictions: the encrypted model predictions
+   * @param sample_weights: the encrypted sample weights
+   * @return
+   */
+  std::vector<double> lime_linear_reg_train(
+      Party party,
+      const std::string& linear_reg_param_str,
+      const std::vector<std::vector<double>>& train_data,
+      EncodedNumber* predictions,
+      EncodedNumber* sample_weights);
 };
 
 /**

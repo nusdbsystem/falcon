@@ -88,6 +88,7 @@ void LogisticRegressionModel::predict_proba(
   int negative_one = -1;
   EncodedNumber pos_one_double, neg_one_int;
   pos_one_double.set_double(phe_pub_key->n[0], CERTAIN_PROBABILITY, prediction_precision);
+  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, pos_one_double, pos_one_double);
   neg_one_int.set_integer(phe_pub_key->n[0], negative_one);
   for (int i = 0; i < cur_sample_size; i++) {
     EncodedNumber label_neg;
@@ -124,7 +125,7 @@ void LogisticRegressionModel::forward_computation(
 
   // step 2.2: convert the encrypted batch aggregation into secret shares
   // in order to do the exponential calculation
-  // use 4 * fixed precision, encrypted_weights_precision + plaintext_samples_precision
+  // use 2 * fixed precision, encrypted_weights_precision + plaintext_samples_precision
   std::vector<double> batch_aggregation_shares;
   party.ciphers_to_secret_shares(
       encrypted_batch_aggregation,
@@ -158,13 +159,13 @@ void LogisticRegressionModel::forward_computation(
 
   // active party receive all shares from other party and do the aggregation,
   // and board-cast predicted labels to other party.
-  // use 1.5 * fixed precision
-  int update_precision = (encrypted_batch_aggregation_precision - PHE_FIXED_POINT_PRECISION) / 2;
+  // use 2 * fixed precision
+//  int update_precision = (encrypted_batch_aggregation_precision - PHE_FIXED_POINT_PRECISION) / 2;
   party.secret_shares_to_ciphers(predicted_labels,
                                  batch_logistic_shares,
                                  cur_batch_size,
                                  ACTIVE_PARTY_ID,
-                                 update_precision);
+                                 encrypted_batch_aggregation_precision);
   log_info("[forward_computation]: secret_shares_to_ciphers success");
   log_info("step 2: forward_computation success");
 

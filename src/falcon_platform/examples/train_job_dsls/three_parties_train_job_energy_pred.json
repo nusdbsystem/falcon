@@ -51,8 +51,8 @@
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "batch_size": 512,
-          "max_iteration": 200,
+          "batch_size": 8,
+          "max_iteration": 100,
           "convergence_threshold": 0.001,
           "with_regularization": true,
           "alpha": 0.001,

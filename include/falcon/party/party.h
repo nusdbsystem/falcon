@@ -247,6 +247,21 @@ class Party {
                                   int req_party_id, int dest_precision) const;
 
   /**
+   * compute the multiplication of two cipher vectors
+   *
+   * @param res: the resulted cipher vector
+   * @param ciphers1: the first cipher vector
+   * @param ciphers2: the second cipher vector
+   * @param size: the size of the two vectors
+   * @param req_party_id: the party who request the multiplication
+   */
+  void ciphers_multi(EncodedNumber* res,
+                     EncodedNumber* ciphers1,
+                     EncodedNumber* ciphers2,
+                     int size,
+                     int req_party_id) const;
+
+  /**
    * each party has a int value, sync up to obtain a int array
    *
    * @param v: the value to be sync up

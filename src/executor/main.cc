@@ -109,6 +109,8 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+//   algorithm_name = "lime_interpret";
+
   try {
     auto start_time = high_resolution_clock::now();
 

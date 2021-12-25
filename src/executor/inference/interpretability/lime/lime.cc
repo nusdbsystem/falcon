@@ -13,6 +13,9 @@
 #include <falcon/utils/math/math_ops.h>
 #include <Networking/ssl_sockets.h>
 #include <falcon/operator/mpc/spdz_connector.h>
+#include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
+#include <falcon/utils/pb_converter/alg_params_converter.h>
+#include <falcon/utils/logger/log_alg_params.h>
 
 #include <glog/logging.h>
 
@@ -183,6 +186,7 @@ void LimeExplainer::compute_sample_weights(
     delete [] selected_predictions;
   } else {
     // directly write the generated_samples and computed_predictions
+    selected_samples = generated_samples;
     write_dataset_to_file(generated_samples,
                           delimiter,
                           selected_sample_file);
@@ -272,6 +276,9 @@ void LimeExplainer::compute_dist_weights(const Party &party,
     exit(EXIT_FAILURE);
   }
 
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+
   // do the following steps to compute the distance and sample weights
   //  1. parties locally compute \sum_{i=1}^{d_i} (x[i] - s[i])^2
   int feature_size = (int) origin_data.size();
@@ -279,9 +286,11 @@ void LimeExplainer::compute_dist_weights(const Party &party,
   int total_feature_size = std::accumulate(feature_sizes.begin(), feature_sizes.end(), 0);
 
   //  2. parties aggregate and convert to secret shares
+  log_info("[compute_dist_weights]: begin to compute square dist.");
   int sample_size = (int) sampled_data.size();
   auto* squared_dist = new EncodedNumber[sample_size];
   compute_squared_dist(party, origin_data, sampled_data, squared_dist);
+  log_info("[compute_dist_weights]: finish to compute square dist.");
   std::vector<double> squared_dist_shares;
   party.ciphers_to_secret_shares(
       squared_dist,
@@ -289,7 +298,7 @@ void LimeExplainer::compute_dist_weights(const Party &party,
       sample_size,
       ACTIVE_PARTY_ID,
       PHE_FIXED_POINT_PRECISION);
-  log_error("[compute_dist_weights]: compute encrypted distance finished");
+  log_info("[compute_dist_weights]: compute encrypted distance finished");
 
   //  3. parties compute kernel width (replace the input one by default now -- let spdz compute)
   // kernel_width = std::sqrt(total_feature_size) * 0.75;
@@ -316,12 +325,13 @@ void LimeExplainer::compute_dist_weights(const Party &party,
                                 &promise_values);
   std::vector<double> res = future_values.get();
   spdz_dist_weights.join();
-  log_error("[compute_dist_weights]: communicate with spdz finished");
+  log_info("[compute_dist_weights]: communicate with spdz finished");
+  log_info("[compute_dist_weights]: res.size = " + std::to_string(res.size()));
 
   // 5. convert to cipher and return
   party.secret_shares_to_ciphers(weights, res, sample_size,
                                  ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-  log_error("[compute_dist_weights]: shares to ciphers finished");
+  log_info("[compute_dist_weights]: shares to ciphers finished");
   delete [] squared_dist;
 }
 
@@ -330,9 +340,11 @@ void LimeExplainer::compute_squared_dist(const Party &party,
                                          const std::vector<std::vector<double>> &sampled_data,
                                          EncodedNumber *squared_dist) {
   int sample_size = (int) sampled_data.size();
+  log_info("[compute_squared_dist]: sample_size = " + std::to_string(sample_size));
   std::vector<double> local_squared_sum;
   for (int i = 0; i < sample_size; i++) {
-    local_squared_sum[i] = square_sum(origin_data, sampled_data[i]);
+    double ss = square_sum(origin_data, sampled_data[i]);
+    local_squared_sum.push_back(ss);
   }
 
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
@@ -400,9 +412,84 @@ void LimeExplainer::select_features(Party party,
     log_error("The feature selection method " + feature_selection + " not supported");
     exit(EXIT_FAILURE);
   }
-  // do the following steps to selected features
-  //  1. read selected samples file
-  //  2. read selected predictions
+  // do the following steps to selected feature
+  // 1. read the selected sample file
+  char delimiter = ',';
+  std::vector<std::vector<double>> selected_samples =
+      read_dataset(selected_samples_file, delimiter);
+  std::vector<double> origin_data = selected_samples[0];
+  int selected_sample_size = (int) selected_samples.size();
+  log_info("Read the generated samples finished");
+
+  // 2. read the computed_prediction file (note that
+  //     we assume all parties have the same prediction file now)
+  auto** selected_predictions = new EncodedNumber*[selected_sample_size];
+  for (int i = 0; i < selected_sample_size; i++) {
+    selected_predictions[i] = new EncodedNumber[class_num];
+  }
+  read_encoded_number_matrix_file(selected_predictions,
+                                  selected_sample_size,
+                                  class_num,
+                                  selected_predictions_file);
+  // extract the class_id computed predictions
+  auto* selected_pred_class_id = new EncodedNumber[selected_sample_size];
+  for (int i = 0; i < selected_sample_size; i++) {
+    selected_pred_class_id[i] = selected_predictions[i][class_id];
+  }
+  log_info("Read the computed predictions finished");
+
+  // 3. read the sample weights file (optional at the moment)
+  // TODO: check feature selection with sample weights
+  // TODO: check what secret shares need to be sent to spdz program
+
+  // 4. connect to spdz program and return selected_feature_idx (which is public)
+  std::vector<double> selected_pred_shares;
+  party.ciphers_to_secret_shares(selected_pred_class_id,
+                                 selected_pred_shares,
+                                 selected_sample_size,
+                                 ACTIVE_PARTY_ID,
+                                 PHE_FIXED_POINT_PRECISION);
+  std::vector<int> public_values;
+  public_values.push_back(selected_sample_size);
+  public_values.push_back(num_explained_features);
+  falcon::SpdzLimeCompType comp_type = falcon::PEARSON;
+  std::promise<std::vector<double>> promise_values;
+  std::future<std::vector<double>> future_values = promise_values.get_future();
+  std::thread spdz_pearson_comp(spdz_lime_computation,
+                                party.party_num,
+                                party.party_id,
+                                party.executor_mpc_ports,
+                                party.host_names,
+                                public_values.size(),
+                                public_values,
+                                selected_pred_shares.size(),
+                                selected_pred_shares,
+                                comp_type,
+                                &promise_values);
+  std::vector<double> res = future_values.get();
+  spdz_pearson_comp.join();
+  log_error("[select_features]: communicate with spdz finished");
+
+  // 5. convert the returned res into int vector, and re-organize the selected_features_file
+  std::vector<int> selected_feat_idx;
+  for (int i = 0; i < res.size(); i++) {
+    selected_feat_idx[i] = (int) res[i];
+  }
+  std::vector<std::vector<double>> selected_feat_samples;
+  for (int i = 0; i < selected_sample_size; i++) {
+    std::vector<double> sample;
+    for (int j = 0; j < num_explained_features; j++) {
+      sample.push_back(selected_samples[i][selected_feat_idx[j]]);
+    }
+    selected_feat_samples.push_back(sample);
+  }
+  write_dataset_to_file(selected_feat_samples, delimiter, selected_features_file);
+
+  for (int i = 0; i < selected_sample_size; i++) {
+    delete [] selected_predictions[i];
+  }
+  delete [] selected_predictions;
+  delete [] selected_pred_class_id;
 }
 
 std::vector<double> LimeExplainer::interpret(const Party &party,
@@ -428,36 +515,37 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
   //      the origin data to be explained)
   char delimiter = ',';
   std::vector<std::vector<double>> selected_data = read_dataset(selected_data_file, delimiter);
+  int cur_sample_size = (int) selected_data.size();
 
   //  2. read the selected_predictions_file to get the encrypted labels (with probabilities)
-  auto** encrypted_predictions = new EncodedNumber*[num_samples];
-  for (int i = 0; i < num_samples; i++) {
+  auto** encrypted_predictions = new EncodedNumber*[cur_sample_size];
+  for (int i = 0; i < cur_sample_size; i++) {
     encrypted_predictions[i] = new EncodedNumber[class_num];
   }
   read_encoded_number_matrix_file(encrypted_predictions,
-                                  num_samples,
+                                  cur_sample_size,
                                   class_num,
                                   selected_predictions_file);
 
   //  3. read the sample_weights_file to get the encrypted sample weights for each data
-  auto* encrypted_weights = new EncodedNumber[num_samples];
+  auto* encrypted_weights = new EncodedNumber[cur_sample_size];
   read_encoded_number_array_file(encrypted_weights,
-                                 num_samples,
+                                 cur_sample_size,
                                  sample_weights_file);
 
   //  4. loop for class_num (currently num_top_labels is reserved for selecting labels to explain)
   //    4.1. prepare the information for invoking the corresponding training API
   // extract the k-th model predictions
   std::vector<std::vector<double>> wrap_explanations;
-  auto* kth_predictions = new EncodedNumber[num_samples];
-  for (int i = 0; i < num_samples; i++) {
+  auto* kth_predictions = new EncodedNumber[cur_sample_size];
+  for (int i = 0; i < cur_sample_size; i++) {
     kth_predictions[i] = encrypted_predictions[i][class_id];
   }
   std::vector<double> explanations = explain_one_label(party,
                                                        selected_data,
                                                        kth_predictions,
                                                        encrypted_weights,
-                                                       num_samples,
+                                                       cur_sample_size,
                                                        interpret_model_name,
                                                        interpret_model_param);
 
@@ -465,7 +553,7 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
   wrap_explanations.push_back(explanations);
   write_dataset_to_file(wrap_explanations, delimiter, explanation_report);
 
-  for (int i = 0; i < num_samples; i++) {
+  for (int i = 0; i < cur_sample_size; i++) {
     delete [] encrypted_predictions[i];
   }
   delete [] encrypted_predictions;
@@ -481,24 +569,116 @@ std::vector<double> LimeExplainer::explain_one_label(
     int num_samples,
     const std::string &interpret_model_name,
     const std::string &interpret_model_param) {
-  // for explanation, we need the following steps:
-  //    1. sample a set of `n_samples` data given `origin_data`
-  //    2. compute the distance of the sampled_data and origin_data
-  //    3. compute the prediction (probabilities) of the sampled_data and origin_model
-  //    4. sanity check, e.g., probabilities sum to 1 (optional)
-  //    5. train the interpret_model given sampled_data, distances, predictions, etc.
-  //    6. arrange the results and return (num_top_labels, feature_num) as explanation
+  // for explaining one label, we do the following steps:
+  //  1. given the interpret_model_name and interpret_model_param, init the corresponding builder
+  //  2. invoke the train function directly (need to make sure that it supports sample_weights)
+  //  3. after training finished, decrypt the model weights and return
+  //    TODO: what if the model is decision tree?
 
   std::vector<double> explanations;
+  falcon::AlgorithmName algorithm_name = parse_algorithm_name(interpret_model_name);
+  switch (algorithm_name) {
+    case falcon::LINEAR_REG: {
+      // call linear regression training
+      explanations = lime_linear_reg_train(
+          party,
+          interpret_model_param,
+          train_data,
+          predictions,
+          sample_weights);
+      break;
+    }
+    case falcon::DT: {
+      // call decision tree training
+      break;
+    }
+    default:
+      log_error("The interpret algorithm " + interpret_model_name + " is not supported.");
+      break;
+  }
 
   return explanations;
+}
+
+std::vector<double> LimeExplainer::lime_linear_reg_train(
+    Party party,
+    const std::string &linear_reg_param_str,
+    const std::vector<std::vector<double>>& train_data,
+    EncodedNumber *predictions,
+    EncodedNumber *sample_weights) {
+  // deserialize linear regression params
+  LinearRegressionParams linear_reg_params;
+  // create for debug
+  linear_reg_params.batch_size = 8;
+  linear_reg_params.max_iteration = 100;
+  linear_reg_params.converge_threshold = 0.0001;
+  linear_reg_params.with_regularization = true;
+  linear_reg_params.alpha = 0.1;
+  linear_reg_params.learning_rate = 0.1;
+  linear_reg_params.decay = 0.1;
+  linear_reg_params.penalty = "l2";
+  linear_reg_params.optimizer = "sgd";
+  linear_reg_params.metric = "mse";
+  linear_reg_params.dp_budget = 0.1;
+  linear_reg_params.fit_bias = true;
+  // deserialize_lir_params(linear_reg_params, linear_reg_param_str);
+  log_linear_regression_params(linear_reg_params);
+
+  // train a lime linear regression model
+  std::vector<std::vector<double>> dummy_test_data;
+  std::vector<double> dummy_train_labels, dummy_test_labels;
+  double dummy_train_accuracy, dummy_test_accuracy;
+  std::vector<std::vector<double>> used_train_data = train_data;
+  int weight_size = party.getter_feature_num();
+  if (party.party_type == falcon::ACTIVE_PARTY && linear_reg_params.fit_bias) {
+    log_info("fit_bias = TRUE, will insert x1=1 to features");
+    // insert x1=1 to front of the features
+    double x1 = BIAS_VALUE;
+    for (int i = 0; i < used_train_data.size(); i++) {
+      used_train_data[i].insert(used_train_data[i].begin(), x1);
+    }
+    party.setter_feature_num(++weight_size);
+  }
+
+  LinearRegressionBuilder linear_reg_builder(linear_reg_params,
+                                             weight_size,
+                                             used_train_data,
+                                             dummy_test_data,
+                                             dummy_train_labels,
+                                             dummy_test_labels,
+                                             dummy_train_accuracy,
+                                             dummy_test_accuracy);
+  log_info("Init linear regression builder finished");
+
+  linear_reg_builder.lime_train(party, true, predictions,
+                                true, sample_weights);
+  log_info("Train lime linear regression model finished.");
+
+  // decrypt the model weights and return
+  std::vector<double> local_explanations =
+      linear_reg_builder.linear_reg_model.display_weights(party);
+  log_info("Decrypt and display local explanations finished");
+  return local_explanations;
 }
 
 void lime_comp_pred(Party party, const std::string& params_str) {
   log_info("Begin to compute the lime required samples and predictions");
   // 1. deserialize the LimePreComputeParams
   LimeCompPredictionParams comp_prediction_params;
-  deserialize_lime_comp_pred_params(comp_prediction_params, params_str);
+  // set the values for local debug
+  std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
+  comp_prediction_params.original_model_name = "logistic_regression";
+  comp_prediction_params.original_model_saved_file = path_prefix + "/log_reg/saved_model.pb";
+  comp_prediction_params.model_type = "classification";
+  comp_prediction_params.class_num = 2;
+  comp_prediction_params.explain_instance_idx = 0;
+  comp_prediction_params.sample_around_instance = true;
+  comp_prediction_params.num_total_samples = 1000;
+  comp_prediction_params.sampling_method = "gaussian";
+  comp_prediction_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
+  comp_prediction_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
+
+  // deserialize_lime_comp_pred_params(comp_prediction_params, params_str);
   log_info("Deserialize the lime comp_prediction params");
 
   // 2. generate random samples
@@ -523,8 +703,9 @@ void lime_comp_pred(Party party, const std::string& params_str) {
   log_info("Finish generating random samples");
 
   // 3. load model and compute model predictions
-  auto** predictions = new EncodedNumber*[num_total_samples];
-  for (int i = 0; i < num_total_samples; i++) {
+  int cur_sample_size = (int) generated_samples.size();
+  auto** predictions = new EncodedNumber*[cur_sample_size];
+  for (int i = 0; i < cur_sample_size; i++) {
     predictions[i] = new EncodedNumber[class_num];
   }
   lime_explainer.load_predict_origin_model(party,
@@ -548,17 +729,34 @@ void lime_comp_pred(Party party, const std::string& params_str) {
   log_info("Save the generated samples and predictions to file");
 
   // free information
-  for (int i = 0; i < num_total_samples; i++) {
+  for (int i = 0; i < cur_sample_size; i++) {
     delete [] predictions[i];
   }
   delete [] predictions;
+  delete scaler;
 }
 
 void lime_comp_weight(Party party, const std::string& params_str) {
   log_info("Begin to compute sample weights");
   // deserialize the LimeCompWeightsParams
   LimeCompWeightsParams comp_weights_params;
-  deserialize_lime_comp_weights_params(comp_weights_params, params_str);
+  // set the values for local debug
+  std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
+  comp_weights_params.explain_instance_idx = 0;
+  comp_weights_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
+  comp_weights_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
+  comp_weights_params.is_precompute = false;
+  comp_weights_params.num_samples = 1000;
+  comp_weights_params.class_num = 2;
+  comp_weights_params.distance_metric = "euclidean";
+  comp_weights_params.kernel = "exponential";
+  comp_weights_params.kernel_width = 0.75;
+  comp_weights_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
+  comp_weights_params.selected_samples_file = path_prefix + "/log_reg/selected_sampled_data.txt";
+  comp_weights_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
+
+
+  // deserialize_lime_comp_weights_params(comp_weights_params, params_str);
   log_info("Deserialize the lime comp_weights params");
 
   // call lime_explainer compute_sample_weights function
@@ -605,7 +803,19 @@ void lime_interpret(Party party, const std::string& params_str) {
   log_info("Begin to interpret using lime");
   // 1. deserialize the LimeInterpretParams
   LimeInterpretParams interpret_params;
-  deserialize_lime_interpret_params(interpret_params, params_str);
+  // set the values for local debug
+  std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
+  interpret_params.selected_data_file = path_prefix + "/log_reg/selected_sampled_data.txt";
+  interpret_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
+  interpret_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
+  interpret_params.num_samples = 1000;
+  interpret_params.class_num = 2;
+  interpret_params.class_id = 0;
+  interpret_params.interpret_model_name = "linear_regression";
+  interpret_params.interpret_model_param = "reserved";
+  interpret_params.explanation_report = path_prefix + "/log_reg/exp_report.txt";
+
+  // deserialize_lime_interpret_params(interpret_params, params_str);
   log_info("Deserialize the lime interpret params");
 
   // 2. create the LimeExplainer instance and call explain instance
@@ -627,7 +837,6 @@ void lime_interpret(Party party, const std::string& params_str) {
     log_info("explanation " + std::to_string(i) + " = " + std::to_string(explanation[i]));
   }
 }
-
 
 
 void spdz_lime_computation(int party_num,
@@ -696,7 +905,7 @@ void spdz_lime_computation(int party_num,
     LOG(INFO) << "lime_comp_type = " << lime_comp_type;
     google::FlushLogFiles(google::INFO);
     send_public_values(computation_id, mpc_sockets, party_num);
-    // the active party sends tree type and class num to spdz parties
+    // the active party sends public values to spdz parties
     for (int i = 0; i < public_value_size; i++) {
       std::vector<int> x;
       x.push_back(public_values[i]);
@@ -715,8 +924,8 @@ void spdz_lime_computation(int party_num,
   // receive result from spdz parties according to the computation type
   switch (lime_comp_type) {
     case falcon::DIST_WEIGHT: {
-      LOG(INFO) << "SPDZ lime computation pruning check returned";
-      std::vector<double> return_values = receive_result(mpc_sockets, party_num, 1);
+      LOG(INFO) << "SPDZ lime computation dist weights computation";
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
       res->set_value(return_values);
       break;
     }

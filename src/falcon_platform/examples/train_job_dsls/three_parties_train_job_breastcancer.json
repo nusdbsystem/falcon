@@ -2,7 +2,7 @@
   "job_name": "credit_card_training",
   "job_info": "this is the job_info",
   "job_fl_type": "vertical",
-  "existing_key": 0,
+  "existing_key": 1,
   "party_nums": 3,
   "task_num": 1,
   "party_info": [
@@ -43,7 +43,7 @@
   },
   "tasks": {
     "model_training": {
-      "mpc_algorithm_name": "logistic_regression",
+      "mpc_algorithm_name": "linear_regression",
       "algorithm_name": "logistic_regression",
       "input_configs": {
         "data_input": {
@@ -52,7 +52,7 @@
         },
         "algorithm_config": {
           "batch_size": 8,
-          "max_iteration": 500,
+          "max_iteration": 100,
           "convergence_threshold": 0.0001,
           "with_regularization": false,
           "alpha": 0.1,

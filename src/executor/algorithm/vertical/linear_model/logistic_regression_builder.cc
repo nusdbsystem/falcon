@@ -85,7 +85,19 @@ void LogisticRegressionBuilder::backward_computation(
   // convert batch loss shares back to encrypted losses
   int cur_batch_size = (int) batch_indexes.size();
   auto* encrypted_batch_losses = new EncodedNumber[cur_batch_size];
-  compute_encrypted_residual(party, batch_indexes, training_labels,
+  int predicted_label_precision = std::abs(predicted_labels[0].getter_exponent());
+  auto* batch_true_labels = new EncodedNumber[cur_batch_size];
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    for (int i = 0; i < cur_batch_size; i++) {
+      batch_true_labels[i].set_double(phe_pub_key->n[0],
+                                      training_labels[batch_indexes[i]],
+                                      predicted_label_precision);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+                         batch_true_labels[i], batch_true_labels[i]);
+    }
+  }
+
+  compute_encrypted_residual(party, batch_indexes, batch_true_labels,
                              precision, predicted_labels, encrypted_batch_losses);
 
   // after calculate loss, compute [loss_i]*x_{ij}
@@ -181,6 +193,7 @@ void LogisticRegressionBuilder::backward_computation(
   }
   delete [] encoded_batch_samples;
   delete [] common_gradients;
+  delete [] batch_true_labels;
 }
 
 void LogisticRegressionBuilder::update_encrypted_weights(
@@ -192,9 +205,12 @@ void LogisticRegressionBuilder::update_encrypted_weights(
   // update the j-th weight in local_weight vector
   // need to make sure that the exponents of inner_product
   // and local weights are the same
+  log_info("[update_encrypted_weights] log_reg_model precision is: " + std::to_string(std::abs(log_reg_model.local_weights[0].getter_exponent())));
   for (int j = 0; j < log_reg_model.weight_size; j++) {
-      djcs_t_aux_ee_add(phe_pub_key,log_reg_model.local_weights[j],
-                        log_reg_model.local_weights[j], encrypted_gradients[j]);
+      djcs_t_aux_ee_add(phe_pub_key,
+                        log_reg_model.local_weights[j],
+                        log_reg_model.local_weights[j],
+                        encrypted_gradients[j]);
   }
   djcs_t_free_public_key(phe_pub_key);
 }
@@ -268,9 +284,9 @@ void LogisticRegressionBuilder::train(Party party) {
   }
 
   // step 1: init encrypted local weights
-  // (here use 3 * precision for consistence in the following)
+  // (here use precision for consistence in the following)
   log_reg_model.sync_up_weight_sizes(party);
-  int encrypted_weights_precision = 3 * PHE_FIXED_POINT_PRECISION;
+  int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
   init_encrypted_weights(party, encrypted_weights_precision);
 
@@ -324,12 +340,12 @@ void LogisticRegressionBuilder::train(Party party) {
     auto *predicted_labels = new EncodedNumber[batch_indexes.size()];
     // 4 * fixed precision
     // weight * xj => encrypted_weights_precision + plaintext_samples_precision
-    int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
+    int encrypted_batch_agg_precision = encrypted_weights_precision + plaintext_samples_precision;
     log_reg_model.forward_computation(
         party,
         cur_sample_size,
         encoded_batch_samples,
-        encrypted_batch_aggregation_precision,
+        encrypted_batch_agg_precision,
         predicted_labels);
 
     log_info("-------- Iteration " + std::to_string(iter) + ", forward computation success --------");
@@ -337,20 +353,53 @@ void LogisticRegressionBuilder::train(Party party) {
 
     // step 2.5: update encrypted local weights
     std::vector<double> truncated_weights_shares;
-    auto encrypted_gradients = new EncodedNumber[log_reg_model.weight_size];
-    // need to make sure that update_precision * 2 = encrypted_weights_precision
-    int update_precision = encrypted_weights_precision / 2;
-    log_info("Update_precision is: " + std::to_string(update_precision));
+    auto* encrypted_gradients = new EncodedNumber[log_reg_model.weight_size];
+//    // need to make sure that update_precision * 2 = encrypted_weights_precision
+//    int update_precision = encrypted_weights_precision / 2;
+    log_info("encrypted_batch_agg_precision is: " + std::to_string(encrypted_batch_agg_precision));
 
     backward_computation(
         party,
         batch_samples,
         predicted_labels,
         batch_indexes,
-        update_precision,
+        encrypted_batch_agg_precision,
         encrypted_gradients);
+    log_info("encrypted_gradients precision is: " + std::to_string(std::abs(encrypted_gradients[0].getter_exponent())));
 
     log_info("-------- Iteration " + std::to_string(iter) + ", backward computation success --------");
+    // note that after backward computation, the precision of encrypted
+    // gradients is 4 * PHE_FIXED_POINT_PRECISION, need to truncate
+//    party.truncate_ciphers_precision(encrypted_gradients,
+//                                     log_reg_model.weight_size,
+//                                     ACTIVE_PARTY_ID,
+//                                     encrypted_weights_precision);
+
+    for (int i = 0; i < party.party_num; i++) {
+      if (i == party.party_id) {
+        party.broadcast_encoded_number_array(encrypted_gradients,
+                                             log_reg_model.weight_size,
+                                             party.party_id);
+        party.truncate_ciphers_precision(encrypted_gradients,
+                                         log_reg_model.weight_size,
+                                         party.party_id,
+                                         encrypted_weights_precision);
+      } else {
+        int party_i_weight_size = log_reg_model.party_weight_sizes[i];
+        auto* party_i_enc_grad = new EncodedNumber[party_i_weight_size];
+        party.broadcast_encoded_number_array(party_i_enc_grad,
+                                             party_i_weight_size,
+                                             i);
+        party.truncate_ciphers_precision(party_i_enc_grad,
+                                         party_i_weight_size,
+                                         i,
+                                         encrypted_weights_precision);
+        delete [] party_i_enc_grad;
+      }
+    }
+
+    log_info("encrypted_weights_precision is: " + std::to_string(encrypted_weights_precision));
+    log_info("encrypted_gradients precision is: " + std::to_string(std::abs(encrypted_gradients[0].getter_exponent())));
     update_encrypted_weights(party, encrypted_gradients);
     log_info("-------- Iteration " + std::to_string(iter) + ", update_encrypted_weights computation success --------");
 
@@ -414,9 +463,9 @@ void LogisticRegressionBuilder::distributed_train(
     const Worker& worker) {
   log_info("************* Distributed Training Start *************");
   const clock_t training_start_time = clock();
-  // (here use 3 * precision for consistence in the following)
+  // (here use precision for consistence in the following)
   log_reg_model.sync_up_weight_sizes(party);
-  int encrypted_weights_precision = 3 * PHE_FIXED_POINT_PRECISION;
+  int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
 
   if (optimizer != "sgd") {
@@ -492,13 +541,13 @@ void LogisticRegressionBuilder::distributed_train(
 
     auto *predicted_labels = new EncodedNumber[cur_sample_size];
     // compute predicted label
-    int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
+    int encrypted_batch_agg_precision = encrypted_weights_precision + plaintext_samples_precision;
 
     log_reg_model.forward_computation(
         party,
         cur_sample_size,
         encoded_mini_batch_samples,
-        encrypted_batch_aggregation_precision,
+        encrypted_batch_agg_precision,
         predicted_labels);
 
     log_info("-------- "
@@ -508,13 +557,13 @@ void LogisticRegressionBuilder::distributed_train(
              + " --------");
 
     auto encrypted_gradients = new EncodedNumber[log_reg_model.weight_size];
-    // need to make sure that update_precision * 2 = encrypted_weights_precision
-    int update_precision = encrypted_weights_precision / 2;
+//    // need to make sure that update_precision * 2 = encrypted_weights_precision
+//    int update_precision = encrypted_weights_precision / 2;
     backward_computation(party,
         mini_batch_samples,
         predicted_labels,
         mini_batch_indexes,
-        update_precision,
+        encrypted_batch_agg_precision,
         encrypted_gradients);
 
     log_info("-------- "

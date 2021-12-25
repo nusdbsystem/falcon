@@ -796,6 +796,66 @@ void Party::truncate_ciphers_precision(EncodedNumber *ciphers, int size,
   delete [] dest_ciphers;
 }
 
+void Party::ciphers_multi(EncodedNumber *res,
+                          EncodedNumber *ciphers1,
+                          EncodedNumber *ciphers2,
+                          int size,
+                          int req_party_id) const {
+  // step 1: convert ciphers 1 to secret shares
+  int cipher1_precision = std::abs(ciphers1[0].getter_exponent());
+  int cipher2_precision = std::abs(ciphers2[0].getter_exponent());
+  std::vector<double> ciphers1_shares;
+  ciphers_to_secret_shares(ciphers1, ciphers1_shares,
+                           size, req_party_id, cipher1_precision);
+  auto* encoded_ciphers1_shares = new EncodedNumber[size];
+
+  // step 2: aggregate the plaintext and ciphers2 multiplication
+  auto* global_aggregation = new EncodedNumber[size];
+  auto* local_aggregation = new EncodedNumber[size];
+  for (int i = 0; i < size; i++) {
+    encoded_ciphers1_shares[i].set_double(phe_pub_key->n[0],
+                                        ciphers1_shares[i]);
+    djcs_t_aux_ep_mul(phe_pub_key,
+                      local_aggregation[i],
+                      ciphers2[i],
+                      encoded_ciphers1_shares[i]);
+  }
+  if (party_id == req_party_id) {
+    for (int i = 0; i < size; i++) {
+      global_aggregation[i] = local_aggregation[i];
+    }
+    for (int id = 0; id < party_num; id++) {
+      if (id != party_id) {
+        auto* recv_local_aggregation = new EncodedNumber[size];
+        std::string recv_local_aggregation_str;
+        recv_long_message(id, recv_local_aggregation_str);
+        deserialize_encoded_number_array(recv_local_aggregation,
+                                         size, recv_local_aggregation_str);
+        for (int i = 0; i < size; i++) {
+          djcs_t_aux_ee_add(phe_pub_key, global_aggregation[i],
+                            global_aggregation[i], recv_local_aggregation[i]);
+        }
+        delete [] recv_local_aggregation;
+      }
+    }
+  } else {
+    // serialize and send to req_party_id
+    std::string local_aggregation_str;
+    serialize_encoded_number_array(local_aggregation, size, local_aggregation_str);
+    send_long_message(req_party_id, local_aggregation_str);
+  }
+  broadcast_encoded_number_array(global_aggregation, size, req_party_id);
+
+  // step 3: write to result vector
+  for (int i = 0; i < size; i++) {
+    res[i] = global_aggregation[i];
+  }
+
+  delete [] encoded_ciphers1_shares;
+  delete [] global_aggregation;
+  delete [] local_aggregation;
+}
+
 std::vector<int> Party::sync_up_int_arr(int v) const {
   std::vector<int> sync_arr;
   if (party_type == falcon::ACTIVE_PARTY) {
@@ -824,6 +884,7 @@ std::vector<int> Party::sync_up_int_arr(int v) const {
     recv_long_message(ACTIVE_PARTY_ID, recv_party_weight_sizes_str);
     deserialize_int_array(sync_arr, recv_party_weight_sizes_str);
   }
+  return sync_arr;
 }
 
 Party::~Party() {

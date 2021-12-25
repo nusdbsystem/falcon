@@ -83,14 +83,14 @@ void split_dataset(Party* party,
  *
  * @param party: initialized party object
  * @param batch_indexes: the batch indexes
- * @param training_labels: the original training data labels
+ * @param batch_true_labels: the batch encrypted training data labels
  * @param precision: the ciphertext precision
  * @param predicted_labels: the encrypted predicted labels
  * @param encrypted_batch_losses: return, computed encrypted batch loss
  */
 void compute_encrypted_residual(const Party& party,
                                 const std::vector<int>& batch_indexes,
-                                const std::vector<double>& training_labels,
+                                EncodedNumber* batch_true_labels,
                                 int precision,
                                 EncodedNumber* predicted_labels,
                                 EncodedNumber* encrypted_batch_losses);

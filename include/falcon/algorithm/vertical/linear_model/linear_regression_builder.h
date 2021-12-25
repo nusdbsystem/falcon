@@ -123,6 +123,29 @@ class LinearRegressionBuilder : public ModelBuilder {
       EncodedNumber* encrypted_gradients);
 
   /**
+   * after receiving batch loss shares and truncated weight shares
+   * from spdz parties, compute encrypted gradient
+   *
+   * @param party: initialized party object
+   * @param batch_logistic_shares: secret shares of batch losses
+   * @param batch_indexes: selected batch indexes
+   * @param precision: precision for the batch samples and shares
+   * @param ground_truth_labels: the encrypted ground truth labels
+   * @param use_sample_weights: whether use sample weights
+   * @param sample_weights: (encrypted) sample weights
+   */
+  void lime_backward_computation(
+      const Party& party,
+      const std::vector<std::vector<double> >& batch_samples,
+      EncodedNumber* predicted_labels,
+      const std::vector<int>& batch_indexes,
+      int precision,
+      EncodedNumber *ground_truth_labels,
+      bool use_sample_weights,
+      EncodedNumber *sample_weights,
+      EncodedNumber* encrypted_gradients);
+
+  /**
    * this function computes the regularized gradients of l1
    * regularization method, basically, it checks whether a weight
    * is larger than 0 or not, and assign the corresponding sign with
@@ -149,6 +172,21 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param party: initialized party object
    */
   void train(Party party) override;
+
+  /**
+   * specific train function for lime
+   *
+   * @param party: initialized party object
+   * @param use_encrypted_labels: whether use encrypted labels during training
+   * @param encrypted_true_labels: encrypted labels used
+   * @param use_sample_weights: whether use encrypted sample weights
+   * @param encrypted_sample_weights: encrypted sample weights
+   */
+  void lime_train(Party party,
+                  bool use_encrypted_labels,
+                  EncodedNumber* encrypted_true_labels,
+                  bool use_sample_weights,
+                  EncodedNumber* encrypted_sample_weights);
 
   /**
    * train a logistic regression model

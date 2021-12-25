@@ -167,7 +167,7 @@ void split_dataset(Party* party,
 
 void compute_encrypted_residual(const Party& party,
                                 const std::vector<int>& batch_indexes,
-                                const std::vector<double>& training_labels,
+                                EncodedNumber* batch_true_labels,
                                 int precision,
                                 EncodedNumber* predicted_labels,
                                 EncodedNumber* encrypted_batch_losses) {
@@ -181,30 +181,20 @@ void compute_encrypted_residual(const Party& party,
   // and broadcast active party use the label to calculate loss,
   // and sent it to other parties
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    std::vector<double> batch_labels;
-    for (int index: batch_indexes) {
-      batch_labels.push_back(training_labels[index]);
-    }
-    // for debug
-    log_info("print batch labels");
+    int neg_one = -1;
+    EncodedNumber EncodedNegOne;
+    EncodedNegOne.set_integer(phe_pub_key->n[0], neg_one);
     for (int i = 0; i < cur_batch_size; i++) {
-      log_info("batch label " + std::to_string(i) + " = " + std::to_string(batch_labels[i]));
-    }
-    auto* encrypted_ground_truth_labels = new EncodedNumber[cur_batch_size];
-    for (int i = 0; i < cur_batch_size; i++) {
-      // init "0-y_t"
-      encrypted_ground_truth_labels[i].set_double(
-          phe_pub_key->n[0], 0 - batch_labels[i], precision);
-      // encrypt [0-y_t]
-      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-                         encrypted_ground_truth_labels[i],
-                         encrypted_ground_truth_labels[i]);
+      // compute [0-y_t]
+      djcs_t_aux_ep_mul(phe_pub_key,
+                        batch_true_labels[i],
+                        batch_true_labels[i],
+                        EncodedNegOne);
       // compute phe addition [f_t - y_t]
       djcs_t_aux_ee_add(phe_pub_key, encrypted_batch_losses[i],
                         predicted_labels[i],
-                        encrypted_ground_truth_labels[i]);
+                        batch_true_labels[i]);
     }
-    delete[] encrypted_ground_truth_labels;
   }
   party.broadcast_encoded_number_array(encrypted_batch_losses,
                                        cur_batch_size, ACTIVE_PARTY_ID);
