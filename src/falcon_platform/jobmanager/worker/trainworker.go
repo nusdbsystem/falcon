@@ -1,11 +1,18 @@
 package worker
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"falcon_platform/common"
+	v0 "falcon_platform/common/proto/v0"
 	"falcon_platform/jobmanager/base"
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
+	"github.com/golang/protobuf/proto"
+	"strings"
+
 	// 	"falcon_platform/utils"
 	"net/rpc"
 )
@@ -105,20 +112,52 @@ func (wk *TrainWorker) DoTask(taskName string, rep *entity.DoTaskReply) error {
 	}
 
 	if taskName == common.PreProcSubTask {
+		wk.printParams(wk.DslObj.Tasks.PreProcessing.AlgorithmName)
 		wk.RunPreProcessingTask()
 		// update task error msg
 		update()
 		return nil
-	}
-	if taskName == common.ModelTrainSubTask {
+	}else if taskName == common.ModelTrainSubTask {
+		wk.printParams(wk.DslObj.Tasks.ModelTraining.AlgorithmName)
 		wk.RunModelTrainingTask()
 		// update task error msg
 		update()
 		return nil
+	}else if taskName == common.LimePredSubTask {
+		wk.printParams(wk.DslObj.Tasks.LimePred.AlgorithmName)
+		wk.RunLimePredTask()
+		// update task error msg
+		update()
+		return nil
+	}else if taskName == common.LimeWeightSubTask {
+		wk.printParams(wk.DslObj.Tasks.LimeWeight.AlgorithmName)
+		wk.RunLimeWeightTask()
+		// update task error msg
+		update()
+		return nil
+	}else{
+		if strings.Contains(taskName, common.LimeFeatureSubTask){
+			// update config
+			wk.DslObj.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig = taskName[len(common.LimeFeatureSubTask):]
+			wk.printParams(wk.DslObj.Tasks.LimeFeature.AlgorithmName)
+			wk.RunLimeFeatureTask()
+			// update task error msg
+			update()
+			return nil
+		}
+		if strings.Contains(taskName, common.LimeInterpretSubTask){
+			wk.DslObj.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig = taskName[len(common.LimeInterpretSubTask):]
+			wk.printParams(wk.DslObj.Tasks.LimeInterpret.AlgorithmName)
+			wk.RunLimeInterpretTask()
+			// update task error msg
+			update()
+			return nil
+		}
 	}
 
 	rep.RuntimeError = true
-	rep.TaskMsg.RuntimeMsg = "TaskName wrong! must be in <pre_processing, model_training>"
+	rep.TaskMsg.RuntimeMsg = "TaskName wrong! only support <pre_processing, model_training," +
+		" lime_pred_task, lime_weight_task, lime_feature_task, lime_interpret_task>"
 
 	return nil
 }
@@ -191,4 +230,135 @@ func (w *TrainWorker) RetrieveModelReport(_ string, rep *entity.RetrieveModelRep
 	//}
 	//logger.Log.Println("[TrainWorker] :RetrieveModelReport finished")
 	//return nil
+}
+
+func (w *TrainWorker) printParams(algName string){
+	logger.Log.Println("[TrainWorker]: ----------- WorkerAddr , printParams -----------", algName)
+	//return
+
+	if algName ==  "" {
+
+	}else if algName == common.LogisticRegressAlgName{
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.LogisticRegressionParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structed params =%v\n", out.String())
+
+
+	}else if algName == common.DecisionTreeAlgName{
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.DecisionTreeParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structed params =%v\n", out.String())
+
+	}else if algName == common.RandomForestAlgName{
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.RandomForestParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structed params =%v\n", out.String())
+
+
+		logger.Log.Printf("[TrainWorker]: original DtParam = %+v\n", lrp.DtParam)
+		bs2, _ := json.Marshal(lrp.DtParam)
+		var out2 bytes.Buffer
+		json.Indent(&out2, bs2, "", "\t")
+		logger.Log.Printf("structed DtParam =%v\n", out2.String())
+
+
+	}else if algName == common.LinearRegressionAlgName{
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.LinearRegressionParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structed params =%v\n", out.String())
+
+	}else if algName == common.LimeCompPredictionAlgName{
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.LimePred.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.LimeCompPredictionParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structed params =%v\n", out.String())
+
+
+	}else if algName == common.LimeCompWeightsAlgName{
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.LimeWeight.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.LimeCompWeightsParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structed params =%v\n", out.String())
+
+	}else if algName == common.LimeFeatSelAlgName{
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.LimeFeatSelParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structed params =%v\n", out.String())
+
+	}else if algName == common.LimeInterpretAlgName{
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.LimeInterpretParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structed params =%v\n", out.String())
+
+		res2, _ := base64.StdEncoding.DecodeString(lrp.InterpretModelParam)
+		lrp2 := v0.LinearRegressionParams{}
+		_ = proto.Unmarshal(res2, &lrp2)
+		logger.Log.Printf("[TrainWorker]: original LinearRegressionParams = %+v\n", lrp2)
+		bs2, _ := json.Marshal(lrp2)
+		var out2 bytes.Buffer
+		json.Indent(&out2, bs2, "", "\t")
+		logger.Log.Printf("structed LinearRegressionParams =%v\n", out2.String())
+
+
+	}else{
+
+	}
+
+
+	logger.Log.Println("[TrainWorker]: ----------- WorkerAddr , printParams Done-----------")
+
 }

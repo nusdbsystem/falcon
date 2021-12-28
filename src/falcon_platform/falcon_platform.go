@@ -95,7 +95,7 @@ func initEnv(svcName string) {
 
 	common.FalconDockerImgName = common.GetEnv(
 		"FALCON_WORKER_IMAGE",
-		"falcon-dist-train:latest")
+		"falcon-lime:latest")
 
 	switch svcName {
 	case common.CoordinatorRole:

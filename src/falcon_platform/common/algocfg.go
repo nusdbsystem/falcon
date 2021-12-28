@@ -118,3 +118,101 @@ type LinearRegression struct {
 	// whether to fit the bias the term
 	FitBias bool `json:"fit_bias"`
 }
+
+// This message denotes the LIME interpretability compute predictions parameters
+type LimeCompPrediction struct {
+	// vertical original model name
+	OriginalModelName string `json:"original_model_name"`
+	// vertical original model saved file
+	OriginalModelSavedFile string `json:"original_model_saved_file"`
+	// type of model task, 'regression' or 'classification'
+	ModelType string `json:"model_type"`
+	// number of classes in classification, set to 1 if regression
+	ClassNum int32 `json:"class_num"`
+	// the instance index for explain
+	ExplainInstanceIdx int32 `json:"explain_instance_idx"`
+	// whether sampling around the above instance
+	SampleAroundInstance bool `json:"sample_around_instance"`
+	// number of total samples to be generated
+	NumTotalSamples int32 `json:"num_total_samples"`
+	// the sampling method, now only support "gaussian"
+	SamplingMethod string `json:"sampling_method"`
+	// generated samples save file
+	GeneratedSampleFile string `json:"generated_sample_file"`
+	// prediction save file
+	ComputedPredictionFile string `json:"computed_prediction_file"`
+}
+
+// This message denotes the compute sample weights parameters
+
+type LimeCompWeights struct {
+	// the instance index for explain
+	ExplainInstanceIdx int32 `json:"explain_instance_idx"`
+	// generated samples save file
+	GeneratedSampleFile string `json:"generated_sample_file"`
+	// prediction save file
+	ComputedPredictionFile string `json:"computed_prediction_file"`
+	// whether it is pre-computed
+	IsPrecompute bool `json:"is_precompute"`
+	// number of samples to be generated or selected
+	NumSamples int32 `json:"num_samples"`
+	// number of classes in classification, set to 1 if regression
+	ClassNum int32 `json:"class_num"`
+	// the metric for computing the distance, only "euclidean"
+	DistanceMetric string `json:"distance_metric"`
+	// kernel, similarity kernel that takes euclidean distances and kernel width
+	// as input and outputs weights in (0,1). If not specified, default is exponential kernel
+	Kernel string `json:"kernel"`
+	// width for the kernel
+	KernelWidth float64 `json:"kernel_width"`
+	// sample weights file to be saved
+	SampleWeightsFile string `json:"sample_weights_file"`
+	// selected samples to be saved if is_precompute = true
+	SelectedSamplesFile string `json:"selected_samples_file"`
+	// selected predictions to be saved if is_precompute = true
+	SelectedPredictionsFile string `json:"selected_predictions_file"`
+}
+
+// This message denotes the LIME feature selection parameters
+type LimeFeatSel struct {
+	// selected samples file
+	SelectedSamplesFile string `json:"selected_samples_file"`
+	// selected predictions file
+	SelectedPredictionsFile string `json:"selected_predictions_file"`
+	// the sample weights file
+	SampleWeightsFile string `json:"sample_weights_file"`
+	// number of samples generated or selected
+	NumSamples int32 `json:"num_samples"`
+	// number of classes in classification, set to 1 if regression
+	ClassNum int32 `json:"class_num"`
+	// the label id to be explained
+	ClassId int32 `json:"class_id"`
+	// feature selection method, current options are 'pearson', 'lasso_path',
+	FeatureSelection string `json:"feature_selection"`
+	// number of features to be explained in the interpret model
+	NumExplainedFeatures int32 `json:"num_explained_features"`
+	// selected features to be saved
+	SelectedFeaturesFile string `json:"selected_features_file"`
+}
+
+// This message denotes the LIME interpret model training parameters
+type LimeInterpret struct {
+	// selected data file, either selected_samples_file or selected_features_file
+	SelectedDataFile string `json:"selected_data_file"`
+	// selected predictions saved
+	SelectedPredictionsFile string `json:"selected_predictions_file"`
+	// the sample weights file
+	SampleWeightsFile string `json:"sample_weights_file"`
+	// number of samples generated or selected
+	NumSamples int32 `json:"num_samples"`
+	// number of classes in classification, set to 1 if regression
+	ClassNum int32 `json:"class_num"`
+	// the label id to be explained
+	ClassId int32 `json:"class_id"`
+	// interpretable model name, linear_regression or decision_tree
+	InterpretModelName string `json:"interpret_model_name"`
+	// interpretable model params, should be serialized LinearRegressionParams or DecisionTreeParams
+	InterpretModelParam LinearRegression `json:"interpret_model_param"`
+	// explanation report
+	ExplanationReport string `json:"explanation_report"`
+}

@@ -18,7 +18,7 @@
 using namespace std;
 
 class LinearParameterServer : public ParameterServer {
- private:
+ public:
   // party
   Party party;
  public:

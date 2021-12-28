@@ -5,13 +5,17 @@
 #ifndef FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_H_
 #define FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_H_
 
-#include <string>
-#include <vector>
 
 #include <falcon/common.h>
 #include <falcon/party/party.h>
+#include <falcon/distributed/worker.h>
 #include <falcon/operator/phe/fixed_point_encoder.h>
 #include "scaler.h"
+
+#include <string>
+#include <vector>
+#include <thread>
+#include <future>
 
 struct LimeCompPredictionParams {
   // vertical original model name
@@ -267,6 +271,9 @@ class LimeExplainer {
    *    linear regression or decision tree
    * @param interpret_model_param: the parameters of the model, now use json
    * @param explanation_report: the report for save the explanations
+   * @param is_distributed: whether use distributed interpretable model training
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param worker: if is_distributed = 1 and distributed_role = 1
    * @return
    */
   std::vector<double> interpret(
@@ -279,7 +286,10 @@ class LimeExplainer {
       int class_id,
       const std::string& interpret_model_name,
       const std::string& interpret_model_param,
-      const std::string& explanation_report);
+      const std::string& explanation_report,
+      int is_distributed = 0,
+      int distributed_role = 0,
+      Worker* worker = nullptr);
 
   /**
    * This function explain a specific label by training a model
@@ -291,6 +301,9 @@ class LimeExplainer {
    * @param num_samples: the number of samples for training
    * @param interpret_model_name: the model to be trained
    * @param interpret_model_param: the model params to be used for training
+   * @param is_distributed: whether use distributed interpretable model training
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param worker: if is_distributed = 1 and distributed_role = 1
    * @return
    */
   std::vector<double> explain_one_label(
@@ -300,7 +313,10 @@ class LimeExplainer {
       EncodedNumber* sample_weights,
       int num_samples,
       const std::string &interpret_model_name,
-      const std::string &interpret_model_param);
+      const std::string &interpret_model_param,
+      int is_distributed = 0,
+      int distributed_role = 0,
+      Worker* worker = nullptr);
 
   /**
    * This function trains linear regression model with encrypted predictions,
@@ -311,6 +327,9 @@ class LimeExplainer {
    * @param train_data: the plaintext train data
    * @param predictions: the encrypted model predictions
    * @param sample_weights: the encrypted sample weights
+   * @param is_distributed: whether use distributed interpretable model training
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param worker: if is_distributed = 1 and distributed_role = 1
    * @return
    */
   std::vector<double> lime_linear_reg_train(
@@ -318,7 +337,10 @@ class LimeExplainer {
       const std::string& linear_reg_param_str,
       const std::vector<std::vector<double>>& train_data,
       EncodedNumber* predictions,
-      EncodedNumber* sample_weights);
+      EncodedNumber* sample_weights,
+      int is_distributed = 0,
+      int distributed_role = 0,
+      Worker* worker = nullptr);
 };
 
 /**
@@ -350,8 +372,14 @@ void lime_feat_sel(Party party, const std::string& params_str);
  *
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeInterpretParams
+ * @param is_distributed: whether use distributed interpretable model training
+ * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+ * @param worker: if is_distributed = 1 and distributed_role = 1
  */
-void lime_interpret(Party party, const std::string& params_str);
+void lime_interpret(Party party, const std::string& params_str,
+                    int is_distributed = 0,
+                    int distributed_role = 0,
+                    Worker* worker = nullptr);
 
 /**
  * spdz computation with thread,

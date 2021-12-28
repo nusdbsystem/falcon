@@ -1,9 +1,9 @@
 syntax = "proto3";
 
 package com.nus.dbsytem.falcon.v0;
-option go_package = "/common";
+option go_package = "/v0";
 
-import public "common.proto";
+//import public "vo.proto";
 
 // This message denotes the LIME interpretability compute predictions parameters
 message LimeCompPredictionParams {

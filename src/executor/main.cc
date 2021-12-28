@@ -232,6 +232,12 @@ int main(int argc, char *argv[]) {
           case falcon::GBDT:
             log_error("Type falcon::GBDT not implemented");
             exit(1);
+          case falcon::LIME_INTERPRET:
+            lime_interpret(party,
+                           algorithm_params_pb_str,
+                           is_distributed,
+                           distributed_role);
+            break;
           default:
             launch_log_reg_parameter_server(&party, algorithm_params_pb_str,ps_network_config_pb_str,
                                        model_save_file, model_report_file);
@@ -305,6 +311,15 @@ int main(int argc, char *argv[]) {
             case falcon::GBDT:
               log_error("Type falcon::GBDT not implemented");
               exit(1);
+            case falcon::LIME_INTERPRET: {
+              party.init_phe_keys(use_existing_key, key_file);
+              lime_interpret(party,
+                             algorithm_params_pb_str,
+                             is_distributed,
+                             distributed_role,
+                             worker);
+              break;
+            }
             default:
               train_logistic_regression(&party,
                                         algorithm_params_pb_str,

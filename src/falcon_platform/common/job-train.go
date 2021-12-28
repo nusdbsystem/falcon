@@ -6,6 +6,7 @@ import (
 	"errors"
 	"falcon_platform/common/proto/v0"
 	"falcon_platform/logger"
+	"fmt"
 	"google.golang.org/protobuf/proto"
 	"log"
 	"strings"
@@ -47,8 +48,12 @@ type DistributedTask struct {
 }
 
 type Tasks struct {
-	PreProcessing PreProcessTask `json:"pre_processing"`
-	ModelTraining ModelTrainTask `json:"model_training"`
+	PreProcessing PreProcessTask    `json:"pre_processing"`
+	ModelTraining ModelTrainTask    `json:"model_training"`
+	LimePred      LimePredTask      `json:"lime_pred"`
+	LimeWeight    LimeWeightTask    `json:"lime_weight"`
+	LimeFeature   LimeFeatureTask   `json:"lime_feature"`
+	LimeInterpret LimeInterpretTask `json:"lime_interpret"`
 }
 
 type PreProcessTask struct {
@@ -59,6 +64,36 @@ type PreProcessTask struct {
 }
 
 type ModelTrainTask struct {
+	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
+	AlgorithmName    string      `json:"algorithm_name"`
+	InputConfigs     InputConfig `json:"input_configs"`
+	OutputConfigs    ModelOutput `json:"output_configs"`
+}
+
+type LimePredTask struct {
+	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
+	AlgorithmName    string      `json:"algorithm_name"`
+	InputConfigs     InputConfig `json:"input_configs"`
+	OutputConfigs    ModelOutput `json:"output_configs"`
+}
+
+type LimeWeightTask struct {
+	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
+	AlgorithmName    string      `json:"algorithm_name"`
+	InputConfigs     InputConfig `json:"input_configs"`
+	OutputConfigs    ModelOutput `json:"output_configs"`
+}
+
+type LimeFeatureTask struct {
+	ClassNum         int32
+	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
+	AlgorithmName    string      `json:"algorithm_name"`
+	InputConfigs     InputConfig `json:"input_configs"`
+	OutputConfigs    ModelOutput `json:"output_configs"`
+}
+
+type LimeInterpretTask struct {
+	ClassNum         int32
 	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
@@ -102,8 +137,12 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 		jobInfo.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig =
 			GeneratePreProcessparams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	}
+
 	// if there is ModelTraining, serialize it
-	if jobInfo.Tasks.ModelTraining.AlgorithmName == LogisticRegressAlgName {
+	if jobInfo.Tasks.ModelTraining.AlgorithmName == "" {
+		logger.Log.Println("ParseTrainJob: ModelTraining skip")
+
+	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == LogisticRegressAlgName {
 		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
@@ -123,6 +162,61 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
 			GenerateLinearRegressionParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	} else {
+		return errors.New("algorithm name can not be detected")
+	}
+
+	// if there is interpretability related task, serialize it
+
+	// LimePred
+
+	if jobInfo.Tasks.LimePred.AlgorithmName == "" {
+		logger.Log.Println("ParseTrainJob: LimePred skip")
+
+	} else if jobInfo.Tasks.LimePred.AlgorithmName == LimeCompPredictionAlgName {
+		logger.Log.Println("ParseTrainJob: LimePred AlgorithmName match <-->", jobInfo.Tasks.LimePred.AlgorithmName)
+
+		jobInfo.Tasks.LimePred.InputConfigs.SerializedAlgorithmConfig =
+			GenerateLimeCompPredictionParams(jobInfo.Tasks.LimePred.InputConfigs.AlgorithmConfig)
+	} else {
+		return errors.New("algorithm name can not be detected")
+	}
+
+	// LimeWeight
+	if jobInfo.Tasks.LimeWeight.AlgorithmName == "" {
+		logger.Log.Println("ParseTrainJob: LimeWeight skip")
+
+	} else if jobInfo.Tasks.LimeWeight.AlgorithmName == LimeCompWeightsAlgName {
+		logger.Log.Println("ParseTrainJob: LimeWeight AlgorithmName match <-->", jobInfo.Tasks.LimeWeight.AlgorithmName)
+
+		jobInfo.Tasks.LimeWeight.InputConfigs.SerializedAlgorithmConfig =
+			GenerateLimeCompWeightsParams(jobInfo.Tasks.LimeWeight.InputConfigs.AlgorithmConfig)
+	} else {
+		return errors.New("algorithm name can not be detected")
+	}
+
+	// LimeFeature
+	if jobInfo.Tasks.LimeFeature.AlgorithmName == "" {
+		logger.Log.Println("ParseTrainJob: LimeFeature skip")
+
+	} else if jobInfo.Tasks.LimeFeature.AlgorithmName == LimeFeatSelAlgName {
+		logger.Log.Println("ParseTrainJob: LimeFeature AlgorithmName match <-->", jobInfo.Tasks.LimeFeature.AlgorithmName)
+
+		_, jobInfo.Tasks.LimeFeature.ClassNum, _ =
+			GenerateLimeFeatSelParams(jobInfo.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, 0)
+	} else {
+		return errors.New("algorithm name can not be detected")
+	}
+
+	// LimeInterpret
+	if jobInfo.Tasks.LimeInterpret.AlgorithmName == "" {
+		logger.Log.Println("ParseTrainJob: LimeInterpret skip")
+
+	} else if jobInfo.Tasks.LimeInterpret.AlgorithmName == LimeInterpretAlgName {
+		logger.Log.Println("ParseTrainJob: LimeInterpret AlgorithmName match <-->", jobInfo.Tasks.LimeInterpret.AlgorithmName)
+
+		_, jobInfo.Tasks.LimeInterpret.ClassNum =
+			GenerateLimeInterpretParams(jobInfo.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, 0, "")
 	} else {
 		return errors.New("algorithm name can not be detected")
 	}
@@ -246,7 +340,7 @@ func GenerateTreeParams(cfg map[string]interface{}) string {
 		log.Fatalln("Failed to encode DecisionTreeParams:", err)
 	}
 
-	return string(out)
+	return b64.StdEncoding.EncodeToString(out)
 }
 
 func GenerateRFParams(cfg map[string]interface{}) string {
@@ -324,10 +418,187 @@ func GenerateLinearRegressionParams(cfg map[string]interface{}) string {
 
 	out, err := proto.Marshal(&dtp)
 	if err != nil {
-		log.Fatalln("Failed to encode LinearRegression:", err)
+		log.Fatalln("Failed to encode GenerateLinearRegressionParams:", err)
 	}
 
 	return b64.StdEncoding.EncodeToString(out)
+
+}
+
+func GenerateLimeCompPredictionParams(cfg map[string]interface{}) string {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateLimeCompPredictionParams error in doing Marshal")
+	}
+
+	res := LimeCompPrediction{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateLimeCompPredictionParams error in doing Unmarshal")
+	}
+
+	dtp := v0.LimeCompPredictionParams{
+		OriginalModelName:      res.OriginalModelName,
+		OriginalModelSavedFile: res.OriginalModelSavedFile,
+		ModelType:              res.ModelType,
+		ClassNum:               res.ClassNum,
+		ExplainInstanceIdx:     res.ExplainInstanceIdx,
+		SampleAroundInstance:   res.SampleAroundInstance,
+		NumTotalSamples:        res.NumTotalSamples,
+		SamplingMethod:         res.SamplingMethod,
+		GeneratedSampleFile:    res.GeneratedSampleFile,
+		ComputedPredictionFile: res.ComputedPredictionFile,
+	}
+
+	out, err := proto.Marshal(&dtp)
+	if err != nil {
+		log.Fatalln("Failed to encode GenerateLimeCompPredictionParams:", err)
+	}
+
+	return b64.StdEncoding.EncodeToString(out)
+
+}
+
+func GenerateLimeCompWeightsParams(cfg map[string]interface{}) string {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateLimeCompWeightsParams error in doing Marshal")
+	}
+
+	res := LimeCompWeights{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateLimeCompWeightsParams error in doing Unmarshal")
+	}
+
+	dtp := v0.LimeCompWeightsParams{
+		ExplainInstanceIdx:      res.ExplainInstanceIdx,
+		GeneratedSampleFile:     res.GeneratedSampleFile,
+		ComputedPredictionFile:  res.ComputedPredictionFile,
+		IsPrecompute:            res.IsPrecompute,
+		NumSamples:              res.NumSamples,
+		ClassNum:                res.ClassNum,
+		DistanceMetric:          res.DistanceMetric,
+		Kernel:                  res.Kernel,
+		KernelWidth:             res.KernelWidth,
+		SampleWeightsFile:       res.SampleWeightsFile,
+		SelectedSamplesFile:     res.SelectedSamplesFile,
+		SelectedPredictionsFile: res.SelectedPredictionsFile,
+	}
+
+	out, err := proto.Marshal(&dtp)
+	if err != nil {
+		log.Fatalln("Failed to encode GenerateLimeCompWeightsParams:", err)
+	}
+
+	return b64.StdEncoding.EncodeToString(out)
+
+}
+
+func GenerateLimeFeatSelParams(cfg map[string]interface{}, classId int32) (string, int32, string) {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateLimeFeatSelParams error in doing Marshal")
+	}
+
+	res := LimeFeatSel{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateLimeFeatSelParams error in doing Unmarshal")
+	}
+
+	var selectFeatureFile = ""
+	fileVec := []rune(res.SelectedFeaturesFile)
+	selectFeatureFile = string(fileVec[:len(fileVec)-4]) + fmt.Sprintf("%d", classId) + ".txt"
+
+	log.Println("save features to ", selectFeatureFile)
+
+	dtp := v0.LimeFeatSelParams{
+		SelectedSamplesFile:     res.SelectedSamplesFile,
+		SelectedPredictionsFile: res.SelectedPredictionsFile,
+		SampleWeightsFile:       res.SampleWeightsFile,
+		NumSamples:              res.NumSamples,
+		ClassNum:                res.ClassNum,
+		ClassId:                 classId,
+		FeatureSelection:        res.FeatureSelection,
+		NumExplainedFeatures:    res.NumExplainedFeatures,
+		SelectedFeaturesFile:    selectFeatureFile,
+	}
+
+	out, err := proto.Marshal(&dtp)
+	if err != nil {
+		log.Fatalln("Failed to encode GenerateLimeFeatSelParams:", err)
+	}
+
+	return b64.StdEncoding.EncodeToString(out), res.ClassNum, res.SelectedFeaturesFile
+
+}
+
+func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, selectFeatureFile string) (string, int32) {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateLimeInterpretParams error in doing Marshal")
+	}
+
+	res := LimeInterpret{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateLimeInterpretParams error in doing Unmarshal")
+	}
+
+	// if selectFeatureFile is empty , assign it to default value.
+	// 以及如果lime_feature有执行，那么lime_interpret中的selected_data_file: 也需要加上lime_feature中带class_id的输出；
+	// 如果lime_feature没有执行，那么lime_interpret可以是相同的
+	if selectFeatureFile == "" {
+		selectFeatureFile = res.SelectedDataFile
+	}
+
+	lr := v0.LinearRegressionParams{
+		BatchSize:                 res.InterpretModelParam.BatchSize,
+		MaxIteration:              res.InterpretModelParam.MaxIteration,
+		ConvergeThreshold:         res.InterpretModelParam.ConvergeThreshold,
+		WithRegularization:        res.InterpretModelParam.WithRegularization,
+		Alpha:                     res.InterpretModelParam.Alpha,
+		LearningRate:              res.InterpretModelParam.LearningRate,
+		Decay:                     res.InterpretModelParam.Decay,
+		Penalty:                   res.InterpretModelParam.Penalty,
+		Optimizer:                 res.InterpretModelParam.Optimizer,
+		Metric:                    res.InterpretModelParam.Metric,
+		DifferentialPrivacyBudget: res.InterpretModelParam.DifferentialPrivacyBudget,
+		FitBias:                   res.InterpretModelParam.FitBias,
+	}
+
+	out1, err1 := proto.Marshal(&lr)
+	if err1 != nil {
+		log.Fatalln("Failed to encode GenerateLimeInterpretParams:", err)
+	}
+
+	dtp := v0.LimeInterpretParams{
+		SelectedDataFile:        selectFeatureFile,
+		SelectedPredictionsFile: res.SelectedPredictionsFile,
+		SampleWeightsFile:       res.SampleWeightsFile,
+		NumSamples:              res.NumSamples,
+		ClassNum:                res.ClassNum,
+		ClassId:                 classId,
+		InterpretModelName:      res.InterpretModelName,
+		InterpretModelParam:     b64.StdEncoding.EncodeToString(out1),
+		ExplanationReport:       res.ExplanationReport,
+	}
+
+	out, err := proto.Marshal(&dtp)
+	if err != nil {
+		log.Fatalln("Failed to encode GenerateLimeInterpretParams:", err)
+	}
+
+	return b64.StdEncoding.EncodeToString(out), res.ClassNum
 
 }
 

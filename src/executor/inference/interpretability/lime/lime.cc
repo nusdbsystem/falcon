@@ -16,6 +16,7 @@
 #include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/logger/log_alg_params.h>
+#include <falcon/utils/base64.h>
 
 #include <glog/logging.h>
 
@@ -211,6 +212,16 @@ void LimeExplainer::compute_sample_weights(
                        kernel,
                        kernel_width);
   log_info("Compute dist and weights finished");
+
+//  // for debug
+//  auto* dec_weights = new EncodedNumber[selected_sample_size];
+//  party.collaborative_decrypt(encrypted_weights, dec_weights, selected_sample_size, ACTIVE_PARTY_ID);
+//  for (int i = 0; i < selected_sample_size; i++) {
+//    double x;
+//    dec_weights[i].decode(x);
+//    log_info("[compute_sample_weights]: dec_weights[" + std::to_string(i) + "] = " + std::to_string(x));
+//  }
+//  delete [] dec_weights;
 
   //  6. write the encrypted sample weights to the sample_weights_file
   write_encoded_number_array_to_file(encrypted_weights,
@@ -501,7 +512,10 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
                                              int class_id,
                                              const std::string &interpret_model_name,
                                              const std::string &interpret_model_param,
-                                             const std::string &explanation_report) {
+                                             const std::string &explanation_report,
+                                             int is_distributed,
+                                             int distributed_role,
+                                             Worker* worker) {
   // for interpret model training, do the following steps:
   //  1. read the selected_features_file to get the training data (the first row should be
   //      the origin data to be explained)
@@ -533,8 +547,7 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
                                  cur_sample_size,
                                  sample_weights_file);
 
-  //  4. loop for class_num (currently num_top_labels is reserved for selecting labels to explain)
-  //    4.1. prepare the information for invoking the corresponding training API
+  //  4. prepare the information for invoking the corresponding training API
   // extract the k-th model predictions
   std::vector<std::vector<double>> wrap_explanations;
   auto* kth_predictions = new EncodedNumber[cur_sample_size];
@@ -547,7 +560,10 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
                                                        encrypted_weights,
                                                        cur_sample_size,
                                                        interpret_model_name,
-                                                       interpret_model_param);
+                                                       interpret_model_param,
+                                                       is_distributed,
+                                                       distributed_role,
+                                                       worker);
 
   //  5. return the result for display and save the explanations to the report
   wrap_explanations.push_back(explanations);
@@ -559,6 +575,8 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
   delete [] encrypted_predictions;
   delete [] encrypted_weights;
   delete [] kth_predictions;
+
+  return explanations;
 }
 
 std::vector<double> LimeExplainer::explain_one_label(
@@ -568,7 +586,10 @@ std::vector<double> LimeExplainer::explain_one_label(
     EncodedNumber* sample_weights,
     int num_samples,
     const std::string &interpret_model_name,
-    const std::string &interpret_model_param) {
+    const std::string &interpret_model_param,
+    int is_distributed,
+    int distributed_role,
+    Worker* worker) {
   // for explaining one label, we do the following steps:
   //  1. given the interpret_model_name and interpret_model_param, init the corresponding builder
   //  2. invoke the train function directly (need to make sure that it supports sample_weights)
@@ -585,7 +606,10 @@ std::vector<double> LimeExplainer::explain_one_label(
           interpret_model_param,
           train_data,
           predictions,
-          sample_weights);
+          sample_weights,
+          is_distributed,
+          distributed_role,
+          worker);
       break;
     }
     case falcon::DT: {
@@ -605,23 +629,29 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
     const std::string &linear_reg_param_str,
     const std::vector<std::vector<double>>& train_data,
     EncodedNumber *predictions,
-    EncodedNumber *sample_weights) {
+    EncodedNumber *sample_weights,
+    int is_distributed,
+    int distributed_role,
+    Worker* worker) {
+  std::vector<double> local_explanations;
   // deserialize linear regression params
   LinearRegressionParams linear_reg_params;
-  // create for debug
-  linear_reg_params.batch_size = 8;
-  linear_reg_params.max_iteration = 100;
-  linear_reg_params.converge_threshold = 0.0001;
-  linear_reg_params.with_regularization = true;
-  linear_reg_params.alpha = 0.1;
-  linear_reg_params.learning_rate = 0.1;
-  linear_reg_params.decay = 0.1;
-  linear_reg_params.penalty = "l2";
-  linear_reg_params.optimizer = "sgd";
-  linear_reg_params.metric = "mse";
-  linear_reg_params.dp_budget = 0.1;
-  linear_reg_params.fit_bias = true;
-  // deserialize_lir_params(linear_reg_params, linear_reg_param_str);
+  //  // create for debug
+  //  linear_reg_params.batch_size = 8;
+  //  linear_reg_params.max_iteration = 100;
+  //  linear_reg_params.converge_threshold = 0.0001;
+  //  linear_reg_params.with_regularization = true;
+  //  linear_reg_params.alpha = 0.1;
+  //  linear_reg_params.learning_rate = 0.1;
+  //  linear_reg_params.decay = 0.1;
+  //  linear_reg_params.penalty = "l2";
+  //  linear_reg_params.optimizer = "sgd";
+  //  linear_reg_params.metric = "mse";
+  //  linear_reg_params.dp_budget = 0.1;
+  //  linear_reg_params.fit_bias = true;
+
+  std::string linear_reg_param_pb_str = base64_decode_to_pb_string(linear_reg_param_str);
+  deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);
   log_linear_regression_params(linear_reg_params);
 
   // train a lime linear regression model
@@ -640,24 +670,37 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
     party.setter_feature_num(++weight_size);
   }
 
-  LinearRegressionBuilder linear_reg_builder(linear_reg_params,
-                                             weight_size,
-                                             used_train_data,
-                                             dummy_test_data,
-                                             dummy_train_labels,
-                                             dummy_test_labels,
-                                             dummy_train_accuracy,
-                                             dummy_test_accuracy);
-  log_info("Init linear regression builder finished");
+  if (is_distributed == 0) {
 
-  linear_reg_builder.lime_train(party, true, predictions,
-                                true, sample_weights);
-  log_info("Train lime linear regression model finished.");
+    LinearRegressionBuilder linear_reg_builder(linear_reg_params,
+                                               weight_size,
+                                               used_train_data,
+                                               dummy_test_data,
+                                               dummy_train_labels,
+                                               dummy_test_labels,
+                                               dummy_train_accuracy,
+                                               dummy_test_accuracy);
+    log_info("Init linear regression builder finished");
 
-  // decrypt the model weights and return
-  std::vector<double> local_explanations =
-      linear_reg_builder.linear_reg_model.display_weights(party);
-  log_info("Decrypt and display local explanations finished");
+    linear_reg_builder.lime_train(party, true, predictions,
+                                  true, sample_weights);
+    log_info("Train lime linear regression model finished.");
+    // decrypt the model weights and return
+    local_explanations =
+        linear_reg_builder.linear_reg_model.display_weights(party);
+    log_info("Decrypt and display local explanations finished");
+  }
+
+  // is_distributed == 1 and distributed_role = 0 (parameter server)
+  if (is_distributed == 1 && distributed_role == 0) {
+
+  }
+
+  // is_distributed == 1 and distributed_role = 1 (worker)
+  if (is_distributed == 1 && distributed_role == 1) {
+
+  }
+
   return local_explanations;
 }
 
@@ -667,18 +710,22 @@ void lime_comp_pred(Party party, const std::string& params_str) {
   LimeCompPredictionParams comp_prediction_params;
   // set the values for local debug
   std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
-  comp_prediction_params.original_model_name = "logistic_regression";
-  comp_prediction_params.original_model_saved_file = path_prefix + "/log_reg/saved_model.pb";
-  comp_prediction_params.model_type = "classification";
-  comp_prediction_params.class_num = 2;
-  comp_prediction_params.explain_instance_idx = 0;
-  comp_prediction_params.sample_around_instance = true;
-  comp_prediction_params.num_total_samples = 1000;
-  comp_prediction_params.sampling_method = "gaussian";
-  comp_prediction_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
-  comp_prediction_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
+//  comp_prediction_params.original_model_name = "logistic_regression";
+//  comp_prediction_params.original_model_saved_file = path_prefix + "/log_reg/saved_model.pb";
+//  comp_prediction_params.model_type = "classification";
+//  comp_prediction_params.class_num = 2;
+//  comp_prediction_params.explain_instance_idx = 0;
+//  comp_prediction_params.sample_around_instance = true;
+//  comp_prediction_params.num_total_samples = 1000;
+//  comp_prediction_params.sampling_method = "gaussian";
+//  comp_prediction_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
+//  comp_prediction_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
 
-  // deserialize_lime_comp_pred_params(comp_prediction_params, params_str);
+  std::string comp_pred_params_str = base64_decode_to_pb_string(params_str);
+  deserialize_lime_comp_pred_params(comp_prediction_params, comp_pred_params_str);
+  comp_prediction_params.original_model_saved_file = path_prefix + comp_prediction_params.original_model_saved_file;
+  comp_prediction_params.generated_sample_file = path_prefix + comp_prediction_params.generated_sample_file;
+  comp_prediction_params.computed_prediction_file = path_prefix + comp_prediction_params.computed_prediction_file;
   log_info("Deserialize the lime comp_prediction params");
 
   // 2. generate random samples
@@ -723,7 +770,7 @@ void lime_comp_pred(Party party, const std::string& params_str) {
                         delimiter,
                         comp_prediction_params.generated_sample_file);
   write_encoded_number_matrix_to_file(predictions,
-                                      num_total_samples,
+                                      cur_sample_size,
                                       class_num,
                                       comp_prediction_params.computed_prediction_file);
   log_info("Save the generated samples and predictions to file");
@@ -742,21 +789,26 @@ void lime_comp_weight(Party party, const std::string& params_str) {
   LimeCompWeightsParams comp_weights_params;
   // set the values for local debug
   std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
-  comp_weights_params.explain_instance_idx = 0;
-  comp_weights_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
-  comp_weights_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
-  comp_weights_params.is_precompute = false;
-  comp_weights_params.num_samples = 1000;
-  comp_weights_params.class_num = 2;
-  comp_weights_params.distance_metric = "euclidean";
-  comp_weights_params.kernel = "exponential";
-  comp_weights_params.kernel_width = 0.75;
-  comp_weights_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
-  comp_weights_params.selected_samples_file = path_prefix + "/log_reg/selected_sampled_data.txt";
-  comp_weights_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
+//  comp_weights_params.explain_instance_idx = 0;
+//  comp_weights_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
+//  comp_weights_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
+//  comp_weights_params.is_precompute = false;
+//  comp_weights_params.num_samples = 1000;
+//  comp_weights_params.class_num = 2;
+//  comp_weights_params.distance_metric = "euclidean";
+//  comp_weights_params.kernel = "exponential";
+//  comp_weights_params.kernel_width = 0.75;
+//  comp_weights_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
+//  comp_weights_params.selected_samples_file = path_prefix + "/log_reg/selected_sampled_data.txt";
+//  comp_weights_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
 
-
-  // deserialize_lime_comp_weights_params(comp_weights_params, params_str);
+  std::string comp_weight_params_str = base64_decode_to_pb_string(params_str);
+  deserialize_lime_comp_weights_params(comp_weights_params, comp_weight_params_str);
+  comp_weights_params.generated_sample_file = path_prefix + comp_weights_params.generated_sample_file;
+  comp_weights_params.computed_prediction_file = path_prefix + comp_weights_params.computed_prediction_file;
+  comp_weights_params.sample_weights_file = path_prefix + comp_weights_params.sample_weights_file;
+  comp_weights_params.selected_samples_file = path_prefix + comp_weights_params.selected_samples_file;
+  comp_weights_params.selected_predictions_file = path_prefix + comp_weights_params.selected_predictions_file;
   log_info("Deserialize the lime comp_weights params");
 
   // call lime_explainer compute_sample_weights function
@@ -799,24 +851,33 @@ void lime_feat_sel(Party party, const std::string& params_str) {
 }
 
 
-void lime_interpret(Party party, const std::string& params_str) {
+void lime_interpret(Party party, const std::string& params_str,
+                    int is_distributed,
+                    int distributed_role,
+                    Worker* worker) {
   log_info("Begin to interpret using lime");
   // 1. deserialize the LimeInterpretParams
   LimeInterpretParams interpret_params;
   // set the values for local debug
   std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
-  interpret_params.selected_data_file = path_prefix + "/log_reg/selected_sampled_data.txt";
-  interpret_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
-  interpret_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
-  interpret_params.num_samples = 1000;
-  interpret_params.class_num = 2;
-  interpret_params.class_id = 0;
-  interpret_params.interpret_model_name = "linear_regression";
-  interpret_params.interpret_model_param = "reserved";
-  interpret_params.explanation_report = path_prefix + "/log_reg/exp_report.txt";
+//  interpret_params.selected_data_file = path_prefix + "/log_reg/selected_sampled_data.txt";
+//  interpret_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
+//  interpret_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
+//  interpret_params.num_samples = 1000;
+//  interpret_params.class_num = 2;
+//  interpret_params.class_id = 0;
+//  interpret_params.interpret_model_name = "linear_regression";
+//  interpret_params.interpret_model_param = "reserved";
+//  interpret_params.explanation_report = path_prefix + "/log_reg/exp_report.txt";
 
-  // deserialize_lime_interpret_params(interpret_params, params_str);
+  std::string interpret_params_str = base64_decode_to_pb_string(params_str);
+  deserialize_lime_interpret_params(interpret_params, interpret_params_str);
+  interpret_params.selected_data_file = path_prefix + interpret_params.selected_data_file;
+  interpret_params.selected_predictions_file = path_prefix + interpret_params.selected_predictions_file;
+  interpret_params.sample_weights_file = path_prefix + interpret_params.sample_weights_file;
+  interpret_params.explanation_report = path_prefix + interpret_params.explanation_report;
   log_info("Deserialize the lime interpret params");
+  log_info("[lime_interpret]: interpret_params[class_id] = " + std::to_string(interpret_params.class_id));
 
   // 2. create the LimeExplainer instance and call explain instance
   LimeExplainer lime_explainer;
@@ -829,13 +890,31 @@ void lime_interpret(Party party, const std::string& params_str) {
                            interpret_params.class_id,
                            interpret_params.interpret_model_name,
                            interpret_params.interpret_model_param,
-                           interpret_params.explanation_report);
+                           interpret_params.explanation_report,
+                           is_distributed,
+                           distributed_role,
+                           worker);
 
   // 3. print the explanation
   log_info("The explanation for class" + std::to_string(interpret_params.class_id) + " is: ");
   for (int i = 0; i < explanation.size(); i++) {
     log_info("explanation " + std::to_string(i) + " = " + std::to_string(explanation[i]));
   }
+}
+
+
+void launch_lime_interpret_ps(Party party,
+                              const std::string& params_str,
+                              const std::string& ps_network_config_pb_str) {
+
+}
+
+
+void launch_lime_interpret_worker(Party party,
+                                  const std::string& params_str,
+                                  int is_distributed,
+                                  Worker* worker) {
+
 }
 
 

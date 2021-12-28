@@ -23,8 +23,8 @@ class LinearRegParameterServer : public LinearParameterServer{
  private:
   // LR model builder
   LinearRegressionBuilder alg_builder;
-  // party
-  Party party;
+//  // party
+//  Party party;
  public:
   LinearRegParameterServer(const LinearRegressionBuilder& m_alg_builder,
                           const Party& m_party,

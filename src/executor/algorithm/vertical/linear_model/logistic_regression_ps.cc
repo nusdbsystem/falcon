@@ -31,7 +31,13 @@ LogRegParameterServer::LogRegParameterServer(
         const Party& m_party,
         const string &ps_network_config_pb_str):
         LinearParameterServer(m_party, ps_network_config_pb_str),
-        alg_builder(m_alg_builder) {}
+        alg_builder(m_alg_builder) {
+  log_info("[LogRegParameterServer::LogRegParameterServer]: constructor. Test party's content.");
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  log_info("[LogRegParameterServer::LogRegParameterServer]: okay.");
+  djcs_t_free_public_key(phe_pub_key);
+}
 
 LogRegParameterServer::LogRegParameterServer(
     const Party &m_party,
@@ -43,11 +49,12 @@ LogRegParameterServer::~LogRegParameterServer() = default;
 void LogRegParameterServer::distributed_train(){
 
   // step 1: init encrypted local weights
-  // (here use 3 * precision for consistence in the following)
-  int encrypted_weights_precision = 3 * PHE_FIXED_POINT_PRECISION;
+  // (here use precision for consistence in the following)
+  int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
 
   // create encrypted weight and store it to alg_builder 's local_weight
+  this->alg_builder.log_reg_model.sync_up_weight_sizes(party);
   this->alg_builder.init_encrypted_weights(this->party, encrypted_weights_precision);
 
   // record training data ids in training_data_indexes for iteratively batch selection
@@ -175,8 +182,13 @@ void launch_log_reg_parameter_server(
       testing_accuracy);
 
   log_info("Init logistic regression model");
+  log_info("[launch_log_reg_ps]: test party's content.");
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party->getter_phe_pub_key(phe_pub_key);
+  log_info("[launch_log_reg_ps]: okay.");
 
   auto ps = new LogRegParameterServer(*log_reg_model_builder, *party, ps_network_config_pb_str);
+  djcs_t_free_public_key(phe_pub_key);
 
   // here need to send the train/test data/labels to workers
   // also, need to send the phe keys to workers

@@ -64,10 +64,6 @@ data/dataset/breast_cancer_data/client0/phe_keys
 data/dataset/breast_cancer_data/client1/phe_keys
 data/dataset/breast_cancer_data/client2/phe_keys
 
-exps/breast_cancer/client0/log_reg/saved_model.pb
-exps/breast_cancer/client1/log_reg/saved_model.pb
-exps/breast_cancer/client2/log_reg/saved_model.pb
-
 data/dataset/breast_cancer_data/client0/report.txt
 data/dataset/breast_cancer_data/client1/report.txt
 data/dataset/breast_cancer_data/client2/report.txt
@@ -75,10 +71,6 @@ data/dataset/breast_cancer_data/client2/report.txt
 data/dataset/energy_prediction_data/client0/phe_keys
 data/dataset/energy_prediction_data/client1/phe_keys
 data/dataset/energy_prediction_data/client2/phe_keys
-
-data/dataset/energy_prediction_data/client0/saved_model.pb
-data/dataset/energy_prediction_data/client1/saved_model.pb
-data/dataset/energy_prediction_data/client2/saved_model.pb
 
 data/dataset/energy_prediction_data/client0/report.txt
 data/dataset/energy_prediction_data/client1/report.txt
@@ -141,4 +133,3 @@ src/executor/include/message/*.cc
 src/executor/include/message/*.h
 
 tools/ml_baseline/python/linearreg_sklearn/mlscratch/
-exps/

@@ -116,13 +116,13 @@ func (master *Master) dispatchPreProcessingTask(wg *sync.WaitGroup) {
  * @Param
  * @return
  **/
-func (master *Master) dispatchModelTrainingTask(wg *sync.WaitGroup) {
+func (master *Master) dispatchGeneralTask(wg *sync.WaitGroup, taskName string) {
 	master.Lock()
 	for _, worker := range master.workers {
 		wg.Add(1)
 		go func(addr string) {
 			defer logger.HandleErrors()
-			master.dispatchTask(addr, common.ModelTrainSubTask, "DoTask", wg)
+			master.dispatchTask(addr, taskName, "DoTask", wg)
 		}(worker.Addr)
 	}
 

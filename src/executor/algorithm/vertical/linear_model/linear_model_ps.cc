@@ -27,7 +27,13 @@ LinearParameterServer::LinearParameterServer(
 
 LinearParameterServer::LinearParameterServer(
     const Party &m_party, const std::string &ps_network_config_pb_str) :
-    ParameterServer(ps_network_config_pb_str), party(m_party) {}
+    ParameterServer(ps_network_config_pb_str), party(m_party) {
+  log_info("[LinearParameterServer::LinearParameterServer]: constructor. Test party's content.");
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  log_info("[LinearParameterServer::LinearParameterServer]: okay.");
+  djcs_t_free_public_key(phe_pub_key);
+}
 
 LinearParameterServer::~LinearParameterServer() = default;
 

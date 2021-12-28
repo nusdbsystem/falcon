@@ -137,6 +137,10 @@ const (
 	MpcSubTask                 = "mpc"
 	PreProcSubTask             = "pre_processing"
 	ModelTrainSubTask          = "model_training"
+	LimePredSubTask            = "lime_pred_task"
+	LimeWeightSubTask          = "lime_weight_task"
+	LimeFeatureSubTask         = "lime_feature_task"
+	LimeInterpretSubTask       = "lime_interpret_task"
 	RetrieveModelReportSubTask = "model_report_retrieve"
 
 	ActiveParty  = "active"
@@ -150,10 +154,14 @@ const (
 	HorizontalFl = "horizontal"
 	VerticalFl   = "vertical"
 
-	LogisticRegressAlgName  = "logistic_regression"
-	DecisionTreeAlgName     = "decision_tree"
-	RandomForestAlgName     = "random_forest"
-	LinearRegressionAlgName = "linear_regression"
+	LogisticRegressAlgName    = "logistic_regression"
+	DecisionTreeAlgName       = "decision_tree"
+	RandomForestAlgName       = "random_forest"
+	LinearRegressionAlgName   = "linear_regression"
+	LimeCompPredictionAlgName = "lime_compute_prediction"
+	LimeCompWeightsAlgName    = "lime_compute_weights"
+	LimeFeatSelAlgName        = "lime_feature_selection"
+	LimeInterpretAlgName      = "lime_interpret"
 )
 
 // Ports used on mpc-executor communication, which is hardcoded in executor now

@@ -381,12 +381,49 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
   // here compute cipher multiplication, and set the dest precision to loss_i.precision
   // [loss_i] = [loss_i] * [sample_weights_i]
   int loss_precision = std::abs(encrypted_batch_losses[0].getter_exponent());
+  int sample_weight_precision = std::abs(batch_sample_weights[0].getter_exponent());
+  log_info("[lime_backward_computation]: loss_precision = " + std::to_string(loss_precision));
+  log_info("[lime_backward_computation]: sample_weight_precision = " + std::to_string(sample_weight_precision));
+
+//  for debug
+//  auto* batch_losses = new EncodedNumber[cur_batch_size];
+//  auto* batch_weights = new EncodedNumber[cur_batch_size];
+//  auto* updated_batch_losses = new EncodedNumber[cur_batch_size];
+//  party.collaborative_decrypt(encrypted_batch_losses, batch_losses,
+//                              cur_batch_size, ACTIVE_PARTY_ID);
+//  party.collaborative_decrypt(batch_sample_weights, batch_weights,
+//                              cur_batch_size, ACTIVE_PARTY_ID);
+//  for (int i = 0; i < cur_batch_size; i++) {
+//    double l, w;
+//    batch_losses[i].decode(l);
+//    batch_weights[i].decode(w);
+//    log_info("[lime_backward_computation]: batch_losses["
+//             "" + std::to_string(i) + "] = " + std::to_string(l));
+//    log_info("[lime_backward_computation]: batch_weights["
+//             "" + std::to_string(i) + "] = " + std::to_string(w));
+//  }
+
+
   party.ciphers_multi(encrypted_batch_losses,
                       encrypted_batch_losses,
                       batch_sample_weights,
                       cur_batch_size,
                       ACTIVE_PARTY_ID);
   log_info("[lime_backward_computation]: finish compute cipher multiplication");
+
+//  // for debug
+//  party.collaborative_decrypt(encrypted_batch_losses, updated_batch_losses,
+//                              cur_batch_size, ACTIVE_PARTY_ID);
+//  for (int i = 0; i < cur_batch_size; i++) {
+//    double ul;
+//    updated_batch_losses[i].decode(ul);
+//    log_info("[lime_backward_computation]: updated_batch_losses["
+//             "" + std::to_string(i) + "] = " + std::to_string(ul));
+//  }
+//  delete [] batch_losses;
+//  delete [] batch_weights;
+//  delete [] updated_batch_losses;
+
   party.truncate_ciphers_precision(encrypted_batch_losses,
                                    cur_batch_size,
                                    ACTIVE_PARTY_ID,
@@ -1496,7 +1533,7 @@ void train_linear_regression(
     const std::string& model_save_file,
     const std::string& model_report_file,
     int is_distributed_train, Worker* worker) {
-  log_info("Run train_logistic_regression");
+  log_info("Run train_linear_regression");
   log_info("is_distributed_train = " + std::to_string(is_distributed_train));
 
   LinearRegressionParams params;

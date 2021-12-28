@@ -44,13 +44,15 @@ void LinearRegParameterServer::distributed_train(){
 
   // step 1: init encrypted local weights
   // (here use 3 * precision for consistence in the following)
-  int encrypted_weights_precision = 3 * PHE_FIXED_POINT_PRECISION;
+  int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
 
   // create encrypted weight and store it to alg_builder 's local_weight
+  this->alg_builder.linear_reg_model.sync_up_weight_sizes(party);
   init_encrypted_model_weights(party, this->alg_builder.linear_reg_model.party_weight_sizes,
                          this->alg_builder.linear_reg_model.local_weights,
                          encrypted_weights_precision);
+  log_info("current channel size = " + std::to_string(this->worker_channels.size()));
 
   // record training data ids in training_data_indexes for iteratively batch selection
   std::vector<int> training_data_indexes;
@@ -144,7 +146,7 @@ void launch_linear_reg_parameter_server(
   LinearRegressionParams params;
   deserialize_lir_params(params, params_pb_str);
   log_info("deserialize lr params on ps success");
-  log_info("PS Init logistic regression model");
+  log_info("PS Init linear regression model");
   log_linear_regression_params(params);
   google::FlushLogFiles(google::INFO);
 
@@ -176,18 +178,23 @@ void launch_linear_reg_parameter_server(
       training_accuracy,
       testing_accuracy);
 
-  log_info("Init logistic regression model");
+  log_info("[launch_linear_reg_parameter_server]: init linear regression model");
 
   auto ps = new LinearRegParameterServer(*linear_reg_model_builder, *party, ps_network_config_pb_str);
+  log_info("[launch_linear_reg_parameter_server]: Init ps finished.");
 
   // here need to send the train/test data/labels to workers
   // also, need to send the phe keys to workers
   // accordingly, workers have to receive and deserialize these
   ps->broadcast_train_test_data(training_data, testing_data, training_labels, testing_labels);
+  log_info("[launch_linear_reg_parameter_server]: broadcast train test data finished.");
+
   ps->broadcast_phe_keys();
+  log_info("[launch_linear_reg_parameter_server]: broadcast phe keys finished.");
 
   // start to train the task in a distributed way
   ps->distributed_train();
+  log_info("[launch_linear_reg_parameter_server]: distributed train finished.");
 
   // evaluate the model on the training and testing datasets
   ps->distributed_eval(falcon::TRAIN, model_report_file);

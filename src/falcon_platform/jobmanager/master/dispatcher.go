@@ -82,10 +82,101 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 		}
 
 		// Run model_training
-		master.dispatchModelTrainingTask(&wg)
+		master.dispatchGeneralTask(&wg, common.ModelTrainSubTask)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
+	}
+
+	// 3.4 Run LimePred if there is the task
+	if dslOjb.Tasks.LimePred.AlgorithmName != "" {
+
+		// Run mpc
+		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimePred.MpcAlgorithmName)
+		if ok := master.isSuccessful(); !ok {
+			return
+		}
+
+		// Run model_training
+		master.dispatchGeneralTask(&wg, common.LimePredSubTask)
+		if ok := master.isSuccessful(); !ok {
+			return
+		}
+	}
+
+	// 3.5 Run LimeWeight if there is the task
+	if dslOjb.Tasks.LimeWeight.AlgorithmName != "" {
+
+		// Run mpc
+		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeWeight.MpcAlgorithmName)
+		if ok := master.isSuccessful(); !ok {
+			return
+		}
+
+		// Run model_training
+		master.dispatchGeneralTask(&wg, common.LimeWeightSubTask)
+		if ok := master.isSuccessful(); !ok {
+			return
+		}
+	}
+
+	// 3.6 Run LimeFeature and LimeInterpret if there is the task
+	if dslOjb.Tasks.LimeFeature.AlgorithmName != "" || dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
+
+		// get current class number
+		var classNum int32
+		if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
+			classNum = dslOjb.Tasks.LimeFeature.ClassNum
+		} else if dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
+			classNum = dslOjb.Tasks.LimeInterpret.ClassNum
+		}
+
+		// for each classID, assign tasks Serially
+		var selectFeatureFile = ""
+		var classId int32
+		for classId = 0; classId < classNum; classId++ {
+
+			if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
+
+				// generate SerializedAlgorithmConfig
+				dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
+					common.GenerateLimeFeatSelParams(dslOjb.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, classId)
+
+				// Run mpc
+				master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeFeature.MpcAlgorithmName)
+				if ok := master.isSuccessful(); !ok {
+					return
+				}
+
+				// Run model_training
+				master.dispatchGeneralTask(&wg, common.LimeFeatureSubTask + dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig)
+				if ok := master.isSuccessful(); !ok {
+					return
+				}
+			}
+
+			if dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
+
+				// generate SerializedAlgorithmConfig
+				dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
+					common.GenerateLimeInterpretParams(dslOjb.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, classId, selectFeatureFile)
+
+				// Run mpc
+				master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName)
+				if ok := master.isSuccessful(); !ok {
+					return
+				}
+
+				// Run model_training
+				master.dispatchGeneralTask(&wg, common.LimeInterpretSubTask + dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig)
+				if ok := master.isSuccessful(); !ok {
+					return
+				}
+			}
+		}
+
+		//todo: for each classID, assign tasks Parallelly?
+
 	}
 
 	// 3.5 more tasks later? add later

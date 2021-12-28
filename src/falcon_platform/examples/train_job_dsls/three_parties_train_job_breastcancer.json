@@ -43,7 +43,7 @@
   },
   "tasks": {
     "model_training": {
-      "mpc_algorithm_name": "linear_regression",
+      "mpc_algorithm_name": "logistic_regression",
       "algorithm_name": "logistic_regression",
       "input_configs": {
         "data_input": {
@@ -52,7 +52,7 @@
         },
         "algorithm_config": {
           "batch_size": 8,
-          "max_iteration": 100,
+          "max_iteration": 10,
           "convergence_threshold": 0.0001,
           "with_regularization": false,
           "alpha": 0.1,
