@@ -14,6 +14,7 @@
 #include <Networking/ssl_sockets.h>
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
+#include <falcon/algorithm/vertical/linear_model/linear_regression_ps.h>
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/utils/base64.h>
@@ -513,9 +514,10 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
                                              const std::string &interpret_model_name,
                                              const std::string &interpret_model_param,
                                              const std::string &explanation_report,
+                                             const std::string& ps_network_str,
                                              int is_distributed,
                                              int distributed_role,
-                                             Worker* worker) {
+                                             int worker_id) {
   // for interpret model training, do the following steps:
   //  1. read the selected_features_file to get the training data (the first row should be
   //      the origin data to be explained)
@@ -561,9 +563,10 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
                                                        cur_sample_size,
                                                        interpret_model_name,
                                                        interpret_model_param,
+                                                       ps_network_str,
                                                        is_distributed,
                                                        distributed_role,
-                                                       worker);
+                                                       worker_id);
 
   //  5. return the result for display and save the explanations to the report
   wrap_explanations.push_back(explanations);
@@ -587,9 +590,10 @@ std::vector<double> LimeExplainer::explain_one_label(
     int num_samples,
     const std::string &interpret_model_name,
     const std::string &interpret_model_param,
+    const std::string& ps_network_str,
     int is_distributed,
     int distributed_role,
-    Worker* worker) {
+    int worker_id) {
   // for explaining one label, we do the following steps:
   //  1. given the interpret_model_name and interpret_model_param, init the corresponding builder
   //  2. invoke the train function directly (need to make sure that it supports sample_weights)
@@ -607,9 +611,10 @@ std::vector<double> LimeExplainer::explain_one_label(
           train_data,
           predictions,
           sample_weights,
+          ps_network_str,
           is_distributed,
           distributed_role,
-          worker);
+          worker_id);
       break;
     }
     case falcon::DT: {
@@ -630,9 +635,10 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
     const std::vector<std::vector<double>>& train_data,
     EncodedNumber *predictions,
     EncodedNumber *sample_weights,
+    const std::string& ps_network_str,
     int is_distributed,
     int distributed_role,
-    Worker* worker) {
+    int worker_id) {
   std::vector<double> local_explanations;
   // deserialize linear regression params
   LinearRegressionParams linear_reg_params;
@@ -671,7 +677,6 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
   }
 
   if (is_distributed == 0) {
-
     LinearRegressionBuilder linear_reg_builder(linear_reg_params,
                                                weight_size,
                                                used_train_data,
@@ -681,8 +686,8 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
                                                dummy_train_accuracy,
                                                dummy_test_accuracy);
     log_info("Init linear regression builder finished");
-
-    linear_reg_builder.lime_train(party, true, predictions,
+    linear_reg_builder.lime_train(party,
+                                  true, predictions,
                                   true, sample_weights);
     log_info("Train lime linear regression model finished.");
     // decrypt the model weights and return
@@ -693,12 +698,48 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
 
   // is_distributed == 1 and distributed_role = 0 (parameter server)
   if (is_distributed == 1 && distributed_role == 0) {
-
+    log_info("************* Distributed LIME Interpret *************");
+    // init linear_reg instance
+    auto linear_reg_model_builder = new LinearRegressionBuilder (
+        linear_reg_params,
+        weight_size,
+        used_train_data,
+        dummy_test_data,
+        dummy_train_labels,
+        dummy_test_labels,
+        dummy_train_accuracy,
+        dummy_test_accuracy);
+    log_info("[lime_linear_reg_train ps]: init linear regression model");
+    auto ps = new LinearRegParameterServer(*linear_reg_model_builder,
+                                           party,
+                                           ps_network_str);
+    log_info("[lime_linear_reg_train ps]: Init ps finished.");
+    // start to train the task in a distributed way
+    ps->distributed_lime_train(true, predictions,
+                               true, sample_weights);
+    log_info("[lime_linear_reg_train ps]: distributed train finished.");
   }
 
   // is_distributed == 1 and distributed_role = 1 (worker)
   if (is_distributed == 1 && distributed_role == 1) {
+    log_info("************* Distributed LIME Interpret *************");
+    // init linear_reg instance
+    auto linear_reg_model_builder = new LinearRegressionBuilder (
+        linear_reg_params,
+        weight_size,
+        used_train_data,
+        dummy_test_data,
+        dummy_train_labels,
+        dummy_test_labels,
+        dummy_train_accuracy,
+        dummy_test_accuracy);
+    // worker is created to communicate with parameter server
+    auto worker = new Worker(ps_network_str, worker_id);
 
+    log_info("[lime_linear_reg_train worker]: init linear regression model");
+    linear_reg_model_builder->distributed_lime_train(party, *worker,
+                                                     true, predictions,
+                                                     true, sample_weights);
   }
 
   return local_explanations;
@@ -850,11 +891,11 @@ void lime_feat_sel(Party party, const std::string& params_str) {
   log_info("Finish feature selection");
 }
 
-
 void lime_interpret(Party party, const std::string& params_str,
+                    const std::string& ps_network_str,
                     int is_distributed,
                     int distributed_role,
-                    Worker* worker) {
+                    int worker_id) {
   log_info("Begin to interpret using lime");
   // 1. deserialize the LimeInterpretParams
   LimeInterpretParams interpret_params;
@@ -891,9 +932,10 @@ void lime_interpret(Party party, const std::string& params_str,
                            interpret_params.interpret_model_name,
                            interpret_params.interpret_model_param,
                            interpret_params.explanation_report,
+                           ps_network_str,
                            is_distributed,
                            distributed_role,
-                           worker);
+                           worker_id);
 
   // 3. print the explanation
   log_info("The explanation for class" + std::to_string(interpret_params.class_id) + " is: ");
@@ -901,22 +943,6 @@ void lime_interpret(Party party, const std::string& params_str,
     log_info("explanation " + std::to_string(i) + " = " + std::to_string(explanation[i]));
   }
 }
-
-
-void launch_lime_interpret_ps(Party party,
-                              const std::string& params_str,
-                              const std::string& ps_network_config_pb_str) {
-
-}
-
-
-void launch_lime_interpret_worker(Party party,
-                                  const std::string& params_str,
-                                  int is_distributed,
-                                  Worker* worker) {
-
-}
-
 
 void spdz_lime_computation(int party_num,
                            int party_id,

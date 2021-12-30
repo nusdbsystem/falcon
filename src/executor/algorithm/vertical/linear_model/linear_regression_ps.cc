@@ -43,7 +43,7 @@ LinearRegParameterServer::~LinearRegParameterServer() = default;
 void LinearRegParameterServer::distributed_train(){
 
   // step 1: init encrypted local weights
-  // (here use 3 * precision for consistence in the following)
+  // (here use precision for consistence in the following)
   int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
 
@@ -52,6 +52,64 @@ void LinearRegParameterServer::distributed_train(){
   init_encrypted_model_weights(party, this->alg_builder.linear_reg_model.party_weight_sizes,
                          this->alg_builder.linear_reg_model.local_weights,
                          encrypted_weights_precision);
+  log_info("current channel size = " + std::to_string(this->worker_channels.size()));
+
+  // record training data ids in training_data_indexes for iteratively batch selection
+  std::vector<int> training_data_indexes;
+  for (int i = 0; i < this->alg_builder.getter_training_data().size(); i++) {
+    training_data_indexes.push_back(i);
+  }
+  std::vector<std::vector<int>> batch_iter_indexes = precompute_iter_batch_idx(this->alg_builder.batch_size,
+                                                                               this->alg_builder.max_iteration,
+                                                                               training_data_indexes);
+
+  log_info("current channel size = " + std::to_string(this->worker_channels.size()));
+
+  for (int iter = 0; iter < this->alg_builder.max_iteration; iter++) {
+    log_info("--------PS Iteration " + std::to_string(iter) + " --------");
+    // step 2: broadcast weight
+    this->broadcast_encrypted_weights(this->alg_builder.linear_reg_model);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps broadcast_encrypted_weights successful --------");
+    // step 3: randomly select a batch of samples from training data
+    // active ps select batch idx and broadcast to passive ps
+    std::vector<int> batch_indexes = sync_batch_idx(this->party,
+                                                    this->alg_builder.batch_size,
+                                                    batch_iter_indexes[iter]);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps select_batch_idx successful --------");
+    // step 4: partition sample ids, since the partition method is deterministic
+    // all ps can do this step in its own cluster and broadcast to its own workers
+    this->partition_examples(batch_indexes);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps partition_examples successful --------");
+    // step 5: wait worker finish execution
+    auto encoded_message = this->wait_worker_complete();
+    log_info("LRParameterServer received all loss * X_{ij} from falcon_worker");
+    log_info("--------PS Iteration " + std::to_string(iter) + ", LRParameterServer received all loss * X_{ij} from falcon_worker successful --------");
+    // step 6: receive loss, and update weight
+    int weight_phe_precision = abs(this->alg_builder.linear_reg_model.local_weights[0].getter_exponent());
+    this->update_encrypted_weights(encoded_message,
+                                   this->alg_builder.linear_reg_model.weight_size,
+                                   weight_phe_precision,
+                                   this->alg_builder.linear_reg_model.local_weights);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps update_encrypted_weights successful --------");
+  }
+}
+
+void LinearRegParameterServer::distributed_lime_train(
+    bool use_encrypted_labels,
+    EncodedNumber *encrypted_true_labels,
+    bool use_sample_weights,
+    EncodedNumber *encrypted_sample_weights) {
+  // should be the same as the distributed train function (here duplicate first and then check)
+  // step 1: init encrypted local weights
+  // (here use precision for consistence in the following)
+  int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
+  int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
+
+  // create encrypted weight and store it to alg_builder 's local_weight
+  this->alg_builder.linear_reg_model.sync_up_weight_sizes(party);
+  init_encrypted_model_weights(party, this->alg_builder.linear_reg_model.party_weight_sizes,
+                               this->alg_builder.linear_reg_model.local_weights,
+                               encrypted_weights_precision);
   log_info("current channel size = " + std::to_string(this->worker_channels.size()));
 
   // record training data ids in training_data_indexes for iteratively batch selection

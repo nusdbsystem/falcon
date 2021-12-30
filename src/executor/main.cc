@@ -235,6 +235,7 @@ int main(int argc, char *argv[]) {
           case falcon::LIME_INTERPRET:
             lime_interpret(party,
                            algorithm_params_pb_str,
+                           ps_network_config_pb_str,
                            is_distributed,
                            distributed_role);
             break;
@@ -254,11 +255,10 @@ int main(int argc, char *argv[]) {
       party.init_network_channels(network_config_pb_str);
       // party.init_phe_keys(use_existing_key, key_file);
 
-      // worker is created to communicate with parameter server
-      auto worker = new Worker(ps_network_config_pb_str, worker_id);
-
       if (is_inference) {
         log_info("Execute distributed inference logic");
+        // worker is created to communicate with parameter server
+        auto worker = new Worker(ps_network_config_pb_str, worker_id);
         if (party_type == falcon::ACTIVE_PARTY) {
           // receive batch index from ps
           while (true) {
@@ -281,27 +281,36 @@ int main(int argc, char *argv[]) {
         } else {
           run_passive_server(model_save_file, party, parsed_algorithm_name);
         }
-      }else{
+        delete worker;
+      } else{
         log_info("Execute distributed training logic");
         if (distributed_role==1){
           log_info("Execute as worker");
           switch(parsed_algorithm_name) {
-            case falcon::LOG_REG:
+            case falcon::LOG_REG: {
+              // worker is created to communicate with parameter server
+              auto worker = new Worker(ps_network_config_pb_str, worker_id);
               train_logistic_regression(&party,
                                         algorithm_params_pb_str,
                                         model_save_file,
                                         model_report_file,
                                         is_distributed,
                                         worker);
+              delete worker;
               break;
-            case falcon::LINEAR_REG:
+            }
+            case falcon::LINEAR_REG: {
+              // worker is created to communicate with parameter server
+              auto worker = new Worker(ps_network_config_pb_str, worker_id);
               train_linear_regression(&party,
                                       algorithm_params_pb_str,
                                       model_save_file,
                                       model_report_file,
                                       is_distributed,
                                       worker);
+              delete worker;
               break;
+            }
             case falcon::DT:
               log_error("Type falcon::DT not implemented");
               exit(1);
@@ -315,24 +324,28 @@ int main(int argc, char *argv[]) {
               party.init_phe_keys(use_existing_key, key_file);
               lime_interpret(party,
                              algorithm_params_pb_str,
+                             ps_network_config_pb_str,
                              is_distributed,
                              distributed_role,
-                             worker);
+                             worker_id);
               break;
             }
-            default:
+            default: {
+              // worker is created to communicate with parameter server
+              auto worker = new Worker(ps_network_config_pb_str, worker_id);
               train_logistic_regression(&party,
                                         algorithm_params_pb_str,
                                         model_save_file,
                                         model_report_file,
                                         is_distributed,
                                         worker);
+              delete worker;
               break;
+            }
           }
           log_info("Finish distributed training algorithm");
         }
       }
-      delete worker;
     }
 
     // After function call

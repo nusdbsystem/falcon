@@ -1097,7 +1097,7 @@ void LinearRegressionBuilder::lime_train(Party party,
 void LinearRegressionBuilder::distributed_train(const Party &party, const Worker &worker) {
   log_info("************* Distributed Training Start *************");
   const clock_t training_start_time = clock();
-  // (here use 3 * precision for consistence in the following)
+  // (here use precision for consistence in the following)
   linear_reg_model.sync_up_weight_sizes(party);
   int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
   int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
@@ -1239,6 +1239,162 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
   log_info("Distributed Training time = " + std::to_string(training_consumed_time));
   log_info("************* Distributed Training Finished *************");
 
+}
+
+void LinearRegressionBuilder::distributed_lime_train(
+    Party party,
+    const Worker &worker,
+    bool use_encrypted_labels,
+    EncodedNumber *encrypted_true_labels,
+    bool use_sample_weights,
+    EncodedNumber *encrypted_sample_weights) {
+  log_info("************* Distributed LIME Training Start *************");
+  const clock_t training_start_time = clock();
+  // (here use precision for consistence in the following)
+  linear_reg_model.sync_up_weight_sizes(party);
+  int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
+  int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
+
+  if (optimizer != "sgd") {
+    log_error("The " + optimizer + " optimizer does not supported");
+    exit(1);
+  }
+
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+
+  for (int iter = 0; iter < max_iteration; iter++) {
+    log_info("-------- Worker Iteration " + std::to_string(iter) + " --------");
+    // step 1.1: receive weight from master, and assign to current log_reg_model.local_weights
+    std::string weight_str;
+    worker.recv_long_message_from_ps(weight_str);
+    log_info("-------- Worker Iteration " + std::to_string(iter) + ", "
+                                                                   "worker.receive weight success --------");
+
+    auto* deserialized_weight = new EncodedNumber[linear_reg_model.weight_size];
+    deserialize_encoded_number_array(deserialized_weight, linear_reg_model.weight_size, weight_str);
+    for (int i = 0; i < linear_reg_model.weight_size; i++) {
+      this->linear_reg_model.local_weights[i] = deserialized_weight[i];
+    }
+
+    // step 1.2: receive sample id from master, and assign batch_size to current log_reg_model.batch_size
+    std::string mini_batch_indexes_str;
+    worker.recv_long_message_from_ps(mini_batch_indexes_str);
+    std::vector<int> mini_batch_indexes;
+    deserialize_int_array(mini_batch_indexes, mini_batch_indexes_str);
+    // here should not record the current batch size in this->batch_size
+    // this->batch_size = mini_batch_indexes.size();
+
+    log_info("-------- "
+             "Worker Iteration "
+                 + std::to_string(iter)
+                 + ", worker.receive sample id success, batch size "
+                 + std::to_string(mini_batch_indexes.size()) + " --------");
+
+    const clock_t iter_start_time = clock();
+
+    // step 2.1: activate party send batch_indexes to other party, while other party receive them.
+    // in distributed training, passive party use the index sent by active party instead of the one sent by ps
+    // so overwrite mini_batch_indexes
+    // mini_batch_indexes = select_batch_idx(party, mini_batch_indexes);
+
+    log_info("-------- "
+             "Worker Iteration "
+                 + std::to_string(iter)
+                 + ", worker.consensus on batch ids"
+                 + " --------");
+    log_info("print mini_batch_indexes");
+    print_vector(mini_batch_indexes);
+
+    // get training data with selected batch_index
+    std::vector<std::vector<double> > mini_batch_samples;
+    for (int index : mini_batch_indexes) {
+      mini_batch_samples.push_back(training_data[index]);
+    }
+
+    // encode the training data
+    int cur_sample_size = (int) mini_batch_samples.size();
+    auto** encoded_mini_batch_samples = new EncodedNumber*[cur_sample_size];
+    for (int i = 0; i < cur_sample_size; i++) {
+      encoded_mini_batch_samples[i] = new EncodedNumber[linear_reg_model.weight_size];
+    }
+    linear_reg_model.encode_samples(party, mini_batch_samples, encoded_mini_batch_samples, plaintext_samples_precision);
+
+    log_info("-------- "
+             "Worker Iteration "
+                 + std::to_string(iter)
+                 + ", worker.encode_samples success"
+                 + " --------");
+
+    auto *predicted_labels = new EncodedNumber[cur_sample_size];
+    // compute predicted label
+    int encrypted_batch_aggregation_precision = encrypted_weights_precision + plaintext_samples_precision;
+
+    linear_reg_model.forward_computation(
+        party,
+        cur_sample_size,
+        encoded_mini_batch_samples,
+        encrypted_batch_aggregation_precision,
+        predicted_labels);
+
+    log_info("-------- "
+             "Worker Iteration "
+                 + std::to_string(iter)
+                 + ", forward computation success"
+                 + " --------");
+
+    auto encrypted_gradients = new EncodedNumber[linear_reg_model.weight_size];
+    // need to make sure that update_precision * 2 = encrypted_weights_precision
+    int update_precision = encrypted_batch_aggregation_precision;
+    lime_backward_computation(
+        party,
+        mini_batch_samples,
+        predicted_labels,
+        mini_batch_indexes,
+        encrypted_batch_aggregation_precision,
+        encrypted_true_labels,
+        use_sample_weights,
+        encrypted_sample_weights,
+        encrypted_gradients);
+
+    log_info("-------- "
+             "Worker Iteration "
+                 + std::to_string(iter)
+                 + ", backward computation success"
+                 + " --------");
+
+    // step 2.5: send encrypted gradients to ps, ps will update weight
+    std::string encrypted_gradients_str;
+    serialize_encoded_number_array(encrypted_gradients, linear_reg_model.weight_size, encrypted_gradients_str);
+    worker.send_long_message_to_ps(encrypted_gradients_str);
+
+    log_info("-------- "
+             "Worker Iteration "
+                 + std::to_string(iter)
+                 + ", send gradients to ps success"
+                 + " --------");
+
+    const clock_t iter_finish_time = clock();
+    double iter_consumed_time =
+        double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+
+    log_info("-------- The " + std::to_string(iter) + "-th "
+                                                      "iteration consumed time = " + std::to_string(iter_consumed_time));
+
+    delete [] deserialized_weight;
+    for (int i = 0; i < cur_sample_size; i++) {
+      delete [] encoded_mini_batch_samples[i];
+    }
+    delete [] predicted_labels;
+    delete [] encoded_mini_batch_samples;
+    delete [] encrypted_gradients;
+  }
+
+  const clock_t training_finish_time = clock();
+  double training_consumed_time =
+      double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  log_info("Distributed Training time = " + std::to_string(training_consumed_time));
+  log_info("************* Distributed Training Finished *************");
 }
 
 void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, const std::string &report_save_path) {

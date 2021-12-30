@@ -271,6 +271,7 @@ class LimeExplainer {
    *    linear regression or decision tree
    * @param interpret_model_param: the parameters of the model, now use json
    * @param explanation_report: the report for save the explanations
+   * @param ps_network_str: the parameters of ps network string,
    * @param is_distributed: whether use distributed interpretable model training
    * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
    * @param worker: if is_distributed = 1 and distributed_role = 1
@@ -287,9 +288,10 @@ class LimeExplainer {
       const std::string& interpret_model_name,
       const std::string& interpret_model_param,
       const std::string& explanation_report,
+      const std::string& ps_network_str = std::string(),
       int is_distributed = 0,
       int distributed_role = 0,
-      Worker* worker = nullptr);
+      int worker_id = 0);
 
   /**
    * This function explain a specific label by training a model
@@ -301,6 +303,7 @@ class LimeExplainer {
    * @param num_samples: the number of samples for training
    * @param interpret_model_name: the model to be trained
    * @param interpret_model_param: the model params to be used for training
+   * @param ps_network_str: the parameters of ps network string,
    * @param is_distributed: whether use distributed interpretable model training
    * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
    * @param worker: if is_distributed = 1 and distributed_role = 1
@@ -314,9 +317,10 @@ class LimeExplainer {
       int num_samples,
       const std::string &interpret_model_name,
       const std::string &interpret_model_param,
+      const std::string& ps_network_str = std::string(),
       int is_distributed = 0,
       int distributed_role = 0,
-      Worker* worker = nullptr);
+      int worker_id = 0);
 
   /**
    * This function trains linear regression model with encrypted predictions,
@@ -327,6 +331,7 @@ class LimeExplainer {
    * @param train_data: the plaintext train data
    * @param predictions: the encrypted model predictions
    * @param sample_weights: the encrypted sample weights
+   * @param ps_network_str: the parameters of ps network string,
    * @param is_distributed: whether use distributed interpretable model training
    * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
    * @param worker: if is_distributed = 1 and distributed_role = 1
@@ -338,9 +343,10 @@ class LimeExplainer {
       const std::vector<std::vector<double>>& train_data,
       EncodedNumber* predictions,
       EncodedNumber* sample_weights,
+      const std::string& ps_network_str = std::string(),
       int is_distributed = 0,
       int distributed_role = 0,
-      Worker* worker = nullptr);
+      int worker_id = 0);
 };
 
 /**
@@ -372,14 +378,16 @@ void lime_feat_sel(Party party, const std::string& params_str);
  *
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeInterpretParams
+ * @param ps_network_str: the parameters of ps network string,
  * @param is_distributed: whether use distributed interpretable model training
  * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
- * @param worker: if is_distributed = 1 and distributed_role = 1
+ * @param worker_id: if is_distributed = 1 and distributed_role = 1
  */
 void lime_interpret(Party party, const std::string& params_str,
+                    const std::string& ps_network_str = std::string(),
                     int is_distributed = 0,
                     int distributed_role = 0,
-                    Worker* worker = nullptr);
+                    int worker_id = 0);
 
 /**
  * spdz computation with thread,
