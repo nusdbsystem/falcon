@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
             exit(1);
           case falcon::LIME_INTERPRET:
             lime_interpret(party,
-                           algorithm_params_pb_str,
+                           algorithm_params,
                            ps_network_config_pb_str,
                            is_distributed,
                            distributed_role);
@@ -323,7 +323,7 @@ int main(int argc, char *argv[]) {
             case falcon::LIME_INTERPRET: {
               party.init_phe_keys(use_existing_key, key_file);
               lime_interpret(party,
-                             algorithm_params_pb_str,
+                             algorithm_params,
                              ps_network_config_pb_str,
                              is_distributed,
                              distributed_role,

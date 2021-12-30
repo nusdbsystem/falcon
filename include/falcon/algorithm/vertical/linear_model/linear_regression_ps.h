@@ -20,7 +20,7 @@ using namespace std;
 
 
 class LinearRegParameterServer : public LinearParameterServer{
- private:
+ public:
   // LR model builder
   LinearRegressionBuilder alg_builder;
 //  // party

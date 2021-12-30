@@ -556,6 +556,7 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
   for (int i = 0; i < cur_sample_size; i++) {
     kth_predictions[i] = encrypted_predictions[i][class_id];
   }
+  log_info("[interpret]: interpret_model_name = " + interpret_model_name);
   std::vector<double> explanations = explain_one_label(party,
                                                        selected_data,
                                                        kth_predictions,
@@ -601,7 +602,9 @@ std::vector<double> LimeExplainer::explain_one_label(
   //    TODO: what if the model is decision tree?
 
   std::vector<double> explanations;
+  log_info("[explain_one_label]: interpret_model_name = " + interpret_model_name);
   falcon::AlgorithmName algorithm_name = parse_algorithm_name(interpret_model_name);
+  log_info("[explain_one_label]: algorithm_name = " + algorithm_name);
   switch (algorithm_name) {
     case falcon::LINEAR_REG: {
       // call linear regression training
@@ -718,6 +721,12 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
     ps->distributed_lime_train(true, predictions,
                                true, sample_weights);
     log_info("[lime_linear_reg_train ps]: distributed train finished.");
+    // decrypt the model weights and return
+    local_explanations =
+        ps->alg_builder.linear_reg_model.display_weights(party);
+    log_info("Decrypt and display local explanations finished");
+    delete linear_reg_model_builder;
+    delete ps;
   }
 
   // is_distributed == 1 and distributed_role = 1 (worker)
@@ -740,6 +749,13 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
     linear_reg_model_builder->distributed_lime_train(party, *worker,
                                                      true, predictions,
                                                      true, sample_weights);
+    log_info("[lime_linear_reg_train worker]: distributed train finished.");
+    // decrypt the model weights and return
+    local_explanations =
+        linear_reg_model_builder->linear_reg_model.display_weights(party);
+    log_info("Decrypt and display local explanations finished");
+    delete linear_reg_model_builder;
+    delete worker;
   }
 
   return local_explanations;
@@ -919,6 +935,7 @@ void lime_interpret(Party party, const std::string& params_str,
   interpret_params.explanation_report = path_prefix + interpret_params.explanation_report;
   log_info("Deserialize the lime interpret params");
   log_info("[lime_interpret]: interpret_params[class_id] = " + std::to_string(interpret_params.class_id));
+  log_info("[lime_interpret]: interpret_params[interpret_model_name] = " + interpret_params.interpret_model_name);
 
   // 2. create the LimeExplainer instance and call explain instance
   LimeExplainer lime_explainer;
