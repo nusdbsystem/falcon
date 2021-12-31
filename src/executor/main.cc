@@ -232,6 +232,13 @@ int main(int argc, char *argv[]) {
           case falcon::GBDT:
             log_error("Type falcon::GBDT not implemented");
             exit(1);
+          case falcon::LIME_FEAT_SEL:
+            lime_feat_sel(party,
+                          algorithm_params,
+                          ps_network_config_pb_str,
+                          is_distributed,
+                          distributed_role);
+            break;
           case falcon::LIME_INTERPRET:
             lime_interpret(party,
                            algorithm_params,
@@ -320,6 +327,16 @@ int main(int argc, char *argv[]) {
             case falcon::GBDT:
               log_error("Type falcon::GBDT not implemented");
               exit(1);
+            case falcon::LIME_FEAT_SEL: {
+              party.init_phe_keys(use_existing_key, key_file);
+              lime_feat_sel(party,
+                            algorithm_params,
+                            ps_network_config_pb_str,
+                            is_distributed,
+                            distributed_role,
+                            worker_id);
+              break;
+            }
             case falcon::LIME_INTERPRET: {
               party.init_phe_keys(use_existing_key, key_file);
               lime_interpret(party,
