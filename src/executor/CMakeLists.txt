@@ -124,6 +124,8 @@ set(SOURCE_FILES
         utils/logger/log_alg_params.cc
         ../../include/falcon/utils/metric/regression.h
         utils/metric/regression.cc
+        include/message/interpretability.pb.h
+        include/message/interpretability.pb.cc
         ../../include/falcon/algorithm/vertical/linear_model/linear_model_ps.h
         algorithm/vertical/linear_model/linear_model_ps.cc
         ../../include/falcon/algorithm/vertical/linear_model/linear_regression_ps.h

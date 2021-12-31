@@ -14,7 +14,7 @@
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/pb_converter/lr_converter.h>
 #include <falcon/utils/pb_converter/interpretability_converter.h>
-
+#include <falcon/utils/base64.h>
 
 TEST(PB_Converter, ModelPublishRequest) {
   int model_id = 1;
@@ -1293,6 +1293,8 @@ TEST(PB_Converter, LimeFeatureSelectParams) {
   lime_feat_sel_params.selected_predictions_file = "selected_predictions_file.txt";
   lime_feat_sel_params.sample_weights_file = "sample_weights_file.txt";
   lime_feat_sel_params.num_samples = 5000;
+  lime_feat_sel_params.class_num = 2;
+  lime_feat_sel_params.class_id = 0;
   lime_feat_sel_params.feature_selection = "pearson";
   lime_feat_sel_params.num_explained_features = 5;
   lime_feat_sel_params.selected_features_file = "selected_features_file.txt";
@@ -1306,6 +1308,8 @@ TEST(PB_Converter, LimeFeatureSelectParams) {
   EXPECT_TRUE(lime_feat_sel_params.selected_predictions_file == output_lime_feat_sel_params.selected_predictions_file);
   EXPECT_TRUE(lime_feat_sel_params.sample_weights_file == output_lime_feat_sel_params.sample_weights_file);
   EXPECT_EQ(lime_feat_sel_params.num_samples, output_lime_feat_sel_params.num_samples);
+  EXPECT_EQ(lime_feat_sel_params.class_num, output_lime_feat_sel_params.class_num);
+  EXPECT_EQ(lime_feat_sel_params.class_id, output_lime_feat_sel_params.class_id);
   EXPECT_TRUE(lime_feat_sel_params.feature_selection == output_lime_feat_sel_params.feature_selection);
   EXPECT_EQ(lime_feat_sel_params.num_explained_features, output_lime_feat_sel_params.num_explained_features);
   EXPECT_TRUE(lime_feat_sel_params.selected_features_file == output_lime_feat_sel_params.selected_features_file);

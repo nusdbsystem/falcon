@@ -536,7 +536,7 @@ func GenerateLimeFeatSelParams(cfg map[string]interface{}, classId int32) (strin
 		log.Fatalln("Failed to encode GenerateLimeFeatSelParams:", err)
 	}
 
-	return b64.StdEncoding.EncodeToString(out), res.ClassNum, res.SelectedFeaturesFile
+	return b64.StdEncoding.EncodeToString(out), res.ClassNum, selectFeatureFile
 
 }
 

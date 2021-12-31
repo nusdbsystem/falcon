@@ -134,4 +134,13 @@ double average(std::vector<double> inputs);
  */
 double square_sum(std::vector<double> a, std::vector<double> b);
 
+/**
+ * find top k indexes
+ *
+ * @param a
+ * @param k
+ * @return
+ */
+std::vector<int> find_top_k_indexes(const std::vector<double>& a, int k);
+
 #endif  // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

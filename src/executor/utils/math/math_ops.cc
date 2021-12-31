@@ -10,6 +10,7 @@
 #include <map>
 #include <numeric>
 #include <falcon/utils/math/math_ops.h>
+#include <queue>
 
 inline void check_vectors(std::vector<double> a, std::vector<double> b,
                      const std::vector<double>& weights) {
@@ -236,4 +237,28 @@ double square_sum(std::vector<double> a, std::vector<double> b) {
     ss += (diff * diff);
   }
   return ss;
+}
+
+std::vector<int> find_top_k_indexes(const std::vector<double>& a, int k) {
+  // from: https://stackoverflow.com/questions/14902876/indices-of-the-k-largest-elements-in-an-unsorted-length-n-array/23486017
+  std::vector<int> indexes;
+  std::priority_queue< std::pair<double, int>, std::vector< std::pair<double, int> >, std::greater <std::pair<double, int> > > q;
+  for (int i = 0; i < a.size(); ++i) {
+    if(q.size()<k)
+      q.push(std::pair<double, int>(a[i], i));
+    else if(q.top().first < a[i]){
+      q.pop();
+      q.push(std::pair<double, int>(a[i], i));
+    }
+  }
+  k = q.size();
+  std::vector<int> res(k);
+  for (int i = 0; i < k; ++i) {
+    res[k - i - 1] = q.top().second;
+    q.pop();
+  }
+//  for (int i = 0; i < k; ++i) {
+//    std::cout<< res[i] <<std::endl;
+//  }
+  return res;
 }

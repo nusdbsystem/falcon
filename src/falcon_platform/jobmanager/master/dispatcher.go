@@ -149,7 +149,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 				}
 
 				// Run model_training
-				master.dispatchGeneralTask(&wg, common.LimeFeatureSubTask + dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig)
+				master.dispatchGeneralTask(&wg, common.LimeFeatureSubTask+dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig)
 				if ok := master.isSuccessful(); !ok {
 					return
 				}
@@ -168,7 +168,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 				}
 
 				// Run model_training
-				master.dispatchGeneralTask(&wg, common.LimeInterpretSubTask + dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig)
+				master.dispatchGeneralTask(&wg, common.LimeInterpretSubTask+dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig)
 				if ok := master.isSuccessful(); !ok {
 					return
 				}

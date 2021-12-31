@@ -10,6 +10,7 @@
 #include <falcon/party/party.h>
 #include <falcon/distributed/worker.h>
 #include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
 #include "scaler.h"
 
 #include <string>
@@ -245,6 +246,10 @@ class LimeExplainer {
    * @param feature_selection: selection method, currently only support pearson
    * @param num_explained_features: the number of features to be explained
    * @param selected_features_file: the selected features file to be saved
+   * @param ps_network_str: the parameters of ps network string,
+   * @param is_distributed: whether use distributed interpretable model training
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param worker_id: if is_distributed = 1 and distributed_role = 1
    */
   void select_features(Party party,
                        const std::string& selected_samples_file,
@@ -255,7 +260,25 @@ class LimeExplainer {
                        int class_id,
                        const std::string& feature_selection,
                        int num_explained_features,
-                       const std::string& selected_features_file);
+                       const std::string& selected_features_file,
+                       const std::string& ps_network_str = std::string(),
+                       int is_distributed = 0,
+                       int distributed_role = 0,
+                       int worker_id = 0);
+
+  /**
+   * find the corresponding party's index
+   *
+   * @param party_weight_sizes
+   * @param global_model_weights
+   * @param num_explained_features
+   * @return
+   */
+  std::vector<std::vector<int>> find_party_feat_idx(
+      std::vector<int> party_weight_sizes,
+      std::vector<double> global_model_weights,
+      int num_explained_features
+      );
 
   /**
    * This function explains a origin_data's model prediction
@@ -339,7 +362,7 @@ class LimeExplainer {
    */
   std::vector<double> lime_linear_reg_train(
       Party party,
-      const std::string& linear_reg_param_str,
+      const LinearRegressionParams & linear_reg_params,
       const std::vector<std::vector<double>>& train_data,
       EncodedNumber* predictions,
       EncodedNumber* sample_weights,
@@ -370,8 +393,16 @@ void lime_comp_weight(Party party, const std::string& params_str);
  *
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeFeatureSelectionParams
+ * @param ps_network_str: the parameters of ps network string,
+ * @param is_distributed: whether use distributed interpretable model training
+ * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+ * @param worker_id: if is_distributed = 1 and distributed_role = 1
  */
-void lime_feat_sel(Party party, const std::string& params_str);
+void lime_feat_sel(Party party, const std::string& params_str,
+                   const std::string& ps_network_str = std::string(),
+                   int is_distributed = 0,
+                   int distributed_role = 0,
+                   int worker_id = 0);
 
 /**
  * interpret a given sample
