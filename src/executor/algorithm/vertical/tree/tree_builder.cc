@@ -140,6 +140,11 @@ void DecisionTreeBuilder::precompute_feature_helpers() {
     feature_helpers[i].sort_feature();
     feature_helpers[i].find_splits();
     feature_helpers[i].compute_split_ivs();
+
+    // for debug
+    for (int x = 0; x < feature_helpers[i].split_values.size(); x++) {
+      log_info("Feature " + std::to_string(i) + "'s split values[" + std::to_string(x) + "] = " + std::to_string(feature_helpers[i].split_values[x]));
+    }
   }
 }
 
@@ -1020,7 +1025,7 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
       float sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
 
       // find the first split value that larger than the current feature value, usually only step by 1
-      if (sorted_feature_value > feature_helpers[feature_id].split_values[split_iterator]) {
+      if ((sorted_feature_value - feature_helpers[feature_id].split_values[split_iterator]) > ROUNDED_PRECISION) {
         split_iterator += 1;
         if (split_iterator == split_num) continue;
       }

@@ -6,6 +6,7 @@
 #include <numeric>      // std::iota
 #include <algorithm>    // std::sort
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 
 FeatureHelper::FeatureHelper() {
   // empty constructor
@@ -113,6 +114,8 @@ void FeatureHelper::find_splits() {
 
   int n_samples = origin_feature_values.size();
   std::vector<double> distinct_values = compute_distinct_values();
+
+  log_info("The number of distinct values of this feature is " + std::to_string(distinct_values.size()));
 
   // if distinct values is larger than max_bins + 1, treat as continuous feature
   // otherwise, treat as categorical feature
