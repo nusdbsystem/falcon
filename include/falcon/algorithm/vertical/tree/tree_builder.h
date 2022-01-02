@@ -153,6 +153,21 @@ class DecisionTreeBuilder : public ModelBuilder {
   void train(Party party, EncodedNumber* encrypted_labels);
 
   /**
+ * specific train function for lime
+ *
+ * @param party: initialized party object
+ * @param use_encrypted_labels: whether use encrypted labels during training
+ * @param encrypted_true_labels: encrypted labels used
+ * @param use_sample_weights: whether use encrypted sample weights
+ * @param encrypted_sample_weights: encrypted sample weights
+ */
+  void lime_train(Party party,
+                  bool use_encrypted_labels,
+                  EncodedNumber* encrypted_true_labels,
+                  bool use_sample_weights,
+                  EncodedNumber* encrypted_sample_weights);
+
+  /**
    * build the decision tree model
    * @param party
   */
@@ -170,7 +185,9 @@ class DecisionTreeBuilder : public ModelBuilder {
       int node_index,
       std::vector<int> available_feature_ids,
       EncodedNumber *sample_mask_iv,
-      EncodedNumber * encrypted_labels);
+      EncodedNumber * encrypted_labels,
+      bool use_sample_weights = false,
+      EncodedNumber *encrypted_weights = nullptr);
 
   /**
    * check if this node satisfies the pruning conditions
@@ -196,7 +213,9 @@ class DecisionTreeBuilder : public ModelBuilder {
   void compute_leaf_statistics(Party &party,
       int node_index,
       EncodedNumber *sample_mask_iv,
-      EncodedNumber *encrypted_labels);
+      EncodedNumber *encrypted_labels,
+      bool use_sample_weights = false,
+      EncodedNumber *encrypted_weights = nullptr);
 
   /**
      * compute encrypted impurity gain for each feature and each split
@@ -213,7 +232,9 @@ class DecisionTreeBuilder : public ModelBuilder {
       EncodedNumber ** encrypted_statistics,
       EncodedNumber * encrypted_labels,
       EncodedNumber * encrypted_left_sample_nums,
-      EncodedNumber * encrypted_right_sample_nums);
+      EncodedNumber * encrypted_right_sample_nums,
+      bool use_sample_weights = false,
+      EncodedNumber *encrypted_weights = nullptr);
 
   /**
      * predict a result given a sample id

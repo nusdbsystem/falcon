@@ -301,11 +301,83 @@ void DecisionTreeBuilder::train(Party party, EncodedNumber *encrypted_labels) {
   google::FlushLogFiles(google::INFO);
 }
 
+void DecisionTreeBuilder::lime_train(
+    Party party,
+    bool use_encrypted_labels,
+    EncodedNumber *encrypted_true_labels,
+    bool use_sample_weights,
+    EncodedNumber *encrypted_weights) {
+/// To avoid each tree node disclose which samples are on available,
+  /// we use an encrypted mask vector to protect the information
+  /// while ensure that the training can still be processed.
+  /// Note that for the root node, all the samples are available and every
+  /// party can initialize an encrypted mask vector with [1]
+  /// for the labels, the format should be encrypted (with size class_num * sample_num),
+  /// and is known to other parties as well (should be sent before calling this train method)
+
+  std::cout << "************* Training Start *************" << std::endl;
+  LOG(INFO) << "************* Training Start *************";
+  const clock_t training_start_time = clock();
+
+  // pre-compute label helper and feature helper
+  precompute_label_helper(party.party_type);
+  precompute_feature_helpers();
+  log_info("[train]: step 1, finished init label and features");
+
+  int sample_num = training_data.size();
+  int label_size = class_num * sample_num;
+  std::vector<int> available_feature_ids;
+  for (int i = 0; i < local_feature_num; i++) {
+    available_feature_ids.push_back(i);
+  }
+  auto * sample_mask_iv = new EncodedNumber[sample_num];
+
+  // retrieve phe pub key
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  // as the samples are available at the beginning of the training, init with 1
+  EncodedNumber tmp;
+  tmp.set_integer(phe_pub_key->n[0], 1);
+  // init encrypted mask vector on the root node
+  for (int i = 0; i < sample_num; i++) {
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sample_mask_iv[i], tmp);
+  }
+
+  // init the root node info
+  tree.nodes[0].depth = 0;
+  EncodedNumber max_impurity;
+  max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
+  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, max_impurity);
+
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+  // recursively build the tree
+  build_node(party,
+             0,
+             available_feature_ids,
+             sample_mask_iv,
+             encrypted_true_labels,
+             use_sample_weights,
+             encrypted_weights);
+  LOG(INFO) << "tree capacity = " << tree.capacity;
+
+  delete [] sample_mask_iv;
+  djcs_t_free_public_key(phe_pub_key);
+
+  const clock_t training_finish_time = clock();
+  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  LOG(INFO) << "Training time = " << training_consumed_time;
+  LOG(INFO) << "************* Training Finished *************";
+  google::FlushLogFiles(google::INFO);
+}
+
 void DecisionTreeBuilder::build_node(Party &party,
     int node_index,
     std::vector<int> available_feature_ids,
     EncodedNumber *sample_mask_iv,
-    EncodedNumber *encrypted_labels) {
+    EncodedNumber *encrypted_labels,
+    bool use_sample_weights,
+    EncodedNumber *encrypted_weights) {
   std::cout << "****** Build tree node " << node_index
             << " (depth = " << tree.nodes[node_index].depth << ")******" << std::endl;
   LOG(INFO) << "****** Build tree node " << node_index
@@ -333,7 +405,7 @@ void DecisionTreeBuilder::build_node(Party &party,
   /// 9. recursively build the next two tree nodes
 
   if (node_index >= tree.capacity) {
-    LOG(ERROR) << "Node index exceeds the maximum tree depth";
+    log_info("Node index exceeds the maximum tree depth");
     exit(1);
   }
 
@@ -342,7 +414,12 @@ void DecisionTreeBuilder::build_node(Party &party,
 
   /// step 2: if satisfied, compute label via spdz computation
   if (is_satisfied) {
-    compute_leaf_statistics(party, node_index, sample_mask_iv, encrypted_labels);
+    compute_leaf_statistics(party,
+                            node_index,
+                            sample_mask_iv,
+                            encrypted_labels,
+                            use_sample_weights,
+                            encrypted_weights);
     return;
   }
 
@@ -368,7 +445,7 @@ void DecisionTreeBuilder::build_node(Party &party,
   /// step 4.6: parties jointly send shares to spdz parties
 
   int local_splits_num = 0, global_split_num = 0;
-  int available_local_feature_num = available_feature_ids.size();
+  int available_local_feature_num = (int) available_feature_ids.size();
   for (int i = 0; i < available_local_feature_num; i++) {
     int feature_id = available_feature_ids[i];
     local_splits_num = local_splits_num + feature_helpers[feature_id].num_splits;
@@ -404,9 +481,11 @@ void DecisionTreeBuilder::build_node(Party &party,
                                  encrypted_statistics,
                                  encrypted_labels,
                                  encrypted_left_branch_sample_nums,
-                                 encrypted_right_branch_sample_nums);
+                                 encrypted_right_branch_sample_nums,
+                                 use_sample_weights,
+                                 encrypted_weights);
   }
-  LOG(INFO) << "Finish computing local statistics";
+  log_info("Finish computing local statistics");
 
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // pack self
@@ -439,12 +518,12 @@ void DecisionTreeBuilder::build_node(Party &party,
         }
 
         if (recv_split_num != 0) {
-          EncodedNumber **recv_encrypted_statistics = new EncodedNumber*[recv_split_num];
+          auto **recv_encrypted_statistics = new EncodedNumber*[recv_split_num];
           for (int s = 0; s < recv_split_num; s++) {
             recv_encrypted_statistics[s] = new EncodedNumber[2 * class_num];
           }
-          EncodedNumber *recv_left_sample_nums = new EncodedNumber[recv_split_num];
-          EncodedNumber *recv_right_sample_nums = new EncodedNumber[recv_split_num];
+          auto *recv_left_sample_nums = new EncodedNumber[recv_split_num];
+          auto *recv_right_sample_nums = new EncodedNumber[recv_split_num];
           deserialize_encrypted_statistics(recv_party_id, recv_node_index,
                                            recv_split_num, recv_classes_num,
                                            recv_left_sample_nums, recv_right_sample_nums,
@@ -470,7 +549,7 @@ void DecisionTreeBuilder::build_node(Party &party,
         }
       }
     }
-    LOG(INFO) << "The global_split_num = " << global_split_num;
+    log_info("The global_split_num = " + std::to_string(global_split_num));
     // send the total number of splits for the other clients to generate secret shares
     //logger(logger_out, "Send global split num to the other clients\n");
     std::string split_info_str;
@@ -484,7 +563,7 @@ void DecisionTreeBuilder::build_node(Party &party,
 
   if (party.party_type == falcon::PASSIVE_PARTY) {
     // first send local split num
-    LOG(INFO) << "Local split num = " << local_splits_num;
+    log_info("Local split num = " + std::to_string(local_splits_num));
     std::string local_split_num_str = std::to_string(local_splits_num);
     party.send_long_message(ACTIVE_PARTY_ID, local_split_num_str);
     // then send the encrypted statistics
@@ -500,7 +579,7 @@ void DecisionTreeBuilder::build_node(Party &party,
     std::string recv_split_info_str;
     party.recv_long_message(0, recv_split_info_str);
     deserialize_split_info(global_split_num, party_split_nums, recv_split_info_str);
-    LOG(INFO) << "The global_split_num = " << global_split_num;
+    log_info("The global_split_num = " + std::to_string(global_split_num));
   }
 
   /// step 5: encrypted statistics computed finished, convert to secret shares
@@ -509,12 +588,26 @@ void DecisionTreeBuilder::build_node(Party &party,
   std::vector<double> right_sample_nums_shares;
   std::vector<int> public_values;
   std::vector<double> private_values;
+  int branch_sample_nums_prec;
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    branch_sample_nums_prec = std::abs(global_left_branch_sample_nums[0].getter_exponent());
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        party.send_long_message(id, std::to_string(branch_sample_nums_prec));
+      }
+    }
+  } else {
+    std::string recv_prec;
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_prec);
+    branch_sample_nums_prec = std::stoi(recv_prec);
+  }
+  log_info("[build_node]: branch_sample_nums_prec = " + std::to_string(branch_sample_nums_prec));
   party.ciphers_to_secret_shares(global_left_branch_sample_nums,
       left_sample_nums_shares, global_split_num,
-      ACTIVE_PARTY_ID, 0);
+      ACTIVE_PARTY_ID, branch_sample_nums_prec);
   party.ciphers_to_secret_shares(global_right_branch_sample_nums,
       right_sample_nums_shares, global_split_num,
-      ACTIVE_PARTY_ID, 0);
+      ACTIVE_PARTY_ID, branch_sample_nums_prec);
   for (int i = 0; i < global_split_num; i++) {
     std::vector<double> tmp;
     party.ciphers_to_secret_shares(global_encrypted_statistics[i],
@@ -522,6 +615,7 @@ void DecisionTreeBuilder::build_node(Party &party,
         ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
     stats_shares.push_back(tmp);
   }
+  log_info("[build_node]: convert secret shares finished ");
 
   /// step 6: secret shares conversion finished, talk to spdz for computation
   // communicate with spdz parties and receive results to compute labels
@@ -564,6 +658,7 @@ void DecisionTreeBuilder::build_node(Party &party,
       &promise_values);
   std::vector<double> res = future_values.get();
   spdz_pruning_check_thread.join();
+  log_info("[build_node]: communicate with spdz program finished");
 
   // the result values are as follows (assume public in this version):
   // best_split_index (global), best_left_impurity, and best_right_impurity
@@ -585,7 +680,7 @@ void DecisionTreeBuilder::build_node(Party &party,
 
   /// step 7: update tree nodes, including sample iv for iterative node computation
   std::vector<int> available_feature_ids_new;
-  int sample_num = training_data.size();
+  int sample_num = (int) training_data.size();
   EncodedNumber *sample_mask_iv_left = new EncodedNumber[sample_num];
   EncodedNumber *sample_mask_iv_right = new EncodedNumber[sample_num];
   EncodedNumber *encrypted_labels_left = new EncodedNumber[sample_num * class_num];
@@ -609,7 +704,7 @@ void DecisionTreeBuilder::build_node(Party &party,
       index_tmp = index_tmp - party_split_nums[i];
     }
   }
-  LOG(INFO) << "Best split party: i_star = " << i_star;
+  log_info("Best split party: i_star = " + std::to_string(i_star));
 
   // if the party has the best split:
   // compute locally and broadcast, find the j_* feature and s_* split
@@ -628,8 +723,8 @@ void DecisionTreeBuilder::build_node(Party &party,
       }
     }
 
-    LOG(INFO) << "Best feature id: j_star = " << j_star;
-    LOG(INFO) << "Best split id: s_star = " << s_star;
+    log_info("Best feature id: j_star = " + std::to_string(j_star));
+    log_info("Best split id: s_star = " + std::to_string(s_star));
 
     // now we have (i_*, j_*, s_*), retrieve s_*-th split ivs and update sample_ivs of two branches
     // update current node index for prediction
@@ -795,8 +890,8 @@ bool DecisionTreeBuilder::check_pruning_conditions(Party &party,
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
   // init temp values
-  EncodedNumber *encrypted_sample_count = new EncodedNumber[1];
-  EncodedNumber *encrypted_impurity = new EncodedNumber[1];
+  auto *encrypted_sample_count = new EncodedNumber[1];
+  auto *encrypted_impurity = new EncodedNumber[1];
   std::vector<int> public_values;
   std::vector<double> private_values;
   std::vector<double> condition_shares1, condition_shares2;
@@ -861,8 +956,10 @@ bool DecisionTreeBuilder::check_pruning_conditions(Party &party,
 void DecisionTreeBuilder::compute_leaf_statistics(Party &party,
     int node_index,
     EncodedNumber *sample_mask_iv,
-    EncodedNumber *encrypted_labels) {
-  int sample_num = training_data.size();
+    EncodedNumber *encrypted_labels,
+    bool use_sample_weights,
+    EncodedNumber *encrypted_weights) {
+  int sample_num = (int) training_data.size();
   // retrieve phe pub key
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
@@ -871,6 +968,17 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party,
   std::vector<double> private_values, shares1, shares2;
   public_values.push_back(tree_type);
   public_values.push_back(class_num);
+  // if with encrypted sample weights, can multiply encrypted_labels with
+  // encrypted_weights before computing the label by spdz computation
+  if (use_sample_weights) {
+    // multiply encrypted_weights and set back to encrypted labels
+    party.ciphers_multi(encrypted_labels,
+                        encrypted_labels,
+                        encrypted_weights,
+                        sample_num,
+                        ACTIVE_PARTY_ID);
+    log_info("[compute_leaf_statistics]: encrypted_labels multiply encrypted weights finished.");
+  }
   if (party.party_type == falcon::ACTIVE_PARTY) {
     if (tree_type == falcon::CLASSIFICATION) {
       // compute how many samples in each class, eg: [100, 90], 100 samples for c1, and 90 for c2
@@ -970,7 +1078,9 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
     EncodedNumber **encrypted_statistics,
     EncodedNumber *encrypted_labels,
     EncodedNumber *encrypted_left_sample_nums,
-    EncodedNumber *encrypted_right_sample_nums) {
+    EncodedNumber *encrypted_right_sample_nums,
+    bool use_sample_weights,
+    EncodedNumber *encrypted_weights) {
   std::cout << " Compute encrypted statistics for node " << node_index << std::endl;
   LOG(INFO) << " Compute encrypted statistics for node " << node_index;
   const clock_t start_time = clock();
@@ -993,22 +1103,43 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
     int feature_id = available_feature_ids[j];
     int split_num = feature_helpers[feature_id].num_splits;
     std::vector<int> sorted_indices = feature_helpers[feature_id].sorted_indexes;
-    EncodedNumber *sorted_sample_iv = new EncodedNumber[sample_num];
-
+    auto *sorted_sample_iv = new EncodedNumber[sample_num];
     // copy the sample_iv
     for (int idx = 0; idx < sample_num; idx++) {
       sorted_sample_iv[idx] = sample_mask_iv[sorted_indices[idx]];
     }
-
+    // add encrypted_weights logic here, first convert sorted_sample_iv
+    // into double EncodedNumber array
+    EncodedNumber pos_constant;
+    pos_constant.set_double(phe_pub_key->n[0],
+                            CERTAIN_PROBABILITY,
+                            PHE_FIXED_POINT_PRECISION);
+    for (int idx = 0; idx < sample_num; idx++) {
+      djcs_t_aux_ep_mul(phe_pub_key,
+                        sorted_sample_iv[idx],
+                        sorted_sample_iv[idx],
+                        pos_constant);
+    }
+    // if use encrypted weights, need to execute an element-wise cipher multiplication
+    if (use_sample_weights) {
+      party.ciphers_multi(sorted_sample_iv,
+                          sorted_sample_iv,
+                          encrypted_weights,
+                          sample_num,
+                          ACTIVE_PARTY_ID);
+    }
+    // compute the cipher precision
+    int sorted_sample_iv_prec = std::abs(sorted_sample_iv[0].getter_exponent());
+    log_info("[compute_encrypted_statistics]: sorted_sample_iv_prec = " + std::to_string(sorted_sample_iv_prec));
     // compute the encrypted aggregation of split_num + 1 buckets
-    EncodedNumber *left_sums = new EncodedNumber[split_num];
-    EncodedNumber *right_sums = new EncodedNumber[split_num];
+    auto *left_sums = new EncodedNumber[split_num];
+    auto *right_sums = new EncodedNumber[split_num];
     EncodedNumber total_sum;
-    total_sum.set_integer(phe_pub_key->n[0], 0);
+    total_sum.set_double(phe_pub_key->n[0], 0.0, sorted_sample_iv_prec);
     djcs_t_aux_encrypt(phe_pub_key, party.phe_random, total_sum, total_sum);
     for (int idx = 0; idx < split_num; idx++) {
-      left_sums[idx].set_integer(phe_pub_key->n[0], 0);
-      right_sums[idx].set_integer(phe_pub_key->n[0], 0);
+      left_sums[idx].set_double(phe_pub_key->n[0], 0.0, sorted_sample_iv_prec);
+      right_sums[idx].set_double(phe_pub_key->n[0], 0.0, sorted_sample_iv_prec);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random, left_sums[idx], left_sums[idx]);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random, right_sums[idx], right_sums[idx]);
     }
@@ -1022,7 +1153,7 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
         continue;
       }
       int sorted_idx = sorted_indices[sample_idx];
-      float sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
+      double sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
 
       // find the first split value that larger than the current feature value, usually only step by 1
       if ((sorted_feature_value - feature_helpers[feature_id].split_values[split_iterator]) > ROUNDED_PRECISION) {
@@ -1034,9 +1165,9 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
     }
 
     // compute the encrypted statistics for each class
-    EncodedNumber **left_stats = new EncodedNumber*[split_num];
-    EncodedNumber **right_stats = new EncodedNumber*[split_num];
-    EncodedNumber *sums_stats = new EncodedNumber[class_num];
+    auto **left_stats = new EncodedNumber*[split_num];
+    auto **right_stats = new EncodedNumber*[split_num];
+    auto *sums_stats = new EncodedNumber[class_num];
     for (int k = 0; k < split_num; k++) {
       left_stats[k] = new EncodedNumber[class_num];
       right_stats[k] = new EncodedNumber[class_num];
@@ -1084,16 +1215,16 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
 
     // write the left sums to encrypted_left_sample_nums and update the right sums
     EncodedNumber left_num_help, right_num_help, plain_constant_help;
-    left_num_help.set_integer(phe_pub_key->n[0], 0);
-    right_num_help.set_integer(phe_pub_key->n[0], 0);
+    left_num_help.set_double(phe_pub_key->n[0], 0.0, sorted_sample_iv_prec);
+    right_num_help.set_double(phe_pub_key->n[0], 0.0, sorted_sample_iv_prec);
     plain_constant_help.set_integer(phe_pub_key->n[0], -1);
     djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
         left_num_help, left_num_help);
     djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
         right_num_help, right_num_help);
 
-    EncodedNumber *left_stat_help = new EncodedNumber[class_num];
-    EncodedNumber *right_stat_help = new EncodedNumber[class_num];
+    auto *left_stat_help = new EncodedNumber[class_num];
+    auto *right_stat_help = new EncodedNumber[class_num];
     for (int c = 0; c < class_num; c++) {
       left_stat_help[c].set_double(phe_pub_key->n[0], 0);
       right_stat_help[c].set_double(phe_pub_key->n[0], 0);
@@ -1500,12 +1631,26 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
     std::vector<double> right_sample_nums_shares;
     std::vector<int> public_values;
     std::vector<double> private_values;
+    int branch_sample_nums_prec;
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      branch_sample_nums_prec = std::abs(global_left_branch_sample_nums[0].getter_exponent());
+      for (int id = 0; id < party.party_num; id++) {
+        if (id != party.party_id) {
+          party.send_long_message(id, std::to_string(branch_sample_nums_prec));
+        }
+      }
+    } else {
+      std::string recv_prec;
+      party.recv_long_message(ACTIVE_PARTY_ID, recv_prec);
+      branch_sample_nums_prec = std::stoi(recv_prec);
+    }
+    log_info("[build_node]: branch_sample_nums_prec = " + std::to_string(branch_sample_nums_prec));
     party.ciphers_to_secret_shares(global_left_branch_sample_nums,
                                    left_sample_nums_shares, global_split_num,
-                                   ACTIVE_PARTY_ID, 0);
+                                   ACTIVE_PARTY_ID, branch_sample_nums_prec);
     party.ciphers_to_secret_shares(global_right_branch_sample_nums,
                                    right_sample_nums_shares, global_split_num,
-                                   ACTIVE_PARTY_ID, 0);
+                                   ACTIVE_PARTY_ID, branch_sample_nums_prec);
     for (int i = 0; i < global_split_num; i++) {
       std::vector<double> tmp;
       party.ciphers_to_secret_shares(global_encrypted_statistics[i],
