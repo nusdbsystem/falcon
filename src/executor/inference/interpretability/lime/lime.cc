@@ -748,26 +748,27 @@ std::vector<double> LimeExplainer::explain_one_label(
   log_info("[explain_one_label]: interpret_model_name = " + interpret_model_name);
   falcon::AlgorithmName algorithm_name = parse_algorithm_name(interpret_model_name);
   log_info("[explain_one_label]: algorithm_name = " + std::to_string(algorithm_name));
-  // deserialize linear regression params
-  LinearRegressionParams linear_reg_params;
-  //  // create for debug
-  //  linear_reg_params.batch_size = 8;
-  //  linear_reg_params.max_iteration = 100;
-  //  linear_reg_params.converge_threshold = 0.0001;
-  //  linear_reg_params.with_regularization = true;
-  //  linear_reg_params.alpha = 0.1;
-  //  linear_reg_params.learning_rate = 0.1;
-  //  linear_reg_params.decay = 0.1;
-  //  linear_reg_params.penalty = "l2";
-  //  linear_reg_params.optimizer = "sgd";
-  //  linear_reg_params.metric = "mse";
-  //  linear_reg_params.dp_budget = 0.1;
-  //  linear_reg_params.fit_bias = true;
-  std::string linear_reg_param_pb_str = base64_decode_to_pb_string(interpret_model_param);
-  deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);
-  log_linear_regression_params(linear_reg_params);
+
   switch (algorithm_name) {
     case falcon::LINEAR_REG: {
+      // deserialize linear regression params
+      LinearRegressionParams linear_reg_params;
+      //  // create for debug
+      //  linear_reg_params.batch_size = 8;
+      //  linear_reg_params.max_iteration = 100;
+      //  linear_reg_params.converge_threshold = 0.0001;
+      //  linear_reg_params.with_regularization = true;
+      //  linear_reg_params.alpha = 0.1;
+      //  linear_reg_params.learning_rate = 0.1;
+      //  linear_reg_params.decay = 0.1;
+      //  linear_reg_params.penalty = "l2";
+      //  linear_reg_params.optimizer = "sgd";
+      //  linear_reg_params.metric = "mse";
+      //  linear_reg_params.dp_budget = 0.1;
+      //  linear_reg_params.fit_bias = true;
+      std::string linear_reg_param_pb_str = base64_decode_to_pb_string(interpret_model_param);
+      deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);
+      log_linear_regression_params(linear_reg_params);
       // call linear regression training
       explanations = lime_linear_reg_train(
           party,
@@ -782,7 +783,34 @@ std::vector<double> LimeExplainer::explain_one_label(
       break;
     }
     case falcon::DT: {
-      // call decision tree training
+      // deserialize decision tree params
+      DecisionTreeParams dt_params;
+      // create for debug
+      dt_params.tree_type = "regression";
+      dt_params.criterion = "mse";
+      dt_params.split_strategy = "best";
+      dt_params.class_num = 2;
+      dt_params.max_depth = 5;
+      dt_params.max_bins = 8;
+      dt_params.min_samples_split = 5;
+      dt_params.min_samples_leaf = 5;
+      dt_params.max_leaf_nodes = 64;
+      dt_params.min_impurity_decrease = 0.1;
+      dt_params.min_impurity_split = 0.001;
+      dt_params.dp_budget = 0.1;
+//      std::string dt_param_pb_str = base64_decode_to_pb_string(interpret_model_param);
+//      deserialize_dt_params(dt_params, dt_param_pb_str);
+      log_decision_tree_params(dt_params);
+      explanations = lime_decision_tree_train(
+          party,
+          dt_params,
+          train_data,
+          predictions,
+          sample_weights,
+          ps_network_str,
+          is_distributed,
+          distributed_role,
+          worker_id);
       break;
     }
     default:
@@ -901,6 +929,140 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
     delete worker;
   }
 
+  return local_explanations;
+}
+
+std::vector<double> LimeExplainer::lime_decision_tree_train(
+    Party party,
+    const DecisionTreeParams &dt_params,
+    const std::vector<std::vector<double>> &train_data,
+    EncodedNumber *predictions,
+    EncodedNumber *sample_weights,
+    const std::string &ps_network_str,
+    int is_distributed,
+    int distributed_role,
+    int worker_id) {
+  std::vector<double> local_explanations;
+
+  // train a lime decision tree model
+  std::vector<std::vector<double>> dummy_test_data;
+  std::vector<double> dummy_train_labels, dummy_test_labels;
+  double dummy_train_accuracy, dummy_test_accuracy;
+  std::vector<std::vector<double>> used_train_data = train_data;
+  int weight_size = (int) used_train_data[0].size();
+  party.setter_feature_num(weight_size);
+  // since lime use regression tree, need to compute predictions^2 and
+  // assign to encrypted_labels before passing to lime_train function
+  int cur_sample_size = (int) used_train_data.size();
+  int label_size = REGRESSION_TREE_CLASS_NUM * cur_sample_size;
+  auto* encrypted_labels = new EncodedNumber[label_size];
+  auto* predictions_square = new EncodedNumber[cur_sample_size];
+  party.ciphers_multi(predictions_square,
+                      predictions,
+                      predictions,
+                      cur_sample_size,
+                      ACTIVE_PARTY_ID);
+  int predictions_prec = std::abs(predictions[0].getter_exponent());
+  log_info("[lime_decision_tree_train]: predictions_prec = " + std::to_string(predictions_prec));
+  party.truncate_ciphers_precision(predictions_square,
+                                   cur_sample_size,
+                                   ACTIVE_PARTY_ID,
+                                   predictions_prec);
+  int predictions_square_prec = std::abs(predictions_square[0].getter_exponent());
+  log_info("[lime_decision_tree_train]: predictions_square_prec = " + std::to_string(predictions_square_prec));
+  for (int i = 0; i < cur_sample_size; i++) {
+    encrypted_labels[i] = predictions[i];
+    encrypted_labels[i + cur_sample_size] = predictions_square[i];
+  }
+  log_info("[lime_decision_tree_train]: encrypted_label_size = " + std::to_string(label_size));
+
+  // for debug decrypt encrypted weights
+  auto *decrypted_weights = new EncodedNumber[cur_sample_size];
+  party.collaborative_decrypt(sample_weights, decrypted_weights, cur_sample_size, ACTIVE_PARTY_ID);
+  log_info("[lime_decision_tree_train]: print decrypted sample weights");
+  for (int i = 0; i < cur_sample_size; i++) {
+    double x;
+    decrypted_weights[i].decode(x);
+    log_info("sample_weights[" + std::to_string(i) + "] = " + std::to_string(x));
+  }
+  delete [] decrypted_weights;
+
+  if (is_distributed == 0) {
+    DecisionTreeBuilder decision_tree_builder(dt_params,
+                                              used_train_data,
+                                              dummy_test_data,
+                                              dummy_train_labels,
+                                              dummy_test_labels,
+                                              dummy_train_accuracy,
+                                              dummy_test_accuracy);
+    log_info("Init decision tree builder finished");
+    decision_tree_builder.lime_train(
+        party, true, encrypted_labels, true, sample_weights);
+    log_info("Train lime decision tree model finished.");
+    // to print the tree for comparison
+    log_info("TODO: print tree for better comparison");
+  }
+
+  // is_distributed == 1 and distributed_role = 0 (parameter server)
+  if (is_distributed == 1 && distributed_role == 0) {
+    log_info("************* Distributed LIME Interpret *************");
+//    // init linear_reg instance
+//    auto linear_reg_model_builder = new LinearRegressionBuilder (
+//        linear_reg_params,
+//        weight_size,
+//        used_train_data,
+//        dummy_test_data,
+//        dummy_train_labels,
+//        dummy_test_labels,
+//        dummy_train_accuracy,
+//        dummy_test_accuracy);
+//    log_info("[lime_linear_reg_train ps]: init linear regression model");
+//    auto ps = new LinearRegParameterServer(*linear_reg_model_builder,
+//                                           party,
+//                                           ps_network_str);
+//    log_info("[lime_linear_reg_train ps]: Init ps finished.");
+//    // start to train the task in a distributed way
+//    ps->distributed_lime_train(true, predictions,
+//                               true, sample_weights);
+//    log_info("[lime_linear_reg_train ps]: distributed train finished.");
+//    // decrypt the model weights and return
+//    local_explanations =
+//        ps->alg_builder.linear_reg_model.display_weights(party);
+//    log_info("Decrypt and display local explanations finished");
+//    delete linear_reg_model_builder;
+//    delete ps;
+  }
+
+  // is_distributed == 1 and distributed_role = 1 (worker)
+  if (is_distributed == 1 && distributed_role == 1) {
+//    log_info("************* Distributed LIME Interpret *************");
+//    // init linear_reg instance
+//    auto linear_reg_model_builder = new LinearRegressionBuilder (
+//        linear_reg_params,
+//        weight_size,
+//        used_train_data,
+//        dummy_test_data,
+//        dummy_train_labels,
+//        dummy_test_labels,
+//        dummy_train_accuracy,
+//        dummy_test_accuracy);
+//    // worker is created to communicate with parameter server
+//    auto worker = new Worker(ps_network_str, worker_id);
+//
+//    log_info("[lime_linear_reg_train worker]: init linear regression model");
+//    linear_reg_model_builder->distributed_lime_train(party, *worker,
+//                                                     true, predictions,
+//                                                     true, sample_weights);
+//    log_info("[lime_linear_reg_train worker]: distributed train finished.");
+//    // decrypt the model weights and return
+//    local_explanations =
+//        linear_reg_model_builder->linear_reg_model.display_weights(party);
+//    log_info("Decrypt and display local explanations finished");
+//    delete linear_reg_model_builder;
+//    delete worker;
+  }
+  delete [] encrypted_labels;
+  delete [] predictions_square;
   return local_explanations;
 }
 

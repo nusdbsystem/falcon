@@ -52,10 +52,10 @@
           "split_strategy": "best",
           "class_num": 2,
           "max_depth": 5,
-          "max_bins": 8,
+          "max_bins": 12,
           "min_samples_split": 5,
           "min_samples_leaf": 5,
-          "max_leaf_nodes": 16,
+          "max_leaf_nodes": 64,
           "min_impurity_decrease": 0.1,
           "min_impurity_split": 0.001,
           "dp_budget": 0.1

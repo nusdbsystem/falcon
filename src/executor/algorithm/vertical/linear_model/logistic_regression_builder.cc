@@ -258,12 +258,13 @@ void LogisticRegressionBuilder::backward_computation(
   djcs_t_free_public_key(phe_pub_key);
   // hcs_free_random(phe_random);
   delete [] encrypted_batch_losses;
+  delete [] batch_true_labels;
   for (int i = 0; i < cur_batch_size; i++) {
     delete [] encoded_batch_samples[i];
   }
   delete [] encoded_batch_samples;
   delete [] common_gradients;
-  delete [] batch_true_labels;
+  delete [] global_encrypted_gradients;
 }
 
 void LogisticRegressionBuilder::update_encrypted_weights(

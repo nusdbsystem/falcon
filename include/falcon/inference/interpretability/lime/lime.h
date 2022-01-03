@@ -11,6 +11,7 @@
 #include <falcon/distributed/worker.h>
 #include <falcon/operator/phe/fixed_point_encoder.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
+#include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include "scaler.h"
 
 #include <string>
@@ -363,6 +364,32 @@ class LimeExplainer {
   std::vector<double> lime_linear_reg_train(
       Party party,
       const LinearRegressionParams & linear_reg_params,
+      const std::vector<std::vector<double>>& train_data,
+      EncodedNumber* predictions,
+      EncodedNumber* sample_weights,
+      const std::string& ps_network_str = std::string(),
+      int is_distributed = 0,
+      int distributed_role = 0,
+      int worker_id = 0);
+
+  /**
+   * This function trains decision tree model with encrypted predictions,
+   * and encrypted sample_weights.
+   *
+   * @param party: the participating party
+   * @param linear_reg_param_str: linear regression param string
+   * @param train_data: the plaintext train data
+   * @param predictions: the encrypted model predictions
+   * @param sample_weights: the encrypted sample weights
+   * @param ps_network_str: the parameters of ps network string,
+   * @param is_distributed: whether use distributed interpretable model training
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param worker: if is_distributed = 1 and distributed_role = 1
+   * @return
+   */
+  std::vector<double> lime_decision_tree_train(
+      Party party,
+      const DecisionTreeParams & dt_params,
       const std::vector<std::vector<double>>& train_data,
       EncodedNumber* predictions,
       EncodedNumber* sample_weights,

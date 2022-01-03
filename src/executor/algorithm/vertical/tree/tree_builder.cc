@@ -307,7 +307,7 @@ void DecisionTreeBuilder::lime_train(
     EncodedNumber *encrypted_true_labels,
     bool use_sample_weights,
     EncodedNumber *encrypted_weights) {
-/// To avoid each tree node disclose which samples are on available,
+  /// To avoid each tree node disclose which samples are on available,
   /// we use an encrypted mask vector to protect the information
   /// while ensure that the training can still be processed.
   /// Note that for the root node, all the samples are available and every
@@ -324,8 +324,9 @@ void DecisionTreeBuilder::lime_train(
   precompute_feature_helpers();
   log_info("[train]: step 1, finished init label and features");
 
-  int sample_num = training_data.size();
+  int sample_num = (int) training_data.size();
   int label_size = class_num * sample_num;
+  log_info("[train]: sample_num = " + std::to_string(sample_num) + ", label_size = " + std::to_string(label_size));
   std::vector<int> available_feature_ids;
   for (int i = 0; i < local_feature_num; i++) {
     available_feature_ids.push_back(i);
@@ -349,6 +350,33 @@ void DecisionTreeBuilder::lime_train(
   max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
   djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, max_impurity);
 
+  // check whether use sample_weights, if so, compute cipher multi
+  auto* weighted_encrypted_true_labels = new EncodedNumber[label_size];
+  if (use_sample_weights) {
+    auto* assist_encrypted_weights = new EncodedNumber[label_size];
+    for (int i = 0; i < sample_num; i++) {
+      assist_encrypted_weights[i] = encrypted_weights[i];
+      assist_encrypted_weights[i+sample_num] = encrypted_weights[i];
+    }
+    party.ciphers_multi(weighted_encrypted_true_labels,
+                        encrypted_true_labels,
+                        assist_encrypted_weights,
+                        label_size,
+                        ACTIVE_PARTY_ID);
+    delete [] assist_encrypted_weights;
+  } else {
+    for (int i = 0; i < label_size; i++) {
+      weighted_encrypted_true_labels[i] = encrypted_true_labels[i];
+    }
+  }
+
+  // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
+  // TODO: make the label precision automatically match
+  party.truncate_ciphers_precision(weighted_encrypted_true_labels,
+                                   label_size,
+                                   ACTIVE_PARTY_ID,
+                                   PHE_FIXED_POINT_PRECISION);
+
   // required by spdz connector and mpc computation
   bigint::init_thread();
   // recursively build the tree
@@ -356,12 +384,13 @@ void DecisionTreeBuilder::lime_train(
              0,
              available_feature_ids,
              sample_mask_iv,
-             encrypted_true_labels,
+             weighted_encrypted_true_labels,
              use_sample_weights,
              encrypted_weights);
   LOG(INFO) << "tree capacity = " << tree.capacity;
 
   delete [] sample_mask_iv;
+  delete [] weighted_encrypted_true_labels;
   djcs_t_free_public_key(phe_pub_key);
 
   const clock_t training_finish_time = clock();
@@ -1086,11 +1115,25 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
   const clock_t start_time = clock();
 
   int split_index = 0;
-  int available_feature_num = available_feature_ids.size();
-  int sample_num = training_data.size();
+  int available_feature_num = (int) available_feature_ids.size();
+  int sample_num = (int) training_data.size();
   // retrieve phe pub key
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
+
+  auto* weighted_sample_mask_iv = new EncodedNumber[sample_num];
+  if (use_sample_weights) {
+    // if use encrypted weights, need to execute an element-wise cipher multiplication
+    party.ciphers_multi(weighted_sample_mask_iv,
+                        sample_mask_iv,
+                        encrypted_weights,
+                        sample_num,
+                        ACTIVE_PARTY_ID);
+  } else {
+    for (int i = 0; i < sample_num; i++) {
+      weighted_sample_mask_iv[i] = sample_mask_iv[i];
+    }
+  }
 
   /// splits of features are flatted, classes_num * 2 are for left and right
   /// in this method, the feature values are sorted,
@@ -1106,31 +1149,24 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
     auto *sorted_sample_iv = new EncodedNumber[sample_num];
     // copy the sample_iv
     for (int idx = 0; idx < sample_num; idx++) {
-      sorted_sample_iv[idx] = sample_mask_iv[sorted_indices[idx]];
+      sorted_sample_iv[idx] = weighted_sample_mask_iv[sorted_indices[idx]];
     }
-    // add encrypted_weights logic here, first convert sorted_sample_iv
-    // into double EncodedNumber array
-    EncodedNumber pos_constant;
-    pos_constant.set_double(phe_pub_key->n[0],
-                            CERTAIN_PROBABILITY,
-                            PHE_FIXED_POINT_PRECISION);
-    for (int idx = 0; idx < sample_num; idx++) {
-      djcs_t_aux_ep_mul(phe_pub_key,
-                        sorted_sample_iv[idx],
-                        sorted_sample_iv[idx],
-                        pos_constant);
-    }
-    // if use encrypted weights, need to execute an element-wise cipher multiplication
-    if (use_sample_weights) {
-      party.ciphers_multi(sorted_sample_iv,
-                          sorted_sample_iv,
-                          encrypted_weights,
-                          sample_num,
-                          ACTIVE_PARTY_ID);
-    }
+//    // add encrypted_weights logic here, first convert sorted_sample_iv
+//    // into double EncodedNumber array
+//    EncodedNumber pos_constant;
+//    pos_constant.set_double(phe_pub_key->n[0],
+//                            CERTAIN_PROBABILITY,
+//                            PHE_FIXED_POINT_PRECISION);
+//    for (int idx = 0; idx < sample_num; idx++) {
+//      djcs_t_aux_ep_mul(phe_pub_key,
+//                        sorted_sample_iv[idx],
+//                        sorted_sample_iv[idx],
+//                        pos_constant);
+//    }
     // compute the cipher precision
     int sorted_sample_iv_prec = std::abs(sorted_sample_iv[0].getter_exponent());
     log_info("[compute_encrypted_statistics]: sorted_sample_iv_prec = " + std::to_string(sorted_sample_iv_prec));
+
     // compute the encrypted aggregation of split_num + 1 buckets
     auto *left_sums = new EncodedNumber[split_num];
     auto *right_sums = new EncodedNumber[split_num];
@@ -1143,7 +1179,7 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random, left_sums[idx], left_sums[idx]);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random, right_sums[idx], right_sums[idx]);
     }
-
+    log_info("[compute_encrypted_statistics]: init finished");
     // compute sample iv statistics by one traverse
     int split_iterator = 0;
     for (int sample_idx = 0; sample_idx < sample_num; sample_idx++) {
@@ -1265,6 +1301,7 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
     delete [] right_stat_help;
   }
 
+  delete [] weighted_sample_mask_iv;
   djcs_t_free_public_key(phe_pub_key);
 
   const clock_t finish_time = clock();
