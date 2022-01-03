@@ -13,7 +13,7 @@
 #include <iostream>
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/model/model_io.h>
-
+#include <falcon/operator/mpc/spdz_connector.h>
 
 DTParameterServer::DTParameterServer(const DTParameterServer &obj) {}
 
@@ -188,6 +188,9 @@ void DTParameterServer::build_tree(){
   std::vector< EncodedNumber* > node_mask_stack;
   std::vector< EncodedNumber* > node_label_stack;
 
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+
   /// 2. start training
   while (!node_index_stack.empty()){
 
@@ -210,45 +213,45 @@ void DTParameterServer::build_tree(){
       }
       break;
     }
-//    // check if stopping the training
-//    if (node_index > 0){
-//
-//      log_info("[Ps.build_tree]: step 2.2, check if stopping the training");
-//
-//      EncodedNumber* sample_mask_iv = node_mask_stack.back();
-//      node_mask_stack.pop_back();
-//      EncodedNumber* encrypted_labels = node_label_stack.back();
-//      node_label_stack.pop_back();
-//
-//      // print sample_mask_iv[sample_num-1] info for debug
-//      int sample_num = alg_builder.train_data_size;
-//      log_info("[Ps.build_tree]: step 2.2, sample_num = " + to_string(sample_num));
-//      log_info("[Ps.build_tree]: step 2.2, sample_mask_iv[sample_num-1].exponent = " + to_string(sample_mask_iv[sample_num-1].getter_exponent()));
-//      mpz_t t;
-//      mpz_init(t);
-//      sample_mask_iv[sample_num-1].getter_n(t);
-//      gmp_printf("[Ps.build_tree]: step 2.2, sample_mask_iv[sample_num-1].n = %Zd", t);
-//      mpz_clear(t);
-//
-//      /// step 1: check pruning condition via spdz computation
-//      bool is_satisfied = alg_builder.check_pruning_conditions(
-//          party, node_index, sample_mask_iv);
-//
-//      log_info("[Ps.build_tree]: step 2.2, is_satisfied = " + to_string(is_satisfied));
-//
-//      /// step 2: if satisfied, compute label via spdz computation
-//      if (is_satisfied) {
-//        alg_builder.compute_leaf_statistics(party, node_index, sample_mask_iv, encrypted_labels);
-//        log_info("[Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers");
-//
-//        for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
-//          this->send_long_message_to_worker(wk_index, "stop");
-//        }
-//        break;
-//      }else{
-//        log_info("[Ps.build_tree]: step 2.2, Node is not satisfied, continue training");
-//      }
-//    }
+    // check if stopping the training
+    if (node_index > 0){
+
+      log_info("[Ps.build_tree]: step 2.2, check if stopping the training");
+
+      EncodedNumber* sample_mask_iv = node_mask_stack.back();
+      node_mask_stack.pop_back();
+      EncodedNumber* encrypted_labels = node_label_stack.back();
+      node_label_stack.pop_back();
+
+      // print sample_mask_iv[sample_num-1] info for debug
+      int sample_num = alg_builder.train_data_size;
+      log_info("[Ps.build_tree]: step 2.2, sample_num = " + to_string(sample_num));
+      log_info("[Ps.build_tree]: step 2.2, sample_mask_iv[sample_num-1].exponent = " + to_string(sample_mask_iv[sample_num-1].getter_exponent()));
+      mpz_t t;
+      mpz_init(t);
+      sample_mask_iv[sample_num-1].getter_n(t);
+      gmp_printf("[Ps.build_tree]: step 2.2, sample_mask_iv[sample_num-1].n = %Zd", t);
+      mpz_clear(t);
+
+      /// step 1: check pruning condition via spdz computation
+      bool is_satisfied = alg_builder.check_pruning_conditions(
+          party, node_index, sample_mask_iv);
+
+      log_info("[Ps.build_tree]: step 2.2, is_satisfied = " + to_string(is_satisfied));
+
+      /// step 2: if satisfied, compute label via spdz computation
+      if (is_satisfied) {
+        alg_builder.compute_leaf_statistics(party, node_index, sample_mask_iv, encrypted_labels);
+        log_info("[Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers");
+
+        for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
+          this->send_long_message_to_worker(wk_index, "stop");
+        }
+        break;
+      }else{
+        log_info("[Ps.build_tree]: step 2.2, Node is not satisfied, continue training");
+      }
+    }
 
     /// 2.3 send node index to worker
     log_info("[Ps.build_tree]: step 2.3, ps boardcast node index = " + to_string(node_index) + "to workers");
@@ -501,22 +504,21 @@ void DTParameterServer::save_model(const std::string& model_save_file){
 }
 
 
-std::vector<double> DTParameterServer::retrieve_global_best_split(const std::vector<string>& encoded_msg){
-  log_info("[Ps.retrieve_global_best_split]: send encoded msgs to worker to compare and get global best splits");
+std::vector<double> DTParameterServer::retrieve_global_best_split(const std::vector<string>& encoded_msgs){
+  log_info("[Ps.retrieve_global_best_split]: compare and get global best splits");
 
-  // currently, ps dont have mpc, so send it to worker 0 to compute
-  int received_worker_id = 0;
-  // send number of workers to worker 0
-  this->send_long_message_to_worker(received_worker_id, to_string(encoded_msg.size()));
 
-  for (const auto& msg: encoded_msg){
-    this->send_long_message_to_worker(received_worker_id, msg);
+  std::vector< vector <double> > local_best_splits_vector;
+
+  for ( const auto& encoded_msg: encoded_msgs){
+    std::vector<double> local_best_split;
+    deserialize_double_array(local_best_split, encoded_msg);
+    local_best_splits_vector.push_back(local_best_split);
   }
 
-  std::string received_str;
-  std::vector<double> global_best_split;
-  this->recv_long_message_from_worker(received_worker_id, received_str);
-  deserialize_double_array(global_best_split, received_str);
+  //todo: implement compare
+
+  std::vector<double> global_best_split = local_best_splits_vector[0];
 
   int best_split_index = (int) global_best_split[0];
   double left_impurity = global_best_split[1];

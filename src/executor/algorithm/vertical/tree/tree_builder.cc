@@ -953,6 +953,11 @@ bool DecisionTreeBuilder::check_pruning_conditions(Party &party,
   private_values.push_back(condition_shares1[0]);
   private_values.push_back(condition_shares2[0]);
 
+  // print executor_mpc_ports for debug
+  for (int i = 0; i < party.executor_mpc_ports.size(); i++) {
+    log_info("[check_pruning_conditions]: party.executor_mpc_ports[" + std::to_string(i) + "] = " + std::to_string(party.executor_mpc_ports[i]));
+  }
+
   // check if encrypted sample count is less than a threshold (prune_sample_num),
   // or if the impurity satisfies the pruning condition
   // communicate with spdz parties and receive results
@@ -1753,9 +1758,9 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
     worker.send_long_message_to_ps(local_best_split_str);
 
     // only worker 1 help to do the compare
-    if (worker.worker_id == 1){
-      retrieve_global_best_split(worker);
-    }
+//    if (worker.worker_id == 1){
+//      retrieve_global_best_split(worker);
+//    }
 
     std::vector<double> final_decision_res;
     std::string final_decision_str;
@@ -2209,35 +2214,35 @@ void DecisionTreeBuilder::distributed_eval(Party &party,
 }
 
 
-void DecisionTreeBuilder::retrieve_global_best_split(const Worker &worker){
-
-  std::string received_str;
-  worker.recv_long_message_from_ps(received_str);
-
-  log_info("[DT_train_worker.retrieve_global_best_split]: number of workers:" + received_str);
-
-  std::vector< vector <double> > local_best_splits_vector;
-
-  for ( int i = 0; i< std::stoi(received_str); i++){
-    std::string received_encoded_msg;
-    std::vector<double> local_best_split;
-
-    worker.recv_long_message_from_ps(received_encoded_msg);
-    deserialize_double_array(local_best_split, received_encoded_msg);
-    local_best_splits_vector.push_back(local_best_split);
-
-  }
-
-  log_info("[DT_train_worker.retrieve_global_best_split]: begin to compare and get global best split");
-
-  //todo: implement compare
-
-  std::vector<double> global_best_split = local_best_splits_vector[0];
-
-  std::string send_str;
-  serialize_double_array(global_best_split, send_str);
-  worker.send_long_message_to_ps(send_str);
-}
+//void DecisionTreeBuilder::retrieve_global_best_split(const Worker &worker){
+//
+//  std::string received_str;
+//  worker.recv_long_message_from_ps(received_str);
+//
+//  log_info("[DT_train_worker.retrieve_global_best_split]: number of workers:" + received_str);
+//
+//  std::vector< vector <double> > local_best_splits_vector;
+//
+//  for ( int i = 0; i< std::stoi(received_str); i++){
+//    std::string received_encoded_msg;
+//    std::vector<double> local_best_split;
+//
+//    worker.recv_long_message_from_ps(received_encoded_msg);
+//    deserialize_double_array(local_best_split, received_encoded_msg);
+//    local_best_splits_vector.push_back(local_best_split);
+//
+//  }
+//
+//  log_info("[DT_train_worker.retrieve_global_best_split]: begin to compare and get global best split");
+//
+//  //todo: implement compare
+//
+//  std::vector<double> global_best_split = local_best_splits_vector[0];
+//
+//  std::string send_str;
+//  serialize_double_array(global_best_split, send_str);
+//  worker.send_long_message_to_ps(send_str);
+//}
 
 
 void spdz_tree_computation(int party_num,

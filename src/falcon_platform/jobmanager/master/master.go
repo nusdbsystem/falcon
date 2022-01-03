@@ -92,7 +92,7 @@ func newMaster(masterAddr string, partyNum uint) (ms *Master) {
 	ms.PartyNums = partyNum
 	ms.RequiredResource = make([]*common.LaunchResourceReply, ms.PartyNums)
 	ms.LimeDecision = LimeScheduleRes{}
-	ms.LimeDecision.ClassParallelism = 2
+	ms.LimeDecision.ClassParallelism = 1
 	ms.LimeDecision.workerParallelism = int32(ms.workerNum) / ms.LimeDecision.ClassParallelism
 	return
 }
@@ -348,8 +348,10 @@ func (master *Master) ExtractResourceInformation() {
 			}
 			psPortArray[i] = tmp
 		}
-		for i := 0; i < int(master.PartyNums); i++ {
-			mpcPortArray = append(mpcPortArray, int32(0))
+
+		// generate mpc port array, for each ps
+		for _, port := range mpcExecutorPorts[workerID] {
+			mpcPortArray = append(mpcPortArray, int32(port))
 		}
 
 		// generate mpc port array, for each executor
@@ -357,6 +359,14 @@ func (master *Master) ExtractResourceInformation() {
 		executorPairNetworkCfg[workerID] = networkCfg
 		logger.Log.Println("[Master.extractResourceInfo] executorPairNetworkCfg including parameter server "+
 			"workerID:b64_Str is ", executorPairNetworkCfg)
+
+		// generate network config for ps
+		var portsMpc []int32
+		for _, port := range mpcPairsPorts[workerID] {
+			portsMpc = append(portsMpc, int32(port))
+		}
+		networkCfgMpc := getMpcMpcNetworkCfg(IPs, portsMpc)
+		mpcPairNetworkCfg[workerID] = networkCfgMpc
 	}
 
 	// generate network for each mpc pair
@@ -383,6 +393,7 @@ func (master *Master) ExtractResourceInformation() {
 
 		for workerID, svc := range master.RequiredResource[i].ResourceSVCs {
 			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.WorkerId: %d", i, workerID, svc.WorkerId)
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.GroupId: %d", i, workerID, svc.GroupId)
 			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.ResourceIP: %s", i, workerID, svc.ResourceIP)
 			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.WorkerPort: %d", i, workerID, svc.WorkerPort)
 			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.ExecutorExecutorPort: %d", i, workerID, svc.ExecutorExecutorPort)
