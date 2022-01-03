@@ -10,12 +10,12 @@ import (
 	"falcon_platform/partyserver"
 	"falcon_platform/resourcemanager"
 	"fmt"
+	"math/rand"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
-	"math/rand"
 )
 
 //	logPath (outside, LogPath):  …/falcon_logs or ./logs  store logs
@@ -80,7 +80,7 @@ func initLogger() {
 
 	var logFileName string
 	rand.Seed(time.Now().UnixNano())
-	logFileName = common.LogPath + "/" + common.ServiceName + "-" + rawTime.Format(layout) + "-" +fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
+	logFileName = common.LogPath + "/" + common.ServiceName + "-" + rawTime.Format(layout) + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
 	fmt.Println("Logs will be written to ", logFileName)
 
 	logger.Log, logger.LogFile = logger.GetLogger(logFileName)
@@ -246,6 +246,9 @@ func initEnv(svcName string) {
 		workerId, _ := strconv.Atoi(common.GetEnv("WORKER_ID", ""))
 		common.WorkerID = common.WorkerIdType(workerId)
 
+		GroupId, _ := strconv.Atoi(common.GetEnv("GROUP_ID", ""))
+		common.GroupID = common.GroupIdType(GroupId)
+
 		partyId, _ := strconv.Atoi(common.GetEnv("PARTY_ID", ""))
 		common.PartyID = common.PartyIdType(partyId)
 
@@ -367,7 +370,7 @@ func main() {
 		// init the train worker with addresses of master and worker, also the partyID
 		// this is the entry of prod model, in prod, only use NativeProcessMngr right now
 		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr, common.PartyID,
-			common.WorkerID, uint(common.DistributedRole))
+			common.WorkerID, common.GroupID, uint(common.DistributedRole))
 
 		wk.RunWorker(wk)
 

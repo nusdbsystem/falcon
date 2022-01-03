@@ -8,6 +8,7 @@ import (
 	"falcon_platform/logger"
 	"falcon_platform/utils"
 	"fmt"
+	"math"
 	"sync"
 	"time"
 )
@@ -23,7 +24,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	master.Lock()
 	var SerializedWorker []string
 	for _, worker := range master.workers {
-		tmp := fmt.Sprintf("WorkerAddr=%s, PartyID=%d, WorkerID=%d", worker.Addr, worker.PartyID, worker.WorkerID)
+		tmp := fmt.Sprintf("WorkerAddr=%s, PartyID=%d, GroupID=%d, WorkerID=%d", worker.Addr, worker.PartyID, worker.GroupID, worker.WorkerID)
 		SerializedWorker = append(SerializedWorker, tmp)
 	}
 	logger.Log.Println("[Master.Dispatcher]: All worker found:", SerializedWorker)
@@ -60,7 +61,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	if dslOjb.Tasks.PreProcessing.AlgorithmName != "" {
 
 		// Run mpc
-		master.dispatchMpcTask(&wg, dslOjb.Tasks.PreProcessing.MpcAlgorithmName)
+		master.dispatchMpcTask(&wg, dslOjb.Tasks.PreProcessing.MpcAlgorithmName, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
@@ -76,13 +77,13 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	if dslOjb.Tasks.ModelTraining.AlgorithmName != "" {
 
 		// Run mpc
-		master.dispatchMpcTask(&wg, dslOjb.Tasks.ModelTraining.MpcAlgorithmName)
+		master.dispatchMpcTask(&wg, dslOjb.Tasks.ModelTraining.MpcAlgorithmName, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
 
 		// Run model_training
-		master.dispatchGeneralTask(&wg, common.ModelTrainSubTask)
+		master.dispatchGeneralTask(&wg, common.ModelTrainSubTask, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
@@ -92,13 +93,13 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	if dslOjb.Tasks.LimePred.AlgorithmName != "" {
 
 		// Run mpc
-		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimePred.MpcAlgorithmName)
+		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimePred.MpcAlgorithmName, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
 
 		// Run model_training
-		master.dispatchGeneralTask(&wg, common.LimePredSubTask)
+		master.dispatchGeneralTask(&wg, common.LimePredSubTask, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
@@ -108,13 +109,13 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	if dslOjb.Tasks.LimeWeight.AlgorithmName != "" {
 
 		// Run mpc
-		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeWeight.MpcAlgorithmName)
+		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeWeight.MpcAlgorithmName, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
 
 		// Run model_training
-		master.dispatchGeneralTask(&wg, common.LimeWeightSubTask)
+		master.dispatchGeneralTask(&wg, common.LimeWeightSubTask, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
@@ -131,51 +132,161 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 			classNum = dslOjb.Tasks.LimeInterpret.ClassNum
 		}
 
-		// for each classID, assign tasks Serially
-		var selectFeatureFile = ""
-		var classId int32
-		for classId = 0; classId < classNum; classId++ {
+		if dslOjb.DistributedTask.Enable == 0 {
+			// for each classID, assign tasks Serially
+			var selectFeatureFile = ""
+			var classId int32
+			for classId = 0; classId < classNum; classId++ {
 
-			if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
+				if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
 
-				// generate SerializedAlgorithmConfig
-				dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
-					common.GenerateLimeFeatSelParams(dslOjb.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, classId)
+					// generate SerializedAlgorithmConfig
+					dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
+						common.GenerateLimeFeatSelParams(dslOjb.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, classId)
 
-				// Run mpc
-				master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeFeature.MpcAlgorithmName)
-				if ok := master.isSuccessful(); !ok {
-					return
+					// Run mpc
+					master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeFeature.MpcAlgorithmName, common.DefaultWorkerGroupID)
+					if ok := master.isSuccessful(); !ok {
+						return
+					}
+
+					// Run model_training
+					master.dispatchGeneralTask(&wg,
+						common.LimeFeatureSubTask+dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig,
+						common.DefaultWorkerGroupID)
+
+					if ok := master.isSuccessful(); !ok {
+						return
+					}
 				}
 
-				// Run model_training
-				master.dispatchGeneralTask(&wg, common.LimeFeatureSubTask+dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig)
-				if ok := master.isSuccessful(); !ok {
-					return
-				}
-			}
+				if dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
 
-			if dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
+					// generate SerializedAlgorithmConfig
+					dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
+						common.GenerateLimeInterpretParams(dslOjb.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, classId, selectFeatureFile)
 
-				// generate SerializedAlgorithmConfig
-				dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
-					common.GenerateLimeInterpretParams(dslOjb.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, classId, selectFeatureFile)
+					// Run mpc
+					master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName,
+						common.DefaultWorkerGroupID)
+					if ok := master.isSuccessful(); !ok {
+						return
+					}
 
-				// Run mpc
-				master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName)
-				if ok := master.isSuccessful(); !ok {
-					return
-				}
+					// Run model_training
+					master.dispatchGeneralTask(&wg, common.LimeInterpretSubTask+dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig,
+						common.DefaultWorkerGroupID)
 
-				// Run model_training
-				master.dispatchGeneralTask(&wg, common.LimeInterpretSubTask+dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig)
-				if ok := master.isSuccessful(); !ok {
-					return
+					if ok := master.isSuccessful(); !ok {
+						return
+					}
 				}
 			}
 		}
 
-		//todo: for each classID, assign tasks Parallelly?
+		if dslOjb.DistributedTask.Enable == 1 {
+
+			classIterationTimes := int(math.Ceil(float64(classNum / master.LimeDecision.ClassParallelism)))
+
+			// generate availableGroupIds
+			var availableGroupIds []common.GroupIdType
+			for i := int32(0); i < master.LimeDecision.ClassParallelism; i++ {
+				availableGroupIds = append(availableGroupIds, common.GroupIdType(i))
+			}
+
+			var classId int32 = 0
+			var curIter = 0
+
+			// for each iteration, assign task to many workers
+			for curIter < classIterationTimes {
+				if classId == classNum {
+					break
+				}
+
+				// for each group, assign a class id
+				for i := 0; i < len(availableGroupIds); i++ {
+
+					if classId == classNum {
+						break
+					}
+
+					groupId := availableGroupIds[0]
+					availableGroupIds = availableGroupIds[1:]
+
+					go func(groupIdParam common.GroupIdType, classIdParam int32, availableGroupIds *[]common.GroupIdType) {
+
+						var selectFeatureFile = ""
+
+						if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
+
+							// generate SerializedAlgorithmConfig
+							dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
+								common.GenerateLimeFeatSelParams(dslOjb.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, classIdParam)
+
+							// Run mpc
+							master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeFeature.MpcAlgorithmName, groupIdParam)
+							if ok := master.isSuccessful(); !ok {
+								return
+							}
+
+							// Run model_training
+							master.dispatchGeneralTask(&wg,
+								common.LimeFeatureSubTask+dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig,
+								groupIdParam)
+
+							if ok := master.isSuccessful(); !ok {
+								return
+							}
+						}
+
+						if dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
+
+							// generate SerializedAlgorithmConfig
+							dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
+								common.GenerateLimeInterpretParams(dslOjb.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig,
+									classIdParam, selectFeatureFile)
+
+							// Run mpc
+							master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName,
+								groupIdParam)
+							if ok := master.isSuccessful(); !ok {
+								return
+							}
+
+							// Run model_training
+							master.dispatchGeneralTask(&wg,
+								common.LimeInterpretSubTask+dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig,
+								groupIdParam)
+
+							if ok := master.isSuccessful(); !ok {
+								return
+							}
+						}
+
+						// after finishing the task, append the groupIdParam back to availableGroupIds
+						*availableGroupIds = append(*availableGroupIds, groupIdParam)
+
+					}(groupId, classId, &availableGroupIds)
+
+					// process the next task, with new classID
+					classId++
+				}
+
+				curIter++
+			}
+
+			// wait until all task done
+			for {
+				if int32(len(availableGroupIds)) == master.LimeDecision.ClassParallelism && // all groupId has been released
+					// classId is latest
+					classId == classNum {
+					break
+				} else {
+					time.Sleep(20 * time.Second)
+				}
+			}
+
+		}
 
 	}
 

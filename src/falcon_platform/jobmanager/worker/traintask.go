@@ -1079,7 +1079,7 @@ func (wk *TrainWorker) mpc(algName string) {
 		"write port [%s] to file [%s] \n", wk.DslObj.MpcExecutorNetworkCfg, mpcExecutorPortFile)
 
 	// in distributed training situation and this worker is train worker
-	if wk.DslObj.DistributedTask.Enable == 1 && wk.DistributedRole == common.DistributedWorker {
+	if wk.DslObj.DistributedTask.Enable == 1 {
 		cmd = exec.Command(
 			common.MpcExePath,
 			"-F",

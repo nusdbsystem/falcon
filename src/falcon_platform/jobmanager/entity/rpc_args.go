@@ -50,8 +50,10 @@ type WorkerInfo struct {
 	Addr string
 	// the same as the ID of the party
 	PartyID common.PartyIdType
-	// the same as the ID of the party
+
 	WorkerID common.WorkerIdType
+
+	GroupID common.GroupIdType
 }
 
 type ShutdownReply struct {
@@ -102,7 +104,9 @@ func EncodeWorkerInfo(args *WorkerInfo) string {
 		":" +
 		fmt.Sprintf("%d", args.PartyID) + // 2
 		":" +
-		fmt.Sprintf("%d", args.WorkerID) // 3
+		fmt.Sprintf("%d", args.WorkerID) + // 3
+		":" +
+		fmt.Sprintf("%d", args.GroupID) // 4
 
 	return encodedStr
 }
@@ -114,11 +118,13 @@ func DecodeWorkerInfo(encodedStr string) *WorkerInfo {
 	tmpAddr := workerTmpList[0] + ":" + workerTmpList[1]
 	tmpPartyID, _ := strconv.Atoi(workerTmpList[2])
 	tmpWorkerID, _ := strconv.Atoi(workerTmpList[3])
+	tmpWorkerGroupID, _ := strconv.Atoi(workerTmpList[4])
 
 	args := new(WorkerInfo)
 	args.Addr = tmpAddr
 	args.PartyID = common.PartyIdType(tmpPartyID)
 	args.WorkerID = common.WorkerIdType(tmpWorkerID)
+	args.GroupID = common.GroupIdType(tmpWorkerGroupID)
 	return args
 }
 

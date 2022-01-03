@@ -26,17 +26,22 @@ func schedule(workerId common.WorkerIdType) (nodeId int) {
 func RunWorker(masterAddr, workerType,
 	jobId,
 	dataPath, modelPath, dataOutput string,
-	workerGroupNum, partyNum int) *common.LaunchResourceReply {
+	enableDistributedTrain int,
+	workerPreGroup, partyNum, workerGroupNum int) *common.LaunchResourceReply {
 
 	reply := new(common.LaunchResourceReply)
-	reply.ResourceNum = workerGroupNum
+	reply.ResourceNum = workerPreGroup
 	reply.PartyID = common.PartyID
 	reply.ResourceSVCs = make(map[common.WorkerIdType]*common.ResourceSVC)
 
-	logger.Log.Println("[PartyServer]: PartyServer setup workers, workerGroupNum = ", workerGroupNum)
+	var totalWorkerNum common.WorkerIdType = common.WorkerIdType(workerGroupNum * workerPreGroup)
+
+	logger.Log.Println(
+		"[PartyServer]: PartyServer setup workers, workerGroupNum = ", workerGroupNum,
+		" workerPreGroup = ", workerPreGroup, "totalWorkers=", totalWorkerNum)
 
 	// centralized way
-	if workerGroupNum == 1 {
+	if enableDistributedTrain == 0 {
 		logger.Log.Println("[PartyServer]: PartyServer setup one worker for centralized training")
 
 		// in centralized way, to avoid schedule worker to fixed server every time, use jobId
@@ -50,6 +55,7 @@ func RunWorker(masterAddr, workerType,
 		resourceSVC := new(common.ResourceSVC)
 		resourceSVC.WorkerId = workerId
 		resourceSVC.ResourceIP = nodeIP
+		resourceSVC.GroupId = common.DefaultWorkerGroupID
 		resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
 		resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
 		resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
@@ -81,74 +87,101 @@ func RunWorker(masterAddr, workerType,
 	}
 
 	// in distributed way, currently, only support using docker, others could be added later
-	if workerGroupNum > 1 {
-		logger.Log.Println("[PartyServer]: PartyServer setup one worker as parameter " +
-			"server to conduct distributed training")
+	if enableDistributedTrain == 1 {
 
 		var workerId common.WorkerIdType = 0
+		var groupId common.GroupIdType = 0
 
-		nodeID := schedule(workerId)
-		nodeIP := common.PartyServerClusterIPs[nodeID]
+		// for each worker group, deploy one ps and many workers
+		for groupId < common.GroupIdType(workerGroupNum) {
 
-		// init resourceSVC information
-		resourceSVC := new(common.ResourceSVC)
-		resourceSVC.WorkerId = workerId
-		resourceSVC.ResourceIP = nodeIP
-		resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
-		resourceSVC.ExecutorExecutorPort = []common.PortType{}
-		resourceSVC.MpcMpcPort = 0
-		resourceSVC.MpcExecutorPort = 0
-		resourceSVC.ExecutorPSPort = 0
-		resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerGroupNum - 1)
-		resourceSVC.PsPsPorts = resourcemanager.GetFreePort(partyNum)
-		resourceSVC.DistributedRole = common.DistributedParameterServer
-		reply.ResourceSVCs[workerId] = resourceSVC
+			logger.Log.Println("[PartyServer]: PartyServer deploy worker and ps for group", groupId, "...")
 
-		// 1 worker is for serving parameter server
-		if common.Deployment == common.Docker {
-			nodeLabel := common.PartyServerClusterLabels[nodeID]
-			jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-				dataOutput, resourceSVC, common.DistributedParameterServer, nodeLabel)
+			// 1 worker is for serving parameter server
 
-		} else {
-			logger.Log.Printf("[PartyServer]: Deployment %s not supported in distributed training\n", common.Deployment)
-		}
-
-		// other workers are for serving train worker
-		for workerID := 1; workerID < workerGroupNum; workerID++ {
-
-			logger.Log.Printf("[PartyServer]: PartyServer setup one worker %d as train worker "+
-				"to conduct distributed training\n", workerID)
-
-			nodeID := schedule(common.WorkerIdType(workerID))
+			logger.Log.Println("[PartyServer]: PartyServer setup one worker as parameter " +
+				"server to conduct distributed training")
+			nodeID := schedule(workerId)
 			nodeIP := common.PartyServerClusterIPs[nodeID]
-
 			// init resourceSVC information
 			resourceSVC := new(common.ResourceSVC)
-			resourceSVC.WorkerId = common.WorkerIdType(workerID)
+			resourceSVC.WorkerId = workerId
+			resourceSVC.GroupId = groupId
 			resourceSVC.ResourceIP = nodeIP
 			resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
-			resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
+			resourceSVC.ExecutorExecutorPort = []common.PortType{}
 			resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
-			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId))
-			resourceSVC.ExecutorPSPort = resourcemanager.GetFreePort(1)[0]
-			resourceSVC.PsExecutorPorts = []common.PortType{}
-			resourceSVC.PsPsPorts = []common.PortType{}
-			resourceSVC.DistributedRole = common.DistributedWorker
-			reply.ResourceSVCs[common.WorkerIdType(workerID)] = resourceSVC
-
-			logger.Log.Printf("[PartyServer]: PartyServer setup one worker as train worker with workerID=%d to "+
-				"conduct distributed training\n", workerID)
-
+			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0)
+			resourceSVC.ExecutorPSPort = 0
+			resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerPreGroup - 1)
+			resourceSVC.PsPsPorts = resourcemanager.GetFreePort(partyNum)
+			resourceSVC.DistributedRole = common.DistributedParameterServer
+			reply.ResourceSVCs[workerId] = resourceSVC
 			if common.Deployment == common.Docker {
 				nodeLabel := common.PartyServerClusterLabels[nodeID]
 				jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-					dataOutput, resourceSVC, common.DistributedWorker, nodeLabel)
+					dataOutput, resourceSVC, common.DistributedParameterServer, nodeLabel)
 
 			} else {
-				logger.Log.Printf("[PartyServer]: Deployment %s not supported in distributed training\n",
-					common.Deployment)
+				if common.IsDebug == common.DebugOn {
+					resourceSVC.ResourceIP = common.PartyServerIP
+					jobmanager.DeployWorkerThread(masterAddr, workerType, jobId, dataPath, modelPath,
+						dataOutput, resourceSVC, common.DistributedParameterServer)
+
+				} else {
+					logger.Log.Printf("[PartyServer]: Deployment %s not supported in distributed training\n", common.Deployment)
+				}
 			}
+			workerId++
+
+			// other workers are for serving train worker
+			for ii := 1; ii < workerPreGroup; ii++ {
+
+				logger.Log.Printf("[PartyServer]: PartyServer setup one worker %d as train worker "+
+					"to conduct distributed training\n", workerId)
+
+				nodeID := schedule(workerId)
+				nodeIP := common.PartyServerClusterIPs[nodeID]
+
+				// init resourceSVC information
+				resourceSVC := new(common.ResourceSVC)
+				resourceSVC.WorkerId = workerId
+				resourceSVC.GroupId = groupId
+				resourceSVC.ResourceIP = nodeIP
+				resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
+				resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
+				resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
+				resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId))
+				resourceSVC.ExecutorPSPort = resourcemanager.GetFreePort(1)[0]
+				resourceSVC.PsExecutorPorts = []common.PortType{}
+				resourceSVC.PsPsPorts = []common.PortType{}
+				resourceSVC.DistributedRole = common.DistributedWorker
+				reply.ResourceSVCs[workerId] = resourceSVC
+
+				logger.Log.Printf("[PartyServer]: PartyServer setup one worker as train worker with workerID=%d to "+
+					"conduct distributed training\n", workerId)
+
+				if common.Deployment == common.Docker {
+					nodeLabel := common.PartyServerClusterLabels[nodeID]
+					jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
+						dataOutput, resourceSVC, common.DistributedWorker, nodeLabel)
+
+				} else {
+
+					if common.IsDebug == common.DebugOn {
+						resourceSVC.ResourceIP = common.PartyServerIP
+						jobmanager.DeployWorkerThread(masterAddr, workerType, jobId, dataPath, modelPath,
+							dataOutput, resourceSVC, common.DistributedWorker)
+
+					} else {
+						logger.Log.Printf("[PartyServer]: Deployment %s not supported in distributed training\n",
+							common.Deployment)
+					}
+				}
+
+				workerId++
+			}
+			groupId++
 		}
 	}
 

@@ -46,6 +46,9 @@ type WorkerBase struct {
 	// each worker is linked to the PartyID
 	PartyID common.PartyIdType
 
+	// each worker is linked to the PartyID
+	GroupID common.GroupIdType
+
 	// DistributedRole=1 worker, DistributedRole=0 parameter sever
 	DistributedRole uint
 
@@ -89,6 +92,7 @@ func (w *WorkerBase) RegisterToMaster(MasterAddr string) {
 	worker := new(entity.WorkerInfo)
 	worker.Addr = w.Addr
 	worker.PartyID = w.PartyID
+	worker.GroupID = w.GroupID
 	worker.WorkerID = w.WorkerID
 
 	logger.Log.Printf("[WorkerBase]: call Master.RegisterWorker to register WorkerAddr: %s \n", worker.Addr)

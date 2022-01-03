@@ -69,10 +69,10 @@ func ManageJobLifeCycle(masterAddr string, dslOjb *cache.DslObj, workerType stri
 
 	// default use only 1 worker in centralized way.
 	// in distributed training/inference, each party will launch multiple workers, and default use only 1 ps
-	var workerGroupNum = 1
+	var workerPreGroup = 1
 	if dslOjb.DistributedTask.Enable == 1 {
 		parameterServerNum := 1
-		workerGroupNum = dslOjb.DistributedTask.WorkerNumber + parameterServerNum
+		workerPreGroup = dslOjb.DistributedTask.WorkerNumber + parameterServerNum
 	}
 
 	// master will call party server's endpoint to launch worker, to train or predict
@@ -89,7 +89,9 @@ func ManageJobLifeCycle(masterAddr string, dslOjb *cache.DslObj, workerType stri
 			masterAddr, workerType,
 			fmt.Sprintf("%d", dslOjb.JobId),
 			dataPath, modelPath, dataOutput,
-			workerGroupNum, int(dslOjb.PartyNums),
+			dslOjb.DistributedTask.Enable,
+			workerPreGroup, int(dslOjb.PartyNums),
+			int(ms.LimeDecision.ClassParallelism),
 		)
 
 		reply := new(common.RunWorkerReply)

@@ -71,12 +71,14 @@ const (
 
 	TaskTypeKey = "task-type"
 
-	TrainDataPath    = "train-data-path"
-	TrainDataOutput  = "train-data-output"
-	ModelPath        = "model-path"
-	WorkerGroupNum   = "worker-group-num"
-	IsTrained        = "is_trained"
-	TotalPartyNumber = "total-party-num"
+	TrainDataPath          = "train-data-path"
+	TrainDataOutput        = "train-data-output"
+	ModelPath              = "model-path"
+	WorkerPreGroup         = "worker-num-pre-group"
+	IsTrained              = "is_trained"
+	TotalPartyNumber       = "total-party-num"
+	WorkerGroupNumber      = "worker-group-num"
+	EnableDistributedTrain = "enable-distributed-train"
 
 	JobName = "job_name"
 	ExtInfo = "ext_info"
@@ -176,6 +178,10 @@ const (
 	DistributedParameterServer = 0
 	DistributedWorker          = 1
 	CentralizedWorker          = 2
+)
+
+const (
+	DefaultWorkerGroupID = 0
 )
 
 // if pass empty params in cmd. pass "0" to avoid error

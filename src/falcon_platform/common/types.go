@@ -11,3 +11,5 @@ type PartyIdType uint
 type WorkerIdType uint
 
 type PortType int32
+
+type GroupIdType uint

@@ -80,6 +80,7 @@ var (
 
 var (
 	WorkerID WorkerIdType
+	GroupID  GroupIdType
 	// used in distributed training, ps, worker, or centralized
 	DistributedRole int
 

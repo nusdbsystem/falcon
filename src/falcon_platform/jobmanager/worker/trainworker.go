@@ -32,12 +32,15 @@ type TrainWorker struct {
 	distributedRole： 0: ps, 1: worker
  * @return
  **/
-func InitTrainWorker(masterAddr, workerAddr string, PartyID common.PartyIdType, WorkerID common.WorkerIdType, DistributedRole uint) *TrainWorker {
+func InitTrainWorker(masterAddr, workerAddr string,
+	PartyID common.PartyIdType, WorkerID common.WorkerIdType, GroupID common.GroupIdType,
+	DistributedRole uint) *TrainWorker {
 
 	wk := TrainWorker{}
 	wk.InitWorkerBase(workerAddr, common.TrainWorker)
 	wk.MasterAddr = masterAddr
 	wk.PartyID = PartyID
+	wk.GroupID = GroupID
 	wk.WorkerID = WorkerID
 	wk.DistributedRole = DistributedRole
 
@@ -164,11 +167,11 @@ func (wk *TrainWorker) DoTask(taskName string, rep *entity.DoTaskReply) error {
 
 func (wk *TrainWorker) RunMpc(mpcAlgorithmName string, rep *entity.DoTaskReply) error {
 
-	if wk.DslObj.DistributedTask.Enable == 1 && wk.DistributedRole == common.DistributedParameterServer {
-		logger.Log.Println("[TrainWorker]: this is Parameter server, skip executing mpc")
-		rep.RuntimeError = false
-		return nil
-	}
+	//if wk.DslObj.DistributedTask.Enable == 1 && wk.DistributedRole == common.DistributedParameterServer {
+	//	logger.Log.Println("[TrainWorker]: this is Parameter server, skip executing mpc")
+	//	rep.RuntimeError = false
+	//	return nil
+	//}
 
 	// 1. decode args
 	logger.Log.Println("[TrainWorker] TrainWorker.RunMpc called, mpcAlgorithmName:", mpcAlgorithmName)

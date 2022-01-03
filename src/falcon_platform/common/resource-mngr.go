@@ -30,6 +30,9 @@ type ResourceSVC struct {
 	// worker id
 	WorkerId WorkerIdType
 
+	// group id, this is used by lime, lime can be trained in distributed way
+	GroupId GroupIdType
+
 	// Ip of the service running in this resource
 	ResourceIP string
 

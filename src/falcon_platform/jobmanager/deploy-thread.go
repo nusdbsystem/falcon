@@ -60,7 +60,10 @@ func DeployWorkerThread(masterAddr, workerType, jobId,
 
 		serviceName = "job-" + jobId + "-train"
 		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
-		wk := worker.InitTrainWorker(masterAddr, workerAddr, common.PartyID, resourceSVCs.WorkerId, distributedRole)
+		wk := worker.InitTrainWorker(masterAddr, workerAddr,
+			common.PartyID, resourceSVCs.WorkerId, resourceSVCs.GroupId,
+			distributedRole)
+
 		go func() {
 			defer logger.HandleErrors()
 			wk.RunWorker(wk)

@@ -47,11 +47,7 @@ func (master *Master) dispatchDslObj(wg *sync.WaitGroup, dslObj *cache.DslObj) {
 			workerAddr := ResourceSVC.ToAddr(ResourceSVC.WorkerPort)
 			dslObj4sp.ExecutorPairNetworkCfg = master.ExtractedResource.executorPairNetworkCfg[workerID]
 			dslObj4sp.MpcPairNetworkCfg = master.ExtractedResource.mpcPairNetworkCfg[workerID]
-			if ResourceSVC.DistributedRole != common.DistributedParameterServer {
-				dslObj4sp.MpcExecutorNetworkCfg = master.ExtractedResource.mpcExecutorNetworkCfg[workerID][partyIndex]
-			} else {
-				dslObj4sp.MpcExecutorNetworkCfg = "0"
-			}
+			dslObj4sp.MpcExecutorNetworkCfg = master.ExtractedResource.mpcExecutorNetworkCfg[workerID][partyIndex]
 
 			// encode object and send to the worker
 			args := entity.EncodeDslObj4SingleParty(dslObj4sp)
@@ -70,20 +66,21 @@ func (master *Master) dispatchDslObj(wg *sync.WaitGroup, dslObj *cache.DslObj) {
 }
 
 /**
- * @Description dispatch mpc task to each worker, worker decide to accept or not
+ * @Description dispatch mpc task to each worker in this group, worker decide to accept or not
  * @Date 下午2:49 25/08/21
  * @Param mpcAlgoName, Algorithm name for running mpc, different algorithm use different mpc
  * @return
  **/
-func (master *Master) dispatchMpcTask(wg *sync.WaitGroup, mpcAlgoName string) {
+func (master *Master) dispatchMpcTask(wg *sync.WaitGroup, mpcAlgoName string, groupID common.GroupIdType) {
 	master.Lock()
 	for _, worker := range master.workers {
-		wg.Add(1)
-		go func(addr string) {
-			defer logger.HandleErrors()
-			master.dispatchTask(addr, mpcAlgoName, "RunMpc", wg)
-		}(worker.Addr)
-
+		if worker.GroupID == groupID {
+			wg.Add(1)
+			go func(addr string) {
+				defer logger.HandleErrors()
+				master.dispatchTask(addr, mpcAlgoName, "RunMpc", wg)
+			}(worker.Addr)
+		}
 	}
 	master.Unlock()
 	wg.Wait()
@@ -116,14 +113,16 @@ func (master *Master) dispatchPreProcessingTask(wg *sync.WaitGroup) {
  * @Param
  * @return
  **/
-func (master *Master) dispatchGeneralTask(wg *sync.WaitGroup, taskName string) {
+func (master *Master) dispatchGeneralTask(wg *sync.WaitGroup, taskName string, groupID common.GroupIdType) {
 	master.Lock()
 	for _, worker := range master.workers {
-		wg.Add(1)
-		go func(addr string) {
-			defer logger.HandleErrors()
-			master.dispatchTask(addr, taskName, "DoTask", wg)
-		}(worker.Addr)
+		if worker.GroupID == groupID {
+			wg.Add(1)
+			go func(addr string) {
+				defer logger.HandleErrors()
+				master.dispatchTask(addr, taskName, "DoTask", wg)
+			}(worker.Addr)
+		}
 	}
 
 	master.Unlock()

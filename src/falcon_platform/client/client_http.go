@@ -23,7 +23,7 @@ func PartyServerAdd(ServerAddr, partyserverAddr, partyserverPort string) {
 	resp, err := PostForm(reqUrl, data)
 	defer func() {
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 	if err != nil || resp.StatusCode != 200 {
@@ -39,7 +39,7 @@ func PartyServerDelete(ServerAddr, partyserverAddr string) {
 	resp, err := PostForm(reqUrl, data)
 	defer func() {
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 	if err != nil || resp.StatusCode != 200 {
@@ -51,24 +51,27 @@ func RunWorker(ServerAddr string, masterAddr string,
 	workerType string,
 	jobId string,
 	dataPath, modelPath, dataOutput string,
-	workerGroupNum, partyNum int,
+	enableDistributedTrain int,
+	workerPreGroup, partyNum, workerGroupNum int,
 ) []byte {
 	data := url.Values{
-		common.MasterAddrKey:    {masterAddr},
-		common.TaskTypeKey:      {workerType},
-		common.JobId:            {jobId},
-		common.TrainDataPath:    {dataPath},
-		common.ModelPath:        {modelPath},
-		common.TrainDataOutput:  {dataOutput},
-		common.WorkerGroupNum:   {fmt.Sprintf("%d", workerGroupNum)},
-		common.TotalPartyNumber: {fmt.Sprintf("%d", partyNum)},
+		common.MasterAddrKey:          {masterAddr},
+		common.TaskTypeKey:            {workerType},
+		common.JobId:                  {jobId},
+		common.TrainDataPath:          {dataPath},
+		common.ModelPath:              {modelPath},
+		common.TrainDataOutput:        {dataOutput},
+		common.EnableDistributedTrain: {fmt.Sprintf("%d", enableDistributedTrain)},
+		common.WorkerPreGroup:         {fmt.Sprintf("%d", workerPreGroup)},
+		common.TotalPartyNumber:       {fmt.Sprintf("%d", partyNum)},
+		common.WorkerGroupNumber:      {fmt.Sprintf("%d", workerGroupNum)},
 	}
 
 	reqUrl := ServerAddr + common.RunWorker
 	resp, err := PostForm(reqUrl, data)
 	defer func() {
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 	if err != nil || resp.StatusCode != 200 {
@@ -92,7 +95,7 @@ func JobUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 	resp, err := PostForm(reqUrl, data)
 	defer func() {
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 	if err != nil || resp.StatusCode != 200 {
@@ -111,7 +114,7 @@ func InferenceUpdateMaster(ServerAddr string, masterAddr string, jobId uint) {
 	resp, err := PostForm(reqUrl, data)
 	defer func() {
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 	if err != nil || resp.StatusCode != 200 {
@@ -132,7 +135,7 @@ func JobUpdateResInfo(ServerAddr string, errorMsg, jobResult, extInfo string, jo
 	resp, err := PostForm(reqUrl, data)
 	defer func() {
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 	if err != nil || resp.StatusCode != 200 {
@@ -170,7 +173,7 @@ func ModelUpdate(ServerAddr string, isTrained uint, jobId uint) {
 	resp, err := PostForm(reqUrl, data)
 	defer func() {
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 	if err != nil || resp.StatusCode != 200 {
@@ -189,7 +192,7 @@ func InferenceUpdateStatus(ServerAddr string, status string, jobId uint) {
 	resp, err := PostForm(reqUrl, data)
 	defer func() {
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 	}()
 	if err != nil || resp.StatusCode != 200 {

@@ -1,6 +1,8 @@
 package master
 
 import (
+	"bytes"
+	"encoding/json"
 	"falcon_platform/common"
 	"falcon_platform/jobmanager/base"
 	"falcon_platform/jobmanager/entity"
@@ -19,6 +21,13 @@ type ExtractedResource struct {
 	requiredWorkers        map[common.PartyIdType]map[common.WorkerIdType]bool
 }
 
+type LimeScheduleRes struct {
+	// alpha in paper, how many class running at the same time
+	ClassParallelism int32
+	// beta in paper, how many worker each class use
+	workerParallelism int32
+}
+
 type Master struct {
 	base.RpcBaseClass
 	// cond
@@ -32,6 +41,9 @@ type Master struct {
 	ExtractedResource ExtractedResource
 	// total party number
 	PartyNums uint
+
+	// lime
+	LimeDecision LimeScheduleRes
 
 	// tmp slice to store registered workers
 	tmpWorkers chan string
@@ -79,6 +91,9 @@ func newMaster(masterAddr string, partyNum uint) (ms *Master) {
 	ms.workerNum = 0
 	ms.PartyNums = partyNum
 	ms.RequiredResource = make([]*common.LaunchResourceReply, ms.PartyNums)
+	ms.LimeDecision = LimeScheduleRes{}
+	ms.LimeDecision.ClassParallelism = 2
+	ms.LimeDecision.workerParallelism = int32(ms.workerNum) / ms.LimeDecision.ClassParallelism
 	return
 }
 
@@ -86,7 +101,11 @@ func newMaster(masterAddr string, partyNum uint) (ms *Master) {
 // up to report that they are ready to receive tasks.
 func (master *Master) RegisterWorker(args *entity.WorkerInfo, _ *struct{}) error {
 
-	logger.Log.Println("[master/RegisterWorker] one Worker registered! args: ", args)
+	var out bytes.Buffer
+	bs, _ := json.Marshal(args)
+	_ = json.Indent(&out, bs, "", "\t")
+	logger.Log.Printf("[master.RegisterWorker] one Worker registered! args: %v\n", out.String())
+
 	// Pass WorkerAddrIdType (addr:partyID) into tmpWorkers for pre-processing
 	// IP:Port:WorkerID
 	encodedStr := entity.EncodeWorkerInfo(args)
@@ -100,14 +119,14 @@ func (master *Master) forwardRegistrations() {
 	master.BeginCountingWorkers.Wait()
 	master.Unlock()
 
-	logger.Log.Printf("[Master]: start forwardRegistrations... ")
+	logger.Log.Printf("[Master.forwardRegistrations]: start forwardRegistrations... ")
 
 loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
 
-			logger.Log.Println("[Master]: Thread-2 forwardRegistrations: exit")
+			logger.Log.Println("[Master.forwardRegistrations]: Thread-2 forwardRegistrations: exit")
 			break loop
 
 		case tmpWorker := <-master.tmpWorkers:
@@ -182,15 +201,15 @@ func (master *Master) ExtractResourceInformation() {
 			for workerID, ResourceSVC := range LaunchResourceReply.ResourceSVCs {
 				if orderedWorkId == int(workerID) {
 
+					// required workers id
+					if _, ok := requiredWorkers[partyID]; !ok {
+						requiredWorkers[partyID] = make(map[common.WorkerIdType]bool)
+					}
+					requiredWorkers[partyID][workerID] = false
+
 					// for centralized worker or distributed worker
 					if ResourceSVC.DistributedRole != common.DistributedParameterServer {
 						master.workerNum++
-
-						// required workers id
-						if _, ok := requiredWorkers[partyID]; !ok {
-							requiredWorkers[partyID] = make(map[common.WorkerIdType]bool)
-						}
-						requiredWorkers[partyID][workerID] = false
 
 						// resourceIps
 						if _, ok := executorPairIps[workerID]; !ok {
@@ -242,6 +261,19 @@ func (master *Master) ExtractResourceInformation() {
 						for wIndex, port := range ResourceSVC.PsExecutorPorts {
 							distPsPorts[partyID][wIndex] = port
 						}
+
+						// both ps and executors has mpc, assign mpc's ports
+						// record mpc-mpc port
+						if _, ok := mpcPairsPorts[workerID]; !ok {
+							mpcPairsPorts[workerID] = make([]common.PortType, master.PartyNums)
+						}
+						mpcPairsPorts[workerID][partyIndex] = ResourceSVC.MpcMpcPort
+
+						// mpc-executor ports
+						if _, ok := mpcExecutorPorts[workerID]; !ok {
+							mpcExecutorPorts[workerID] = make([]common.PortType, master.PartyNums)
+						}
+						mpcExecutorPorts[workerID][partyIndex] = ResourceSVC.MpcExecutorPort
 
 					}
 
