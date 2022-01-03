@@ -1066,6 +1066,9 @@ func (wk *TrainWorker) mpc(algName string) {
 	// write file to local disk, input path to mpc process
 	mpcExecutorPairNetworkCfgPath := fmt.Sprintf("/opt/falcon/third_party/MP-SPDZ/mpc-network-%d", wk.DslObj.PartyInfo.ID)
 
+	logger.Log.Printf("[TrainWorker]: Config mpc-network file, "+
+		"write [%s] to file [%s] \n", wk.DslObj.MpcPairNetworkCfg, mpcExecutorPairNetworkCfgPath)
+
 	tmpFile, err := os.Create(mpcExecutorPairNetworkCfgPath)
 	if err != nil {
 		logger.Log.Printf("[TrainWorker]: create file error, %s \n", mpcExecutorPairNetworkCfgPath)
@@ -1078,11 +1081,12 @@ func (wk *TrainWorker) mpc(algName string) {
 	}
 	_ = tmpFile.Close()
 
-	logger.Log.Printf("[TrainWorker]: Config mpcExecutorPairNetworkCfgPath file, "+
-		"write to file [%s] \n", mpcExecutorPairNetworkCfgPath)
 
 	// write file to local disk, input path to mpc process
 	mpcExecutorPortFile := common.MpcExecutorPortFileBasePath + algName
+	logger.Log.Printf("[TrainWorker]: Config mpcExecutorPortFile file, "+
+		"write [%s] to file [%s] \n", wk.DslObj.MpcExecutorNetworkCfg, mpcExecutorPortFile)
+
 	tmpFile, err = os.Create(mpcExecutorPortFile)
 	if err != nil {
 		logger.Log.Printf("[TrainWorker]: create file error, %s \n", mpcExecutorPortFile)
@@ -1095,7 +1099,7 @@ func (wk *TrainWorker) mpc(algName string) {
 	}
 	_ = tmpFile.Close()
 
-	logger.Log.Printf("[TrainWorker]: Config network-mpc, network file, "+
+	logger.Log.Printf("[TrainWorker]: Config mpcExecutorPairNetworkCfgPath file, "+
 		"write port [%s] to file [%s] \n", wk.DslObj.MpcExecutorNetworkCfg, mpcExecutorPortFile)
 
 	// in distributed training situation and this worker is train worker

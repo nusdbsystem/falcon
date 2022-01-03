@@ -45,6 +45,9 @@ void DTParameterServer::broadcast_train_test_data(
   int test_data_prev_index = 0;
   int test_data_last_index;
 
+  std::string worker_feature_index_prefix_train_data;
+  std::string worker_feature_index_prefix_test_data;
+
   for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
 
     // get the last index of training_data[0].size()
@@ -54,10 +57,15 @@ void DTParameterServer::broadcast_train_test_data(
     if (wk_index == this->worker_channels.size()-1){
       train_data_last_index = training_data[0].size();
       test_data_last_index = testing_data[0].size();
+      worker_feature_index_prefix_train_data += to_string(train_data_prev_index);
+      worker_feature_index_prefix_test_data += to_string(train_data_prev_index);
     }else{
       train_data_last_index = train_data_prev_index+each_worker_features_num; //4
       test_data_last_index = test_data_prev_index+each_worker_features_num; //4
+      worker_feature_index_prefix_train_data += to_string(train_data_prev_index) +" ";
+      worker_feature_index_prefix_test_data += to_string(train_data_prev_index)+" ";
     }
+
 
     // assign
     for(int j = 0; j < training_data.size(); j++){
@@ -83,6 +91,12 @@ void DTParameterServer::broadcast_train_test_data(
 
     train_data_prev_index = train_data_last_index;
     test_data_prev_index = test_data_last_index;
+  }
+
+  // ps send index perfix to each worker, each worker can map local to party-global index
+  for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
+    this->send_long_message_to_worker(wk_index, worker_feature_index_prefix_train_data);
+    this->send_long_message_to_worker(wk_index, worker_feature_index_prefix_test_data);
   }
 
   // only active ps sends the training labels and testing labels to workers
@@ -244,10 +258,10 @@ void DTParameterServer::build_tree(){
         alg_builder.compute_leaf_statistics(party, node_index, sample_mask_iv, encrypted_labels);
         log_info("[Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers");
 
-        for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
-          this->send_long_message_to_worker(wk_index, "stop");
-        }
-        break;
+//        for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
+//          this->send_long_message_to_worker(wk_index, "stop");
+//        }
+        continue;
       }else{
         log_info("[Ps.build_tree]: step 2.2, Node is not satisfied, continue training");
       }

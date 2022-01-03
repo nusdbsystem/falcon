@@ -164,7 +164,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 					// generate SerializedAlgorithmConfig
 					dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
-						common.GenerateLimeInterpretParams(dslOjb.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, classId, selectFeatureFile)
+						common.GenerateLimeInterpretParams(dslOjb.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, classId, selectFeatureFile, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName)
 
 					// Run mpc
 					master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName,
@@ -244,7 +244,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 							// generate SerializedAlgorithmConfig
 							dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
 								common.GenerateLimeInterpretParams(dslOjb.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig,
-									classIdParam, selectFeatureFile)
+									classIdParam, selectFeatureFile, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName)
 
 							// Run mpc
 							master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName,

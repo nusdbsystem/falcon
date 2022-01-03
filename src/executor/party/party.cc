@@ -11,7 +11,7 @@
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <falcon/utils/base64.h>
 #include <glog/logging.h>
-
+#include <falcon/utils/logger/logger.h>
 #include <cstdlib>
 #include <ctime>
 #include <falcon/network/ConfigFile.hpp>
@@ -167,6 +167,10 @@ void Party::init_network_channels(const std::string &m_network_file) {
         std::cout << "port_array[" << i << "][" << j
                   << "] = " << port_arrays[i][j] << std::endl;
       }
+    }
+
+    for (int i = 0; i < executor_mpc_ports.size(); i++) {
+      log_info("executor_mpc_ports[" + std::to_string(i) + "] = " + std::to_string(executor_mpc_ports[i]));
     }
   }
 

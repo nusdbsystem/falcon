@@ -1842,6 +1842,8 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
         }
       }
 
+      j_star += worker.get_train_feature_prefix();
+
       log_info("[DT_train_worker.distributed_train]: step 4.9, i_str and worker are matched with best split,"
                 "the Best feature id: j_star = " + to_string(j_star) +
                 "Best split id: s_star = " + to_string(s_star));
@@ -2476,6 +2478,29 @@ void train_decision_tree(
     worker->recv_long_message_from_ps(recv_testing_data_str);
     deserialize_double_matrix(training_data, recv_training_data_str);
     deserialize_double_matrix(testing_data, recv_testing_data_str);
+
+    std::string recv_worker_feature_index_prefix_train_data;
+    std::string recv_worker_feature_index_prefix_test_data;
+    worker->recv_long_message_from_ps(recv_worker_feature_index_prefix_train_data);
+    worker->recv_long_message_from_ps(recv_worker_feature_index_prefix_test_data);
+
+    // decode worker_feature_index_prefix_train_data
+    std::stringstream iss( recv_worker_feature_index_prefix_train_data );
+    int worker_feature_index_prefix_train_data_num;
+    std::vector<int> worker_feature_index_prefix_train_data_vector;
+    while ( iss >> worker_feature_index_prefix_train_data_num )
+      worker_feature_index_prefix_train_data_vector.push_back( worker_feature_index_prefix_train_data_num );
+
+    // decode worker_feature_index_prefix_test_data
+    std::stringstream iss2( recv_worker_feature_index_prefix_test_data );
+    int worker_feature_index_prefix_test_data_num;
+    std::vector<int> worker_feature_index_prefix_test_data_vector;
+    while ( iss2 >> worker_feature_index_prefix_test_data_num )
+      worker_feature_index_prefix_test_data_vector.push_back( worker_feature_index_prefix_test_data_num );
+
+    worker->assign_train_feature_prefix(worker_feature_index_prefix_train_data_vector[worker->worker_id-1]);
+    worker->assign_test_feature_prefix(worker_feature_index_prefix_test_data_vector[worker->worker_id-1]);
+
     if (party->party_type == falcon::ACTIVE_PARTY) {
       worker->recv_long_message_from_ps(recv_training_labels_str);
       worker->recv_long_message_from_ps(recv_testing_labels_str);
