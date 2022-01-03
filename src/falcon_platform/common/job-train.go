@@ -216,7 +216,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 		logger.Log.Println("ParseTrainJob: LimeInterpret AlgorithmName match <-->", jobInfo.Tasks.LimeInterpret.AlgorithmName)
 
 		_, jobInfo.Tasks.LimeInterpret.ClassNum =
-			GenerateLimeInterpretParams(jobInfo.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, 0, "")
+			GenerateLimeInterpretParams(jobInfo.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, 0, "", jobInfo.Tasks.LimeInterpret.MpcAlgorithmName)
 	} else {
 		return errors.New("algorithm name can not be detected")
 	}
@@ -540,65 +540,133 @@ func GenerateLimeFeatSelParams(cfg map[string]interface{}, classId int32) (strin
 
 }
 
-func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, selectFeatureFile string) (string, int32) {
+func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, selectFeatureFile string, mpcAlgName string) (string, int32) {
 
 	jb, err := json.Marshal(cfg)
 	if err != nil {
 		panic("GenerateLimeInterpretParams error in doing Marshal")
 	}
 
-	res := LimeInterpret{}
+	var out []byte
+	var classNum int32
 
-	if err := json.Unmarshal(jb, &res); err != nil {
-		// do error check
-		panic("GenerateLimeInterpretParams error in doing Unmarshal")
+
+	if mpcAlgName == LimeDecisionTreeAlgName{
+
+		res := LimeInterpretDT{}
+
+		if err := json.Unmarshal(jb, &res); err != nil {
+			// do error check
+			panic("GenerateLimeInterpretParams error in doing Unmarshal")
+		}
+
+		// if selectFeatureFile is empty , assign it to default value.
+		// 以及如果lime_feature有执行，那么lime_interpret中的selected_data_file: 也需要加上lime_feature中带class_id的输出；
+		// 如果lime_feature没有执行，那么lime_interpret可以是相同的
+		if selectFeatureFile == "" {
+			selectFeatureFile = res.SelectedDataFile
+		}
+
+		lr := v0.DecisionTreeParams{
+			TreeType:                 res.InterpretModelParam.TreeType,
+			Criterion:              res.InterpretModelParam.Criterion,
+			SplitStrategy:         res.InterpretModelParam.SplitStrategy,
+			ClassNum:        res.InterpretModelParam.ClassNum,
+			MaxDepth:                     res.InterpretModelParam.MaxDepth,
+			MaxBins:              res.InterpretModelParam.MaxBins,
+			MinSamplesSplit:                     res.InterpretModelParam.MinSamplesSplit,
+			MinSamplesLeaf:                   res.InterpretModelParam.MinSamplesLeaf,
+			MaxLeafNodes:                 res.InterpretModelParam.MaxLeafNodes,
+			MinImpurityDecrease:                    res.InterpretModelParam.MinImpurityDecrease,
+			MinImpuritySplit: res.InterpretModelParam.MinImpuritySplit,
+			DpBudget:                   res.InterpretModelParam.DpBudget,
+		}
+
+		out1, err := proto.Marshal(&lr)
+		if err != nil {
+			log.Fatalln("Failed to encode GenerateLimeInterpretParams:", err)
+		}
+
+		dtp := v0.LimeInterpretParams{
+			SelectedDataFile:        selectFeatureFile,
+			SelectedPredictionsFile: res.SelectedPredictionsFile,
+			SampleWeightsFile:       res.SampleWeightsFile,
+			NumSamples:              res.NumSamples,
+			ClassNum:                res.ClassNum,
+			ClassId:                 classId,
+			InterpretModelName:      res.InterpretModelName,
+			InterpretModelParam:     b64.StdEncoding.EncodeToString(out1),
+			ExplanationReport:       res.ExplanationReport,
+		}
+
+		out, err = proto.Marshal(&dtp)
+		if err != nil {
+			log.Fatalln("Failed to encode GenerateLimeInterpretParams:", err)
+		}
+
+		classNum = res.ClassNum
+
+	}else if mpcAlgName == LimeLinearRegressionAlgName{
+
+		res := LimeInterpretLR{}
+
+		if err := json.Unmarshal(jb, &res); err != nil {
+			// do error check
+			panic("GenerateLimeInterpretParams error in doing Unmarshal")
+		}
+
+		// if selectFeatureFile is empty , assign it to default value.
+		// 以及如果lime_feature有执行，那么lime_interpret中的selected_data_file: 也需要加上lime_feature中带class_id的输出；
+		// 如果lime_feature没有执行，那么lime_interpret可以是相同的
+		if selectFeatureFile == "" {
+			selectFeatureFile = res.SelectedDataFile
+		}
+
+		lr := v0.LinearRegressionParams{
+			BatchSize:                 res.InterpretModelParam.BatchSize,
+			MaxIteration:              res.InterpretModelParam.MaxIteration,
+			ConvergeThreshold:         res.InterpretModelParam.ConvergeThreshold,
+			WithRegularization:        res.InterpretModelParam.WithRegularization,
+			Alpha:                     res.InterpretModelParam.Alpha,
+			LearningRate:              res.InterpretModelParam.LearningRate,
+			Decay:                     res.InterpretModelParam.Decay,
+			Penalty:                   res.InterpretModelParam.Penalty,
+			Optimizer:                 res.InterpretModelParam.Optimizer,
+			Metric:                    res.InterpretModelParam.Metric,
+			DifferentialPrivacyBudget: res.InterpretModelParam.DifferentialPrivacyBudget,
+			FitBias:                   res.InterpretModelParam.FitBias,
+		}
+
+		out1, err := proto.Marshal(&lr)
+		if err != nil {
+			log.Fatalln("Failed to encode GenerateLimeInterpretParams:", err)
+		}
+
+		dtp := v0.LimeInterpretParams{
+			SelectedDataFile:        selectFeatureFile,
+			SelectedPredictionsFile: res.SelectedPredictionsFile,
+			SampleWeightsFile:       res.SampleWeightsFile,
+			NumSamples:              res.NumSamples,
+			ClassNum:                res.ClassNum,
+			ClassId:                 classId,
+			InterpretModelName:      res.InterpretModelName,
+			InterpretModelParam:     b64.StdEncoding.EncodeToString(out1),
+			ExplanationReport:       res.ExplanationReport,
+		}
+
+		out, err = proto.Marshal(&dtp)
+		if err != nil {
+			log.Fatalln("Failed to encode GenerateLimeInterpretParams:", err)
+		}
+
+		classNum = res.ClassNum
+
+	}else{
+		log.Fatalln("GenerateLimeInterpretParams, mpc alg name is not supported:", err)
 	}
 
-	// if selectFeatureFile is empty , assign it to default value.
-	// 以及如果lime_feature有执行，那么lime_interpret中的selected_data_file: 也需要加上lime_feature中带class_id的输出；
-	// 如果lime_feature没有执行，那么lime_interpret可以是相同的
-	if selectFeatureFile == "" {
-		selectFeatureFile = res.SelectedDataFile
-	}
 
-	lr := v0.LinearRegressionParams{
-		BatchSize:                 res.InterpretModelParam.BatchSize,
-		MaxIteration:              res.InterpretModelParam.MaxIteration,
-		ConvergeThreshold:         res.InterpretModelParam.ConvergeThreshold,
-		WithRegularization:        res.InterpretModelParam.WithRegularization,
-		Alpha:                     res.InterpretModelParam.Alpha,
-		LearningRate:              res.InterpretModelParam.LearningRate,
-		Decay:                     res.InterpretModelParam.Decay,
-		Penalty:                   res.InterpretModelParam.Penalty,
-		Optimizer:                 res.InterpretModelParam.Optimizer,
-		Metric:                    res.InterpretModelParam.Metric,
-		DifferentialPrivacyBudget: res.InterpretModelParam.DifferentialPrivacyBudget,
-		FitBias:                   res.InterpretModelParam.FitBias,
-	}
-
-	out1, err1 := proto.Marshal(&lr)
-	if err1 != nil {
-		log.Fatalln("Failed to encode GenerateLimeInterpretParams:", err)
-	}
-
-	dtp := v0.LimeInterpretParams{
-		SelectedDataFile:        selectFeatureFile,
-		SelectedPredictionsFile: res.SelectedPredictionsFile,
-		SampleWeightsFile:       res.SampleWeightsFile,
-		NumSamples:              res.NumSamples,
-		ClassNum:                res.ClassNum,
-		ClassId:                 classId,
-		InterpretModelName:      res.InterpretModelName,
-		InterpretModelParam:     b64.StdEncoding.EncodeToString(out1),
-		ExplanationReport:       res.ExplanationReport,
-	}
-
-	out, err := proto.Marshal(&dtp)
-	if err != nil {
-		log.Fatalln("Failed to encode GenerateLimeInterpretParams:", err)
-	}
-
-	return b64.StdEncoding.EncodeToString(out), res.ClassNum
+	return b64.StdEncoding.EncodeToString(out), classNum
 
 }
 

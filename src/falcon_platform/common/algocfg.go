@@ -196,7 +196,7 @@ type LimeFeatSel struct {
 }
 
 // This message denotes the LIME interpret model training parameters
-type LimeInterpret struct {
+type LimeInterpretLR struct {
 	// selected data file, either selected_samples_file or selected_features_file
 	SelectedDataFile string `json:"selected_data_file"`
 	// selected predictions saved
@@ -213,6 +213,28 @@ type LimeInterpret struct {
 	InterpretModelName string `json:"interpret_model_name"`
 	// interpretable model params, should be serialized LinearRegressionParams or DecisionTreeParams
 	InterpretModelParam LinearRegression `json:"interpret_model_param"`
+	// explanation report
+	ExplanationReport string `json:"explanation_report"`
+}
+
+// This message denotes the LIME interpret model training parameters
+type LimeInterpretDT struct {
+	// selected data file, either selected_samples_file or selected_features_file
+	SelectedDataFile string `json:"selected_data_file"`
+	// selected predictions saved
+	SelectedPredictionsFile string `json:"selected_predictions_file"`
+	// the sample weights file
+	SampleWeightsFile string `json:"sample_weights_file"`
+	// number of samples generated or selected
+	NumSamples int32 `json:"num_samples"`
+	// number of classes in classification, set to 1 if regression
+	ClassNum int32 `json:"class_num"`
+	// the label id to be explained
+	ClassId int32 `json:"class_id"`
+	// interpretable model name, linear_regression or decision_tree
+	InterpretModelName string `json:"interpret_model_name"`
+	// interpretable model params, should be serialized LinearRegressionParams or DecisionTreeParams
+	InterpretModelParam DecisionTree `json:"interpret_model_param"`
 	// explanation report
 	ExplanationReport string `json:"explanation_report"`
 }

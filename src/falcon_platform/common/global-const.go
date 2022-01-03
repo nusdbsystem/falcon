@@ -164,6 +164,9 @@ const (
 	LimeCompWeightsAlgName    = "lime_compute_weights"
 	LimeFeatSelAlgName        = "lime_feature_selection"
 	LimeInterpretAlgName      = "lime_interpret"
+
+	LimeDecisionTreeAlgName = "vfl_decision_tree"
+	LimeLinearRegressionAlgName = "linear_regression"
 )
 
 // Ports used on mpc-executor communication, which is hardcoded in executor now
