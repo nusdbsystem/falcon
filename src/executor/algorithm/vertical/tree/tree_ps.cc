@@ -270,6 +270,7 @@ void DTParameterServer::build_tree(){
 
         for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
           this->send_long_message_to_worker(wk_index, "LEAF");
+          this->send_long_message_to_worker(wk_index, to_string(node_index));
           this->send_long_message_to_worker(wk_index, serialized_label);
         }
         continue;

@@ -1,0 +1,764 @@
+Log file created at: 2022/01/05 06:03:35
+Running on machine: wuyuncheng-ThinkPad-X13-Gen-2i
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0105 06:03:35.836741   941 main.cc:118] Init log file.
+I0105 06:03:35.838979   941 logger.cc:11] -------- parse parameters correct --------
+I0105 06:03:35.839033   941 logger.cc:11] party-id: 1
+I0105 06:03:35.839051   941 logger.cc:11] party-num: 3
+I0105 06:03:35.839073   941 logger.cc:11] fl-setting: 1
+I0105 06:03:35.839089   941 logger.cc:11] existing-key: 1
+I0105 06:03:35.839119   941 logger.cc:11] network-file: CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfarAferAfirARILCgmJrAGKrAGLrAESCwoJnKwBnawBnqwBGgsKCfClA/ClA/ClAw==
+I0105 06:03:35.839139   941 logger.cc:11] log-file: /opt/falcon/src/falcon_platform/falcon_logs/Party-1_20220105_135821/runtime_logs/party1-distributed-parameter-server0-job1-train-decision_tree/parameter_server
+I0105 06:03:35.839164   941 logger.cc:11] data-input-file: /dataOutputPath/client.txt
+I0105 06:03:35.839191   941 logger.cc:11] data-output-file: 0
+I0105 06:03:35.839221   941 logger.cc:11] key-file: /dataPath/phe_keys
+I0105 06:03:35.839242   941 logger.cc:11] algorithm-name: decision_tree
+I0105 06:03:35.839267   941 logger.cc:11] model-save-file: /modelPath/saved_model.pb
+I0105 06:03:35.839287   941 logger.cc:11] model-report-file: /modelPath/report.txt
+I0105 06:03:35.841213   941 logger.cc:11] is-inference: 0
+I0105 06:03:35.845503   941 logger.cc:11] inference-endpoint: 0
+I0105 06:03:35.845559   941 logger.cc:11] is-distributed: 1
+I0105 06:03:35.845623   941 logger.cc:11] distributed-train-network-file: Cg8KCTEyNy4wLjAuMRCRrAEKDwoJMTI3LjAuMC4xEJesARIPCgkxMjcuMC4wLjEQh6wBEg8KCTEyNy4wLjAuMRCIrAE=
+I0105 06:03:35.845690   941 logger.cc:11] worker-id: 0
+I0105 06:03:35.845738   941 logger.cc:11] distributed-role: 0
+I0105 06:03:35.850178   941 party.cc:41] local_data is reading dataset from: /dataOutputPath/client.txt
+I0105 06:03:35.850193   941 party.cc:42] sample_num = 569
+I0105 06:03:35.850204   941 party.cc:53] feature_num = 10
+I0105 06:03:35.850222   941 logger.cc:11] Parse algorithm name and run the program
+I0105 06:03:35.850342   941 logger.cc:11] Execute as parameter server
+I0105 06:03:35.850378   941 logger.cc:11] Execute distributed training logic
+I0105 06:03:35.850428   941 network_converter.cc:53] [deserialize_network_configs]: mpc_port_array_size: 3 --------
+I0105 06:03:35.850489   941 party.cc:156] [deserialize_network_configs]: mpc_port_array_size after: 3 --------
+I0105 06:03:35.850507   941 party.cc:159] [deserialize_network_configs]: size of ip address is: 3 --------
+I0105 06:03:35.850519   941 party.cc:163] ips[0] = 127.0.0.1
+I0105 06:03:35.850533   941 party.cc:165] port_array[0][0] = 22006
+I0105 06:03:35.850545   941 party.cc:165] port_array[0][1] = 22007
+I0105 06:03:35.850561   941 party.cc:165] port_array[0][2] = 22008
+I0105 06:03:35.850572   941 party.cc:163] ips[1] = 127.0.0.1
+I0105 06:03:35.850584   941 party.cc:165] port_array[1][0] = 22025
+I0105 06:03:35.850594   941 party.cc:165] port_array[1][1] = 22026
+I0105 06:03:35.850607   941 party.cc:165] port_array[1][2] = 22027
+I0105 06:03:35.850616   941 party.cc:163] ips[2] = 127.0.0.1
+I0105 06:03:35.850625   941 party.cc:165] port_array[2][0] = 22044
+I0105 06:03:35.850631   941 party.cc:165] port_array[2][1] = 22045
+I0105 06:03:35.850641   941 party.cc:165] port_array[2][2] = 22046
+I0105 06:03:35.850651   941 logger.cc:11] executor_mpc_ports[0] = 54000
+I0105 06:03:35.850672   941 logger.cc:11] executor_mpc_ports[1] = 54000
+I0105 06:03:35.850685   941 logger.cc:11] executor_mpc_ports[2] = 54000
+I0105 06:03:35.850706   941 party.cc:181] Establish network communications with other parties
+I0105 06:03:35.850728   941 party.cc:193] My party id is: 1, I am listening party 0 on port 22025
+I0105 06:03:35.850788   941 party.cc:202] The other party's port I will send data to is: 22007
+I0105 06:03:36.347126   941 party.cc:208] Communication channel established with party 0, port is 22025.
+I0105 06:03:36.347260   941 party.cc:193] My party id is: 1, I am listening party 2 on port 22027
+I0105 06:03:36.347424   941 party.cc:202] The other party's port I will send data to is: 22045
+I0105 06:03:36.848649   941 party.cc:208] Communication channel established with party 2, port is 22027.
+I0105 06:03:36.848781   941 party.cc:223] Init threshold partially homomorphic encryption keys
+I0105 06:03:36.850531   941 party.cc:233] Initialize phe keys success
+I0105 06:03:36.850564   941 party.cc:234] m_use_existing_key = 1
+I0105 06:03:36.852185   941 logger.cc:11] Run the example decision tree train
+I0105 06:03:36.852306   941 logger.cc:11] [DTParameterServer]: split_train_test_data
+I0105 06:03:36.852356   941 party.cc:401] Split local data and labels into training and testing dataset.
+I0105 06:03:36.852377   941 party.cc:403] Split percentage for train-test = 0.8
+I0105 06:03:36.852434   941 party.cc:404] training_data_size = 455
+I0105 06:03:36.854007   941 logger.cc:11] Init decision tree model builder
+I0105 06:03:36.854089   941 logger.cc:11] params.tree_type = classification
+I0105 06:03:36.854138   941 logger.cc:11] params.criterion = gini
+I0105 06:03:36.854205   941 logger.cc:11] params.split_strategy = best
+I0105 06:03:36.854264   941 logger.cc:11] params.class_num = 2
+I0105 06:03:36.854329   941 logger.cc:11] params.max_depth = 3
+I0105 06:03:36.854377   941 logger.cc:11] params.max_bins = 8
+I0105 06:03:36.854435   941 logger.cc:11] params.min_samples_split = 5
+I0105 06:03:36.854485   941 logger.cc:11] params.min_samples_leaf = 5
+I0105 06:03:36.854552   941 logger.cc:11] params.max_leaf_nodes = 16
+I0105 06:03:36.854609   941 logger.cc:11] params.min_impurity_decrease = 0.100000
+I0105 06:03:36.854662   941 logger.cc:11] params.min_impurity_split = 0.001000
+I0105 06:03:36.854715   941 logger.cc:11] params.dp_budget = 0.100000
+I0105 06:03:36.854786   941 logger.cc:11] [DTParameterServer]: Init decision tree model
+I0105 06:03:36.856109   941 logger.cc:11] [DTParameterServer]: Init decision tree model finished
+I0105 06:03:36.856264   941 network_converter.cc:120] worker size = 2
+I0105 06:03:36.856418   941 logger.cc:11] Establish network communications with workers
+I0105 06:03:37.349691   941 logger.cc:11] Communication channel established with worker index 0, ip is 127.0.0.1, port is 22033
+I0105 06:03:37.351795   941 logger.cc:11] Communication channel established with worker index 1, ip is 127.0.0.1, port is 22039
+I0105 06:03:37.352242   941 logger.cc:11] [DecisionTreeBuilder]: copy constructor started.
+I0105 06:03:37.352339   941 logger.cc:11] [DecisionTreeBuilder]: copy constructor finished.
+I0105 06:03:37.353191   941 logger.cc:11] [DTParameterServer]: begin to broadcast_train_test_data and keys
+I0105 06:03:37.356158   941 logger.cc:11] [DTParameterServer]: start to train the task in a distributed way
+I0105 06:03:37.356213   941 logger.cc:11] ************* [Ps.distributed_train] Training started *************
+I0105 06:03:37.359302   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 0
+I0105 06:03:37.359371   941 logger.cc:11] [Ps.build_tree]: step 2.3, ps boardcast node index = 0to workers
+I0105 06:03:37.359468   941 logger.cc:11] [Ps.build_tree]: step 2.4, ps wait_worker_complete
+I0105 06:03:37.359529   941 logger.cc:11] [Ps.wait_worker_complete]: ps wait worker complete ... 
+I0105 06:03:49.551661   941 logger.cc:11] [Ps.build_tree]: step 2.5, ps begin to compare and get the best split
+I0105 06:03:49.551712   941 logger.cc:11] [Ps.retrieve_global_best_split]: compare and get global best splits
+I0105 06:03:49.551796   941 logger.cc:11] [Ps.retrieve_global_best_split]: received the best from worker: 
+best_split_index is 18
+left_impurity is 0.077866
+right_impurity is 0.081161
+best_split_worker_id is 0
+I0105 06:03:49.551867   941 logger.cc:11] [Ps.build_tree]: step 2.5, size of final_decision_res 4
+I0105 06:03:49.551893   941 logger.cc:11] [Ps.build_tree]: step 2.6, ps boardcast global best to other workers
+I0105 06:03:49.552008   941 logger.cc:11] [Ps.build_tree]: step 2.7, ps receive party-id
+I0105 06:03:49.559883   941 logger.cc:11] [Ps.build_tree]: step 2.8, best party's ps received the updated masks and labels and then it sent them to other workers
+I0105 06:03:49.559943   941 logger.cc:11] [Ps.build_tree]: step 2.8, party id is not matched, receive updated info from other party's worker
+I0105 06:03:49.609683   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 0
+I0105 06:03:49.609737   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 574100
+I0105 06:03:49.609760   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 648337
+I0105 06:03:49.609787   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 516158
+I0105 06:03:49.619482   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 1
+I0105 06:03:49.619576   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 574100
+I0105 06:03:49.619628   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 648337
+I0105 06:03:49.619684   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 516158
+I0105 06:03:49.619743   941 logger.cc:11] [Ps.build_tree]: step 2.9, deserialize the updated sample iv and label
+I0105 06:03:49.634439   941 logger.cc:11] [Ps.build_tree]: step 2.9, class num: 2
+I0105 06:03:49.634640   941 logger.cc:11] [Ps.build_tree]: step 2.9, sample_num: 455
+I0105 06:03:49.634734   941 logger.cc:11] [Ps.build_tree]: step 2.9, size of encrypted_labels_right: 910
+I0105 06:03:49.653194   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, ps update tree, node_index:0
+best_party_id:0
+recv_best_feature_id :2
+best_split_id:4
+I0105 06:03:49.653276   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, sample_mask_iv_right[sample_num-1].exponent = 0
+I0105 06:03:49.653344   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test1[sample_num-1].exponent = 0
+I0105 06:03:49.653378   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test2[sample_num-1].exponent = 0
+I0105 06:03:49.653502   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 2
+I0105 06:03:49.653528   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:03:49.671325   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[0] = 54000
+I0105 06:03:49.671389   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[1] = 54000
+I0105 06:03:49.671414   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[2] = 54000
+I0105 06:03:49.684527   942 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x612000262b40, port_num = 54000.
+I0105 06:03:49.688660   942 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x612000266740, port_num = 54001.
+I0105 06:03:49.692550   942 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x6120002686c0, port_num = 54002.
+I0105 06:03:49.692569   942 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:03:49.692782   942 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:03:49.692806   942 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:03:49.692838   942 tree_builder.cc:2487] party_id = 1
+I0105 06:03:49.692859   942 tree_builder.cc:2505] private value size = 2
+I0105 06:03:49.696899   942 tree_builder.cc:2515] SPDZ tree computation pruning check returned
+I0105 06:03:49.696911   942 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:03:49.698993   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 0
+I0105 06:03:49.699024   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is not satisfied, continue training
+I0105 06:03:49.699066   941 logger.cc:11] [Ps.build_tree]: step 2.3, ps boardcast node index = 2to workers
+I0105 06:03:49.699159   941 logger.cc:11] [Ps.build_tree]: step 2.4, ps wait_worker_complete
+I0105 06:03:49.699187   941 logger.cc:11] [Ps.wait_worker_complete]: ps wait worker complete ... 
+I0105 06:03:59.615789   941 logger.cc:11] [Ps.build_tree]: step 2.5, ps begin to compare and get the best split
+I0105 06:03:59.615830   941 logger.cc:11] [Ps.retrieve_global_best_split]: compare and get global best splits
+I0105 06:03:59.615967   941 logger.cc:11] [Ps.retrieve_global_best_split]: received the best from worker: 
+best_split_index is 71
+left_impurity is 0.059113
+right_impurity is 0.097351
+best_split_worker_id is 0
+I0105 06:03:59.615998   941 logger.cc:11] [Ps.build_tree]: step 2.5, size of final_decision_res 4
+I0105 06:03:59.616019   941 logger.cc:11] [Ps.build_tree]: step 2.6, ps boardcast global best to other workers
+I0105 06:03:59.616127   941 logger.cc:11] [Ps.build_tree]: step 2.7, ps receive party-id
+I0105 06:03:59.624418   941 logger.cc:11] [Ps.build_tree]: step 2.8, best party's ps received the updated masks and labels and then it sent them to other workers
+I0105 06:03:59.624454   941 logger.cc:11] [Ps.build_tree]: step 2.8, party id is not matched, receive updated info from other party's worker
+I0105 06:03:59.658886   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 0
+I0105 06:03:59.658949   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 400564
+I0105 06:03:59.658969   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 327150
+I0105 06:03:59.658991   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 490218
+I0105 06:03:59.665727   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 1
+I0105 06:03:59.665784   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 400564
+I0105 06:03:59.665803   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 327150
+I0105 06:03:59.665825   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 490218
+I0105 06:03:59.665841   941 logger.cc:11] [Ps.build_tree]: step 2.9, deserialize the updated sample iv and label
+I0105 06:03:59.680513   941 logger.cc:11] [Ps.build_tree]: step 2.9, class num: 2
+I0105 06:03:59.680555   941 logger.cc:11] [Ps.build_tree]: step 2.9, sample_num: 455
+I0105 06:03:59.680580   941 logger.cc:11] [Ps.build_tree]: step 2.9, size of encrypted_labels_right: 910
+I0105 06:03:59.694268   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, ps update tree, node_index:2
+best_party_id:2
+recv_best_feature_id :1
+best_split_id:1
+I0105 06:03:59.694320   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, sample_mask_iv_right[sample_num-1].exponent = 0
+I0105 06:03:59.694355   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test1[sample_num-1].exponent = 0
+I0105 06:03:59.694387   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test2[sample_num-1].exponent = 0
+I0105 06:03:59.694432   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 6
+I0105 06:03:59.694455   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:03:59.712596   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[0] = 54000
+I0105 06:03:59.712674   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[1] = 54000
+I0105 06:03:59.712697   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[2] = 54000
+I0105 06:03:59.717113   945 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x61200041e540, port_num = 54000.
+I0105 06:03:59.720041   945 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x61200040e7c0, port_num = 54001.
+I0105 06:03:59.723152   945 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x6120003fc7c0, port_num = 54002.
+I0105 06:03:59.723163   945 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:03:59.723325   945 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:03:59.723338   945 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:03:59.723371   945 tree_builder.cc:2487] party_id = 1
+I0105 06:03:59.723378   945 tree_builder.cc:2505] private value size = 2
+I0105 06:03:59.732614   945 tree_builder.cc:2515] SPDZ tree computation pruning check returned
+I0105 06:03:59.732630   945 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:03:59.734232   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 0
+I0105 06:03:59.734272   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is not satisfied, continue training
+I0105 06:03:59.734302   941 logger.cc:11] [Ps.build_tree]: step 2.3, ps boardcast node index = 6to workers
+I0105 06:03:59.734380   941 logger.cc:11] [Ps.build_tree]: step 2.4, ps wait_worker_complete
+I0105 06:03:59.734407   941 logger.cc:11] [Ps.wait_worker_complete]: ps wait worker complete ... 
+I0105 06:04:09.331967   941 logger.cc:11] [Ps.build_tree]: step 2.5, ps begin to compare and get the best split
+I0105 06:04:09.332015   941 logger.cc:11] [Ps.retrieve_global_best_split]: compare and get global best splits
+I0105 06:04:09.332073   941 logger.cc:11] [Ps.retrieve_global_best_split]: received the best from worker: 
+best_split_index is 5
+left_impurity is 0.093018
+right_impurity is 0.000000
+best_split_worker_id is 0
+I0105 06:04:09.332099   941 logger.cc:11] [Ps.build_tree]: step 2.5, size of final_decision_res 4
+I0105 06:04:09.332116   941 logger.cc:11] [Ps.build_tree]: step 2.6, ps boardcast global best to other workers
+I0105 06:04:09.332221   941 logger.cc:11] [Ps.build_tree]: step 2.7, ps receive party-id
+I0105 06:04:09.340013   941 logger.cc:11] [Ps.build_tree]: step 2.8, best party's ps received the updated masks and labels and then it sent them to other workers
+I0105 06:04:09.340057   941 logger.cc:11] [Ps.build_tree]: step 2.8, party id is not matched, receive updated info from other party's worker
+I0105 06:04:09.373349   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 0
+I0105 06:04:09.373399   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 387588
+I0105 06:04:09.373443   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 354328
+I0105 06:04:09.373486   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 437100
+I0105 06:04:09.380002   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 1
+I0105 06:04:09.380065   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 387588
+I0105 06:04:09.380101   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 354328
+I0105 06:04:09.380142   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 437100
+I0105 06:04:09.380178   941 logger.cc:11] [Ps.build_tree]: step 2.9, deserialize the updated sample iv and label
+I0105 06:04:09.390458   941 logger.cc:11] [Ps.build_tree]: step 2.9, class num: 2
+I0105 06:04:09.390509   941 logger.cc:11] [Ps.build_tree]: step 2.9, sample_num: 455
+I0105 06:04:09.390554   941 logger.cc:11] [Ps.build_tree]: step 2.9, size of encrypted_labels_right: 910
+I0105 06:04:09.404613   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, ps update tree, node_index:6
+best_party_id:0
+recv_best_feature_id :0
+best_split_id:5
+I0105 06:04:09.404817   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, sample_mask_iv_right[sample_num-1].exponent = 0
+I0105 06:04:09.405014   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test1[sample_num-1].exponent = 0
+I0105 06:04:09.405122   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test2[sample_num-1].exponent = 0
+I0105 06:04:09.405514   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 14
+I0105 06:04:09.405779   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:09.406020   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 1
+I0105 06:04:09.431926   947 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x6120005d25c0, port_num = 54000.
+I0105 06:04:09.434823   947 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x6120005d6940, port_num = 54001.
+I0105 06:04:09.438235   947 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x6120005d88c0, port_num = 54002.
+I0105 06:04:09.438251   947 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:09.438421   947 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:09.438433   947 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:09.438462   947 tree_builder.cc:2487] party_id = 1
+I0105 06:04:09.438472   947 tree_builder.cc:2505] private value size = 2
+I0105 06:04:09.442806   947 tree_builder.cc:2521] SPDZ tree computation calculate leaf label returned
+I0105 06:04:09.442818   947 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:09.444438   941 tree_builder.cc:1128] Node 14 label = 0
+I0105 06:04:09.446722   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers
+I0105 06:04:09.447197   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 13
+I0105 06:04:09.447224   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:09.447255   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 1
+I0105 06:04:09.472766   949 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x6120005e24c0, port_num = 54000.
+I0105 06:04:09.479594   949 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x6120005e63c0, port_num = 54001.
+I0105 06:04:09.482985   949 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x6120005e8340, port_num = 54002.
+I0105 06:04:09.483000   949 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:09.483180   949 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:09.483197   949 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:09.483233   949 tree_builder.cc:2487] party_id = 1
+I0105 06:04:09.483244   949 tree_builder.cc:2505] private value size = 2
+I0105 06:04:09.488130   949 tree_builder.cc:2521] SPDZ tree computation calculate leaf label returned
+I0105 06:04:09.488148   949 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:09.489840   941 tree_builder.cc:1128] Node 13 label = 0
+I0105 06:04:09.492062   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers
+I0105 06:04:09.492384   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 5
+I0105 06:04:09.492482   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:09.512404   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[0] = 54000
+I0105 06:04:09.512459   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[1] = 54000
+I0105 06:04:09.512475   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[2] = 54000
+I0105 06:04:09.517149   951 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x6120005f2540, port_num = 54000.
+I0105 06:04:09.520836   951 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x6120005f68c0, port_num = 54001.
+I0105 06:04:09.524010   951 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x6120005f8840, port_num = 54002.
+I0105 06:04:09.524025   951 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:09.524183   951 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:09.524196   951 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:09.524233   951 tree_builder.cc:2487] party_id = 1
+I0105 06:04:09.524243   951 tree_builder.cc:2505] private value size = 2
+I0105 06:04:09.531775   951 tree_builder.cc:2515] SPDZ tree computation pruning check returned
+I0105 06:04:09.531795   951 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:09.533504   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 0
+I0105 06:04:09.533568   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is not satisfied, continue training
+I0105 06:04:09.533627   941 logger.cc:11] [Ps.build_tree]: step 2.3, ps boardcast node index = 5to workers
+I0105 06:04:09.541285   941 logger.cc:11] [Ps.build_tree]: step 2.4, ps wait_worker_complete
+I0105 06:04:09.541327   941 logger.cc:11] [Ps.wait_worker_complete]: ps wait worker complete ... 
+I0105 06:04:19.080094   941 logger.cc:11] [Ps.build_tree]: step 2.5, ps begin to compare and get the best split
+I0105 06:04:19.080142   941 logger.cc:11] [Ps.retrieve_global_best_split]: compare and get global best splits
+I0105 06:04:19.080209   941 logger.cc:11] [Ps.retrieve_global_best_split]: received the best from worker: 
+best_split_index is 19
+left_impurity is 0.161179
+right_impurity is 0.083328
+best_split_worker_id is 0
+I0105 06:04:19.080235   941 logger.cc:11] [Ps.build_tree]: step 2.5, size of final_decision_res 4
+I0105 06:04:19.080248   941 logger.cc:11] [Ps.build_tree]: step 2.6, ps boardcast global best to other workers
+I0105 06:04:19.080323   941 logger.cc:11] [Ps.build_tree]: step 2.7, ps receive party-id
+I0105 06:04:19.088431   941 logger.cc:11] [Ps.build_tree]: step 2.8, best party's ps received the updated masks and labels and then it sent them to other workers
+I0105 06:04:19.088505   941 logger.cc:11] [Ps.build_tree]: step 2.8, party id is not matched, receive updated info from other party's worker
+I0105 06:04:19.119555   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 0
+I0105 06:04:19.119606   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 306071
+I0105 06:04:19.119624   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 317265
+I0105 06:04:19.119645   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 311095
+I0105 06:04:19.128109   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 1
+I0105 06:04:19.128166   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 306071
+I0105 06:04:19.128185   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 317265
+I0105 06:04:19.128209   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 311095
+I0105 06:04:19.128226   941 logger.cc:11] [Ps.build_tree]: step 2.9, deserialize the updated sample iv and label
+I0105 06:04:19.141938   941 logger.cc:11] [Ps.build_tree]: step 2.9, class num: 2
+I0105 06:04:19.141991   941 logger.cc:11] [Ps.build_tree]: step 2.9, sample_num: 455
+I0105 06:04:19.142017   941 logger.cc:11] [Ps.build_tree]: step 2.9, size of encrypted_labels_right: 910
+I0105 06:04:19.153283   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, ps update tree, node_index:5
+best_party_id:0
+recv_best_feature_id :3
+best_split_id:5
+I0105 06:04:19.153331   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, sample_mask_iv_right[sample_num-1].exponent = 0
+I0105 06:04:19.153390   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test1[sample_num-1].exponent = 0
+I0105 06:04:19.153427   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test2[sample_num-1].exponent = 0
+I0105 06:04:19.153471   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 12
+I0105 06:04:19.153496   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:19.153518   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 1
+I0105 06:04:19.177989   953 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x61200076e4c0, port_num = 54000.
+I0105 06:04:19.180869   953 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x61200075e440, port_num = 54001.
+I0105 06:04:19.183763   953 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x61200074c440, port_num = 54002.
+I0105 06:04:19.183774   953 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:19.183930   953 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:19.183943   953 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:19.183971   953 tree_builder.cc:2487] party_id = 1
+I0105 06:04:19.183984   953 tree_builder.cc:2505] private value size = 2
+I0105 06:04:19.188537   953 tree_builder.cc:2521] SPDZ tree computation calculate leaf label returned
+I0105 06:04:19.188553   953 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:19.190193   941 tree_builder.cc:1128] Node 12 label = 0
+I0105 06:04:19.192317   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers
+I0105 06:04:19.192528   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 11
+I0105 06:04:19.192584   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:19.192636   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 1
+I0105 06:04:19.218600   955 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x612000772540, port_num = 54000.
+I0105 06:04:19.221779   955 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x612000776440, port_num = 54001.
+I0105 06:04:19.224470   955 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x6120007783c0, port_num = 54002.
+I0105 06:04:19.224481   955 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:19.224632   955 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:19.224642   955 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:19.224668   955 tree_builder.cc:2487] party_id = 1
+I0105 06:04:19.224675   955 tree_builder.cc:2505] private value size = 2
+I0105 06:04:19.228850   955 tree_builder.cc:2521] SPDZ tree computation calculate leaf label returned
+I0105 06:04:19.228863   955 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:19.230345   941 tree_builder.cc:1128] Node 11 label = 1
+I0105 06:04:19.232611   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers
+I0105 06:04:19.232790   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 1
+I0105 06:04:19.232837   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:19.251844   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[0] = 54000
+I0105 06:04:19.251909   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[1] = 54000
+I0105 06:04:19.251935   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[2] = 54000
+I0105 06:04:19.259481   956 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x6120007825c0, port_num = 54000.
+I0105 06:04:19.262810   956 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x612000786940, port_num = 54001.
+I0105 06:04:19.266322   956 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x6120007888c0, port_num = 54002.
+I0105 06:04:19.266338   956 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:19.266499   956 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:19.266515   956 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:19.266553   956 tree_builder.cc:2487] party_id = 1
+I0105 06:04:19.266568   956 tree_builder.cc:2505] private value size = 2
+I0105 06:04:19.272007   956 tree_builder.cc:2515] SPDZ tree computation pruning check returned
+I0105 06:04:19.272022   956 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:19.274020   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 0
+I0105 06:04:19.274049   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is not satisfied, continue training
+I0105 06:04:19.274077   941 logger.cc:11] [Ps.build_tree]: step 2.3, ps boardcast node index = 1to workers
+I0105 06:04:19.281273   941 logger.cc:11] [Ps.build_tree]: step 2.4, ps wait_worker_complete
+I0105 06:04:19.281323   941 logger.cc:11] [Ps.wait_worker_complete]: ps wait worker complete ... 
+I0105 06:04:29.130669   941 logger.cc:11] [Ps.build_tree]: step 2.5, ps begin to compare and get the best split
+I0105 06:04:29.130720   941 logger.cc:11] [Ps.retrieve_global_best_split]: compare and get global best splits
+I0105 06:04:29.130790   941 logger.cc:11] [Ps.retrieve_global_best_split]: received the best from worker: 
+best_split_index is 27
+left_impurity is 0.055176
+right_impurity is 0.045166
+best_split_worker_id is 0
+I0105 06:04:29.130827   941 logger.cc:11] [Ps.build_tree]: step 2.5, size of final_decision_res 4
+I0105 06:04:29.130846   941 logger.cc:11] [Ps.build_tree]: step 2.6, ps boardcast global best to other workers
+I0105 06:04:29.133312   941 logger.cc:11] [Ps.build_tree]: step 2.7, ps receive party-id
+I0105 06:04:29.138913   941 logger.cc:11] [Ps.build_tree]: step 2.8, best party's ps received the updated masks and labels and then it sent them to other workers
+I0105 06:04:29.138954   941 logger.cc:11] [Ps.build_tree]: step 2.8, party id is not matched, receive updated info from other party's worker
+I0105 06:04:29.175084   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 0
+I0105 06:04:29.175132   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 466644
+I0105 06:04:29.175170   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 616216
+I0105 06:04:29.175213   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 333331
+I0105 06:04:29.182843   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 1
+I0105 06:04:29.182945   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 466644
+I0105 06:04:29.182987   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 616216
+I0105 06:04:29.183033   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 333331
+I0105 06:04:29.183071   941 logger.cc:11] [Ps.build_tree]: step 2.9, deserialize the updated sample iv and label
+I0105 06:04:29.196485   941 logger.cc:11] [Ps.build_tree]: step 2.9, class num: 2
+I0105 06:04:29.196563   941 logger.cc:11] [Ps.build_tree]: step 2.9, sample_num: 455
+I0105 06:04:29.196635   941 logger.cc:11] [Ps.build_tree]: step 2.9, size of encrypted_labels_right: 910
+I0105 06:04:29.213161   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, ps update tree, node_index:1
+best_party_id:0
+recv_best_feature_id :4
+best_split_id:6
+I0105 06:04:29.213213   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, sample_mask_iv_right[sample_num-1].exponent = 0
+I0105 06:04:29.213250   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test1[sample_num-1].exponent = 0
+I0105 06:04:29.213280   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test2[sample_num-1].exponent = 0
+I0105 06:04:29.213375   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 4
+I0105 06:04:29.213431   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:29.230108   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[0] = 54000
+I0105 06:04:29.230162   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[1] = 54000
+I0105 06:04:29.230216   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[2] = 54000
+I0105 06:04:29.244333   958 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x612000982540, port_num = 54000.
+I0105 06:04:29.247098   958 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x612000986440, port_num = 54001.
+I0105 06:04:29.250018   958 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x6120009883c0, port_num = 54002.
+I0105 06:04:29.250030   958 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:29.250205   958 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:29.250218   958 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:29.250257   958 tree_builder.cc:2487] party_id = 1
+I0105 06:04:29.250272   958 tree_builder.cc:2505] private value size = 2
+I0105 06:04:29.250875   958 tree_builder.cc:2515] SPDZ tree computation pruning check returned
+I0105 06:04:29.250886   958 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:29.252686   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 0
+I0105 06:04:29.252717   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is not satisfied, continue training
+I0105 06:04:29.252748   941 logger.cc:11] [Ps.build_tree]: step 2.3, ps boardcast node index = 4to workers
+I0105 06:04:29.252822   941 logger.cc:11] [Ps.build_tree]: step 2.4, ps wait_worker_complete
+I0105 06:04:29.252848   941 logger.cc:11] [Ps.wait_worker_complete]: ps wait worker complete ... 
+I0105 06:04:38.856774   941 logger.cc:11] [Ps.build_tree]: step 2.5, ps begin to compare and get the best split
+I0105 06:04:38.856817   941 logger.cc:11] [Ps.retrieve_global_best_split]: compare and get global best splits
+I0105 06:04:38.856876   941 logger.cc:11] [Ps.retrieve_global_best_split]: received the best from worker: 
+best_split_index is 2
+left_impurity is 0.071793
+right_impurity is 0.069931
+best_split_worker_id is 0
+I0105 06:04:38.856904   941 logger.cc:11] [Ps.build_tree]: step 2.5, size of final_decision_res 4
+I0105 06:04:38.856920   941 logger.cc:11] [Ps.build_tree]: step 2.6, ps boardcast global best to other workers
+I0105 06:04:38.857003   941 logger.cc:11] [Ps.build_tree]: step 2.7, ps receive party-id
+I0105 06:04:38.864931   941 logger.cc:11] [Ps.build_tree]: step 2.8, best party's ps received the updated masks and labels and then it sent them to other workers
+I0105 06:04:38.864980   941 logger.cc:11] [Ps.build_tree]: step 2.8, party id is not matched, receive updated info from other party's worker
+I0105 06:04:38.892663   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 0
+I0105 06:04:38.892733   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 309152
+I0105 06:04:38.892804   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 319743
+I0105 06:04:38.892856   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 314798
+I0105 06:04:38.898579   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 1
+I0105 06:04:38.898654   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 309152
+I0105 06:04:38.898698   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 319743
+I0105 06:04:38.898741   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 314798
+I0105 06:04:38.898782   941 logger.cc:11] [Ps.build_tree]: step 2.9, deserialize the updated sample iv and label
+I0105 06:04:38.908963   941 logger.cc:11] [Ps.build_tree]: step 2.9, class num: 2
+I0105 06:04:38.909076   941 logger.cc:11] [Ps.build_tree]: step 2.9, sample_num: 455
+I0105 06:04:38.909227   941 logger.cc:11] [Ps.build_tree]: step 2.9, size of encrypted_labels_right: 910
+I0105 06:04:38.922889   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, ps update tree, node_index:4
+best_party_id:0
+recv_best_feature_id :0
+best_split_id:2
+I0105 06:04:38.923166   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, sample_mask_iv_right[sample_num-1].exponent = 0
+I0105 06:04:38.923336   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test1[sample_num-1].exponent = 0
+I0105 06:04:38.923419   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test2[sample_num-1].exponent = 0
+I0105 06:04:38.923527   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 10
+I0105 06:04:38.923609   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:38.923689   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 1
+I0105 06:04:38.953255   960 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x612000af24c0, port_num = 54000.
+I0105 06:04:38.956542   960 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x612000af63c0, port_num = 54001.
+I0105 06:04:38.959455   960 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x612000af8340, port_num = 54002.
+I0105 06:04:38.959467   960 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:38.959647   960 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:38.959663   960 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:38.959699   960 tree_builder.cc:2487] party_id = 1
+I0105 06:04:38.959710   960 tree_builder.cc:2505] private value size = 2
+I0105 06:04:38.970906   960 tree_builder.cc:2521] SPDZ tree computation calculate leaf label returned
+I0105 06:04:38.970921   960 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:38.972537   941 tree_builder.cc:1128] Node 10 label = 0
+I0105 06:04:38.974776   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers
+I0105 06:04:38.974939   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 9
+I0105 06:04:38.974963   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:38.974992   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 1
+I0105 06:04:39.001055   962 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x612000afc840, port_num = 54000.
+I0105 06:04:39.004005   962 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x612000aec4c0, port_num = 54001.
+I0105 06:04:39.007362   962 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x612000aee440, port_num = 54002.
+I0105 06:04:39.007380   962 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:39.007596   962 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:39.007613   962 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:39.007660   962 tree_builder.cc:2487] party_id = 1
+I0105 06:04:39.007673   962 tree_builder.cc:2505] private value size = 2
+I0105 06:04:39.019526   962 tree_builder.cc:2521] SPDZ tree computation calculate leaf label returned
+I0105 06:04:39.019553   962 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:39.021253   941 tree_builder.cc:1128] Node 9 label = 1
+I0105 06:04:39.023707   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers
+I0105 06:04:39.023913   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 3
+I0105 06:04:39.023947   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:39.042161   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[0] = 54000
+I0105 06:04:39.042213   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[1] = 54000
+I0105 06:04:39.042232   941 logger.cc:11] [check_pruning_conditions]: party.executor_mpc_ports[2] = 54000
+I0105 06:04:39.050326   965 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x612000b125c0, port_num = 54000.
+I0105 06:04:39.053285   965 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x612000b164c0, port_num = 54001.
+I0105 06:04:39.056597   965 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x612000b18440, port_num = 54002.
+I0105 06:04:39.056608   965 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:39.056766   965 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:39.056778   965 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:39.056808   965 tree_builder.cc:2487] party_id = 1
+I0105 06:04:39.056821   965 tree_builder.cc:2505] private value size = 2
+I0105 06:04:39.061319   965 tree_builder.cc:2515] SPDZ tree computation pruning check returned
+I0105 06:04:39.061329   965 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:39.062878   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 0
+I0105 06:04:39.062906   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is not satisfied, continue training
+I0105 06:04:39.062932   941 logger.cc:11] [Ps.build_tree]: step 2.3, ps boardcast node index = 3to workers
+I0105 06:04:39.072436   941 logger.cc:11] [Ps.build_tree]: step 2.4, ps wait_worker_complete
+I0105 06:04:39.072499   941 logger.cc:11] [Ps.wait_worker_complete]: ps wait worker complete ... 
+I0105 06:04:48.598348   941 logger.cc:11] [Ps.build_tree]: step 2.5, ps begin to compare and get the best split
+I0105 06:04:48.598399   941 logger.cc:11] [Ps.retrieve_global_best_split]: compare and get global best splits
+I0105 06:04:48.598469   941 logger.cc:11] [Ps.retrieve_global_best_split]: received the best from worker: 
+best_split_index is 17
+left_impurity is 0.015671
+right_impurity is 0.039154
+best_split_worker_id is 0
+I0105 06:04:48.598506   941 logger.cc:11] [Ps.build_tree]: step 2.5, size of final_decision_res 4
+I0105 06:04:48.598533   941 logger.cc:11] [Ps.build_tree]: step 2.6, ps boardcast global best to other workers
+I0105 06:04:48.598618   941 logger.cc:11] [Ps.build_tree]: step 2.7, ps receive party-id
+I0105 06:04:48.606622   941 logger.cc:11] [Ps.build_tree]: step 2.8, best party's ps received the updated masks and labels and then it sent them to other workers
+I0105 06:04:48.606662   941 logger.cc:11] [Ps.build_tree]: step 2.8, party id is not matched, receive updated info from other party's worker
+I0105 06:04:48.645732   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 0
+I0105 06:04:48.645779   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 450589
+I0105 06:04:48.645807   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 559388
+I0105 06:04:48.645828   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 358038
+I0105 06:04:48.659217   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker index: 1
+I0105 06:04:48.659350   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: 450589
+I0105 06:04:48.659374   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: 559388
+I0105 06:04:48.659523   941 logger.cc:11] [Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: 358038
+I0105 06:04:48.659551   941 logger.cc:11] [Ps.build_tree]: step 2.9, deserialize the updated sample iv and label
+I0105 06:04:48.669564   941 logger.cc:11] [Ps.build_tree]: step 2.9, class num: 2
+I0105 06:04:48.670689   941 logger.cc:11] [Ps.build_tree]: step 2.9, sample_num: 455
+I0105 06:04:48.670838   941 logger.cc:11] [Ps.build_tree]: step 2.9, size of encrypted_labels_right: 910
+I0105 06:04:48.687240   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, ps update tree, node_index:3
+best_party_id:0
+recv_best_feature_id :3
+best_split_id:3
+I0105 06:04:48.687289   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, sample_mask_iv_right[sample_num-1].exponent = 0
+I0105 06:04:48.687322   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test1[sample_num-1].exponent = 0
+I0105 06:04:48.687350   941 logger.cc:11] [DT_train_worker.distributed_train]: step 2.10, test2[sample_num-1].exponent = 0
+I0105 06:04:48.687433   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 8
+I0105 06:04:48.687458   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:48.687476   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 1
+I0105 06:04:48.707361   966 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x612000cfe5c0, port_num = 54000.
+I0105 06:04:48.710196   966 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x612000cee540, port_num = 54001.
+I0105 06:04:48.713393   966 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x612000cdc3c0, port_num = 54002.
+I0105 06:04:48.713405   966 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:48.713568   966 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:48.713582   966 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:48.713613   966 tree_builder.cc:2487] party_id = 1
+I0105 06:04:48.713620   966 tree_builder.cc:2505] private value size = 2
+I0105 06:04:48.722443   966 tree_builder.cc:2521] SPDZ tree computation calculate leaf label returned
+I0105 06:04:48.722460   966 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:48.724300   941 tree_builder.cc:1128] Node 8 label = 1
+I0105 06:04:48.726491   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers
+I0105 06:04:48.726694   941 logger.cc:11] [Ps.build_tree]: step 2.1, train node with index = 7
+I0105 06:04:48.726717   941 logger.cc:11] [Ps.build_tree]: step 2.2, check if stopping the training
+I0105 06:04:48.726742   941 logger.cc:11] [Ps.build_tree]: step 2.2, is_satisfied = 1
+I0105 06:04:48.760109   967 tree_builder.cc:2462] Set up socket connections for 0-th spdz party succeed, sockets = 0x612000d024c0, port_num = 54000.
+I0105 06:04:48.763157   967 tree_builder.cc:2462] Set up socket connections for 1-th spdz party succeed, sockets = 0x612000d06840, port_num = 54001.
+I0105 06:04:48.766180   967 tree_builder.cc:2462] Set up socket connections for 2-th spdz party succeed, sockets = 0x612000d087c0, port_num = 54002.
+I0105 06:04:48.766196   967 tree_builder.cc:2465] Finish setup socket connections to spdz engines.
+I0105 06:04:48.766377   967 tree_builder.cc:2473] Using prime 3138550867693340381917894711603833208051177722232017256453
+I0105 06:04:48.766395   967 tree_builder.cc:2480] Finish initializing gfp field.
+I0105 06:04:48.766453   967 tree_builder.cc:2487] party_id = 1
+I0105 06:04:48.766466   967 tree_builder.cc:2505] private value size = 2
+I0105 06:04:48.770707   967 tree_builder.cc:2521] SPDZ tree computation calculate leaf label returned
+I0105 06:04:48.770720   967 spdz_connector.cc:148] Receive mpc computation result from the SPDZ engine
+I0105 06:04:48.772284   941 tree_builder.cc:1128] Node 7 label = 1
+I0105 06:04:48.775921   941 logger.cc:11] [Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers
+I0105 06:04:48.794502   941 logger.cc:11] ======= print the tree ====== 
+I0105 06:04:48.794554   941 logger.cc:11] [DT_train_worker.print_tree_model]: tree.class_num2
+I0105 06:04:48.794574   941 logger.cc:11] [DT_train_worker.print_tree_model]: tree.max_depth3
+I0105 06:04:48.794596   941 logger.cc:11] [DT_train_worker.print_tree_model]: tree.internal_node_num7
+I0105 06:04:48.794615   941 logger.cc:11] [DT_train_worker.print_tree_model]: tree.total_node_num7
+I0105 06:04:48.794646   941 logger.cc:11] [DT_train_worker.print_tree_model]: tree.capacity15
+I0105 06:04:48.794684   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.794709   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  0
+I0105 06:04:48.794728   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  0
+I0105 06:04:48.794751   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  0
+I0105 06:04:48.794770   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  0
+I0105 06:04:48.794797   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  0
+I0105 06:04:48.794816   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  2
+I0105 06:04:48.794838   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  4
+I0105 06:04:48.794854   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.794878   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.794899   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.794924   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.794956   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.794981   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  1
+I0105 06:04:48.794998   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  0
+I0105 06:04:48.795022   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  1
+I0105 06:04:48.795039   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  0
+I0105 06:04:48.795061   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  0
+I0105 06:04:48.795079   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  4
+I0105 06:04:48.795102   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  6
+I0105 06:04:48.795120   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.795145   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.795164   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.795188   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.795215   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.795239   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  2
+I0105 06:04:48.795256   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  0
+I0105 06:04:48.795282   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  1
+I0105 06:04:48.795301   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  0
+I0105 06:04:48.795325   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  2
+I0105 06:04:48.795342   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  1
+I0105 06:04:48.795364   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  1
+I0105 06:04:48.795382   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.795403   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.795421   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.795444   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.795473   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.795496   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  3
+I0105 06:04:48.795512   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  0
+I0105 06:04:48.795536   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  2
+I0105 06:04:48.795552   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  0
+I0105 06:04:48.795575   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  0
+I0105 06:04:48.795591   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  3
+I0105 06:04:48.795617   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  3
+I0105 06:04:48.795634   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.795657   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.795675   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.795697   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.795722   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.795743   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  4
+I0105 06:04:48.795758   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  0
+I0105 06:04:48.795778   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  2
+I0105 06:04:48.795795   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  0
+I0105 06:04:48.795815   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  0
+I0105 06:04:48.795830   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  0
+I0105 06:04:48.795852   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  2
+I0105 06:04:48.795868   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.795889   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.795907   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.795931   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.795953   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.795979   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  5
+I0105 06:04:48.796000   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  0
+I0105 06:04:48.796018   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  2
+I0105 06:04:48.796033   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  0
+I0105 06:04:48.796053   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  0
+I0105 06:04:48.796069   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  3
+I0105 06:04:48.796090   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  5
+I0105 06:04:48.796105   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.796128   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.796146   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.796167   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.796190   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.796214   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  6
+I0105 06:04:48.796232   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  0
+I0105 06:04:48.796257   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  2
+I0105 06:04:48.796272   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  0
+I0105 06:04:48.796293   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  0
+I0105 06:04:48.796309   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  0
+I0105 06:04:48.796334   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  5
+I0105 06:04:48.796350   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.796371   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.796388   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.796411   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.796438   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.796460   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  7
+I0105 06:04:48.796478   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  1
+I0105 06:04:48.796497   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  3
+I0105 06:04:48.796514   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  -1
+I0105 06:04:48.796535   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  -1
+I0105 06:04:48.796551   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  -1
+I0105 06:04:48.796573   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  -1
+I0105 06:04:48.796589   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.796612   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.796627   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.796653   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.796680   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.796702   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  8
+I0105 06:04:48.796718   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  1
+I0105 06:04:48.796741   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  3
+I0105 06:04:48.796762   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  -1
+I0105 06:04:48.796783   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  -1
+I0105 06:04:48.796798   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  -1
+I0105 06:04:48.796820   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  -1
+I0105 06:04:48.796838   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.796859   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.796876   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.796898   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.796921   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.796942   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  9
+I0105 06:04:48.796958   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  1
+I0105 06:04:48.796979   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  3
+I0105 06:04:48.796995   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  -1
+I0105 06:04:48.797017   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  -1
+I0105 06:04:48.797034   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  -1
+I0105 06:04:48.797055   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  -1
+I0105 06:04:48.797070   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.797093   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.797111   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.797132   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.797158   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.797179   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  10
+I0105 06:04:48.797197   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  1
+I0105 06:04:48.797228   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  3
+I0105 06:04:48.797245   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  -1
+I0105 06:04:48.797268   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  -1
+I0105 06:04:48.797283   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  -1
+I0105 06:04:48.797305   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  -1
+I0105 06:04:48.797322   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.797343   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.797360   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.797381   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.797405   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.797426   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  11
+I0105 06:04:48.797441   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  1
+I0105 06:04:48.797464   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  3
+I0105 06:04:48.797482   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  -1
+I0105 06:04:48.797504   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  -1
+I0105 06:04:48.797526   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  -1
+I0105 06:04:48.797552   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  -1
+I0105 06:04:48.797569   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.797592   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.797610   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.797633   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.797658   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.797681   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  12
+I0105 06:04:48.797698   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  1
+I0105 06:04:48.797721   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  3
+I0105 06:04:48.797739   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  -1
+I0105 06:04:48.797761   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  -1
+I0105 06:04:48.797780   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  -1
+I0105 06:04:48.797802   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  -1
+I0105 06:04:48.797822   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.797844   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.797863   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.797886   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.797914   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.797937   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  13
+I0105 06:04:48.797955   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  1
+I0105 06:04:48.797978   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  3
+I0105 06:04:48.797996   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  -1
+I0105 06:04:48.798019   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  -1
+I0105 06:04:48.798036   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  -1
+I0105 06:04:48.798063   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  -1
+I0105 06:04:48.798079   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.798103   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.798123   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.798146   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.798172   941 logger.cc:11] [DT_train_worker.print_tree_model]: checking each node ------>
+I0105 06:04:48.798197   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node index=  14
+I0105 06:04:48.798214   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_type=  1
+I0105 06:04:48.798238   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node depth=  3
+I0105 06:04:48.798254   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node is_self_feature=  -1
+I0105 06:04:48.798276   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_party_id=  -1
+I0105 06:04:48.798293   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_feature_id=  -1
+I0105 06:04:48.798318   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node best_split_id=  -1
+I0105 06:04:48.798339   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node left_child=  -1
+I0105 06:04:48.798363   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node right_child=  -1
+I0105 06:04:48.798382   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node split_threshold=  0.000000
+I0105 06:04:48.798406   941 logger.cc:11] [DT_train_worker.print_tree_model]: current node node_sample_num=  0
+I0105 06:04:48.798429   941 logger.cc:11] [Ps.distributed_train]: tree capacity = 15
+I0105 06:04:48.798456   941 logger.cc:11] [Ps.distributed_train]: Training time = 0.570135
+I0105 06:04:48.798475   941 logger.cc:11] ************* [Ps.distributed_train] Training Finished *************
+I0105 06:04:48.798499   941 logger.cc:11] [DTParameterServer]: start to eval the task in a distributed way
+I0105 06:04:48.798517   941 logger.cc:11] [Ps.distributed_eval]: ------ Evaluation on train dataset Start------ 
+I0105 06:04:48.801378   941 logger.cc:11] [Ps.distributed_predict]: 1. current channel size = 2
+I0105 06:04:48.801422   941 logger.cc:11] [PS.partition_examples]: ps worker size = 2
+I0105 06:04:48.801448   941 logger.cc:11] [PS.partition_examples]: mini batch size = 227
+I0105 06:04:48.801467   941 logger.cc:11] [PS.partition_examples]: batch_indexes = 455
+I0105 06:04:48.801556   941 logger.cc:11] [PS.partition_examples]: ps send batch_size 227 to worker 1, first last index are [0, 226]
+I0105 06:04:48.801754   941 logger.cc:11] [PS.partition_examples]: ps send batch_size 228 to worker 2, first last index are [227, 454]
+I0105 06:04:48.809007   941 logger.cc:11] [PS.partition_examples]: Broadcast client's batch requests to other workers
+I0105 06:04:48.809067   941 logger.cc:11] [Ps.distributed_predict]: 2. cur_test_data_indexes.size = 455
+I0105 06:04:48.809105   941 logger.cc:11] [PS.distributed_predict]: 3. check message size, send worker0 with message size 227
+I0105 06:04:48.809129   941 logger.cc:11] [PS.distributed_predict]: 3. check message size, send worker1 with message size 228
+I0105 06:04:48.809361   941 logger.cc:11] [Ps.distributed_eval]: ------ Evaluation on test dataset Start ------ 
+I0105 06:04:48.809571   941 logger.cc:11] [Ps.distributed_predict]: 1. current channel size = 2
+I0105 06:04:48.809612   941 logger.cc:11] [PS.partition_examples]: ps worker size = 2
+I0105 06:04:48.809631   941 logger.cc:11] [PS.partition_examples]: mini batch size = 57
+I0105 06:04:48.809660   941 logger.cc:11] [PS.partition_examples]: batch_indexes = 114
+I0105 06:04:48.809710   941 logger.cc:11] [PS.partition_examples]: ps send batch_size 57 to worker 1, first last index are [0, 56]
+I0105 06:04:48.809801   941 logger.cc:11] [PS.partition_examples]: ps send batch_size 57 to worker 2, first last index are [57, 113]
+I0105 06:04:48.809842   941 logger.cc:11] [PS.partition_examples]: Broadcast client's batch requests to other workers
+I0105 06:04:48.809876   941 logger.cc:11] [Ps.distributed_predict]: 2. cur_test_data_indexes.size = 114
+I0105 06:04:48.809900   941 logger.cc:11] [PS.distributed_predict]: 3. check message size, send worker0 with message size 57
+I0105 06:04:48.809926   941 logger.cc:11] [PS.distributed_predict]: 3. check message size, send worker1 with message size 57
+I0105 06:04:48.809991   941 logger.cc:11] [DTParameterServer]: start to save model
+I0105 06:04:48.821805   941 logger.cc:11] [DecisionTreeBuilder]: destructor called
+I0105 06:04:48.822242   941 logger.cc:11] [DecisionTreeBuilder]: destructor called
+I0105 06:04:48.822729   941 logger.cc:11] Parameter Server are running
+I0105 06:04:48.822814   941 logger.cc:11] Time taken by main func: 72976878 microseconds

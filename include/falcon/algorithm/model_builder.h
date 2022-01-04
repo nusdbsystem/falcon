@@ -31,6 +31,8 @@ class ModelBuilder {
    */
   ModelBuilder();
 
+  ModelBuilder(const ModelBuilder& builder);
+
   /**
    * model constructor
    *

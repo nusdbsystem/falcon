@@ -98,6 +98,9 @@ class DecisionTreeBuilder : public ModelBuilder {
   /** default constructor */
   DecisionTreeBuilder();
 
+  /** copy constructor */
+  DecisionTreeBuilder(const DecisionTreeBuilder& builder);
+
   /**
  * destructor
  */

@@ -3,12 +3,22 @@
 //
 
 #include <falcon/algorithm/model_builder.h>
-
+#include <falcon/utils/logger/logger.h>
 #include <utility>
 
 ModelBuilder::ModelBuilder() {
   training_accuracy = 0.0;
   testing_accuracy = 0.0;
+}
+
+ModelBuilder::ModelBuilder(const ModelBuilder &builder) {
+  log_info("[ModelBuilder]: copy constructor");
+  training_data = builder.training_data;
+  training_labels = builder.training_labels;
+  training_accuracy = builder.training_accuracy;
+  testing_data = builder.testing_data;
+  testing_labels = builder.testing_labels;
+  testing_accuracy = builder.testing_accuracy;
 }
 
 ModelBuilder::ModelBuilder(std::vector<std::vector<double> > m_training_data,
