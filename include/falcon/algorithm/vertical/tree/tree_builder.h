@@ -270,6 +270,8 @@ class DecisionTreeBuilder : public ModelBuilder {
    */
   void retrieve_global_best_split(const Worker &worker);
 
+  void print_tree_model();
+
 };
 
 /**

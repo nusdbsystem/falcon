@@ -258,4 +258,5 @@ RUN c_rehash Player-Data/
 # Define working directory.
 WORKDIR /opt/falcon
 COPY cmd_lime.sh /opt/falcon/
+RUN git pull && bash make.sh
 CMD ["bash", "cmd_lime.sh"]

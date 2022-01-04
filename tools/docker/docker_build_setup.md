@@ -9,6 +9,7 @@ Need to provide the `SSH_PRIVATE_KEY` build argument to the docker build command
 docker build -t falcon-dist-train:latest -f ./Dockerfile.ubuntu20.04 . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa_forGithub)" --no-cache
 
 docker build -t falcon-dist-train:latest -f ./ubuntu18.04-dev.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)"
+docker build -t falcon-lime:latest -f ./ubuntu18.04-lime.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)"
 ```
 
 Useful docker build flags:

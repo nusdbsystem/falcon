@@ -6,7 +6,7 @@
 #include <falcon/algorithm/vertical/tree/tree_model.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <cmath>
-
+#include <falcon/utils/logger/logger.h>
 #include <glog/logging.h>
 #include <iostream>
 #include <stack>
@@ -74,11 +74,19 @@ std::vector<int> TreeModel::comp_predict_vector(std::vector<double> sample,
   while (!traverse_prediction_objs.empty()) {
     PredictHelper pred_obj = traverse_prediction_objs.top();
     if (pred_obj.is_leaf == 1) {
+
+      log_info("[DT_train_worker.comp_predict_vector]: current pred_obj is leaf node, index ="+
+          to_string(pred_obj.index));
+
       // find leaf index and record
       int leaf_index = node_index_2_leaf_index_map.find(pred_obj.index)->second;
       binary_vector[leaf_index] = pred_obj.mark;
       traverse_prediction_objs.pop();
     } else if (pred_obj.is_self_feature != 1) {
+
+      log_info("[DT_train_worker.comp_predict_vector]: current pred_obj is not my feature, node index ="+
+          to_string(pred_obj.index));
+
       // both left and right branches are marked as 1 * current_mark
       traverse_prediction_objs.pop();
       int left_node_index = pred_obj.index * 2 + 1;
@@ -101,6 +109,10 @@ std::vector<int> TreeModel::comp_predict_vector(std::vector<double> sample,
       traverse_prediction_objs.push(left);
       traverse_prediction_objs.push(right);
     } else {
+
+      log_info("[DT_train_worker.comp_predict_vector]: current pred_obj is my feature, node index ="+
+          to_string(pred_obj.index));
+
       // is self feature, retrieve split value and compare
       traverse_prediction_objs.pop();
       int node_index = pred_obj.index;
@@ -108,6 +120,10 @@ std::vector<int> TreeModel::comp_predict_vector(std::vector<double> sample,
       int split_id = pred_obj.best_split_id;
       double split_value = nodes[node_index].split_threshold;
       int left_mark, right_mark;
+
+      log_info("[DT_train_worker.comp_predict_vector]: check feature_id="+to_string(feature_id) +
+      " sample features size=" + to_string(sample.size()));
+
       if (sample[feature_id] <= split_value) {
         left_mark = pred_obj.mark * 1;
         right_mark = pred_obj.mark * 0;

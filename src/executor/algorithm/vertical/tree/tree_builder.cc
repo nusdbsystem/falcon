@@ -1518,13 +1518,29 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
     std::string received_str;
     worker.recv_long_message_from_ps(received_str);
     // only break after receiving ps's stop message
+
     if (received_str == "stop"){
-      log_info("[DT_train_worker.distributed_train]: step 4.1, -------- Worker stop training at Iteration " + std::to_string(iter)
-                +" (depth = " + to_string(tree.nodes[node_index].depth) + ")" + "-------- ");
+
+      log_info("[DT_train_worker.distributed_train]: step 6, -------- Worker stop training at Iteration " + std::to_string(iter) + "-------- ");
       break;
+
+    }else if (received_str == "LEAF"){
+      // receive node label
+      std::string received_label_str;
+      EncodedNumber label;
+      worker.recv_long_message_from_ps(received_label_str);
+      deserialize_encoded_number(label, received_label_str);
+
+      tree.nodes[node_index].label = label;
+      tree.nodes[node_index].node_type = falcon::LEAF;
+
+      log_info("[DT_train_worker.distributed_train]: step 6, -------- Worker mark node_index =" +
+              std::to_string(node_index) + "to leaf node");
+      continue;
+
     }else{
       node_index = std::stoi( received_str );
-      log_info("[DT_train_worker.distributed_train]: step 4.1, -------- Worker update node index :"+
+      log_info("[DT_train_worker.distributed_train]: step 6, -------- Worker update node index :"+
                 received_str + "at Iteration " + std::to_string(iter) + "-------- ");
     }
 
@@ -1842,6 +1858,14 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
         }
       }
 
+      // match worker update mask and labels info, and send to both ps and other party
+      // update available features
+      for (int feature_id : available_feature_ids) {
+        if (j_star != feature_id) {
+          available_feature_ids_new.push_back(feature_id);
+        }
+      }
+
       j_star += worker.get_train_feature_prefix();
 
       log_info("[DT_train_worker.distributed_train]: step 4.9, i_str and worker are matched with best split,"
@@ -1863,18 +1887,14 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
       tree.nodes[right_child_index].impurity = encrypted_right_impurity;
 
       log_info("[DT_train_worker.distributed_train]: step 4.9, matched worker of matched party finish updating tree, "
-               "node_index:" + to_string(node_index) +
-          "best_party_id:" + to_string(i_star) +
-          "recv_best_feature_id) :" + to_string(j_star) +
-          "best_split_id:" + to_string(s_star));
-
-      // match worker update mask and labels info, and send to both ps and other party
-      // update available features
-      for (int feature_id : available_feature_ids) {
-        if (j_star != feature_id) {
-          available_feature_ids_new.push_back(feature_id);
-        }
-      }
+                   "\nnode_index:" + to_string(node_index) +
+                   "\nis_self_feature:" + to_string(tree.nodes[node_index].is_self_feature) +
+                   "\nbest_party_id:" + to_string(tree.nodes[node_index].best_party_id) +
+                   "\nbest_feature_id:" + to_string(tree.nodes[node_index].best_feature_id) +
+                   "\nbest_split_id:" + to_string(tree.nodes[node_index].best_split_id) +
+                   "\nsplit_threshold:" + to_string(tree.nodes[node_index].split_threshold) +
+                   "\nleft_child_index:" + to_string(left_child_index) +
+                   "\nright_child_index:" + to_string(right_child_index));
 
       // compute between split_iv and sample_iv and update
       std::vector<int> split_left_iv = feature_helpers[j_star].split_ivs_left[s_star];
@@ -2005,9 +2025,15 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
 
       log_info("[DT_train_worker.distributed_train]: step 4.9, other worker of matched party finish updating tree, "
                "node_index:" + to_string(node_index) +
-          "best_party_id:" + to_string(recv_best_party_id) +
-          "recv_best_feature_id) :" + to_string(recv_best_feature_id) +
-          "best_split_id:" + to_string(recv_best_split_id));
+          "\nis_self_feature:" + to_string(tree.nodes[node_index].is_self_feature) +
+          "\nbest_party_id:" + to_string(tree.nodes[node_index].best_party_id) +
+          "\nbest_feature_id:" + to_string(tree.nodes[node_index].best_feature_id) +
+          "\nbest_split_id:" + to_string(tree.nodes[node_index].best_split_id) +
+          "\nsplit_threshold:" + to_string(tree.nodes[node_index].split_threshold) +
+          "\nleft_child_index:" + to_string(left_child_index) +
+          "\nright_child_index:" + to_string(right_child_index));
+
+
     }
 
     if (i_star != party.party_id) {
@@ -2054,11 +2080,15 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
 
       available_feature_ids_new = available_feature_ids;
 
-      log_info("[DT_train_worker.distributed_train]: step 4.9, any worker of other party finish updating tree, "
+      log_info("[DT_train_worker.distributed_train]: step 4.9, all workers of un-matched party finish updating tree,  "
                "node_index:" + to_string(node_index) +
-          "best_party_id:" + to_string(recv_best_party_id) +
-          "recv_best_feature_id) :" + to_string(recv_best_feature_id) +
-          "best_split_id:" + to_string(recv_best_split_id));
+          "\nis_self_feature:" + to_string(tree.nodes[node_index].is_self_feature) +
+          "\nbest_party_id:" + to_string(tree.nodes[node_index].best_party_id) +
+          "\nbest_feature_id:" + to_string(tree.nodes[node_index].best_feature_id) +
+          "\nbest_split_id:" + to_string(tree.nodes[node_index].best_split_id) +
+          "\nsplit_threshold:" + to_string(tree.nodes[node_index].split_threshold) +
+          "\nleft_child_index:" + to_string(left_child_index) +
+          "\nright_child_index:" + to_string(right_child_index));
     }
 
     tree.internal_node_num += 1;
@@ -2084,7 +2114,16 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
       delete [] encrypted_statistics[i];
     }
     delete [] encrypted_statistics;
+
+    delete [] sample_mask_iv_left;
+    delete [] sample_mask_iv_right;
+    delete [] encrypted_labels_right;
+    delete [] encrypted_labels_left;
   }
+
+  delete [] sample_mask_iv;
+  delete [] encrypted_labels;
+
 
   djcs_t_free_public_key(phe_pub_key);
 
@@ -2097,7 +2136,7 @@ void DecisionTreeBuilder::distributed_eval(Party &party,
                                            falcon::DatasetType eval_type) {
 
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
-  log_info("[DT_train_worker.distributed_eval]: Evaluation on " + dataset_str + "Start ");
+  log_info("[DT_train_worker.distributed_eval]: ----- Evaluation on " + dataset_str + "Start -----");
   const clock_t testing_start_time = clock();
 
   // retrieve phe pub key and phe random
@@ -2105,7 +2144,7 @@ void DecisionTreeBuilder::distributed_eval(Party &party,
   party.getter_phe_pub_key(phe_pub_key);
 
   /// step 1: init full dataset, used dataset.
-
+  log_info("[DT_train_worker.distributed_eval]: step 1 init full dataset, used dataset ");
   // read from local
   int full_dataset_size = (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
   std::vector<std::vector<double> > full_dataset =
@@ -2119,81 +2158,109 @@ void DecisionTreeBuilder::distributed_eval(Party &party,
   std::vector<int> sample_indexes;
   deserialize_int_array(sample_indexes, used_indexes_str);
 
-  log_info("[DT_train_worker.distributed_eval]: "
-           "Worker Iteration , worker.receive sample id success, batch size "
-               + std::to_string(sample_indexes.size()));
+  log_info("[DT_train_worker.distributed_eval]: step 2 Worker Iteration, worker.receive sample id success");
+
+  log_info("[DT_train_worker.distributed_eval]: step 2 Worker received batch_size " +
+      std::to_string(sample_indexes.size()) +
+      ", current worker id" + std::to_string(worker.worker_id) +
+      ", first last index are [" + to_string(sample_indexes[0]) + ", " +to_string(sample_indexes.back()) + "]");
 
   // generate used vector
   std::vector<std::vector<double> > cur_test_dataset;
   for (int index : sample_indexes) {
+    log_info("[DT_train_worker.distributed_eval]: step 2 Worker push data, index =" + to_string(index)
+    + " read from full dataset with size="+to_string(full_dataset.size()));
     cur_test_dataset.push_back(full_dataset[index]);
   }
 
-  std::vector<double> cur_test_dataset_labels;
-  for (int index : sample_indexes) {
-    cur_test_dataset_labels.push_back(full_dataset_labels[index]);
-  }
-
   // get dataset_size
-  int dataset_size = (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
+  int sample_size = sample_indexes.size();
 
   /// step 2: call tree model predict function to obtain predicted_labels
-  auto *predicted_labels = new EncodedNumber[dataset_size];
-  tree.predict(party, cur_test_dataset, dataset_size, predicted_labels);
+
+  log_info("[DT_train_worker.distributed_eval]: step 3 call tree model predict function to obtain predicted_labels");
+
+  auto *predicted_labels = new EncodedNumber[sample_size];
+  log_info("[DT_train_worker.distributed_eval]: step 3 check if dataset size full_dataset_size:"+
+      to_string(full_dataset_size) +
+      " cur_test_dataset size: " + to_string(cur_test_dataset.size()) +
+      " sample_size size: " + to_string(sample_size));
+  tree.predict(party, cur_test_dataset, sample_size, predicted_labels);
 
   /// step 3: active party aggregates and call collaborative decryption
-  auto *decrypted_labels = new EncodedNumber[dataset_size];
+  log_info("[DT_train_worker.distributed_eval]: step 4 active party aggregates and call collaborative decryption");
+
+  auto *decrypted_labels = new EncodedNumber[sample_size];
   party.collaborative_decrypt(predicted_labels,
                               decrypted_labels,
-                              dataset_size,
+                              sample_size,
                               ACTIVE_PARTY_ID);
 
-  // compute accuracy by the super client
+  /// step 4 compute accuracy by the super client
+  log_info("[DT_train_worker.distributed_eval]: step 5.1 super client computes accuracy by the super client");
   if (party.party_type == falcon::ACTIVE_PARTY) {
+
+    log_info("[DT_train_worker.distributed_eval]: step 5.2 super client init real labels");
+    std::vector<double> cur_test_dataset_labels;
+    for (int index : sample_indexes) {
+      log_info("[DT_train_worker.distributed_eval]: step 5.2 Worker push label, index =" + to_string(index)
+                   + " read from full labelset with size="+to_string(full_dataset_labels.size()));
+      cur_test_dataset_labels.push_back(full_dataset_labels[index]);
+    }
+
     // init predicted_label_vector
+    log_info("[DT_train_worker.distributed_eval]: step 5.3 super client decode label");
     std::vector<double> predicted_label_vector;
-    for (int i = 0; i < dataset_size; i++) {
+    for (int i = 0; i < sample_size; i++) {
       predicted_label_vector.push_back(0.0);
     }
-    for (int i = 0; i < dataset_size; i++) {
+    for (int i = 0; i < sample_size; i++) {
       decrypted_labels[i].decode(predicted_label_vector[i]);
     }
 
     if (tree_type == falcon::CLASSIFICATION) {
       int correct_num = 0;
-      for (int i = 0; i < dataset_size; i++) {
+      for (int i = 0; i < sample_size; i++) {
         if (predicted_label_vector[i] == cur_test_dataset_labels[i]) {
           correct_num += 1;
         }
       }
       if (eval_type == falcon::TRAIN) {
         training_accuracy = (double) correct_num / full_dataset_size;
-        LOG(INFO) << "Dataset size = " << full_dataset_size << ", correct predicted num = "
-                  << correct_num << ", training accuracy = " << training_accuracy;
+
+        log_info("[DT_train_worker.distributed_eval]: step 5.4 Dataset size = " +
+            to_string(full_dataset_size) + ", correct predicted num = "
+                     + to_string(correct_num) + ", testing accuracy = " + to_string(training_accuracy));
+
       }
       if (eval_type == falcon::TEST) {
         testing_accuracy = (double) correct_num / full_dataset_size;
-        LOG(INFO) << "Dataset size = " << full_dataset_size << ", correct predicted num = "
-                  << correct_num << ", testing accuracy = " << testing_accuracy;
+        log_info("[DT_train_worker.distributed_eval]: step 5.4 Dataset size = " +
+                      to_string(full_dataset_size) + ", correct predicted num = "
+                     + to_string(correct_num) + ", testing accuracy = " + to_string(testing_accuracy));
+
       }
     } else {
 
       assert(predicted_label_vector.size() == cur_test_dataset_labels.size());
       double squared_error = 0.0;
-      for (int i = 0; i < dataset_size; i++) {
+      for (int i = 0; i < sample_size; i++) {
         squared_error = squared_error + (predicted_label_vector[i] - cur_test_dataset_labels[i]) *
             (predicted_label_vector[i] - cur_test_dataset_labels[i]);
       }
       if (eval_type == falcon::TRAIN) {
         training_accuracy = squared_error / full_dataset_size;
-        LOG(INFO) << "Training accuracy = " << training_accuracy;
+
+        log_info("[DT_train_worker.distributed_eval]: step 5.4 Training accuracy = " + to_string(training_accuracy));
       }
       if (eval_type == falcon::TEST) {
         testing_accuracy = squared_error / full_dataset_size;
-        LOG(INFO) << "Testing accuracy = " << testing_accuracy;
+
+        log_info("[DT_train_worker.distributed_eval]: step 5.4 Testing accuracy = " + to_string(testing_accuracy));
       }
     }
 
+    log_info("[DT_train_worker.distributed_eval]: step 5.6 send training_accuracy to ps");
     if (eval_type == falcon::TRAIN) {
       worker.send_long_message_to_ps(to_string(training_accuracy));
     }
@@ -2208,11 +2275,42 @@ void DecisionTreeBuilder::distributed_eval(Party &party,
 
     const clock_t testing_finish_time = clock();
     double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-    LOG(INFO) << "Evaluation time = " << testing_consumed_time;
+    LOG(INFO) << "[DT_train_worker.distributed_eval]: Evaluation time = " << testing_consumed_time;
     LOG(INFO) << "************* Evaluation on " << dataset_str << " Finished *************";
     google::FlushLogFiles(google::INFO);
 
   }
+}
+
+void DecisionTreeBuilder::print_tree_model() {
+
+  log_info("======= print the tree ====== ");
+
+  log_info("[DT_train_worker.print_tree_model]: tree.class_num" + to_string(tree.class_num));
+  log_info("[DT_train_worker.print_tree_model]: tree.max_depth" + to_string(tree.max_depth));
+  log_info("[DT_train_worker.print_tree_model]: tree.internal_node_num" + to_string(tree.internal_node_num));
+  log_info("[DT_train_worker.print_tree_model]: tree.total_node_num" + to_string(tree.total_node_num));
+  log_info("[DT_train_worker.print_tree_model]: tree.capacity" + to_string(tree.capacity));
+
+  int maximum_nodes = (int) pow(2, tree.max_depth + 1) - 1;
+
+  for (int i = 0; i < maximum_nodes; i++) {
+
+    auto node = tree.nodes[i];
+    log_info("[DT_train_worker.print_tree_model]: checking each node ------>");
+    log_info("[DT_train_worker.print_tree_model]: current node index=  " + to_string(i));
+    log_info("[DT_train_worker.print_tree_model]: current node node_type=  " + to_string(node.node_type));
+    log_info("[DT_train_worker.print_tree_model]: current node depth=  " + to_string(node.depth));
+    log_info("[DT_train_worker.print_tree_model]: current node is_self_feature=  " + to_string(node.is_self_feature));
+    log_info("[DT_train_worker.print_tree_model]: current node best_party_id=  " + to_string(node.best_party_id));
+    log_info("[DT_train_worker.print_tree_model]: current node best_feature_id=  " + to_string(node.best_feature_id));
+    log_info("[DT_train_worker.print_tree_model]: current node best_split_id=  " + to_string(node.best_split_id));
+    log_info("[DT_train_worker.print_tree_model]: current node left_child=  " + to_string(node.left_child));
+    log_info("[DT_train_worker.print_tree_model]: current node right_child=  " + to_string(node.right_child));
+    log_info("[DT_train_worker.print_tree_model]: current node split_threshold=  " + to_string(node.split_threshold));
+    log_info("[DT_train_worker.print_tree_model]: current node node_sample_num=  " + to_string(node.node_sample_num));
+  }
+
 }
 
 
@@ -2554,7 +2652,7 @@ void train_decision_tree(
   } else {
 
     // on evaluation stage, each worker should have all features.
-    DecisionTreeBuilder decision_tree_builder_eval(params,
+    auto decision_tree_builder_eval =  new DecisionTreeBuilder (params,
                                                    full_training_data,
                                                    full_testing_data,
                                                    full_training_labels,
@@ -2564,10 +2662,16 @@ void train_decision_tree(
 
     decision_tree_builder.distributed_train(*party, *worker);
     // update the tree instance in decision_tree_builder_eval.
-    decision_tree_builder_eval.tree = decision_tree_builder.tree;
-    decision_tree_builder_eval.distributed_eval(*party, *worker, falcon::TRAIN);
-    decision_tree_builder_eval.distributed_eval(*party, *worker, falcon::TEST);
+    log_info("Print the tree of the decision_tree_builder, which is the tree after training");
+    decision_tree_builder.print_tree_model();
+    decision_tree_builder_eval->tree = decision_tree_builder.tree;
+    log_info("Print the tree of the decision_tree_builder_eval, which is the tree used for evaluation");
+    decision_tree_builder_eval->print_tree_model();
+    decision_tree_builder_eval->distributed_eval(*party, *worker, falcon::TRAIN);
+    decision_tree_builder_eval->distributed_eval(*party, *worker, falcon::TEST);
     // in is_distributed_train, parameter server will save the model.
+
+    delete decision_tree_builder_eval;
 
   }
 }
