@@ -20,9 +20,9 @@ coordinator_server
 falcon.db
 
 # falcon_logs
-#.falcon_logs
-#falcon_logs/*
-#falcon_logs_notes/
+# .falcon_logs
+falcon_logs/*
+# falcon_logs_notes/
 *.pid
 .logs/*
 
