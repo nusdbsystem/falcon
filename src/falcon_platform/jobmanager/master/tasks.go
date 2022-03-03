@@ -22,24 +22,18 @@ func (master *Master) dispatchDslObj(wg *sync.WaitGroup, dslObj *cache.DslObj) {
 
 		partyID := LaunchResourceReply.PartyID
 
-		dslObj4sp := new(entity.DslObj4SingleParty)
+		dslObj4sp := new(entity.DslObj4SingleWorker)
 
 		// all worker in same party share those vars
 		dslObj4sp.JobFlType = dslObj.JobFlType
 		dslObj4sp.ExistingKey = dslObj.ExistingKey
 		dslObj4sp.PartyNums = dslObj.PartyNums
 		dslObj4sp.Tasks = dslObj.Tasks
+		dslObj4sp.WorkerPreGroup = dslObj.DistributedTask.WorkerNumber + 1
 
 		// store only this party's information, contains PartyType used in train task
 		dslObj4sp.PartyInfo = dslObj.PartyInfoList[partyIndex]
 		dslObj4sp.DistributedTask = dslObj.DistributedTask
-
-		// all workers in same party use the same disNetCfg
-		var disNetCfg string
-		if dslObj.DistributedTask.Enable == 1 {
-			disNetCfg = master.ExtractedResource.distributedNetworkCfg[partyID]
-		}
-		dslObj4sp.DistributedExecutorPairNetworkCfg = disNetCfg
 
 		// each worker in same party have following individual vars
 		for workerID, ResourceSVC := range LaunchResourceReply.ResourceSVCs {
@@ -48,12 +42,23 @@ func (master *Master) dispatchDslObj(wg *sync.WaitGroup, dslObj *cache.DslObj) {
 			dslObj4sp.ExecutorPairNetworkCfg = master.ExtractedResource.executorPairNetworkCfg[workerID]
 			dslObj4sp.MpcPairNetworkCfg = master.ExtractedResource.mpcPairNetworkCfg[workerID]
 			dslObj4sp.MpcExecutorNetworkCfg = master.ExtractedResource.mpcExecutorNetworkCfg[workerID][partyIndex]
+			dslObj4sp.DistributedExecutorPairNetworkCfg = master.ExtractedResource.distributedNetworkCfg[partyID][ResourceSVC.GroupId]
 
 			// encode object and send to the worker
-			args := entity.EncodeDslObj4SingleParty(dslObj4sp)
+			args := entity.EncodeDslObj4SingleWorker(dslObj4sp)
 
 			logger.Log.Println("[Master.Dispatch]: task 1. Dispatch registered worker=", workerAddr,
-				"with the JobInfo - dslObj4sp.PartyInfo = ", dslObj4sp.PartyInfo)
+				" worker_id = ", workerID, " group id = ", ResourceSVC.GroupId,
+				" with the JobInfo:",
+				"\nExecutorPairNetworkCfg= ", dslObj4sp.ExecutorPairNetworkCfg,
+				"\nMpcPairNetworkCfg= ", dslObj4sp.MpcPairNetworkCfg,
+				"\nMpcExecutorNetworkCfg= ", dslObj4sp.MpcExecutorNetworkCfg,
+				"\nDistributedExecutorPairNetworkCfg= ", dslObj4sp.DistributedExecutorPairNetworkCfg)
+
+			common.RetrieveNetworkConfig(dslObj4sp.ExecutorPairNetworkCfg)
+			common.RetrieveDistributedNetworkConfig(dslObj4sp.DistributedExecutorPairNetworkCfg)
+
+
 			wg.Add(1)
 			// dispatch dslObj to the worker
 			go func(addr string, args []byte) {

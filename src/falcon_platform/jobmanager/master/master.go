@@ -14,10 +14,11 @@ import (
 )
 
 type ExtractedResource struct {
+	// each worker or ps has a mpc, and they will communicate with each other
 	mpcPairNetworkCfg      map[common.WorkerIdType]string
 	executorPairNetworkCfg map[common.WorkerIdType]string
 	mpcExecutorNetworkCfg  map[common.WorkerIdType][]string
-	distributedNetworkCfg  map[common.PartyIdType]string
+	distributedNetworkCfg  map[common.PartyIdType]map[common.GroupIdType]string
 	requiredWorkers        map[common.PartyIdType]map[common.WorkerIdType]bool
 }
 
@@ -164,20 +165,22 @@ func (master *Master) ExtractResourceInformation() {
 	// value: executor address
 
 	var executorPairIps = make(map[common.WorkerIdType][]string)
-	var psPairIps = make(map[common.WorkerIdType][]string)
 	var executorPairsPorts = make(map[common.WorkerIdType][][]common.PortType)
+
 	var mpcPairsPorts = make(map[common.WorkerIdType][]common.PortType)
 	var mpcExecutorPorts = make(map[common.WorkerIdType][]common.PortType)
-	var distPsIp = make(map[common.PartyIdType]string)
-	var distPsPorts = make(map[common.PartyIdType][]common.PortType)
-	var distWorkerIps = make(map[common.PartyIdType][]string)
-	var distWorkerPorts = make(map[common.PartyIdType][]common.PortType)
-	var psPairsPorts = make(map[common.WorkerIdType][][]common.PortType)
+
+	var distPsIp = make(map[common.PartyIdType]map[common.GroupIdType]string)
+	var distPsPorts = make(map[common.PartyIdType]map[common.GroupIdType][]common.PortType)
+
+	// worker address and port of one party
+	var distWorkerIps = make(map[common.PartyIdType]map[common.GroupIdType][]string)
+	var distWorkerPorts = make(map[common.PartyIdType]map[common.GroupIdType][]common.PortType)
 
 	// each matching pair, have 3 network cfg, if there is ps, 4 network configs
 	var executorPairNetworkCfg = make(map[common.WorkerIdType]string)
 	var mpcPairNetworkCfg = make(map[common.WorkerIdType]string)
-	var distributedNetworkCfg = make(map[common.PartyIdType]string)
+	var distributedNetworkCfg = make(map[common.PartyIdType]map[common.GroupIdType]string)
 
 	// 2-dim to record required workers, each worker is labeled with partyID, workerID
 	var requiredWorkers = make(map[common.PartyIdType]map[common.WorkerIdType]bool)
@@ -185,9 +188,9 @@ func (master *Master) ExtractResourceInformation() {
 	// for each party's replied "LaunchResourceReply" struct
 	for partyIndex, LaunchResourceReply := range master.RequiredResource {
 		partyID := LaunchResourceReply.PartyID
-		// there are only 1 ps in each party in distributed train
-		trainWorkerNum := LaunchResourceReply.ResourceNum - 1
-		logger.Log.Println("[Master.extractResourceInfo] -----debug-----trainWorkerNum:", trainWorkerNum)
+		// there are only 1 ps in each party's group in distributed train
+		trainWorkerPreGroup := LaunchResourceReply.ResourceNumPreGroup - 1
+		logger.Log.Println("[Master.extractResourceInfo] -----debug-----trainWorkerPreGroup:", trainWorkerPreGroup)
 
 		// get sorted work id
 		var orderedWorkIds []int
@@ -196,112 +199,107 @@ func (master *Master) ExtractResourceInformation() {
 		}
 		sort.Ints(orderedWorkIds)
 
-		// for each resource in single party
+		// for each resource in single party, force counting start from 0
 		for _, orderedWorkId := range orderedWorkIds {
 			for workerID, ResourceSVC := range LaunchResourceReply.ResourceSVCs {
 				if orderedWorkId == int(workerID) {
-
+					master.workerNum++
 					// required workers id
 					if _, ok := requiredWorkers[partyID]; !ok {
 						requiredWorkers[partyID] = make(map[common.WorkerIdType]bool)
 					}
 					requiredWorkers[partyID][workerID] = false
 
-					// for centralized worker or distributed worker
-					if ResourceSVC.DistributedRole != common.DistributedParameterServer {
-						master.workerNum++
-
-						// resourceIps
-						if _, ok := executorPairIps[workerID]; !ok {
-							executorPairIps[workerID] = make([]string, master.PartyNums)
-						}
-						executorPairIps[workerID][partyIndex] = ResourceSVC.ResourceIP
-						logger.Log.Println("[Master.extractResourceInfo] -----debug-----extractResourceInfo:", executorPairIps)
-
-						// record executor-executor port
-						if _, ok := executorPairsPorts[workerID]; !ok {
-							executorPairsPorts[workerID] = make([][]common.PortType, master.PartyNums)
-						}
-						executorPairsPorts[workerID][partyIndex] = ResourceSVC.ExecutorExecutorPort
-
-						// record mpc-mpc port
-						if _, ok := mpcPairsPorts[workerID]; !ok {
-							mpcPairsPorts[workerID] = make([]common.PortType, master.PartyNums)
-						}
-						mpcPairsPorts[workerID][partyIndex] = ResourceSVC.MpcMpcPort
-
-						// mpc-executor ports
-						if _, ok := mpcExecutorPorts[workerID]; !ok {
-							mpcExecutorPorts[workerID] = make([]common.PortType, master.PartyNums)
-						}
-						mpcExecutorPorts[workerID][partyIndex] = ResourceSVC.MpcExecutorPort
+					// resource executor-executor ops
+					if _, ok := executorPairIps[workerID]; !ok {
+						executorPairIps[workerID] = make([]string, master.PartyNums)
 					}
+					executorPairIps[workerID][partyIndex] = ResourceSVC.ResourceIP
+					//logger.Log.Println("[Master.extractResourceInfo] -----debug-----extractResourceInfo:", executorPairIps)
+
+					// record executor-executor ports
+					if _, ok := executorPairsPorts[workerID]; !ok {
+						executorPairsPorts[workerID] = make([][]common.PortType, master.PartyNums)
+					}
+					executorPairsPorts[workerID][partyIndex] = ResourceSVC.ExecutorExecutorPort
+
+					// record mpc-mpc ports
+					if _, ok := mpcPairsPorts[workerID]; !ok {
+						mpcPairsPorts[workerID] = make([]common.PortType, master.PartyNums)
+					}
+					mpcPairsPorts[workerID][partyIndex] = ResourceSVC.MpcMpcPort
+
+					// mpc-executor ports
+					if _, ok := mpcExecutorPorts[workerID]; !ok {
+						mpcExecutorPorts[workerID] = make([]common.PortType, master.PartyNums)
+					}
+					mpcExecutorPorts[workerID][partyIndex] = ResourceSVC.MpcExecutorPort
 
 					// for distributed parameter
 					if ResourceSVC.DistributedRole == common.DistributedParameterServer {
-						distPsIp[partyID] = ResourceSVC.ResourceIP
-						master.workerNum++
 
-						// record ps-ps ips
-						if _, ok := psPairIps[workerID]; !ok {
-							psPairIps[workerID] = make([]string, master.PartyNums)
+						if _, ok := distPsIp[partyID]; !ok{
+							distPsIp[partyID] = make(map[common.GroupIdType]string)
 						}
-						psPairIps[workerID][partyIndex] = ResourceSVC.ResourceIP
+						distPsIp[partyID][ResourceSVC.GroupId] = ResourceSVC.ResourceIP
 
-						// record executor-executor port
-						if _, ok := psPairsPorts[workerID]; !ok {
-							psPairsPorts[workerID] = make([][]common.PortType, master.PartyNums)
+						// record ps-worker ports
+						if _, ok := distPsPorts[partyID]; !ok{
+							distPsPorts[partyID] = make(map[common.GroupIdType][]common.PortType)
 						}
-						psPairsPorts[workerID][partyIndex] = ResourceSVC.PsPsPorts
-
-						if _, ok := distPsPorts[partyID]; !ok {
+						if _, ok := distPsPorts[partyID][ResourceSVC.GroupId]; !ok {
 							// len = number of train workers
-							distPsPorts[partyID] = make([]common.PortType, trainWorkerNum)
+							distPsPorts[partyID][ResourceSVC.GroupId] = make([]common.PortType, trainWorkerPreGroup)
 						}
 						for wIndex, port := range ResourceSVC.PsExecutorPorts {
-							distPsPorts[partyID][wIndex] = port
+							distPsPorts[partyID][ResourceSVC.GroupId][wIndex] = port
 						}
-
-						// both ps and executors has mpc, assign mpc's ports
-						// record mpc-mpc port
-						if _, ok := mpcPairsPorts[workerID]; !ok {
-							mpcPairsPorts[workerID] = make([]common.PortType, master.PartyNums)
-						}
-						mpcPairsPorts[workerID][partyIndex] = ResourceSVC.MpcMpcPort
-
-						// mpc-executor ports
-						if _, ok := mpcExecutorPorts[workerID]; !ok {
-							mpcExecutorPorts[workerID] = make([]common.PortType, master.PartyNums)
-						}
-						mpcExecutorPorts[workerID][partyIndex] = ResourceSVC.MpcExecutorPort
-
 					}
 
 					// if it's distributed worker, record worker's ip to generate distributed network alter
 					if ResourceSVC.DistributedRole == common.DistributedWorker {
-						//which is in order
-						distWorkerIps[partyID] = append(distWorkerIps[partyID], ResourceSVC.ResourceIP)
-						distWorkerPorts[partyID] = append(distWorkerPorts[partyID], ResourceSVC.ExecutorPSPort)
-					}
 
+						if _, ok := distWorkerIps[partyID]; !ok{
+							distWorkerIps[partyID] = make(map[common.GroupIdType][]string)
+						}
+
+						//which is in order
+						distWorkerIps[partyID][ResourceSVC.GroupId] =
+							append(distWorkerIps[partyID][ResourceSVC.GroupId], ResourceSVC.ResourceIP)
+
+						if _, ok := distWorkerPorts[partyID]; !ok{
+							distWorkerPorts[partyID] = make(map[common.GroupIdType][]common.PortType)
+						}
+
+						distWorkerPorts[partyID][ResourceSVC.GroupId] =
+								append(distWorkerPorts[partyID][ResourceSVC.GroupId], ResourceSVC.ExecutorPSPort)
+					}
 					break
 				}
 			}
 		}
 
 		// get distributed networkCfg used inside each party
+		for groupIndex := 0; groupIndex < LaunchResourceReply.GroupNum; groupIndex++{
+			groupID := common.GroupIdType(groupIndex)
+			if _, ok := distributedNetworkCfg[partyID]; !ok{
+				distributedNetworkCfg[partyID] = make(map[common.GroupIdType]string)
+			}
 
-		distributedNetworkCfg[partyID] = getDistributedNetworkCfg(distPsIp[partyID], distPsPorts[partyID], distWorkerIps[partyID], distWorkerPorts[partyID])
+			distributedNetworkCfg[partyID][groupID] = getDistributedNetworkCfg(
+				distPsIp[partyID][groupID], distPsPorts[partyID][groupID],
+				distWorkerIps[partyID][groupID], distWorkerPorts[partyID][groupID])
 
-		logger.Log.Println("[Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID =",
-			partyID,
-			"distPsIp: ", distPsIp[partyID],
-			"distPsPorts: ", distPsPorts[partyID],
-			"distWorkerIps: ", distWorkerIps[partyID],
-			"distWorkerPorts: ", distWorkerPorts[partyID],
-			"distributedNetworkCfg: ", distributedNetworkCfg[partyID])
+			logger.Log.Println("[Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID =",
+				partyID, " group_id = ", groupID,
+				"distPsIp: ", distPsIp[partyID][groupID],
+				"distPsPorts: ", distPsPorts[partyID][groupID],
+				"distWorkerIps: ", distWorkerIps[partyID][groupID],
+				"distWorkerPorts: ", distWorkerPorts[partyID][groupID],
+				"distributedNetworkCfg: ", distributedNetworkCfg[partyID][groupID])
 
-		common.RetrieveDistributedNetworkConfig(distributedNetworkCfg[partyID])
+			common.RetrieveDistributedNetworkConfig(distributedNetworkCfg[partyID][groupID])
+		}
 	}
 
 	// generate network for each executor pair
@@ -312,11 +310,8 @@ func (master *Master) ExtractResourceInformation() {
 
 		// generate port matrix for exe-exe communication
 		executorPortArray = make([][]int32, master.PartyNums)
-
 		for i, portArray := range executorPairsPorts[workerID] {
-
 			tmp := make([]int32, master.PartyNums)
-
 			for j, port := range portArray {
 				tmp[j] = int32(port)
 			}
@@ -327,59 +322,18 @@ func (master *Master) ExtractResourceInformation() {
 		for _, port := range mpcExecutorPorts[workerID] {
 			mpcPortArray = append(mpcPortArray, int32(port))
 		}
+		executorPairNetworkCfg[workerID] = common.GenerateNetworkConfig(IPs, executorPortArray, mpcPortArray)
 
-		networkCfg := common.GenerateNetworkConfig(IPs, executorPortArray, mpcPortArray)
-		executorPairNetworkCfg[workerID] = networkCfg
-	}
-	logger.Log.Println("[Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is ", executorPairNetworkCfg)
-
-	// generate network for each parameter server pair
-	for workerID, IPs := range psPairIps {
-
-		var psPortArray [][]int32
-		var mpcPortArray []int32
-
-		// generate port matrix for exe-exe communication
-		psPortArray = make([][]int32, master.PartyNums)
-		for i, portArray := range psPairsPorts[workerID] {
-			tmp := make([]int32, master.PartyNums)
-			for j, port := range portArray {
-				tmp[j] = int32(port)
-			}
-			psPortArray[i] = tmp
-		}
-
-		// generate mpc port array, for each ps
-		for _, port := range mpcExecutorPorts[workerID] {
-			mpcPortArray = append(mpcPortArray, int32(port))
-		}
-
-		// generate mpc port array, for each executor
-		networkCfg := common.GenerateNetworkConfig(IPs, psPortArray, mpcPortArray)
-		executorPairNetworkCfg[workerID] = networkCfg
-		logger.Log.Println("[Master.extractResourceInfo] executorPairNetworkCfg including parameter server "+
-			"workerID:b64_Str is ", executorPairNetworkCfg)
-
-		// generate network config for ps
+		// generate network for each mpc pair
 		var portsMpc []int32
 		for _, port := range mpcPairsPorts[workerID] {
 			portsMpc = append(portsMpc, int32(port))
 		}
-		networkCfgMpc := getMpcMpcNetworkCfg(IPs, portsMpc)
-		mpcPairNetworkCfg[workerID] = networkCfgMpc
+		mpcPairNetworkCfg[workerID] = getMpcMpcNetworkCfg(IPs, portsMpc)
 	}
 
-	// generate network for each mpc pair
-	for workerID, ips := range executorPairIps {
-		var ports []int32
+	logger.Log.Println("[Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is ", executorPairNetworkCfg)
 
-		for _, port := range mpcPairsPorts[workerID] {
-			ports = append(ports, int32(port))
-		}
-
-		networkCfg := getMpcMpcNetworkCfg(ips, ports)
-		mpcPairNetworkCfg[workerID] = networkCfg
-	}
 	mpcExecutorNetworkCfg := getMpcExecutorNetworkCfg(mpcExecutorPorts)
 
 	logger.Log.Println("[Master.extractResourceInfo] -----checking configurations-----")
@@ -390,24 +344,23 @@ func (master *Master) ExtractResourceInformation() {
 	for i := 0; i < len(master.RequiredResource); i++ {
 		logger.Log.Printf("[Master.extractResourceInfo] party %d PartyID: %d", i, master.RequiredResource[i].PartyID)
 		logger.Log.Printf("[Master.extractResourceInfo] party %d ResourceNum: %d", i, master.RequiredResource[i].ResourceNum)
+		logger.Log.Printf("[Master.extractResourceInfo] party %d ResourceNumPreGroup: %d", i, master.RequiredResource[i].ResourceNumPreGroup)
 
 		for workerID, svc := range master.RequiredResource[i].ResourceSVCs {
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.WorkerId: %d", i, workerID, svc.WorkerId)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.GroupId: %d", i, workerID, svc.GroupId)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.ResourceIP: %s", i, workerID, svc.ResourceIP)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.WorkerPort: %d", i, workerID, svc.WorkerPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.ExecutorExecutorPort: %d", i, workerID, svc.ExecutorExecutorPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.MpcMpcPort: %d", i, workerID, svc.MpcMpcPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.MpcExecutorPort: %d", i, workerID, svc.MpcExecutorPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.ExecutorPSPort: %d", i, workerID, svc.ExecutorPSPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.PsExecutorPorts: %v, ResourceSVCs.PsPsPorts: %v", i, workerID, svc.PsExecutorPorts, svc.PsPsPorts)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.DistributedRole: %s\n", i, workerID, common.DistributedRoleToName(svc.DistributedRole))
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.WorkerId: %d", i, workerID, svc.GroupId, svc.WorkerId)
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d", i, workerID, svc.GroupId)
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.ResourceIP: %s", i, workerID, svc.GroupId, svc.ResourceIP)
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.WorkerPort: %d", i, workerID, svc.GroupId, svc.WorkerPort)
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.ExecutorExecutorPort: %d", i, workerID, svc.GroupId, svc.ExecutorExecutorPort)
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.MpcMpcPort: %d", i, workerID, svc.GroupId, svc.MpcMpcPort)
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.MpcExecutorPort: %d", i, workerID, svc.GroupId, svc.MpcExecutorPort)
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.ExecutorPSPort: %d", i, workerID, svc.GroupId, svc.ExecutorPSPort)
+			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.DistributedRole: %s\n", i, workerID, svc.GroupId, common.DistributedRoleToName(svc.DistributedRole))
 		}
 	}
 
 	logger.Log.Println("[Master.extractResourceInfo] requiredWorkers is ", requiredWorkers)
 	logger.Log.Println("[Master.extractResourceInfo] executorPairIps is ", executorPairIps)
-	logger.Log.Println("[Master.extractResourceInfo] psPairIps is ", psPairIps)
 	logger.Log.Println("[Master.extractResourceInfo] executorPairsPorts is ", executorPairsPorts)
 	logger.Log.Println("[Master.extractResourceInfo] mpcPairsPorts is ", mpcPairsPorts)
 	logger.Log.Println("[Master.extractResourceInfo] mpcExecutorPorts workerID:[partyPort...] is ", mpcExecutorPorts)

@@ -200,7 +200,7 @@ func (wk *TrainWorker) RunModelTrainingTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -237,7 +237,7 @@ func (wk *TrainWorker) RunModelTrainingTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -273,7 +273,7 @@ func (wk *TrainWorker) RunModelTrainingTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", common.EmptyParams,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -383,7 +383,7 @@ func (wk *TrainWorker) RunLimePredTask() {
 		//	"--inference-endpoint", common.EmptyParams,
 		//	"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 		//	"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-		//	"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+		//	"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 		//	"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		//)
 	}
@@ -426,7 +426,7 @@ func (wk *TrainWorker) RunLimePredTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -462,7 +462,7 @@ func (wk *TrainWorker) RunLimePredTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", common.EmptyParams,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -572,7 +572,7 @@ func (wk *TrainWorker) RunLimeWeightTask() {
 		//	"--inference-endpoint", common.EmptyParams,
 		//	"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 		//	"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-		//	"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+		//	"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 		//	"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		//)
 	}
@@ -615,7 +615,7 @@ func (wk *TrainWorker) RunLimeWeightTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -651,7 +651,7 @@ func (wk *TrainWorker) RunLimeWeightTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", common.EmptyParams,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -757,7 +757,7 @@ func (wk *TrainWorker) RunLimeFeatureTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -794,7 +794,7 @@ func (wk *TrainWorker) RunLimeFeatureTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -830,7 +830,7 @@ func (wk *TrainWorker) RunLimeFeatureTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", common.EmptyParams,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -936,7 +936,7 @@ func (wk *TrainWorker) RunLimeInterpretTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -973,7 +973,7 @@ func (wk *TrainWorker) RunLimeInterpretTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}
@@ -1009,7 +1009,7 @@ func (wk *TrainWorker) RunLimeInterpretTask() {
 			"--inference-endpoint", common.EmptyParams,
 			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
 			"--distributed-train-network-file", common.EmptyParams,
-			"--worker-id", fmt.Sprintf("%d", wk.WorkerID),
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
 			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
 		)
 	}

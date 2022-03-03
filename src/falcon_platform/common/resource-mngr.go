@@ -22,8 +22,14 @@ type LaunchResourceReply struct {
 	// how many resources created by this partyServer
 	ResourceNum int
 
-	// key workerID value: *ResourceSVC
+	// key workerID, value: *ResourceSVC
 	ResourceSVCs map[WorkerIdType]*ResourceSVC
+
+	//group number, how many worker groups in this partyServer
+	GroupNum int
+
+	//group number, how many workers in this group
+	ResourceNumPreGroup int
 }
 
 type ResourceSVC struct {
@@ -52,8 +58,6 @@ type ResourceSVC struct {
 
 	// if this worker is Executor, this port listen requests sent from current party's parameter server
 	ExecutorPSPort PortType // workerId: Executor port
-	// if this worker is parameter server, listen requests sent from other party's ps
-	PsPsPorts []PortType
 	// if this worker is parameter server, listen requests sent from current party's executor
 	PsExecutorPorts []PortType
 

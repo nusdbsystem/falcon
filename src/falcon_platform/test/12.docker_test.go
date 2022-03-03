@@ -99,7 +99,7 @@ func TestNetworkCfg(t *testing.T) {
 }
 
 func TestPSNetworkCfg(t *testing.T) {
-	a := "Cg8KCTEyNy4wLjAuMRCKrAEKDwoJMTI3LjAuMC4xEI+sARIPCgkxMjcuMC4wLjEQgqwBEg8KCTEyNy4wLjAuMRCDrAE="
+	a := "Cg8KCTEyNy4wLjAuMRD+qwEKDwoJMTI3LjAuMC4xEISsAQoPCgkxMjcuMC4wLjEQkawBCg8KCTEyNy4wLjAuMRCXrAESDwoJMTI3LjAuMC4xEIesARIPCgkxMjcuMC4wLjEQiKwB"
 
 	res, _ := base64.StdEncoding.DecodeString(a)
 

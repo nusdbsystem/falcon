@@ -449,17 +449,14 @@ func DeployWorkerDockerContainer(masterAddr, workerType, jobId, dataPath, modelP
 		// if DistributedParameterServer, 2 port needed, one communicate with master, one train worker
 		logger.Log.Println("[JobManager]: DistributedParameterServer, map 2 ports to host")
 
-		logger.Log.Printf("[JobManager]: DistributedParameterServer, WorkerPort is %d, PsExecutorPorts is %v and PsPsPorts is %v\n",
-			resourceSVC.WorkerPort, resourceSVC.PsExecutorPorts, resourceSVC.PsPsPorts)
+		logger.Log.Printf("[JobManager]: DistributedParameterServer, WorkerPort is %d, PsExecutorPorts is %v \n",
+			resourceSVC.WorkerPort, resourceSVC.PsExecutorPorts)
 
 		dockerCmd = exec.Command(
 			"docker", "run",
 			"-d",
 			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
 			"--net", "host",
-			"-p", fmt.Sprintf("%d-%d:%d-%d",
-				utils.MinV(resourceSVC.PsPsPorts), utils.MaxV(resourceSVC.PsPsPorts),
-				utils.MinV(resourceSVC.PsPsPorts), utils.MaxV(resourceSVC.PsPsPorts)),
 			"-p", fmt.Sprintf("%d-%d:%d-%d",
 				utils.MinV(resourceSVC.PsExecutorPorts), utils.MaxV(resourceSVC.PsExecutorPorts),
 				utils.MinV(resourceSVC.PsExecutorPorts), utils.MaxV(resourceSVC.PsExecutorPorts)),

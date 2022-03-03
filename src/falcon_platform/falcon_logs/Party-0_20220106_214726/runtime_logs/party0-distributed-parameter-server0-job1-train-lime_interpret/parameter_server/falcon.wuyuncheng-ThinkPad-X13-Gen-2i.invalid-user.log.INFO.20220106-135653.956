@@ -1,0 +1,2355 @@
+Log file created at: 2022/01/06 13:56:53
+Running on machine: wuyuncheng-ThinkPad-X13-Gen-2i
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0106 13:56:53.485824   956 main.cc:118] Init log file.
+I0106 13:56:53.486357   956 logger.cc:11] -------- parse parameters correct --------
+I0106 13:56:53.486595   956 logger.cc:11] party-id: 0
+I0106 13:56:53.486862   956 logger.cc:11] party-num: 3
+I0106 13:56:53.487228   956 logger.cc:11] fl-setting: 1
+I0106 13:56:53.487304   956 logger.cc:11] existing-key: 1
+I0106 13:56:53.487380   956 logger.cc:11] network-file: CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfOrAfSrAfWrARILCgmGrAGHrAGIrAESCwoJmawBmqwBm6wBGgsKCfClA/ClA/ClAw==
+I0106 13:56:53.487468   956 logger.cc:11] log-file: /opt/falcon/src/falcon_platform/falcon_logs/Party-0_20220106_214726/runtime_logs/party0-distributed-parameter-server0-job1-train-lime_interpret/parameter_server
+I0106 13:56:53.487537   956 logger.cc:11] data-input-file: /dataOutputPath/client.txt
+I0106 13:56:53.487599   956 logger.cc:11] data-output-file: 0
+I0106 13:56:53.487681   956 logger.cc:11] key-file: /dataPath/phe_keys
+I0106 13:56:53.487741   956 logger.cc:11] algorithm-name: lime_interpret
+I0106 13:56:53.487818   956 logger.cc:11] model-save-file: /modelPath/saved_model.pb
+I0106 13:56:53.487890   956 logger.cc:11] model-report-file: /modelPath/report.txt
+I0106 13:56:53.487960   956 logger.cc:11] is-inference: 0
+I0106 13:56:53.488039   956 logger.cc:11] inference-endpoint: 0
+I0106 13:56:53.488104   956 logger.cc:11] is-distributed: 1
+I0106 13:56:53.488170   956 logger.cc:11] distributed-train-network-file: Cg8KCTEyNy4wLjAuMRD+qwEKDwoJMTI3LjAuMC4xEISsARIPCgkxMjcuMC4wLjEQ96sBEg8KCTEyNy4wLjAuMRD4qwE=
+I0106 13:56:53.488240   956 logger.cc:11] worker-id: 0
+I0106 13:56:53.488306   956 logger.cc:11] distributed-role: 0
+I0106 13:56:53.495398   956 party.cc:41] local_data is reading dataset from: /dataOutputPath/client.txt
+I0106 13:56:53.495417   956 party.cc:42] sample_num = 569
+I0106 13:56:53.495486   956 party.cc:50] Active party last column is label, so feature_num-1
+I0106 13:56:53.495502   956 party.cc:53] feature_num = 10
+I0106 13:56:53.495606   956 logger.cc:11] Parse algorithm name and run the program
+I0106 13:56:53.495806   956 logger.cc:11] Execute as parameter server
+I0106 13:56:53.495939   956 logger.cc:11] Execute distributed training logic
+I0106 13:56:53.496028   956 network_converter.cc:53] [deserialize_network_configs]: mpc_port_array_size: 3 --------
+I0106 13:56:53.496157   956 party.cc:156] [deserialize_network_configs]: mpc_port_array_size after: 3 --------
+I0106 13:56:53.496281   956 party.cc:159] [deserialize_network_configs]: size of ip address is: 3 --------
+I0106 13:56:53.496341   956 party.cc:163] ips[0] = 127.0.0.1
+I0106 13:56:53.496352   956 party.cc:165] port_array[0][0] = 22003
+I0106 13:56:53.496393   956 party.cc:165] port_array[0][1] = 22004
+I0106 13:56:53.496500   956 party.cc:165] port_array[0][2] = 22005
+I0106 13:56:53.496546   956 party.cc:163] ips[1] = 127.0.0.1
+I0106 13:56:53.496554   956 party.cc:165] port_array[1][0] = 22022
+I0106 13:56:53.496598   956 party.cc:165] port_array[1][1] = 22023
+I0106 13:56:53.496610   956 party.cc:165] port_array[1][2] = 22024
+I0106 13:56:53.496625   956 party.cc:163] ips[2] = 127.0.0.1
+I0106 13:56:53.496632   956 party.cc:165] port_array[2][0] = 22041
+I0106 13:56:53.496646   956 party.cc:165] port_array[2][1] = 22042
+I0106 13:56:53.496654   956 party.cc:165] port_array[2][2] = 22043
+I0106 13:56:53.496677   956 logger.cc:11] executor_mpc_ports[0] = 54000
+I0106 13:56:53.496696   956 logger.cc:11] executor_mpc_ports[1] = 54000
+I0106 13:56:53.496714   956 logger.cc:11] executor_mpc_ports[2] = 54000
+I0106 13:56:53.496738   956 party.cc:181] Establish network communications with other parties
+I0106 13:56:53.496778   956 party.cc:193] My party id is: 0, I am listening party 1 on port 22004
+I0106 13:56:53.496881   956 party.cc:202] The other party's port I will send data to is: 22022
+I0106 13:56:53.997669   956 party.cc:208] Communication channel established with party 1, port is 22004.
+I0106 13:56:53.997782   956 party.cc:193] My party id is: 0, I am listening party 2 on port 22005
+I0106 13:56:53.997988   956 party.cc:202] The other party's port I will send data to is: 22041
+I0106 13:56:53.998884   956 party.cc:208] Communication channel established with party 2, port is 22005.
+I0106 13:56:53.998988   956 party.cc:223] Init threshold partially homomorphic encryption keys
+I0106 13:56:54.000443   956 party.cc:233] Initialize phe keys success
+I0106 13:56:54.000470   956 party.cc:234] m_use_existing_key = 1
+I0106 13:56:54.002257   956 logger.cc:11] Begin to interpret using lime
+I0106 13:56:54.002384   956 logger.cc:11] Deserialize the lime interpret params
+I0106 13:56:54.002398   956 logger.cc:11] [lime_interpret]: interpret_params[class_id] = 1
+I0106 13:56:54.002413   956 logger.cc:11] [lime_interpret]: interpret_params[interpret_model_name] = linear_regression
+I0106 13:56:54.254957   956 logger.cc:11] [interpret]: interpret_model_name = linear_regression
+I0106 13:56:54.255453   956 logger.cc:11] [explain_one_label]: interpret_model_name = linear_regression
+I0106 13:56:54.255487   956 logger.cc:11] [explain_one_label]: algorithm_name = 1
+I0106 13:56:54.255573   956 logger.cc:11] linear_reg_params.batch_size = 8
+I0106 13:56:54.255592   956 logger.cc:11] linear_reg_params.max_iteration = 100
+I0106 13:56:54.255625   956 logger.cc:11] linear_reg_params.converge_threshold = 0.000000
+I0106 13:56:54.255645   956 logger.cc:11] linear_reg_params.with_regularization = 0
+I0106 13:56:54.255664   956 logger.cc:11] linear_reg_params.alpha = 0.100000
+I0106 13:56:54.255684   956 logger.cc:11] linear_reg_params.learning_rate = 0.100000
+I0106 13:56:54.255709   956 logger.cc:11] linear_reg_params.decay = 0.100000
+I0106 13:56:54.255725   956 logger.cc:11] linear_reg_params.penalty = l1
+I0106 13:56:54.255743   956 logger.cc:11] linear_reg_params.optimizer = sgd
+I0106 13:56:54.255754   956 logger.cc:11] linear_reg_params.metric = mse
+I0106 13:56:54.255780   956 logger.cc:11] linear_reg_params.dp_budget = 0.100000
+I0106 13:56:54.255797   956 logger.cc:11] linear_reg_params.fit_bias = 1
+I0106 13:56:54.256943   956 logger.cc:11] fit_bias = TRUE, will insert x1=1 to features
+I0106 13:56:54.257587   956 logger.cc:11] ************* Distributed LIME Interpret *************
+I0106 13:56:54.258029   956 logger.cc:11] [lime_linear_reg_train ps]: init linear regression model
+I0106 13:56:54.258069   956 network_converter.cc:120] worker size = 2
+I0106 13:56:54.258129   956 logger.cc:11] Establish network communications with workers
+I0106 13:56:54.758854   956 logger.cc:11] Communication channel established with worker index 0, ip is 127.0.0.1, port is 22014
+I0106 13:56:54.787395   956 logger.cc:11] Communication channel established with worker index 1, ip is 127.0.0.1, port is 22020
+I0106 13:56:54.788949   956 logger.cc:11] [LinearParameterServer::LinearParameterServer]: constructor. Test party's content.
+I0106 13:56:54.789009   956 logger.cc:11] [LinearParameterServer::LinearParameterServer]: okay.
+I0106 13:56:54.789041   956 logger.cc:11] [ModelBuilder]: copy constructor
+I0106 13:56:54.790073   956 logger.cc:11] [lime_linear_reg_train ps]: Init ps finished.
+I0106 13:56:55.461854   956 logger.cc:11] limit = 0.308607
+I0106 13:56:55.461974   956 logger.cc:11] global_weights[0] = -0.106710
+I0106 13:56:55.462023   956 logger.cc:11] global_weights[1] = 0.005679
+I0106 13:56:55.462076   956 logger.cc:11] global_weights[2] = 0.273254
+I0106 13:56:55.462113   956 logger.cc:11] global_weights[3] = 0.029492
+I0106 13:56:55.462164   956 logger.cc:11] global_weights[4] = 0.283294
+I0106 13:56:55.462216   956 logger.cc:11] global_weights[5] = 0.008065
+I0106 13:56:55.462271   956 logger.cc:11] global_weights[6] = 0.201330
+I0106 13:56:55.462312   956 logger.cc:11] global_weights[7] = 0.025807
+I0106 13:56:55.462357   956 logger.cc:11] global_weights[8] = 0.179289
+I0106 13:56:55.462394   956 logger.cc:11] global_weights[9] = 0.208601
+I0106 13:56:55.462443   956 logger.cc:11] global_weights[10] = -0.207393
+I0106 13:56:55.462479   956 logger.cc:11] global_weights[11] = 0.093342
+I0106 13:56:55.462541   956 logger.cc:11] global_weights[12] = 0.023038
+I0106 13:56:55.462579   956 logger.cc:11] global_weights[13] = -0.235700
+I0106 13:56:55.462627   956 logger.cc:11] global_weights[14] = 0.068593
+I0106 13:56:55.462668   956 logger.cc:11] global_weights[15] = -0.209358
+I0106 13:56:55.462718   956 logger.cc:11] global_weights[16] = -0.189967
+I0106 13:56:55.462754   956 logger.cc:11] global_weights[17] = -0.202647
+I0106 13:56:55.462800   956 logger.cc:11] global_weights[18] = 0.142622
+I0106 13:56:55.462843   956 logger.cc:11] global_weights[19] = -0.020304
+I0106 13:56:55.462898   956 logger.cc:11] global_weights[20] = -0.052816
+I0106 13:56:55.462949   956 logger.cc:11] local_weights[0] = -0.106710
+I0106 13:56:55.467346   956 logger.cc:11] local_weights[1] = 0.005679
+I0106 13:56:55.471325   956 logger.cc:11] local_weights[2] = 0.273254
+I0106 13:56:55.475414   956 logger.cc:11] local_weights[3] = 0.029492
+I0106 13:56:55.480291   956 logger.cc:11] local_weights[4] = 0.283294
+I0106 13:56:55.484409   956 logger.cc:11] local_weights[5] = 0.008065
+I0106 13:56:55.488386   956 logger.cc:11] local_weights[6] = 0.201330
+I0106 13:56:55.492437   956 logger.cc:11] local_weights[7] = 0.025807
+I0106 13:56:55.496448   956 logger.cc:11] local_weights[8] = 0.179289
+I0106 13:56:55.500541   956 logger.cc:11] local_weights[9] = 0.208601
+I0106 13:56:55.504557   956 logger.cc:11] current channel size = 2
+I0106 13:56:55.990568   956 logger.cc:11] ------ batch indexes for iter 0 ------
+I0106 13:56:55.990696   956 logger.cc:11] data_indexes selected = 302
+I0106 13:56:55.990717   956 logger.cc:11] data_indexes selected = 45
+I0106 13:56:55.990728   956 logger.cc:11] data_indexes selected = 232
+I0106 13:56:55.990746   956 logger.cc:11] data_indexes selected = 418
+I0106 13:56:55.990757   956 logger.cc:11] data_indexes selected = 682
+I0106 13:56:55.990772   956 logger.cc:11] data_indexes selected = 799
+I0106 13:56:55.990787   956 logger.cc:11] data_indexes selected = 864
+I0106 13:56:55.990805   956 logger.cc:11] data_indexes selected = 548
+I0106 13:56:55.990828   956 logger.cc:11] ------ batch indexes for iter 1 ------
+I0106 13:56:55.990928   956 logger.cc:11] data_indexes selected = 119
+I0106 13:56:55.990938   956 logger.cc:11] data_indexes selected = 159
+I0106 13:56:55.990950   956 logger.cc:11] data_indexes selected = 378
+I0106 13:56:55.990960   956 logger.cc:11] data_indexes selected = 775
+I0106 13:56:55.990976   956 logger.cc:11] data_indexes selected = 601
+I0106 13:56:55.990988   956 logger.cc:11] data_indexes selected = 932
+I0106 13:56:55.991004   956 logger.cc:11] data_indexes selected = 314
+I0106 13:56:55.991015   956 logger.cc:11] data_indexes selected = 385
+I0106 13:56:55.991035   956 logger.cc:11] ------ batch indexes for iter 2 ------
+I0106 13:56:55.991168   956 logger.cc:11] data_indexes selected = 384
+I0106 13:56:55.991183   956 logger.cc:11] data_indexes selected = 201
+I0106 13:56:55.991195   956 logger.cc:11] data_indexes selected = 910
+I0106 13:56:55.991217   956 logger.cc:11] data_indexes selected = 816
+I0106 13:56:55.991232   956 logger.cc:11] data_indexes selected = 857
+I0106 13:56:55.991250   956 logger.cc:11] data_indexes selected = 613
+I0106 13:56:55.991271   956 logger.cc:11] data_indexes selected = 828
+I0106 13:56:55.991286   956 logger.cc:11] data_indexes selected = 169
+I0106 13:56:55.991297   956 logger.cc:11] ------ batch indexes for iter 3 ------
+I0106 13:56:55.991406   956 logger.cc:11] data_indexes selected = 710
+I0106 13:56:55.991421   956 logger.cc:11] data_indexes selected = 330
+I0106 13:56:55.991436   956 logger.cc:11] data_indexes selected = 192
+I0106 13:56:55.991446   956 logger.cc:11] data_indexes selected = 843
+I0106 13:56:55.991463   956 logger.cc:11] data_indexes selected = 865
+I0106 13:56:55.991596   956 logger.cc:11] data_indexes selected = 471
+I0106 13:56:55.991680   956 logger.cc:11] data_indexes selected = 695
+I0106 13:56:55.991696   956 logger.cc:11] data_indexes selected = 328
+I0106 13:56:55.991719   956 logger.cc:11] ------ batch indexes for iter 4 ------
+I0106 13:56:55.991847   956 logger.cc:11] data_indexes selected = 868
+I0106 13:56:55.991878   956 logger.cc:11] data_indexes selected = 453
+I0106 13:56:55.991894   956 logger.cc:11] data_indexes selected = 559
+I0106 13:56:55.991921   956 logger.cc:11] data_indexes selected = 70
+I0106 13:56:55.991937   956 logger.cc:11] data_indexes selected = 956
+I0106 13:56:55.991958   956 logger.cc:11] data_indexes selected = 674
+I0106 13:56:55.991974   956 logger.cc:11] data_indexes selected = 239
+I0106 13:56:55.991995   956 logger.cc:11] data_indexes selected = 544
+I0106 13:56:55.992013   956 logger.cc:11] ------ batch indexes for iter 5 ------
+I0106 13:56:55.992121   956 logger.cc:11] data_indexes selected = 989
+I0106 13:56:55.992133   956 logger.cc:11] data_indexes selected = 510
+I0106 13:56:55.992148   956 logger.cc:11] data_indexes selected = 342
+I0106 13:56:55.992159   956 logger.cc:11] data_indexes selected = 58
+I0106 13:56:55.992173   956 logger.cc:11] data_indexes selected = 88
+I0106 13:56:55.992188   956 logger.cc:11] data_indexes selected = 461
+I0106 13:56:55.992209   956 logger.cc:11] data_indexes selected = 390
+I0106 13:56:55.992224   956 logger.cc:11] data_indexes selected = 790
+I0106 13:56:55.992252   956 logger.cc:11] ------ batch indexes for iter 6 ------
+I0106 13:56:55.992343   956 logger.cc:11] data_indexes selected = 640
+I0106 13:56:55.992363   956 logger.cc:11] data_indexes selected = 244
+I0106 13:56:55.992374   956 logger.cc:11] data_indexes selected = 360
+I0106 13:56:55.992393   956 logger.cc:11] data_indexes selected = 863
+I0106 13:56:55.992408   956 logger.cc:11] data_indexes selected = 268
+I0106 13:56:55.992426   956 logger.cc:11] data_indexes selected = 380
+I0106 13:56:55.992441   956 logger.cc:11] data_indexes selected = 741
+I0106 13:56:55.992460   956 logger.cc:11] data_indexes selected = 517
+I0106 13:56:55.992477   956 logger.cc:11] ------ batch indexes for iter 7 ------
+I0106 13:56:55.992609   956 logger.cc:11] data_indexes selected = 66
+I0106 13:56:55.992624   956 logger.cc:11] data_indexes selected = 23
+I0106 13:56:55.992638   956 logger.cc:11] data_indexes selected = 599
+I0106 13:56:55.992648   956 logger.cc:11] data_indexes selected = 416
+I0106 13:56:55.992661   956 logger.cc:11] data_indexes selected = 2
+I0106 13:56:55.992671   956 logger.cc:11] data_indexes selected = 825
+I0106 13:56:55.992688   956 logger.cc:11] data_indexes selected = 474
+I0106 13:56:55.992703   956 logger.cc:11] data_indexes selected = 971
+I0106 13:56:55.992733   956 logger.cc:11] ------ batch indexes for iter 8 ------
+I0106 13:56:55.992852   956 logger.cc:11] data_indexes selected = 780
+I0106 13:56:55.992867   956 logger.cc:11] data_indexes selected = 961
+I0106 13:56:55.992877   956 logger.cc:11] data_indexes selected = 861
+I0106 13:56:55.992890   956 logger.cc:11] data_indexes selected = 97
+I0106 13:56:55.992905   956 logger.cc:11] data_indexes selected = 206
+I0106 13:56:55.992923   956 logger.cc:11] data_indexes selected = 714
+I0106 13:56:55.992935   956 logger.cc:11] data_indexes selected = 268
+I0106 13:56:55.992952   956 logger.cc:11] data_indexes selected = 537
+I0106 13:56:55.992966   956 logger.cc:11] ------ batch indexes for iter 9 ------
+I0106 13:56:55.993050   956 logger.cc:11] data_indexes selected = 539
+I0106 13:56:55.993063   956 logger.cc:11] data_indexes selected = 678
+I0106 13:56:55.993079   956 logger.cc:11] data_indexes selected = 442
+I0106 13:56:55.993093   956 logger.cc:11] data_indexes selected = 125
+I0106 13:56:55.993108   956 logger.cc:11] data_indexes selected = 323
+I0106 13:56:55.993124   956 logger.cc:11] data_indexes selected = 688
+I0106 13:56:55.993146   956 logger.cc:11] data_indexes selected = 366
+I0106 13:56:55.993158   956 logger.cc:11] data_indexes selected = 482
+I0106 13:56:55.993177   956 logger.cc:11] ------ batch indexes for iter 10 ------
+I0106 13:56:55.993269   956 logger.cc:11] data_indexes selected = 401
+I0106 13:56:55.993290   956 logger.cc:11] data_indexes selected = 592
+I0106 13:56:55.993304   956 logger.cc:11] data_indexes selected = 320
+I0106 13:56:55.993320   956 logger.cc:11] data_indexes selected = 371
+I0106 13:56:55.993337   956 logger.cc:11] data_indexes selected = 613
+I0106 13:56:55.993356   956 logger.cc:11] data_indexes selected = 859
+I0106 13:56:55.993369   956 logger.cc:11] data_indexes selected = 473
+I0106 13:56:55.993386   956 logger.cc:11] data_indexes selected = 598
+I0106 13:56:55.993403   956 logger.cc:11] ------ batch indexes for iter 11 ------
+I0106 13:56:55.993506   956 logger.cc:11] data_indexes selected = 884
+I0106 13:56:55.993523   956 logger.cc:11] data_indexes selected = 275
+I0106 13:56:55.993546   956 logger.cc:11] data_indexes selected = 869
+I0106 13:56:55.993557   956 logger.cc:11] data_indexes selected = 404
+I0106 13:56:55.993571   956 logger.cc:11] data_indexes selected = 204
+I0106 13:56:55.993582   956 logger.cc:11] data_indexes selected = 302
+I0106 13:56:55.993598   956 logger.cc:11] data_indexes selected = 15
+I0106 13:56:55.993613   956 logger.cc:11] data_indexes selected = 467
+I0106 13:56:55.993633   956 logger.cc:11] ------ batch indexes for iter 12 ------
+I0106 13:56:55.993736   956 logger.cc:11] data_indexes selected = 919
+I0106 13:56:55.993755   956 logger.cc:11] data_indexes selected = 138
+I0106 13:56:55.993768   956 logger.cc:11] data_indexes selected = 983
+I0106 13:56:55.993784   956 logger.cc:11] data_indexes selected = 495
+I0106 13:56:55.993794   956 logger.cc:11] data_indexes selected = 479
+I0106 13:56:55.993806   956 logger.cc:11] data_indexes selected = 218
+I0106 13:56:55.993818   956 logger.cc:11] data_indexes selected = 110
+I0106 13:56:55.993835   956 logger.cc:11] data_indexes selected = 80
+I0106 13:56:55.993851   956 logger.cc:11] ------ batch indexes for iter 13 ------
+I0106 13:56:55.993953   956 logger.cc:11] data_indexes selected = 180
+I0106 13:56:55.993968   956 logger.cc:11] data_indexes selected = 163
+I0106 13:56:55.993988   956 logger.cc:11] data_indexes selected = 400
+I0106 13:56:55.994000   956 logger.cc:11] data_indexes selected = 577
+I0106 13:56:55.994017   956 logger.cc:11] data_indexes selected = 428
+I0106 13:56:55.994030   956 logger.cc:11] data_indexes selected = 955
+I0106 13:56:55.994046   956 logger.cc:11] data_indexes selected = 215
+I0106 13:56:55.994060   956 logger.cc:11] data_indexes selected = 476
+I0106 13:56:55.994079   956 logger.cc:11] ------ batch indexes for iter 14 ------
+I0106 13:56:55.994156   956 logger.cc:11] data_indexes selected = 26
+I0106 13:56:55.994171   956 logger.cc:11] data_indexes selected = 624
+I0106 13:56:55.994185   956 logger.cc:11] data_indexes selected = 589
+I0106 13:56:55.994204   956 logger.cc:11] data_indexes selected = 809
+I0106 13:56:55.994221   956 logger.cc:11] data_indexes selected = 95
+I0106 13:56:55.994240   956 logger.cc:11] data_indexes selected = 619
+I0106 13:56:55.994254   956 logger.cc:11] data_indexes selected = 490
+I0106 13:56:55.994282   956 logger.cc:11] data_indexes selected = 943
+I0106 13:56:55.994297   956 logger.cc:11] ------ batch indexes for iter 15 ------
+I0106 13:56:55.994397   956 logger.cc:11] data_indexes selected = 442
+I0106 13:56:55.994411   956 logger.cc:11] data_indexes selected = 65
+I0106 13:56:55.994433   956 logger.cc:11] data_indexes selected = 218
+I0106 13:56:55.994446   956 logger.cc:11] data_indexes selected = 658
+I0106 13:56:55.994463   956 logger.cc:11] data_indexes selected = 194
+I0106 13:56:55.994475   956 logger.cc:11] data_indexes selected = 997
+I0106 13:56:55.994493   956 logger.cc:11] data_indexes selected = 429
+I0106 13:56:55.994505   956 logger.cc:11] data_indexes selected = 147
+I0106 13:56:55.994524   956 logger.cc:11] ------ batch indexes for iter 16 ------
+I0106 13:56:55.994606   956 logger.cc:11] data_indexes selected = 697
+I0106 13:56:55.994621   956 logger.cc:11] data_indexes selected = 970
+I0106 13:56:55.994632   956 logger.cc:11] data_indexes selected = 572
+I0106 13:56:55.994649   956 logger.cc:11] data_indexes selected = 682
+I0106 13:56:55.994670   956 logger.cc:11] data_indexes selected = 230
+I0106 13:56:55.994688   956 logger.cc:11] data_indexes selected = 3
+I0106 13:56:55.994699   956 logger.cc:11] data_indexes selected = 805
+I0106 13:56:55.994717   956 logger.cc:11] data_indexes selected = 939
+I0106 13:56:55.994736   956 logger.cc:11] ------ batch indexes for iter 17 ------
+I0106 13:56:55.994825   956 logger.cc:11] data_indexes selected = 637
+I0106 13:56:55.994837   956 logger.cc:11] data_indexes selected = 210
+I0106 13:56:55.994855   956 logger.cc:11] data_indexes selected = 789
+I0106 13:56:55.994868   956 logger.cc:11] data_indexes selected = 594
+I0106 13:56:55.994885   956 logger.cc:11] data_indexes selected = 655
+I0106 13:56:55.994897   956 logger.cc:11] data_indexes selected = 640
+I0106 13:56:55.994915   956 logger.cc:11] data_indexes selected = 192
+I0106 13:56:55.994927   956 logger.cc:11] data_indexes selected = 980
+I0106 13:56:55.994943   956 logger.cc:11] ------ batch indexes for iter 18 ------
+I0106 13:56:55.995031   956 logger.cc:11] data_indexes selected = 286
+I0106 13:56:55.995044   956 logger.cc:11] data_indexes selected = 280
+I0106 13:56:55.995062   956 logger.cc:11] data_indexes selected = 106
+I0106 13:56:55.995085   956 logger.cc:11] data_indexes selected = 551
+I0106 13:56:55.995100   956 logger.cc:11] data_indexes selected = 541
+I0106 13:56:55.995117   956 logger.cc:11] data_indexes selected = 171
+I0106 13:56:55.995131   956 logger.cc:11] data_indexes selected = 225
+I0106 13:56:55.995146   956 logger.cc:11] data_indexes selected = 384
+I0106 13:56:55.995159   956 logger.cc:11] ------ batch indexes for iter 19 ------
+I0106 13:56:55.995261   956 logger.cc:11] data_indexes selected = 368
+I0106 13:56:55.995276   956 logger.cc:11] data_indexes selected = 681
+I0106 13:56:55.995293   956 logger.cc:11] data_indexes selected = 284
+I0106 13:56:55.995307   956 logger.cc:11] data_indexes selected = 270
+I0106 13:56:55.995324   956 logger.cc:11] data_indexes selected = 846
+I0106 13:56:55.995337   956 logger.cc:11] data_indexes selected = 931
+I0106 13:56:55.995355   956 logger.cc:11] data_indexes selected = 843
+I0106 13:56:55.995368   956 logger.cc:11] data_indexes selected = 596
+I0106 13:56:55.995393   956 logger.cc:11] ------ batch indexes for iter 20 ------
+I0106 13:56:55.995491   956 logger.cc:11] data_indexes selected = 383
+I0106 13:56:55.995510   956 logger.cc:11] data_indexes selected = 451
+I0106 13:56:55.995522   956 logger.cc:11] data_indexes selected = 743
+I0106 13:56:55.995539   956 logger.cc:11] data_indexes selected = 759
+I0106 13:56:55.995553   956 logger.cc:11] data_indexes selected = 776
+I0106 13:56:55.995569   956 logger.cc:11] data_indexes selected = 244
+I0106 13:56:55.995582   956 logger.cc:11] data_indexes selected = 945
+I0106 13:56:55.995599   956 logger.cc:11] data_indexes selected = 179
+I0106 13:56:55.995615   956 logger.cc:11] ------ batch indexes for iter 21 ------
+I0106 13:56:55.995708   956 logger.cc:11] data_indexes selected = 452
+I0106 13:56:55.995723   956 logger.cc:11] data_indexes selected = 58
+I0106 13:56:55.995738   956 logger.cc:11] data_indexes selected = 947
+I0106 13:56:55.995750   956 logger.cc:11] data_indexes selected = 278
+I0106 13:56:55.995767   956 logger.cc:11] data_indexes selected = 575
+I0106 13:56:55.995786   956 logger.cc:11] data_indexes selected = 593
+I0106 13:56:55.995802   956 logger.cc:11] data_indexes selected = 18
+I0106 13:56:55.995815   956 logger.cc:11] data_indexes selected = 922
+I0106 13:56:55.995832   956 logger.cc:11] ------ batch indexes for iter 22 ------
+I0106 13:56:55.995918   956 logger.cc:11] data_indexes selected = 967
+I0106 13:56:55.995935   956 logger.cc:11] data_indexes selected = 935
+I0106 13:56:55.995949   956 logger.cc:11] data_indexes selected = 745
+I0106 13:56:55.995968   956 logger.cc:11] data_indexes selected = 320
+I0106 13:56:55.995981   956 logger.cc:11] data_indexes selected = 263
+I0106 13:56:55.995998   956 logger.cc:11] data_indexes selected = 452
+I0106 13:56:55.996012   956 logger.cc:11] data_indexes selected = 166
+I0106 13:56:55.996030   956 logger.cc:11] data_indexes selected = 365
+I0106 13:56:55.996047   956 logger.cc:11] ------ batch indexes for iter 23 ------
+I0106 13:56:55.996179   956 logger.cc:11] data_indexes selected = 931
+I0106 13:56:55.996191   956 logger.cc:11] data_indexes selected = 876
+I0106 13:56:55.996222   956 logger.cc:11] data_indexes selected = 882
+I0106 13:56:55.996234   956 logger.cc:11] data_indexes selected = 616
+I0106 13:56:55.996253   956 logger.cc:11] data_indexes selected = 884
+I0106 13:56:55.996264   956 logger.cc:11] data_indexes selected = 194
+I0106 13:56:55.996280   956 logger.cc:11] data_indexes selected = 512
+I0106 13:56:55.996292   956 logger.cc:11] data_indexes selected = 442
+I0106 13:56:55.996313   956 logger.cc:11] ------ batch indexes for iter 24 ------
+I0106 13:56:55.996436   956 logger.cc:11] data_indexes selected = 702
+I0106 13:56:55.996454   956 logger.cc:11] data_indexes selected = 166
+I0106 13:56:55.996466   956 logger.cc:11] data_indexes selected = 9
+I0106 13:56:55.996480   956 logger.cc:11] data_indexes selected = 403
+I0106 13:56:55.996493   956 logger.cc:11] data_indexes selected = 585
+I0106 13:56:55.996511   956 logger.cc:11] data_indexes selected = 162
+I0106 13:56:55.996523   956 logger.cc:11] data_indexes selected = 464
+I0106 13:56:55.996541   956 logger.cc:11] data_indexes selected = 10
+I0106 13:56:55.996554   956 logger.cc:11] ------ batch indexes for iter 25 ------
+I0106 13:56:55.996668   956 logger.cc:11] data_indexes selected = 915
+I0106 13:56:55.996683   956 logger.cc:11] data_indexes selected = 123
+I0106 13:56:55.996701   956 logger.cc:11] data_indexes selected = 886
+I0106 13:56:55.996711   956 logger.cc:11] data_indexes selected = 301
+I0106 13:56:55.996729   956 logger.cc:11] data_indexes selected = 520
+I0106 13:56:55.996742   956 logger.cc:11] data_indexes selected = 956
+I0106 13:56:55.996758   956 logger.cc:11] data_indexes selected = 13
+I0106 13:56:55.996770   956 logger.cc:11] data_indexes selected = 846
+I0106 13:56:55.996789   956 logger.cc:11] ------ batch indexes for iter 26 ------
+I0106 13:56:55.996871   956 logger.cc:11] data_indexes selected = 372
+I0106 13:56:55.996891   956 logger.cc:11] data_indexes selected = 498
+I0106 13:56:55.996904   956 logger.cc:11] data_indexes selected = 705
+I0106 13:56:55.996922   956 logger.cc:11] data_indexes selected = 3
+I0106 13:56:55.996933   956 logger.cc:11] data_indexes selected = 183
+I0106 13:56:55.996949   956 logger.cc:11] data_indexes selected = 847
+I0106 13:56:55.996961   956 logger.cc:11] data_indexes selected = 270
+I0106 13:56:55.996987   956 logger.cc:11] data_indexes selected = 298
+I0106 13:56:55.997004   956 logger.cc:11] ------ batch indexes for iter 27 ------
+I0106 13:56:55.997136   956 logger.cc:11] data_indexes selected = 305
+I0106 13:56:55.997153   956 logger.cc:11] data_indexes selected = 481
+I0106 13:56:55.997172   956 logger.cc:11] data_indexes selected = 156
+I0106 13:56:55.997184   956 logger.cc:11] data_indexes selected = 121
+I0106 13:56:55.997201   956 logger.cc:11] data_indexes selected = 967
+I0106 13:56:55.997215   956 logger.cc:11] data_indexes selected = 17
+I0106 13:56:55.997232   956 logger.cc:11] data_indexes selected = 572
+I0106 13:56:55.997246   956 logger.cc:11] data_indexes selected = 351
+I0106 13:56:55.997263   956 logger.cc:11] ------ batch indexes for iter 28 ------
+I0106 13:56:55.997370   956 logger.cc:11] data_indexes selected = 790
+I0106 13:56:55.997385   956 logger.cc:11] data_indexes selected = 293
+I0106 13:56:55.997398   956 logger.cc:11] data_indexes selected = 536
+I0106 13:56:55.997416   956 logger.cc:11] data_indexes selected = 540
+I0106 13:56:55.997444   956 logger.cc:11] data_indexes selected = 375
+I0106 13:56:55.997464   956 logger.cc:11] data_indexes selected = 266
+I0106 13:56:55.997479   956 logger.cc:11] data_indexes selected = 271
+I0106 13:56:55.997498   956 logger.cc:11] data_indexes selected = 48
+I0106 13:56:55.997514   956 logger.cc:11] ------ batch indexes for iter 29 ------
+I0106 13:56:55.997617   956 logger.cc:11] data_indexes selected = 890
+I0106 13:56:55.997629   956 logger.cc:11] data_indexes selected = 506
+I0106 13:56:55.997648   956 logger.cc:11] data_indexes selected = 94
+I0106 13:56:55.997659   956 logger.cc:11] data_indexes selected = 308
+I0106 13:56:55.997678   956 logger.cc:11] data_indexes selected = 823
+I0106 13:56:55.997694   956 logger.cc:11] data_indexes selected = 628
+I0106 13:56:55.997718   956 logger.cc:11] data_indexes selected = 788
+I0106 13:56:55.997732   956 logger.cc:11] data_indexes selected = 162
+I0106 13:56:55.997752   956 logger.cc:11] ------ batch indexes for iter 30 ------
+I0106 13:56:55.997860   956 logger.cc:11] data_indexes selected = 567
+I0106 13:56:55.997884   956 logger.cc:11] data_indexes selected = 657
+I0106 13:56:55.997896   956 logger.cc:11] data_indexes selected = 221
+I0106 13:56:55.997910   956 logger.cc:11] data_indexes selected = 616
+I0106 13:56:55.997925   956 logger.cc:11] data_indexes selected = 559
+I0106 13:56:55.997941   956 logger.cc:11] data_indexes selected = 777
+I0106 13:56:55.997951   956 logger.cc:11] data_indexes selected = 743
+I0106 13:56:55.997965   956 logger.cc:11] data_indexes selected = 223
+I0106 13:56:55.997977   956 logger.cc:11] ------ batch indexes for iter 31 ------
+I0106 13:56:55.998080   956 logger.cc:11] data_indexes selected = 966
+I0106 13:56:55.998093   956 logger.cc:11] data_indexes selected = 596
+I0106 13:56:55.998111   956 logger.cc:11] data_indexes selected = 203
+I0106 13:56:55.998126   956 logger.cc:11] data_indexes selected = 304
+I0106 13:56:55.998144   956 logger.cc:11] data_indexes selected = 317
+I0106 13:56:55.998158   956 logger.cc:11] data_indexes selected = 531
+I0106 13:56:55.998176   956 logger.cc:11] data_indexes selected = 295
+I0106 13:56:55.998190   956 logger.cc:11] data_indexes selected = 555
+I0106 13:56:55.998219   956 logger.cc:11] ------ batch indexes for iter 32 ------
+I0106 13:56:55.998322   956 logger.cc:11] data_indexes selected = 810
+I0106 13:56:55.998337   956 logger.cc:11] data_indexes selected = 58
+I0106 13:56:55.998350   956 logger.cc:11] data_indexes selected = 412
+I0106 13:56:55.998366   956 logger.cc:11] data_indexes selected = 62
+I0106 13:56:55.998379   956 logger.cc:11] data_indexes selected = 934
+I0106 13:56:55.998395   956 logger.cc:11] data_indexes selected = 692
+I0106 13:56:55.998407   956 logger.cc:11] data_indexes selected = 501
+I0106 13:56:55.998425   956 logger.cc:11] data_indexes selected = 651
+I0106 13:56:55.998437   956 logger.cc:11] ------ batch indexes for iter 33 ------
+I0106 13:56:55.998554   956 logger.cc:11] data_indexes selected = 506
+I0106 13:56:55.998569   956 logger.cc:11] data_indexes selected = 722
+I0106 13:56:55.998589   956 logger.cc:11] data_indexes selected = 664
+I0106 13:56:55.998605   956 logger.cc:11] data_indexes selected = 676
+I0106 13:56:55.998621   956 logger.cc:11] data_indexes selected = 725
+I0106 13:56:55.998636   956 logger.cc:11] data_indexes selected = 395
+I0106 13:56:55.998661   956 logger.cc:11] data_indexes selected = 43
+I0106 13:56:55.998677   956 logger.cc:11] data_indexes selected = 1000
+I0106 13:56:55.998697   956 logger.cc:11] ------ batch indexes for iter 34 ------
+I0106 13:56:55.998785   956 logger.cc:11] data_indexes selected = 435
+I0106 13:56:55.998802   956 logger.cc:11] data_indexes selected = 632
+I0106 13:56:55.998817   956 logger.cc:11] data_indexes selected = 700
+I0106 13:56:55.998836   956 logger.cc:11] data_indexes selected = 114
+I0106 13:56:55.998849   956 logger.cc:11] data_indexes selected = 340
+I0106 13:56:55.998864   956 logger.cc:11] data_indexes selected = 333
+I0106 13:56:55.998873   956 logger.cc:11] data_indexes selected = 277
+I0106 13:56:55.998884   956 logger.cc:11] data_indexes selected = 180
+I0106 13:56:55.998894   956 logger.cc:11] ------ batch indexes for iter 35 ------
+I0106 13:56:55.998984   956 logger.cc:11] data_indexes selected = 700
+I0106 13:56:55.998996   956 logger.cc:11] data_indexes selected = 973
+I0106 13:56:55.999008   956 logger.cc:11] data_indexes selected = 87
+I0106 13:56:55.999022   956 logger.cc:11] data_indexes selected = 404
+I0106 13:56:55.999047   956 logger.cc:11] data_indexes selected = 821
+I0106 13:56:55.999061   956 logger.cc:11] data_indexes selected = 921
+I0106 13:56:55.999078   956 logger.cc:11] data_indexes selected = 832
+I0106 13:56:55.999094   956 logger.cc:11] data_indexes selected = 840
+I0106 13:56:55.999111   956 logger.cc:11] ------ batch indexes for iter 36 ------
+I0106 13:56:55.999207   956 logger.cc:11] data_indexes selected = 475
+I0106 13:56:55.999224   956 logger.cc:11] data_indexes selected = 79
+I0106 13:56:55.999238   956 logger.cc:11] data_indexes selected = 164
+I0106 13:56:55.999255   956 logger.cc:11] data_indexes selected = 613
+I0106 13:56:55.999266   956 logger.cc:11] data_indexes selected = 455
+I0106 13:56:55.999284   956 logger.cc:11] data_indexes selected = 198
+I0106 13:56:55.999296   956 logger.cc:11] data_indexes selected = 195
+I0106 13:56:55.999315   956 logger.cc:11] data_indexes selected = 474
+I0106 13:56:55.999330   956 logger.cc:11] ------ batch indexes for iter 37 ------
+I0106 13:56:55.999441   956 logger.cc:11] data_indexes selected = 364
+I0106 13:56:55.999466   956 logger.cc:11] data_indexes selected = 404
+I0106 13:56:55.999486   956 logger.cc:11] data_indexes selected = 763
+I0106 13:56:55.999498   956 logger.cc:11] data_indexes selected = 107
+I0106 13:56:55.999516   956 logger.cc:11] data_indexes selected = 433
+I0106 13:56:55.999531   956 logger.cc:11] data_indexes selected = 902
+I0106 13:56:55.999542   956 logger.cc:11] data_indexes selected = 154
+I0106 13:56:55.999554   956 logger.cc:11] data_indexes selected = 514
+I0106 13:56:55.999568   956 logger.cc:11] ------ batch indexes for iter 38 ------
+I0106 13:56:55.999653   956 logger.cc:11] data_indexes selected = 548
+I0106 13:56:55.999671   956 logger.cc:11] data_indexes selected = 530
+I0106 13:56:55.999686   956 logger.cc:11] data_indexes selected = 971
+I0106 13:56:55.999698   956 logger.cc:11] data_indexes selected = 410
+I0106 13:56:55.999707   956 logger.cc:11] data_indexes selected = 173
+I0106 13:56:55.999719   956 logger.cc:11] data_indexes selected = 611
+I0106 13:56:55.999728   956 logger.cc:11] data_indexes selected = 368
+I0106 13:56:55.999752   956 logger.cc:11] data_indexes selected = 534
+I0106 13:56:55.999768   956 logger.cc:11] ------ batch indexes for iter 39 ------
+I0106 13:56:55.999851   956 logger.cc:11] data_indexes selected = 592
+I0106 13:56:55.999866   956 logger.cc:11] data_indexes selected = 82
+I0106 13:56:55.999882   956 logger.cc:11] data_indexes selected = 667
+I0106 13:56:55.999895   956 logger.cc:11] data_indexes selected = 339
+I0106 13:56:55.999912   956 logger.cc:11] data_indexes selected = 930
+I0106 13:56:55.999923   956 logger.cc:11] data_indexes selected = 229
+I0106 13:56:55.999940   956 logger.cc:11] data_indexes selected = 216
+I0106 13:56:55.999953   956 logger.cc:11] data_indexes selected = 763
+I0106 13:56:55.999969   956 logger.cc:11] ------ batch indexes for iter 40 ------
+I0106 13:56:56.000056   956 logger.cc:11] data_indexes selected = 711
+I0106 13:56:56.000073   956 logger.cc:11] data_indexes selected = 381
+I0106 13:56:56.000084   956 logger.cc:11] data_indexes selected = 43
+I0106 13:56:56.000102   956 logger.cc:11] data_indexes selected = 722
+I0106 13:56:56.000115   956 logger.cc:11] data_indexes selected = 397
+I0106 13:56:56.000138   956 logger.cc:11] data_indexes selected = 841
+I0106 13:56:56.000150   956 logger.cc:11] data_indexes selected = 21
+I0106 13:56:56.000165   956 logger.cc:11] data_indexes selected = 53
+I0106 13:56:56.000177   956 logger.cc:11] ------ batch indexes for iter 41 ------
+I0106 13:56:56.000274   956 logger.cc:11] data_indexes selected = 987
+I0106 13:56:56.000288   956 logger.cc:11] data_indexes selected = 305
+I0106 13:56:56.000306   956 logger.cc:11] data_indexes selected = 200
+I0106 13:56:56.000319   956 logger.cc:11] data_indexes selected = 932
+I0106 13:56:56.000335   956 logger.cc:11] data_indexes selected = 234
+I0106 13:56:56.000349   956 logger.cc:11] data_indexes selected = 810
+I0106 13:56:56.000367   956 logger.cc:11] data_indexes selected = 889
+I0106 13:56:56.000380   956 logger.cc:11] data_indexes selected = 309
+I0106 13:56:56.000397   956 logger.cc:11] ------ batch indexes for iter 42 ------
+I0106 13:56:56.000488   956 logger.cc:11] data_indexes selected = 508
+I0106 13:56:56.000505   956 logger.cc:11] data_indexes selected = 804
+I0106 13:56:56.000519   956 logger.cc:11] data_indexes selected = 501
+I0106 13:56:56.000545   956 logger.cc:11] data_indexes selected = 611
+I0106 13:56:56.000558   956 logger.cc:11] data_indexes selected = 743
+I0106 13:56:56.000574   956 logger.cc:11] data_indexes selected = 247
+I0106 13:56:56.000587   956 logger.cc:11] data_indexes selected = 675
+I0106 13:56:56.000604   956 logger.cc:11] data_indexes selected = 132
+I0106 13:56:56.000617   956 logger.cc:11] ------ batch indexes for iter 43 ------
+I0106 13:56:56.000723   956 logger.cc:11] data_indexes selected = 833
+I0106 13:56:56.000741   956 logger.cc:11] data_indexes selected = 896
+I0106 13:56:56.000758   956 logger.cc:11] data_indexes selected = 846
+I0106 13:56:56.000770   956 logger.cc:11] data_indexes selected = 60
+I0106 13:56:56.000784   956 logger.cc:11] data_indexes selected = 893
+I0106 13:56:56.000797   956 logger.cc:11] data_indexes selected = 472
+I0106 13:56:56.000814   956 logger.cc:11] data_indexes selected = 835
+I0106 13:56:56.000825   956 logger.cc:11] data_indexes selected = 566
+I0106 13:56:56.000845   956 logger.cc:11] ------ batch indexes for iter 44 ------
+I0106 13:56:56.000970   956 logger.cc:11] data_indexes selected = 677
+I0106 13:56:56.000990   956 logger.cc:11] data_indexes selected = 551
+I0106 13:56:56.001004   956 logger.cc:11] data_indexes selected = 269
+I0106 13:56:56.001021   956 logger.cc:11] data_indexes selected = 78
+I0106 13:56:56.001034   956 logger.cc:11] data_indexes selected = 721
+I0106 13:56:56.001052   956 logger.cc:11] data_indexes selected = 131
+I0106 13:56:56.001065   956 logger.cc:11] data_indexes selected = 632
+I0106 13:56:56.001082   956 logger.cc:11] data_indexes selected = 419
+I0106 13:56:56.001097   956 logger.cc:11] ------ batch indexes for iter 45 ------
+I0106 13:56:56.001238   956 logger.cc:11] data_indexes selected = 524
+I0106 13:56:56.001251   956 logger.cc:11] data_indexes selected = 161
+I0106 13:56:56.001269   956 logger.cc:11] data_indexes selected = 913
+I0106 13:56:56.001282   956 logger.cc:11] data_indexes selected = 770
+I0106 13:56:56.001299   956 logger.cc:11] data_indexes selected = 164
+I0106 13:56:56.001314   956 logger.cc:11] data_indexes selected = 73
+I0106 13:56:56.001340   956 logger.cc:11] data_indexes selected = 926
+I0106 13:56:56.001353   956 logger.cc:11] data_indexes selected = 980
+I0106 13:56:56.001372   956 logger.cc:11] ------ batch indexes for iter 46 ------
+I0106 13:56:56.001503   956 logger.cc:11] data_indexes selected = 865
+I0106 13:56:56.001523   956 logger.cc:11] data_indexes selected = 224
+I0106 13:56:56.001535   956 logger.cc:11] data_indexes selected = 633
+I0106 13:56:56.001552   956 logger.cc:11] data_indexes selected = 653
+I0106 13:56:56.001565   956 logger.cc:11] data_indexes selected = 146
+I0106 13:56:56.001582   956 logger.cc:11] data_indexes selected = 180
+I0106 13:56:56.001595   956 logger.cc:11] data_indexes selected = 193
+I0106 13:56:56.001612   956 logger.cc:11] data_indexes selected = 192
+I0106 13:56:56.001627   956 logger.cc:11] ------ batch indexes for iter 47 ------
+I0106 13:56:56.001749   956 logger.cc:11] data_indexes selected = 898
+I0106 13:56:56.001762   956 logger.cc:11] data_indexes selected = 911
+I0106 13:56:56.001777   956 logger.cc:11] data_indexes selected = 672
+I0106 13:56:56.001791   956 logger.cc:11] data_indexes selected = 605
+I0106 13:56:56.001816   956 logger.cc:11] data_indexes selected = 371
+I0106 13:56:56.001829   956 logger.cc:11] data_indexes selected = 205
+I0106 13:56:56.001847   956 logger.cc:11] data_indexes selected = 102
+I0106 13:56:56.001860   956 logger.cc:11] data_indexes selected = 92
+I0106 13:56:56.001883   956 logger.cc:11] ------ batch indexes for iter 48 ------
+I0106 13:56:56.002017   956 logger.cc:11] data_indexes selected = 298
+I0106 13:56:56.002036   956 logger.cc:11] data_indexes selected = 687
+I0106 13:56:56.002048   956 logger.cc:11] data_indexes selected = 926
+I0106 13:56:56.002064   956 logger.cc:11] data_indexes selected = 780
+I0106 13:56:56.002077   956 logger.cc:11] data_indexes selected = 85
+I0106 13:56:56.002094   956 logger.cc:11] data_indexes selected = 261
+I0106 13:56:56.002107   956 logger.cc:11] data_indexes selected = 689
+I0106 13:56:56.002130   956 logger.cc:11] data_indexes selected = 356
+I0106 13:56:56.002146   956 logger.cc:11] ------ batch indexes for iter 49 ------
+I0106 13:56:56.002285   956 logger.cc:11] data_indexes selected = 655
+I0106 13:56:56.002306   956 logger.cc:11] data_indexes selected = 243
+I0106 13:56:56.002323   956 logger.cc:11] data_indexes selected = 647
+I0106 13:56:56.002336   956 logger.cc:11] data_indexes selected = 40
+I0106 13:56:56.002360   956 logger.cc:11] data_indexes selected = 208
+I0106 13:56:56.002373   956 logger.cc:11] data_indexes selected = 607
+I0106 13:56:56.002390   956 logger.cc:11] data_indexes selected = 425
+I0106 13:56:56.002403   956 logger.cc:11] data_indexes selected = 719
+I0106 13:56:56.002421   956 logger.cc:11] ------ batch indexes for iter 50 ------
+I0106 13:56:56.002558   956 logger.cc:11] data_indexes selected = 682
+I0106 13:56:56.002575   956 logger.cc:11] data_indexes selected = 969
+I0106 13:56:56.002589   956 logger.cc:11] data_indexes selected = 550
+I0106 13:56:56.002609   956 logger.cc:11] data_indexes selected = 88
+I0106 13:56:56.002622   956 logger.cc:11] data_indexes selected = 580
+I0106 13:56:56.002640   956 logger.cc:11] data_indexes selected = 506
+I0106 13:56:56.002653   956 logger.cc:11] data_indexes selected = 551
+I0106 13:56:56.002679   956 logger.cc:11] data_indexes selected = 17
+I0106 13:56:56.002694   956 logger.cc:11] ------ batch indexes for iter 51 ------
+I0106 13:56:56.002835   956 logger.cc:11] data_indexes selected = 366
+I0106 13:56:56.002847   956 logger.cc:11] data_indexes selected = 89
+I0106 13:56:56.002864   956 logger.cc:11] data_indexes selected = 816
+I0106 13:56:56.002877   956 logger.cc:11] data_indexes selected = 836
+I0106 13:56:56.002894   956 logger.cc:11] data_indexes selected = 937
+I0106 13:56:56.002907   956 logger.cc:11] data_indexes selected = 249
+I0106 13:56:56.002924   956 logger.cc:11] data_indexes selected = 660
+I0106 13:56:56.002938   956 logger.cc:11] data_indexes selected = 904
+I0106 13:56:56.002956   956 logger.cc:11] ------ batch indexes for iter 52 ------
+I0106 13:56:56.003093   956 logger.cc:11] data_indexes selected = 630
+I0106 13:56:56.003110   956 logger.cc:11] data_indexes selected = 486
+I0106 13:56:56.003123   956 logger.cc:11] data_indexes selected = 286
+I0106 13:56:56.003140   956 logger.cc:11] data_indexes selected = 160
+I0106 13:56:56.003154   956 logger.cc:11] data_indexes selected = 61
+I0106 13:56:56.003180   956 logger.cc:11] data_indexes selected = 667
+I0106 13:56:56.003193   956 logger.cc:11] data_indexes selected = 327
+I0106 13:56:56.003209   956 logger.cc:11] data_indexes selected = 550
+I0106 13:56:56.003226   956 logger.cc:11] ------ batch indexes for iter 53 ------
+I0106 13:56:56.003366   956 logger.cc:11] data_indexes selected = 537
+I0106 13:56:56.003379   956 logger.cc:11] data_indexes selected = 485
+I0106 13:56:56.003396   956 logger.cc:11] data_indexes selected = 620
+I0106 13:56:56.003410   956 logger.cc:11] data_indexes selected = 606
+I0106 13:56:56.003427   956 logger.cc:11] data_indexes selected = 381
+I0106 13:56:56.003441   956 logger.cc:11] data_indexes selected = 49
+I0106 13:56:56.003458   956 logger.cc:11] data_indexes selected = 855
+I0106 13:56:56.003471   956 logger.cc:11] data_indexes selected = 674
+I0106 13:56:56.003489   956 logger.cc:11] ------ batch indexes for iter 54 ------
+I0106 13:56:56.003621   956 logger.cc:11] data_indexes selected = 141
+I0106 13:56:56.003639   956 logger.cc:11] data_indexes selected = 349
+I0106 13:56:56.003660   956 logger.cc:11] data_indexes selected = 406
+I0106 13:56:56.003679   956 logger.cc:11] data_indexes selected = 847
+I0106 13:56:56.003690   956 logger.cc:11] data_indexes selected = 111
+I0106 13:56:56.003707   956 logger.cc:11] data_indexes selected = 974
+I0106 13:56:56.003720   956 logger.cc:11] data_indexes selected = 563
+I0106 13:56:56.003736   956 logger.cc:11] data_indexes selected = 665
+I0106 13:56:56.003751   956 logger.cc:11] ------ batch indexes for iter 55 ------
+I0106 13:56:56.003881   956 logger.cc:11] data_indexes selected = 268
+I0106 13:56:56.003895   956 logger.cc:11] data_indexes selected = 125
+I0106 13:56:56.003918   956 logger.cc:11] data_indexes selected = 560
+I0106 13:56:56.003931   956 logger.cc:11] data_indexes selected = 60
+I0106 13:56:56.003949   956 logger.cc:11] data_indexes selected = 578
+I0106 13:56:56.003963   956 logger.cc:11] data_indexes selected = 867
+I0106 13:56:56.003979   956 logger.cc:11] data_indexes selected = 813
+I0106 13:56:56.003991   956 logger.cc:11] data_indexes selected = 607
+I0106 13:56:56.004009   956 logger.cc:11] ------ batch indexes for iter 56 ------
+I0106 13:56:56.004125   956 logger.cc:11] data_indexes selected = 202
+I0106 13:56:56.004145   956 logger.cc:11] data_indexes selected = 862
+I0106 13:56:56.004159   956 logger.cc:11] data_indexes selected = 683
+I0106 13:56:56.004176   956 logger.cc:11] data_indexes selected = 296
+I0106 13:56:56.004189   956 logger.cc:11] data_indexes selected = 362
+I0106 13:56:56.004206   956 logger.cc:11] data_indexes selected = 254
+I0106 13:56:56.004220   956 logger.cc:11] data_indexes selected = 582
+I0106 13:56:56.004236   956 logger.cc:11] data_indexes selected = 282
+I0106 13:56:56.004252   956 logger.cc:11] ------ batch indexes for iter 57 ------
+I0106 13:56:56.004381   956 logger.cc:11] data_indexes selected = 350
+I0106 13:56:56.004395   956 logger.cc:11] data_indexes selected = 373
+I0106 13:56:56.004415   956 logger.cc:11] data_indexes selected = 446
+I0106 13:56:56.004427   956 logger.cc:11] data_indexes selected = 119
+I0106 13:56:56.004443   956 logger.cc:11] data_indexes selected = 885
+I0106 13:56:56.004456   956 logger.cc:11] data_indexes selected = 340
+I0106 13:56:56.004482   956 logger.cc:11] data_indexes selected = 607
+I0106 13:56:56.004496   956 logger.cc:11] data_indexes selected = 629
+I0106 13:56:56.004515   956 logger.cc:11] ------ batch indexes for iter 58 ------
+I0106 13:56:56.004631   956 logger.cc:11] data_indexes selected = 37
+I0106 13:56:56.004649   956 logger.cc:11] data_indexes selected = 308
+I0106 13:56:56.004662   956 logger.cc:11] data_indexes selected = 957
+I0106 13:56:56.004676   956 logger.cc:11] data_indexes selected = 659
+I0106 13:56:56.004690   956 logger.cc:11] data_indexes selected = 226
+I0106 13:56:56.004707   956 logger.cc:11] data_indexes selected = 276
+I0106 13:56:56.004721   956 logger.cc:11] data_indexes selected = 994
+I0106 13:56:56.004740   956 logger.cc:11] data_indexes selected = 9
+I0106 13:56:56.004755   956 logger.cc:11] ------ batch indexes for iter 59 ------
+I0106 13:56:56.004894   956 logger.cc:11] data_indexes selected = 379
+I0106 13:56:56.004907   956 logger.cc:11] data_indexes selected = 818
+I0106 13:56:56.004923   956 logger.cc:11] data_indexes selected = 219
+I0106 13:56:56.004936   956 logger.cc:11] data_indexes selected = 727
+I0106 13:56:56.004962   956 logger.cc:11] data_indexes selected = 433
+I0106 13:56:56.004976   956 logger.cc:11] data_indexes selected = 144
+I0106 13:56:56.004992   956 logger.cc:11] data_indexes selected = 725
+I0106 13:56:56.005007   956 logger.cc:11] data_indexes selected = 241
+I0106 13:56:56.005026   956 logger.cc:11] ------ batch indexes for iter 60 ------
+I0106 13:56:56.005160   956 logger.cc:11] data_indexes selected = 408
+I0106 13:56:56.005178   956 logger.cc:11] data_indexes selected = 573
+I0106 13:56:56.005192   956 logger.cc:11] data_indexes selected = 737
+I0106 13:56:56.005208   956 logger.cc:11] data_indexes selected = 986
+I0106 13:56:56.005221   956 logger.cc:11] data_indexes selected = 597
+I0106 13:56:56.005239   956 logger.cc:11] data_indexes selected = 381
+I0106 13:56:56.005252   956 logger.cc:11] data_indexes selected = 685
+I0106 13:56:56.005267   956 logger.cc:11] data_indexes selected = 766
+I0106 13:56:56.005281   956 logger.cc:11] ------ batch indexes for iter 61 ------
+I0106 13:56:56.005403   956 logger.cc:11] data_indexes selected = 802
+I0106 13:56:56.005420   956 logger.cc:11] data_indexes selected = 62
+I0106 13:56:56.005455   956 logger.cc:11] data_indexes selected = 657
+I0106 13:56:56.005471   956 logger.cc:11] data_indexes selected = 752
+I0106 13:56:56.005491   956 logger.cc:11] data_indexes selected = 656
+I0106 13:56:56.005508   956 logger.cc:11] data_indexes selected = 824
+I0106 13:56:56.005527   956 logger.cc:11] data_indexes selected = 817
+I0106 13:56:56.005542   956 logger.cc:11] data_indexes selected = 193
+I0106 13:56:56.005561   956 logger.cc:11] ------ batch indexes for iter 62 ------
+I0106 13:56:56.005703   956 logger.cc:11] data_indexes selected = 564
+I0106 13:56:56.005728   956 logger.cc:11] data_indexes selected = 133
+I0106 13:56:56.005739   956 logger.cc:11] data_indexes selected = 43
+I0106 13:56:56.005755   956 logger.cc:11] data_indexes selected = 487
+I0106 13:56:56.005769   956 logger.cc:11] data_indexes selected = 140
+I0106 13:56:56.005789   956 logger.cc:11] data_indexes selected = 95
+I0106 13:56:56.005805   956 logger.cc:11] data_indexes selected = 951
+I0106 13:56:56.005823   956 logger.cc:11] data_indexes selected = 930
+I0106 13:56:56.005851   956 logger.cc:11] ------ batch indexes for iter 63 ------
+I0106 13:56:56.005985   956 logger.cc:11] data_indexes selected = 252
+I0106 13:56:56.006001   956 logger.cc:11] data_indexes selected = 320
+I0106 13:56:56.006019   956 logger.cc:11] data_indexes selected = 41
+I0106 13:56:56.006033   956 logger.cc:11] data_indexes selected = 402
+I0106 13:56:56.006052   956 logger.cc:11] data_indexes selected = 796
+I0106 13:56:56.006063   956 logger.cc:11] data_indexes selected = 108
+I0106 13:56:56.006079   956 logger.cc:11] data_indexes selected = 702
+I0106 13:56:56.006093   956 logger.cc:11] data_indexes selected = 91
+I0106 13:56:56.006111   956 logger.cc:11] ------ batch indexes for iter 64 ------
+I0106 13:56:56.006227   956 logger.cc:11] data_indexes selected = 181
+I0106 13:56:56.006245   956 logger.cc:11] data_indexes selected = 342
+I0106 13:56:56.006260   956 logger.cc:11] data_indexes selected = 718
+I0106 13:56:56.006278   956 logger.cc:11] data_indexes selected = 736
+I0106 13:56:56.006289   956 logger.cc:11] data_indexes selected = 919
+I0106 13:56:56.006315   956 logger.cc:11] data_indexes selected = 335
+I0106 13:56:56.006330   956 logger.cc:11] data_indexes selected = 18
+I0106 13:56:56.006345   956 logger.cc:11] data_indexes selected = 651
+I0106 13:56:56.006361   956 logger.cc:11] ------ batch indexes for iter 65 ------
+I0106 13:56:56.006484   956 logger.cc:11] data_indexes selected = 460
+I0106 13:56:56.006497   956 logger.cc:11] data_indexes selected = 603
+I0106 13:56:56.006515   956 logger.cc:11] data_indexes selected = 668
+I0106 13:56:56.006527   956 logger.cc:11] data_indexes selected = 219
+I0106 13:56:56.006544   956 logger.cc:11] data_indexes selected = 333
+I0106 13:56:56.006556   956 logger.cc:11] data_indexes selected = 729
+I0106 13:56:56.006573   956 logger.cc:11] data_indexes selected = 146
+I0106 13:56:56.006584   956 logger.cc:11] data_indexes selected = 746
+I0106 13:56:56.006603   956 logger.cc:11] ------ batch indexes for iter 66 ------
+I0106 13:56:56.006865   956 logger.cc:11] data_indexes selected = 845
+I0106 13:56:56.006883   956 logger.cc:11] data_indexes selected = 576
+I0106 13:56:56.006897   956 logger.cc:11] data_indexes selected = 44
+I0106 13:56:56.006925   956 logger.cc:11] data_indexes selected = 35
+I0106 13:56:56.006939   956 logger.cc:11] data_indexes selected = 194
+I0106 13:56:56.006959   956 logger.cc:11] data_indexes selected = 544
+I0106 13:56:56.006973   956 logger.cc:11] data_indexes selected = 97
+I0106 13:56:56.006991   956 logger.cc:11] data_indexes selected = 834
+I0106 13:56:56.007005   956 logger.cc:11] ------ batch indexes for iter 67 ------
+I0106 13:56:56.007262   956 logger.cc:11] data_indexes selected = 594
+I0106 13:56:56.007279   956 logger.cc:11] data_indexes selected = 43
+I0106 13:56:56.007297   956 logger.cc:11] data_indexes selected = 434
+I0106 13:56:56.007311   956 logger.cc:11] data_indexes selected = 267
+I0106 13:56:56.007328   956 logger.cc:11] data_indexes selected = 352
+I0106 13:56:56.007339   956 logger.cc:11] data_indexes selected = 742
+I0106 13:56:56.007351   956 logger.cc:11] data_indexes selected = 500
+I0106 13:56:56.007361   956 logger.cc:11] data_indexes selected = 988
+I0106 13:56:56.007377   956 logger.cc:11] ------ batch indexes for iter 68 ------
+I0106 13:56:56.007459   956 logger.cc:11] data_indexes selected = 653
+I0106 13:56:56.007483   956 logger.cc:11] data_indexes selected = 391
+I0106 13:56:56.007496   956 logger.cc:11] data_indexes selected = 197
+I0106 13:56:56.007515   956 logger.cc:11] data_indexes selected = 428
+I0106 13:56:56.007530   956 logger.cc:11] data_indexes selected = 308
+I0106 13:56:56.007547   956 logger.cc:11] data_indexes selected = 566
+I0106 13:56:56.007561   956 logger.cc:11] data_indexes selected = 261
+I0106 13:56:56.007580   956 logger.cc:11] data_indexes selected = 118
+I0106 13:56:56.007608   956 logger.cc:11] ------ batch indexes for iter 69 ------
+I0106 13:56:56.007745   956 logger.cc:11] data_indexes selected = 523
+I0106 13:56:56.007762   956 logger.cc:11] data_indexes selected = 381
+I0106 13:56:56.007783   956 logger.cc:11] data_indexes selected = 670
+I0106 13:56:56.007800   956 logger.cc:11] data_indexes selected = 984
+I0106 13:56:56.007818   956 logger.cc:11] data_indexes selected = 761
+I0106 13:56:56.007831   956 logger.cc:11] data_indexes selected = 521
+I0106 13:56:56.007854   956 logger.cc:11] data_indexes selected = 587
+I0106 13:56:56.007864   956 logger.cc:11] data_indexes selected = 980
+I0106 13:56:56.007882   956 logger.cc:11] ------ batch indexes for iter 70 ------
+I0106 13:56:56.008008   956 logger.cc:11] data_indexes selected = 122
+I0106 13:56:56.008034   956 logger.cc:11] data_indexes selected = 914
+I0106 13:56:56.008049   956 logger.cc:11] data_indexes selected = 982
+I0106 13:56:56.008064   956 logger.cc:11] data_indexes selected = 372
+I0106 13:56:56.008073   956 logger.cc:11] data_indexes selected = 789
+I0106 13:56:56.008090   956 logger.cc:11] data_indexes selected = 604
+I0106 13:56:56.008100   956 logger.cc:11] data_indexes selected = 351
+I0106 13:56:56.008114   956 logger.cc:11] data_indexes selected = 324
+I0106 13:56:56.008127   956 logger.cc:11] ------ batch indexes for iter 71 ------
+I0106 13:56:56.008255   956 logger.cc:11] data_indexes selected = 631
+I0106 13:56:56.008271   956 logger.cc:11] data_indexes selected = 467
+I0106 13:56:56.008291   956 logger.cc:11] data_indexes selected = 231
+I0106 13:56:56.008304   956 logger.cc:11] data_indexes selected = 440
+I0106 13:56:56.008329   956 logger.cc:11] data_indexes selected = 585
+I0106 13:56:56.008342   956 logger.cc:11] data_indexes selected = 538
+I0106 13:56:56.008358   956 logger.cc:11] data_indexes selected = 197
+I0106 13:56:56.008370   956 logger.cc:11] data_indexes selected = 961
+I0106 13:56:56.008388   956 logger.cc:11] ------ batch indexes for iter 72 ------
+I0106 13:56:56.008499   956 logger.cc:11] data_indexes selected = 120
+I0106 13:56:56.008522   956 logger.cc:11] data_indexes selected = 603
+I0106 13:56:56.008535   956 logger.cc:11] data_indexes selected = 753
+I0106 13:56:56.008553   956 logger.cc:11] data_indexes selected = 400
+I0106 13:56:56.008565   956 logger.cc:11] data_indexes selected = 778
+I0106 13:56:56.008580   956 logger.cc:11] data_indexes selected = 108
+I0106 13:56:56.008594   956 logger.cc:11] data_indexes selected = 869
+I0106 13:56:56.008617   956 logger.cc:11] data_indexes selected = 152
+I0106 13:56:56.008635   956 logger.cc:11] ------ batch indexes for iter 73 ------
+I0106 13:56:56.008772   956 logger.cc:11] data_indexes selected = 556
+I0106 13:56:56.008798   956 logger.cc:11] data_indexes selected = 548
+I0106 13:56:56.008821   956 logger.cc:11] data_indexes selected = 40
+I0106 13:56:56.008836   956 logger.cc:11] data_indexes selected = 875
+I0106 13:56:56.008857   956 logger.cc:11] data_indexes selected = 286
+I0106 13:56:56.008872   956 logger.cc:11] data_indexes selected = 223
+I0106 13:56:56.008893   956 logger.cc:11] data_indexes selected = 994
+I0106 13:56:56.008905   956 logger.cc:11] data_indexes selected = 319
+I0106 13:56:56.009073   956 logger.cc:11] ------ batch indexes for iter 74 ------
+I0106 13:56:56.009275   956 logger.cc:11] data_indexes selected = 348
+I0106 13:56:56.009294   956 logger.cc:11] data_indexes selected = 389
+I0106 13:56:56.009308   956 logger.cc:11] data_indexes selected = 737
+I0106 13:56:56.009331   956 logger.cc:11] data_indexes selected = 748
+I0106 13:56:56.009344   956 logger.cc:11] data_indexes selected = 827
+I0106 13:56:56.009357   956 logger.cc:11] data_indexes selected = 496
+I0106 13:56:56.009367   956 logger.cc:11] data_indexes selected = 246
+I0106 13:56:56.009382   956 logger.cc:11] data_indexes selected = 669
+I0106 13:56:56.009410   956 logger.cc:11] ------ batch indexes for iter 75 ------
+I0106 13:56:56.009532   956 logger.cc:11] data_indexes selected = 537
+I0106 13:56:56.009548   956 logger.cc:11] data_indexes selected = 790
+I0106 13:56:56.009568   956 logger.cc:11] data_indexes selected = 261
+I0106 13:56:56.009583   956 logger.cc:11] data_indexes selected = 34
+I0106 13:56:56.009603   956 logger.cc:11] data_indexes selected = 752
+I0106 13:56:56.009618   956 logger.cc:11] data_indexes selected = 953
+I0106 13:56:56.009639   956 logger.cc:11] data_indexes selected = 671
+I0106 13:56:56.009653   956 logger.cc:11] data_indexes selected = 121
+I0106 13:56:56.009675   956 logger.cc:11] ------ batch indexes for iter 76 ------
+I0106 13:56:56.009783   956 logger.cc:11] data_indexes selected = 9
+I0106 13:56:56.009804   956 logger.cc:11] data_indexes selected = 939
+I0106 13:56:56.009817   956 logger.cc:11] data_indexes selected = 892
+I0106 13:56:56.009836   956 logger.cc:11] data_indexes selected = 934
+I0106 13:56:56.009850   956 logger.cc:11] data_indexes selected = 569
+I0106 13:56:56.009876   956 logger.cc:11] data_indexes selected = 548
+I0106 13:56:56.009889   956 logger.cc:11] data_indexes selected = 255
+I0106 13:56:56.009912   956 logger.cc:11] data_indexes selected = 682
+I0106 13:56:56.009927   956 logger.cc:11] ------ batch indexes for iter 77 ------
+I0106 13:56:56.010056   956 logger.cc:11] data_indexes selected = 32
+I0106 13:56:56.010071   956 logger.cc:11] data_indexes selected = 460
+I0106 13:56:56.010089   956 logger.cc:11] data_indexes selected = 505
+I0106 13:56:56.010105   956 logger.cc:11] data_indexes selected = 732
+I0106 13:56:56.010125   956 logger.cc:11] data_indexes selected = 613
+I0106 13:56:56.010140   956 logger.cc:11] data_indexes selected = 474
+I0106 13:56:56.010159   956 logger.cc:11] data_indexes selected = 75
+I0106 13:56:56.010174   956 logger.cc:11] data_indexes selected = 466
+I0106 13:56:56.010195   956 logger.cc:11] ------ batch indexes for iter 78 ------
+I0106 13:56:56.010327   956 logger.cc:11] data_indexes selected = 760
+I0106 13:56:56.010345   956 logger.cc:11] data_indexes selected = 120
+I0106 13:56:56.010356   956 logger.cc:11] data_indexes selected = 228
+I0106 13:56:56.010380   956 logger.cc:11] data_indexes selected = 964
+I0106 13:56:56.010394   956 logger.cc:11] data_indexes selected = 688
+I0106 13:56:56.010408   956 logger.cc:11] data_indexes selected = 510
+I0106 13:56:56.010419   956 logger.cc:11] data_indexes selected = 380
+I0106 13:56:56.010434   956 logger.cc:11] data_indexes selected = 443
+I0106 13:56:56.010454   956 logger.cc:11] ------ batch indexes for iter 79 ------
+I0106 13:56:56.010586   956 logger.cc:11] data_indexes selected = 125
+I0106 13:56:56.010602   956 logger.cc:11] data_indexes selected = 891
+I0106 13:56:56.010622   956 logger.cc:11] data_indexes selected = 99
+I0106 13:56:56.010632   956 logger.cc:11] data_indexes selected = 183
+I0106 13:56:56.010644   956 logger.cc:11] data_indexes selected = 910
+I0106 13:56:56.010655   956 logger.cc:11] data_indexes selected = 290
+I0106 13:56:56.010674   956 logger.cc:11] data_indexes selected = 149
+I0106 13:56:56.010689   956 logger.cc:11] data_indexes selected = 3
+I0106 13:56:56.010708   956 logger.cc:11] ------ batch indexes for iter 80 ------
+I0106 13:56:56.010820   956 logger.cc:11] data_indexes selected = 72
+I0106 13:56:56.010846   956 logger.cc:11] data_indexes selected = 232
+I0106 13:56:56.010859   956 logger.cc:11] data_indexes selected = 733
+I0106 13:56:56.010874   956 logger.cc:11] data_indexes selected = 416
+I0106 13:56:56.010885   956 logger.cc:11] data_indexes selected = 982
+I0106 13:56:56.010910   956 logger.cc:11] data_indexes selected = 7
+I0106 13:56:56.010922   956 logger.cc:11] data_indexes selected = 783
+I0106 13:56:56.010939   956 logger.cc:11] data_indexes selected = 526
+I0106 13:56:56.010951   956 logger.cc:11] ------ batch indexes for iter 81 ------
+I0106 13:56:56.011071   956 logger.cc:11] data_indexes selected = 180
+I0106 13:56:56.011086   956 logger.cc:11] data_indexes selected = 446
+I0106 13:56:56.011103   956 logger.cc:11] data_indexes selected = 260
+I0106 13:56:56.011116   956 logger.cc:11] data_indexes selected = 670
+I0106 13:56:56.011133   956 logger.cc:11] data_indexes selected = 938
+I0106 13:56:56.011147   956 logger.cc:11] data_indexes selected = 112
+I0106 13:56:56.011171   956 logger.cc:11] data_indexes selected = 275
+I0106 13:56:56.011185   956 logger.cc:11] data_indexes selected = 889
+I0106 13:56:56.011201   956 logger.cc:11] ------ batch indexes for iter 82 ------
+I0106 13:56:56.011303   956 logger.cc:11] data_indexes selected = 879
+I0106 13:56:56.011320   956 logger.cc:11] data_indexes selected = 134
+I0106 13:56:56.011332   956 logger.cc:11] data_indexes selected = 867
+I0106 13:56:56.011346   956 logger.cc:11] data_indexes selected = 902
+I0106 13:56:56.011358   956 logger.cc:11] data_indexes selected = 942
+I0106 13:56:56.011373   956 logger.cc:11] data_indexes selected = 915
+I0106 13:56:56.011382   956 logger.cc:11] data_indexes selected = 286
+I0106 13:56:56.011399   956 logger.cc:11] data_indexes selected = 75
+I0106 13:56:56.011412   956 logger.cc:11] ------ batch indexes for iter 83 ------
+I0106 13:56:56.011523   956 logger.cc:11] data_indexes selected = 125
+I0106 13:56:56.011534   956 logger.cc:11] data_indexes selected = 676
+I0106 13:56:56.011548   956 logger.cc:11] data_indexes selected = 538
+I0106 13:56:56.011561   956 logger.cc:11] data_indexes selected = 184
+I0106 13:56:56.011586   956 logger.cc:11] data_indexes selected = 460
+I0106 13:56:56.011597   956 logger.cc:11] data_indexes selected = 875
+I0106 13:56:56.011615   956 logger.cc:11] data_indexes selected = 618
+I0106 13:56:56.011627   956 logger.cc:11] data_indexes selected = 904
+I0106 13:56:56.011646   956 logger.cc:11] ------ batch indexes for iter 84 ------
+I0106 13:56:56.011723   956 logger.cc:11] data_indexes selected = 132
+I0106 13:56:56.011739   956 logger.cc:11] data_indexes selected = 951
+I0106 13:56:56.011754   956 logger.cc:11] data_indexes selected = 89
+I0106 13:56:56.011771   956 logger.cc:11] data_indexes selected = 346
+I0106 13:56:56.011782   956 logger.cc:11] data_indexes selected = 302
+I0106 13:56:56.011795   956 logger.cc:11] data_indexes selected = 342
+I0106 13:56:56.011806   956 logger.cc:11] data_indexes selected = 54
+I0106 13:56:56.011818   956 logger.cc:11] data_indexes selected = 681
+I0106 13:56:56.011834   956 logger.cc:11] ------ batch indexes for iter 85 ------
+I0106 13:56:56.011962   956 logger.cc:11] data_indexes selected = 201
+I0106 13:56:56.011977   956 logger.cc:11] data_indexes selected = 957
+I0106 13:56:56.012006   956 logger.cc:11] data_indexes selected = 882
+I0106 13:56:56.012018   956 logger.cc:11] data_indexes selected = 618
+I0106 13:56:56.012035   956 logger.cc:11] data_indexes selected = 861
+I0106 13:56:56.012048   956 logger.cc:11] data_indexes selected = 753
+I0106 13:56:56.012065   956 logger.cc:11] data_indexes selected = 966
+I0106 13:56:56.012080   956 logger.cc:11] data_indexes selected = 825
+I0106 13:56:56.012100   956 logger.cc:11] ------ batch indexes for iter 86 ------
+I0106 13:56:56.012223   956 logger.cc:11] data_indexes selected = 833
+I0106 13:56:56.012239   956 logger.cc:11] data_indexes selected = 519
+I0106 13:56:56.012254   956 logger.cc:11] data_indexes selected = 77
+I0106 13:56:56.012337   956 logger.cc:11] data_indexes selected = 913
+I0106 13:56:56.012439   956 logger.cc:11] data_indexes selected = 274
+I0106 13:56:56.012542   956 logger.cc:11] data_indexes selected = 723
+I0106 13:56:56.012555   956 logger.cc:11] data_indexes selected = 278
+I0106 13:56:56.012578   956 logger.cc:11] data_indexes selected = 825
+I0106 13:56:56.012607   956 logger.cc:11] ------ batch indexes for iter 87 ------
+I0106 13:56:56.012743   956 logger.cc:11] data_indexes selected = 680
+I0106 13:56:56.012764   956 logger.cc:11] data_indexes selected = 911
+I0106 13:56:56.012786   956 logger.cc:11] data_indexes selected = 122
+I0106 13:56:56.012800   956 logger.cc:11] data_indexes selected = 46
+I0106 13:56:56.012817   956 logger.cc:11] data_indexes selected = 618
+I0106 13:56:56.012833   956 logger.cc:11] data_indexes selected = 574
+I0106 13:56:56.012853   956 logger.cc:11] data_indexes selected = 253
+I0106 13:56:56.012869   956 logger.cc:11] data_indexes selected = 268
+I0106 13:56:56.012892   956 logger.cc:11] ------ batch indexes for iter 88 ------
+I0106 13:56:56.012995   956 logger.cc:11] data_indexes selected = 102
+I0106 13:56:56.013015   956 logger.cc:11] data_indexes selected = 916
+I0106 13:56:56.013031   956 logger.cc:11] data_indexes selected = 157
+I0106 13:56:56.013052   956 logger.cc:11] data_indexes selected = 43
+I0106 13:56:56.013065   956 logger.cc:11] data_indexes selected = 275
+I0106 13:56:56.013172   956 logger.cc:11] data_indexes selected = 209
+I0106 13:56:56.013284   956 logger.cc:11] data_indexes selected = 806
+I0106 13:56:56.013301   956 logger.cc:11] data_indexes selected = 599
+I0106 13:56:56.013320   956 logger.cc:11] ------ batch indexes for iter 89 ------
+I0106 13:56:56.013449   956 logger.cc:11] data_indexes selected = 213
+I0106 13:56:56.013466   956 logger.cc:11] data_indexes selected = 830
+I0106 13:56:56.013485   956 logger.cc:11] data_indexes selected = 360
+I0106 13:56:56.013496   956 logger.cc:11] data_indexes selected = 101
+I0106 13:56:56.013511   956 logger.cc:11] data_indexes selected = 43
+I0106 13:56:56.013525   956 logger.cc:11] data_indexes selected = 352
+I0106 13:56:56.013537   956 logger.cc:11] data_indexes selected = 22
+I0106 13:56:56.013547   956 logger.cc:11] data_indexes selected = 515
+I0106 13:56:56.013563   956 logger.cc:11] ------ batch indexes for iter 90 ------
+I0106 13:56:56.013665   956 logger.cc:11] data_indexes selected = 928
+I0106 13:56:56.013684   956 logger.cc:11] data_indexes selected = 738
+I0106 13:56:56.013700   956 logger.cc:11] data_indexes selected = 969
+I0106 13:56:56.013727   956 logger.cc:11] data_indexes selected = 854
+I0106 13:56:56.013738   956 logger.cc:11] data_indexes selected = 599
+I0106 13:56:56.013752   956 logger.cc:11] data_indexes selected = 686
+I0106 13:56:56.013763   956 logger.cc:11] data_indexes selected = 955
+I0106 13:56:56.013777   956 logger.cc:11] data_indexes selected = 767
+I0106 13:56:56.013789   956 logger.cc:11] ------ batch indexes for iter 91 ------
+I0106 13:56:56.013904   956 logger.cc:11] data_indexes selected = 806
+I0106 13:56:56.013922   956 logger.cc:11] data_indexes selected = 761
+I0106 13:56:56.013937   956 logger.cc:11] data_indexes selected = 346
+I0106 13:56:56.013950   956 logger.cc:11] data_indexes selected = 477
+I0106 13:56:56.013965   956 logger.cc:11] data_indexes selected = 594
+I0106 13:56:56.013975   956 logger.cc:11] data_indexes selected = 340
+I0106 13:56:56.013990   956 logger.cc:11] data_indexes selected = 718
+I0106 13:56:56.014005   956 logger.cc:11] data_indexes selected = 50
+I0106 13:56:56.014027   956 logger.cc:11] ------ batch indexes for iter 92 ------
+I0106 13:56:56.014138   956 logger.cc:11] data_indexes selected = 643
+I0106 13:56:56.014164   956 logger.cc:11] data_indexes selected = 823
+I0106 13:56:56.014181   956 logger.cc:11] data_indexes selected = 939
+I0106 13:56:56.014201   956 logger.cc:11] data_indexes selected = 636
+I0106 13:56:56.014216   956 logger.cc:11] data_indexes selected = 574
+I0106 13:56:56.014241   956 logger.cc:11] data_indexes selected = 739
+I0106 13:56:56.014256   956 logger.cc:11] data_indexes selected = 513
+I0106 13:56:56.014276   956 logger.cc:11] data_indexes selected = 629
+I0106 13:56:56.014292   956 logger.cc:11] ------ batch indexes for iter 93 ------
+I0106 13:56:56.014400   956 logger.cc:11] data_indexes selected = 468
+I0106 13:56:56.014415   956 logger.cc:11] data_indexes selected = 492
+I0106 13:56:56.014436   956 logger.cc:11] data_indexes selected = 439
+I0106 13:56:56.014451   956 logger.cc:11] data_indexes selected = 796
+I0106 13:56:56.014472   956 logger.cc:11] data_indexes selected = 220
+I0106 13:56:56.014490   956 logger.cc:11] data_indexes selected = 225
+I0106 13:56:56.014509   956 logger.cc:11] data_indexes selected = 692
+I0106 13:56:56.014531   956 logger.cc:11] data_indexes selected = 21
+I0106 13:56:56.014552   956 logger.cc:11] ------ batch indexes for iter 94 ------
+I0106 13:56:56.014664   956 logger.cc:11] data_indexes selected = 39
+I0106 13:56:56.014681   956 logger.cc:11] data_indexes selected = 12
+I0106 13:56:56.014696   956 logger.cc:11] data_indexes selected = 571
+I0106 13:56:56.014716   956 logger.cc:11] data_indexes selected = 277
+I0106 13:56:56.014731   956 logger.cc:11] data_indexes selected = 538
+I0106 13:56:56.014750   956 logger.cc:11] data_indexes selected = 585
+I0106 13:56:56.014765   956 logger.cc:11] data_indexes selected = 696
+I0106 13:56:56.014786   956 logger.cc:11] data_indexes selected = 941
+I0106 13:56:56.014803   956 logger.cc:11] ------ batch indexes for iter 95 ------
+I0106 13:56:56.014909   956 logger.cc:11] data_indexes selected = 737
+I0106 13:56:56.014923   956 logger.cc:11] data_indexes selected = 399
+I0106 13:56:56.014936   956 logger.cc:11] data_indexes selected = 211
+I0106 13:56:56.014947   956 logger.cc:11] data_indexes selected = 166
+I0106 13:56:56.014968   956 logger.cc:11] data_indexes selected = 889
+I0106 13:56:56.014979   956 logger.cc:11] data_indexes selected = 244
+I0106 13:56:56.014994   956 logger.cc:11] data_indexes selected = 988
+I0106 13:56:56.015007   956 logger.cc:11] data_indexes selected = 0
+I0106 13:56:56.015027   956 logger.cc:11] ------ batch indexes for iter 96 ------
+I0106 13:56:56.015148   956 logger.cc:11] data_indexes selected = 889
+I0106 13:56:56.015167   956 logger.cc:11] data_indexes selected = 852
+I0106 13:56:56.015178   956 logger.cc:11] data_indexes selected = 129
+I0106 13:56:56.015192   956 logger.cc:11] data_indexes selected = 222
+I0106 13:56:56.015201   956 logger.cc:11] data_indexes selected = 180
+I0106 13:56:56.015214   956 logger.cc:11] data_indexes selected = 347
+I0106 13:56:56.015224   956 logger.cc:11] data_indexes selected = 312
+I0106 13:56:56.015239   956 logger.cc:11] data_indexes selected = 241
+I0106 13:56:56.015255   956 logger.cc:11] ------ batch indexes for iter 97 ------
+I0106 13:56:56.015375   956 logger.cc:11] data_indexes selected = 907
+I0106 13:56:56.015390   956 logger.cc:11] data_indexes selected = 270
+I0106 13:56:56.015413   956 logger.cc:11] data_indexes selected = 971
+I0106 13:56:56.015424   956 logger.cc:11] data_indexes selected = 710
+I0106 13:56:56.015439   956 logger.cc:11] data_indexes selected = 242
+I0106 13:56:56.015455   956 logger.cc:11] data_indexes selected = 85
+I0106 13:56:56.015471   956 logger.cc:11] data_indexes selected = 244
+I0106 13:56:56.015483   956 logger.cc:11] data_indexes selected = 169
+I0106 13:56:56.015501   956 logger.cc:11] ------ batch indexes for iter 98 ------
+I0106 13:56:56.015594   956 logger.cc:11] data_indexes selected = 252
+I0106 13:56:56.015607   956 logger.cc:11] data_indexes selected = 518
+I0106 13:56:56.015617   956 logger.cc:11] data_indexes selected = 753
+I0106 13:56:56.015635   956 logger.cc:11] data_indexes selected = 310
+I0106 13:56:56.015650   956 logger.cc:11] data_indexes selected = 669
+I0106 13:56:56.015668   956 logger.cc:11] data_indexes selected = 327
+I0106 13:56:56.015681   956 logger.cc:11] data_indexes selected = 16
+I0106 13:56:56.015694   956 logger.cc:11] data_indexes selected = 881
+I0106 13:56:56.015707   956 logger.cc:11] ------ batch indexes for iter 99 ------
+I0106 13:56:56.015836   956 logger.cc:11] data_indexes selected = 740
+I0106 13:56:56.015851   956 logger.cc:11] data_indexes selected = 616
+I0106 13:56:56.015866   956 logger.cc:11] data_indexes selected = 894
+I0106 13:56:56.015878   956 logger.cc:11] data_indexes selected = 595
+I0106 13:56:56.015892   956 logger.cc:11] data_indexes selected = 741
+I0106 13:56:56.015902   956 logger.cc:11] data_indexes selected = 261
+I0106 13:56:56.015915   956 logger.cc:11] data_indexes selected = 853
+I0106 13:56:56.015926   956 logger.cc:11] data_indexes selected = 136
+I0106 13:56:56.015959   956 logger.cc:11] current channel size = 2
+I0106 13:56:56.015982   956 logger.cc:11] --------PS Iteration 0 --------
+I0106 13:56:56.016338   956 logger.cc:11] --------PS Iteration 0, ps broadcast_encrypted_weights successful --------
+I0106 13:56:56.016367   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:56.016526   956 logger.cc:11] --------PS Iteration 0, ps select_batch_idx successful --------
+I0106 13:56:56.016553   956 logger.cc:11] ps worker size = 2
+I0106 13:56:56.016577   956 logger.cc:11] mini batch size = 4
+I0106 13:56:56.016659   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:56.016687   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:56.016705   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:56.016731   956 logger.cc:11] --------PS Iteration 0, ps partition_examples successful --------
+I0106 13:56:56.292129   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:56.292173   956 logger.cc:11] --------PS Iteration 0, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:56.308120   956 logger.cc:11] --------PS Iteration 0, ps update_encrypted_weights successful --------
+I0106 13:56:56.308158   956 logger.cc:11] --------PS Iteration 1 --------
+I0106 13:56:56.308372   956 logger.cc:11] --------PS Iteration 1, ps broadcast_encrypted_weights successful --------
+I0106 13:56:56.308400   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:56.308780   956 logger.cc:11] --------PS Iteration 1, ps select_batch_idx successful --------
+I0106 13:56:56.308810   956 logger.cc:11] ps worker size = 2
+I0106 13:56:56.308825   956 logger.cc:11] mini batch size = 4
+I0106 13:56:56.316635   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:56.316660   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:56.316680   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:56.316699   956 logger.cc:11] --------PS Iteration 1, ps partition_examples successful --------
+I0106 13:56:56.598881   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:56.598928   956 logger.cc:11] --------PS Iteration 1, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:56.615530   956 logger.cc:11] --------PS Iteration 1, ps update_encrypted_weights successful --------
+I0106 13:56:56.615556   956 logger.cc:11] --------PS Iteration 2 --------
+I0106 13:56:56.615798   956 logger.cc:11] --------PS Iteration 2, ps broadcast_encrypted_weights successful --------
+I0106 13:56:56.615823   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:56.616173   956 logger.cc:11] --------PS Iteration 2, ps select_batch_idx successful --------
+I0106 13:56:56.616194   956 logger.cc:11] ps worker size = 2
+I0106 13:56:56.616209   956 logger.cc:11] mini batch size = 4
+I0106 13:56:56.616283   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:56.616302   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:56.616313   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:56.616333   956 logger.cc:11] --------PS Iteration 2, ps partition_examples successful --------
+I0106 13:56:56.909152   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:56.909204   956 logger.cc:11] --------PS Iteration 2, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:56.926015   956 logger.cc:11] --------PS Iteration 2, ps update_encrypted_weights successful --------
+I0106 13:56:56.926048   956 logger.cc:11] --------PS Iteration 3 --------
+I0106 13:56:56.926265   956 logger.cc:11] --------PS Iteration 3, ps broadcast_encrypted_weights successful --------
+I0106 13:56:56.926291   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:56.926645   956 logger.cc:11] --------PS Iteration 3, ps select_batch_idx successful --------
+I0106 13:56:56.926674   956 logger.cc:11] ps worker size = 2
+I0106 13:56:56.926688   956 logger.cc:11] mini batch size = 4
+I0106 13:56:56.934260   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:56.934285   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:56.934305   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:56.934327   956 logger.cc:11] --------PS Iteration 3, ps partition_examples successful --------
+I0106 13:56:57.220788   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:57.220825   956 logger.cc:11] --------PS Iteration 3, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:57.237041   956 logger.cc:11] --------PS Iteration 3, ps update_encrypted_weights successful --------
+I0106 13:56:57.237071   956 logger.cc:11] --------PS Iteration 4 --------
+I0106 13:56:57.237884   956 logger.cc:11] --------PS Iteration 4, ps broadcast_encrypted_weights successful --------
+I0106 13:56:57.237911   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:57.238220   956 logger.cc:11] --------PS Iteration 4, ps select_batch_idx successful --------
+I0106 13:56:57.238248   956 logger.cc:11] ps worker size = 2
+I0106 13:56:57.238268   956 logger.cc:11] mini batch size = 4
+I0106 13:56:57.238340   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:57.238364   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:57.238379   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:57.238400   956 logger.cc:11] --------PS Iteration 4, ps partition_examples successful --------
+I0106 13:56:57.521085   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:57.521262   956 logger.cc:11] --------PS Iteration 4, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:57.538167   956 logger.cc:11] --------PS Iteration 4, ps update_encrypted_weights successful --------
+I0106 13:56:57.538198   956 logger.cc:11] --------PS Iteration 5 --------
+I0106 13:56:57.538421   956 logger.cc:11] --------PS Iteration 5, ps broadcast_encrypted_weights successful --------
+I0106 13:56:57.538445   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:57.538499   956 logger.cc:11] --------PS Iteration 5, ps select_batch_idx successful --------
+I0106 13:56:57.538520   956 logger.cc:11] ps worker size = 2
+I0106 13:56:57.538535   956 logger.cc:11] mini batch size = 4
+I0106 13:56:57.538601   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:57.538615   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:57.538631   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:57.538646   956 logger.cc:11] --------PS Iteration 5, ps partition_examples successful --------
+I0106 13:56:57.832940   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:57.833052   956 logger.cc:11] --------PS Iteration 5, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:57.849383   956 logger.cc:11] --------PS Iteration 5, ps update_encrypted_weights successful --------
+I0106 13:56:57.849409   956 logger.cc:11] --------PS Iteration 6 --------
+I0106 13:56:57.849655   956 logger.cc:11] --------PS Iteration 6, ps broadcast_encrypted_weights successful --------
+I0106 13:56:57.849678   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:57.849751   956 logger.cc:11] --------PS Iteration 6, ps select_batch_idx successful --------
+I0106 13:56:57.849768   956 logger.cc:11] ps worker size = 2
+I0106 13:56:57.849786   956 logger.cc:11] mini batch size = 4
+I0106 13:56:57.849843   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:57.849867   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:57.849881   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:57.849902   956 logger.cc:11] --------PS Iteration 6, ps partition_examples successful --------
+I0106 13:56:58.144013   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:58.144052   956 logger.cc:11] --------PS Iteration 6, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:58.163620   956 logger.cc:11] --------PS Iteration 6, ps update_encrypted_weights successful --------
+I0106 13:56:58.163658   956 logger.cc:11] --------PS Iteration 7 --------
+I0106 13:56:58.163878   956 logger.cc:11] --------PS Iteration 7, ps broadcast_encrypted_weights successful --------
+I0106 13:56:58.163920   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:58.164781   956 logger.cc:11] --------PS Iteration 7, ps select_batch_idx successful --------
+I0106 13:56:58.164829   956 logger.cc:11] ps worker size = 2
+I0106 13:56:58.164882   956 logger.cc:11] mini batch size = 4
+I0106 13:56:58.165078   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:58.165117   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:58.165174   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:58.165205   956 logger.cc:11] --------PS Iteration 7, ps partition_examples successful --------
+I0106 13:56:58.460683   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:58.460721   956 logger.cc:11] --------PS Iteration 7, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:58.477067   956 logger.cc:11] --------PS Iteration 7, ps update_encrypted_weights successful --------
+I0106 13:56:58.477093   956 logger.cc:11] --------PS Iteration 8 --------
+I0106 13:56:58.477319   956 logger.cc:11] --------PS Iteration 8, ps broadcast_encrypted_weights successful --------
+I0106 13:56:58.477337   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:58.477401   956 logger.cc:11] --------PS Iteration 8, ps select_batch_idx successful --------
+I0106 13:56:58.477416   956 logger.cc:11] ps worker size = 2
+I0106 13:56:58.477434   956 logger.cc:11] mini batch size = 4
+I0106 13:56:58.477486   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:58.477504   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:58.477514   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:58.477532   956 logger.cc:11] --------PS Iteration 8, ps partition_examples successful --------
+I0106 13:56:58.769412   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:58.769495   956 logger.cc:11] --------PS Iteration 8, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:58.786106   956 logger.cc:11] --------PS Iteration 8, ps update_encrypted_weights successful --------
+I0106 13:56:58.786154   956 logger.cc:11] --------PS Iteration 9 --------
+I0106 13:56:58.786370   956 logger.cc:11] --------PS Iteration 9, ps broadcast_encrypted_weights successful --------
+I0106 13:56:58.786407   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:58.786465   956 logger.cc:11] --------PS Iteration 9, ps select_batch_idx successful --------
+I0106 13:56:58.786485   956 logger.cc:11] ps worker size = 2
+I0106 13:56:58.786500   956 logger.cc:11] mini batch size = 4
+I0106 13:56:58.786553   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:58.786577   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:58.786597   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:58.786614   956 logger.cc:11] --------PS Iteration 9, ps partition_examples successful --------
+I0106 13:56:59.091027   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:59.091065   956 logger.cc:11] --------PS Iteration 9, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:59.109120   956 logger.cc:11] --------PS Iteration 9, ps update_encrypted_weights successful --------
+I0106 13:56:59.109153   956 logger.cc:11] --------PS Iteration 10 --------
+I0106 13:56:59.109447   956 logger.cc:11] --------PS Iteration 10, ps broadcast_encrypted_weights successful --------
+I0106 13:56:59.109477   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:59.109571   956 logger.cc:11] --------PS Iteration 10, ps select_batch_idx successful --------
+I0106 13:56:59.109596   956 logger.cc:11] ps worker size = 2
+I0106 13:56:59.109617   956 logger.cc:11] mini batch size = 4
+I0106 13:56:59.109720   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:59.109750   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:59.109763   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:59.109786   956 logger.cc:11] --------PS Iteration 10, ps partition_examples successful --------
+I0106 13:56:59.493944   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:59.493999   956 logger.cc:11] --------PS Iteration 10, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:59.516327   956 logger.cc:11] --------PS Iteration 10, ps update_encrypted_weights successful --------
+I0106 13:56:59.516367   956 logger.cc:11] --------PS Iteration 11 --------
+I0106 13:56:59.516683   956 logger.cc:11] --------PS Iteration 11, ps broadcast_encrypted_weights successful --------
+I0106 13:56:59.516726   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:59.517298   956 logger.cc:11] --------PS Iteration 11, ps select_batch_idx successful --------
+I0106 13:56:59.517341   956 logger.cc:11] ps worker size = 2
+I0106 13:56:59.517371   956 logger.cc:11] mini batch size = 4
+I0106 13:56:59.529484   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:59.529517   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:59.529541   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:59.529563   956 logger.cc:11] --------PS Iteration 11, ps partition_examples successful --------
+I0106 13:56:59.934392   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:56:59.934433   956 logger.cc:11] --------PS Iteration 11, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:56:59.957360   956 logger.cc:11] --------PS Iteration 11, ps update_encrypted_weights successful --------
+I0106 13:56:59.957391   956 logger.cc:11] --------PS Iteration 12 --------
+I0106 13:56:59.957736   956 logger.cc:11] --------PS Iteration 12, ps broadcast_encrypted_weights successful --------
+I0106 13:56:59.957762   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:56:59.957911   956 logger.cc:11] --------PS Iteration 12, ps select_batch_idx successful --------
+I0106 13:56:59.957937   956 logger.cc:11] ps worker size = 2
+I0106 13:56:59.957964   956 logger.cc:11] mini batch size = 4
+I0106 13:56:59.958047   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:56:59.958076   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:56:59.958094   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:56:59.958122   956 logger.cc:11] --------PS Iteration 12, ps partition_examples successful --------
+I0106 13:57:00.384238   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:00.384295   956 logger.cc:11] --------PS Iteration 12, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:00.406064   956 logger.cc:11] --------PS Iteration 12, ps update_encrypted_weights successful --------
+I0106 13:57:00.406100   956 logger.cc:11] --------PS Iteration 13 --------
+I0106 13:57:00.406423   956 logger.cc:11] --------PS Iteration 13, ps broadcast_encrypted_weights successful --------
+I0106 13:57:00.406459   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:00.406543   956 logger.cc:11] --------PS Iteration 13, ps select_batch_idx successful --------
+I0106 13:57:00.406575   956 logger.cc:11] ps worker size = 2
+I0106 13:57:00.406594   956 logger.cc:11] mini batch size = 4
+I0106 13:57:00.406682   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:00.406702   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:00.406728   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:00.406750   956 logger.cc:11] --------PS Iteration 13, ps partition_examples successful --------
+I0106 13:57:00.832041   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:00.832084   956 logger.cc:11] --------PS Iteration 13, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:00.860285   956 logger.cc:11] --------PS Iteration 13, ps update_encrypted_weights successful --------
+I0106 13:57:00.860316   956 logger.cc:11] --------PS Iteration 14 --------
+I0106 13:57:00.860600   956 logger.cc:11] --------PS Iteration 14, ps broadcast_encrypted_weights successful --------
+I0106 13:57:00.860627   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:00.860785   956 logger.cc:11] --------PS Iteration 14, ps select_batch_idx successful --------
+I0106 13:57:00.860813   956 logger.cc:11] ps worker size = 2
+I0106 13:57:00.860839   956 logger.cc:11] mini batch size = 4
+I0106 13:57:00.860922   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:00.860950   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:00.860973   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:00.861006   956 logger.cc:11] --------PS Iteration 14, ps partition_examples successful --------
+I0106 13:57:01.265574   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:01.265621   956 logger.cc:11] --------PS Iteration 14, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:01.289832   956 logger.cc:11] --------PS Iteration 14, ps update_encrypted_weights successful --------
+I0106 13:57:01.289870   956 logger.cc:11] --------PS Iteration 15 --------
+I0106 13:57:01.290159   956 logger.cc:11] --------PS Iteration 15, ps broadcast_encrypted_weights successful --------
+I0106 13:57:01.290187   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:01.290340   956 logger.cc:11] --------PS Iteration 15, ps select_batch_idx successful --------
+I0106 13:57:01.290401   956 logger.cc:11] ps worker size = 2
+I0106 13:57:01.290446   956 logger.cc:11] mini batch size = 4
+I0106 13:57:01.290563   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:01.290606   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:01.290647   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:01.290688   956 logger.cc:11] --------PS Iteration 15, ps partition_examples successful --------
+I0106 13:57:01.712407   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:01.712467   956 logger.cc:11] --------PS Iteration 15, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:01.736236   956 logger.cc:11] --------PS Iteration 15, ps update_encrypted_weights successful --------
+I0106 13:57:01.736279   956 logger.cc:11] --------PS Iteration 16 --------
+I0106 13:57:01.736696   956 logger.cc:11] --------PS Iteration 16, ps broadcast_encrypted_weights successful --------
+I0106 13:57:01.736728   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:01.736891   956 logger.cc:11] --------PS Iteration 16, ps select_batch_idx successful --------
+I0106 13:57:01.736925   956 logger.cc:11] ps worker size = 2
+I0106 13:57:01.736959   956 logger.cc:11] mini batch size = 4
+I0106 13:57:01.737149   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:01.737201   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:01.737227   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:01.737260   956 logger.cc:11] --------PS Iteration 16, ps partition_examples successful --------
+I0106 13:57:02.156514   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:02.156575   956 logger.cc:11] --------PS Iteration 16, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:02.179839   956 logger.cc:11] --------PS Iteration 16, ps update_encrypted_weights successful --------
+I0106 13:57:02.179891   956 logger.cc:11] --------PS Iteration 17 --------
+I0106 13:57:02.180284   956 logger.cc:11] --------PS Iteration 17, ps broadcast_encrypted_weights successful --------
+I0106 13:57:02.180344   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:02.180526   956 logger.cc:11] --------PS Iteration 17, ps select_batch_idx successful --------
+I0106 13:57:02.180563   956 logger.cc:11] ps worker size = 2
+I0106 13:57:02.180581   956 logger.cc:11] mini batch size = 4
+I0106 13:57:02.180675   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:02.180701   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:02.180729   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:02.180752   956 logger.cc:11] --------PS Iteration 17, ps partition_examples successful --------
+I0106 13:57:02.597807   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:02.597860   956 logger.cc:11] --------PS Iteration 17, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:02.620461   956 logger.cc:11] --------PS Iteration 17, ps update_encrypted_weights successful --------
+I0106 13:57:02.620492   956 logger.cc:11] --------PS Iteration 18 --------
+I0106 13:57:02.620791   956 logger.cc:11] --------PS Iteration 18, ps broadcast_encrypted_weights successful --------
+I0106 13:57:02.620817   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:02.621001   956 logger.cc:11] --------PS Iteration 18, ps select_batch_idx successful --------
+I0106 13:57:02.621040   956 logger.cc:11] ps worker size = 2
+I0106 13:57:02.621279   956 logger.cc:11] mini batch size = 4
+I0106 13:57:02.625871   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:02.626197   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:02.626502   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:02.626806   956 logger.cc:11] --------PS Iteration 18, ps partition_examples successful --------
+I0106 13:57:03.043859   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:03.043917   956 logger.cc:11] --------PS Iteration 18, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:03.071751   956 logger.cc:11] --------PS Iteration 18, ps update_encrypted_weights successful --------
+I0106 13:57:03.071792   956 logger.cc:11] --------PS Iteration 19 --------
+I0106 13:57:03.072085   956 logger.cc:11] --------PS Iteration 19, ps broadcast_encrypted_weights successful --------
+I0106 13:57:03.072115   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:03.072680   956 logger.cc:11] --------PS Iteration 19, ps select_batch_idx successful --------
+I0106 13:57:03.072715   956 logger.cc:11] ps worker size = 2
+I0106 13:57:03.072733   956 logger.cc:11] mini batch size = 4
+I0106 13:57:03.072827   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:03.072847   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:03.072870   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:03.072912   956 logger.cc:11] --------PS Iteration 19, ps partition_examples successful --------
+I0106 13:57:03.501763   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:03.501801   956 logger.cc:11] --------PS Iteration 19, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:03.523277   956 logger.cc:11] --------PS Iteration 19, ps update_encrypted_weights successful --------
+I0106 13:57:03.523319   956 logger.cc:11] --------PS Iteration 20 --------
+I0106 13:57:03.523705   956 logger.cc:11] --------PS Iteration 20, ps broadcast_encrypted_weights successful --------
+I0106 13:57:03.523753   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:03.524775   956 logger.cc:11] --------PS Iteration 20, ps select_batch_idx successful --------
+I0106 13:57:03.524801   956 logger.cc:11] ps worker size = 2
+I0106 13:57:03.524824   956 logger.cc:11] mini batch size = 4
+I0106 13:57:03.524927   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:03.524952   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:03.524973   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:03.524996   956 logger.cc:11] --------PS Iteration 20, ps partition_examples successful --------
+I0106 13:57:03.931802   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:03.931854   956 logger.cc:11] --------PS Iteration 20, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:03.964201   956 logger.cc:11] --------PS Iteration 20, ps update_encrypted_weights successful --------
+I0106 13:57:03.964248   956 logger.cc:11] --------PS Iteration 21 --------
+I0106 13:57:03.964546   956 logger.cc:11] --------PS Iteration 21, ps broadcast_encrypted_weights successful --------
+I0106 13:57:03.964586   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:03.964854   956 logger.cc:11] --------PS Iteration 21, ps select_batch_idx successful --------
+I0106 13:57:03.964892   956 logger.cc:11] ps worker size = 2
+I0106 13:57:03.964910   956 logger.cc:11] mini batch size = 4
+I0106 13:57:03.965011   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:03.965034   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:03.965059   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:03.965080   956 logger.cc:11] --------PS Iteration 21, ps partition_examples successful --------
+I0106 13:57:04.369542   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:04.369585   956 logger.cc:11] --------PS Iteration 21, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:04.391451   956 logger.cc:11] --------PS Iteration 21, ps update_encrypted_weights successful --------
+I0106 13:57:04.391484   956 logger.cc:11] --------PS Iteration 22 --------
+I0106 13:57:04.391801   956 logger.cc:11] --------PS Iteration 22, ps broadcast_encrypted_weights successful --------
+I0106 13:57:04.391827   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:04.392176   956 logger.cc:11] --------PS Iteration 22, ps select_batch_idx successful --------
+I0106 13:57:04.392210   956 logger.cc:11] ps worker size = 2
+I0106 13:57:04.392236   956 logger.cc:11] mini batch size = 4
+I0106 13:57:04.392323   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:04.392351   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:04.392367   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:04.392393   956 logger.cc:11] --------PS Iteration 22, ps partition_examples successful --------
+I0106 13:57:04.804491   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:04.804538   956 logger.cc:11] --------PS Iteration 22, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:04.832401   956 logger.cc:11] --------PS Iteration 22, ps update_encrypted_weights successful --------
+I0106 13:57:04.832446   956 logger.cc:11] --------PS Iteration 23 --------
+I0106 13:57:04.832749   956 logger.cc:11] --------PS Iteration 23, ps broadcast_encrypted_weights successful --------
+I0106 13:57:04.832788   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:04.833051   956 logger.cc:11] --------PS Iteration 23, ps select_batch_idx successful --------
+I0106 13:57:04.833094   956 logger.cc:11] ps worker size = 2
+I0106 13:57:04.833117   956 logger.cc:11] mini batch size = 4
+I0106 13:57:04.833209   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:04.833227   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:04.833250   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:04.833269   956 logger.cc:11] --------PS Iteration 23, ps partition_examples successful --------
+I0106 13:57:05.234556   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:05.234611   956 logger.cc:11] --------PS Iteration 23, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:05.256670   956 logger.cc:11] --------PS Iteration 23, ps update_encrypted_weights successful --------
+I0106 13:57:05.256712   956 logger.cc:11] --------PS Iteration 24 --------
+I0106 13:57:05.257006   956 logger.cc:11] --------PS Iteration 24, ps broadcast_encrypted_weights successful --------
+I0106 13:57:05.257035   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:05.257544   956 logger.cc:11] --------PS Iteration 24, ps select_batch_idx successful --------
+I0106 13:57:05.257594   956 logger.cc:11] ps worker size = 2
+I0106 13:57:05.257638   956 logger.cc:11] mini batch size = 4
+I0106 13:57:05.258692   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:05.258769   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:05.258828   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:05.258888   956 logger.cc:11] --------PS Iteration 24, ps partition_examples successful --------
+I0106 13:57:05.678952   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:05.679004   956 logger.cc:11] --------PS Iteration 24, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:05.706732   956 logger.cc:11] --------PS Iteration 24, ps update_encrypted_weights successful --------
+I0106 13:57:05.706771   956 logger.cc:11] --------PS Iteration 25 --------
+I0106 13:57:05.707069   956 logger.cc:11] --------PS Iteration 25, ps broadcast_encrypted_weights successful --------
+I0106 13:57:05.707106   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:05.707195   956 logger.cc:11] --------PS Iteration 25, ps select_batch_idx successful --------
+I0106 13:57:05.707227   956 logger.cc:11] ps worker size = 2
+I0106 13:57:05.707245   956 logger.cc:11] mini batch size = 4
+I0106 13:57:05.707324   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:05.707343   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:05.707365   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:05.707387   956 logger.cc:11] --------PS Iteration 25, ps partition_examples successful --------
+I0106 13:57:06.116478   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:06.116523   956 logger.cc:11] --------PS Iteration 25, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:06.138298   956 logger.cc:11] --------PS Iteration 25, ps update_encrypted_weights successful --------
+I0106 13:57:06.138325   956 logger.cc:11] --------PS Iteration 26 --------
+I0106 13:57:06.138615   956 logger.cc:11] --------PS Iteration 26, ps broadcast_encrypted_weights successful --------
+I0106 13:57:06.138648   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:06.138762   956 logger.cc:11] --------PS Iteration 26, ps select_batch_idx successful --------
+I0106 13:57:06.138808   956 logger.cc:11] ps worker size = 2
+I0106 13:57:06.138857   956 logger.cc:11] mini batch size = 4
+I0106 13:57:06.139012   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:06.139045   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:06.139065   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:06.139091   956 logger.cc:11] --------PS Iteration 26, ps partition_examples successful --------
+I0106 13:57:06.537111   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:06.537184   956 logger.cc:11] --------PS Iteration 26, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:06.570096   956 logger.cc:11] --------PS Iteration 26, ps update_encrypted_weights successful --------
+I0106 13:57:06.570143   956 logger.cc:11] --------PS Iteration 27 --------
+I0106 13:57:06.570449   956 logger.cc:11] --------PS Iteration 27, ps broadcast_encrypted_weights successful --------
+I0106 13:57:06.570483   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:06.570621   956 logger.cc:11] --------PS Iteration 27, ps select_batch_idx successful --------
+I0106 13:57:06.570655   956 logger.cc:11] ps worker size = 2
+I0106 13:57:06.570683   956 logger.cc:11] mini batch size = 4
+I0106 13:57:06.570773   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:06.570794   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:06.570818   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:06.570842   956 logger.cc:11] --------PS Iteration 27, ps partition_examples successful --------
+I0106 13:57:06.981326   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:06.981376   956 logger.cc:11] --------PS Iteration 27, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:07.017850   956 logger.cc:11] --------PS Iteration 27, ps update_encrypted_weights successful --------
+I0106 13:57:07.017891   956 logger.cc:11] --------PS Iteration 28 --------
+I0106 13:57:07.018261   956 logger.cc:11] --------PS Iteration 28, ps broadcast_encrypted_weights successful --------
+I0106 13:57:07.018306   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:07.018498   956 logger.cc:11] --------PS Iteration 28, ps select_batch_idx successful --------
+I0106 13:57:07.018528   956 logger.cc:11] ps worker size = 2
+I0106 13:57:07.018558   956 logger.cc:11] mini batch size = 4
+I0106 13:57:07.018712   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:07.018747   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:07.018767   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:07.018803   956 logger.cc:11] --------PS Iteration 28, ps partition_examples successful --------
+I0106 13:57:07.426003   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:07.426049   956 logger.cc:11] --------PS Iteration 28, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:07.446970   956 logger.cc:11] --------PS Iteration 28, ps update_encrypted_weights successful --------
+I0106 13:57:07.447011   956 logger.cc:11] --------PS Iteration 29 --------
+I0106 13:57:07.447418   956 logger.cc:11] --------PS Iteration 29, ps broadcast_encrypted_weights successful --------
+I0106 13:57:07.447459   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:07.447552   956 logger.cc:11] --------PS Iteration 29, ps select_batch_idx successful --------
+I0106 13:57:07.447585   956 logger.cc:11] ps worker size = 2
+I0106 13:57:07.447604   956 logger.cc:11] mini batch size = 4
+I0106 13:57:07.449569   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:07.449605   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:07.449638   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:07.449663   956 logger.cc:11] --------PS Iteration 29, ps partition_examples successful --------
+I0106 13:57:07.843128   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:07.843179   956 logger.cc:11] --------PS Iteration 29, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:07.865478   956 logger.cc:11] --------PS Iteration 29, ps update_encrypted_weights successful --------
+I0106 13:57:07.865517   956 logger.cc:11] --------PS Iteration 30 --------
+I0106 13:57:07.865852   956 logger.cc:11] --------PS Iteration 30, ps broadcast_encrypted_weights successful --------
+I0106 13:57:07.865883   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:07.866021   956 logger.cc:11] --------PS Iteration 30, ps select_batch_idx successful --------
+I0106 13:57:07.866047   956 logger.cc:11] ps worker size = 2
+I0106 13:57:07.866072   956 logger.cc:11] mini batch size = 4
+I0106 13:57:07.866154   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:07.866184   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:07.866204   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:07.866232   956 logger.cc:11] --------PS Iteration 30, ps partition_examples successful --------
+I0106 13:57:08.283772   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:08.283826   956 logger.cc:11] --------PS Iteration 30, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:08.305918   956 logger.cc:11] --------PS Iteration 30, ps update_encrypted_weights successful --------
+I0106 13:57:08.305967   956 logger.cc:11] --------PS Iteration 31 --------
+I0106 13:57:08.306273   956 logger.cc:11] --------PS Iteration 31, ps broadcast_encrypted_weights successful --------
+I0106 13:57:08.306313   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:08.306437   956 logger.cc:11] --------PS Iteration 31, ps select_batch_idx successful --------
+I0106 13:57:08.306471   956 logger.cc:11] ps worker size = 2
+I0106 13:57:08.306489   956 logger.cc:11] mini batch size = 4
+I0106 13:57:08.306571   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:08.306591   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:08.306619   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:08.306639   956 logger.cc:11] --------PS Iteration 31, ps partition_examples successful --------
+I0106 13:57:08.711366   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:08.711411   956 logger.cc:11] --------PS Iteration 31, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:08.743340   956 logger.cc:11] --------PS Iteration 31, ps update_encrypted_weights successful --------
+I0106 13:57:08.743376   956 logger.cc:11] --------PS Iteration 32 --------
+I0106 13:57:08.743716   956 logger.cc:11] --------PS Iteration 32, ps broadcast_encrypted_weights successful --------
+I0106 13:57:08.743747   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:08.744047   956 logger.cc:11] --------PS Iteration 32, ps select_batch_idx successful --------
+I0106 13:57:08.744093   956 logger.cc:11] ps worker size = 2
+I0106 13:57:08.744127   956 logger.cc:11] mini batch size = 4
+I0106 13:57:08.744220   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:08.744246   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:08.744262   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:08.744288   956 logger.cc:11] --------PS Iteration 32, ps partition_examples successful --------
+I0106 13:57:09.152694   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:09.152745   956 logger.cc:11] --------PS Iteration 32, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:09.173811   956 logger.cc:11] --------PS Iteration 32, ps update_encrypted_weights successful --------
+I0106 13:57:09.173846   956 logger.cc:11] --------PS Iteration 33 --------
+I0106 13:57:09.174134   956 logger.cc:11] --------PS Iteration 33, ps broadcast_encrypted_weights successful --------
+I0106 13:57:09.174175   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:09.174300   956 logger.cc:11] --------PS Iteration 33, ps select_batch_idx successful --------
+I0106 13:57:09.174333   956 logger.cc:11] ps worker size = 2
+I0106 13:57:09.174355   956 logger.cc:11] mini batch size = 4
+I0106 13:57:09.174916   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:09.174952   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:09.174976   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:09.174996   956 logger.cc:11] --------PS Iteration 33, ps partition_examples successful --------
+I0106 13:57:09.574375   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:09.574419   956 logger.cc:11] --------PS Iteration 33, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:09.596240   956 logger.cc:11] --------PS Iteration 33, ps update_encrypted_weights successful --------
+I0106 13:57:09.596267   956 logger.cc:11] --------PS Iteration 34 --------
+I0106 13:57:09.596562   956 logger.cc:11] --------PS Iteration 34, ps broadcast_encrypted_weights successful --------
+I0106 13:57:09.596590   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:09.596859   956 logger.cc:11] --------PS Iteration 34, ps select_batch_idx successful --------
+I0106 13:57:09.596889   956 logger.cc:11] ps worker size = 2
+I0106 13:57:09.596915   956 logger.cc:11] mini batch size = 4
+I0106 13:57:09.597003   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:09.597029   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:09.597046   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:09.597072   956 logger.cc:11] --------PS Iteration 34, ps partition_examples successful --------
+I0106 13:57:10.003046   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:10.003108   956 logger.cc:11] --------PS Iteration 34, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:10.024864   956 logger.cc:11] --------PS Iteration 34, ps update_encrypted_weights successful --------
+I0106 13:57:10.024899   956 logger.cc:11] --------PS Iteration 35 --------
+I0106 13:57:10.025192   956 logger.cc:11] --------PS Iteration 35, ps broadcast_encrypted_weights successful --------
+I0106 13:57:10.025235   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:10.025552   956 logger.cc:11] --------PS Iteration 35, ps select_batch_idx successful --------
+I0106 13:57:10.025619   956 logger.cc:11] ps worker size = 2
+I0106 13:57:10.025662   956 logger.cc:11] mini batch size = 4
+I0106 13:57:10.025786   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:10.025827   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:10.025871   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:10.025899   956 logger.cc:11] --------PS Iteration 35, ps partition_examples successful --------
+I0106 13:57:10.437358   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:10.437403   956 logger.cc:11] --------PS Iteration 35, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:10.460062   956 logger.cc:11] --------PS Iteration 35, ps update_encrypted_weights successful --------
+I0106 13:57:10.460103   956 logger.cc:11] --------PS Iteration 36 --------
+I0106 13:57:10.460410   956 logger.cc:11] --------PS Iteration 36, ps broadcast_encrypted_weights successful --------
+I0106 13:57:10.460438   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:10.460534   956 logger.cc:11] --------PS Iteration 36, ps select_batch_idx successful --------
+I0106 13:57:10.460556   956 logger.cc:11] ps worker size = 2
+I0106 13:57:10.460582   956 logger.cc:11] mini batch size = 4
+I0106 13:57:10.460652   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:10.460675   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:10.460691   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:10.460716   956 logger.cc:11] --------PS Iteration 36, ps partition_examples successful --------
+I0106 13:57:10.855607   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:10.855660   956 logger.cc:11] --------PS Iteration 36, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:10.877578   956 logger.cc:11] --------PS Iteration 36, ps update_encrypted_weights successful --------
+I0106 13:57:10.877616   956 logger.cc:11] --------PS Iteration 37 --------
+I0106 13:57:10.878007   956 logger.cc:11] --------PS Iteration 37, ps broadcast_encrypted_weights successful --------
+I0106 13:57:10.878057   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:10.878155   956 logger.cc:11] --------PS Iteration 37, ps select_batch_idx successful --------
+I0106 13:57:10.878185   956 logger.cc:11] ps worker size = 2
+I0106 13:57:10.878203   956 logger.cc:11] mini batch size = 4
+I0106 13:57:10.878288   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:10.878309   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:10.878333   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:10.878352   956 logger.cc:11] --------PS Iteration 37, ps partition_examples successful --------
+I0106 13:57:11.294888   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:11.294937   956 logger.cc:11] --------PS Iteration 37, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:11.316514   956 logger.cc:11] --------PS Iteration 37, ps update_encrypted_weights successful --------
+I0106 13:57:11.316540   956 logger.cc:11] --------PS Iteration 38 --------
+I0106 13:57:11.316841   956 logger.cc:11] --------PS Iteration 38, ps broadcast_encrypted_weights successful --------
+I0106 13:57:11.316871   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:11.316970   956 logger.cc:11] --------PS Iteration 38, ps select_batch_idx successful --------
+I0106 13:57:11.316992   956 logger.cc:11] ps worker size = 2
+I0106 13:57:11.317015   956 logger.cc:11] mini batch size = 4
+I0106 13:57:11.317093   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:11.317118   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:11.317132   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:11.317157   956 logger.cc:11] --------PS Iteration 38, ps partition_examples successful --------
+I0106 13:57:11.718048   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:11.718102   956 logger.cc:11] --------PS Iteration 38, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:11.745970   956 logger.cc:11] --------PS Iteration 38, ps update_encrypted_weights successful --------
+I0106 13:57:11.746023   956 logger.cc:11] --------PS Iteration 39 --------
+I0106 13:57:11.746351   956 logger.cc:11] --------PS Iteration 39, ps broadcast_encrypted_weights successful --------
+I0106 13:57:11.746392   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:11.746506   956 logger.cc:11] --------PS Iteration 39, ps select_batch_idx successful --------
+I0106 13:57:11.746556   956 logger.cc:11] ps worker size = 2
+I0106 13:57:11.746578   956 logger.cc:11] mini batch size = 4
+I0106 13:57:11.746665   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:11.746686   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:11.746711   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:11.746733   956 logger.cc:11] --------PS Iteration 39, ps partition_examples successful --------
+I0106 13:57:12.161608   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:12.161659   956 logger.cc:11] --------PS Iteration 39, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:12.193516   956 logger.cc:11] --------PS Iteration 39, ps update_encrypted_weights successful --------
+I0106 13:57:12.193549   956 logger.cc:11] --------PS Iteration 40 --------
+I0106 13:57:12.193861   956 logger.cc:11] --------PS Iteration 40, ps broadcast_encrypted_weights successful --------
+I0106 13:57:12.193886   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:12.194136   956 logger.cc:11] --------PS Iteration 40, ps select_batch_idx successful --------
+I0106 13:57:12.194164   956 logger.cc:11] ps worker size = 2
+I0106 13:57:12.194190   956 logger.cc:11] mini batch size = 4
+I0106 13:57:12.194284   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:12.194311   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:12.194330   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:12.194357   956 logger.cc:11] --------PS Iteration 40, ps partition_examples successful --------
+I0106 13:57:12.586319   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:12.586387   956 logger.cc:11] --------PS Iteration 40, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:12.614262   956 logger.cc:11] --------PS Iteration 40, ps update_encrypted_weights successful --------
+I0106 13:57:12.614300   956 logger.cc:11] --------PS Iteration 41 --------
+I0106 13:57:12.614585   956 logger.cc:11] --------PS Iteration 41, ps broadcast_encrypted_weights successful --------
+I0106 13:57:12.614624   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:12.614755   956 logger.cc:11] --------PS Iteration 41, ps select_batch_idx successful --------
+I0106 13:57:12.614809   956 logger.cc:11] ps worker size = 2
+I0106 13:57:12.614846   956 logger.cc:11] mini batch size = 4
+I0106 13:57:12.614957   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:12.615000   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:12.615046   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:12.615077   956 logger.cc:11] --------PS Iteration 41, ps partition_examples successful --------
+I0106 13:57:13.026664   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:13.026721   956 logger.cc:11] --------PS Iteration 41, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:13.058179   956 logger.cc:11] --------PS Iteration 41, ps update_encrypted_weights successful --------
+I0106 13:57:13.058224   956 logger.cc:11] --------PS Iteration 42 --------
+I0106 13:57:13.058596   956 logger.cc:11] --------PS Iteration 42, ps broadcast_encrypted_weights successful --------
+I0106 13:57:13.058636   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:13.058817   956 logger.cc:11] --------PS Iteration 42, ps select_batch_idx successful --------
+I0106 13:57:13.058851   956 logger.cc:11] ps worker size = 2
+I0106 13:57:13.058885   956 logger.cc:11] mini batch size = 4
+I0106 13:57:13.058990   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:13.059024   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:13.059046   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:13.059092   956 logger.cc:11] --------PS Iteration 42, ps partition_examples successful --------
+I0106 13:57:13.463268   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:13.463316   956 logger.cc:11] --------PS Iteration 42, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:13.484659   956 logger.cc:11] --------PS Iteration 42, ps update_encrypted_weights successful --------
+I0106 13:57:13.484699   956 logger.cc:11] --------PS Iteration 43 --------
+I0106 13:57:13.485038   956 logger.cc:11] --------PS Iteration 43, ps broadcast_encrypted_weights successful --------
+I0106 13:57:13.485081   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:13.485253   956 logger.cc:11] --------PS Iteration 43, ps select_batch_idx successful --------
+I0106 13:57:13.485288   956 logger.cc:11] ps worker size = 2
+I0106 13:57:13.485308   956 logger.cc:11] mini batch size = 4
+I0106 13:57:13.485447   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:13.485471   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:13.485496   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:13.485517   956 logger.cc:11] --------PS Iteration 43, ps partition_examples successful --------
+I0106 13:57:13.895274   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:13.895314   956 logger.cc:11] --------PS Iteration 43, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:13.916666   956 logger.cc:11] --------PS Iteration 43, ps update_encrypted_weights successful --------
+I0106 13:57:13.916697   956 logger.cc:11] --------PS Iteration 44 --------
+I0106 13:57:13.917027   956 logger.cc:11] --------PS Iteration 44, ps broadcast_encrypted_weights successful --------
+I0106 13:57:13.917068   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:13.917630   956 logger.cc:11] --------PS Iteration 44, ps select_batch_idx successful --------
+I0106 13:57:13.917660   956 logger.cc:11] ps worker size = 2
+I0106 13:57:13.917693   956 logger.cc:11] mini batch size = 4
+I0106 13:57:13.925611   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:13.925783   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:13.925952   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:13.926137   956 logger.cc:11] --------PS Iteration 44, ps partition_examples successful --------
+I0106 13:57:14.330237   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:14.330292   956 logger.cc:11] --------PS Iteration 44, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:14.352533   956 logger.cc:11] --------PS Iteration 44, ps update_encrypted_weights successful --------
+I0106 13:57:14.352567   956 logger.cc:11] --------PS Iteration 45 --------
+I0106 13:57:14.352876   956 logger.cc:11] --------PS Iteration 45, ps broadcast_encrypted_weights successful --------
+I0106 13:57:14.352941   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:14.353628   956 logger.cc:11] --------PS Iteration 45, ps select_batch_idx successful --------
+I0106 13:57:14.353683   956 logger.cc:11] ps worker size = 2
+I0106 13:57:14.353710   956 logger.cc:11] mini batch size = 4
+I0106 13:57:14.360926   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:14.360963   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:14.360993   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:14.361022   956 logger.cc:11] --------PS Iteration 45, ps partition_examples successful --------
+I0106 13:57:14.773905   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:14.773990   956 logger.cc:11] --------PS Iteration 45, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:14.794891   956 logger.cc:11] --------PS Iteration 45, ps update_encrypted_weights successful --------
+I0106 13:57:14.794926   956 logger.cc:11] --------PS Iteration 46 --------
+I0106 13:57:14.795280   956 logger.cc:11] --------PS Iteration 46, ps broadcast_encrypted_weights successful --------
+I0106 13:57:14.795315   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:14.795470   956 logger.cc:11] --------PS Iteration 46, ps select_batch_idx successful --------
+I0106 13:57:14.795500   956 logger.cc:11] ps worker size = 2
+I0106 13:57:14.795552   956 logger.cc:11] mini batch size = 4
+I0106 13:57:14.795657   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:14.795686   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:14.795703   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:14.795743   956 logger.cc:11] --------PS Iteration 46, ps partition_examples successful --------
+I0106 13:57:15.194810   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:15.194867   956 logger.cc:11] --------PS Iteration 46, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:15.216056   956 logger.cc:11] --------PS Iteration 46, ps update_encrypted_weights successful --------
+I0106 13:57:15.216090   956 logger.cc:11] --------PS Iteration 47 --------
+I0106 13:57:15.216374   956 logger.cc:11] --------PS Iteration 47, ps broadcast_encrypted_weights successful --------
+I0106 13:57:15.216408   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:15.216555   956 logger.cc:11] --------PS Iteration 47, ps select_batch_idx successful --------
+I0106 13:57:15.216603   956 logger.cc:11] ps worker size = 2
+I0106 13:57:15.216629   956 logger.cc:11] mini batch size = 4
+I0106 13:57:15.222837   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:15.222872   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:15.222893   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:15.222918   956 logger.cc:11] --------PS Iteration 47, ps partition_examples successful --------
+I0106 13:57:15.612727   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:15.612774   956 logger.cc:11] --------PS Iteration 47, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:15.635421   956 logger.cc:11] --------PS Iteration 47, ps update_encrypted_weights successful --------
+I0106 13:57:15.635455   956 logger.cc:11] --------PS Iteration 48 --------
+I0106 13:57:15.635788   956 logger.cc:11] --------PS Iteration 48, ps broadcast_encrypted_weights successful --------
+I0106 13:57:15.635819   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:15.636265   956 logger.cc:11] --------PS Iteration 48, ps select_batch_idx successful --------
+I0106 13:57:15.636292   956 logger.cc:11] ps worker size = 2
+I0106 13:57:15.636320   956 logger.cc:11] mini batch size = 4
+I0106 13:57:15.636402   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:15.636430   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:15.636451   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:15.636478   956 logger.cc:11] --------PS Iteration 48, ps partition_examples successful --------
+I0106 13:57:16.044752   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:16.044809   956 logger.cc:11] --------PS Iteration 48, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:16.066057   956 logger.cc:11] --------PS Iteration 48, ps update_encrypted_weights successful --------
+I0106 13:57:16.066093   956 logger.cc:11] --------PS Iteration 49 --------
+I0106 13:57:16.066403   956 logger.cc:11] --------PS Iteration 49, ps broadcast_encrypted_weights successful --------
+I0106 13:57:16.066439   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:16.066570   956 logger.cc:11] --------PS Iteration 49, ps select_batch_idx successful --------
+I0106 13:57:16.066602   956 logger.cc:11] ps worker size = 2
+I0106 13:57:16.066619   956 logger.cc:11] mini batch size = 4
+I0106 13:57:16.066704   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:16.066727   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:16.066753   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:16.066773   956 logger.cc:11] --------PS Iteration 49, ps partition_examples successful --------
+I0106 13:57:16.466428   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:16.466485   956 logger.cc:11] --------PS Iteration 49, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:16.489507   956 logger.cc:11] --------PS Iteration 49, ps update_encrypted_weights successful --------
+I0106 13:57:16.489544   956 logger.cc:11] --------PS Iteration 50 --------
+I0106 13:57:16.489872   956 logger.cc:11] --------PS Iteration 50, ps broadcast_encrypted_weights successful --------
+I0106 13:57:16.489902   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:16.490057   956 logger.cc:11] --------PS Iteration 50, ps select_batch_idx successful --------
+I0106 13:57:16.490092   956 logger.cc:11] ps worker size = 2
+I0106 13:57:16.490119   956 logger.cc:11] mini batch size = 4
+I0106 13:57:16.490208   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:16.490237   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:16.490255   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:16.490284   956 logger.cc:11] --------PS Iteration 50, ps partition_examples successful --------
+I0106 13:57:16.898092   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:16.898149   956 logger.cc:11] --------PS Iteration 50, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:16.920212   956 logger.cc:11] --------PS Iteration 50, ps update_encrypted_weights successful --------
+I0106 13:57:16.920253   956 logger.cc:11] --------PS Iteration 51 --------
+I0106 13:57:16.920536   956 logger.cc:11] --------PS Iteration 51, ps broadcast_encrypted_weights successful --------
+I0106 13:57:16.920569   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:16.921072   956 logger.cc:11] --------PS Iteration 51, ps select_batch_idx successful --------
+I0106 13:57:16.921128   956 logger.cc:11] ps worker size = 2
+I0106 13:57:16.921157   956 logger.cc:11] mini batch size = 4
+I0106 13:57:16.925594   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:16.925778   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:16.926012   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:16.926177   956 logger.cc:11] --------PS Iteration 51, ps partition_examples successful --------
+I0106 13:57:17.320900   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:17.320935   956 logger.cc:11] --------PS Iteration 51, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:17.343103   956 logger.cc:11] --------PS Iteration 51, ps update_encrypted_weights successful --------
+I0106 13:57:17.343138   956 logger.cc:11] --------PS Iteration 52 --------
+I0106 13:57:17.343438   956 logger.cc:11] --------PS Iteration 52, ps broadcast_encrypted_weights successful --------
+I0106 13:57:17.343467   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:17.343991   956 logger.cc:11] --------PS Iteration 52, ps select_batch_idx successful --------
+I0106 13:57:17.344043   956 logger.cc:11] ps worker size = 2
+I0106 13:57:17.344094   956 logger.cc:11] mini batch size = 4
+I0106 13:57:17.345706   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:17.345793   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:17.345849   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:17.345921   956 logger.cc:11] --------PS Iteration 52, ps partition_examples successful --------
+I0106 13:57:17.758792   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:17.758842   956 logger.cc:11] --------PS Iteration 52, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:17.779800   956 logger.cc:11] --------PS Iteration 52, ps update_encrypted_weights successful --------
+I0106 13:57:17.779839   956 logger.cc:11] --------PS Iteration 53 --------
+I0106 13:57:17.780112   956 logger.cc:11] --------PS Iteration 53, ps broadcast_encrypted_weights successful --------
+I0106 13:57:17.780143   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:17.780232   956 logger.cc:11] --------PS Iteration 53, ps select_batch_idx successful --------
+I0106 13:57:17.780261   956 logger.cc:11] ps worker size = 2
+I0106 13:57:17.780279   956 logger.cc:11] mini batch size = 4
+I0106 13:57:17.780359   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:17.780380   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:17.780400   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:17.780426   956 logger.cc:11] --------PS Iteration 53, ps partition_examples successful --------
+I0106 13:57:18.173045   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:18.173094   956 logger.cc:11] --------PS Iteration 53, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:18.194785   956 logger.cc:11] --------PS Iteration 53, ps update_encrypted_weights successful --------
+I0106 13:57:18.194826   956 logger.cc:11] --------PS Iteration 54 --------
+I0106 13:57:18.195149   956 logger.cc:11] --------PS Iteration 54, ps broadcast_encrypted_weights successful --------
+I0106 13:57:18.195176   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:18.195652   956 logger.cc:11] --------PS Iteration 54, ps select_batch_idx successful --------
+I0106 13:57:18.195679   956 logger.cc:11] ps worker size = 2
+I0106 13:57:18.195703   956 logger.cc:11] mini batch size = 4
+I0106 13:57:18.202221   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:18.202267   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:18.202284   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:18.202311   956 logger.cc:11] --------PS Iteration 54, ps partition_examples successful --------
+I0106 13:57:18.594988   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:18.595126   956 logger.cc:11] --------PS Iteration 54, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:18.627876   956 logger.cc:11] --------PS Iteration 54, ps update_encrypted_weights successful --------
+I0106 13:57:18.627923   956 logger.cc:11] --------PS Iteration 55 --------
+I0106 13:57:18.628224   956 logger.cc:11] --------PS Iteration 55, ps broadcast_encrypted_weights successful --------
+I0106 13:57:18.628260   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:18.629173   956 logger.cc:11] --------PS Iteration 55, ps select_batch_idx successful --------
+I0106 13:57:18.629216   956 logger.cc:11] ps worker size = 2
+I0106 13:57:18.629240   956 logger.cc:11] mini batch size = 4
+I0106 13:57:18.635653   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:18.635717   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:18.635768   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:18.635809   956 logger.cc:11] --------PS Iteration 55, ps partition_examples successful --------
+I0106 13:57:19.033197   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:19.033280   956 logger.cc:11] --------PS Iteration 55, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:19.055236   956 logger.cc:11] --------PS Iteration 55, ps update_encrypted_weights successful --------
+I0106 13:57:19.055274   956 logger.cc:11] --------PS Iteration 56 --------
+I0106 13:57:19.055625   956 logger.cc:11] --------PS Iteration 56, ps broadcast_encrypted_weights successful --------
+I0106 13:57:19.055660   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:19.055791   956 logger.cc:11] --------PS Iteration 56, ps select_batch_idx successful --------
+I0106 13:57:19.055817   956 logger.cc:11] ps worker size = 2
+I0106 13:57:19.055843   956 logger.cc:11] mini batch size = 4
+I0106 13:57:19.055925   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:19.055953   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:19.055969   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:19.055999   956 logger.cc:11] --------PS Iteration 56, ps partition_examples successful --------
+I0106 13:57:19.462141   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:19.462217   956 logger.cc:11] --------PS Iteration 56, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:19.485831   956 logger.cc:11] --------PS Iteration 56, ps update_encrypted_weights successful --------
+I0106 13:57:19.485872   956 logger.cc:11] --------PS Iteration 57 --------
+I0106 13:57:19.486266   956 logger.cc:11] --------PS Iteration 57, ps broadcast_encrypted_weights successful --------
+I0106 13:57:19.486308   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:19.486624   956 logger.cc:11] --------PS Iteration 57, ps select_batch_idx successful --------
+I0106 13:57:19.486675   956 logger.cc:11] ps worker size = 2
+I0106 13:57:19.486807   956 logger.cc:11] mini batch size = 4
+I0106 13:57:19.486943   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:19.486970   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:19.487001   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:19.487040   956 logger.cc:11] --------PS Iteration 57, ps partition_examples successful --------
+I0106 13:57:19.891904   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:19.891948   956 logger.cc:11] --------PS Iteration 57, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:19.913059   956 logger.cc:11] --------PS Iteration 57, ps update_encrypted_weights successful --------
+I0106 13:57:19.913090   956 logger.cc:11] --------PS Iteration 58 --------
+I0106 13:57:19.913411   956 logger.cc:11] --------PS Iteration 58, ps broadcast_encrypted_weights successful --------
+I0106 13:57:19.913488   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:19.913609   956 logger.cc:11] --------PS Iteration 58, ps select_batch_idx successful --------
+I0106 13:57:19.913638   956 logger.cc:11] ps worker size = 2
+I0106 13:57:19.913668   956 logger.cc:11] mini batch size = 4
+I0106 13:57:19.913756   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:19.913782   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:19.913801   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:19.913836   956 logger.cc:11] --------PS Iteration 58, ps partition_examples successful --------
+I0106 13:57:20.315163   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:20.315232   956 logger.cc:11] --------PS Iteration 58, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:20.343190   956 logger.cc:11] --------PS Iteration 58, ps update_encrypted_weights successful --------
+I0106 13:57:20.343264   956 logger.cc:11] --------PS Iteration 59 --------
+I0106 13:57:20.343657   956 logger.cc:11] --------PS Iteration 59, ps broadcast_encrypted_weights successful --------
+I0106 13:57:20.343693   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:20.343842   956 logger.cc:11] --------PS Iteration 59, ps select_batch_idx successful --------
+I0106 13:57:20.343878   956 logger.cc:11] ps worker size = 2
+I0106 13:57:20.343897   956 logger.cc:11] mini batch size = 4
+I0106 13:57:20.343986   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:20.344007   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:20.344030   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:20.344053   956 logger.cc:11] --------PS Iteration 59, ps partition_examples successful --------
+I0106 13:57:20.743779   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:20.743815   956 logger.cc:11] --------PS Iteration 59, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:20.765102   956 logger.cc:11] --------PS Iteration 59, ps update_encrypted_weights successful --------
+I0106 13:57:20.765141   956 logger.cc:11] --------PS Iteration 60 --------
+I0106 13:57:20.765491   956 logger.cc:11] --------PS Iteration 60, ps broadcast_encrypted_weights successful --------
+I0106 13:57:20.765522   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:20.765650   956 logger.cc:11] --------PS Iteration 60, ps select_batch_idx successful --------
+I0106 13:57:20.765674   956 logger.cc:11] ps worker size = 2
+I0106 13:57:20.765698   956 logger.cc:11] mini batch size = 4
+I0106 13:57:20.777545   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:20.777591   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:20.777618   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:20.777647   956 logger.cc:11] --------PS Iteration 60, ps partition_examples successful --------
+I0106 13:57:21.177120   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:21.177167   956 logger.cc:11] --------PS Iteration 60, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:21.198271   956 logger.cc:11] --------PS Iteration 60, ps update_encrypted_weights successful --------
+I0106 13:57:21.198307   956 logger.cc:11] --------PS Iteration 61 --------
+I0106 13:57:21.198570   956 logger.cc:11] --------PS Iteration 61, ps broadcast_encrypted_weights successful --------
+I0106 13:57:21.198603   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:21.198724   956 logger.cc:11] --------PS Iteration 61, ps select_batch_idx successful --------
+I0106 13:57:21.198760   956 logger.cc:11] ps worker size = 2
+I0106 13:57:21.198776   956 logger.cc:11] mini batch size = 4
+I0106 13:57:21.198860   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:21.198879   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:21.198904   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:21.198931   956 logger.cc:11] --------PS Iteration 61, ps partition_examples successful --------
+I0106 13:57:21.587848   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:21.587893   956 logger.cc:11] --------PS Iteration 61, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:21.620187   956 logger.cc:11] --------PS Iteration 61, ps update_encrypted_weights successful --------
+I0106 13:57:21.620226   956 logger.cc:11] --------PS Iteration 62 --------
+I0106 13:57:21.620518   956 logger.cc:11] --------PS Iteration 62, ps broadcast_encrypted_weights successful --------
+I0106 13:57:21.620548   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:21.621058   956 logger.cc:11] --------PS Iteration 62, ps select_batch_idx successful --------
+I0106 13:57:21.621084   956 logger.cc:11] ps worker size = 2
+I0106 13:57:21.621109   956 logger.cc:11] mini batch size = 4
+I0106 13:57:21.629555   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:21.629635   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:21.629667   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:21.629714   956 logger.cc:11] --------PS Iteration 62, ps partition_examples successful --------
+I0106 13:57:22.009289   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:22.009337   956 logger.cc:11] --------PS Iteration 62, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:22.031141   956 logger.cc:11] --------PS Iteration 62, ps update_encrypted_weights successful --------
+I0106 13:57:22.031177   956 logger.cc:11] --------PS Iteration 63 --------
+I0106 13:57:22.031522   956 logger.cc:11] --------PS Iteration 63, ps broadcast_encrypted_weights successful --------
+I0106 13:57:22.031560   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:22.031689   956 logger.cc:11] --------PS Iteration 63, ps select_batch_idx successful --------
+I0106 13:57:22.031728   956 logger.cc:11] ps worker size = 2
+I0106 13:57:22.031749   956 logger.cc:11] mini batch size = 4
+I0106 13:57:22.031877   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:22.031919   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:22.031965   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:22.032006   956 logger.cc:11] --------PS Iteration 63, ps partition_examples successful --------
+I0106 13:57:22.446455   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:22.446498   956 logger.cc:11] --------PS Iteration 63, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:22.468048   956 logger.cc:11] --------PS Iteration 63, ps update_encrypted_weights successful --------
+I0106 13:57:22.468084   956 logger.cc:11] --------PS Iteration 64 --------
+I0106 13:57:22.468353   956 logger.cc:11] --------PS Iteration 64, ps broadcast_encrypted_weights successful --------
+I0106 13:57:22.468376   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:22.468566   956 logger.cc:11] --------PS Iteration 64, ps select_batch_idx successful --------
+I0106 13:57:22.468593   956 logger.cc:11] ps worker size = 2
+I0106 13:57:22.468621   956 logger.cc:11] mini batch size = 4
+I0106 13:57:22.468708   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:22.468735   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:22.468753   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:22.468783   956 logger.cc:11] --------PS Iteration 64, ps partition_examples successful --------
+I0106 13:57:22.868788   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:22.868841   956 logger.cc:11] --------PS Iteration 64, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:22.889973   956 logger.cc:11] --------PS Iteration 64, ps update_encrypted_weights successful --------
+I0106 13:57:22.890022   956 logger.cc:11] --------PS Iteration 65 --------
+I0106 13:57:22.890297   956 logger.cc:11] --------PS Iteration 65, ps broadcast_encrypted_weights successful --------
+I0106 13:57:22.890326   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:22.890501   956 logger.cc:11] --------PS Iteration 65, ps select_batch_idx successful --------
+I0106 13:57:22.890537   956 logger.cc:11] ps worker size = 2
+I0106 13:57:22.890556   956 logger.cc:11] mini batch size = 4
+I0106 13:57:22.893646   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:22.893680   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:22.893705   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:22.893733   956 logger.cc:11] --------PS Iteration 65, ps partition_examples successful --------
+I0106 13:57:23.295336   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:23.295378   956 logger.cc:11] --------PS Iteration 65, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:23.316618   956 logger.cc:11] --------PS Iteration 65, ps update_encrypted_weights successful --------
+I0106 13:57:23.316646   956 logger.cc:11] --------PS Iteration 66 --------
+I0106 13:57:23.316926   956 logger.cc:11] --------PS Iteration 66, ps broadcast_encrypted_weights successful --------
+I0106 13:57:23.316956   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:23.317451   956 logger.cc:11] --------PS Iteration 66, ps select_batch_idx successful --------
+I0106 13:57:23.317487   956 logger.cc:11] ps worker size = 2
+I0106 13:57:23.317513   956 logger.cc:11] mini batch size = 4
+I0106 13:57:23.318910   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:23.318951   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:23.318967   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:23.318992   956 logger.cc:11] --------PS Iteration 66, ps partition_examples successful --------
+I0106 13:57:23.712654   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:23.712718   956 logger.cc:11] --------PS Iteration 66, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:23.734827   956 logger.cc:11] --------PS Iteration 66, ps update_encrypted_weights successful --------
+I0106 13:57:23.734874   956 logger.cc:11] --------PS Iteration 67 --------
+I0106 13:57:23.735193   956 logger.cc:11] --------PS Iteration 67, ps broadcast_encrypted_weights successful --------
+I0106 13:57:23.735234   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:23.735556   956 logger.cc:11] --------PS Iteration 67, ps select_batch_idx successful --------
+I0106 13:57:23.735599   956 logger.cc:11] ps worker size = 2
+I0106 13:57:23.735620   956 logger.cc:11] mini batch size = 4
+I0106 13:57:23.735718   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:23.735738   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:23.735766   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:23.735787   956 logger.cc:11] --------PS Iteration 67, ps partition_examples successful --------
+I0106 13:57:24.133574   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:24.133633   956 logger.cc:11] --------PS Iteration 67, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:24.165796   956 logger.cc:11] --------PS Iteration 67, ps update_encrypted_weights successful --------
+I0106 13:57:24.165827   956 logger.cc:11] --------PS Iteration 68 --------
+I0106 13:57:24.166112   956 logger.cc:11] --------PS Iteration 68, ps broadcast_encrypted_weights successful --------
+I0106 13:57:24.166148   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:24.166281   956 logger.cc:11] --------PS Iteration 68, ps select_batch_idx successful --------
+I0106 13:57:24.166306   956 logger.cc:11] ps worker size = 2
+I0106 13:57:24.166339   956 logger.cc:11] mini batch size = 4
+I0106 13:57:24.166436   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:24.166472   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:24.166489   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:24.166517   956 logger.cc:11] --------PS Iteration 68, ps partition_examples successful --------
+I0106 13:57:24.571388   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:24.571440   956 logger.cc:11] --------PS Iteration 68, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:24.593528   956 logger.cc:11] --------PS Iteration 68, ps update_encrypted_weights successful --------
+I0106 13:57:24.593560   956 logger.cc:11] --------PS Iteration 69 --------
+I0106 13:57:24.593837   956 logger.cc:11] --------PS Iteration 69, ps broadcast_encrypted_weights successful --------
+I0106 13:57:24.593869   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:24.594036   956 logger.cc:11] --------PS Iteration 69, ps select_batch_idx successful --------
+I0106 13:57:24.594077   956 logger.cc:11] ps worker size = 2
+I0106 13:57:24.594095   956 logger.cc:11] mini batch size = 4
+I0106 13:57:24.594190   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:24.594214   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:24.594239   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:24.594260   956 logger.cc:11] --------PS Iteration 69, ps partition_examples successful --------
+I0106 13:57:25.002601   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:25.002635   956 logger.cc:11] --------PS Iteration 69, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:25.024304   956 logger.cc:11] --------PS Iteration 69, ps update_encrypted_weights successful --------
+I0106 13:57:25.024341   956 logger.cc:11] --------PS Iteration 70 --------
+I0106 13:57:25.024703   956 logger.cc:11] --------PS Iteration 70, ps broadcast_encrypted_weights successful --------
+I0106 13:57:25.024739   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:25.024832   956 logger.cc:11] --------PS Iteration 70, ps select_batch_idx successful --------
+I0106 13:57:25.024854   956 logger.cc:11] ps worker size = 2
+I0106 13:57:25.024878   956 logger.cc:11] mini batch size = 4
+I0106 13:57:25.024966   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:25.025008   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:25.025040   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:25.025068   956 logger.cc:11] --------PS Iteration 70, ps partition_examples successful --------
+I0106 13:57:25.423763   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:25.423808   956 logger.cc:11] --------PS Iteration 70, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:25.446143   956 logger.cc:11] --------PS Iteration 70, ps update_encrypted_weights successful --------
+I0106 13:57:25.446192   956 logger.cc:11] --------PS Iteration 71 --------
+I0106 13:57:25.446522   956 logger.cc:11] --------PS Iteration 71, ps broadcast_encrypted_weights successful --------
+I0106 13:57:25.446570   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:25.446746   956 logger.cc:11] --------PS Iteration 71, ps select_batch_idx successful --------
+I0106 13:57:25.446791   956 logger.cc:11] ps worker size = 2
+I0106 13:57:25.446813   956 logger.cc:11] mini batch size = 4
+I0106 13:57:25.446933   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:25.446962   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:25.446993   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:25.447021   956 logger.cc:11] --------PS Iteration 71, ps partition_examples successful --------
+I0106 13:57:25.849684   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:25.849750   956 logger.cc:11] --------PS Iteration 71, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:25.877004   956 logger.cc:11] --------PS Iteration 71, ps update_encrypted_weights successful --------
+I0106 13:57:25.877039   956 logger.cc:11] --------PS Iteration 72 --------
+I0106 13:57:25.877347   956 logger.cc:11] --------PS Iteration 72, ps broadcast_encrypted_weights successful --------
+I0106 13:57:25.877375   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:25.877652   956 logger.cc:11] --------PS Iteration 72, ps select_batch_idx successful --------
+I0106 13:57:25.877681   956 logger.cc:11] ps worker size = 2
+I0106 13:57:25.877712   956 logger.cc:11] mini batch size = 4
+I0106 13:57:25.877807   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:25.877835   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:25.877853   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:25.877878   956 logger.cc:11] --------PS Iteration 72, ps partition_examples successful --------
+I0106 13:57:26.281708   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:26.281765   956 logger.cc:11] --------PS Iteration 72, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:26.303383   956 logger.cc:11] --------PS Iteration 72, ps update_encrypted_weights successful --------
+I0106 13:57:26.303431   956 logger.cc:11] --------PS Iteration 73 --------
+I0106 13:57:26.303726   956 logger.cc:11] --------PS Iteration 73, ps broadcast_encrypted_weights successful --------
+I0106 13:57:26.303766   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:26.303866   956 logger.cc:11] --------PS Iteration 73, ps select_batch_idx successful --------
+I0106 13:57:26.303900   956 logger.cc:11] ps worker size = 2
+I0106 13:57:26.303917   956 logger.cc:11] mini batch size = 4
+I0106 13:57:26.305496   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:26.305532   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:26.305560   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:26.305586   956 logger.cc:11] --------PS Iteration 73, ps partition_examples successful --------
+I0106 13:57:26.707201   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:26.707265   956 logger.cc:11] --------PS Iteration 73, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:26.746572   956 logger.cc:11] --------PS Iteration 73, ps update_encrypted_weights successful --------
+I0106 13:57:26.746623   956 logger.cc:11] --------PS Iteration 74 --------
+I0106 13:57:26.747222   956 logger.cc:11] --------PS Iteration 74, ps broadcast_encrypted_weights successful --------
+I0106 13:57:26.747283   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:26.747529   956 logger.cc:11] --------PS Iteration 74, ps select_batch_idx successful --------
+I0106 13:57:26.747582   956 logger.cc:11] ps worker size = 2
+I0106 13:57:26.747632   956 logger.cc:11] mini batch size = 4
+I0106 13:57:26.747786   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:26.747835   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:26.747872   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:26.747920   956 logger.cc:11] --------PS Iteration 74, ps partition_examples successful --------
+I0106 13:57:27.152563   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:27.152616   956 logger.cc:11] --------PS Iteration 74, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:27.179558   956 logger.cc:11] --------PS Iteration 74, ps update_encrypted_weights successful --------
+I0106 13:57:27.179597   956 logger.cc:11] --------PS Iteration 75 --------
+I0106 13:57:27.179925   956 logger.cc:11] --------PS Iteration 75, ps broadcast_encrypted_weights successful --------
+I0106 13:57:27.179957   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:27.180042   956 logger.cc:11] --------PS Iteration 75, ps select_batch_idx successful --------
+I0106 13:57:27.180088   956 logger.cc:11] ps worker size = 2
+I0106 13:57:27.180104   956 logger.cc:11] mini batch size = 4
+I0106 13:57:27.185550   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:27.185580   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:27.185603   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:27.185624   956 logger.cc:11] --------PS Iteration 75, ps partition_examples successful --------
+I0106 13:57:27.578186   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:27.578233   956 logger.cc:11] --------PS Iteration 75, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:27.609756   956 logger.cc:11] --------PS Iteration 75, ps update_encrypted_weights successful --------
+I0106 13:57:27.609802   956 logger.cc:11] --------PS Iteration 76 --------
+I0106 13:57:27.610138   956 logger.cc:11] --------PS Iteration 76, ps broadcast_encrypted_weights successful --------
+I0106 13:57:27.610168   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:27.610427   956 logger.cc:11] --------PS Iteration 76, ps select_batch_idx successful --------
+I0106 13:57:27.610456   956 logger.cc:11] ps worker size = 2
+I0106 13:57:27.610484   956 logger.cc:11] mini batch size = 4
+I0106 13:57:27.610579   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:27.610607   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:27.610625   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:27.610649   956 logger.cc:11] --------PS Iteration 76, ps partition_examples successful --------
+I0106 13:57:28.010807   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:28.010856   956 logger.cc:11] --------PS Iteration 76, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:28.032140   956 logger.cc:11] --------PS Iteration 76, ps update_encrypted_weights successful --------
+I0106 13:57:28.032189   956 logger.cc:11] --------PS Iteration 77 --------
+I0106 13:57:28.032603   956 logger.cc:11] --------PS Iteration 77, ps broadcast_encrypted_weights successful --------
+I0106 13:57:28.032661   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:28.032759   956 logger.cc:11] --------PS Iteration 77, ps select_batch_idx successful --------
+I0106 13:57:28.032789   956 logger.cc:11] ps worker size = 2
+I0106 13:57:28.032806   956 logger.cc:11] mini batch size = 4
+I0106 13:57:28.032907   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:28.032938   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:28.032958   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:28.032974   956 logger.cc:11] --------PS Iteration 77, ps partition_examples successful --------
+I0106 13:57:28.432446   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:28.432487   956 logger.cc:11] --------PS Iteration 77, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:28.454037   956 logger.cc:11] --------PS Iteration 77, ps update_encrypted_weights successful --------
+I0106 13:57:28.454067   956 logger.cc:11] --------PS Iteration 78 --------
+I0106 13:57:28.454342   956 logger.cc:11] --------PS Iteration 78, ps broadcast_encrypted_weights successful --------
+I0106 13:57:28.454370   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:28.454507   956 logger.cc:11] --------PS Iteration 78, ps select_batch_idx successful --------
+I0106 13:57:28.454533   956 logger.cc:11] ps worker size = 2
+I0106 13:57:28.454556   956 logger.cc:11] mini batch size = 4
+I0106 13:57:28.457110   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:28.457151   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:28.457171   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:28.457201   956 logger.cc:11] --------PS Iteration 78, ps partition_examples successful --------
+I0106 13:57:28.853991   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:28.854043   956 logger.cc:11] --------PS Iteration 78, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:28.876102   956 logger.cc:11] --------PS Iteration 78, ps update_encrypted_weights successful --------
+I0106 13:57:28.876147   956 logger.cc:11] --------PS Iteration 79 --------
+I0106 13:57:28.876439   956 logger.cc:11] --------PS Iteration 79, ps broadcast_encrypted_weights successful --------
+I0106 13:57:28.876483   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:28.876767   956 logger.cc:11] --------PS Iteration 79, ps select_batch_idx successful --------
+I0106 13:57:28.876811   956 logger.cc:11] ps worker size = 2
+I0106 13:57:28.876835   956 logger.cc:11] mini batch size = 4
+I0106 13:57:28.876946   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:28.876966   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:28.876988   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:28.877009   956 logger.cc:11] --------PS Iteration 79, ps partition_examples successful --------
+I0106 13:57:29.273209   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:29.273260   956 logger.cc:11] --------PS Iteration 79, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:29.294463   956 logger.cc:11] --------PS Iteration 79, ps update_encrypted_weights successful --------
+I0106 13:57:29.294492   956 logger.cc:11] --------PS Iteration 80 --------
+I0106 13:57:29.294793   956 logger.cc:11] --------PS Iteration 80, ps broadcast_encrypted_weights successful --------
+I0106 13:57:29.294822   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:29.295367   956 logger.cc:11] --------PS Iteration 80, ps select_batch_idx successful --------
+I0106 13:57:29.295398   956 logger.cc:11] ps worker size = 2
+I0106 13:57:29.295423   956 logger.cc:11] mini batch size = 4
+I0106 13:57:29.309487   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:29.309547   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:29.309576   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:29.309610   956 logger.cc:11] --------PS Iteration 80, ps partition_examples successful --------
+I0106 13:57:29.684098   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:29.684154   956 logger.cc:11] --------PS Iteration 80, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:29.705889   956 logger.cc:11] --------PS Iteration 80, ps update_encrypted_weights successful --------
+I0106 13:57:29.705921   956 logger.cc:11] --------PS Iteration 81 --------
+I0106 13:57:29.706202   956 logger.cc:11] --------PS Iteration 81, ps broadcast_encrypted_weights successful --------
+I0106 13:57:29.706239   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:29.706566   956 logger.cc:11] --------PS Iteration 81, ps select_batch_idx successful --------
+I0106 13:57:29.706609   956 logger.cc:11] ps worker size = 2
+I0106 13:57:29.706630   956 logger.cc:11] mini batch size = 4
+I0106 13:57:29.706885   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:29.706912   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:29.706938   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:29.706959   956 logger.cc:11] --------PS Iteration 81, ps partition_examples successful --------
+I0106 13:57:30.116698   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:30.116735   956 logger.cc:11] --------PS Iteration 81, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:30.137821   956 logger.cc:11] --------PS Iteration 81, ps update_encrypted_weights successful --------
+I0106 13:57:30.137849   956 logger.cc:11] --------PS Iteration 82 --------
+I0106 13:57:30.138131   956 logger.cc:11] --------PS Iteration 82, ps broadcast_encrypted_weights successful --------
+I0106 13:57:30.138165   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:30.138291   956 logger.cc:11] --------PS Iteration 82, ps select_batch_idx successful --------
+I0106 13:57:30.138315   956 logger.cc:11] ps worker size = 2
+I0106 13:57:30.138339   956 logger.cc:11] mini batch size = 4
+I0106 13:57:30.138422   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:30.138450   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:30.138468   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:30.138494   956 logger.cc:11] --------PS Iteration 82, ps partition_examples successful --------
+I0106 13:57:30.542697   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:30.542757   956 logger.cc:11] --------PS Iteration 82, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:30.565397   956 logger.cc:11] --------PS Iteration 82, ps update_encrypted_weights successful --------
+I0106 13:57:30.565445   956 logger.cc:11] --------PS Iteration 83 --------
+I0106 13:57:30.565737   956 logger.cc:11] --------PS Iteration 83, ps broadcast_encrypted_weights successful --------
+I0106 13:57:30.565783   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:30.566532   956 logger.cc:11] --------PS Iteration 83, ps select_batch_idx successful --------
+I0106 13:57:30.566570   956 logger.cc:11] ps worker size = 2
+I0106 13:57:30.566586   956 logger.cc:11] mini batch size = 4
+I0106 13:57:30.575909   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:30.575945   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:30.575969   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:30.575990   956 logger.cc:11] --------PS Iteration 83, ps partition_examples successful --------
+I0106 13:57:30.969288   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:30.969326   956 logger.cc:11] --------PS Iteration 83, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:30.991093   956 logger.cc:11] --------PS Iteration 83, ps update_encrypted_weights successful --------
+I0106 13:57:30.991122   956 logger.cc:11] --------PS Iteration 84 --------
+I0106 13:57:30.991418   956 logger.cc:11] --------PS Iteration 84, ps broadcast_encrypted_weights successful --------
+I0106 13:57:30.991447   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:30.991602   956 logger.cc:11] --------PS Iteration 84, ps select_batch_idx successful --------
+I0106 13:57:30.991683   956 logger.cc:11] ps worker size = 2
+I0106 13:57:30.991719   956 logger.cc:11] mini batch size = 4
+I0106 13:57:30.991839   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:30.991871   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:30.991888   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:30.991916   956 logger.cc:11] --------PS Iteration 84, ps partition_examples successful --------
+I0106 13:57:31.402462   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:31.402508   956 logger.cc:11] --------PS Iteration 84, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:31.424026   956 logger.cc:11] --------PS Iteration 84, ps update_encrypted_weights successful --------
+I0106 13:57:31.424065   956 logger.cc:11] --------PS Iteration 85 --------
+I0106 13:57:31.424355   956 logger.cc:11] --------PS Iteration 85, ps broadcast_encrypted_weights successful --------
+I0106 13:57:31.424388   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:31.424476   956 logger.cc:11] --------PS Iteration 85, ps select_batch_idx successful --------
+I0106 13:57:31.424505   956 logger.cc:11] ps worker size = 2
+I0106 13:57:31.424522   956 logger.cc:11] mini batch size = 4
+I0106 13:57:31.424629   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:31.424654   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:31.424679   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:31.424723   956 logger.cc:11] --------PS Iteration 85, ps partition_examples successful --------
+I0106 13:57:31.827139   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:31.827180   956 logger.cc:11] --------PS Iteration 85, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:31.848181   956 logger.cc:11] --------PS Iteration 85, ps update_encrypted_weights successful --------
+I0106 13:57:31.848207   956 logger.cc:11] --------PS Iteration 86 --------
+I0106 13:57:31.848491   956 logger.cc:11] --------PS Iteration 86, ps broadcast_encrypted_weights successful --------
+I0106 13:57:31.848522   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:31.848974   956 logger.cc:11] --------PS Iteration 86, ps select_batch_idx successful --------
+I0106 13:57:31.849005   956 logger.cc:11] ps worker size = 2
+I0106 13:57:31.849045   956 logger.cc:11] mini batch size = 4
+I0106 13:57:31.849165   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:31.849206   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:31.849226   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:31.849252   956 logger.cc:11] --------PS Iteration 86, ps partition_examples successful --------
+I0106 13:57:32.245388   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:32.245438   956 logger.cc:11] --------PS Iteration 86, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:32.266469   956 logger.cc:11] --------PS Iteration 86, ps update_encrypted_weights successful --------
+I0106 13:57:32.266501   956 logger.cc:11] --------PS Iteration 87 --------
+I0106 13:57:32.266762   956 logger.cc:11] --------PS Iteration 87, ps broadcast_encrypted_weights successful --------
+I0106 13:57:32.266795   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:32.266880   956 logger.cc:11] --------PS Iteration 87, ps select_batch_idx successful --------
+I0106 13:57:32.266908   956 logger.cc:11] ps worker size = 2
+I0106 13:57:32.266928   956 logger.cc:11] mini batch size = 4
+I0106 13:57:32.267009   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:32.267028   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:32.267050   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:32.267067   956 logger.cc:11] --------PS Iteration 87, ps partition_examples successful --------
+I0106 13:57:32.669713   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:32.669757   956 logger.cc:11] --------PS Iteration 87, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:32.691612   956 logger.cc:11] --------PS Iteration 87, ps update_encrypted_weights successful --------
+I0106 13:57:32.691643   956 logger.cc:11] --------PS Iteration 88 --------
+I0106 13:57:32.691931   956 logger.cc:11] --------PS Iteration 88, ps broadcast_encrypted_weights successful --------
+I0106 13:57:32.691958   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:32.692090   956 logger.cc:11] --------PS Iteration 88, ps select_batch_idx successful --------
+I0106 13:57:32.692116   956 logger.cc:11] ps worker size = 2
+I0106 13:57:32.692142   956 logger.cc:11] mini batch size = 4
+I0106 13:57:32.692720   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:32.692761   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:32.692777   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:32.692803   956 logger.cc:11] --------PS Iteration 88, ps partition_examples successful --------
+I0106 13:57:33.100433   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:33.100478   956 logger.cc:11] --------PS Iteration 88, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:33.122172   956 logger.cc:11] --------PS Iteration 88, ps update_encrypted_weights successful --------
+I0106 13:57:33.122220   956 logger.cc:11] --------PS Iteration 89 --------
+I0106 13:57:33.122511   956 logger.cc:11] --------PS Iteration 89, ps broadcast_encrypted_weights successful --------
+I0106 13:57:33.122546   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:33.122629   956 logger.cc:11] --------PS Iteration 89, ps select_batch_idx successful --------
+I0106 13:57:33.122658   956 logger.cc:11] ps worker size = 2
+I0106 13:57:33.122678   956 logger.cc:11] mini batch size = 4
+I0106 13:57:33.122763   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:33.122784   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:33.122807   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:33.122838   956 logger.cc:11] --------PS Iteration 89, ps partition_examples successful --------
+I0106 13:57:33.526515   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:33.526561   956 logger.cc:11] --------PS Iteration 89, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:33.548593   956 logger.cc:11] --------PS Iteration 89, ps update_encrypted_weights successful --------
+I0106 13:57:33.548643   956 logger.cc:11] --------PS Iteration 90 --------
+I0106 13:57:33.549094   956 logger.cc:11] --------PS Iteration 90, ps broadcast_encrypted_weights successful --------
+I0106 13:57:33.549137   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:33.549314   956 logger.cc:11] --------PS Iteration 90, ps select_batch_idx successful --------
+I0106 13:57:33.549347   956 logger.cc:11] ps worker size = 2
+I0106 13:57:33.549381   956 logger.cc:11] mini batch size = 4
+I0106 13:57:33.560760   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:33.560839   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:33.560864   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:33.560904   956 logger.cc:11] --------PS Iteration 90, ps partition_examples successful --------
+I0106 13:57:33.955374   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:33.955427   956 logger.cc:11] --------PS Iteration 90, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:33.977128   956 logger.cc:11] --------PS Iteration 90, ps update_encrypted_weights successful --------
+I0106 13:57:33.977169   956 logger.cc:11] --------PS Iteration 91 --------
+I0106 13:57:33.977505   956 logger.cc:11] --------PS Iteration 91, ps broadcast_encrypted_weights successful --------
+I0106 13:57:33.977545   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:33.978080   956 logger.cc:11] --------PS Iteration 91, ps select_batch_idx successful --------
+I0106 13:57:33.978121   956 logger.cc:11] ps worker size = 2
+I0106 13:57:33.978145   956 logger.cc:11] mini batch size = 4
+I0106 13:57:33.981544   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:33.981590   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:33.981618   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:33.981642   956 logger.cc:11] --------PS Iteration 91, ps partition_examples successful --------
+I0106 13:57:34.370628   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:34.370743   956 logger.cc:11] --------PS Iteration 91, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:34.392668   956 logger.cc:11] --------PS Iteration 91, ps update_encrypted_weights successful --------
+I0106 13:57:34.392705   956 logger.cc:11] --------PS Iteration 92 --------
+I0106 13:57:34.392997   956 logger.cc:11] --------PS Iteration 92, ps broadcast_encrypted_weights successful --------
+I0106 13:57:34.393025   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:34.393492   956 logger.cc:11] --------PS Iteration 92, ps select_batch_idx successful --------
+I0106 13:57:34.393519   956 logger.cc:11] ps worker size = 2
+I0106 13:57:34.393543   956 logger.cc:11] mini batch size = 4
+I0106 13:57:34.393671   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:34.393697   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:34.393714   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:34.393740   956 logger.cc:11] --------PS Iteration 92, ps partition_examples successful --------
+I0106 13:57:34.807376   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:34.807425   956 logger.cc:11] --------PS Iteration 92, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:34.828555   956 logger.cc:11] --------PS Iteration 92, ps update_encrypted_weights successful --------
+I0106 13:57:34.828590   956 logger.cc:11] --------PS Iteration 93 --------
+I0106 13:57:34.828877   956 logger.cc:11] --------PS Iteration 93, ps broadcast_encrypted_weights successful --------
+I0106 13:57:34.828919   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:34.829100   956 logger.cc:11] --------PS Iteration 93, ps select_batch_idx successful --------
+I0106 13:57:34.829136   956 logger.cc:11] ps worker size = 2
+I0106 13:57:34.829155   956 logger.cc:11] mini batch size = 4
+I0106 13:57:34.833564   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:34.833622   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:34.833663   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:34.833703   956 logger.cc:11] --------PS Iteration 93, ps partition_examples successful --------
+I0106 13:57:35.237401   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:35.237452   956 logger.cc:11] --------PS Iteration 93, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:35.260970   956 logger.cc:11] --------PS Iteration 93, ps update_encrypted_weights successful --------
+I0106 13:57:35.261000   956 logger.cc:11] --------PS Iteration 94 --------
+I0106 13:57:35.261271   956 logger.cc:11] --------PS Iteration 94, ps broadcast_encrypted_weights successful --------
+I0106 13:57:35.261297   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:35.261782   956 logger.cc:11] --------PS Iteration 94, ps select_batch_idx successful --------
+I0106 13:57:35.261813   956 logger.cc:11] ps worker size = 2
+I0106 13:57:35.261840   956 logger.cc:11] mini batch size = 4
+I0106 13:57:35.261926   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:35.261952   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:35.261972   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:35.262001   956 logger.cc:11] --------PS Iteration 94, ps partition_examples successful --------
+I0106 13:57:35.647706   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:35.647877   956 logger.cc:11] --------PS Iteration 94, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:35.669580   956 logger.cc:11] --------PS Iteration 94, ps update_encrypted_weights successful --------
+I0106 13:57:35.669621   956 logger.cc:11] --------PS Iteration 95 --------
+I0106 13:57:35.669967   956 logger.cc:11] --------PS Iteration 95, ps broadcast_encrypted_weights successful --------
+I0106 13:57:35.670006   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:35.670487   956 logger.cc:11] --------PS Iteration 95, ps select_batch_idx successful --------
+I0106 13:57:35.670524   956 logger.cc:11] ps worker size = 2
+I0106 13:57:35.670542   956 logger.cc:11] mini batch size = 4
+I0106 13:57:35.673486   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:35.673516   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:35.673545   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:35.673599   956 logger.cc:11] --------PS Iteration 95, ps partition_examples successful --------
+I0106 13:57:36.079844   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:36.079879   956 logger.cc:11] --------PS Iteration 95, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:36.101176   956 logger.cc:11] --------PS Iteration 95, ps update_encrypted_weights successful --------
+I0106 13:57:36.101215   956 logger.cc:11] --------PS Iteration 96 --------
+I0106 13:57:36.101593   956 logger.cc:11] --------PS Iteration 96, ps broadcast_encrypted_weights successful --------
+I0106 13:57:36.101624   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:36.102018   956 logger.cc:11] --------PS Iteration 96, ps select_batch_idx successful --------
+I0106 13:57:36.102049   956 logger.cc:11] ps worker size = 2
+I0106 13:57:36.102075   956 logger.cc:11] mini batch size = 4
+I0106 13:57:36.102185   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:36.102226   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:36.102246   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:36.102273   956 logger.cc:11] --------PS Iteration 96, ps partition_examples successful --------
+I0106 13:57:36.507848   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:36.507896   956 logger.cc:11] --------PS Iteration 96, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:36.528906   956 logger.cc:11] --------PS Iteration 96, ps update_encrypted_weights successful --------
+I0106 13:57:36.528939   956 logger.cc:11] --------PS Iteration 97 --------
+I0106 13:57:36.529201   956 logger.cc:11] --------PS Iteration 97, ps broadcast_encrypted_weights successful --------
+I0106 13:57:36.529229   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:36.529456   956 logger.cc:11] --------PS Iteration 97, ps select_batch_idx successful --------
+I0106 13:57:36.529503   956 logger.cc:11] ps worker size = 2
+I0106 13:57:36.529525   956 logger.cc:11] mini batch size = 4
+I0106 13:57:36.529642   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:36.529668   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:36.529692   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:36.529714   956 logger.cc:11] --------PS Iteration 97, ps partition_examples successful --------
+I0106 13:57:36.935482   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:36.935526   956 logger.cc:11] --------PS Iteration 97, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:36.957502   956 logger.cc:11] --------PS Iteration 97, ps update_encrypted_weights successful --------
+I0106 13:57:36.957536   956 logger.cc:11] --------PS Iteration 98 --------
+I0106 13:57:36.957939   956 logger.cc:11] --------PS Iteration 98, ps broadcast_encrypted_weights successful --------
+I0106 13:57:36.957975   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:36.958161   956 logger.cc:11] --------PS Iteration 98, ps select_batch_idx successful --------
+I0106 13:57:36.958194   956 logger.cc:11] ps worker size = 2
+I0106 13:57:36.958222   956 logger.cc:11] mini batch size = 4
+I0106 13:57:36.958323   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:36.958357   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:36.958381   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:36.958418   956 logger.cc:11] --------PS Iteration 98, ps partition_examples successful --------
+I0106 13:57:37.362725   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:37.362778   956 logger.cc:11] --------PS Iteration 98, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:37.399195   956 logger.cc:11] --------PS Iteration 98, ps update_encrypted_weights successful --------
+I0106 13:57:37.399246   956 logger.cc:11] --------PS Iteration 99 --------
+I0106 13:57:37.399706   956 logger.cc:11] --------PS Iteration 99, ps broadcast_encrypted_weights successful --------
+I0106 13:57:37.399757   956 logger.cc:11] ACTIVE_PARTY sync batch indexes
+I0106 13:57:37.399924   956 logger.cc:11] --------PS Iteration 99, ps select_batch_idx successful --------
+I0106 13:57:37.399974   956 logger.cc:11] ps worker size = 2
+I0106 13:57:37.399996   956 logger.cc:11] mini batch size = 4
+I0106 13:57:37.400117   956 logger.cc:11] message_sizes[0] = 4
+I0106 13:57:37.400148   956 logger.cc:11] message_sizes[1] = 4
+I0106 13:57:37.400180   956 logger.cc:11] Broadcast client's batch requests to other workers
+I0106 13:57:37.400213   956 logger.cc:11] --------PS Iteration 99, ps partition_examples successful --------
+I0106 13:57:37.798950   956 logger.cc:11] LRParameterServer received all loss * X_{ij} from falcon_worker
+I0106 13:57:37.799037   956 logger.cc:11] --------PS Iteration 99, LRParameterServer received all loss * X_{ij} from falcon_worker successful --------
+I0106 13:57:37.834767   956 logger.cc:11] --------PS Iteration 99, ps update_encrypted_weights successful --------
+I0106 13:57:37.835219   956 logger.cc:11] [lime_linear_reg_train ps]: distributed train finished.
+I0106 13:57:37.836817   956 logger.cc:11] display local weights
+I0106 13:57:37.837100   956 logger.cc:11] party 0's weight size = 10
+I0106 13:57:37.837363   956 logger.cc:11] party 1's weight size = 4
+I0106 13:57:37.837393   956 logger.cc:11] party 2's weight size = 7
+I0106 13:57:37.837662   956 logger.cc:11] decrypt party 0's weights
+I0106 13:57:37.837730   956 logger.cc:11] I am party 0, i am packaging weights
+I0106 13:57:37.931066   956 linear_model_base.cc:218] local weight[0] = 0.44140625
+I0106 13:57:37.931102   956 linear_model_base.cc:218] local weight[1] = 0.177490234375
+I0106 13:57:37.931674   956 linear_model_base.cc:218] local weight[2] = 0.16064453125
+I0106 13:57:37.931783   956 linear_model_base.cc:218] local weight[3] = 0.078125
+I0106 13:57:37.932051   956 linear_model_base.cc:218] local weight[4] = 0.197265625
+I0106 13:57:37.932157   956 linear_model_base.cc:218] local weight[5] = -0.0537109375
+I0106 13:57:37.932394   956 linear_model_base.cc:218] local weight[6] = 0.17822265625
+I0106 13:57:37.932421   956 linear_model_base.cc:218] local weight[7] = -0.11767578125
+I0106 13:57:37.932524   956 linear_model_base.cc:218] local weight[8] = 0.22705078125
+I0106 13:57:37.932605   956 linear_model_base.cc:218] local weight[9] = 0.181640625
+I0106 13:57:37.932806   956 logger.cc:11] decrypt party 1's weights
+I0106 13:57:37.973953   956 logger.cc:11] decrypt party 2's weights
+I0106 13:57:38.016584   956 logger.cc:11] Decrypt and display local explanations finished
+I0106 13:57:38.021234   956 logger.cc:11] The explanation for class1 is: 
+I0106 13:57:38.021291   956 logger.cc:11] explanation 0 = 0.441406
+I0106 13:57:38.021312   956 logger.cc:11] explanation 1 = 0.177490
+I0106 13:57:38.021337   956 logger.cc:11] explanation 2 = 0.160645
+I0106 13:57:38.021355   956 logger.cc:11] explanation 3 = 0.078125
+I0106 13:57:38.021381   956 logger.cc:11] explanation 4 = 0.197266
+I0106 13:57:38.021402   956 logger.cc:11] explanation 5 = -0.053711
+I0106 13:57:38.021433   956 logger.cc:11] explanation 6 = 0.178223
+I0106 13:57:38.021457   956 logger.cc:11] explanation 7 = -0.117676
+I0106 13:57:38.021481   956 logger.cc:11] explanation 8 = 0.227051
+I0106 13:57:38.021500   956 logger.cc:11] explanation 9 = 0.181641
+I0106 13:57:38.021705   956 logger.cc:11] Parameter Server are running
+I0106 13:57:38.021735   956 logger.cc:11] Time taken by main func: 44533248 microseconds

@@ -1,0 +1,1291 @@
+2022/01/06 21:47:28 global-const.go:223: Read user defined env var {IS_DEBUG: debug-off}
+2022/01/06 21:47:28 global-const.go:220: Set env var to default {TEST_IMG_NAME: redis:5.0.3-alpine3.8}
+2022/01/06 21:47:28 global-const.go:220: Set env var to default {FALCON_WORKER_IMAGE: falcon-lime:latest}
+2022/01/06 21:47:28 global-const.go:223: Read user defined env var {COORD_SERVER_IP: 127.0.0.1}
+2022/01/06 21:47:28 global-const.go:223: Read user defined env var {COORD_SERVER_PORT: 30004}
+2022/01/06 21:47:28 global-const.go:220: Set env var to default {COORD_SERVER_BASEPATH: ./falcon_logs}
+2022/01/06 21:47:28 global-const.go:223: Read user defined env var {N_CONSUMER: 3}
+2022/01/06 21:47:28 global-const.go:223: Read user defined env var {JOB_DATABASE: sqlite3}
+2022/01/06 21:47:28 global-const.go:220: Set env var to default {JOB_DB_SQLITE_DB: falcon.db}
+2022/01/06 21:47:28 falcon_platform.go:342: Launch falcon_platform, Service is  coord
+2022/01/06 21:47:28 run_coordserver.go:29: [coordinator server]: Init DataBase...
+2022/01/06 21:47:28 run_coordserver.go:35: [coordinator server]: Create admin user...
+2022/01/06 21:47:28 run_coordserver.go:39: [coordinator server]: Starting multi consumers...
+2022/01/06 21:47:28 run_coordserver.go:115: [coordinator server] listening on IP: 127.0.0.1, Port: 30004
+2022/01/06 21:49:03 helper_receive.go:21: Uploaded File: three_parties_lime_job_breastcancer_distributed_lr.json
+2022/01/06 21:49:03 helper_receive.go:22: File Size: 3454
+2022/01/06 21:49:03 helper_receive.go:23: MIME Header: map[Content-Disposition:[form-data; name="train-job-file"; filename="three_parties_lime_job_breastcancer_distributed_lr.json"]]
+2022/01/06 21:49:03 job_router.go:72: [Coordinator]: Submit train job with multipart form
+2022/01/06 21:49:03 job-train.go:143: ParseTrainJob: ModelTraining skip
+2022/01/06 21:49:03 job-train.go:174: ParseTrainJob: LimePred skip
+2022/01/06 21:49:03 job-train.go:187: ParseTrainJob: LimeWeight skip
+2022/01/06 21:49:03 job-train.go:203: ParseTrainJob: LimeFeature AlgorithmName match <--> lime_feature_selection
+2022/01/06 21:49:03 job-train.go:216: ParseTrainJob: LimeInterpret AlgorithmName match <--> lime_interpret
+2022/01/06 21:49:03 driver.go:66: Consume:2 Got from dslqueue
+2022/01/06 21:49:03 job-manager.go:31: [JobManager]: Deploy master with thread
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{}]
+2022/01/06 21:49:03 deploy-thread.go:22: [JobManager]: Assign port 22001 to master
+2022/01/06 21:49:03 job-manager.go:54: [JobManager] begin ManageJobLifeCycle, masterAddr=127.0.0.1:22001 workerType=TrainWorker
+2022/01/06 21:49:03 job-manager.go:56: [JobManager] call master.RunMaster with dslOjb:
+2022/01/06 21:49:03 rpcbase.go:28: [rpcbase] InitRpcBase called with Addr 127.0.0.1:22001
+2022/01/06 21:49:03 rpcbase.go:42: [Master]: listening on tcp, 0.0.0.0:22001 
+2022/01/06 21:49:03 job-manager.go:85: [JobManager] master call partyserver 127.0.0.1:30005 to spawn workers 
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{}]
+2022/01/06 21:49:03 job-manager.go:85: [JobManager] master call partyserver 127.0.0.1:30006 to spawn workers 
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{}]
+2022/01/06 21:49:03 job-manager.go:85: [JobManager] master call partyserver 127.0.0.1:30007 to spawn workers 
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{}]
+2022/01/06 21:49:03 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{}]
+2022/01/06 21:49:03 master.go:193: [Master.extractResourceInfo] -----debug-----trainWorkerPreGroup: 2
+2022/01/06 21:49:03 master.go:465: [getDistributedNetworkCfg]: [22014 22020] [22007 22008]
+2022/01/06 21:49:03 master.go:293: [Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID = 0  group_id =  0 distPsIp:  127.0.0.1 distPsPorts:  [22007 22008] distWorkerIps:  [127.0.0.1 127.0.0.1] distWorkerPorts:  [22014 22020] distributedNetworkCfg:  Cg8KCTEyNy4wLjAuMRD+qwEKDwoJMTI3LjAuMC4xEISsARIPCgkxMjcuMC4wLjEQ96sBEg8KCTEyNy4wLjAuMRD4qwE=
+2022/01/06 21:49:03 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22007 ps_ip:"127.0.0.1" ps_port:22008]
+2022/01/06 21:49:03 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22014 worker_ip:"127.0.0.1" worker_port:22020]
+2022/01/06 21:49:03 master.go:193: [Master.extractResourceInfo] -----debug-----trainWorkerPreGroup: 2
+2022/01/06 21:49:03 master.go:465: [getDistributedNetworkCfg]: [22033 22039] [22026 22027]
+2022/01/06 21:49:03 master.go:293: [Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID = 1  group_id =  0 distPsIp:  127.0.0.1 distPsPorts:  [22026 22027] distWorkerIps:  [127.0.0.1 127.0.0.1] distWorkerPorts:  [22033 22039] distributedNetworkCfg:  Cg8KCTEyNy4wLjAuMRCRrAEKDwoJMTI3LjAuMC4xEJesARIPCgkxMjcuMC4wLjEQiqwBEg8KCTEyNy4wLjAuMRCLrAE=
+2022/01/06 21:49:03 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22026 ps_ip:"127.0.0.1" ps_port:22027]
+2022/01/06 21:49:03 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22033 worker_ip:"127.0.0.1" worker_port:22039]
+2022/01/06 21:49:03 master.go:193: [Master.extractResourceInfo] -----debug-----trainWorkerPreGroup: 2
+2022/01/06 21:49:03 master.go:465: [getDistributedNetworkCfg]: [22052 22058] [22045 22046]
+2022/01/06 21:49:03 master.go:293: [Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID = 2  group_id =  0 distPsIp:  127.0.0.1 distPsPorts:  [22045 22046] distWorkerIps:  [127.0.0.1 127.0.0.1] distWorkerPorts:  [22052 22058] distributedNetworkCfg:  Cg8KCTEyNy4wLjAuMRCkrAEKDwoJMTI3LjAuMC4xEKqsARIPCgkxMjcuMC4wLjEQnawBEg8KCTEyNy4wLjAuMRCerAE=
+2022/01/06 21:49:03 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22045 ps_ip:"127.0.0.1" ps_port:22046]
+2022/01/06 21:49:03 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22052 worker_ip:"127.0.0.1" worker_port:22058]
+2022/01/06 21:49:03 master.go:335: [Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is  map[0:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfOrAfSrAfWrARILCgmGrAGHrAGIrAESCwoJmawBmqwBm6wBGgsKCfClA/ClA/ClAw== 1:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfqrAfurAfyrARILCgmNrAGOrAGPrAESCwoJoKwBoawBoqwBGgsKCditA9itA9itAw== 2:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCYCsAYGsAYKsARILCgmTrAGUrAGVrAESCwoJpqwBp6wBqKwBGgsKCcC1A8C1A8C1Aw==]
+2022/01/06 21:49:03 master.go:339: [Master.extractResourceInfo] -----checking configurations-----
+2022/01/06 21:49:03 master.go:340: [Master.extractResourceInfo] master.RequiredResource is :
+2022/01/06 21:49:03 master.go:342: [Master.extractResourceInfo] workerNum: 9
+2022/01/06 21:49:03 master.go:345: [Master.extractResourceInfo] party 0 PartyID: 0
+2022/01/06 21:49:03 master.go:346: [Master.extractResourceInfo] party 0 ResourceNum: 3
+2022/01/06 21:49:03 master.go:347: [Master.extractResourceInfo] party 0 ResourceNumPreGroup: 3
+2022/01/06 21:49:03 master.go:350: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.WorkerId: 2
+2022/01/06 21:49:03 master.go:351: [Master.extractResourceInfo] party 0, workerID 2, groupID 0
+2022/01/06 21:49:03 master.go:352: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 21:49:03 master.go:353: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.WorkerPort: 22015
+2022/01/06 21:49:03 master.go:354: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22016 22017 22018]
+2022/01/06 21:49:03 master.go:355: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.MpcMpcPort: 22019
+2022/01/06 21:49:03 master.go:356: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.MpcExecutorPort: 56000
+2022/01/06 21:49:03 master.go:357: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.ExecutorPSPort: 22020
+2022/01/06 21:49:03 master.go:358: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 21:49:03 master.go:350: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.WorkerId: 0
+2022/01/06 21:49:03 master.go:351: [Master.extractResourceInfo] party 0, workerID 0, groupID 0
+2022/01/06 21:49:03 master.go:352: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 21:49:03 master.go:353: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.WorkerPort: 22002
+2022/01/06 21:49:03 master.go:354: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22003 22004 22005]
+2022/01/06 21:49:03 master.go:355: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.MpcMpcPort: 22006
+2022/01/06 21:49:03 master.go:356: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.MpcExecutorPort: 54000
+2022/01/06 21:49:03 master.go:357: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.ExecutorPSPort: 0
+2022/01/06 21:49:03 master.go:358: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.DistributedRole: distributed-parameter-server
+2022/01/06 21:49:03 master.go:350: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.WorkerId: 1
+2022/01/06 21:49:03 master.go:351: [Master.extractResourceInfo] party 0, workerID 1, groupID 0
+2022/01/06 21:49:03 master.go:352: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 21:49:03 master.go:353: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.WorkerPort: 22009
+2022/01/06 21:49:03 master.go:354: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22010 22011 22012]
+2022/01/06 21:49:03 master.go:355: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.MpcMpcPort: 22013
+2022/01/06 21:49:03 master.go:356: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.MpcExecutorPort: 55000
+2022/01/06 21:49:03 master.go:357: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.ExecutorPSPort: 22014
+2022/01/06 21:49:03 master.go:358: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 21:49:03 master.go:345: [Master.extractResourceInfo] party 1 PartyID: 1
+2022/01/06 21:49:03 master.go:346: [Master.extractResourceInfo] party 1 ResourceNum: 3
+2022/01/06 21:49:03 master.go:347: [Master.extractResourceInfo] party 1 ResourceNumPreGroup: 3
+2022/01/06 21:49:03 master.go:350: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.WorkerId: 0
+2022/01/06 21:49:03 master.go:351: [Master.extractResourceInfo] party 1, workerID 0, groupID 0
+2022/01/06 21:49:03 master.go:352: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 21:49:03 master.go:353: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.WorkerPort: 22021
+2022/01/06 21:49:03 master.go:354: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22022 22023 22024]
+2022/01/06 21:49:03 master.go:355: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.MpcMpcPort: 22025
+2022/01/06 21:49:03 master.go:356: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.MpcExecutorPort: 54000
+2022/01/06 21:49:03 master.go:357: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.ExecutorPSPort: 0
+2022/01/06 21:49:03 master.go:358: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.DistributedRole: distributed-parameter-server
+2022/01/06 21:49:03 master.go:350: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.WorkerId: 1
+2022/01/06 21:49:03 master.go:351: [Master.extractResourceInfo] party 1, workerID 1, groupID 0
+2022/01/06 21:49:03 master.go:352: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 21:49:03 master.go:353: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.WorkerPort: 22028
+2022/01/06 21:49:03 master.go:354: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22029 22030 22031]
+2022/01/06 21:49:03 master.go:355: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.MpcMpcPort: 22032
+2022/01/06 21:49:03 master.go:356: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.MpcExecutorPort: 55000
+2022/01/06 21:49:03 master.go:357: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.ExecutorPSPort: 22033
+2022/01/06 21:49:03 master.go:358: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 21:49:03 master.go:350: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.WorkerId: 2
+2022/01/06 21:49:03 master.go:351: [Master.extractResourceInfo] party 1, workerID 2, groupID 0
+2022/01/06 21:49:03 master.go:352: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 21:49:03 master.go:353: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.WorkerPort: 22034
+2022/01/06 21:49:03 master.go:354: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22035 22036 22037]
+2022/01/06 21:49:03 master.go:355: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.MpcMpcPort: 22038
+2022/01/06 21:49:03 master.go:356: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.MpcExecutorPort: 56000
+2022/01/06 21:49:03 master.go:357: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.ExecutorPSPort: 22039
+2022/01/06 21:49:03 master.go:358: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 21:49:03 master.go:345: [Master.extractResourceInfo] party 2 PartyID: 2
+2022/01/06 21:49:03 master.go:346: [Master.extractResourceInfo] party 2 ResourceNum: 3
+2022/01/06 21:49:03 master.go:347: [Master.extractResourceInfo] party 2 ResourceNumPreGroup: 3
+2022/01/06 21:49:03 master.go:350: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.WorkerId: 0
+2022/01/06 21:49:03 master.go:351: [Master.extractResourceInfo] party 2, workerID 0, groupID 0
+2022/01/06 21:49:03 master.go:352: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 21:49:03 master.go:353: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.WorkerPort: 22040
+2022/01/06 21:49:03 master.go:354: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22041 22042 22043]
+2022/01/06 21:49:03 master.go:355: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.MpcMpcPort: 22044
+2022/01/06 21:49:03 master.go:356: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.MpcExecutorPort: 54000
+2022/01/06 21:49:03 master.go:357: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.ExecutorPSPort: 0
+2022/01/06 21:49:03 master.go:358: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.DistributedRole: distributed-parameter-server
+2022/01/06 21:49:03 master.go:350: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.WorkerId: 1
+2022/01/06 21:49:03 master.go:351: [Master.extractResourceInfo] party 2, workerID 1, groupID 0
+2022/01/06 21:49:03 master.go:352: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 21:49:03 master.go:353: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.WorkerPort: 22047
+2022/01/06 21:49:03 master.go:354: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22048 22049 22050]
+2022/01/06 21:49:03 master.go:355: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.MpcMpcPort: 22051
+2022/01/06 21:49:03 master.go:356: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.MpcExecutorPort: 55000
+2022/01/06 21:49:03 master.go:357: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.ExecutorPSPort: 22052
+2022/01/06 21:49:03 master.go:358: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 21:49:03 master.go:350: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.WorkerId: 2
+2022/01/06 21:49:03 master.go:351: [Master.extractResourceInfo] party 2, workerID 2, groupID 0
+2022/01/06 21:49:03 master.go:352: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 21:49:03 master.go:353: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.WorkerPort: 22053
+2022/01/06 21:49:03 master.go:354: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22054 22055 22056]
+2022/01/06 21:49:03 master.go:355: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.MpcMpcPort: 22057
+2022/01/06 21:49:03 master.go:356: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.MpcExecutorPort: 56000
+2022/01/06 21:49:03 master.go:357: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.ExecutorPSPort: 22058
+2022/01/06 21:49:03 master.go:358: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 21:49:03 master.go:362: [Master.extractResourceInfo] requiredWorkers is  map[0:map[0:false 1:false 2:false] 1:map[0:false 1:false 2:false] 2:map[0:false 1:false 2:false]]
+2022/01/06 21:49:03 master.go:363: [Master.extractResourceInfo] executorPairIps is  map[0:[127.0.0.1 127.0.0.1 127.0.0.1] 1:[127.0.0.1 127.0.0.1 127.0.0.1] 2:[127.0.0.1 127.0.0.1 127.0.0.1]]
+2022/01/06 21:49:03 master.go:364: [Master.extractResourceInfo] executorPairsPorts is  map[0:[[22003 22004 22005] [22022 22023 22024] [22041 22042 22043]] 1:[[22010 22011 22012] [22029 22030 22031] [22048 22049 22050]] 2:[[22016 22017 22018] [22035 22036 22037] [22054 22055 22056]]]
+2022/01/06 21:49:03 master.go:365: [Master.extractResourceInfo] mpcPairsPorts is  map[0:[22006 22025 22044] 1:[22013 22032 22051] 2:[22019 22038 22057]]
+2022/01/06 21:49:03 master.go:366: [Master.extractResourceInfo] mpcExecutorPorts workerID:[partyPort...] is  map[0:[54000 54000 54000] 1:[55000 55000 55000] 2:[56000 56000 56000]]
+2022/01/06 21:49:03 master.go:367: [Master.extractResourceInfo] distPsIp is  map[0:map[0:127.0.0.1] 1:map[0:127.0.0.1] 2:map[0:127.0.0.1]]
+2022/01/06 21:49:03 master.go:368: [Master.extractResourceInfo] distWorkerIps is  map[0:map[0:[127.0.0.1 127.0.0.1]] 1:map[0:[127.0.0.1 127.0.0.1]] 2:map[0:[127.0.0.1 127.0.0.1]]]
+2022/01/06 21:49:03 master.go:371: [Master.extractResourceInfo] mpcPairNetworkCfg workerID:partyMpcMpcAddrs is is  map[0:127.0.0.1:22006
+127.0.0.1:22025
+127.0.0.1:22044 1:127.0.0.1:22013
+127.0.0.1:22032
+127.0.0.1:22051 2:127.0.0.1:22019
+127.0.0.1:22038
+127.0.0.1:22057]
+2022/01/06 21:49:03 master.go:372: [Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is  map[0:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfOrAfSrAfWrARILCgmGrAGHrAGIrAESCwoJmawBmqwBm6wBGgsKCfClA/ClA/ClAw== 1:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfqrAfurAfyrARILCgmNrAGOrAGPrAESCwoJoKwBoawBoqwBGgsKCditA9itA9itAw== 2:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCYCsAYGsAYKsARILCgmTrAGUrAGVrAESCwoJpqwBp6wBqKwBGgsKCcC1A8C1A8C1Aw==]
+2022/01/06 21:49:03 master.go:373: [Master.extractResourceInfo] mpcExecutorNetworkCfg workerID:[partyMpcExecutorPort...] is  map[0:[54000 54000 54000] 1:[55000 55000 55000] 2:[56000 56000 56000]]
+2022/01/06 21:49:03 master.go:374: [Master.extractResourceInfo] distributedNetworkCfg partyID:b64_Str is  map[0:map[0:Cg8KCTEyNy4wLjAuMRD+qwEKDwoJMTI3LjAuMC4xEISsARIPCgkxMjcuMC4wLjEQ96sBEg8KCTEyNy4wLjAuMRD4qwE=] 1:map[0:Cg8KCTEyNy4wLjAuMRCRrAEKDwoJMTI3LjAuMC4xEJesARIPCgkxMjcuMC4wLjEQiqwBEg8KCTEyNy4wLjAuMRCLrAE=] 2:map[0:Cg8KCTEyNy4wLjAuMRCkrAEKDwoJMTI3LjAuMC4xEKqsARIPCgkxMjcuMC4wLjEQnawBEg8KCTEyNy4wLjAuMRCerAE=]]
+2022/01/06 21:49:03 master.go:376: [Master.extractResourceInfo] -----done with checking configurations-----
+2022/01/06 21:49:03 job-manager.go:110: [JobManager] master received all partyServer's reply
+2022/01/06 21:49:03 job-manager.go:113: [JobManager] master wait here until job finish
+2022/01/06 21:49:03 master.go:123: [Master.forwardRegistrations]: start forwardRegistrations... 
+2022/01/06 21:53:40 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22034",
+	"PartyID": 1,
+	"WorkerID": 2,
+	"GroupID": 0
+}
+2022/01/06 21:53:42 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:53:48 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22040",
+	"PartyID": 2,
+	"WorkerID": 0,
+	"GroupID": 0
+}
+2022/01/06 21:53:48 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22028",
+	"PartyID": 1,
+	"WorkerID": 1,
+	"GroupID": 0
+}
+2022/01/06 21:53:52 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22047",
+	"PartyID": 2,
+	"WorkerID": 1,
+	"GroupID": 0
+}
+2022/01/06 21:53:52 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:53:52 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:53:52 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:53:52 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:53:53 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22053",
+	"PartyID": 2,
+	"WorkerID": 2,
+	"GroupID": 0
+}
+2022/01/06 21:53:53 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22009",
+	"PartyID": 0,
+	"WorkerID": 1,
+	"GroupID": 0
+}
+2022/01/06 21:53:54 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22015",
+	"PartyID": 0,
+	"WorkerID": 2,
+	"GroupID": 0
+}
+2022/01/06 21:53:54 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22021",
+	"PartyID": 1,
+	"WorkerID": 0,
+	"GroupID": 0
+}
+2022/01/06 21:53:54 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22002",
+	"PartyID": 0,
+	"WorkerID": 0,
+	"GroupID": 0
+}
+2022/01/06 21:53:54 dispatcher.go:30: [Master.Dispatcher]: All worker found: [
+  WorkerAddr=127.0.0.1:22034, PartyID=1, GroupID=0, WorkerID=2 
+  WorkerAddr=127.0.0.1:22040, PartyID=2, GroupID=0, WorkerID=0 
+  WorkerAddr=127.0.0.1:22028, PartyID=1, GroupID=0, WorkerID=1 
+  WorkerAddr=127.0.0.1:22047, PartyID=2, GroupID=0, WorkerID=1 
+  WorkerAddr=127.0.0.1:22053, PartyID=2, GroupID=0, WorkerID=2 
+  WorkerAddr=127.0.0.1:22009, PartyID=0, GroupID=0, WorkerID=1 
+  WorkerAddr=127.0.0.1:22015, PartyID=0, GroupID=0, WorkerID=2 
+  WorkerAddr=127.0.0.1:22021, PartyID=1, GroupID=0, WorkerID=0 
+  WorkerAddr=127.0.0.1:22002, PartyID=0, GroupID=0, WorkerID=0]
+2022/01/06 21:53:54 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22002  worker_id =  0  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfOrAfSrAfWrARILCgmGrAGHrAGIrAESCwoJmawBmqwBm6wBGgsKCfClA/ClA/ClAw== 
+MpcPairNetworkCfg=  127.0.0.1:22006
+127.0.0.1:22025
+127.0.0.1:22044 
+MpcExecutorNetworkCfg=  54000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRD+qwEKDwoJMTI3LjAuMC4xEISsARIPCgkxMjcuMC4wLjEQ96sBEg8KCTEyNy4wLjAuMRD4qwE=
+2022/01/06 21:53:54 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 21:53:54 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22003 ports:22004 ports:22005 ports:22022 ports:22023 ports:22024 ports:22041 ports:22042 ports:22043]
+2022/01/06 21:53:54 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:54000 ports:54000 ports:54000
+2022/01/06 21:53:54 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22007 ps_ip:"127.0.0.1" ps_port:22008]
+2022/01/06 21:53:54 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22014 worker_ip:"127.0.0.1" worker_port:22020]
+2022/01/06 21:53:54 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22009  worker_id =  1  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfqrAfurAfyrARILCgmNrAGOrAGPrAESCwoJoKwBoawBoqwBGgsKCditA9itA9itAw== 
+MpcPairNetworkCfg=  127.0.0.1:22013
+127.0.0.1:22032
+127.0.0.1:22051 
+MpcExecutorNetworkCfg=  55000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRD+qwEKDwoJMTI3LjAuMC4xEISsARIPCgkxMjcuMC4wLjEQ96sBEg8KCTEyNy4wLjAuMRD4qwE=
+2022/01/06 21:53:54 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 21:53:54 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22010 ports:22011 ports:22012 ports:22029 ports:22030 ports:22031 ports:22048 ports:22049 ports:22050]
+2022/01/06 21:53:54 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:55000 ports:55000 ports:55000
+2022/01/06 21:53:54 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 21:53:54 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22007 ps_ip:"127.0.0.1" ps_port:22008]
+2022/01/06 21:53:54 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22014 worker_ip:"127.0.0.1" worker_port:22020]
+2022/01/06 21:53:54 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22015  worker_id =  2  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCYCsAYGsAYKsARILCgmTrAGUrAGVrAESCwoJpqwBp6wBqKwBGgsKCcC1A8C1A8C1Aw== 
+MpcPairNetworkCfg=  127.0.0.1:22019
+127.0.0.1:22038
+127.0.0.1:22057 
+MpcExecutorNetworkCfg=  56000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRD+qwEKDwoJMTI3LjAuMC4xEISsARIPCgkxMjcuMC4wLjEQ96sBEg8KCTEyNy4wLjAuMRD4qwE=
+2022/01/06 21:53:54 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 21:53:54 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22016 ports:22017 ports:22018 ports:22035 ports:22036 ports:22037 ports:22054 ports:22055 ports:22056]
+2022/01/06 21:53:54 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 21:53:54 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:56000 ports:56000 ports:56000
+2022/01/06 21:53:54 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22007 ps_ip:"127.0.0.1" ps_port:22008]
+2022/01/06 21:53:54 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22014 worker_ip:"127.0.0.1" worker_port:22020]
+2022/01/06 21:53:54 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22021  worker_id =  0  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfOrAfSrAfWrARILCgmGrAGHrAGIrAESCwoJmawBmqwBm6wBGgsKCfClA/ClA/ClAw== 
+MpcPairNetworkCfg=  127.0.0.1:22006
+127.0.0.1:22025
+127.0.0.1:22044 
+MpcExecutorNetworkCfg=  54000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRCRrAEKDwoJMTI3LjAuMC4xEJesARIPCgkxMjcuMC4wLjEQiqwBEg8KCTEyNy4wLjAuMRCLrAE=
+2022/01/06 21:53:54 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 21:53:54 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22003 ports:22004 ports:22005 ports:22022 ports:22023 ports:22024 ports:22041 ports:22042 ports:22043]
+2022/01/06 21:53:54 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 21:53:54 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:54000 ports:54000 ports:54000
+2022/01/06 21:53:54 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22026 ps_ip:"127.0.0.1" ps_port:22027]
+2022/01/06 21:53:54 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22033 worker_ip:"127.0.0.1" worker_port:22039]
+2022/01/06 21:53:54 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 21:53:54 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22028  worker_id =  1  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfqrAfurAfyrARILCgmNrAGOrAGPrAESCwoJoKwBoawBoqwBGgsKCditA9itA9itAw== 
+MpcPairNetworkCfg=  127.0.0.1:22013
+127.0.0.1:22032
+127.0.0.1:22051 
+MpcExecutorNetworkCfg=  55000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRCRrAEKDwoJMTI3LjAuMC4xEJesARIPCgkxMjcuMC4wLjEQiqwBEg8KCTEyNy4wLjAuMRCLrAE=
+2022/01/06 21:53:54 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 21:53:54 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22010 ports:22011 ports:22012 ports:22029 ports:22030 ports:22031 ports:22048 ports:22049 ports:22050]
+2022/01/06 21:53:54 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:55000 ports:55000 ports:55000
+2022/01/06 21:53:54 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22026 ps_ip:"127.0.0.1" ps_port:22027]
+2022/01/06 21:53:54 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22033 worker_ip:"127.0.0.1" worker_port:22039]
+2022/01/06 21:53:54 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22034  worker_id =  2  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCYCsAYGsAYKsARILCgmTrAGUrAGVrAESCwoJpqwBp6wBqKwBGgsKCcC1A8C1A8C1Aw== 
+MpcPairNetworkCfg=  127.0.0.1:22019
+127.0.0.1:22038
+127.0.0.1:22057 
+MpcExecutorNetworkCfg=  56000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRCRrAEKDwoJMTI3LjAuMC4xEJesARIPCgkxMjcuMC4wLjEQiqwBEg8KCTEyNy4wLjAuMRCLrAE=
+2022/01/06 21:53:54 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 21:53:54 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22016 ports:22017 ports:22018 ports:22035 ports:22036 ports:22037 ports:22054 ports:22055 ports:22056]
+2022/01/06 21:53:54 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:56000 ports:56000 ports:56000
+2022/01/06 21:53:54 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22026 ps_ip:"127.0.0.1" ps_port:22027]
+2022/01/06 21:53:54 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22033 worker_ip:"127.0.0.1" worker_port:22039]
+2022/01/06 21:53:54 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 21:53:54 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22040  worker_id =  0  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfOrAfSrAfWrARILCgmGrAGHrAGIrAESCwoJmawBmqwBm6wBGgsKCfClA/ClA/ClAw== 
+MpcPairNetworkCfg=  127.0.0.1:22006
+127.0.0.1:22025
+127.0.0.1:22044 
+MpcExecutorNetworkCfg=  54000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRCkrAEKDwoJMTI3LjAuMC4xEKqsARIPCgkxMjcuMC4wLjEQnawBEg8KCTEyNy4wLjAuMRCerAE=
+2022/01/06 21:53:54 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 21:53:54 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22003 ports:22004 ports:22005 ports:22022 ports:22023 ports:22024 ports:22041 ports:22042 ports:22043]
+2022/01/06 21:53:54 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:54000 ports:54000 ports:54000
+2022/01/06 21:53:54 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22045 ps_ip:"127.0.0.1" ps_port:22046]
+2022/01/06 21:53:54 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22052 worker_ip:"127.0.0.1" worker_port:22058]
+2022/01/06 21:53:54 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 21:53:54 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22047  worker_id =  1  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfqrAfurAfyrARILCgmNrAGOrAGPrAESCwoJoKwBoawBoqwBGgsKCditA9itA9itAw== 
+MpcPairNetworkCfg=  127.0.0.1:22013
+127.0.0.1:22032
+127.0.0.1:22051 
+MpcExecutorNetworkCfg=  55000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRCkrAEKDwoJMTI3LjAuMC4xEKqsARIPCgkxMjcuMC4wLjEQnawBEg8KCTEyNy4wLjAuMRCerAE=
+2022/01/06 21:53:54 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 21:53:54 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 21:53:54 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22010 ports:22011 ports:22012 ports:22029 ports:22030 ports:22031 ports:22048 ports:22049 ports:22050]
+2022/01/06 21:53:54 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:55000 ports:55000 ports:55000
+2022/01/06 21:53:54 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22045 ps_ip:"127.0.0.1" ps_port:22046]
+2022/01/06 21:53:54 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22052 worker_ip:"127.0.0.1" worker_port:22058]
+2022/01/06 21:53:54 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22053  worker_id =  2  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCYCsAYGsAYKsARILCgmTrAGUrAGVrAESCwoJpqwBp6wBqKwBGgsKCcC1A8C1A8C1Aw== 
+MpcPairNetworkCfg=  127.0.0.1:22019
+127.0.0.1:22038
+127.0.0.1:22057 
+MpcExecutorNetworkCfg=  56000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRCkrAEKDwoJMTI3LjAuMC4xEKqsARIPCgkxMjcuMC4wLjEQnawBEg8KCTEyNy4wLjAuMRCerAE=
+2022/01/06 21:53:54 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 21:53:54 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22016 ports:22017 ports:22018 ports:22035 ports:22036 ports:22037 ports:22054 ports:22055 ports:22056]
+2022/01/06 21:53:54 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 21:53:54 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:56000 ports:56000 ports:56000
+2022/01/06 21:53:54 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22045 ps_ip:"127.0.0.1" ps_port:22046]
+2022/01/06 21:53:54 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22052 worker_ip:"127.0.0.1" worker_port:22058]
+2022/01/06 21:53:54 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 21:53:54 dispatcher.go:198: [Master.Dispatcher]: dispatch lime tasks, len(availableGroupIds) =  1  max class parallelism = 1  classNum =  2
+2022/01/06 21:53:54 dispatcher.go:217: [Master.Dispatcher]: dispatch lime tasks, assign classid= 0  to worker group = 0  current len(availableGroupIds) =  []
+2022/01/06 21:53:54 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:53:55 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:53:56 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:53:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.RunMpc 
+2022/01/06 21:53:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.RunMpc 
+2022/01/06 21:53:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.RunMpc 
+2022/01/06 21:53:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.RunMpc 
+2022/01/06 21:53:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.RunMpc 
+2022/01/06 21:53:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.RunMpc 
+2022/01/06 21:53:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.RunMpc 
+2022/01/06 21:53:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.RunMpc 
+2022/01/06 21:53:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.RunMpc 
+2022/01/06 21:53:57 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:53:58 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:53:59 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:00 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:01 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:02 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.DoTask 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.DoTask 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.DoTask 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.DoTask 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.DoTask 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.DoTask 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.DoTask 
+2022/01/06 21:54:03 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.DoTask 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.DoTask 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:03 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:04 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:05 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:06 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:07 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:08 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:09 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:10 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:11 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:12 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:13 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:14 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:15 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:15 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:15 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:15 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:15 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:15 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:15 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:15 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:15 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:15 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:16 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:17 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:18 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:19 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:20 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:21 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:22 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:23 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:24 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:25 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:26 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:27 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:27 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:27 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:27 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:27 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:27 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:27 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:27 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:27 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:27 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:28 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:29 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:30 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:31 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:32 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:33 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:34 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:35 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:36 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:37 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:38 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:39 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:39 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:39 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:39 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:39 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:39 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:39 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:39 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:39 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:39 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:40 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:41 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:42 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:43 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:44 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:45 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:46 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:47 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:48 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:49 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:50 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:51 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:51 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:51 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:51 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:51 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:51 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:51 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:51 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:51 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:51 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:54:52 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:53 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:54 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:55 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:56 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:57 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:57 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.RunMpc 
+2022/01/06 21:54:57 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.RunMpc 
+2022/01/06 21:54:57 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.RunMpc 
+2022/01/06 21:54:57 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.RunMpc 
+2022/01/06 21:54:57 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.RunMpc 
+2022/01/06 21:54:57 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.RunMpc 
+2022/01/06 21:54:57 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.RunMpc 
+2022/01/06 21:54:57 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.RunMpc 
+2022/01/06 21:54:57 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.RunMpc 
+2022/01/06 21:54:58 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:54:59 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:00 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:01 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:01 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:01 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:01 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:01 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:01 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:01 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:01 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:01 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:01 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:02 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:03 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:04 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:05 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:06 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:07 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:08 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:09 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:10 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:11 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:12 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:13 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:14 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:14 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:14 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:14 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:14 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:14 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:14 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:14 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:14 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:14 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:15 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:16 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:17 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:18 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:19 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:20 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:21 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:22 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:23 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:24 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:25 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:26 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:27 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:28 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:29 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:30 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:31 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:32 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:33 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:34 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:35 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:36 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:37 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:38 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:38 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:38 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:38 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:38 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:38 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:38 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:38 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:38 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:38 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:39 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:40 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:41 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:42 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:43 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:44 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:45 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:46 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:47 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:48 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:49 dispatcher.go:210: [Master.Dispatcher]: wait until one worker group is released...
+2022/01/06 21:55:50 dispatcher.go:278: [Master.Dispatcher]: dispatch lime tasks, add group id back to availableGroupIds, current len =  1
+2022/01/06 21:55:50 dispatcher.go:217: [Master.Dispatcher]: dispatch lime tasks, assign classid= 1  to worker group = 0  current len(availableGroupIds) =  []
+2022/01/06 21:55:50 dispatcher.go:290: [Master.Dispatcher]: dispatch lime tasks done, now waiting for all lime task (for each class) finishing...
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:50 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.RunMpc 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.RunMpc 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.RunMpc 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.RunMpc 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.RunMpc 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.RunMpc 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.RunMpc 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.RunMpc 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.RunMpc 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:55:55 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:55:55 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:55 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:55 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:55 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:55 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:55 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:55 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:55 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.DoTask 
+2022/01/06 21:55:55 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:00 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:05 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:10 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:15 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:20 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:25 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:30 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:35 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:40 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:45 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:48 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.RunMpc 
+2022/01/06 21:56:48 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.RunMpc 
+2022/01/06 21:56:48 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.RunMpc 
+2022/01/06 21:56:48 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.RunMpc 
+2022/01/06 21:56:48 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.RunMpc 
+2022/01/06 21:56:48 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.RunMpc 
+2022/01/06 21:56:48 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.RunMpc 
+2022/01/06 21:56:48 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.RunMpc 
+2022/01/06 21:56:48 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.RunMpc 
+2022/01/06 21:56:50 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:56:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:50 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:56:53 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:53 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:53 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:53 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:53 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:53 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:53 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:53 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:53 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.DoTask 
+2022/01/06 21:56:55 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:57:00 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:57:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:00 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:05 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:57:10 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:57:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:10 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:15 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:57:20 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:57:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:20 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:25 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:57:30 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:57:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:30 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.ResetTime 
+2022/01/06 21:57:35 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  0
+2022/01/06 21:57:38 dispatcher.go:278: [Master.Dispatcher]: dispatch lime tasks, add group id back to availableGroupIds, current len =  1
+2022/01/06 21:57:40 dispatcher.go:302: [Master.Dispatcher]: current len(len(availableGroupIds)) =  1
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22034, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22040, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22028, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22047, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22053, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22009, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22015, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22021, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22002, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 21:57:40 dispatcher.go:319: [Master.Dispatcher]: report is 
+2022/01/06 21:57:40 master.go:396: [Master]: Finish job, update to coord, jobStatus: <finished> 
+2022/01/06 21:57:40 dispatcher.go:338: [Scheduler]: Master finish dispatching tasks.
+2022/01/06 21:57:40 master.go:399: [Master]: Finish job, begin to shutdown master
+2022/01/06 21:57:40 rpcbase.go:103: [Master]: call Master.Shutdown
+2022/01/06 21:57:40 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22001, methodName: Master.Shutdown 
+2022/01/06 21:57:40 master.go:422: [Master]: Shutdown server
+2022/01/06 21:57:40 rpcbase.go:68: [Master]: Listener.Accept: accept tcp [::]:22001: use of closed network connection 
+2022/01/06 21:57:40 rpcbase.go:73: [Master]: RpcServer closed
+2022/01/06 21:57:40 rpcbase.go:110: [Master]: call Master.Shutdown successfully
+2022/01/06 21:57:40 master.go:402: [Master] 127.0.0.1:22001: Thread-4 master.finish, job completed
+2022/01/06 21:57:40 master.go:130: [Master.forwardRegistrations]: Thread-2 forwardRegistrations: exit
+2022/01/06 21:57:40 job-manager.go:117: [JobManager] master finish all jobs
+2022/01/06 21:57:40 master_heartbeat.go:17: [Master.Heartbeat] Thread-1 heartBeatLoop exit
+2022/01/06 22:00:05 helper_receive.go:21: Uploaded File: three_parties_train_job_breastcancer_distributed_dt.json
+2022/01/06 22:00:05 helper_receive.go:22: File Size: 2111
+2022/01/06 22:00:05 helper_receive.go:23: MIME Header: map[Content-Disposition:[form-data; name="train-job-file"; filename="three_parties_train_job_breastcancer_distributed_dt.json"]]
+2022/01/06 22:00:05 job_router.go:72: [Coordinator]: Submit train job with multipart form
+2022/01/06 22:00:05 job-train.go:151: ParseTrainJob: ModelTraining AlgorithmName match <--> decision_tree
+2022/01/06 22:00:05 job-train.go:174: ParseTrainJob: LimePred skip
+2022/01/06 22:00:05 job-train.go:187: ParseTrainJob: LimeWeight skip
+2022/01/06 22:00:05 job-train.go:200: ParseTrainJob: LimeFeature skip
+2022/01/06 22:00:05 job-train.go:213: ParseTrainJob: LimeInterpret skip
+2022/01/06 22:00:05 driver.go:66: Consume:0 Got from dslqueue
+2022/01/06 22:00:05 job-manager.go:31: [JobManager]: Deploy master with thread
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{}]
+2022/01/06 22:00:05 deploy-thread.go:22: [JobManager]: Assign port 22059 to master
+2022/01/06 22:00:05 job-manager.go:54: [JobManager] begin ManageJobLifeCycle, masterAddr=127.0.0.1:22059 workerType=TrainWorker
+2022/01/06 22:00:05 job-manager.go:56: [JobManager] call master.RunMaster with dslOjb:
+2022/01/06 22:00:05 rpcbase.go:28: [rpcbase] InitRpcBase called with Addr 127.0.0.1:22059
+2022/01/06 22:00:05 rpcbase.go:42: [Master]: listening on tcp, 0.0.0.0:22059 
+2022/01/06 22:00:05 job-manager.go:85: [JobManager] master call partyserver 127.0.0.1:30005 to spawn workers 
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{}]
+2022/01/06 22:00:05 job-manager.go:85: [JobManager] master call partyserver 127.0.0.1:30006 to spawn workers 
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{}]
+2022/01/06 22:00:05 job-manager.go:85: [JobManager] master call partyserver 127.0.0.1:30007 to spawn workers 
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{} 22103:{} 22104:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{} 22103:{} 22104:{} 22105:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{} 22103:{} 22104:{} 22105:{} 22106:{} 22107:{} 22108:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{} 22103:{} 22104:{} 22105:{} 22106:{} 22107:{} 22108:{} 22109:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{} 22103:{} 22104:{} 22105:{} 22106:{} 22107:{} 22108:{} 22109:{} 22110:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{} 22103:{} 22104:{} 22105:{} 22106:{} 22107:{} 22108:{} 22109:{} 22110:{} 22111:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{} 22103:{} 22104:{} 22105:{} 22106:{} 22107:{} 22108:{} 22109:{} 22110:{} 22111:{} 22112:{} 22113:{} 22114:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{} 22103:{} 22104:{} 22105:{} 22106:{} 22107:{} 22108:{} 22109:{} 22110:{} 22111:{} 22112:{} 22113:{} 22114:{} 22115:{}]
+2022/01/06 22:00:05 resource_controller.go:44: AssignPort: Current Port usage:  map[22001:{} 22002:{} 22003:{} 22004:{} 22005:{} 22006:{} 22007:{} 22008:{} 22009:{} 22010:{} 22011:{} 22012:{} 22013:{} 22014:{} 22015:{} 22016:{} 22017:{} 22018:{} 22019:{} 22020:{} 22021:{} 22022:{} 22023:{} 22024:{} 22025:{} 22026:{} 22027:{} 22028:{} 22029:{} 22030:{} 22031:{} 22032:{} 22033:{} 22034:{} 22035:{} 22036:{} 22037:{} 22038:{} 22039:{} 22040:{} 22041:{} 22042:{} 22043:{} 22044:{} 22045:{} 22046:{} 22047:{} 22048:{} 22049:{} 22050:{} 22051:{} 22052:{} 22053:{} 22054:{} 22055:{} 22056:{} 22057:{} 22058:{} 22059:{} 22060:{} 22061:{} 22062:{} 22063:{} 22064:{} 22065:{} 22066:{} 22067:{} 22068:{} 22069:{} 22070:{} 22071:{} 22072:{} 22073:{} 22074:{} 22075:{} 22076:{} 22077:{} 22078:{} 22079:{} 22080:{} 22081:{} 22082:{} 22083:{} 22084:{} 22085:{} 22086:{} 22087:{} 22088:{} 22089:{} 22090:{} 22091:{} 22092:{} 22093:{} 22094:{} 22095:{} 22096:{} 22097:{} 22098:{} 22099:{} 22100:{} 22101:{} 22102:{} 22103:{} 22104:{} 22105:{} 22106:{} 22107:{} 22108:{} 22109:{} 22110:{} 22111:{} 22112:{} 22113:{} 22114:{} 22115:{} 22116:{}]
+2022/01/06 22:00:05 master.go:193: [Master.extractResourceInfo] -----debug-----trainWorkerPreGroup: 2
+2022/01/06 22:00:05 master.go:465: [getDistributedNetworkCfg]: [22072 22078] [22065 22066]
+2022/01/06 22:00:05 master.go:293: [Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID = 0  group_id =  0 distPsIp:  127.0.0.1 distPsPorts:  [22065 22066] distWorkerIps:  [127.0.0.1 127.0.0.1] distWorkerPorts:  [22072 22078] distributedNetworkCfg:  Cg8KCTEyNy4wLjAuMRC4rAEKDwoJMTI3LjAuMC4xEL6sARIPCgkxMjcuMC4wLjEQsawBEg8KCTEyNy4wLjAuMRCyrAE=
+2022/01/06 22:00:05 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22065 ps_ip:"127.0.0.1" ps_port:22066]
+2022/01/06 22:00:05 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22072 worker_ip:"127.0.0.1" worker_port:22078]
+2022/01/06 22:00:05 master.go:193: [Master.extractResourceInfo] -----debug-----trainWorkerPreGroup: 2
+2022/01/06 22:00:05 master.go:465: [getDistributedNetworkCfg]: [22091 22097] [22084 22085]
+2022/01/06 22:00:05 master.go:293: [Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID = 1  group_id =  0 distPsIp:  127.0.0.1 distPsPorts:  [22084 22085] distWorkerIps:  [127.0.0.1 127.0.0.1] distWorkerPorts:  [22091 22097] distributedNetworkCfg:  Cg8KCTEyNy4wLjAuMRDLrAEKDwoJMTI3LjAuMC4xENGsARIPCgkxMjcuMC4wLjEQxKwBEg8KCTEyNy4wLjAuMRDFrAE=
+2022/01/06 22:00:05 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22084 ps_ip:"127.0.0.1" ps_port:22085]
+2022/01/06 22:00:05 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22091 worker_ip:"127.0.0.1" worker_port:22097]
+2022/01/06 22:00:05 master.go:193: [Master.extractResourceInfo] -----debug-----trainWorkerPreGroup: 2
+2022/01/06 22:00:05 master.go:465: [getDistributedNetworkCfg]: [22110 22116] [22103 22104]
+2022/01/06 22:00:05 master.go:293: [Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID = 2  group_id =  0 distPsIp:  127.0.0.1 distPsPorts:  [22103 22104] distWorkerIps:  [127.0.0.1 127.0.0.1] distWorkerPorts:  [22110 22116] distributedNetworkCfg:  Cg8KCTEyNy4wLjAuMRDerAEKDwoJMTI3LjAuMC4xEOSsARIPCgkxMjcuMC4wLjEQ16wBEg8KCTEyNy4wLjAuMRDYrAE=
+2022/01/06 22:00:05 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22103 ps_ip:"127.0.0.1" ps_port:22104]
+2022/01/06 22:00:05 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22110 worker_ip:"127.0.0.1" worker_port:22116]
+2022/01/06 22:00:05 master.go:335: [Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is  map[0:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCa2sAa6sAa+sARILCgnArAHBrAHCrAESCwoJ06wB1KwB1awBGgsKCfClA/ClA/ClAw== 1:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbSsAbWsAbasARILCgnHrAHIrAHJrAESCwoJ2qwB26wB3KwBGgsKCditA9itA9itAw== 2:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbqsAbusAbysARILCgnNrAHOrAHPrAESCwoJ4KwB4awB4qwBGgsKCcC1A8C1A8C1Aw==]
+2022/01/06 22:00:05 master.go:339: [Master.extractResourceInfo] -----checking configurations-----
+2022/01/06 22:00:05 master.go:340: [Master.extractResourceInfo] master.RequiredResource is :
+2022/01/06 22:00:05 master.go:342: [Master.extractResourceInfo] workerNum: 9
+2022/01/06 22:00:05 master.go:345: [Master.extractResourceInfo] party 0 PartyID: 0
+2022/01/06 22:00:05 master.go:346: [Master.extractResourceInfo] party 0 ResourceNum: 3
+2022/01/06 22:00:05 master.go:347: [Master.extractResourceInfo] party 0 ResourceNumPreGroup: 3
+2022/01/06 22:00:05 master.go:350: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.WorkerId: 0
+2022/01/06 22:00:05 master.go:351: [Master.extractResourceInfo] party 0, workerID 0, groupID 0
+2022/01/06 22:00:05 master.go:352: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 22:00:05 master.go:353: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.WorkerPort: 22060
+2022/01/06 22:00:05 master.go:354: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22061 22062 22063]
+2022/01/06 22:00:05 master.go:355: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.MpcMpcPort: 22064
+2022/01/06 22:00:05 master.go:356: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.MpcExecutorPort: 54000
+2022/01/06 22:00:05 master.go:357: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.ExecutorPSPort: 0
+2022/01/06 22:00:05 master.go:358: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.DistributedRole: distributed-parameter-server
+2022/01/06 22:00:05 master.go:350: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.WorkerId: 1
+2022/01/06 22:00:05 master.go:351: [Master.extractResourceInfo] party 0, workerID 1, groupID 0
+2022/01/06 22:00:05 master.go:352: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 22:00:05 master.go:353: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.WorkerPort: 22067
+2022/01/06 22:00:05 master.go:354: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22068 22069 22070]
+2022/01/06 22:00:05 master.go:355: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.MpcMpcPort: 22071
+2022/01/06 22:00:05 master.go:356: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.MpcExecutorPort: 55000
+2022/01/06 22:00:05 master.go:357: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.ExecutorPSPort: 22072
+2022/01/06 22:00:05 master.go:358: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 22:00:05 master.go:350: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.WorkerId: 2
+2022/01/06 22:00:05 master.go:351: [Master.extractResourceInfo] party 0, workerID 2, groupID 0
+2022/01/06 22:00:05 master.go:352: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 22:00:05 master.go:353: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.WorkerPort: 22073
+2022/01/06 22:00:05 master.go:354: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22074 22075 22076]
+2022/01/06 22:00:05 master.go:355: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.MpcMpcPort: 22077
+2022/01/06 22:00:05 master.go:356: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.MpcExecutorPort: 56000
+2022/01/06 22:00:05 master.go:357: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.ExecutorPSPort: 22078
+2022/01/06 22:00:05 master.go:358: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 22:00:05 master.go:345: [Master.extractResourceInfo] party 1 PartyID: 1
+2022/01/06 22:00:05 master.go:346: [Master.extractResourceInfo] party 1 ResourceNum: 3
+2022/01/06 22:00:05 master.go:347: [Master.extractResourceInfo] party 1 ResourceNumPreGroup: 3
+2022/01/06 22:00:05 master.go:350: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.WorkerId: 1
+2022/01/06 22:00:05 master.go:351: [Master.extractResourceInfo] party 1, workerID 1, groupID 0
+2022/01/06 22:00:05 master.go:352: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 22:00:05 master.go:353: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.WorkerPort: 22086
+2022/01/06 22:00:05 master.go:354: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22087 22088 22089]
+2022/01/06 22:00:05 master.go:355: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.MpcMpcPort: 22090
+2022/01/06 22:00:05 master.go:356: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.MpcExecutorPort: 55000
+2022/01/06 22:00:05 master.go:357: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.ExecutorPSPort: 22091
+2022/01/06 22:00:05 master.go:358: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 22:00:05 master.go:350: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.WorkerId: 2
+2022/01/06 22:00:05 master.go:351: [Master.extractResourceInfo] party 1, workerID 2, groupID 0
+2022/01/06 22:00:05 master.go:352: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 22:00:05 master.go:353: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.WorkerPort: 22092
+2022/01/06 22:00:05 master.go:354: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22093 22094 22095]
+2022/01/06 22:00:05 master.go:355: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.MpcMpcPort: 22096
+2022/01/06 22:00:05 master.go:356: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.MpcExecutorPort: 56000
+2022/01/06 22:00:05 master.go:357: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.ExecutorPSPort: 22097
+2022/01/06 22:00:05 master.go:358: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 22:00:05 master.go:350: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.WorkerId: 0
+2022/01/06 22:00:05 master.go:351: [Master.extractResourceInfo] party 1, workerID 0, groupID 0
+2022/01/06 22:00:05 master.go:352: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 22:00:05 master.go:353: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.WorkerPort: 22079
+2022/01/06 22:00:05 master.go:354: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22080 22081 22082]
+2022/01/06 22:00:05 master.go:355: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.MpcMpcPort: 22083
+2022/01/06 22:00:05 master.go:356: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.MpcExecutorPort: 54000
+2022/01/06 22:00:05 master.go:357: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.ExecutorPSPort: 0
+2022/01/06 22:00:05 master.go:358: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.DistributedRole: distributed-parameter-server
+2022/01/06 22:00:05 master.go:345: [Master.extractResourceInfo] party 2 PartyID: 2
+2022/01/06 22:00:05 master.go:346: [Master.extractResourceInfo] party 2 ResourceNum: 3
+2022/01/06 22:00:05 master.go:347: [Master.extractResourceInfo] party 2 ResourceNumPreGroup: 3
+2022/01/06 22:00:05 master.go:350: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.WorkerId: 0
+2022/01/06 22:00:05 master.go:351: [Master.extractResourceInfo] party 2, workerID 0, groupID 0
+2022/01/06 22:00:05 master.go:352: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 22:00:05 master.go:353: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.WorkerPort: 22098
+2022/01/06 22:00:05 master.go:354: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22099 22100 22101]
+2022/01/06 22:00:05 master.go:355: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.MpcMpcPort: 22102
+2022/01/06 22:00:05 master.go:356: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.MpcExecutorPort: 54000
+2022/01/06 22:00:05 master.go:357: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.ExecutorPSPort: 0
+2022/01/06 22:00:05 master.go:358: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.DistributedRole: distributed-parameter-server
+2022/01/06 22:00:05 master.go:350: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.WorkerId: 1
+2022/01/06 22:00:05 master.go:351: [Master.extractResourceInfo] party 2, workerID 1, groupID 0
+2022/01/06 22:00:05 master.go:352: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 22:00:05 master.go:353: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.WorkerPort: 22105
+2022/01/06 22:00:05 master.go:354: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22106 22107 22108]
+2022/01/06 22:00:05 master.go:355: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.MpcMpcPort: 22109
+2022/01/06 22:00:05 master.go:356: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.MpcExecutorPort: 55000
+2022/01/06 22:00:05 master.go:357: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.ExecutorPSPort: 22110
+2022/01/06 22:00:05 master.go:358: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 22:00:05 master.go:350: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.WorkerId: 2
+2022/01/06 22:00:05 master.go:351: [Master.extractResourceInfo] party 2, workerID 2, groupID 0
+2022/01/06 22:00:05 master.go:352: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/01/06 22:00:05 master.go:353: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.WorkerPort: 22111
+2022/01/06 22:00:05 master.go:354: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22112 22113 22114]
+2022/01/06 22:00:05 master.go:355: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.MpcMpcPort: 22115
+2022/01/06 22:00:05 master.go:356: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.MpcExecutorPort: 56000
+2022/01/06 22:00:05 master.go:357: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.ExecutorPSPort: 22116
+2022/01/06 22:00:05 master.go:358: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.DistributedRole: distributed-worker
+2022/01/06 22:00:05 master.go:362: [Master.extractResourceInfo] requiredWorkers is  map[0:map[0:false 1:false 2:false] 1:map[0:false 1:false 2:false] 2:map[0:false 1:false 2:false]]
+2022/01/06 22:00:05 master.go:363: [Master.extractResourceInfo] executorPairIps is  map[0:[127.0.0.1 127.0.0.1 127.0.0.1] 1:[127.0.0.1 127.0.0.1 127.0.0.1] 2:[127.0.0.1 127.0.0.1 127.0.0.1]]
+2022/01/06 22:00:05 master.go:364: [Master.extractResourceInfo] executorPairsPorts is  map[0:[[22061 22062 22063] [22080 22081 22082] [22099 22100 22101]] 1:[[22068 22069 22070] [22087 22088 22089] [22106 22107 22108]] 2:[[22074 22075 22076] [22093 22094 22095] [22112 22113 22114]]]
+2022/01/06 22:00:05 master.go:365: [Master.extractResourceInfo] mpcPairsPorts is  map[0:[22064 22083 22102] 1:[22071 22090 22109] 2:[22077 22096 22115]]
+2022/01/06 22:00:05 master.go:366: [Master.extractResourceInfo] mpcExecutorPorts workerID:[partyPort...] is  map[0:[54000 54000 54000] 1:[55000 55000 55000] 2:[56000 56000 56000]]
+2022/01/06 22:00:05 master.go:367: [Master.extractResourceInfo] distPsIp is  map[0:map[0:127.0.0.1] 1:map[0:127.0.0.1] 2:map[0:127.0.0.1]]
+2022/01/06 22:00:05 master.go:368: [Master.extractResourceInfo] distWorkerIps is  map[0:map[0:[127.0.0.1 127.0.0.1]] 1:map[0:[127.0.0.1 127.0.0.1]] 2:map[0:[127.0.0.1 127.0.0.1]]]
+2022/01/06 22:00:05 master.go:371: [Master.extractResourceInfo] mpcPairNetworkCfg workerID:partyMpcMpcAddrs is is  map[0:127.0.0.1:22064
+127.0.0.1:22083
+127.0.0.1:22102 1:127.0.0.1:22071
+127.0.0.1:22090
+127.0.0.1:22109 2:127.0.0.1:22077
+127.0.0.1:22096
+127.0.0.1:22115]
+2022/01/06 22:00:05 master.go:372: [Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is  map[0:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCa2sAa6sAa+sARILCgnArAHBrAHCrAESCwoJ06wB1KwB1awBGgsKCfClA/ClA/ClAw== 1:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbSsAbWsAbasARILCgnHrAHIrAHJrAESCwoJ2qwB26wB3KwBGgsKCditA9itA9itAw== 2:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbqsAbusAbysARILCgnNrAHOrAHPrAESCwoJ4KwB4awB4qwBGgsKCcC1A8C1A8C1Aw==]
+2022/01/06 22:00:05 master.go:373: [Master.extractResourceInfo] mpcExecutorNetworkCfg workerID:[partyMpcExecutorPort...] is  map[0:[54000 54000 54000] 1:[55000 55000 55000] 2:[56000 56000 56000]]
+2022/01/06 22:00:05 master.go:374: [Master.extractResourceInfo] distributedNetworkCfg partyID:b64_Str is  map[0:map[0:Cg8KCTEyNy4wLjAuMRC4rAEKDwoJMTI3LjAuMC4xEL6sARIPCgkxMjcuMC4wLjEQsawBEg8KCTEyNy4wLjAuMRCyrAE=] 1:map[0:Cg8KCTEyNy4wLjAuMRDLrAEKDwoJMTI3LjAuMC4xENGsARIPCgkxMjcuMC4wLjEQxKwBEg8KCTEyNy4wLjAuMRDFrAE=] 2:map[0:Cg8KCTEyNy4wLjAuMRDerAEKDwoJMTI3LjAuMC4xEOSsARIPCgkxMjcuMC4wLjEQ16wBEg8KCTEyNy4wLjAuMRDYrAE=]]
+2022/01/06 22:00:05 master.go:376: [Master.extractResourceInfo] -----done with checking configurations-----
+2022/01/06 22:00:05 job-manager.go:110: [JobManager] master received all partyServer's reply
+2022/01/06 22:00:05 job-manager.go:113: [JobManager] master wait here until job finish
+2022/01/06 22:00:05 master.go:123: [Master.forwardRegistrations]: start forwardRegistrations... 
+2022/01/06 22:04:54 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22092",
+	"PartyID": 1,
+	"WorkerID": 2,
+	"GroupID": 0
+}
+2022/01/06 22:04:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ResetTime 
+2022/01/06 22:04:59 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22079",
+	"PartyID": 1,
+	"WorkerID": 0,
+	"GroupID": 0
+}
+2022/01/06 22:04:59 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22086",
+	"PartyID": 1,
+	"WorkerID": 1,
+	"GroupID": 0
+}
+2022/01/06 22:05:03 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22105",
+	"PartyID": 2,
+	"WorkerID": 1,
+	"GroupID": 0
+}
+2022/01/06 22:05:03 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22073",
+	"PartyID": 0,
+	"WorkerID": 2,
+	"GroupID": 0
+}
+2022/01/06 22:05:04 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22067",
+	"PartyID": 0,
+	"WorkerID": 1,
+	"GroupID": 0
+}
+2022/01/06 22:05:04 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22098",
+	"PartyID": 2,
+	"WorkerID": 0,
+	"GroupID": 0
+}
+2022/01/06 22:05:04 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22060",
+	"PartyID": 0,
+	"WorkerID": 0,
+	"GroupID": 0
+}
+2022/01/06 22:05:04 master.go:108: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22111",
+	"PartyID": 2,
+	"WorkerID": 2,
+	"GroupID": 0
+}
+2022/01/06 22:05:04 dispatcher.go:30: [Master.Dispatcher]: All worker found: [
+  WorkerAddr=127.0.0.1:22092, PartyID=1, GroupID=0, WorkerID=2 
+  WorkerAddr=127.0.0.1:22079, PartyID=1, GroupID=0, WorkerID=0 
+  WorkerAddr=127.0.0.1:22086, PartyID=1, GroupID=0, WorkerID=1 
+  WorkerAddr=127.0.0.1:22105, PartyID=2, GroupID=0, WorkerID=1 
+  WorkerAddr=127.0.0.1:22073, PartyID=0, GroupID=0, WorkerID=2 
+  WorkerAddr=127.0.0.1:22067, PartyID=0, GroupID=0, WorkerID=1 
+  WorkerAddr=127.0.0.1:22098, PartyID=2, GroupID=0, WorkerID=0 
+  WorkerAddr=127.0.0.1:22060, PartyID=0, GroupID=0, WorkerID=0 
+  WorkerAddr=127.0.0.1:22111, PartyID=2, GroupID=0, WorkerID=2]
+2022/01/06 22:05:04 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22060  worker_id =  0  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCa2sAa6sAa+sARILCgnArAHBrAHCrAESCwoJ06wB1KwB1awBGgsKCfClA/ClA/ClAw== 
+MpcPairNetworkCfg=  127.0.0.1:22064
+127.0.0.1:22083
+127.0.0.1:22102 
+MpcExecutorNetworkCfg=  54000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRC4rAEKDwoJMTI3LjAuMC4xEL6sARIPCgkxMjcuMC4wLjEQsawBEg8KCTEyNy4wLjAuMRCyrAE=
+2022/01/06 22:05:04 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 22:05:04 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22061 ports:22062 ports:22063 ports:22080 ports:22081 ports:22082 ports:22099 ports:22100 ports:22101]
+2022/01/06 22:05:04 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:54000 ports:54000 ports:54000
+2022/01/06 22:05:04 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22065 ps_ip:"127.0.0.1" ps_port:22066]
+2022/01/06 22:05:04 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22072 worker_ip:"127.0.0.1" worker_port:22078]
+2022/01/06 22:05:04 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22067  worker_id =  1  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbSsAbWsAbasARILCgnHrAHIrAHJrAESCwoJ2qwB26wB3KwBGgsKCditA9itA9itAw== 
+MpcPairNetworkCfg=  127.0.0.1:22071
+127.0.0.1:22090
+127.0.0.1:22109 
+MpcExecutorNetworkCfg=  55000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRC4rAEKDwoJMTI3LjAuMC4xEL6sARIPCgkxMjcuMC4wLjEQsawBEg8KCTEyNy4wLjAuMRCyrAE=
+2022/01/06 22:05:04 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 22:05:04 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22068 ports:22069 ports:22070 ports:22087 ports:22088 ports:22089 ports:22106 ports:22107 ports:22108]
+2022/01/06 22:05:04 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:55000 ports:55000 ports:55000
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 22:05:04 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22065 ps_ip:"127.0.0.1" ps_port:22066]
+2022/01/06 22:05:04 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22072 worker_ip:"127.0.0.1" worker_port:22078]
+2022/01/06 22:05:04 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22073  worker_id =  2  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbqsAbusAbysARILCgnNrAHOrAHPrAESCwoJ4KwB4awB4qwBGgsKCcC1A8C1A8C1Aw== 
+MpcPairNetworkCfg=  127.0.0.1:22077
+127.0.0.1:22096
+127.0.0.1:22115 
+MpcExecutorNetworkCfg=  56000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRC4rAEKDwoJMTI3LjAuMC4xEL6sARIPCgkxMjcuMC4wLjEQsawBEg8KCTEyNy4wLjAuMRCyrAE=
+2022/01/06 22:05:04 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 22:05:04 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22074 ports:22075 ports:22076 ports:22093 ports:22094 ports:22095 ports:22112 ports:22113 ports:22114]
+2022/01/06 22:05:04 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:56000 ports:56000 ports:56000
+2022/01/06 22:05:04 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22065 ps_ip:"127.0.0.1" ps_port:22066]
+2022/01/06 22:05:04 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22072 worker_ip:"127.0.0.1" worker_port:22078]
+2022/01/06 22:05:04 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22086  worker_id =  1  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbSsAbWsAbasARILCgnHrAHIrAHJrAESCwoJ2qwB26wB3KwBGgsKCditA9itA9itAw== 
+MpcPairNetworkCfg=  127.0.0.1:22071
+127.0.0.1:22090
+127.0.0.1:22109 
+MpcExecutorNetworkCfg=  55000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRDLrAEKDwoJMTI3LjAuMC4xENGsARIPCgkxMjcuMC4wLjEQxKwBEg8KCTEyNy4wLjAuMRDFrAE=
+2022/01/06 22:05:04 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 22:05:04 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22068 ports:22069 ports:22070 ports:22087 ports:22088 ports:22089 ports:22106 ports:22107 ports:22108]
+2022/01/06 22:05:04 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:55000 ports:55000 ports:55000
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 22:05:04 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22084 ps_ip:"127.0.0.1" ps_port:22085]
+2022/01/06 22:05:04 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22091 worker_ip:"127.0.0.1" worker_port:22097]
+2022/01/06 22:05:04 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22092  worker_id =  2  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbqsAbusAbysARILCgnNrAHOrAHPrAESCwoJ4KwB4awB4qwBGgsKCcC1A8C1A8C1Aw== 
+MpcPairNetworkCfg=  127.0.0.1:22077
+127.0.0.1:22096
+127.0.0.1:22115 
+MpcExecutorNetworkCfg=  56000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRDLrAEKDwoJMTI3LjAuMC4xENGsARIPCgkxMjcuMC4wLjEQxKwBEg8KCTEyNy4wLjAuMRDFrAE=
+2022/01/06 22:05:04 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 22:05:04 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22074 ports:22075 ports:22076 ports:22093 ports:22094 ports:22095 ports:22112 ports:22113 ports:22114]
+2022/01/06 22:05:04 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:56000 ports:56000 ports:56000
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 22:05:04 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22084 ps_ip:"127.0.0.1" ps_port:22085]
+2022/01/06 22:05:04 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22091 worker_ip:"127.0.0.1" worker_port:22097]
+2022/01/06 22:05:04 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22079  worker_id =  0  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCa2sAa6sAa+sARILCgnArAHBrAHCrAESCwoJ06wB1KwB1awBGgsKCfClA/ClA/ClAw== 
+MpcPairNetworkCfg=  127.0.0.1:22064
+127.0.0.1:22083
+127.0.0.1:22102 
+MpcExecutorNetworkCfg=  54000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRDLrAEKDwoJMTI3LjAuMC4xENGsARIPCgkxMjcuMC4wLjEQxKwBEg8KCTEyNy4wLjAuMRDFrAE=
+2022/01/06 22:05:04 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 22:05:04 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22061 ports:22062 ports:22063 ports:22080 ports:22081 ports:22082 ports:22099 ports:22100 ports:22101]
+2022/01/06 22:05:04 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:54000 ports:54000 ports:54000
+2022/01/06 22:05:04 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22084 ps_ip:"127.0.0.1" ps_port:22085]
+2022/01/06 22:05:04 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22091 worker_ip:"127.0.0.1" worker_port:22097]
+2022/01/06 22:05:04 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22098  worker_id =  0  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCa2sAa6sAa+sARILCgnArAHBrAHCrAESCwoJ06wB1KwB1awBGgsKCfClA/ClA/ClAw== 
+MpcPairNetworkCfg=  127.0.0.1:22064
+127.0.0.1:22083
+127.0.0.1:22102 
+MpcExecutorNetworkCfg=  54000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRDerAEKDwoJMTI3LjAuMC4xEOSsARIPCgkxMjcuMC4wLjEQ16wBEg8KCTEyNy4wLjAuMRDYrAE=
+2022/01/06 22:05:04 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 22:05:04 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22061 ports:22062 ports:22063 ports:22080 ports:22081 ports:22082 ports:22099 ports:22100 ports:22101]
+2022/01/06 22:05:04 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:54000 ports:54000 ports:54000
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 22:05:04 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22103 ps_ip:"127.0.0.1" ps_port:22104]
+2022/01/06 22:05:04 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22110 worker_ip:"127.0.0.1" worker_port:22116]
+2022/01/06 22:05:04 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22105  worker_id =  1  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbSsAbWsAbasARILCgnHrAHIrAHJrAESCwoJ2qwB26wB3KwBGgsKCditA9itA9itAw== 
+MpcPairNetworkCfg=  127.0.0.1:22071
+127.0.0.1:22090
+127.0.0.1:22109 
+MpcExecutorNetworkCfg=  55000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRDerAEKDwoJMTI3LjAuMC4xEOSsARIPCgkxMjcuMC4wLjEQ16wBEg8KCTEyNy4wLjAuMRDYrAE=
+2022/01/06 22:05:04 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 22:05:04 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22068 ports:22069 ports:22070 ports:22087 ports:22088 ports:22089 ports:22106 ports:22107 ports:22108]
+2022/01/06 22:05:04 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:55000 ports:55000 ports:55000
+2022/01/06 22:05:04 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22103 ps_ip:"127.0.0.1" ps_port:22104]
+2022/01/06 22:05:04 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22110 worker_ip:"127.0.0.1" worker_port:22116]
+2022/01/06 22:05:04 tasks.go:50: [Master.Dispatch]: task 1. Dispatch registered worker= 127.0.0.1:22111  worker_id =  2  group id =  0  with the JobInfo: 
+ExecutorPairNetworkCfg=  CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCbqsAbusAbysARILCgnNrAHOrAHPrAESCwoJ4KwB4awB4qwBGgsKCcC1A8C1A8C1Aw== 
+MpcPairNetworkCfg=  127.0.0.1:22077
+127.0.0.1:22096
+127.0.0.1:22115 
+MpcExecutorNetworkCfg=  56000 
+DistributedExecutorPairNetworkCfg=  Cg8KCTEyNy4wLjAuMRDerAEKDwoJMTI3LjAuMC4xEOSsARIPCgkxMjcuMC4wLjEQ16wBEg8KCTEyNy4wLjAuMRDYrAE=
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 22:05:04 job-train.go:771: [RetrieveNetworkConfig]: cfg.Ips [127.0.0.1 127.0.0.1 127.0.0.1]
+2022/01/06 22:05:04 job-train.go:772: [RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays [ports:22074 ports:22075 ports:22076 ports:22093 ports:22094 ports:22095 ports:22112 ports:22113 ports:22114]
+2022/01/06 22:05:04 job-train.go:773: [RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray ports:56000 ports:56000 ports:56000
+2022/01/06 22:05:04 job-train.go:759: [RetrieveDistributedNetworkConfig]: cfg.Ps [ps_ip:"127.0.0.1" ps_port:22103 ps_ip:"127.0.0.1" ps_port:22104]
+2022/01/06 22:05:04 job-train.go:760: [RetrieveDistributedNetworkConfig]: cfg.Workers [worker_ip:"127.0.0.1" worker_port:22110 worker_ip:"127.0.0.1" worker_port:22116]
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.ReceiveJobInfo 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.RunMpc 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.RunMpc 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.RunMpc 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.RunMpc 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.RunMpc 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.RunMpc 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.RunMpc 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.RunMpc 
+2022/01/06 22:05:04 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.RunMpc 
+2022/01/06 22:05:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:09 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.DoTask 
+2022/01/06 22:05:09 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.DoTask 
+2022/01/06 22:05:09 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.DoTask 
+2022/01/06 22:05:09 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.DoTask 
+2022/01/06 22:05:09 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.DoTask 
+2022/01/06 22:05:09 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.DoTask 
+2022/01/06 22:05:09 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.DoTask 
+2022/01/06 22:05:09 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.DoTask 
+2022/01/06 22:05:09 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.DoTask 
+2022/01/06 22:05:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:26 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:36 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:36 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:36 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:36 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:36 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:36 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:36 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:36 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:36 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:46 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:46 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:46 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:46 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:46 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:46 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:46 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:46 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:46 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.ResetTime 
+2022/01/06 22:05:56 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:06 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:16 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.ResetTime 
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22092, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22079, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22086, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22105, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22073, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22067, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22098, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22060, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22111, methodName: TrainWorker.RetrieveModelReport 
+2022/01/06 22:06:22 dispatcher.go:319: [Master.Dispatcher]: report is 
+2022/01/06 22:06:22 master.go:396: [Master]: Finish job, update to coord, jobStatus: <finished> 
+2022/01/06 22:06:22 dispatcher.go:338: [Scheduler]: Master finish dispatching tasks.
+2022/01/06 22:06:22 master.go:399: [Master]: Finish job, begin to shutdown master
+2022/01/06 22:06:22 rpcbase.go:103: [Master]: call Master.Shutdown
+2022/01/06 22:06:22 rpc_utils.go:49: ----Rpc Call----, addr: 127.0.0.1:22059, methodName: Master.Shutdown 
+2022/01/06 22:06:22 master.go:422: [Master]: Shutdown server
+2022/01/06 22:06:22 rpcbase.go:68: [Master]: Listener.Accept: accept tcp [::]:22059: use of closed network connection 
+2022/01/06 22:06:22 rpcbase.go:73: [Master]: RpcServer closed
+2022/01/06 22:06:22 rpcbase.go:110: [Master]: call Master.Shutdown successfully
+2022/01/06 22:06:22 master.go:402: [Master] 127.0.0.1:22059: Thread-4 master.finish, job completed
+2022/01/06 22:06:22 job-manager.go:117: [JobManager] master finish all jobs
+2022/01/06 22:06:22 master.go:130: [Master.forwardRegistrations]: Thread-2 forwardRegistrations: exit
+2022/01/06 22:06:22 master_heartbeat.go:17: [Master.Heartbeat] Thread-1 heartBeatLoop exit
+2022/01/12 19:44:33 run_coordserver.go:90: [coordinator server]: Stop multi consumers
+2022/01/12 19:44:33 run_coordserver.go:93: [coordinator server]: Monitor Stopped
+2022/01/12 19:44:33 run_coordserver.go:99: [coordinator server]: Consumer Stopped
+2022/01/12 19:44:33 run_coordserver.go:129: [coordinator server]: Server Stopped

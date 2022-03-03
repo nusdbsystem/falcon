@@ -30,7 +30,9 @@ func RunWorker(masterAddr, workerType,
 	workerPreGroup, partyNum, workerGroupNum int) *common.LaunchResourceReply {
 
 	reply := new(common.LaunchResourceReply)
-	reply.ResourceNum = workerPreGroup
+	reply.ResourceNum = workerGroupNum * workerPreGroup
+	reply.ResourceNumPreGroup = workerPreGroup
+	reply.GroupNum = workerGroupNum
 	reply.PartyID = common.PartyID
 	reply.ResourceSVCs = make(map[common.WorkerIdType]*common.ResourceSVC)
 
@@ -62,7 +64,7 @@ func RunWorker(masterAddr, workerType,
 		resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId))
 		resourceSVC.ExecutorPSPort = 0
 		resourceSVC.PsExecutorPorts = []common.PortType{}
-		resourceSVC.PsPsPorts = []common.PortType{}
+		//resourceSVC.PsPsPorts = []common.PortType{}
 		resourceSVC.DistributedRole = common.CentralizedWorker
 		reply.ResourceSVCs[workerId] = resourceSVC
 
@@ -109,12 +111,11 @@ func RunWorker(masterAddr, workerType,
 			resourceSVC.GroupId = groupId
 			resourceSVC.ResourceIP = nodeIP
 			resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
-			resourceSVC.ExecutorExecutorPort = []common.PortType{}
+			resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
 			resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
 			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0)
 			resourceSVC.ExecutorPSPort = 0
 			resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerPreGroup - 1)
-			resourceSVC.PsPsPorts = resourcemanager.GetFreePort(partyNum)
 			resourceSVC.DistributedRole = common.DistributedParameterServer
 			reply.ResourceSVCs[workerId] = resourceSVC
 			if common.Deployment == common.Docker {
@@ -154,7 +155,6 @@ func RunWorker(masterAddr, workerType,
 				resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId))
 				resourceSVC.ExecutorPSPort = resourcemanager.GetFreePort(1)[0]
 				resourceSVC.PsExecutorPorts = []common.PortType{}
-				resourceSVC.PsPsPorts = []common.PortType{}
 				resourceSVC.DistributedRole = common.DistributedWorker
 				reply.ResourceSVCs[workerId] = resourceSVC
 

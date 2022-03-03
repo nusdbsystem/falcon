@@ -89,7 +89,7 @@ func (wk *TrainWorker) DoTask(taskName string, rep *entity.DoTaskReply) error {
 	// 1. decode args
 	logger.Log.Println("[TrainWorker] TrainWorker.DoTask called, taskName:", taskName)
 	defer func() {
-		logger.Log.Printf("[TrainWorker]: WorkerAddr %s, TrainWorker.DoTask for task %s done\n", wk.Addr, taskName)
+		logger.Log.Printf("[TrainWorker]: WorkerAddr %s, TrainWorker.DoTask Done for task %s \n", wk.Addr, taskName)
 	}()
 
 	// 2. init task manager for this task

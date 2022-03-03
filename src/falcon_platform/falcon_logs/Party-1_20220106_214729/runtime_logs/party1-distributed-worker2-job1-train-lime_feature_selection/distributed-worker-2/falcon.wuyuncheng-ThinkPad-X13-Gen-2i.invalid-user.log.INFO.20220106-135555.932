@@ -1,0 +1,799 @@
+Log file created at: 2022/01/06 13:55:55
+Running on machine: wuyuncheng-ThinkPad-X13-Gen-2i
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0106 13:55:55.882300   932 main.cc:118] Init log file.
+I0106 13:55:55.882696   932 logger.cc:11] -------- parse parameters correct --------
+I0106 13:55:55.882759   932 logger.cc:11] party-id: 1
+I0106 13:55:55.882778   932 logger.cc:11] party-num: 3
+I0106 13:55:55.882830   932 logger.cc:11] fl-setting: 1
+I0106 13:55:55.882853   932 logger.cc:11] existing-key: 1
+I0106 13:55:55.882900   932 logger.cc:11] network-file: CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCYCsAYGsAYKsARILCgmTrAGUrAGVrAESCwoJpqwBp6wBqKwBGgsKCcC1A8C1A8C1Aw==
+I0106 13:55:55.882925   932 logger.cc:11] log-file: /opt/falcon/src/falcon_platform/falcon_logs/Party-1_20220106_214729/runtime_logs/party1-distributed-worker2-job1-train-lime_feature_selection/distributed-worker-2
+I0106 13:55:55.882961   932 logger.cc:11] data-input-file: /dataOutputPath/client.txt
+I0106 13:55:55.882985   932 logger.cc:11] data-output-file: 0
+I0106 13:55:55.883014   932 logger.cc:11] key-file: /dataPath/phe_keys
+I0106 13:55:55.883045   932 logger.cc:11] algorithm-name: lime_feature_selection
+I0106 13:55:55.883091   932 logger.cc:11] model-save-file: /modelPath/saved_model.pb
+I0106 13:55:55.883116   932 logger.cc:11] model-report-file: /modelPath/report.txt
+I0106 13:55:55.883157   932 logger.cc:11] is-inference: 0
+I0106 13:55:55.883179   932 logger.cc:11] inference-endpoint: 0
+I0106 13:55:55.883213   932 logger.cc:11] is-distributed: 1
+I0106 13:55:55.883241   932 logger.cc:11] distributed-train-network-file: Cg8KCTEyNy4wLjAuMRCRrAEKDwoJMTI3LjAuMC4xEJesARIPCgkxMjcuMC4wLjEQiqwBEg8KCTEyNy4wLjAuMRCLrAE=
+I0106 13:55:55.883270   932 logger.cc:11] worker-id: 2
+I0106 13:55:55.883297   932 logger.cc:11] distributed-role: 1
+I0106 13:55:55.889637   932 party.cc:41] local_data is reading dataset from: /dataOutputPath/client.txt
+I0106 13:55:55.889667   932 party.cc:42] sample_num = 569
+I0106 13:55:55.889683   932 party.cc:53] feature_num = 10
+I0106 13:55:55.889700   932 logger.cc:11] Parse algorithm name and run the program
+I0106 13:55:55.889856   932 network_converter.cc:53] [deserialize_network_configs]: mpc_port_array_size: 3 --------
+I0106 13:55:55.889928   932 party.cc:156] [deserialize_network_configs]: mpc_port_array_size after: 3 --------
+I0106 13:55:55.889948   932 party.cc:159] [deserialize_network_configs]: size of ip address is: 3 --------
+I0106 13:55:55.889959   932 party.cc:163] ips[0] = 127.0.0.1
+I0106 13:55:55.889981   932 party.cc:165] port_array[0][0] = 22016
+I0106 13:55:55.889990   932 party.cc:165] port_array[0][1] = 22017
+I0106 13:55:55.890003   932 party.cc:165] port_array[0][2] = 22018
+I0106 13:55:55.890013   932 party.cc:163] ips[1] = 127.0.0.1
+I0106 13:55:55.890024   932 party.cc:165] port_array[1][0] = 22035
+I0106 13:55:55.890043   932 party.cc:165] port_array[1][1] = 22036
+I0106 13:55:55.890056   932 party.cc:165] port_array[1][2] = 22037
+I0106 13:55:55.890066   932 party.cc:163] ips[2] = 127.0.0.1
+I0106 13:55:55.890081   932 party.cc:165] port_array[2][0] = 22054
+I0106 13:55:55.890089   932 party.cc:165] port_array[2][1] = 22055
+I0106 13:55:55.890110   932 party.cc:165] port_array[2][2] = 22056
+I0106 13:55:55.890130   932 logger.cc:11] executor_mpc_ports[0] = 56000
+I0106 13:55:55.890167   932 logger.cc:11] executor_mpc_ports[1] = 56000
+I0106 13:55:55.890183   932 logger.cc:11] executor_mpc_ports[2] = 56000
+I0106 13:55:55.890205   932 party.cc:181] Establish network communications with other parties
+I0106 13:55:55.890249   932 party.cc:193] My party id is: 1, I am listening party 0 on port 22035
+I0106 13:55:55.890333   932 party.cc:202] The other party's port I will send data to is: 22017
+I0106 13:55:56.391237   932 party.cc:208] Communication channel established with party 0, port is 22035.
+I0106 13:55:56.391469   932 party.cc:193] My party id is: 1, I am listening party 2 on port 22037
+I0106 13:55:56.391571   932 party.cc:202] The other party's port I will send data to is: 22055
+I0106 13:55:56.892416   932 party.cc:208] Communication channel established with party 2, port is 22037.
+I0106 13:55:56.892560   932 logger.cc:11] Execute distributed training logic
+I0106 13:55:56.892635   932 logger.cc:11] Execute as worker
+I0106 13:55:56.892683   932 party.cc:223] Init threshold partially homomorphic encryption keys
+I0106 13:55:56.894250   932 party.cc:233] Initialize phe keys success
+I0106 13:55:56.894279   932 party.cc:234] m_use_existing_key = 1
+I0106 13:55:56.896845   932 logger.cc:11] Begin to select features
+I0106 13:55:56.896919   932 logger.cc:11] [lime_feat_sel]: params_str = CiIvbG9nX3JlZy9zZWxlY3RlZF9zYW1wbGVkX2RhdGEudHh0EiEvbG9nX3JlZy9zZWxlY3RlZF9wcmVkaWN0aW9ucy50eHQaGy9sb2dfcmVnL3NhbXBsZV93ZWlnaHRzLnR4dCDoBygCMAE6EWxpbmVhcl9yZWdyZXNzaW9uQBRKIy9sb2dfcmVnL3NlbGVjdGVkX2ZlYXR1cmVfZGF0YTEudHh0
+I0106 13:55:56.897126   932 logger.cc:11] Deserialize the lime feature_selection params
+I0106 13:55:56.897189   932 logger.cc:11] [lime_feat_sel] num_samples = 1000
+I0106 13:55:56.897269   932 logger.cc:11] [lime_feat_sel] feature_selection = linear_regression
+I0106 13:55:56.913123   932 logger.cc:11] Read the generated samples finished
+I0106 13:55:57.121886   932 logger.cc:11] Read the computed predictions finished
+I0106 13:55:57.216746   932 logger.cc:11] [select_features]: feature_selection = linear_regression
+I0106 13:55:57.216800   932 logger.cc:11] [explain_one_label]: algorithm_name = 1
+I0106 13:55:57.216820   932 logger.cc:11] linear_reg_params.batch_size = 256
+I0106 13:55:57.216842   932 logger.cc:11] linear_reg_params.max_iteration = 20
+I0106 13:55:57.216866   932 logger.cc:11] linear_reg_params.converge_threshold = 0.000100
+I0106 13:55:57.216888   932 logger.cc:11] linear_reg_params.with_regularization = 1
+I0106 13:55:57.216907   932 logger.cc:11] linear_reg_params.alpha = 0.100000
+I0106 13:55:57.216938   932 logger.cc:11] linear_reg_params.learning_rate = 0.100000
+I0106 13:55:57.216955   932 logger.cc:11] linear_reg_params.decay = 0.100000
+I0106 13:55:57.216980   932 logger.cc:11] linear_reg_params.penalty = l2
+I0106 13:55:57.216997   932 logger.cc:11] linear_reg_params.optimizer = sgd
+I0106 13:55:57.217020   932 logger.cc:11] linear_reg_params.metric = mse
+I0106 13:55:57.217037   932 logger.cc:11] linear_reg_params.dp_budget = 0.100000
+I0106 13:55:57.217057   932 logger.cc:11] linear_reg_params.fit_bias = 1
+I0106 13:55:57.218897   932 logger.cc:11] ************* Distributed LIME Interpret *************
+I0106 13:55:57.219600   932 logger.cc:11] begin to deserialize the ps network configs
+I0106 13:55:57.219658   932 network_converter.cc:120] worker size = 2
+I0106 13:55:57.219732   932 logger.cc:11] Establish network communications with parameter server, current worker id = 2
+I0106 13:55:57.219758   932 logger.cc:11] worker_ips[0] = 127.0.0.1
+I0106 13:55:57.219784   932 logger.cc:11] worker_ports[0] = 22033
+I0106 13:55:57.219806   932 logger.cc:11] ps_ips[0] = 127.0.0.1
+I0106 13:55:57.219830   932 logger.cc:11] ps_ports[0] = 22026
+I0106 13:55:57.219846   932 logger.cc:11] worker_ips[1] = 127.0.0.1
+I0106 13:55:57.219864   932 logger.cc:11] worker_ports[1] = 22039
+I0106 13:55:57.219877   932 logger.cc:11] ps_ips[1] = 127.0.0.1
+I0106 13:55:57.219902   932 logger.cc:11] ps_ports[1] = 22027
+I0106 13:55:57.864547   932 logger.cc:11] Communication channel established with ps 127.0.0.1, port is 22027
+I0106 13:55:57.864660   932 logger.cc:11] [lime_linear_reg_train worker]: init linear regression model
+I0106 13:55:57.867367   932 logger.cc:11] ************* Distributed LIME Training Start *************
+I0106 13:55:57.869531   932 logger.cc:11] -------- Worker Iteration 0 --------
+I0106 13:55:58.474221   932 logger.cc:11] -------- Worker Iteration 0, worker.receive weight success --------
+I0106 13:55:58.474624   932 logger.cc:11] -------- Worker Iteration 0, worker.receive sample id success, batch size 128 --------
+I0106 13:55:58.474682   932 logger.cc:11] -------- Worker Iteration 0, worker.consensus on batch ids --------
+I0106 13:55:58.474753   932 logger.cc:11] print mini_batch_indexes
+I0106 13:55:58.478664   932 logger.cc:11] -------- Worker Iteration 0, worker.encode_samples success --------
+I0106 13:55:58.478783   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:55:58.478859   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:55:58.478893   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:55:58.478917   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:55:58.479086   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:55:58.887193   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:55:58.887240   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:55:58.888911   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:55:58.895552   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:55:58.895654   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:55:58.895689   932 logger.cc:11] -------- Worker Iteration 0, forward computation success --------
+I0106 13:55:58.895779   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:55:58.896605   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:55:58.902886   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:55:58.903017   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:55:58.903043   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:55:58.903066   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:55:59.826225   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:55:59.826256   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:55:59.826270   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:55:59.903012   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:55:59.903055   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:00.123725   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:00.220640   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:00.220681   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:00.221470   932 logger.cc:11] -------- Worker Iteration 0, backward computation success --------
+I0106 13:56:00.221740   932 logger.cc:11] -------- Worker Iteration 0, send gradients to ps success --------
+I0106 13:56:00.221765   932 logger.cc:11] -------- The 0-th iteration consumed time = 1.558358
+I0106 13:56:00.222226   932 logger.cc:11] -------- Worker Iteration 1 --------
+I0106 13:56:00.254420   932 logger.cc:11] -------- Worker Iteration 1, worker.receive weight success --------
+I0106 13:56:00.257681   932 logger.cc:11] -------- Worker Iteration 1, worker.receive sample id success, batch size 128 --------
+I0106 13:56:00.257723   932 logger.cc:11] -------- Worker Iteration 1, worker.consensus on batch ids --------
+I0106 13:56:00.257758   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:00.261956   932 logger.cc:11] -------- Worker Iteration 1, worker.encode_samples success --------
+I0106 13:56:00.262037   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:00.262099   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:00.262122   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:00.262136   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:00.262156   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:00.519950   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:00.519981   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:00.521620   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:00.641263   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:00.641373   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:00.641404   932 logger.cc:11] -------- Worker Iteration 1, forward computation success --------
+I0106 13:56:00.641482   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:00.642259   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:00.648440   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:00.648479   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:00.648495   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:00.648514   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:01.588346   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:01.588382   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:01.588398   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:01.705526   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:01.705559   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:01.970283   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:02.043949   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:02.043998   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:02.044502   932 logger.cc:11] -------- Worker Iteration 1, backward computation success --------
+I0106 13:56:02.044718   932 logger.cc:11] -------- Worker Iteration 1, send gradients to ps success --------
+I0106 13:56:02.044745   932 logger.cc:11] -------- The 1-th iteration consumed time = 1.416079
+I0106 13:56:02.045392   932 logger.cc:11] -------- Worker Iteration 2 --------
+I0106 13:56:02.066754   932 logger.cc:11] -------- Worker Iteration 2, worker.receive weight success --------
+I0106 13:56:02.075050   932 logger.cc:11] -------- Worker Iteration 2, worker.receive sample id success, batch size 128 --------
+I0106 13:56:02.075109   932 logger.cc:11] -------- Worker Iteration 2, worker.consensus on batch ids --------
+I0106 13:56:02.075140   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:02.079607   932 logger.cc:11] -------- Worker Iteration 2, worker.encode_samples success --------
+I0106 13:56:02.079718   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:02.079790   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:02.079811   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:02.079823   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:02.079839   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:02.573426   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:02.573487   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:02.575717   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:02.586133   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:02.586247   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:02.586288   932 logger.cc:11] -------- Worker Iteration 2, forward computation success --------
+I0106 13:56:02.586362   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:02.587113   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:02.595355   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:02.595402   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:02.595429   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:02.595458   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:04.028940   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:04.028980   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:04.028995   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:04.127674   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:04.127729   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:04.453768   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:04.662504   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:04.662564   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:04.663183   932 logger.cc:11] -------- Worker Iteration 2, backward computation success --------
+I0106 13:56:04.663453   932 logger.cc:11] -------- Worker Iteration 2, send gradients to ps success --------
+I0106 13:56:04.663484   932 logger.cc:11] -------- The 2-th iteration consumed time = 2.191671
+I0106 13:56:04.663981   932 logger.cc:11] -------- Worker Iteration 3 --------
+I0106 13:56:04.706600   932 logger.cc:11] -------- Worker Iteration 3, worker.receive weight success --------
+I0106 13:56:04.707991   932 logger.cc:11] -------- Worker Iteration 3, worker.receive sample id success, batch size 128 --------
+I0106 13:56:04.708024   932 logger.cc:11] -------- Worker Iteration 3, worker.consensus on batch ids --------
+I0106 13:56:04.708047   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:04.712975   932 logger.cc:11] -------- Worker Iteration 3, worker.encode_samples success --------
+I0106 13:56:04.713104   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:04.713204   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:04.713230   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:04.713245   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:04.713268   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:05.296360   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:05.296416   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:05.299280   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:05.308080   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:05.308199   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:05.308243   932 logger.cc:11] -------- Worker Iteration 3, forward computation success --------
+I0106 13:56:05.308337   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:05.309340   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:05.317109   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:05.317149   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:05.317170   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:05.317196   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:06.724555   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:06.724602   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:06.724617   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:06.885839   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:06.885882   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:07.152590   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:07.293095   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:07.293149   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:07.293792   932 logger.cc:11] -------- Worker Iteration 3, backward computation success --------
+I0106 13:56:07.294127   932 logger.cc:11] -------- Worker Iteration 3, send gradients to ps success --------
+I0106 13:56:07.294157   932 logger.cc:11] -------- The 3-th iteration consumed time = 2.388789
+I0106 13:56:07.294812   932 logger.cc:11] -------- Worker Iteration 4 --------
+I0106 13:56:07.315541   932 logger.cc:11] -------- Worker Iteration 4, worker.receive weight success --------
+I0106 13:56:07.320065   932 logger.cc:11] -------- Worker Iteration 4, worker.receive sample id success, batch size 128 --------
+I0106 13:56:07.320097   932 logger.cc:11] -------- Worker Iteration 4, worker.consensus on batch ids --------
+I0106 13:56:07.320120   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:07.323693   932 logger.cc:11] -------- Worker Iteration 4, worker.encode_samples success --------
+I0106 13:56:07.323815   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:07.323886   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:07.323909   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:07.323922   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:07.323940   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:07.663673   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:07.663730   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:07.665879   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:07.844030   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:07.844154   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:07.844193   932 logger.cc:11] -------- Worker Iteration 4, forward computation success --------
+I0106 13:56:07.844295   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:07.845291   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:07.853056   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:07.853098   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:07.853121   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:07.853143   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:09.217726   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:09.217782   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:09.217800   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:09.377678   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:09.377718   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:09.748401   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:09.868355   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:09.868412   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:09.869015   932 logger.cc:11] -------- Worker Iteration 4, backward computation success --------
+I0106 13:56:09.869262   932 logger.cc:11] -------- Worker Iteration 4, send gradients to ps success --------
+I0106 13:56:09.869292   932 logger.cc:11] -------- The 4-th iteration consumed time = 2.241161
+I0106 13:56:09.869933   932 logger.cc:11] -------- Worker Iteration 5 --------
+I0106 13:56:09.904297   932 logger.cc:11] -------- Worker Iteration 5, worker.receive weight success --------
+I0106 13:56:09.904589   932 logger.cc:11] -------- Worker Iteration 5, worker.receive sample id success, batch size 128 --------
+I0106 13:56:09.904613   932 logger.cc:11] -------- Worker Iteration 5, worker.consensus on batch ids --------
+I0106 13:56:09.904635   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:09.908735   932 logger.cc:11] -------- Worker Iteration 5, worker.encode_samples success --------
+I0106 13:56:09.908823   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:09.908896   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:09.908915   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:09.908926   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:09.908942   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:10.402019   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:10.402066   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:10.404148   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:10.416146   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:10.416261   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:10.416301   932 logger.cc:11] -------- Worker Iteration 5, forward computation success --------
+I0106 13:56:10.416393   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:10.417165   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:10.428658   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:10.428700   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:10.428726   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:10.428751   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:11.775267   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:11.775314   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:11.775334   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:11.938284   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:11.938328   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:12.202590   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:12.375888   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:12.375965   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:12.376596   932 logger.cc:11] -------- Worker Iteration 5, backward computation success --------
+I0106 13:56:12.376870   932 logger.cc:11] -------- Worker Iteration 5, send gradients to ps success --------
+I0106 13:56:12.376900   932 logger.cc:11] -------- The 5-th iteration consumed time = 2.137800
+I0106 13:56:12.377393   932 logger.cc:11] -------- Worker Iteration 6 --------
+I0106 13:56:12.416724   932 logger.cc:11] -------- Worker Iteration 6, worker.receive weight success --------
+I0106 13:56:12.434226   932 logger.cc:11] -------- Worker Iteration 6, worker.receive sample id success, batch size 128 --------
+I0106 13:56:12.434262   932 logger.cc:11] -------- Worker Iteration 6, worker.consensus on batch ids --------
+I0106 13:56:12.434284   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:12.437350   932 logger.cc:11] -------- Worker Iteration 6, worker.encode_samples success --------
+I0106 13:56:12.437459   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:12.437530   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:12.437552   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:12.437566   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:12.437582   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:12.779301   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:12.779359   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:12.781644   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:12.949537   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:12.949677   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:12.949720   932 logger.cc:11] -------- Worker Iteration 6, forward computation success --------
+I0106 13:56:12.949833   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:12.950897   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:12.958444   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:12.958488   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:12.958519   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:12.958545   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:14.304044   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:14.304085   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:14.304101   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:14.403178   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:14.403234   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:14.726132   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:14.936296   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:14.936372   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:14.937191   932 logger.cc:11] -------- Worker Iteration 6, backward computation success --------
+I0106 13:56:14.937500   932 logger.cc:11] -------- Worker Iteration 6, send gradients to ps success --------
+I0106 13:56:14.937530   932 logger.cc:11] -------- The 6-th iteration consumed time = 1.975958
+I0106 13:56:14.938148   932 logger.cc:11] -------- Worker Iteration 7 --------
+I0106 13:56:14.974146   932 logger.cc:11] -------- Worker Iteration 7, worker.receive weight success --------
+I0106 13:56:14.974537   932 logger.cc:11] -------- Worker Iteration 7, worker.receive sample id success, batch size 128 --------
+I0106 13:56:14.974565   932 logger.cc:11] -------- Worker Iteration 7, worker.consensus on batch ids --------
+I0106 13:56:14.974583   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:14.977222   932 logger.cc:11] -------- Worker Iteration 7, worker.encode_samples success --------
+I0106 13:56:14.977304   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:14.977360   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:14.977380   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:14.977389   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:14.977404   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:15.311484   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:15.311523   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:15.313684   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:15.474097   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:15.474200   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:15.474241   932 logger.cc:11] -------- Worker Iteration 7, forward computation success --------
+I0106 13:56:15.474340   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:15.475035   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:15.482614   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:15.482653   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:15.482676   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:15.482692   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:16.798498   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:16.806756   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:16.806813   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:16.970250   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:16.970294   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:17.202193   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:17.417083   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:17.417165   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:17.418097   932 logger.cc:11] -------- Worker Iteration 7, backward computation success --------
+I0106 13:56:17.418423   932 logger.cc:11] -------- Worker Iteration 7, send gradients to ps success --------
+I0106 13:56:17.418452   932 logger.cc:11] -------- The 7-th iteration consumed time = 1.783395
+I0106 13:56:17.419157   932 logger.cc:11] -------- Worker Iteration 8 --------
+I0106 13:56:17.503338   932 logger.cc:11] -------- Worker Iteration 8, worker.receive weight success --------
+I0106 13:56:17.503942   932 logger.cc:11] -------- Worker Iteration 8, worker.receive sample id success, batch size 128 --------
+I0106 13:56:17.503973   932 logger.cc:11] -------- Worker Iteration 8, worker.consensus on batch ids --------
+I0106 13:56:17.504005   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:17.508324   932 logger.cc:11] -------- Worker Iteration 8, worker.encode_samples success --------
+I0106 13:56:17.508428   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:17.508502   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:17.508523   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:17.508534   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:17.508551   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:18.000582   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:18.000628   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:18.002758   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:18.015444   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:18.015568   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:18.015604   932 logger.cc:11] -------- Worker Iteration 8, forward computation success --------
+I0106 13:56:18.015712   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:18.016471   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:18.027917   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:18.027961   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:18.027987   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:18.028012   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:19.421746   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:19.421788   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:19.421804   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:19.566411   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:19.566448   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:19.831861   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:20.027685   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:20.027740   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:20.028409   932 logger.cc:11] -------- Worker Iteration 8, backward computation success --------
+I0106 13:56:20.028704   932 logger.cc:11] -------- Worker Iteration 8, send gradients to ps success --------
+I0106 13:56:20.028753   932 logger.cc:11] -------- The 8-th iteration consumed time = 2.040520
+I0106 13:56:20.029410   932 logger.cc:11] -------- Worker Iteration 9 --------
+I0106 13:56:20.050778   932 logger.cc:11] -------- Worker Iteration 9, worker.receive weight success --------
+I0106 13:56:20.052512   932 logger.cc:11] -------- Worker Iteration 9, worker.receive sample id success, batch size 128 --------
+I0106 13:56:20.052841   932 logger.cc:11] -------- Worker Iteration 9, worker.consensus on batch ids --------
+I0106 13:56:20.052879   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:20.056706   932 logger.cc:11] -------- Worker Iteration 9, worker.encode_samples success --------
+I0106 13:56:20.056785   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:20.056838   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:20.056856   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:20.056869   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:20.056890   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:20.390945   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:20.390998   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:20.393174   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:20.639106   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:20.639221   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:20.639258   932 logger.cc:11] -------- Worker Iteration 9, forward computation success --------
+I0106 13:56:20.639359   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:20.640290   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:20.650152   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:20.650195   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:20.650216   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:20.650241   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:21.986876   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:21.986922   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:21.986938   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:22.150557   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:22.150599   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:22.512403   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:22.626633   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:22.626688   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:22.627277   932 logger.cc:11] -------- Worker Iteration 9, backward computation success --------
+I0106 13:56:22.627604   932 logger.cc:11] -------- Worker Iteration 9, send gradients to ps success --------
+I0106 13:56:22.627636   932 logger.cc:11] -------- The 9-th iteration consumed time = 1.930381
+I0106 13:56:22.628181   932 logger.cc:11] -------- Worker Iteration 10 --------
+I0106 13:56:22.648983   932 logger.cc:11] -------- Worker Iteration 10, worker.receive weight success --------
+I0106 13:56:22.654098   932 logger.cc:11] -------- Worker Iteration 10, worker.receive sample id success, batch size 128 --------
+I0106 13:56:22.654148   932 logger.cc:11] -------- Worker Iteration 10, worker.consensus on batch ids --------
+I0106 13:56:22.654194   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:22.658725   932 logger.cc:11] -------- Worker Iteration 10, worker.encode_samples success --------
+I0106 13:56:22.658864   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:22.658946   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:22.659067   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:22.659083   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:22.659099   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:23.198601   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:23.198642   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:23.200495   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:23.207878   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:23.207990   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:23.208022   932 logger.cc:11] -------- Worker Iteration 10, forward computation success --------
+I0106 13:56:23.208118   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:23.209035   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:23.216739   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:23.216780   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:23.216804   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:23.216825   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:24.504745   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:24.504796   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:24.504814   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:24.666895   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:24.666937   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:25.032300   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:25.134855   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:25.134903   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:25.135438   932 logger.cc:11] -------- Worker Iteration 10, backward computation success --------
+I0106 13:56:25.136693   932 logger.cc:11] -------- Worker Iteration 10, send gradients to ps success --------
+I0106 13:56:25.136731   932 logger.cc:11] -------- The 10-th iteration consumed time = 2.416085
+I0106 13:56:25.137382   932 logger.cc:11] -------- Worker Iteration 11 --------
+I0106 13:56:25.157411   932 logger.cc:11] -------- Worker Iteration 11, worker.receive weight success --------
+I0106 13:56:25.159512   932 logger.cc:11] -------- Worker Iteration 11, worker.receive sample id success, batch size 128 --------
+I0106 13:56:25.159543   932 logger.cc:11] -------- Worker Iteration 11, worker.consensus on batch ids --------
+I0106 13:56:25.159565   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:25.162434   932 logger.cc:11] -------- Worker Iteration 11, worker.encode_samples success --------
+I0106 13:56:25.162523   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:25.162583   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:25.162603   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:25.162616   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:25.162636   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:25.498221   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:25.498275   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:25.500526   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:25.675812   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:25.675907   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:25.675942   932 logger.cc:11] -------- Worker Iteration 11, forward computation success --------
+I0106 13:56:25.676028   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:25.676649   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:25.683985   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:25.684026   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:25.684049   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:25.684072   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:27.001335   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:27.001379   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:27.001399   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:27.166451   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:27.166491   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:27.520758   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:27.638322   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:27.638375   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:27.639065   932 logger.cc:11] -------- Worker Iteration 11, backward computation success --------
+I0106 13:56:27.639344   932 logger.cc:11] -------- Worker Iteration 11, send gradients to ps success --------
+I0106 13:56:27.639371   932 logger.cc:11] -------- The 11-th iteration consumed time = 1.960694
+I0106 13:56:27.640020   932 logger.cc:11] -------- Worker Iteration 12 --------
+I0106 13:56:27.661249   932 logger.cc:11] -------- Worker Iteration 12, worker.receive weight success --------
+I0106 13:56:27.663264   932 logger.cc:11] -------- Worker Iteration 12, worker.receive sample id success, batch size 128 --------
+I0106 13:56:27.663358   932 logger.cc:11] -------- Worker Iteration 12, worker.consensus on batch ids --------
+I0106 13:56:27.663455   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:27.668234   932 logger.cc:11] -------- Worker Iteration 12, worker.encode_samples success --------
+I0106 13:56:27.668349   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:27.668422   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:27.668442   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:27.668452   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:27.668468   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:28.184984   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:28.185024   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:28.187011   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:28.193533   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:28.193629   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:28.193660   932 logger.cc:11] -------- Worker Iteration 12, forward computation success --------
+I0106 13:56:28.193766   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:28.194461   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:28.201807   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:28.201846   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:28.201869   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:28.201896   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:29.496579   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:29.496624   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:29.496644   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:29.657941   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:29.657972   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:30.016150   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:30.126567   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:30.126621   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:30.127223   932 logger.cc:11] -------- Worker Iteration 12, backward computation success --------
+I0106 13:56:30.127476   932 logger.cc:11] -------- Worker Iteration 12, send gradients to ps success --------
+I0106 13:56:30.127507   932 logger.cc:11] -------- The 12-th iteration consumed time = 2.278151
+I0106 13:56:30.128051   932 logger.cc:11] -------- Worker Iteration 13 --------
+I0106 13:56:30.151347   932 logger.cc:11] -------- Worker Iteration 13, worker.receive weight success --------
+I0106 13:56:30.169579   932 logger.cc:11] -------- Worker Iteration 13, worker.receive sample id success, batch size 128 --------
+I0106 13:56:30.169616   932 logger.cc:11] -------- Worker Iteration 13, worker.consensus on batch ids --------
+I0106 13:56:30.169637   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:30.173817   932 logger.cc:11] -------- Worker Iteration 13, worker.encode_samples success --------
+I0106 13:56:30.173914   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:30.173983   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:30.174003   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:30.174016   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:30.174033   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:30.672886   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:30.672937   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:30.674899   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:30.681385   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:30.681478   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:30.681511   932 logger.cc:11] -------- Worker Iteration 13, forward computation success --------
+I0106 13:56:30.681591   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:30.682216   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:30.689106   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:30.689146   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:30.689169   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:30.689193   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:32.060160   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:32.069250   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:32.069322   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:32.226119   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:32.226181   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:32.574477   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:32.696034   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:32.696105   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:32.696972   932 logger.cc:11] -------- Worker Iteration 13, backward computation success --------
+I0106 13:56:32.697957   932 logger.cc:11] -------- Worker Iteration 13, send gradients to ps success --------
+I0106 13:56:32.697991   932 logger.cc:11] -------- The 13-th iteration consumed time = 2.467577
+I0106 13:56:32.698446   932 logger.cc:11] -------- Worker Iteration 14 --------
+I0106 13:56:32.733510   932 logger.cc:11] -------- Worker Iteration 14, worker.receive weight success --------
+I0106 13:56:32.733834   932 logger.cc:11] -------- Worker Iteration 14, worker.receive sample id success, batch size 128 --------
+I0106 13:56:32.733860   932 logger.cc:11] -------- Worker Iteration 14, worker.consensus on batch ids --------
+I0106 13:56:32.733882   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:32.738104   932 logger.cc:11] -------- Worker Iteration 14, worker.encode_samples success --------
+I0106 13:56:32.738193   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:32.738263   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:32.738282   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:32.738293   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:32.738309   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:33.229486   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:33.229529   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:33.231537   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:33.244225   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:33.244340   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:33.244372   932 logger.cc:11] -------- Worker Iteration 14, forward computation success --------
+I0106 13:56:33.244462   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:33.245462   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:33.255115   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:33.255163   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:33.255185   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:33.255208   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:34.586146   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:34.586194   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:34.586230   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:34.747433   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:34.747495   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:35.003587   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:35.203891   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:35.203970   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:35.204818   932 logger.cc:11] -------- Worker Iteration 14, backward computation success --------
+I0106 13:56:35.205171   932 logger.cc:11] -------- Worker Iteration 14, send gradients to ps success --------
+I0106 13:56:35.205202   932 logger.cc:11] -------- The 14-th iteration consumed time = 1.975538
+I0106 13:56:35.205706   932 logger.cc:11] -------- Worker Iteration 15 --------
+I0106 13:56:35.226548   932 logger.cc:11] -------- Worker Iteration 15, worker.receive weight success --------
+I0106 13:56:35.229295   932 logger.cc:11] -------- Worker Iteration 15, worker.receive sample id success, batch size 128 --------
+I0106 13:56:35.229387   932 logger.cc:11] -------- Worker Iteration 15, worker.consensus on batch ids --------
+I0106 13:56:35.229460   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:35.234179   932 logger.cc:11] -------- Worker Iteration 15, worker.encode_samples success --------
+I0106 13:56:35.234337   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:35.234416   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:35.234470   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:35.234511   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:35.234560   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:35.740010   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:35.740056   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:35.742079   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:35.749112   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:35.749228   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:35.749267   932 logger.cc:11] -------- Worker Iteration 15, forward computation success --------
+I0106 13:56:35.749361   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:35.750381   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:35.761620   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:35.761667   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:35.761699   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:35.761724   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:37.074426   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:37.083554   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:37.083581   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:37.183327   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:37.183380   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:37.592919   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:37.706826   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:37.706885   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:37.707500   932 logger.cc:11] -------- Worker Iteration 15, backward computation success --------
+I0106 13:56:37.707751   932 logger.cc:11] -------- Worker Iteration 15, send gradients to ps success --------
+I0106 13:56:37.707782   932 logger.cc:11] -------- The 15-th iteration consumed time = 2.363994
+I0106 13:56:37.708276   932 logger.cc:11] -------- Worker Iteration 16 --------
+I0106 13:56:37.734741   932 logger.cc:11] -------- Worker Iteration 16, worker.receive weight success --------
+I0106 13:56:37.745620   932 logger.cc:11] -------- Worker Iteration 16, worker.receive sample id success, batch size 128 --------
+I0106 13:56:37.745664   932 logger.cc:11] -------- Worker Iteration 16, worker.consensus on batch ids --------
+I0106 13:56:37.745692   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:37.750303   932 logger.cc:11] -------- Worker Iteration 16, worker.encode_samples success --------
+I0106 13:56:37.750416   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:37.750492   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:37.750514   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:37.750530   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:37.750555   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:38.126663   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:38.126703   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:38.128738   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:38.250142   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:38.250243   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:38.250283   932 logger.cc:11] -------- Worker Iteration 16, forward computation success --------
+I0106 13:56:38.250367   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:38.251068   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:38.258455   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:38.258489   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:38.258505   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:38.258522   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:39.584319   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:39.584349   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:39.584365   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:39.748311   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:39.748353   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:40.095443   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:40.202169   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:40.202212   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:40.202792   932 logger.cc:11] -------- Worker Iteration 16, backward computation success --------
+I0106 13:56:40.203032   932 logger.cc:11] -------- Worker Iteration 16, send gradients to ps success --------
+I0106 13:56:40.203058   932 logger.cc:11] -------- The 16-th iteration consumed time = 2.121508
+I0106 13:56:40.203500   932 logger.cc:11] -------- Worker Iteration 17 --------
+I0106 13:56:40.235472   932 logger.cc:11] -------- Worker Iteration 17, worker.receive weight success --------
+I0106 13:56:40.252614   932 logger.cc:11] -------- Worker Iteration 17, worker.receive sample id success, batch size 128 --------
+I0106 13:56:40.252641   932 logger.cc:11] -------- Worker Iteration 17, worker.consensus on batch ids --------
+I0106 13:56:40.252651   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:40.257114   932 logger.cc:11] -------- Worker Iteration 17, worker.encode_samples success --------
+I0106 13:56:40.257195   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:40.257277   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:40.257287   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:40.257293   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:40.257299   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:40.680796   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:40.680835   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:40.682725   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:40.800217   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:40.800302   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:40.800324   932 logger.cc:11] -------- Worker Iteration 17, forward computation success --------
+I0106 13:56:40.800392   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:40.800926   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:40.808161   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:40.808195   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:40.808212   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:40.808223   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:42.231644   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:42.231676   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:42.231685   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:42.391841   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:42.391883   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:42.747315   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:42.823037   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:42.823087   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:42.823664   932 logger.cc:11] -------- Worker Iteration 17, backward computation success --------
+I0106 13:56:42.823904   932 logger.cc:11] -------- Worker Iteration 17, send gradients to ps success --------
+I0106 13:56:42.823922   932 logger.cc:11] -------- The 17-th iteration consumed time = 2.393486
+I0106 13:56:42.824520   932 logger.cc:11] -------- Worker Iteration 18 --------
+I0106 13:56:42.858458   932 logger.cc:11] -------- Worker Iteration 18, worker.receive weight success --------
+I0106 13:56:42.858901   932 logger.cc:11] -------- Worker Iteration 18, worker.receive sample id success, batch size 128 --------
+I0106 13:56:42.858925   932 logger.cc:11] -------- Worker Iteration 18, worker.consensus on batch ids --------
+I0106 13:56:42.858937   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:42.861660   932 logger.cc:11] -------- Worker Iteration 18, worker.encode_samples success --------
+I0106 13:56:42.861712   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:42.861752   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:42.861758   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:42.861763   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:42.861766   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:43.192633   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:43.192667   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:43.194710   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:43.355995   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:43.356081   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:43.356106   932 logger.cc:11] -------- Worker Iteration 18, forward computation success --------
+I0106 13:56:43.356194   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:43.356858   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:43.363613   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:43.363636   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:43.363654   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:43.363667   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:44.694402   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:44.694432   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:44.694439   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:44.792470   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:44.792507   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:45.108677   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:45.318410   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:45.318455   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:45.319068   932 logger.cc:11] -------- Worker Iteration 18, backward computation success --------
+I0106 13:56:45.319274   932 logger.cc:11] -------- Worker Iteration 18, send gradients to ps success --------
+I0106 13:56:45.319298   932 logger.cc:11] -------- The 18-th iteration consumed time = 1.724884
+I0106 13:56:45.319819   932 logger.cc:11] -------- Worker Iteration 19 --------
+I0106 13:56:45.371515   932 logger.cc:11] -------- Worker Iteration 19, worker.receive weight success --------
+I0106 13:56:45.373715   932 logger.cc:11] -------- Worker Iteration 19, worker.receive sample id success, batch size 128 --------
+I0106 13:56:45.373747   932 logger.cc:11] -------- Worker Iteration 19, worker.consensus on batch ids --------
+I0106 13:56:45.373759   932 logger.cc:11] print mini_batch_indexes
+I0106 13:56:45.378279   932 logger.cc:11] -------- Worker Iteration 19, worker.encode_samples success --------
+I0106 13:56:45.378492   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: getter_phe_pub_key success
+I0106 13:56:45.378567   932 djcs_t_aux.cc:269] [djcs_t_aux_matrix_mult]: mpz_init success --------
+I0106 13:56:45.378582   932 djcs_t_aux.cc:275] [djcs_t_aux_matrix_mult]: ciphers getter success --------
+I0106 13:56:45.378657   932 djcs_t_aux.cc:280] [djcs_t_aux_matrix_mult]: getter_n success --------
+I0106 13:56:45.378671   932 djcs_t_aux.cc:288] [djcs_t_aux_matrix_mult]: mpz_cmp success --------
+I0106 13:56:45.853574   932 djcs_t_aux.cc:294] [djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success --------
+I0106 13:56:45.853603   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success
+I0106 13:56:45.855252   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party send_long_message success
+I0106 13:56:45.887277   932 logger.cc:11] [LogisticRegressionModel.compute_batch_phe_aggregation]: passive party deserialize_encoded_number_array success
+I0106 13:56:45.887390   932 logger.cc:11] [forward_computation]: forward computation success
+I0106 13:56:45.887423   932 logger.cc:11] -------- Worker Iteration 19, forward computation success --------
+I0106 13:56:45.887501   932 logger.cc:11] [lime_backward_computation]: predicted_label_precision = 24
+I0106 13:56:45.888309   932 logger.cc:11] [lime_backward_computation]: batch_true_labels_precision = 24
+I0106 13:56:45.895304   932 logger.cc:11] Finish compute encrypted loss and sync up with all parties
+I0106 13:56:45.895331   932 logger.cc:11] [lime_backward_computation]: finish compute encrypted residual
+I0106 13:56:45.895345   932 logger.cc:11] [lime_backward_computation]: loss_precision = 24
+I0106 13:56:45.895355   932 logger.cc:11] [lime_backward_computation]: sample_weight_precision = 12
+I0106 13:56:47.269871   932 logger.cc:11] [lime_backward_computation]: finish compute cipher multiplication
+I0106 13:56:47.269901   932 party.cc:771] src precision is the same as dest_precision, do nothing
+I0106 13:56:47.269910   932 logger.cc:11] [lime_backward_computation]: finish truncate ciphers
+I0106 13:56:47.428628   932 logger.cc:11] abs(linear_reg_model.local_weight[0].getter_exponent) = 12
+I0106 13:56:47.428676   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) before truncate = 48
+I0106 13:56:47.784955   932 party.cc:667] [secret_shares_to_ciphers]: enter secret shares to ciphers func --------
+I0106 13:56:47.879042   932 party.cc:801] truncate the ciphers precision finished
+I0106 13:56:47.879087   932 logger.cc:11] abs(encrypted_gradients[0].getter_exponent) after truncate = 12
+I0106 13:56:47.879732   932 logger.cc:11] -------- Worker Iteration 19, backward computation success --------
+I0106 13:56:47.879956   932 logger.cc:11] -------- Worker Iteration 19, send gradients to ps success --------
+I0106 13:56:47.879981   932 logger.cc:11] -------- The 19-th iteration consumed time = 2.409693
+I0106 13:56:47.880681   932 logger.cc:11] Distributed Training time = 41.798224
+I0106 13:56:47.880704   932 logger.cc:11] ************* Distributed Training Finished *************
+I0106 13:56:47.880877   932 logger.cc:11] [lime_linear_reg_train worker]: distributed train finished.
+I0106 13:56:47.882201   932 logger.cc:11] display local weights
+I0106 13:56:47.882225   932 logger.cc:11] party 0's weight size = 11
+I0106 13:56:47.882236   932 logger.cc:11] party 1's weight size = 10
+I0106 13:56:47.882246   932 logger.cc:11] party 2's weight size = 10
+I0106 13:56:47.882254   932 logger.cc:11] decrypt party 0's weights
+I0106 13:56:47.975608   932 logger.cc:11] decrypt party 1's weights
+I0106 13:56:47.975713   932 logger.cc:11] I am party 1, i am packaging weights
+I0106 13:56:48.066609   932 linear_model_base.cc:218] local weight[0] = 0.03369140625
+I0106 13:56:48.066679   932 linear_model_base.cc:218] local weight[1] = 0.00732421875
+I0106 13:56:48.066743   932 linear_model_base.cc:218] local weight[2] = -0.074951171875
+I0106 13:56:48.066866   932 linear_model_base.cc:218] local weight[3] = 0.01123046875
+I0106 13:56:48.066928   932 linear_model_base.cc:218] local weight[4] = -0.078857421875
+I0106 13:56:48.066979   932 linear_model_base.cc:218] local weight[5] = -0.07275390625
+I0106 13:56:48.067044   932 linear_model_base.cc:218] local weight[6] = -0.08056640625
+I0106 13:56:48.067092   932 linear_model_base.cc:218] local weight[7] = 0.02099609375
+I0106 13:56:48.067157   932 linear_model_base.cc:218] local weight[8] = -0.0380859375
+I0106 13:56:48.067207   932 linear_model_base.cc:218] local weight[9] = -0.024169921875
+I0106 13:56:48.067282   932 logger.cc:11] decrypt party 2's weights
+I0106 13:56:48.139278   932 logger.cc:11] Decrypt and display local explanations finished
+I0106 13:56:48.152370   932 logger.cc:11] begin to select features and write dataset
+I0106 13:56:48.176388   932 logger.cc:11] Finish feature selection
+I0106 13:56:48.176614   932 logger.cc:11] Finish distributed training algorithm
+I0106 13:56:48.176640   932 logger.cc:11] Time taken by main func: 52293177 microseconds

@@ -8,7 +8,6 @@ import (
 	"falcon_platform/logger"
 	"falcon_platform/utils"
 	"fmt"
-	"math"
 	"sync"
 	"time"
 )
@@ -24,7 +23,8 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	master.Lock()
 	var SerializedWorker []string
 	for _, worker := range master.workers {
-		tmp := fmt.Sprintf("WorkerAddr=%s, PartyID=%d, GroupID=%d, WorkerID=%d", worker.Addr, worker.PartyID, worker.GroupID, worker.WorkerID)
+		tmp := fmt.Sprintf("\n  WorkerAddr=%s, PartyID=%d, GroupID=%d, WorkerID=%d",
+					worker.Addr, worker.PartyID, worker.GroupID, worker.WorkerID)
 		SerializedWorker = append(SerializedWorker, tmp)
 	}
 	logger.Log.Println("[Master.Dispatcher]: All worker found:", SerializedWorker)
@@ -132,6 +132,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 			classNum = dslOjb.Tasks.LimeInterpret.ClassNum
 		}
 
+		// centralized training
 		if dslOjb.DistributedTask.Enable == 0 {
 			// for each classID, assign tasks Serially
 			var selectFeatureFile = ""
@@ -186,8 +187,6 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 		if dslOjb.DistributedTask.Enable == 1 {
 
-			classIterationTimes := int(math.Ceil(float64(classNum / master.LimeDecision.ClassParallelism)))
-
 			// generate availableGroupIds
 			var availableGroupIds []common.GroupIdType
 			for i := int32(0); i < master.LimeDecision.ClassParallelism; i++ {
@@ -195,99 +194,123 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 			}
 
 			var classId int32 = 0
-			var curIter = 0
 
-			// for each iteration, assign task to many workers
-			for curIter < classIterationTimes {
+			logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, len(availableGroupIds) = ",
+				len(availableGroupIds),
+				" max class parallelism =",master.LimeDecision.ClassParallelism,
+				" classNum = ", classNum)
+
+			// for each group, assign a class id
+			for {
 				if classId == classNum {
 					break
 				}
+				master.Lock()
+				if len(availableGroupIds) == 0{
+					logger.Log.Println("[Master.Dispatcher]: wait until one worker group is released...")
+					time.Sleep(1 * time.Second)
+					master.Unlock()
+					continue
+				}
+				groupId := availableGroupIds[0]
+				availableGroupIds = availableGroupIds[1:]
+				logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, assign classid=", classId,
+							" to worker group =", groupId,
+							" current len(availableGroupIds) = ", availableGroupIds)
+				master.Unlock()
 
-				// for each group, assign a class id
-				for i := 0; i < len(availableGroupIds); i++ {
+				// every time create a new limeWg for different worker, because different worker are running parallelism
+				limeWg := sync.WaitGroup{}
 
-					if classId == classNum {
-						break
+				go func(groupIdParam common.GroupIdType, classIdParam int32, availableGroupIds *[]common.GroupIdType, limeWgParam *sync.WaitGroup) {
+
+					var selectFeatureFile = ""
+
+					if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
+
+						// generate SerializedAlgorithmConfig
+						dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
+							common.GenerateLimeFeatSelParams(dslOjb.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, classIdParam)
+
+						// Run mpc
+						master.dispatchMpcTask(&limeWg, dslOjb.Tasks.LimeFeature.MpcAlgorithmName, groupIdParam)
+						if ok := master.isSuccessful(); !ok {
+							return
+						}
+
+						// Run model_training
+						master.dispatchGeneralTask(&limeWg,
+							common.LimeFeatureSubTask+dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig,
+							groupIdParam)
+
+						if ok := master.isSuccessful(); !ok {
+							return
+						}
 					}
 
-					groupId := availableGroupIds[0]
-					availableGroupIds = availableGroupIds[1:]
+					if dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
 
-					go func(groupIdParam common.GroupIdType, classIdParam int32, availableGroupIds *[]common.GroupIdType) {
+						// generate SerializedAlgorithmConfig
+						dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
+							common.GenerateLimeInterpretParams(dslOjb.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig,
+								classIdParam, selectFeatureFile, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName)
 
-						var selectFeatureFile = ""
-
-						if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
-
-							// generate SerializedAlgorithmConfig
-							dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
-								common.GenerateLimeFeatSelParams(dslOjb.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, classIdParam)
-
-							// Run mpc
-							master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeFeature.MpcAlgorithmName, groupIdParam)
-							if ok := master.isSuccessful(); !ok {
-								return
-							}
-
-							// Run model_training
-							master.dispatchGeneralTask(&wg,
-								common.LimeFeatureSubTask+dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig,
-								groupIdParam)
-
-							if ok := master.isSuccessful(); !ok {
-								return
-							}
+						// Run mpc
+						master.dispatchMpcTask(&limeWg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName,
+							groupIdParam)
+						if ok := master.isSuccessful(); !ok {
+							return
 						}
 
-						if dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
+						// Run model_training
+						master.dispatchGeneralTask(&limeWg,
+							common.LimeInterpretSubTask+dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig,
+							groupIdParam)
 
-							// generate SerializedAlgorithmConfig
-							dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
-								common.GenerateLimeInterpretParams(dslOjb.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig,
-									classIdParam, selectFeatureFile, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName)
-
-							// Run mpc
-							master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName,
-								groupIdParam)
-							if ok := master.isSuccessful(); !ok {
-								return
-							}
-
-							// Run model_training
-							master.dispatchGeneralTask(&wg,
-								common.LimeInterpretSubTask+dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig,
-								groupIdParam)
-
-							if ok := master.isSuccessful(); !ok {
-								return
-							}
+						if ok := master.isSuccessful(); !ok {
+							return
 						}
+					}
 
-						// after finishing the task, append the groupIdParam back to availableGroupIds
-						*availableGroupIds = append(*availableGroupIds, groupIdParam)
+					master.Lock()
+					// after finishing the task, append the groupIdParam back to availableGroupIds
+					*availableGroupIds = append(*availableGroupIds, groupIdParam)
+					logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, add group id back to availableGroupIds, current len = ", len(*availableGroupIds))
+					master.Unlock()
 
-					}(groupId, classId, &availableGroupIds)
 
-					// process the next task, with new classID
-					classId++
-				}
+				}(groupId, classId, &availableGroupIds, &limeWg)
 
-				curIter++
+				// process the next task, with new classID
+				classId++
 			}
+
 
 			// wait until all task done
+			logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks done, now waiting for all lime task (for each class) finishing...")
 			for {
-				if int32(len(availableGroupIds)) == master.LimeDecision.ClassParallelism && // all groupId has been released
-					// classId is latest
-					classId == classNum {
+				master.jobStatusLock.Lock()
+				// kill workers may cause to this,
+				if master.jobStatus == common.JobKilled {
+					master.jobStatusLock.Unlock()
+					logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks: job is killed caused by some error")
+
 					break
-				} else {
-					time.Sleep(20 * time.Second)
+				}else{
+					master.jobStatusLock.Unlock()
+					master.Lock()
+					logger.Log.Println("[Master.Dispatcher]: current len(len(availableGroupIds)) = ", len(availableGroupIds))
+					// all groupId has been released
+					if int32(len(availableGroupIds)) == master.LimeDecision.ClassParallelism{
+						master.Unlock()
+						break
+					} else {
+						master.Unlock()
+						time.Sleep(5 * time.Second)
+					}
 				}
 			}
-
 		}
-
 	}
 
 	// 3.5 more tasks later? add later
@@ -312,6 +335,7 @@ func (master *Master) runtimeStatusMonitor(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
+			logger.Log.Println("[Scheduler]: Master finish dispatching tasks.")
 			return
 		case status := <-master.runtimeStatus:
 			// read runtime status,

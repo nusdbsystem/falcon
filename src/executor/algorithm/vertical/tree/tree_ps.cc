@@ -511,14 +511,16 @@ void DTParameterServer::distributed_predict(
         " with message size " + std::to_string(message_sizes[i]));
   }
 
-  double cur_accuracy;
+  double cur_accuracy = 0;
   // step 2: if active party, wait worker finish execution
   if (party.party_type == falcon::ACTIVE_PARTY) {
     std::vector< string > encoded_messages = this->wait_worker_complete();
 
     // deserialize encrypted predicted labels
-    for (int i=0; i < encoded_messages.size(); i++){
-      cur_accuracy += std::stoi(encoded_messages[i]);
+    for (auto & encoded_message : encoded_messages){
+      log_info("[Ps.distributed_predict]: 4. active party receive accuracy from worker, acc = " + encoded_message);
+
+      cur_accuracy += std::stof(encoded_message);
     }
 
     log_info("[Ps.distributed_predict]: 4. active party calculate training accuracy = " + std::to_string(cur_accuracy));
@@ -527,6 +529,8 @@ void DTParameterServer::distributed_predict(
 
 
 void DTParameterServer::save_model(const std::string& model_save_file){
+
+  log_info("[Ps.distributed_predict]: active party save tree model and report to  " + model_save_file);
 
   std::string pb_dt_model_string;
   serialize_tree_model(alg_builder.tree, pb_dt_model_string);

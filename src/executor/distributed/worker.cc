@@ -26,7 +26,7 @@ Worker::Worker(const std::string& ps_network_config_pb_str, int m_worker_id){
       worker_ips,worker_ports,
       ps_ips, ps_ports,
       ps_network_config_pb_str);
-  log_info("Establish network communications with parameter server");
+  log_info("Establish network communications with parameter server, current worker id = " + to_string(worker_id));
 
   for (int i = 0; i < worker_ips.size(); i++) {
     log_info("worker_ips[" + std::to_string(i) + "] = " + worker_ips[i]);

@@ -14,13 +14,14 @@ import (
 
 // parsed from DslObj, sent to each worker with all related information
 // add NetWorkFile, MpcIP, MpcPort
-type DslObj4SingleParty struct {
+type DslObj4SingleWorker struct {
 
 	// those are the same as TranJob object or DslObj
 	JobFlType   string
 	ExistingKey uint
 	PartyNums   uint
 	Tasks       common.Tasks
+	WorkerPreGroup int
 
 	// Only one party's information included
 	PartyInfo common.PartyInfo
@@ -128,7 +129,7 @@ func DecodeWorkerInfo(encodedStr string) *WorkerInfo {
 	return args
 }
 
-func EncodeDslObj4SingleParty(args *DslObj4SingleParty) []byte {
+func EncodeDslObj4SingleWorker(args *DslObj4SingleWorker) []byte {
 
 	argTypeRegister()
 
@@ -143,16 +144,16 @@ func EncodeDslObj4SingleParty(args *DslObj4SingleParty) []byte {
 	return converted
 }
 
-func DecodeDslObj4SingleParty(by []byte) (*DslObj4SingleParty, error) {
+func DecodeDslObj4SingleWorker(by []byte) (*DslObj4SingleWorker, error) {
 	argTypeRegister()
 	reader := bytes.NewReader(by)
 	var decoder = gob.NewDecoder(reader)
-	var d DslObj4SingleParty
+	var d DslObj4SingleWorker
 	err := decoder.Decode(&d)
 	return &d, err
 }
 
-func EncodeDslObj4SinglePartyGeneral(args interface{}) []byte {
+func EncodeDslObj4SingleWorkerGeneral(args interface{}) []byte {
 
 	argTypeRegister()
 
@@ -165,8 +166,8 @@ func EncodeDslObj4SinglePartyGeneral(args interface{}) []byte {
 		logger.Log.Println(t)
 	case *ShutdownReply:
 		args = args.(*ShutdownReply)
-	case *DslObj4SingleParty:
-		args = args.(*DslObj4SingleParty)
+	case *DslObj4SingleWorker:
+		args = args.(*DslObj4SingleWorker)
 	case *DoTaskReply:
 		args = args.(*DoTaskReply)
 	}
@@ -178,7 +179,7 @@ func EncodeDslObj4SinglePartyGeneral(args interface{}) []byte {
 	return converted
 }
 
-func DecodeDslObj4SinglePartyGeneral(by []byte, reply interface{}) {
+func DecodeDslObj4SingleWorkerGeneral(by []byte, reply interface{}) {
 
 	v := reflect.ValueOf(reply).Elem()
 
@@ -208,8 +209,8 @@ func DecodeDslObj4SinglePartyGeneral(by []byte, reply interface{}) {
 				name := relType.Field(i).Name
 				v.FieldByName(name).Set(elem.FieldByName(name))
 			}
-		case *DslObj4SingleParty:
-			var d DslObj4SingleParty
+		case *DslObj4SingleWorker:
+			var d DslObj4SingleWorker
 			err := decoder.Decode(&d)
 			if err != nil {
 				panic(err)

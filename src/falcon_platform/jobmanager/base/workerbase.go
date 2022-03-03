@@ -53,7 +53,7 @@ type WorkerBase struct {
 	DistributedRole uint
 
 	// each worker store full job information,
-	DslObj entity.DslObj4SingleParty
+	DslObj entity.DslObj4SingleWorker
 }
 
 func (w *WorkerBase) RunWorker(worker Worker) {
@@ -77,7 +77,7 @@ func (w *WorkerBase) InitWorkerBase(workerAddr, name string) {
 
 func (w *WorkerBase) ReceiveJobInfo(arg string, rep *entity.DoTaskReply) error {
 	// receive job information, called by master
-	dslObj, err := entity.DecodeDslObj4SingleParty([]byte(arg))
+	dslObj, err := entity.DecodeDslObj4SingleWorker([]byte(arg))
 	if err != nil {
 		rep.RuntimeError = true
 		rep.TaskMsg.RuntimeMsg = err.Error()
