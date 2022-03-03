@@ -22,7 +22,8 @@ int main(int argc, char* argv[]) {
   }
 
   auto file = argv[1];
-  auto flag = argv[2];
+  auto flag = atoi(argv[2]);
+  cout << "flag = " << flag << endl;
   ifstream ifs(file);
   string line;
   vector< vector<float> > table;
@@ -53,6 +54,7 @@ int main(int argc, char* argv[]) {
   } else {
     normalized_attribute = n_attributes;
   }
+  cout << "normalized attribute number: " << normalized_attribute << endl;
   for (int i = 0; i < n_samples; i++) {
     for (int j = 0; j < normalized_attribute; j++) {
       if (table[i][j] > attributes_max[j]) {

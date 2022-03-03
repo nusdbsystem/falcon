@@ -1066,28 +1066,28 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   return local_explanations;
 }
 
-void lime_comp_pred(Party party, const std::string& params_str) {
+void lime_comp_pred(Party party, const std::string& params_str, const std::string& output_path_prefix) {
   log_info("Begin to compute the lime required samples and predictions");
   // 1. deserialize the LimePreComputeParams
   LimeCompPredictionParams comp_prediction_params;
   // set the values for local debug
-  std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
-//  comp_prediction_params.original_model_name = "logistic_regression";
-//  comp_prediction_params.original_model_saved_file = path_prefix + "/log_reg/saved_model.pb";
-//  comp_prediction_params.model_type = "classification";
-//  comp_prediction_params.class_num = 2;
-//  comp_prediction_params.explain_instance_idx = 0;
-//  comp_prediction_params.sample_around_instance = true;
-//  comp_prediction_params.num_total_samples = 1000;
-//  comp_prediction_params.sampling_method = "gaussian";
-//  comp_prediction_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
-//  comp_prediction_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
+  // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
+  //  comp_prediction_params.original_model_name = "logistic_regression";
+  //  comp_prediction_params.original_model_saved_file = path_prefix + "/log_reg/saved_model.pb";
+  //  comp_prediction_params.model_type = "classification";
+  //  comp_prediction_params.class_num = 2;
+  //  comp_prediction_params.explain_instance_idx = 0;
+  //  comp_prediction_params.sample_around_instance = true;
+  //  comp_prediction_params.num_total_samples = 1000;
+  //  comp_prediction_params.sampling_method = "gaussian";
+  //  comp_prediction_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
+  //  comp_prediction_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
 
   std::string comp_pred_params_str = base64_decode_to_pb_string(params_str);
   deserialize_lime_comp_pred_params(comp_prediction_params, comp_pred_params_str);
-  comp_prediction_params.original_model_saved_file = path_prefix + comp_prediction_params.original_model_saved_file;
-  comp_prediction_params.generated_sample_file = path_prefix + comp_prediction_params.generated_sample_file;
-  comp_prediction_params.computed_prediction_file = path_prefix + comp_prediction_params.computed_prediction_file;
+  comp_prediction_params.original_model_saved_file = output_path_prefix + comp_prediction_params.original_model_saved_file;
+  comp_prediction_params.generated_sample_file = output_path_prefix + comp_prediction_params.generated_sample_file;
+  comp_prediction_params.computed_prediction_file = output_path_prefix + comp_prediction_params.computed_prediction_file;
   log_info("Deserialize the lime comp_prediction params");
 
   // 2. generate random samples
@@ -1145,32 +1145,32 @@ void lime_comp_pred(Party party, const std::string& params_str) {
   delete scaler;
 }
 
-void lime_comp_weight(Party party, const std::string& params_str) {
+void lime_comp_weight(Party party, const std::string& params_str, const std::string& output_path_prefix) {
   log_info("Begin to compute sample weights");
   // deserialize the LimeCompWeightsParams
   LimeCompWeightsParams comp_weights_params;
   // set the values for local debug
-  std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
-//  comp_weights_params.explain_instance_idx = 0;
-//  comp_weights_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
-//  comp_weights_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
-//  comp_weights_params.is_precompute = false;
-//  comp_weights_params.num_samples = 1000;
-//  comp_weights_params.class_num = 2;
-//  comp_weights_params.distance_metric = "euclidean";
-//  comp_weights_params.kernel = "exponential";
-//  comp_weights_params.kernel_width = 0.75;
-//  comp_weights_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
-//  comp_weights_params.selected_samples_file = path_prefix + "/log_reg/selected_sampled_data.txt";
-//  comp_weights_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
+  // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
+  //  comp_weights_params.explain_instance_idx = 0;
+  //  comp_weights_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
+  //  comp_weights_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
+  //  comp_weights_params.is_precompute = false;
+  //  comp_weights_params.num_samples = 1000;
+  //  comp_weights_params.class_num = 2;
+  //  comp_weights_params.distance_metric = "euclidean";
+  //  comp_weights_params.kernel = "exponential";
+  //  comp_weights_params.kernel_width = 0.75;
+  //  comp_weights_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
+  //  comp_weights_params.selected_samples_file = path_prefix + "/log_reg/selected_sampled_data.txt";
+  //  comp_weights_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
 
   std::string comp_weight_params_str = base64_decode_to_pb_string(params_str);
   deserialize_lime_comp_weights_params(comp_weights_params, comp_weight_params_str);
-  comp_weights_params.generated_sample_file = path_prefix + comp_weights_params.generated_sample_file;
-  comp_weights_params.computed_prediction_file = path_prefix + comp_weights_params.computed_prediction_file;
-  comp_weights_params.sample_weights_file = path_prefix + comp_weights_params.sample_weights_file;
-  comp_weights_params.selected_samples_file = path_prefix + comp_weights_params.selected_samples_file;
-  comp_weights_params.selected_predictions_file = path_prefix + comp_weights_params.selected_predictions_file;
+  comp_weights_params.generated_sample_file = output_path_prefix + comp_weights_params.generated_sample_file;
+  comp_weights_params.computed_prediction_file = output_path_prefix + comp_weights_params.computed_prediction_file;
+  comp_weights_params.sample_weights_file = output_path_prefix + comp_weights_params.sample_weights_file;
+  comp_weights_params.selected_samples_file = output_path_prefix + comp_weights_params.selected_samples_file;
+  comp_weights_params.selected_predictions_file = output_path_prefix + comp_weights_params.selected_predictions_file;
   log_info("Deserialize the lime comp_weights params");
 
   // call lime_explainer compute_sample_weights function
@@ -1192,6 +1192,7 @@ void lime_comp_weight(Party party, const std::string& params_str) {
 }
 
 void lime_feat_sel(Party party, const std::string& params_str,
+                   const std::string& output_path_prefix,
                    const std::string& ps_network_str,
                    int is_distributed,
                    int distributed_role,
@@ -1205,11 +1206,11 @@ void lime_feat_sel(Party party, const std::string& params_str,
   log_info("Deserialize the lime feature_selection params");
   log_info("[lime_feat_sel] num_samples = " + std::to_string(feat_sel_params.num_samples));
   log_info("[lime_feat_sel] feature_selection = " + feat_sel_params.feature_selection);
-  std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
-  feat_sel_params.selected_samples_file = path_prefix + feat_sel_params.selected_samples_file;
-  feat_sel_params.selected_predictions_file = path_prefix + feat_sel_params.selected_predictions_file;
-  feat_sel_params.sample_weights_file = path_prefix + feat_sel_params.sample_weights_file;
-  feat_sel_params.selected_features_file = path_prefix + feat_sel_params.selected_features_file;
+  // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
+  feat_sel_params.selected_samples_file = output_path_prefix + feat_sel_params.selected_samples_file;
+  feat_sel_params.selected_predictions_file = output_path_prefix + feat_sel_params.selected_predictions_file;
+  feat_sel_params.sample_weights_file = output_path_prefix + feat_sel_params.sample_weights_file;
+  feat_sel_params.selected_features_file = output_path_prefix + feat_sel_params.selected_features_file;
 
   LimeExplainer lime_explainer;
   lime_explainer.select_features(party,
@@ -1230,6 +1231,7 @@ void lime_feat_sel(Party party, const std::string& params_str,
 }
 
 void lime_interpret(Party party, const std::string& params_str,
+                    const std::string& output_path_prefix,
                     const std::string& ps_network_str,
                     int is_distributed,
                     int distributed_role,
@@ -1238,23 +1240,23 @@ void lime_interpret(Party party, const std::string& params_str,
   // 1. deserialize the LimeInterpretParams
   LimeInterpretParams interpret_params;
   // set the values for local debug
-  std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
-//  interpret_params.selected_data_file = path_prefix + "/log_reg/selected_sampled_data.txt";
-//  interpret_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
-//  interpret_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
-//  interpret_params.num_samples = 1000;
-//  interpret_params.class_num = 2;
-//  interpret_params.class_id = 0;
-//  interpret_params.interpret_model_name = "linear_regression";
-//  interpret_params.interpret_model_param = "reserved";
-//  interpret_params.explanation_report = path_prefix + "/log_reg/exp_report.txt";
+  // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
+  //  interpret_params.selected_data_file = path_prefix + "/log_reg/selected_sampled_data.txt";
+  //  interpret_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
+  //  interpret_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
+  //  interpret_params.num_samples = 1000;
+  //  interpret_params.class_num = 2;
+  //  interpret_params.class_id = 0;
+  //  interpret_params.interpret_model_name = "linear_regression";
+  //  interpret_params.interpret_model_param = "reserved";
+  //  interpret_params.explanation_report = path_prefix + "/log_reg/exp_report.txt";
 
   std::string interpret_params_str = base64_decode_to_pb_string(params_str);
   deserialize_lime_interpret_params(interpret_params, interpret_params_str);
-  interpret_params.selected_data_file = path_prefix + interpret_params.selected_data_file;
-  interpret_params.selected_predictions_file = path_prefix + interpret_params.selected_predictions_file;
-  interpret_params.sample_weights_file = path_prefix + interpret_params.sample_weights_file;
-  interpret_params.explanation_report = path_prefix + interpret_params.explanation_report;
+  interpret_params.selected_data_file = output_path_prefix + interpret_params.selected_data_file;
+  interpret_params.selected_predictions_file = output_path_prefix + interpret_params.selected_predictions_file;
+  interpret_params.sample_weights_file = output_path_prefix + interpret_params.sample_weights_file;
+  interpret_params.explanation_report = output_path_prefix + interpret_params.explanation_report;
   log_info("Deserialize the lime interpret params");
   log_info("[lime_interpret]: interpret_params[class_id] = " + std::to_string(interpret_params.class_id));
   log_info("[lime_interpret]: interpret_params[interpret_model_name] = " + interpret_params.interpret_model_name);

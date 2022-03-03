@@ -480,7 +480,7 @@ void LogisticRegressionBuilder::train(Party party) {
     log_info("-------- The " + std::to_string(iter) + "-th "
                            "iteration consumed time = " + std::to_string(iter_consumed_time));
 
-#if DEBUG
+#ifdef DEBUG
     // intermediate information display
     // (including the training loss and weights)
     // whether to print loss+weights and/or evaluation report
@@ -661,7 +661,7 @@ void LogisticRegressionBuilder::distributed_train(
     log_info("-------- The " + std::to_string(iter) + "-th "
                                                       "iteration consumed time = " + std::to_string(iter_consumed_time));
 
-#if DEBUG
+#ifdef DEBUG
     // intermediate information display
     // (including the training loss and weights)
     // whether to print loss+weights and/or evaluation report

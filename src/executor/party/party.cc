@@ -445,7 +445,7 @@ void Party::split_train_test_data(
       }
     }
 
-#if DEBUG
+#ifdef DEBUG
     // save shuffled data_indexes vector<int> local debugging
     std::ostringstream oss;
     oss << TEST_IO_OUTDIR << "/falcon_client0_data_indexes_seed" << RANDOM_SEED

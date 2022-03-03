@@ -6,6 +6,12 @@
 #define FALCON_INCLUDE_COMMON_H_
 
 namespace falcon {
+  // for DEBUG
+  // to display intermediate information
+  // turn DEBUG off in the real application
+  #define DEBUG
+  #define PRINT_EVERY 20  // if debug, display info at this frequency
+
   // Precision for transforming a floating-point value
   // encode a floating-point value into a big integer
   // the higher the precision, the more accurate
@@ -67,11 +73,6 @@ namespace falcon {
   // for inference service
   #define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
 
-  // for DEBUG
-  // to display intermediate information
-  // turn DEBUG off in the real application
-  #define DEBUG true
-  #define PRINT_EVERY 20  // if debug, display info at this frequency
   // gtest IO folder
   #define TEST_IO_OUTDIR "/opt/falcon/test/falcon/io"
 

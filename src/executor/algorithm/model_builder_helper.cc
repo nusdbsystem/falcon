@@ -67,7 +67,11 @@ std::vector<std::vector<int>> precompute_iter_batch_idx(int batch_size,
     std::vector<int> batch_indexes;
     batch_indexes.reserve(batch_size);
     for (int i = 0; i < batch_size; i++) {
-      log_info("data_indexes selected = " + std::to_string(data_indexes[i]));
+#ifdef DEBUG
+      if (i == 0) {
+        log_info("data_indexes selected = " + std::to_string(data_indexes[i]));
+      }
+#endif
       batch_indexes.push_back(data_indexes[i]);
     }
     batch_iter_indexes.push_back(batch_indexes);

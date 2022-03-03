@@ -35,36 +35,26 @@ using namespace boost;
 using namespace std::chrono;
 
 void print_arguments(const boost::program_options::variables_map& vm);
-
-void handle_eptr(std::exception_ptr eptr) // passing by value is ok
-{
-  try {
-    if (eptr) {
-      std::rethrow_exception(eptr);
-    }
-  } catch(const std::exception& e) {
-    std::cout << "Caught exception \"" << e.what() << "\"\n";
-  }
-}
+void handle_eptr(std::exception_ptr eptr);
 
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
 
-  int party_id, party_num, party_type, fl_setting, use_existing_key, is_interpretability;
+  // basic arguments
+  int party_id, party_num, party_type, fl_setting, use_existing_key;
   std::string network_file, log_file, data_input_file, data_output_file, key_file, model_save_file, model_report_file;
-  std::string algorithm_name, algorithm_params, interpretable_method, interpretability_params;
-
+  std::string algorithm_name, algorithm_params;
   // for distributed training
   int is_distributed = 0;
   std::string distributed_network_file;
   int worker_id;
   // parameter server:0, worker:1
   int distributed_role = 0;
-
   // for serving params
   int is_inference = 0;
   std::string inference_endpoint;
 
+  // parse the arguments
   try {
     namespace po = boost::program_options;
     po::options_description description("Usage:");
@@ -93,17 +83,6 @@ int main(int argc, char *argv[]) {
         ("distributed-train-network-file", po::value<string>(&distributed_network_file), "ps network file")
         ("worker-id", po::value<int>(&worker_id), "worker id")
         ("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0");
-//        ("is-interpretability", po::value<int>(&is_interpretability),
-//         "whether needs interpretability")
-//        ("interpretable-method", po::value<std::string>(&interpretable_method),
-//         "applied interpretable method, default is lime")
-//        ("interpretability-params", po::value<std::string>(&interpretability_params),
-//            "the parameters of the specified interpretable method");
-
-    // TODO: set here, need to read from coordinator
-    is_interpretability = 1;
-    interpretable_method = "lime";
-    interpretability_params = "none";
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
@@ -125,6 +104,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  // execute the main logic
   std::exception_ptr eptr;
   try {
     auto start_time = high_resolution_clock::now();
@@ -138,7 +118,6 @@ int main(int argc, char *argv[]) {
     falcon::AlgorithmName parsed_algorithm_name = parse_algorithm_name(algorithm_name);
 
     // decode the base64 string to pb string, assume that only accept config string from coordinator
-    // TODO: check if reading network file from disk is allowed
     std::string algorithm_params_pb_str = base64_decode_to_pb_string(algorithm_params);
     std::string network_config_pb_str = base64_decode_to_pb_string(network_file);
     std::string ps_network_config_pb_str = base64_decode_to_pb_string(distributed_network_file);
@@ -180,16 +159,16 @@ int main(int argc, char *argv[]) {
             train_gbdt(party, algorithm_params, model_save_file, model_report_file);
             break;
           case falcon::LIME_COMP_PRED:
-            lime_comp_pred(party, algorithm_params);
+            lime_comp_pred(party, algorithm_params, data_output_file);
             break;
           case falcon::LIME_COMP_WEIGHT:
-            lime_comp_weight(party, algorithm_params);
+            lime_comp_weight(party, algorithm_params, data_output_file);
             break;
           case falcon::LIME_FEAT_SEL:
-            lime_feat_sel(party, algorithm_params);
+            lime_feat_sel(party, algorithm_params, data_output_file);
             break;
           case falcon::LIME_INTERPRET:
-            lime_interpret(party, algorithm_params);
+            lime_interpret(party, algorithm_params, data_output_file);
             break;
           default:
             train_logistic_regression(&party, algorithm_params_pb_str, model_save_file, model_report_file);
@@ -246,14 +225,15 @@ int main(int argc, char *argv[]) {
                                        model_report_file);
             break;
           case falcon::RF:
-            log_error("Type falcon::RF not implemented");
+            log_error("Type distributed falcon::RF not implemented");
             exit(1);
           case falcon::GBDT:
-            log_error("Type falcon::GBDT not implemented");
+            log_error("Type distributed falcon::GBDT not implemented");
             exit(1);
           case falcon::LIME_FEAT_SEL:
             lime_feat_sel(party,
                           algorithm_params,
+                          data_output_file,
                           ps_network_config_pb_str,
                           is_distributed,
                           distributed_role);
@@ -261,6 +241,7 @@ int main(int argc, char *argv[]) {
           case falcon::LIME_INTERPRET:
             lime_interpret(party,
                            algorithm_params,
+                           data_output_file,
                            ps_network_config_pb_str,
                            is_distributed,
                            distributed_role);
@@ -300,7 +281,7 @@ int main(int argc, char *argv[]) {
             run_active_server(party, model_save_file, mini_batch_indexes, parsed_algorithm_name, decrypted_labels);
             // send result to parameter
             std::string decrypted_predict_label_str;
-            serialize_encoded_number_array(decrypted_labels, mini_batch_indexes.size(), decrypted_predict_label_str);
+            serialize_encoded_number_array(decrypted_labels, (int) mini_batch_indexes.size(), decrypted_predict_label_str);
             worker->send_long_message_to_ps(decrypted_predict_label_str);
             delete [] decrypted_labels;
           }
@@ -341,15 +322,16 @@ int main(int argc, char *argv[]) {
               log_error("Type falcon::DT not implemented");
               exit(1);
             case falcon::RF:
-              log_error("Type falcon::RF not implemented");
+              log_error("Type distributed falcon::RF not implemented");
               exit(1);
             case falcon::GBDT:
-              log_error("Type falcon::GBDT not implemented");
+              log_error("Type distributed falcon::GBDT not implemented");
               exit(1);
             case falcon::LIME_FEAT_SEL: {
               party.init_phe_keys(use_existing_key, key_file);
               lime_feat_sel(party,
                             algorithm_params,
+                            data_output_file,
                             ps_network_config_pb_str,
                             is_distributed,
                             distributed_role,
@@ -360,6 +342,7 @@ int main(int argc, char *argv[]) {
               party.init_phe_keys(use_existing_key, key_file);
               lime_interpret(party,
                              algorithm_params,
+                             data_output_file,
                              ps_network_config_pb_str,
                              is_distributed,
                              distributed_role,
@@ -417,7 +400,16 @@ void print_arguments(const boost::program_options::variables_map& vm) {
   log_info("distributed-train-network-file: " + vm["distributed-train-network-file"].as< std::string >());
   log_info("worker-id: " + std::to_string(vm["worker-id"].as< int >()));
   log_info("distributed-role: " + std::to_string(vm["distributed-role"].as< int >()));
-//  log_info("is-interpretability: " + std::to_string(vm["is-interpretability"].as< int >()));
-//  log_info("interpretable-method: " + vm["interpretable-method"].as< std::string >());
-//  log_info("interpretability-params: " + vm["interpretability-params"].as< std::string >());
+}
+
+// passing by value is ok
+void handle_eptr(std::exception_ptr eptr)
+{
+  try {
+    if (eptr) {
+      std::rethrow_exception(eptr);
+    }
+  } catch(const std::exception& e) {
+    std::cout << "Caught exception \"" << e.what() << "\"\n";
+  }
 }

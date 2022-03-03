@@ -404,28 +404,32 @@ class LimeExplainer {
  *
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeCompPredictionParams
+ * @param output_path_prefix: the path of the output files
  */
-void lime_comp_pred(Party party, const std::string& params_str);
+void lime_comp_pred(Party party, const std::string& params_str, const std::string& output_path_prefix);
 
 /**
  * compute the sample weights
  *
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeCompWeightsParams
+ * @param output_path_prefix: the path of the output files
  */
-void lime_comp_weight(Party party, const std::string& params_str);
+void lime_comp_weight(Party party, const std::string& params_str, const std::string& output_path_prefix);
 
 /**
  * select the features (optional)
  *
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeFeatureSelectionParams
+ * @param output_path_prefix: the path of the output files
  * @param ps_network_str: the parameters of ps network string,
  * @param is_distributed: whether use distributed interpretable model training
  * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
  * @param worker_id: if is_distributed = 1 and distributed_role = 1
  */
 void lime_feat_sel(Party party, const std::string& params_str,
+                   const std::string& output_path_prefix,
                    const std::string& ps_network_str = std::string(),
                    int is_distributed = 0,
                    int distributed_role = 0,
@@ -436,12 +440,14 @@ void lime_feat_sel(Party party, const std::string& params_str,
  *
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeInterpretParams
+ * @param output_path_prefix: the path of the output files
  * @param ps_network_str: the parameters of ps network string,
  * @param is_distributed: whether use distributed interpretable model training
  * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
  * @param worker_id: if is_distributed = 1 and distributed_role = 1
  */
 void lime_interpret(Party party, const std::string& params_str,
+                    const std::string& output_path_prefix,
                     const std::string& ps_network_str = std::string(),
                     int is_distributed = 0,
                     int distributed_role = 0,
