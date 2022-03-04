@@ -160,7 +160,7 @@ func (wk *TrainWorker) RunModelTrainingTask() {
 	}
 
 	// 3. generate many files store etc
-	modelInputFile := common.TaskDataOutput + "/" + wk.DslObj.Tasks.ModelTraining.InputConfigs.DataInput.Data
+	modelInputFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.ModelTraining.InputConfigs.DataInput.Data
 	modelFile := common.TaskModelPath + "/" + wk.DslObj.Tasks.ModelTraining.OutputConfigs.TrainedModel
 	logFile := common.TaskRuntimeLogs + "-" + wk.DslObj.Tasks.ModelTraining.AlgorithmName
 	KeyFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.ModelTraining.InputConfigs.DataInput.Key
@@ -189,7 +189,7 @@ func (wk *TrainWorker) RunModelTrainingTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", psLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.ModelTraining.AlgorithmName,
@@ -226,7 +226,7 @@ func (wk *TrainWorker) RunModelTrainingTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.ModelTraining.AlgorithmName,
@@ -262,7 +262,7 @@ func (wk *TrainWorker) RunModelTrainingTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.ModelTraining.AlgorithmName,
@@ -339,7 +339,7 @@ func (wk *TrainWorker) RunLimePredTask() {
 	}
 
 	// 3. generate many files store etc
-	modelInputFile := common.TaskDataOutput + "/" + wk.DslObj.Tasks.LimePred.InputConfigs.DataInput.Data
+	modelInputFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.LimePred.InputConfigs.DataInput.Data
 	modelFile := common.TaskModelPath + "/" + wk.DslObj.Tasks.LimePred.OutputConfigs.TrainedModel
 	logFile := common.TaskRuntimeLogs + "-" + wk.DslObj.Tasks.LimePred.AlgorithmName
 	KeyFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.LimePred.InputConfigs.DataInput.Key
@@ -372,7 +372,7 @@ func (wk *TrainWorker) RunLimePredTask() {
 		//	"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 		//	"--log-file", psLogFile,
 		//	"--data-input-file", modelInputFile,
-		//	"--data-output-file", common.EmptyParams,
+		//	"--data-output-file", common.TaskDataOutput,
 		//	"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 		//	"--key-file", KeyFile,
 		//	"--algorithm-name", wk.DslObj.Tasks.LimePred.AlgorithmName,
@@ -415,7 +415,7 @@ func (wk *TrainWorker) RunLimePredTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimePred.AlgorithmName,
@@ -451,7 +451,7 @@ func (wk *TrainWorker) RunLimePredTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimePred.AlgorithmName,
@@ -528,7 +528,7 @@ func (wk *TrainWorker) RunLimeWeightTask() {
 	}
 
 	// 3. generate many files store etc
-	modelInputFile := common.TaskDataOutput + "/" + wk.DslObj.Tasks.LimeWeight.InputConfigs.DataInput.Data
+	modelInputFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.LimeWeight.InputConfigs.DataInput.Data
 	modelFile := common.TaskModelPath + "/" + wk.DslObj.Tasks.LimeWeight.OutputConfigs.TrainedModel
 	logFile := common.TaskRuntimeLogs + "-" + wk.DslObj.Tasks.LimeWeight.AlgorithmName
 	KeyFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.LimeWeight.InputConfigs.DataInput.Key
@@ -561,7 +561,7 @@ func (wk *TrainWorker) RunLimeWeightTask() {
 		//	"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 		//	"--log-file", psLogFile,
 		//	"--data-input-file", modelInputFile,
-		//	"--data-output-file", common.EmptyParams,
+		//	"--data-output-file", common.TaskDataOutput,
 		//	"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 		//	"--key-file", KeyFile,
 		//	"--algorithm-name", wk.DslObj.Tasks.LimeWeight.AlgorithmName,
@@ -604,7 +604,7 @@ func (wk *TrainWorker) RunLimeWeightTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimeWeight.AlgorithmName,
@@ -640,7 +640,7 @@ func (wk *TrainWorker) RunLimeWeightTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimeWeight.AlgorithmName,
@@ -717,7 +717,7 @@ func (wk *TrainWorker) RunLimeFeatureTask() {
 	}
 
 	// 3. generate many files store etc
-	modelInputFile := common.TaskDataOutput + "/" + wk.DslObj.Tasks.LimeFeature.InputConfigs.DataInput.Data
+	modelInputFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.LimeFeature.InputConfigs.DataInput.Data
 	modelFile := common.TaskModelPath + "/" + wk.DslObj.Tasks.LimeFeature.OutputConfigs.TrainedModel
 	logFile := common.TaskRuntimeLogs + "-" + wk.DslObj.Tasks.LimeFeature.AlgorithmName
 	KeyFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.LimeFeature.InputConfigs.DataInput.Key
@@ -746,7 +746,7 @@ func (wk *TrainWorker) RunLimeFeatureTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", psLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimeFeature.AlgorithmName,
@@ -783,7 +783,7 @@ func (wk *TrainWorker) RunLimeFeatureTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimeFeature.AlgorithmName,
@@ -819,7 +819,7 @@ func (wk *TrainWorker) RunLimeFeatureTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimeFeature.AlgorithmName,
@@ -896,7 +896,7 @@ func (wk *TrainWorker) RunLimeInterpretTask() {
 	}
 
 	// 3. generate many files store etc
-	modelInputFile := common.TaskDataOutput + "/" + wk.DslObj.Tasks.LimeInterpret.InputConfigs.DataInput.Data
+	modelInputFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.LimeInterpret.InputConfigs.DataInput.Data
 	modelFile := common.TaskModelPath + "/" + wk.DslObj.Tasks.LimeInterpret.OutputConfigs.TrainedModel
 	logFile := common.TaskRuntimeLogs + "-" + wk.DslObj.Tasks.LimeInterpret.AlgorithmName
 	KeyFile := common.TaskDataPath + "/" + wk.DslObj.Tasks.LimeInterpret.InputConfigs.DataInput.Key
@@ -925,7 +925,7 @@ func (wk *TrainWorker) RunLimeInterpretTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", psLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimeInterpret.AlgorithmName,
@@ -962,7 +962,7 @@ func (wk *TrainWorker) RunLimeInterpretTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimeInterpret.AlgorithmName,
@@ -998,7 +998,7 @@ func (wk *TrainWorker) RunLimeInterpretTask() {
 			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
 			"--log-file", wkLogFile,
 			"--data-input-file", modelInputFile,
-			"--data-output-file", common.EmptyParams,
+			"--data-output-file", common.TaskDataOutput,
 			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
 			"--key-file", KeyFile,
 			"--algorithm-name", wk.DslObj.Tasks.LimeInterpret.AlgorithmName,
@@ -1080,7 +1080,6 @@ func (wk *TrainWorker) mpc(algName string) {
 		//panic(err)
 	}
 	_ = tmpFile.Close()
-
 
 	// write file to local disk, input path to mpc process
 	mpcExecutorPortFile := common.MpcExecutorPortFileBasePath + algName
