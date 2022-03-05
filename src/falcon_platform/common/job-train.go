@@ -550,8 +550,7 @@ func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, sele
 	var out []byte
 	var classNum int32
 
-
-	if mpcAlgName == LimeDecisionTreeAlgName{
+	if mpcAlgName == LimeDecisionTreeAlgName {
 
 		res := LimeInterpretDT{}
 
@@ -568,18 +567,18 @@ func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, sele
 		}
 
 		lr := v0.DecisionTreeParams{
-			TreeType:                 res.InterpretModelParam.TreeType,
-			Criterion:              res.InterpretModelParam.Criterion,
-			SplitStrategy:         res.InterpretModelParam.SplitStrategy,
-			ClassNum:        res.InterpretModelParam.ClassNum,
-			MaxDepth:                     res.InterpretModelParam.MaxDepth,
-			MaxBins:              res.InterpretModelParam.MaxBins,
-			MinSamplesSplit:                     res.InterpretModelParam.MinSamplesSplit,
-			MinSamplesLeaf:                   res.InterpretModelParam.MinSamplesLeaf,
-			MaxLeafNodes:                 res.InterpretModelParam.MaxLeafNodes,
-			MinImpurityDecrease:                    res.InterpretModelParam.MinImpurityDecrease,
-			MinImpuritySplit: res.InterpretModelParam.MinImpuritySplit,
-			DpBudget:                   res.InterpretModelParam.DpBudget,
+			TreeType:            res.InterpretModelParam.TreeType,
+			Criterion:           res.InterpretModelParam.Criterion,
+			SplitStrategy:       res.InterpretModelParam.SplitStrategy,
+			ClassNum:            res.InterpretModelParam.ClassNum,
+			MaxDepth:            res.InterpretModelParam.MaxDepth,
+			MaxBins:             res.InterpretModelParam.MaxBins,
+			MinSamplesSplit:     res.InterpretModelParam.MinSamplesSplit,
+			MinSamplesLeaf:      res.InterpretModelParam.MinSamplesLeaf,
+			MaxLeafNodes:        res.InterpretModelParam.MaxLeafNodes,
+			MinImpurityDecrease: res.InterpretModelParam.MinImpurityDecrease,
+			MinImpuritySplit:    res.InterpretModelParam.MinImpuritySplit,
+			DpBudget:            res.InterpretModelParam.DpBudget,
 		}
 
 		out1, err := proto.Marshal(&lr)
@@ -596,7 +595,7 @@ func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, sele
 			ClassId:                 classId,
 			InterpretModelName:      res.InterpretModelName,
 			InterpretModelParam:     b64.StdEncoding.EncodeToString(out1),
-			ExplanationReport:       res.ExplanationReport,
+			ExplanationReport:       res.ExplanationReport[:len(res.ExplanationReport)-4] + fmt.Sprintf("%d", classId) + ".txt",
 		}
 
 		out, err = proto.Marshal(&dtp)
@@ -606,7 +605,7 @@ func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, sele
 
 		classNum = res.ClassNum
 
-	}else if mpcAlgName == LimeLinearRegressionAlgName{
+	} else if mpcAlgName == LimeLinearRegressionAlgName {
 
 		res := LimeInterpretLR{}
 
@@ -651,7 +650,7 @@ func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, sele
 			ClassId:                 classId,
 			InterpretModelName:      res.InterpretModelName,
 			InterpretModelParam:     b64.StdEncoding.EncodeToString(out1),
-			ExplanationReport:       res.ExplanationReport,
+			ExplanationReport:       res.ExplanationReport[:len(res.ExplanationReport)-4] + fmt.Sprintf("%d", classId) + ".txt",
 		}
 
 		out, err = proto.Marshal(&dtp)
@@ -661,10 +660,9 @@ func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, sele
 
 		classNum = res.ClassNum
 
-	}else{
+	} else {
 		log.Fatalln("GenerateLimeInterpretParams, mpc alg name is not supported:", err)
 	}
-
 
 	return b64.StdEncoding.EncodeToString(out), classNum
 
