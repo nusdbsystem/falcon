@@ -723,6 +723,32 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
   wrap_explanations.push_back(explanations);
   write_dataset_to_file(wrap_explanations, delimiter, explanation_report);
 
+#ifdef SAVE_BASELINE
+  //  6. active party collect explanations from passive parties
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::string explanation_report_overall = explanation_report + ".overall";
+    std::vector<double> explanations_overall = explanations;
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        std::string recv_explanation_i_str;
+        party.recv_long_message(i, recv_explanation_i_str);
+        std::vector<double> explanation_party_i;
+        deserialize_double_array(explanation_party_i, recv_explanation_i_str);
+        for (double x : explanation_party_i) {
+          explanations_overall.push_back(x);
+        }
+      }
+    }
+    std::vector<std::vector<double>> wrap_explanations_overall;
+    wrap_explanations_overall.push_back(explanations_overall);
+    write_dataset_to_file(wrap_explanations_overall, delimiter, explanation_report_overall);
+  } else {
+    std::string explanation_i_str;
+    serialize_double_array(explanations, explanation_i_str);
+    party.send_long_message(ACTIVE_PARTY_ID, explanation_i_str);
+  }
+#endif
+
   for (int i = 0; i < cur_sample_size; i++) {
     delete [] encrypted_predictions[i];
   }
