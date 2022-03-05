@@ -81,25 +81,33 @@ void LogisticRegressionModel::predict_proba(
       predicted_samples[i].insert(predicted_samples[i].begin(), x1);
     }
   }
-  // compute the positive prediction
+  // compute the positive prediction, note that the predicted_labels_pos is known to all parties
   auto* predicted_labels_pos = new EncodedNumber[cur_sample_size];
   predict(party, predicted_samples, predicted_labels_pos);
   int prediction_precision = std::abs(predicted_labels_pos[0].getter_exponent());
   int negative_one = -1;
-  EncodedNumber pos_one_double, neg_one_int;
-  pos_one_double.set_double(phe_pub_key->n[0], CERTAIN_PROBABILITY, prediction_precision);
-  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, pos_one_double, pos_one_double);
-  neg_one_int.set_integer(phe_pub_key->n[0], negative_one);
+  double positive_one = 1.0;
+  auto* predicted_labels_neg = new EncodedNumber[cur_sample_size];
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    EncodedNumber pos_one_double, neg_one_int;
+    pos_one_double.set_double(phe_pub_key->n[0], positive_one, prediction_precision);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, pos_one_double, pos_one_double);
+    neg_one_int.set_integer(phe_pub_key->n[0], negative_one);
+    for (int i = 0; i < cur_sample_size; i++) {
+      EncodedNumber label_neg;
+      djcs_t_aux_ep_mul(phe_pub_key, label_neg, predicted_labels_pos[i], neg_one_int);
+      djcs_t_aux_ee_add(phe_pub_key, label_neg, label_neg, pos_one_double);
+      predicted_labels_neg[i] = label_neg;
+    }
+  }
+  party.broadcast_encoded_number_array(predicted_labels_neg, cur_sample_size, ACTIVE_PARTY_ID);
   for (int i = 0; i < cur_sample_size; i++) {
-    EncodedNumber label_neg;
-    djcs_t_aux_ep_mul(phe_pub_key, label_neg, predicted_labels_pos[i], neg_one_int);
-    djcs_t_aux_ee_add(phe_pub_key, label_neg, label_neg, pos_one_double);
-    predicted_labels[i][0] = label_neg;
+    predicted_labels[i][0] = predicted_labels_neg[i];
     predicted_labels[i][1] = predicted_labels_pos[i];
   }
-
   djcs_t_free_public_key(phe_pub_key);
   delete [] predicted_labels_pos;
+  delete [] predicted_labels_neg;
 }
 
 void LogisticRegressionModel::forward_computation(

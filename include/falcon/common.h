@@ -71,13 +71,15 @@ namespace falcon {
   };
 
   // for inference service
-  #define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
+  # define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
 
   // gtest IO folder
   #define TEST_IO_OUTDIR "/opt/falcon/test/falcon/io"
 
   #define CERTAIN_PROBABILITY 1.0
   #define ZERO_PROBABILITY 0.0
+  #define SMOOTHER 1e-3
+  #define SAVE_BASELINE 1
 
   enum FLSetting { HORIZONTAL_FL, VERTICAL_FL };
   enum PartyType { ACTIVE_PARTY, PASSIVE_PARTY };

@@ -409,6 +409,22 @@ class LimeExplainer {
 void lime_comp_pred(Party party, const std::string& params_str, const std::string& output_path_prefix);
 
 /**
+ * save the aggregated generated data and encrypted predictions into files
+ *
+ * @param party: the participating party
+ * @param generated_samples: the party's generated sample data
+ * @param predictions: the encrypted model predictions
+ * @param cur_sample_size: the size of the generated sample
+ * @param class_num: the number of classes
+ * @param generated_sample_file: the original saved generated sample file
+ * @param computed_prediction_file: the original saved prediction file
+ */
+void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>& generated_samples,
+                             EncodedNumber** predictions, int cur_sample_size, int class_num,
+                             const std::string& generated_sample_file,
+                             const std::string& computed_prediction_file);
+
+/**
  * compute the sample weights
  *
  * @param party: the participating party

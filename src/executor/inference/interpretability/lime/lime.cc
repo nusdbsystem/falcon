@@ -32,7 +32,7 @@ std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Pa
                                                                         const std::vector<double> &data_row,
                                                                         int sample_instance_num,
                                                                         const std::string &sampling_method) {
-  // TODO: assume all the features are numerical, categorical features not implemented
+  // TODO: assume features are numerical, categorical features not implemented
   int feature_num = (int) data_row.size();
   std::vector<std::vector<double>> sampled_data;
   sampled_data.push_back(data_row);
@@ -61,6 +61,13 @@ std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Pa
         sampled_data[i+1][j] = (sampled_data[i+1][j] * (scaler->scale[j]) + data_row[j]);
       } else {
         sampled_data[i+1][j] = (sampled_data[i+1][j] * (scaler->scale[j]) + scaler->mean[j]);
+      }
+      // truncate the sampled data to fall into [0, 1] range
+      if (sampled_data[i+1][j] <= 0) {
+        sampled_data[i+1][j] = SMOOTHER;
+      }
+      if (sampled_data[i+1][j] > 1.0) {
+        sampled_data[i+1][j] = 1.0;
       }
     }
   }
@@ -1137,12 +1144,105 @@ void lime_comp_pred(Party party, const std::string& params_str, const std::strin
                                       comp_prediction_params.computed_prediction_file);
   log_info("Save the generated samples and predictions to file");
 
+  // if SAVE_BASELINE is enabled, then save the aggregated sample data and plaintext predictions
+  // as two additional files, say aggregated_{comp_prediction_params.generated_sample_file} and
+  // plaintext_{comp_prediction_params.computed_prediction_file}
+#ifdef SAVE_BASELINE
+  save_data_pred4baseline(party, generated_samples, predictions,
+                            cur_sample_size, class_num,
+                            comp_prediction_params.generated_sample_file,
+                            comp_prediction_params.computed_prediction_file);
+#endif
+
   // free information
   for (int i = 0; i < cur_sample_size; i++) {
     delete [] predictions[i];
   }
   delete [] predictions;
   delete scaler;
+}
+
+void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>& generated_samples,
+                             EncodedNumber** predictions, int cur_sample_size, int class_num,
+                             const std::string& generated_sample_file,
+                             const std::string& computed_prediction_file) {
+  // first, create two file names
+  std::string aggregated_sample_file = generated_sample_file + ".aggregated";
+  std::string plaintext_predictions_file = computed_prediction_file + ".plaintext";
+
+  // second, sync up the sampled data
+  std::vector<std::vector<std::vector<double>>> parties_sampled_data;
+  // parties_sampled_data.push_back(generated_samples);
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        // receive generated sample string and deserialize
+        std::string recv_generated_samples_str_i;
+        party.recv_long_message(i, recv_generated_samples_str_i);
+        std::vector<std::vector<double>> recv_generated_samples_i;
+        deserialize_double_matrix(recv_generated_samples_i, recv_generated_samples_str_i);
+        parties_sampled_data.push_back(recv_generated_samples_i);
+      }
+    }
+  } else {
+    // serialize generated_samples and send it to active party
+    std::string generated_samples_str;
+    serialize_double_matrix(generated_samples, generated_samples_str);
+    party.send_long_message(ACTIVE_PARTY_ID, generated_samples_str);
+  }
+
+  // the active party aggregate the sampled data
+  std::vector<std::vector<double>> aggregated_sampled_data;
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    aggregated_sampled_data = generated_samples;
+    int size = (int) parties_sampled_data[0].size();
+    log_info("[save_data_pred4baseline]: size = " + std::to_string(size));
+    for (std::vector<std::vector<double>> party_sampled_data : parties_sampled_data) {
+      for (int j = 0; j < size; j++) {
+        for (double x : party_sampled_data[j]) {
+          aggregated_sampled_data[j].push_back(x);
+        }
+      }
+    }
+  }
+
+  // third, collaboratively decrypt the predictions
+  std::vector<std::vector<double>> plaintext_predictions;
+  auto** decrypted_predictions = new EncodedNumber*[cur_sample_size];
+  for (int i = 0; i < cur_sample_size; i++) {
+    decrypted_predictions[i] = new EncodedNumber[class_num];
+  }
+
+  for (int i = 0; i < cur_sample_size; i++) {
+    party.collaborative_decrypt(predictions[i], decrypted_predictions[i], class_num, ACTIVE_PARTY_ID);
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      std::vector<double> sample_i_prediction;
+      for (int j = 0; j < class_num; j++) {
+        double x;
+        decrypted_predictions[i][j].decode(x);
+//        log_info("[save_data_pred4baseline]: i = " + std::to_string(i) + ", j = " + std::to_string(j) + ", prediction = " + std::to_string(x));
+        sample_i_prediction.push_back(x);
+      }
+      plaintext_predictions.push_back(sample_i_prediction);
+    }
+  }
+
+  // fourth, save the data and predictions
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    char delimiter = ',';
+    write_dataset_to_file(aggregated_sampled_data,
+                          delimiter,
+                          aggregated_sample_file);
+    write_dataset_to_file(plaintext_predictions,
+                          delimiter,
+                          plaintext_predictions_file);
+  }
+
+  // free memory
+  for (int i = 0; i < cur_sample_size; i++) {
+    delete [] decrypted_predictions[i];
+  }
+  delete [] decrypted_predictions;
 }
 
 void lime_comp_weight(Party party, const std::string& params_str, const std::string& output_path_prefix) {
