@@ -241,6 +241,7 @@ class LimeExplainer {
    * @param selected_sample_file: the selected sample file to be saved
    * @param selected_prediction_file: the selected prediction file to be saved
    * @param sample_weights_file: the encrypted sample weights file
+   * @param output_path_prefix: the path to save result file
    * @param num_samples: the number of selected samples
    * @param class_num: the number of classes
    * @param class_id: the class_id to be explained
@@ -256,6 +257,7 @@ class LimeExplainer {
                        const std::string& selected_samples_file,
                        const std::string& selected_predictions_file,
                        const std::string &sample_weights_file,
+                       const std::string& output_path_prefix,
                        int num_samples,
                        int class_num,
                        int class_id,
@@ -273,12 +275,14 @@ class LimeExplainer {
    * @param party_weight_sizes
    * @param global_model_weights
    * @param num_explained_features
+   * @param selected_feature_idx_file
    * @return
    */
   std::vector<std::vector<int>> find_party_feat_idx(
-      std::vector<int> party_weight_sizes,
-      std::vector<double> global_model_weights,
-      int num_explained_features
+      const std::vector<int>& party_weight_sizes,
+      const std::vector<double>& global_model_weights,
+      int num_explained_features,
+      const std::string& selected_feature_idx_file
       );
 
   /**

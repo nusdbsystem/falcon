@@ -237,6 +237,23 @@ void LimeExplainer::compute_sample_weights(
                                      sample_weights_file);
   log_info("Write encrypted sample weights finished");
 
+#ifdef SAVE_BASELINE
+  //  7. decrypt the encrypted weights and save as a plaintext file
+  std::string plaintext_weights_file = sample_weights_file + ".plaintext";
+  std::vector<double> plaintext_weights;
+  auto* decrypted_weights = new EncodedNumber[selected_sample_size];
+  party.collaborative_decrypt(encrypted_weights, decrypted_weights, selected_sample_size, ACTIVE_PARTY_ID);
+  for (int i = 0; i < selected_sample_size; i++) {
+    double w;
+    decrypted_weights[i].decode(w);
+    plaintext_weights.push_back(w);
+  }
+  std::vector<std::vector<double>> format_weights;
+  format_weights.push_back(plaintext_weights);
+  write_dataset_to_file(format_weights, delimiter, plaintext_weights_file);
+  delete [] decrypted_weights;
+#endif
+
   for (int i = 0; i < generated_samples_size; i++) {
     delete [] computed_predictions[i];
   }
@@ -420,6 +437,7 @@ void LimeExplainer::select_features(Party party,
                                     const std::string &selected_samples_file,
                                     const std::string &selected_predictions_file,
                                     const std::string &sample_weights_file,
+                                    const std::string& output_path_prefix,
                                     int num_samples,
                                     int class_num,
                                     int class_id,
@@ -531,9 +549,16 @@ void LimeExplainer::select_features(Party party,
         }
       }
     }
+    std::string selected_feature_idx_file;
+#ifdef SAVE_BASELINE
+    selected_feature_idx_file = output_path_prefix + "selected_feature_idx_" + std::to_string(class_id) + ".txt";
+#endif
     // find top-k weights and match to each party's local index
     std::vector<std::vector<int>> party_selected_feat_idx = find_party_feat_idx(
-        party_weight_sizes, global_model_weights, num_explained_features
+        party_weight_sizes,
+        global_model_weights,
+        num_explained_features,
+        selected_feature_idx_file
         );
     selected_feat_idx = party_selected_feat_idx[0];
     for (int id = 0; id < party.party_num; id++) {
@@ -608,10 +633,20 @@ void LimeExplainer::select_features(Party party,
 }
 
 std::vector<std::vector<int>> LimeExplainer::find_party_feat_idx(
-    std::vector<int> party_weight_sizes,
-    std::vector<double> global_model_weights,
-    int num_explained_features) {
+    const std::vector<int>& party_weight_sizes,
+    const std::vector<double>& global_model_weights,
+    int num_explained_features,
+    const std::string& selected_feature_idx_file) {
   std::vector<int> top_k_indexes = find_top_k_indexes(global_model_weights, num_explained_features);
+
+#ifdef SAVE_BASELINE
+  std::vector<std::vector<double>> format_selected_feature_idx;
+  std::vector<double> convert_top_k_indexes(top_k_indexes.begin(), top_k_indexes.end());
+  format_selected_feature_idx.push_back(convert_top_k_indexes);
+  char delimiter = ',';
+  write_dataset_to_file(format_selected_feature_idx, delimiter, selected_feature_idx_file);
+#endif
+
   std::vector<std::vector<int>> party_selected_feat_idx;
   for (int i = 0; i < party_weight_sizes.size(); i++) {
     std::vector<int> feat_idx;
@@ -1343,6 +1378,7 @@ void lime_feat_sel(Party party, const std::string& params_str,
                                  feat_sel_params.selected_samples_file,
                                  feat_sel_params.selected_predictions_file,
                                  feat_sel_params.sample_weights_file,
+                                 output_path_prefix,
                                  feat_sel_params.num_samples,
                                  feat_sel_params.class_num,
                                  feat_sel_params.class_id,
