@@ -2,7 +2,7 @@
   "job_name": "credit_card_training",
   "job_info": "this is the job_decs",
   "job_fl_type": "vertical",
-  "existing_key": 0,
+  "existing_key": 1,
   "party_nums": 3,
   "task_num": 1,
   "party_info": [
@@ -51,7 +51,7 @@
           "criterion": "mse",
           "split_strategy": "best",
           "class_num": 2,
-          "max_depth": 5,
+          "max_depth": 2,
           "max_bins": 12,
           "min_samples_split": 5,
           "min_samples_leaf": 5,
@@ -62,8 +62,8 @@
         }
       },
       "output_configs": {
-        "trained_model": "saved_model.pb",
-        "evaluation_report": "report.txt"
+        "trained_model": "20220306_energy_dt.pb",
+        "evaluation_report": "20220306_energy_dt_report.txt"
       }
     }
   }

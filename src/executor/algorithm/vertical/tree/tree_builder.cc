@@ -472,6 +472,34 @@ void DecisionTreeBuilder::build_node(Party &party,
     exit(1);
   }
 
+#ifdef DEBUG
+  // aggregate sample_iv and set node number for debug
+  auto* encrypted_node_num = new EncodedNumber[1];
+  auto* decrypted_node_num = new EncodedNumber[1];
+  // retrieve phe pub key
+  djcs_t_public_key* phe_pub_key_tmp = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key_tmp);
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    encrypted_node_num[0].set_integer(phe_pub_key_tmp->n[0], 0);
+    djcs_t_aux_encrypt(phe_pub_key_tmp, party.phe_random, encrypted_node_num[0], encrypted_node_num[0]);
+    int sample_num = (int) training_data.size();
+    for (int i = 0; i < sample_num; i++) {
+      djcs_t_aux_ee_add(phe_pub_key_tmp, encrypted_node_num[0], encrypted_node_num[0], sample_mask_iv[i]);
+    }
+  }
+  party.broadcast_encoded_number_array(encrypted_node_num, 1, ACTIVE_PARTY_ID);
+  // decrypt
+  party.collaborative_decrypt(encrypted_node_num, decrypted_node_num, 1, ACTIVE_PARTY_ID);
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    long node_sample_num;
+    decrypted_node_num[0].decode(node_sample_num);
+    tree.nodes[node_index].node_sample_num = node_sample_num;
+  }
+  delete [] encrypted_node_num;
+  delete [] decrypted_node_num;
+  djcs_t_free_public_key(phe_pub_key_tmp);
+#endif
+
   /// step 1: check pruning condition via spdz computation
   bool is_satisfied = check_pruning_conditions(party, node_index, sample_mask_iv);
 
@@ -2730,6 +2758,7 @@ void train_decision_tree(
     save_training_report(decision_tree_builder.getter_training_accuracy(),
                          decision_tree_builder.getter_testing_accuracy(),
                          model_report_file);
+    decision_tree_builder.print_tree_model();
 
     LOG(INFO) << "Trained model and report saved";
     std::cout << "Trained model and report saved" << std::endl;
