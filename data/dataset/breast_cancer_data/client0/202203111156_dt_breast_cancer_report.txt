@@ -1,0 +1,2 @@
+The training accuracy of this model is: 0.949451
+The testing accuracy of this model is: 0.938596
