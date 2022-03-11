@@ -55,19 +55,19 @@
           "criterion": "gini",
           "split_strategy": "best",
           "class_num": 2,
-          "max_depth": 3,
+          "max_depth": 2,
           "max_bins": 8,
           "min_samples_split": 5,
           "min_samples_leaf": 5,
-          "max_leaf_nodes": 16,
+          "max_leaf_nodes": 64,
           "min_impurity_decrease": 0.1,
           "min_impurity_split": 0.001,
           "dp_budget": 0.1
         }
       },
       "output_configs": {
-        "trained_model": "saved_model.pb",
-        "evaluation_report": "report.txt"
+        "trained_model": "202203111156.pb",
+        "evaluation_report": "202203111156_dt_breast_cancer_report.txt"
       }
     }
   }

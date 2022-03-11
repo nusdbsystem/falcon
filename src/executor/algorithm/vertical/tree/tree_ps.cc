@@ -174,7 +174,7 @@ void DTParameterServer::distributed_train(){
 
   /// 1. train the tree model
   build_tree();
-  alg_builder.print_tree_model();
+  alg_builder.tree.print_tree_model();
   /// 2. clear and log
   const clock_t training_finish_time = clock();
   double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;

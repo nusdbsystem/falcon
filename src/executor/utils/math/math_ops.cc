@@ -262,3 +262,17 @@ std::vector<int> find_top_k_indexes(const std::vector<double>& a, int k) {
 //  }
   return res;
 }
+
+int global_idx(const std::vector<int>& a, int id, int idx) {
+  int count = 0;
+  int size = (int) a.size();
+  if (id >= size || idx >= a[id]) {
+    LOG(ERROR) << "The input id and idx are invalid";
+    exit(EXIT_FAILURE);
+  }
+  for (int i = 0; i < id; i++) {
+    count += a[i];
+  }
+  count += idx;
+  return count;
+}

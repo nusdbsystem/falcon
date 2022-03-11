@@ -10,6 +10,8 @@
 #include <glog/logging.h>
 #include <iostream>
 #include <stack>
+#include <numeric>
+#include <queue>
 
 TreeModel::TreeModel() {}
 
@@ -294,4 +296,78 @@ void TreeModel::predict(Party &party,
   delete [] label_vector;
   djcs_t_free_public_key(phe_pub_key);
   LOG(INFO) << "Compute predictions on samples finished";
+}
+
+
+std::vector<double> TreeModel::comp_feature_importance(
+    const std::vector<int>& parties_feature_num,
+    int total_sample_num) {
+  log_info("[TreeModel.comp_feature_importance] begin to compute feature importance");
+  // the idea is to iterate each valid internal node and compute the feature importance
+  // aggregate into the corresponding features
+  int global_feature_num = std::accumulate(parties_feature_num.begin(), parties_feature_num.end(), 0);
+  log_info("[TreeModel.comp_feature_importance] the total feature num = " + std::to_string(global_feature_num));
+  std::vector<double> feature_importance_vec;
+  feature_importance_vec.reserve(global_feature_num);
+  for (int i = 0; i < global_feature_num; i++) {
+    feature_importance_vec.push_back(0.0);
+  }
+  int root_node_idx = 0;
+  std::queue<int> q;
+  q.push(root_node_idx);
+  while (!q.empty()) {
+    int idx = q.front();
+    q.pop();
+    if (nodes[idx].node_type == falcon::INTERNAL) {
+      int left_node_index = idx * 2 + 1;
+      int right_node_index = idx * 2 + 2;
+      // collect data
+      double n_t, n_l, n_r;
+      double impurity_t, impurity_l, impurity_r;
+      n_t = (double) nodes[idx].node_sample_num;
+      n_l = (double) nodes[left_node_index].node_sample_num;
+      n_r = (double) nodes[right_node_index].node_sample_num;
+      log_info("[TreeModel.comp_feature_importance] n_t = " + std::to_string(n_t)
+        + ", n_l = " + std::to_string(n_l) + ", n_r = " + std::to_string(n_r));
+      nodes[idx].impurity.decode(impurity_t);
+      nodes[left_node_index].impurity.decode(impurity_l);
+      nodes[right_node_index].impurity.decode(impurity_r);
+      log_info("[TreeModel.comp_feature_importance] impurity_t = " + std::to_string(impurity_t)
+        + ", impurity_l = " + std::to_string(impurity_l) + ", impurity_r = " + std::to_string(impurity_r));
+      // compute feature importance
+      double imp = (n_t / total_sample_num) * (impurity_t
+          - (n_l / n_t) * impurity_l - (n_r / n_t) * impurity_r);
+      log_info("[TreeModel.comp_feature_importance] imp = " + std::to_string(imp));
+      int feature_id = nodes[idx].best_feature_id;
+      log_info("[TreeModel.comp_feature_importance] feature_id = " + std::to_string(feature_id));
+      feature_importance_vec[feature_id] += imp;
+      // push the left and right nodes
+      q.push(left_node_index);
+      q.push(right_node_index);
+      google::FlushLogFiles(google::INFO);
+    }
+  }
+  log_info("[TreeModel.comp_feature_importance] end compute feature importance");
+  google::FlushLogFiles(google::INFO);
+  return feature_importance_vec;
+}
+
+
+void TreeModel::print_tree_model() {
+
+  log_info("============== print the tree =============");
+
+  log_info("[TreeModel.print_tree_model]: tree.class_num = " + to_string(class_num));
+  log_info("[TreeModel.print_tree_model]: tree.max_depth = " + to_string(max_depth));
+  log_info("[TreeModel.print_tree_model]: tree.internal_node_num = " + to_string(internal_node_num));
+  log_info("[TreeModel.print_tree_model]: tree.total_node_num = " + to_string(total_node_num));
+  log_info("[TreeModel.print_tree_model]: tree.capacity = " + to_string(capacity));
+
+  int maximum_nodes = (int) pow(2, max_depth + 1) - 1;
+  for (int i = 0; i < maximum_nodes; i++) {
+    auto node = nodes[i];
+    log_info("[TreeModel.print_tree_model]: <-------- checking each node ---------->");
+    log_info("[TreeModel.print_tree_model]: current node index = " + to_string(i));
+    node.print_node();
+  }
 }

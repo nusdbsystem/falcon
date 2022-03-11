@@ -139,7 +139,7 @@ set(SOURCE_FILES
         ../../include/falcon/algorithm/vertical/linear_model/linear_model_ps.h
         algorithm/vertical/linear_model/linear_model_ps.cc
         ../../include/falcon/algorithm/vertical/linear_model/linear_regression_ps.h
-        algorithm/vertical/linear_model/linear_regression_ps.cc ../../include/falcon/inference/interpretability/lime/lime_base.h inference/interpretability/lime/lime_base.cpp ../../include/falcon/utils/parser.h utils/parser.cc ../../include/falcon/inference/interpretability/lime/scaler.h inference/interpretability/lime/scaler.cc)
+        algorithm/vertical/linear_model/linear_regression_ps.cc ../../include/falcon/inference/interpretability/lime/lime_base.h inference/interpretability/lime/lime_base.cpp ../../include/falcon/utils/parser.h utils/parser.cc ../../include/falcon/inference/interpretability/lime/scaler.h inference/interpretability/lime/scaler.cc utils/alg/tree_util.cc ../../include/falcon/utils/alg/tree_util.h ../../include/falcon/utils/alg/debug_util.h)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")

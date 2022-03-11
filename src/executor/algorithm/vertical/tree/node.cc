@@ -6,6 +6,7 @@
 
 #include <glog/logging.h>
 #include <limits>
+#include <falcon/utils/logger/logger.h>
 
 Node::Node() {
   node_type = falcon::INTERNAL;
@@ -52,23 +53,27 @@ Node& Node::operator=(const Node &node) {
   right_child = node.right_child;
 }
 
-Node::~Node() {}
+Node::~Node() = default;
 
 void Node::print_node() {
-  LOG(INFO) << "Node depth: " << depth;
-  LOG(INFO) << "Node type: " << node_type;
-  LOG(INFO) << "Node is self feature: " << is_self_feature;
-  LOG(INFO) << "Node best party id: " << best_party_id;
-  LOG(INFO) << "Node best feature id: " << best_feature_id;
-  LOG(INFO) << "Node best split id: " << best_split_id;
-  LOG(INFO) << "Node sample num: " << node_sample_num;
-  LOG(INFO) << "Node split threshold: " << split_threshold;
+  log_info("[Node.print_node]: node node_type = " + std::to_string(node_type));
+  log_info("[Node.print_node]: node depth = " + std::to_string(depth));
+  log_info("[Node.print_node]: node is_self_feature = " + std::to_string(is_self_feature));
+  log_info("[Node.print_node]: node best_party_id = " + std::to_string(best_party_id));
+  log_info("[Node.print_node]: node best_feature_id = " + std::to_string(best_feature_id));
+  log_info("[Node.print_node]: node best_split_id = " + std::to_string(best_split_id));
+  log_info("[Node.print_node]: node left_child = " + std::to_string(left_child));
+  log_info("[Node.print_node]: node right_child = " + std::to_string(right_child));
+  log_info("[Node.print_node]: node split_threshold = " + std::to_string(split_threshold));
+  log_info("[Node.print_node]: node node_sample_num = " + std::to_string(node_sample_num));
+
   // assume that the impurity and label are plaintext
   double decoded_impurity, decoded_label;
   impurity.decode(decoded_impurity);
-  LOG(INFO) << "Node impurity: " << decoded_impurity;
+  log_info("[Node.print_node]: node impurity: " + std::to_string(decoded_impurity));
   if (node_type == falcon::LEAF) {
+    log_info("[Node.print_node] node label type: " + std::to_string(label.getter_type()));
     label.decode(decoded_label);
-    LOG(INFO) << "Node label: " << decoded_label;
+    log_info("[Node.print_node]: node label: " + std::to_string(decoded_label));
   }
 }

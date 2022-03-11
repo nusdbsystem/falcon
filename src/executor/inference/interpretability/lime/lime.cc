@@ -858,7 +858,7 @@ std::vector<double> LimeExplainer::explain_one_label(
       dt_params.criterion = "mse";
       dt_params.split_strategy = "best";
       dt_params.class_num = 2;
-      dt_params.max_depth = 5;
+      dt_params.max_depth = 3;
       dt_params.max_bins = 8;
       dt_params.min_samples_split = 5;
       dt_params.min_samples_leaf = 5;
@@ -1044,16 +1044,16 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   }
   log_info("[lime_decision_tree_train]: encrypted_label_size = " + std::to_string(label_size));
 
-  // for debug decrypt encrypted weights
-  auto *decrypted_weights = new EncodedNumber[cur_sample_size];
-  party.collaborative_decrypt(sample_weights, decrypted_weights, cur_sample_size, ACTIVE_PARTY_ID);
-  log_info("[lime_decision_tree_train]: print decrypted sample weights");
-  for (int i = 0; i < cur_sample_size; i++) {
-    double x;
-    decrypted_weights[i].decode(x);
-    log_info("sample_weights[" + std::to_string(i) + "] = " + std::to_string(x));
-  }
-  delete [] decrypted_weights;
+//  // for debug decrypt encrypted weights
+//  auto *decrypted_weights = new EncodedNumber[cur_sample_size];
+//  party.collaborative_decrypt(sample_weights, decrypted_weights, cur_sample_size, ACTIVE_PARTY_ID);
+//  log_info("[lime_decision_tree_train]: print decrypted sample weights");
+//  for (int i = 0; i < cur_sample_size; i++) {
+//    double x;
+//    decrypted_weights[i].decode(x);
+//    log_info("sample_weights[" + std::to_string(i) + "] = " + std::to_string(x));
+//  }
+//  delete [] decrypted_weights;
 
   if (is_distributed == 0) {
     DecisionTreeBuilder decision_tree_builder(dt_params,
@@ -1067,8 +1067,23 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
     decision_tree_builder.lime_train(
         party, true, encrypted_labels, true, sample_weights);
     log_info("Train lime decision tree model finished.");
-    // to print the tree for comparison
-    log_info("TODO: print tree for better comparison");
+
+#ifdef SAVE_BASELINE
+    // to aggregate, decrypt, and print the tree for comparison
+    TreeModel global_tree_model = decision_tree_builder.aggregate_decrypt_tree_model(party);
+    // to calculate the feature importance based on the plaintext tree
+    std::vector<int> parties_feature_nums = party.sync_up_int_arr(decision_tree_builder.local_feature_num);
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      std::vector<double> feature_importance_vec = global_tree_model.comp_feature_importance(
+        parties_feature_nums,
+        decision_tree_builder.train_data_size
+        );
+      local_explanations = feature_importance_vec;
+      global_tree_model.print_tree_model();
+    }
+    log_info("print tree for better comparison");
+    google::FlushLogFiles(google::INFO);
+#endif
   }
 
   // is_distributed == 1 and distributed_role = 0 (parameter server)

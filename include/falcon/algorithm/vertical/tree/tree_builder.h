@@ -273,7 +273,14 @@ class DecisionTreeBuilder : public ModelBuilder {
    */
   void retrieve_global_best_split(const Worker &worker);
 
-  void print_tree_model();
+  /**
+   * active party aggregate the overall tree model
+   * and decrypt the model for print illustration
+   *
+   * @param party: the participating party
+   * @return: return the resulted tree model
+   */
+  TreeModel aggregate_decrypt_tree_model(Party& party);
 
 };
 

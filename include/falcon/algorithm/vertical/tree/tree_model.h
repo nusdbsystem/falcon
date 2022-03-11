@@ -73,6 +73,22 @@ class TreeModel {
       std::vector< std::vector<double> > predicted_samples,
       int predicted_sample_size,
       EncodedNumber* predicted_labels);
+
+  /**
+   * compute the feature importance of the tree model,
+   * according to the link https://sefiks.com/2020/04/06/feature-importance-in-decision-trees/
+   * @param parties_feature_num: the parties local feature numbers
+   * @param total_sample_num: the number of total train samples
+   * @return
+   */
+  std::vector<double> comp_feature_importance(
+      const std::vector<int>& parties_feature_num,
+      int total_sample_num);
+
+  /**
+   * print the tree model (assume that the node impurity is plaintext)
+   */
+  void print_tree_model();
 };
 
 

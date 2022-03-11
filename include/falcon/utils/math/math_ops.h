@@ -143,4 +143,14 @@ double square_sum(std::vector<double> a, std::vector<double> b);
  */
 std::vector<int> find_top_k_indexes(const std::vector<double>& a, int k);
 
+/**
+ * revert the global index given a 2-dimensional index (id, j)
+ *
+ * @param a: the number of elements in each id vector
+ * @param id: the id of local vector
+ * @param idx: the index in local vector
+ * @return
+ */
+int global_idx(const std::vector<int>& a, int id, int idx);
+
 #endif  // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_
