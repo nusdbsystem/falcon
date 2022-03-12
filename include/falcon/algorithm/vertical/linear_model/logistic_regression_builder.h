@@ -229,22 +229,6 @@ class LogisticRegressionBuilder : public ModelBuilder {
   void display_one_ciphertext(Party party, EncodedNumber *number);
 };
 
-/**
- * train a logistic regression model
- *
- * @param party: initialized party object
- * @param params_str: LogisticRegressionParams serialized string
- * @param model_save_file: saved model file
- * @param model_report_file: saved report file
- * @param is_distributed_train: 1: use distributed train
- * @param worker: worker instance, used when is_distributed_train=1
- */
-void train_logistic_regression(
-    Party* party,
-    const std::string& params_str,
-    const std::string& model_save_file,
-    const std::string& model_report_file,
-    int is_distributed_train=0, Worker* worker=nullptr);
 
 
 #endif  // FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_H_

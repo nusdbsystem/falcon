@@ -65,20 +65,4 @@ class LogRegParameterServer : public LinearParameterServer{
   void save_model(const std::string& model_save_file) override;
 };
 
-/**
- * run a master to help to train logistic regression
- *
- * @param party: init
- * @param params_str: LogisticRegressionParams serialized string
- * @param worker_address_str: worker's address 'ip+port'
- * @param model_save_file: the path for saving the trained model
- * @param model_report_file: the path for saving the training report
- */
-void launch_log_reg_parameter_server(
-    Party* party,
-    const std::string& params_pb_str,
-    const std::string& ps_network_config_pb_str,
-    const std::string& model_save_file,
-    const std::string& model_report_file);
-
 #endif //FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_PS_H_

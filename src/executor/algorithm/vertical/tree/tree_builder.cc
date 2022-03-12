@@ -2224,8 +2224,6 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
           "\nsplit_threshold:" + to_string(tree.nodes[node_index].split_threshold) +
           "\nleft_child_index:" + to_string(left_child_index) +
           "\nright_child_index:" + to_string(right_child_index));
-
-
     }
 
     if (i_star != party.party_id) {
@@ -2330,7 +2328,6 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
   djcs_t_free_public_key(phe_pub_key);
 
 }
-
 
 
 void DecisionTreeBuilder::distributed_eval(Party &party,
@@ -2678,192 +2675,6 @@ void spdz_tree_computation(int party_num,
   for (int i = 0; i < party_num; i++) {
     delete mpc_sockets[i];
     mpc_sockets[i] = nullptr;
-  }
-}
-
-void train_decision_tree(
-    Party *party,
-    const std::string& params_str,
-    const std::string& model_save_file,
-    const std::string& model_report_file,
-    int is_distributed_train, Worker* worker) {
-
-  log_info("Run the example decision tree train");
-
-  DecisionTreeParams params;
-  // currently for testing
-  params.tree_type = "classification";
-  params.criterion = "gini";
-  params.split_strategy = "best";
-  params.class_num = 2;
-  params.max_depth = 5;
-  params.max_bins = 8;
-  params.min_samples_split = 5;
-  params.min_samples_leaf = 5;
-  params.max_leaf_nodes = 16;
-  params.min_impurity_decrease = 0.01;
-  params.min_impurity_split = 0.001;
-  params.dp_budget = 0.1;
-
-  LOG(INFO) << "Init decision tree model builder";
-  deserialize_dt_params(params, params_str);
-  int weight_size = party->getter_feature_num();
-  double training_accuracy = 0.0;
-  double testing_accuracy = 0.0;
-
-  std::vector< std::vector<double> > training_data;
-  std::vector< std::vector<double> > testing_data;
-  std::vector<double> training_labels;
-  std::vector<double> testing_labels;
-
-  // record full train and test data for distributed training
-  std::vector< std::vector<double> > full_training_data;
-  std::vector< std::vector<double> > full_testing_data;
-  std::vector<double> full_training_labels;
-  std::vector<double> full_testing_labels;
-
-  // if not distributed train, then the party split the data
-  // otherwise, the party/worker receive the data and phe keys from ps
-  if (is_distributed_train == 0) {
-    double split_percentage = SPLIT_TRAIN_TEST_RATIO;
-    party->split_train_test_data(split_percentage,
-                                training_data,
-                                testing_data,
-                                training_labels,
-                                testing_labels);
-  }
-
-  // here should receive the train/test data/labels from ps
-  else{
-    double split_percentage = SPLIT_TRAIN_TEST_RATIO;
-    party->split_train_test_data(split_percentage,
-                                full_training_data,
-                                full_testing_data,
-                                full_training_labels,
-                                full_testing_labels);
-
-    std::string recv_training_data_str, recv_testing_data_str;
-    std::string recv_training_labels_str, recv_testing_labels_str;
-    worker->recv_long_message_from_ps(recv_training_data_str);
-    worker->recv_long_message_from_ps(recv_testing_data_str);
-    deserialize_double_matrix(training_data, recv_training_data_str);
-    deserialize_double_matrix(testing_data, recv_testing_data_str);
-
-    std::string recv_worker_feature_index_prefix_train_data;
-    std::string recv_worker_feature_index_prefix_test_data;
-    worker->recv_long_message_from_ps(recv_worker_feature_index_prefix_train_data);
-    worker->recv_long_message_from_ps(recv_worker_feature_index_prefix_test_data);
-
-    // decode worker_feature_index_prefix_train_data
-    std::stringstream iss( recv_worker_feature_index_prefix_train_data );
-    int worker_feature_index_prefix_train_data_num;
-    std::vector<int> worker_feature_index_prefix_train_data_vector;
-    while ( iss >> worker_feature_index_prefix_train_data_num )
-      worker_feature_index_prefix_train_data_vector.push_back( worker_feature_index_prefix_train_data_num );
-
-    // decode worker_feature_index_prefix_test_data
-    std::stringstream iss2( recv_worker_feature_index_prefix_test_data );
-    int worker_feature_index_prefix_test_data_num;
-    std::vector<int> worker_feature_index_prefix_test_data_vector;
-    while ( iss2 >> worker_feature_index_prefix_test_data_num )
-      worker_feature_index_prefix_test_data_vector.push_back( worker_feature_index_prefix_test_data_num );
-
-    worker->assign_train_feature_prefix(worker_feature_index_prefix_train_data_vector[worker->worker_id-1]);
-    worker->assign_test_feature_prefix(worker_feature_index_prefix_test_data_vector[worker->worker_id-1]);
-
-    if (party->party_type == falcon::ACTIVE_PARTY) {
-      worker->recv_long_message_from_ps(recv_training_labels_str);
-      worker->recv_long_message_from_ps(recv_testing_labels_str);
-      deserialize_double_array(training_labels, recv_training_labels_str);
-      deserialize_double_array(testing_labels, recv_testing_labels_str);
-    }
-
-    // also, receive the phe keys from ps
-    // and set these to the party
-    std::string recv_phe_keys_str;
-    log_info("begin to receive phe keys from ps ");
-
-    worker->recv_long_message_from_ps(recv_phe_keys_str);
-    log_info("received phe keys from ps: " + recv_phe_keys_str);
-    party->load_phe_key_string(recv_phe_keys_str);
-  }
-
-  if (party->party_type == falcon::ACTIVE_PARTY) {
-    log_info("[train_decision_tree] first data label = " + std::to_string(training_labels[0]));
-    log_info("[train_decision_tree] second data label = " + std::to_string(training_labels[1]));
-    log_info("[train_decision_tree] third data label = " + std::to_string(training_labels[2]));
-  }
-
-  std::cout << "Init decision tree model" << std::endl;
-  LOG(INFO) << "Init decision tree model";
-
-  DecisionTreeBuilder decision_tree_builder(params,
-      training_data,
-      testing_data,
-      training_labels,
-      testing_labels,
-      training_accuracy,
-      testing_accuracy);
-
-  LOG(INFO) << "Init decision tree model finished";
-  std::cout << "Init decision tree model finished" << std::endl;
-  google::FlushLogFiles(google::INFO);
-
-  if (is_distributed_train == 0){
-    decision_tree_builder.train(*party);
-    decision_tree_builder.eval(*party, falcon::TRAIN);
-    decision_tree_builder.eval(*party, falcon::TEST);
-    // save model and report
-    // save_dt_model(decision_tree_builder.tree, model_save_file);
-    std::string pb_dt_model_string;
-    serialize_tree_model(decision_tree_builder.tree, pb_dt_model_string);
-    save_pb_model_string(pb_dt_model_string, model_save_file);
-    save_training_report(decision_tree_builder.getter_training_accuracy(),
-                         decision_tree_builder.getter_testing_accuracy(),
-                         model_report_file);
-    TreeModel tree_model = decision_tree_builder.aggregate_decrypt_tree_model(*party);
-    if (party->party_type == falcon::ACTIVE_PARTY) {
-      tree_model.print_tree_model();
-    }
-
-    LOG(INFO) << "Trained model and report saved";
-    std::cout << "Trained model and report saved" << std::endl;
-    google::FlushLogFiles(google::INFO);
-  } else {
-
-    // on evaluation stage, each worker should have all features.
-    auto decision_tree_builder_eval =  new DecisionTreeBuilder (params,
-                                                   full_training_data,
-                                                   full_testing_data,
-                                                   full_training_labels,
-                                                   full_testing_labels,
-                                                   training_accuracy,
-                                                   testing_accuracy);
-
-    decision_tree_builder.distributed_train(*party, *worker);
-    // update the tree instance in decision_tree_builder_eval.
-    log_info("Print the tree of the decision_tree_builder, which is the tree after training");
-    decision_tree_builder.tree.print_tree_model();
-
-    // copy tree
-    decision_tree_builder_eval->tree.type = decision_tree_builder.tree.type;
-    decision_tree_builder_eval->tree.class_num = decision_tree_builder.tree.class_num;
-    decision_tree_builder_eval->tree.max_depth = decision_tree_builder.tree.max_depth;
-    decision_tree_builder_eval->tree.internal_node_num = decision_tree_builder.tree.internal_node_num;
-    decision_tree_builder_eval->tree.total_node_num = decision_tree_builder.tree.total_node_num;
-    for (int j = 0; j < decision_tree_builder_eval->tree.capacity; j++){
-      decision_tree_builder_eval->tree.nodes[j] = decision_tree_builder.tree.nodes[j];
-    }
-    decision_tree_builder_eval->tree.capacity = decision_tree_builder.tree.capacity;
-
-    log_info("Print the tree of the decision_tree_builder_eval, which is the tree used for evaluation");
-    decision_tree_builder_eval->tree.print_tree_model();
-    decision_tree_builder_eval->distributed_eval(*party, *worker, falcon::TRAIN);
-    decision_tree_builder_eval->distributed_eval(*party, *worker, falcon::TEST);
-    // in is_distributed_train, parameter server will save the model.
-
-    delete decision_tree_builder_eval;
-
   }
 }
 

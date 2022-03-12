@@ -288,21 +288,5 @@ void spdz_linear_regression_computation(int party_num,
                                         int global_weight_size,
                                         std::promise<std::vector<double>> *regularized_grad_shares);
 
-/**
- * train a linear regression model
- *
- * @param party: initialized party object
- * @param params_str: LinearRegressionParams serialized string
- * @param model_save_file: saved model file
- * @param model_report_file: saved report file
- * @param is_distributed_train: 1: use distributed train
- * @param worker: worker instance, used when is_distributed_train=1
- */
-void train_linear_regression(
-    Party* party,
-    const std::string& params_str,
-    const std::string& model_save_file,
-    const std::string& model_report_file,
-    int is_distributed_train=0, Worker* worker=nullptr);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_REGRESSION_BUILDER_H_

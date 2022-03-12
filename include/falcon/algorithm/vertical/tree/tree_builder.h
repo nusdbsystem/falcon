@@ -309,20 +309,4 @@ void spdz_tree_computation(int party_num,
     falcon::SpdzTreeCompType tree_comp_type,
     std::promise<std::vector<double>> *res);
 
-/**
- * train a decision tree model
- * @param party: initialized party object
- * @param params: DecisionTreeBuilderParam serialized string
- * @param model_save_file: saved model file
- * @param model_report_filef: saved report file
- * @param is_distributed_train: 1: use distributed train
- * @param worker: worker instance, used when is_distributed_train=1
- */
-void train_decision_tree(
-    Party *party,
-    const std::string& params_str,
-    const std::string& model_save_file,
-    const std::string& model_report_file,
-    int is_distributed_train=0, Worker* worker=nullptr);
-
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_CART_BUILDER_H_

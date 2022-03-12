@@ -23,6 +23,7 @@
 #include "falcon/utils/base64.h"
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/parser.h>
+#include <falcon/algorithm/vertical/vfl_entry.h>
 
 #include <chrono>
 #include <glog/logging.h>

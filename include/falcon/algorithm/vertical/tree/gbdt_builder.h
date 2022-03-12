@@ -119,14 +119,4 @@ class GbdtBuilder : public ModelBuilder {
             const std::string& report_save_path = std::string()) override;
 };
 
-/**
- * train a gbdt model
- * @param party: initialized party object
- * @param params: GbdtParams serialized string
- * @param model_save_file: saved model file
- * @param model_report_file: saved report file
- */
-void train_gbdt(Party party, const std::string& params_str,
-    const std::string& model_save_file, const std::string& model_report_file);
-
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_BUILDER_H_
