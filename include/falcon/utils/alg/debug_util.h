@@ -14,7 +14,7 @@
 /**
  * This function implements debug of cipher array for check
  *
- * @tparam T: the template of the plaintext, either double or int
+ * @tparam T: the template of the plaintext, either double or long
  * @param party: the participating party
  * @param cipher_array: the cipher array to be debug
  * @param size: the size of cipher_array
@@ -55,7 +55,7 @@ std::vector<T> debug_cipher_array(const Party& party, EncodedNumber* cipher_arra
 /**
  * This function implements debug of cipher matrix for check
  *
- * @tparam T: the template of the plaintext, either double or int
+ * @tparam T: the template of the plaintext, either double or long
  * @param party: the participating party
  * @param cipher_matrix: the cipher matrix to be debug
  * @param row: the number of rows in cipher_matrix
@@ -81,7 +81,7 @@ std::vector<std::vector<T>> debug_cipher_matrix(const Party& party, EncodedNumbe
     for (int i = 0; i < print_row; i++) {
       for (int j = 0; j < print_column; j++) {
         log_info("[debug_cipher_matrix] debug_cipher_matrix[" + std::to_string(i)
-                     + "][ = " + std::to_string(j) + "] = " + std::to_string(decoded_matrix[i][j]));
+                     + "][" + std::to_string(j) + "] = " + std::to_string(decoded_matrix[i][j]));
       }
     }
   }

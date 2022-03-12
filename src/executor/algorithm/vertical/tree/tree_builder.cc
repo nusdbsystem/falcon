@@ -159,7 +159,7 @@ void DecisionTreeBuilder::precompute_label_helper(falcon::PartyType party_type) 
 }
 
 void DecisionTreeBuilder::precompute_feature_helpers() {
-  LOG(INFO) << "Pre-compute feature helpers for training";
+  log_info("Pre-compute feature helpers for training");
   for (int i = 0; i < local_feature_num; i++) {
     // 1. extract feature values of the i-th feature, compute samples_num
     // 2. check if distinct values number <= max_bins, if so, update splits_num as distinct number
@@ -700,6 +700,11 @@ void DecisionTreeBuilder::build_node(Party &party,
     log_info("The global_split_num = " + std::to_string(global_split_num));
   }
 
+  log_info("[DecisionTreeBuilder.build_node] debug global statistics print");
+  debug_cipher_array<double>(party, global_left_branch_sample_nums, global_split_num, ACTIVE_PARTY_ID, true, global_split_num);
+  debug_cipher_array<double>(party, global_right_branch_sample_nums, global_split_num, ACTIVE_PARTY_ID, true, global_split_num);
+  debug_cipher_matrix<double>(party, global_encrypted_statistics, global_split_num, 2 * class_num, ACTIVE_PARTY_ID, true, global_split_num, 2 * class_num);
+
   /// step 5: encrypted statistics computed finished, convert to secret shares
   std::vector< std::vector<double> > stats_shares;
   std::vector<double> left_sample_nums_shares;
@@ -981,12 +986,16 @@ void DecisionTreeBuilder::build_node(Party &party,
       left_child_index,
       available_feature_ids_new,
       sample_mask_iv_left,
-      encrypted_labels_left);
+      encrypted_labels_left,
+      use_sample_weights,
+      encrypted_weights);
   build_node(party,
       right_child_index,
       available_feature_ids_new,
       sample_mask_iv_right,
-      encrypted_labels_right);
+      encrypted_labels_right,
+      use_sample_weights,
+      encrypted_weights);
 
   delete [] sample_mask_iv_left;
   delete [] sample_mask_iv_right;
@@ -1095,17 +1104,17 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party,
   std::vector<double> private_values, shares1, shares2;
   public_values.push_back(tree_type);
   public_values.push_back(class_num);
-  // if with encrypted sample weights, can multiply encrypted_labels with
-  // encrypted_weights before computing the label by spdz computation
-  if (use_sample_weights) {
-    // multiply encrypted_weights and set back to encrypted labels
-    party.ciphers_multi(encrypted_labels,
-                        encrypted_labels,
-                        encrypted_weights,
-                        sample_num,
-                        ACTIVE_PARTY_ID);
-    log_info("[compute_leaf_statistics]: encrypted_labels multiply encrypted weights finished.");
-  }
+//  // if with encrypted sample weights, can multiply encrypted_labels with
+//  // encrypted_weights before computing the label by spdz computation
+//  if (use_sample_weights) {
+//    // multiply encrypted_weights and set back to encrypted labels
+//    party.ciphers_multi(encrypted_labels,
+//                        encrypted_labels,
+//                        encrypted_weights,
+//                        sample_num,
+//                        ACTIVE_PARTY_ID);
+//    log_info("[compute_leaf_statistics]: encrypted_labels multiply encrypted weights finished.");
+//  }
   if (party.party_type == falcon::ACTIVE_PARTY) {
     if (tree_type == falcon::CLASSIFICATION) {
       // compute how many samples in each class, eg: [100, 90], 100 samples for c1, and 90 for c2
@@ -1208,8 +1217,12 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
     EncodedNumber *encrypted_right_sample_nums,
     bool use_sample_weights,
     EncodedNumber *encrypted_weights) {
-  std::cout << " Compute encrypted statistics for node " << node_index << std::endl;
-  LOG(INFO) << " Compute encrypted statistics for node " << node_index;
+  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] Compute encrypted statistics for node " + std::to_string(node_index));
+  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] sample_mask_iv precision =  " + std::to_string(std::abs(sample_mask_iv[0].getter_exponent())));
+  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] encrypted_labels precision =  " + std::to_string(std::abs(encrypted_labels[0].getter_exponent())));
+  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] encrypted_weights precision =  " + std::to_string(std::abs(encrypted_weights[0].getter_exponent())));
+  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] use_sample_weights =  " + std::to_string(use_sample_weights));
+
   const clock_t start_time = clock();
 
   int split_index = 0;
@@ -1243,6 +1256,7 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
   for (int j = 0; j < available_feature_num; j++) {
     int feature_id = available_feature_ids[j];
     int split_num = feature_helpers[feature_id].num_splits;
+    log_info("[DecisionTreeBuilder.compute_encrypted_statistics] split_num = " + std::to_string(split_num));
     std::vector<int> sorted_indices = feature_helpers[feature_id].sorted_indexes;
     auto *sorted_sample_iv = new EncodedNumber[sample_num];
     // copy the sample_iv
@@ -1263,7 +1277,7 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
 //    }
     // compute the cipher precision
     int sorted_sample_iv_prec = std::abs(sorted_sample_iv[0].getter_exponent());
-    // log_info("[compute_encrypted_statistics]: sorted_sample_iv_prec = " + std::to_string(sorted_sample_iv_prec));
+    log_info("[DecisionTreeBuilder.compute_encrypted_statistics] sorted_sample_iv_prec = " + std::to_string(sorted_sample_iv_prec));
 
     // compute the encrypted aggregation of split_num + 1 buckets
     auto *left_sums = new EncodedNumber[split_num];
@@ -1277,27 +1291,6 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random, left_sums[idx], left_sums[idx]);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random, right_sums[idx], right_sums[idx]);
     }
-    // log_info("[compute_encrypted_statistics]: init finished");
-    // compute sample iv statistics by one traverse
-    int split_iterator = 0;
-    for (int sample_idx = 0; sample_idx < sample_num; sample_idx++) {
-      djcs_t_aux_ee_add(phe_pub_key, total_sum,
-          total_sum, sorted_sample_iv[sample_idx]);
-      if (split_iterator == split_num) {
-        continue;
-      }
-      int sorted_idx = sorted_indices[sample_idx];
-      double sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
-
-      // find the first split value that larger than the current feature value, usually only step by 1
-      if ((sorted_feature_value - feature_helpers[feature_id].split_values[split_iterator]) > ROUNDED_PRECISION) {
-        split_iterator += 1;
-        if (split_iterator == split_num) continue;
-      }
-      djcs_t_aux_ee_add(phe_pub_key, left_sums[split_iterator],
-          left_sums[split_iterator], sorted_sample_iv[sample_idx]);
-    }
-
     // compute the encrypted statistics for each class
     auto **left_stats = new EncodedNumber*[split_num];
     auto **right_stats = new EncodedNumber*[split_num];
@@ -1311,42 +1304,102 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
         left_stats[k][c].set_double(phe_pub_key->n[0], 0);
         right_stats[k][c].set_double(phe_pub_key->n[0], 0);
         djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-            left_stats[k][c], left_stats[k][c]);
+                           left_stats[k][c], left_stats[k][c]);
         djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-            right_stats[k][c], right_stats[k][c]);
+                           right_stats[k][c], right_stats[k][c]);
       }
     }
     for (int c = 0; c < class_num; c++) {
       sums_stats[c].set_double(phe_pub_key->n[0], 0);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-          sums_stats[c], sums_stats[c]);
+                         sums_stats[c], sums_stats[c]);
     }
-    split_iterator = 0;
+    // compute sample iv statistics by one traverse
+    int split_iterator = 0;
     for (int sample_idx = 0; sample_idx < sample_num; sample_idx++) {
       int sorted_idx = sorted_indices[sample_idx];
+      double sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
+      djcs_t_aux_ee_add(phe_pub_key, total_sum,
+          total_sum, sorted_sample_iv[sample_idx]);
       for (int c = 0; c < class_num; c++) {
         djcs_t_aux_ee_add(phe_pub_key, sums_stats[c], sums_stats[c],
-            encrypted_labels[c * sample_num + sorted_idx]);
+                          encrypted_labels[c * sample_num + sorted_idx]);
       }
       if (split_iterator == split_num) {
         continue;
       }
-      double sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
 
-      // find the first split value that larger than
-      // the current feature value, usually only step by 1
-      if (sorted_feature_value > feature_helpers[feature_id].split_values[split_iterator]) {
+      // find the first split value that larger than the current feature value, usually only step by 1
+      // if ((sorted_feature_value - feature_helpers[feature_id].split_values[split_iterator]) > ROUNDED_PRECISION) {
+      while ((sorted_feature_value > feature_helpers[feature_id].split_values[split_iterator]) && (split_iterator < split_num)) {
         split_iterator += 1;
-        if (split_iterator == split_num) continue;
+//        log_info("[DecisionTreeBuilder.compute_encrypted_statistics] split_iterator = " + std::to_string(split_iterator));
       }
+      if (split_iterator == split_num) {
+        continue;
+      }
+      djcs_t_aux_ee_add(phe_pub_key, left_sums[split_iterator],
+          left_sums[split_iterator], sorted_sample_iv[sample_idx]);
       for (int c = 0; c < class_num; c++) {
         djcs_t_aux_ee_add(phe_pub_key,
-            left_stats[split_iterator][c],
-            left_stats[split_iterator][c],
-            encrypted_labels[c * sample_num + sorted_idx]);
+                          left_stats[split_iterator][c],
+                          left_stats[split_iterator][c],
+                          encrypted_labels[c * sample_num + sorted_idx]);
       }
     }
 
+//    // compute the encrypted statistics for each class
+//    auto **left_stats = new EncodedNumber*[split_num];
+//    auto **right_stats = new EncodedNumber*[split_num];
+//    auto *sums_stats = new EncodedNumber[class_num];
+//    for (int k = 0; k < split_num; k++) {
+//      left_stats[k] = new EncodedNumber[class_num];
+//      right_stats[k] = new EncodedNumber[class_num];
+//    }
+//    for (int k = 0; k < split_num; k++) {
+//      for (int c = 0; c < class_num; c++) {
+//        left_stats[k][c].set_double(phe_pub_key->n[0], 0);
+//        right_stats[k][c].set_double(phe_pub_key->n[0], 0);
+//        djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+//            left_stats[k][c], left_stats[k][c]);
+//        djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+//            right_stats[k][c], right_stats[k][c]);
+//      }
+//    }
+//    for (int c = 0; c < class_num; c++) {
+//      sums_stats[c].set_double(phe_pub_key->n[0], 0);
+//      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+//          sums_stats[c], sums_stats[c]);
+//    }
+//    split_iterator = 0;
+//    for (int sample_idx = 0; sample_idx < sample_num; sample_idx++) {
+//      int sorted_idx = sorted_indices[sample_idx];
+//      for (int c = 0; c < class_num; c++) {
+//        djcs_t_aux_ee_add(phe_pub_key, sums_stats[c], sums_stats[c],
+//            encrypted_labels[c * sample_num + sorted_idx]);
+//      }
+//      if (split_iterator == split_num) {
+//        continue;
+//      }
+//      double sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
+//
+//      // find the first split value that larger than
+//      // the current feature value, usually only step by 1
+//      while ((sorted_feature_value > feature_helpers[feature_id].split_values[split_iterator]) && (split_iterator < split_num)) {
+//        split_iterator += 1;
+//        log_info("[DecisionTreeBuilder.compute_encrypted_statistics] split_iterator = " + std::to_string(split_iterator));
+//      }
+//      if (split_iterator == split_num) {
+//        continue;
+//      }
+//      for (int c = 0; c < class_num; c++) {
+//        djcs_t_aux_ee_add(phe_pub_key,
+//            left_stats[split_iterator][c],
+//            left_stats[split_iterator][c],
+//            encrypted_labels[c * sample_num + sorted_idx]);
+//      }
+//    }
+    log_info("[DecisionTreeBuilder.compute_encrypted_statistics] finish computing statistics left");
     // write the left sums to encrypted_left_sample_nums and update the right sums
     EncodedNumber left_num_help, right_num_help, plain_constant_help;
     left_num_help.set_double(phe_pub_key->n[0], 0.0, sorted_sample_iv_prec);
@@ -1404,8 +1457,7 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
 
   const clock_t finish_time = clock();
   double consumed_time = double(finish_time - start_time) / CLOCKS_PER_SEC;
-  std::cout << "Node encrypted statistics computation time = " << consumed_time << std::endl;
-  LOG(INFO) << "Node encrypted statistics computation time = " << consumed_time;
+  log_info("Node encrypted statistics computation time = " + std::to_string(consumed_time));
   google::FlushLogFiles(google::INFO);
 }
 
