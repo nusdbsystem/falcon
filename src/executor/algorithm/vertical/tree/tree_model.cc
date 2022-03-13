@@ -335,8 +335,7 @@ std::vector<double> TreeModel::comp_feature_importance(
       log_info("[TreeModel.comp_feature_importance] impurity_t = " + std::to_string(impurity_t)
         + ", impurity_l = " + std::to_string(impurity_l) + ", impurity_r = " + std::to_string(impurity_r));
       // compute feature importance
-      double imp = (n_t / total_sample_num) * (impurity_t
-          - (n_l / n_t) * impurity_l - (n_r / n_t) * impurity_r);
+      double imp = n_t * impurity_t - n_l * impurity_l - n_r * impurity_r;
       log_info("[TreeModel.comp_feature_importance] imp = " + std::to_string(imp));
       int feature_id = nodes[idx].best_feature_id;
       log_info("[TreeModel.comp_feature_importance] feature_id = " + std::to_string(feature_id));
@@ -347,8 +346,13 @@ std::vector<double> TreeModel::comp_feature_importance(
       google::FlushLogFiles(google::INFO);
     }
   }
+  // normalize feature importance vector
+  double imp_sum = std::accumulate(feature_importance_vec.begin(), feature_importance_vec.end(), 0.0);
+  log_info("[TreeModel.comp_feature_importance] imp_sum = " + std::to_string(imp_sum));
+  for (int i = 0; i < feature_importance_vec.size(); i++) {
+    feature_importance_vec[i] = feature_importance_vec[i] / imp_sum;
+  }
   log_info("[TreeModel.comp_feature_importance] end compute feature importance");
-  google::FlushLogFiles(google::INFO);
   return feature_importance_vec;
 }
 

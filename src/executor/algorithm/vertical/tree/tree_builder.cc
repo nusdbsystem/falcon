@@ -367,13 +367,6 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
     djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sample_mask_iv[i], tmp);
   }
 
-  // init the root node info
-  tree.nodes[0].depth = 0;
-  tree.nodes[0].node_sample_num = train_data_size;
-  EncodedNumber max_impurity;
-  max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
-  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, max_impurity);
-
   // check whether use sample_weights, if so, compute cipher multi
   auto* weighted_encrypted_true_labels = new EncodedNumber[label_size];
   if (use_sample_weights) {
@@ -384,6 +377,7 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
     }
     party.ciphers_multi(weighted_encrypted_true_labels, encrypted_true_labels,
                         assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
+    party.broadcast_encoded_number_array(weighted_encrypted_true_labels, class_num * sample_num, ACTIVE_PARTY_ID);
     delete [] assist_encrypted_weights;
   } else {
     for (int i = 0; i < label_size; i++) {
@@ -395,6 +389,19 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
   // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
   party.truncate_ciphers_precision(weighted_encrypted_true_labels, label_size,
                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+
+  // init the root node info
+  tree.nodes[0].depth = 0;
+  tree.nodes[0].node_sample_num = train_data_size;
+  //  EncodedNumber max_impurity;
+  //  max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
+  //  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, max_impurity);
+  double root_impurity = lime_reg_tree_root_impurity(
+      party, use_encrypted_labels, weighted_encrypted_true_labels,
+      sample_num, class_num, use_sample_weights, encrypted_weights);
+  EncodedNumber enc_root_impurity;
+  enc_root_impurity.set_double(phe_pub_key->n[0], root_impurity, PHE_FIXED_POINT_PRECISION);
+  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, enc_root_impurity);
 
   // required by spdz connector and mpc computation
   bigint::init_thread();

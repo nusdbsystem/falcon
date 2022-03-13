@@ -4,6 +4,7 @@
 
 #include <falcon/utils/alg/tree_util.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/utils/alg/debug_util.h>
 
 double root_impurity(const std::vector<double>& labels, falcon::TreeType tree_type, int class_num) {
   // check classification or regression
@@ -47,4 +48,88 @@ double root_impurity(const std::vector<double>& labels, falcon::TreeType tree_ty
   }
 
   return impurity;
+}
+
+
+double lime_reg_tree_root_impurity(Party& party, bool use_encrypted_labels,
+                                   EncodedNumber* weighted_encrypted_true_labels, int size, int class_num,
+                                   bool use_sample_weights, EncodedNumber* encrypted_weights) {
+  log_info("[lime_reg_tree_root_impurity] compute encrypted root impurity");
+  // here the encrypted labels are weighted label and label square, resp.
+  // 1. compute weight_sum = \sum{encrypted_weights}
+  // 2. compute weighted_label_sum and weighted_label_square_sum
+  // 3. decrypt and compute impurity = (label_square_sum / weight_sum) - (label_sum / weight_sum) * (label_sum / weight_sum)
+
+#ifdef DEBUG
+  debug_cipher_array<double>(party, weighted_encrypted_true_labels, 10, ACTIVE_PARTY_ID, true, 10);
+  debug_cipher_array<double>(party, encrypted_weights, 10, ACTIVE_PARTY_ID, true, 10);
+#endif
+
+  auto* enc_label_sum = new EncodedNumber[2];
+  auto* enc_weight_sum = new EncodedNumber[1];
+  auto* dec_label_sum = new EncodedNumber[2];
+  auto* dec_weight_sum = new EncodedNumber[1];
+
+  // retrieve phe pub key
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    int enc_label_prec = std::abs(weighted_encrypted_true_labels[0].getter_exponent());
+    int enc_weight_prec = std::abs(encrypted_weights[0].getter_exponent());
+    log_info("[lime_reg_tree_root_impurity] enc_label_prec = " + std::to_string(enc_label_prec));
+    log_info("[lime_reg_tree_root_impurity] enc_weight_prec = " + std::to_string(enc_weight_prec));
+    log_info("[lime_reg_tree_root_impurity] size = " + std::to_string(size));
+
+    enc_label_sum[0].set_double(phe_pub_key->n[0], 0.0, enc_label_prec);
+    enc_label_sum[1].set_double(phe_pub_key->n[0], 0.0, enc_label_prec);
+    enc_weight_sum[0].set_double(phe_pub_key->n[0], 0.0, enc_weight_prec);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, enc_label_sum[0], enc_label_sum[0]);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, enc_label_sum[1], enc_label_sum[1]);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, enc_weight_sum[0], enc_weight_sum[0]);
+
+    // compute encrypted sum
+    for (int i = 0; i < size; i++) {
+      djcs_t_aux_ee_add(phe_pub_key, enc_label_sum[0], enc_label_sum[0], weighted_encrypted_true_labels[i]);
+      djcs_t_aux_ee_add(phe_pub_key, enc_label_sum[1], enc_label_sum[1], weighted_encrypted_true_labels[i + size]);
+      djcs_t_aux_ee_add(phe_pub_key, enc_weight_sum[0], enc_weight_sum[0], encrypted_weights[i]);
+    }
+  }
+  party.broadcast_encoded_number_array(enc_label_sum, 2, ACTIVE_PARTY_ID);
+  party.broadcast_encoded_number_array(enc_weight_sum, 1, ACTIVE_PARTY_ID);
+
+  // decrypt the sums
+  party.collaborative_decrypt(enc_label_sum, dec_label_sum, 2, ACTIVE_PARTY_ID);
+  party.collaborative_decrypt(enc_weight_sum, dec_weight_sum, 1, ACTIVE_PARTY_ID);
+  double root_impurity;
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // compute impurity
+    double weight_sum, label_sum, label_square_sum;
+    dec_label_sum[0].decode(label_sum);
+    dec_label_sum[1].decode(label_square_sum);
+    dec_weight_sum[0].decode(weight_sum);
+    log_info("[lime_reg_tree_root_impurity] weight_sum = " + std::to_string(weight_sum));
+    log_info("[lime_reg_tree_root_impurity] label_sum = " + std::to_string(label_sum));
+    log_info("[lime_reg_tree_root_impurity] label_square_sum = " + std::to_string(label_square_sum));
+    root_impurity = (label_square_sum / weight_sum) - (label_sum / weight_sum) * (label_sum / weight_sum);
+
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        party.send_long_message(i, std::to_string(root_impurity));
+      }
+    }
+  } else {
+    std::string root_impurity_str;
+    party.recv_long_message(ACTIVE_PARTY_ID, root_impurity_str);
+    root_impurity = std::stod(root_impurity_str);
+  }
+  log_info("[lime_reg_tree_root_impurity] root_impurity = " + std::to_string(root_impurity));
+
+  djcs_t_free_public_key(phe_pub_key);
+  delete [] enc_label_sum;
+  delete [] enc_weight_sum;
+  delete [] dec_label_sum;
+  delete [] dec_weight_sum;
+
+  return root_impurity;
 }
