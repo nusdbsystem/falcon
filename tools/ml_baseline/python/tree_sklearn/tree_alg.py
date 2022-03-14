@@ -126,7 +126,7 @@ if args.random_forest:
 
 # GDBT
 if args.gbdt:
-    assert args.criterion in ['friedman_mse', 'mse']
+    assert args.criterion in ['friedman_mse', 'mse', 'squared_error']
     assert args.loss in ['deviance', 'exponential'] if args.is_classification else \
         args.loss in ['ls', 'lad', 'huber', 'quantile']
 

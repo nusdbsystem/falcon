@@ -24,6 +24,7 @@
 #include <utility>
 #include <falcon/model/model_io.h>
 #include <falcon/utils/pb_converter/lr_converter.h>
+#include <falcon/utils/pb_converter/tree_converter.h>
 #include <random>
 
 std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Party &party,
@@ -97,12 +98,43 @@ void LimeExplainer::load_predict_origin_model(const Party &party,
     }
     case falcon::RF:
     {
-      log_error("Random forest model not integrated yet.");
+      if (class_num == 1) {
+        log_error("Random forest model on regression interpretation not integrated yet.");
+        exit(EXIT_FAILURE);
+      } else {
+        ForestModel saved_forest_model;
+        std::string saved_model_string;
+        load_pb_model_string(saved_model_string, origin_model_saved_file);
+        deserialize_random_forest_model(saved_forest_model, saved_model_string);
+        saved_forest_model.predict_proba(const_cast<Party &>(party), generated_samples, (int) generated_samples.size(), predictions);
+      }
       break;
     }
     case falcon::GBDT:
     {
-      log_error("GBDT model not integrated yet.");
+      if (class_num != 1) {
+        log_error("GBDT model on multiple class interpretation not integrated yet.");
+        exit(EXIT_FAILURE);
+      } else {
+        GbdtModel saved_gbdt_model;
+        std::string saved_model_string;
+        load_pb_model_string(saved_model_string, origin_model_saved_file);
+        deserialize_gbdt_model(saved_gbdt_model, saved_model_string);
+        if (class_num == 1) {
+          // regression, only need one dimensional predictions
+          auto* predictions_assit = new EncodedNumber[generated_samples.size()];
+          saved_gbdt_model.predict(const_cast<Party &>(party), generated_samples, (int) generated_samples.size(), predictions_assit);
+          // copy 1d predictions to 2d predictions
+          for (int i = 0; i < (int) generated_samples.size(); i++) {
+            predictions[i][0] = predictions_assit[i];
+          }
+          delete [] predictions_assit;
+        } else {
+          // TODO: not implement yet
+          log_error("[LimeExplainer.load_predict_origin_model] lime for gbdt classification not support");
+          exit(EXIT_FAILURE);
+        }
+      }
       break;
     }
     default:
@@ -1192,10 +1224,12 @@ void lime_comp_pred(Party party, const std::string& params_str, const std::strin
       num_total_samples,
       comp_prediction_params.sampling_method
       );
-  log_info("Finish generating random samples");
+  log_info("[lime_comp_pred] Finish generating random samples");
 
   // 3. load model and compute model predictions
   int cur_sample_size = (int) generated_samples.size();
+  log_info("[lime_comp_pred] cur_sample_size = " + std::to_string(cur_sample_size));
+  log_info("[lime_comp_pred] class_num = " + std::to_string(class_num));
   auto** predictions = new EncodedNumber*[cur_sample_size];
   for (int i = 0; i < cur_sample_size; i++) {
     predictions[i] = new EncodedNumber[class_num];

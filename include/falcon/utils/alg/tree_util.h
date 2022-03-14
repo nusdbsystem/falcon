@@ -37,4 +37,6 @@ double lime_reg_tree_root_impurity(Party& party, bool use_encrypted_labels, Enco
                                    int size, int class_num, bool use_sample_weights, EncodedNumber* encrypted_weights);
 
 
+std::vector<double> rf_pred2prob(int class_num, const std::vector<double>& pred);
+
 #endif //FALCON_INCLUDE_FALCON_UTILS_ALG_TREE_UTIL_H_

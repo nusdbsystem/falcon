@@ -1,0 +1,96 @@
+{
+  "job_name": "bank dataset lime logistic regression prediction",
+  "job_info": "this is the job_decs",
+  "job_fl_type": "vertical",
+  "existing_key": 1,
+  "party_nums": 3,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "127.0.0.1:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/opt/falcon/data/dataset/news_popularity_data/client0",
+        "data_output": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client0",
+        "model_path": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client0"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "127.0.0.1:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/opt/falcon/data/dataset/news_popularity_data/client1",
+        "data_output": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client1",
+        "model_path": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client1"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "127.0.0.1:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/opt/falcon/data/dataset/news_popularity_data/client2",
+        "data_output": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client2",
+        "model_path": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client2"
+      }
+    }
+  ],
+  "tasks": {
+    "lime_pred": {
+      "mpc_algorithm_name": "vfl_decision_tree",
+      "algorithm_name": "lime_compute_prediction",
+      "input_configs": {
+        "data_input": {
+          "data": "client.txt",
+          "key": "phe_keys"
+        },
+        "algorithm_config": {
+          "original_model_name": "random_forest",
+          "original_model_saved_file": "/news_rf_model_202203131755.pb",
+          "model_type": "classification",
+          "class_num": 5,
+          "explain_instance_idx": 0,
+          "sample_around_instance": true,
+          "num_total_samples": 4000,
+          "sampling_method": "gaussian",
+          "generated_sample_file": "/sampled_data_news_rf_202203131755.txt",
+          "computed_prediction_file": "/predictions_news_rf_202203131755.txt"
+        }
+      },
+      "output_configs": {
+        "trained_model": "sampled_data_news_rf_202203131755.pb",
+        "evaluation_report": "news_rf_report_202203131755.txt"
+      }
+    },
+    "lime_weight": {
+      "mpc_algorithm_name": "lime",
+      "algorithm_name": "lime_compute_weights",
+      "input_configs": {
+        "data_input": {
+          "data": "client.txt",
+          "key": "phe_keys"
+        },
+        "algorithm_config": {
+          "explain_instance_idx": 0,
+          "generated_sample_file": "/sampled_data_news_rf_202203131755.txt",
+          "computed_prediction_file": "/predictions_news_rf_202203131755.txt",
+          "is_precompute": false,
+          "num_samples": 4000,
+          "class_num": 5,
+          "distance_metric": "euclidean",
+          "kernel": "exponential",
+          "kernel_width": 0.0,
+          "sample_weights_file": "/sample_weights_news_rf_202203131755.txt",
+          "selected_samples_file": "/selected_sampled_data_news_rf_202203131755.txt",
+          "selected_predictions_file": "/selected_predictions_news_rf_202203131755.txt"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    }
+  }
+}

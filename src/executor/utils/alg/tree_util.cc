@@ -5,6 +5,7 @@
 #include <falcon/utils/alg/tree_util.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/alg/debug_util.h>
+#include <numeric>
 
 double root_impurity(const std::vector<double>& labels, falcon::TreeType tree_type, int class_num) {
   // check classification or regression
@@ -16,7 +17,11 @@ double root_impurity(const std::vector<double>& labels, falcon::TreeType tree_ty
   // if classification
   if (tree_type == falcon::CLASSIFICATION) {
     // count samples for each class
-    std::vector<double> class_bins(class_num, 0.0);
+    std::vector<double> class_bins;
+    class_bins.reserve(class_num);
+    for (int i = 0; i < class_num; i++) {
+      class_bins.push_back(0.0);
+    }
     for (int i = 0; i < n; i++) {
       int c = (int) labels[i];
       class_bins[c] += 1.0;
@@ -132,4 +137,22 @@ double lime_reg_tree_root_impurity(Party& party, bool use_encrypted_labels,
   delete [] dec_weight_sum;
 
   return root_impurity;
+}
+
+
+std::vector<double> rf_pred2prob(int class_num, const std::vector<double>& pred) {
+  std::vector<double> prob;
+  prob.reserve(class_num);
+  for (int i = 0; i < class_num; i++) {
+    prob.push_back(0.0);
+  }
+  for (double p : pred) {
+    int class_id = (int) p;
+    prob[class_id] += 1.0;
+  }
+  double sum = std::accumulate(prob.begin(), prob.end(), 0.0);
+  for (int i = 0; i < class_num; i++) {
+    prob[i] = prob[i] / sum;
+  }
+  return prob;
 }

@@ -180,6 +180,8 @@ void GbdtBuilder::train_regression_task(Party party) {
   }
   // free retrieved public key
   djcs_t_free_public_key(phe_pub_key);
+  delete [] raw_predictions;
+  delete [] encrypted_true_labels;
 }
 
 void GbdtBuilder::train_classification_task(Party party) {

@@ -117,6 +117,7 @@ int main(int argc, char *argv[]) {
 
     log_info("Parse algorithm name and run the program");
     falcon::AlgorithmName parsed_algorithm_name = parse_algorithm_name(algorithm_name);
+    // parsed_algorithm_name = falcon::GBDT;
 
     // decode the base64 string to pb string, assume that only accept config string from coordinator
     std::string algorithm_params_pb_str = base64_decode_to_pb_string(algorithm_params);

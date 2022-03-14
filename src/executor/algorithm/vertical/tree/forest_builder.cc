@@ -83,11 +83,15 @@ void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
     // shuffle the training data
     // std::random_device rd;
     // using seed, for development
-    std::default_random_engine rng(RANDOM_SEED);
-    //auto rng = std::default_random_engine();
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine rng(seed);
+    // auto rng = std::default_random_engine();
     std::shuffle(std::begin(sampled_data_indexes), std::end(sampled_data_indexes), rng);
     // sample training data for the decision tree
     sampled_data_indexes.resize(sampled_training_data_size);
+    log_info("[RandomForestBuilder.shuffle_and_assign_training_data] sampled_data_indexes[0] = " + std::to_string(sampled_data_indexes[0]));
+    log_info("[RandomForestBuilder.shuffle_and_assign_training_data] sampled_data_indexes[1] = " + std::to_string(sampled_data_indexes[1]));
+    log_info("[RandomForestBuilder.shuffle_and_assign_training_data] sampled_data_indexes[2] = " + std::to_string(sampled_data_indexes[2]));
     // assign the training dataset and labels
     for (int i = 0; i < sampled_data_indexes.size(); i++) {
       sampled_training_data.push_back(training_data[sampled_data_indexes[i]]);

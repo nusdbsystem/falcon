@@ -11,6 +11,8 @@
 
 #include <cmath>
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
+#include <falcon/utils/alg/tree_util.h>
 #include <iostream>
 
 ForestModel::ForestModel() {}
@@ -155,4 +157,109 @@ void ForestModel::predict(Party &party,
     delete [] predicted_forest_labels[tree_id];
   }
   delete [] predicted_forest_labels;
+}
+
+void ForestModel::predict_proba(Party &party,
+                                const std::vector<std::vector<double>> &predicted_samples,
+                                int predicted_sample_size,
+                                EncodedNumber **predicted_labels) {
+  log_info("[ForestModel.predict_proba] begin to predict forest model");
+  if (tree_type == falcon::REGRESSION) {
+    log_info("[ForestModel.predict_proba] regression tree");
+    predict(party, predicted_samples, predicted_sample_size, predicted_labels[0]);
+    return;
+  }
+
+  if (tree_type == falcon::CLASSIFICATION) {
+    log_info("[ForestModel.predict_proba] classification tree");
+    // the prediction workflow is as follows:
+    //     step 1: the parties compute a prediction for each tree for each sample
+    //     step 2: the parties convert the predictions to secret shares and send to mpc to compute mode
+    //     step 3: the parties convert the secret shared results back to ciphertext
+
+    // retrieve phe pub key and phe random
+    djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+    party.getter_phe_pub_key(phe_pub_key);
+
+    // init predicted forest labels to record the predictions, the first dimension
+    // is the number of trees in the forest, and the second dimension is the number
+    // of the samples in the predicted dataset
+    auto** predicted_forest_labels = new EncodedNumber*[tree_size];
+    for (int tree_id = 0; tree_id < tree_size; tree_id++) {
+      predicted_forest_labels[tree_id] = new EncodedNumber[predicted_sample_size];
+    }
+
+    // compute predictions
+    for (int tree_id = 0; tree_id < tree_size; tree_id++) {
+      // compute predictions for each tree in the forest
+      forest_trees[tree_id].predict(party,
+                                    predicted_samples,
+                                    predicted_sample_size,
+                                    predicted_forest_labels[tree_id]);
+    }
+
+    // TODO: currently for lime baseline comparison, decrypt the predicted labels
+    int class_num = forest_trees[0].class_num;
+    auto** decrypted_forest_labels = new EncodedNumber*[tree_size];
+    for (int tree_id = 0; tree_id < tree_size; tree_id++) {
+      decrypted_forest_labels[tree_id] = new EncodedNumber[predicted_sample_size];
+    }
+    for (int i = 0; i < tree_size; i++) {
+      party.collaborative_decrypt(predicted_forest_labels[i], decrypted_forest_labels[i], predicted_sample_size, ACTIVE_PARTY_ID);
+    }
+    // active party compute prediction probabilities and encrypt
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      std::vector<std::vector<double>> dec_predicted_labels;
+      for (int i = 0; i < tree_size; i++) {
+        std::vector<double> dec_predicted_labels_tree_i;
+        for (int j = 0; j < predicted_sample_size; j++) {
+          double d;
+          decrypted_forest_labels[i][j].decode(d);
+          dec_predicted_labels_tree_i.push_back(d);
+        }
+        dec_predicted_labels.push_back(dec_predicted_labels_tree_i);
+      }
+      // compute probabilities
+      std::vector<std::vector<double>> samples_pred_prob;
+      for (int j = 0; j < predicted_sample_size; j++) {
+        std::vector<double> pred;
+        for (int i = 0; i < tree_size; i++) {
+          if (j == 0) {
+            log_info("[ForestModel.predict_proba] print the first sample's tree predicted labels");
+            log_info("[ForestModel.predict_proba] dec_predicted_labels[" + std::to_string(i) + "][0] = " + std::to_string(dec_predicted_labels[i][j]));
+          }
+          pred.push_back(dec_predicted_labels[i][j]);
+        }
+        std::vector<double> prob = rf_pred2prob(class_num, pred);
+        if (j == 0) {
+          log_info("[ForestModel.predict_proba] print the first sample's class probabilities");
+          for (int i = 0; i < prob.size(); i++) {
+            log_info("[ForestModel.predict_proba] prob[" + std::to_string(i) + "]" + std::to_string(prob[i]));
+          }
+        }
+        samples_pred_prob.push_back(prob);
+      }
+      // encrypt
+      for (int i = 0; i < predicted_sample_size; i++) {
+        for (int j = 0; j < class_num; j++) {
+          predicted_labels[i][j].set_double(phe_pub_key->n[0], samples_pred_prob[i][j]);
+          djcs_t_aux_encrypt(phe_pub_key, party.phe_random, predicted_labels[i][j], predicted_labels[i][j]);
+        }
+      }
+    }
+
+    // active party broadcast the predicted labels
+    for (int i = 0; i < predicted_sample_size; i++) {
+      party.broadcast_encoded_number_array(predicted_labels[i], class_num, ACTIVE_PARTY_ID);
+    }
+
+    // free memory
+    djcs_t_free_public_key(phe_pub_key);
+    for (int tree_id = 0; tree_id < tree_size; tree_id++) {
+      delete [] predicted_forest_labels[tree_id];
+      delete [] decrypted_forest_labels[tree_id];
+    }
+    delete [] predicted_forest_labels;
+    delete [] decrypted_forest_labels;
+  }
 }

@@ -51,6 +51,19 @@ class ForestModel {
                const std::vector< std::vector<double> >& predicted_samples,
                int predicted_sample_size,
                EncodedNumber* predicted_labels);
+
+  /**
+  * given the forest tree model, predict on samples with probabilities
+  * @param party
+  * @param predicted_samples
+  * @param predicted_sample_size
+  * @param predicted_labels
+  * @return predicted labels (encrypted)
+  */
+  void predict_proba(Party &party,
+                     const std::vector<std::vector<double> >& predicted_samples,
+                     int predicted_sample_size,
+                     EncodedNumber **predicted_labels);
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_MODEL_H_

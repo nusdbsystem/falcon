@@ -6,6 +6,7 @@
 #include <falcon/algorithm/vertical/tree/gbdt_loss.h>
 
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 
 GbdtModel::GbdtModel(int m_tree_size, std::string m_tree_type,
     int m_n_estimator, int m_class_num, double m_learning_rate) {
@@ -74,6 +75,7 @@ void GbdtModel::predict_single_estimator(Party &party,
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
+  log_info("[GbdtModel.predict_single_estimator] predicted_sample_size = " + std::to_string(predicted_sample_size));
   // if active party, compute the encrypted dummy predictor and broadcast
   // init the encrypted predicted_labels with dummy prediction by 2 * precision
   EncodedNumber* raw_predictions = new EncodedNumber[predicted_sample_size];

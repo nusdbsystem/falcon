@@ -228,8 +228,8 @@ void TreeModel::predict(Party &party,
       // updated_label_vector = new EncodedNumber[binary_vector.size()];
       for (int j = 0; j < binary_vector.size(); j++) {
         encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
-        log_info("[predict]: label_vector[" + std::to_string(j) + "].type = " + std::to_string(label_vector[j].getter_type()));
-        log_info("[predict]: encoded_binary_vector[" + std::to_string(j) + "].type = " + std::to_string(encoded_binary_vector[j].getter_type()));
+//        log_info("[predict]: label_vector[" + std::to_string(j) + "].type = " + std::to_string(label_vector[j].getter_type()));
+//        log_info("[predict]: encoded_binary_vector[" + std::to_string(j) + "].type = " + std::to_string(encoded_binary_vector[j].getter_type()));
         djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
                           label_vector[j], encoded_binary_vector[j]);
       }

@@ -650,10 +650,8 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
 
 #ifdef DEBUG
   log_info("[DecisionTreeBuilder.build_node] debug global statistics print");
-  debug_cipher_array<double>(party, global_left_branch_sample_nums, global_split_num, ACTIVE_PARTY_ID, true, global_split_num);
-  debug_cipher_array<double>(party, global_right_branch_sample_nums, global_split_num, ACTIVE_PARTY_ID, true, global_split_num);
-  debug_cipher_matrix<double>(party, global_encrypted_statistics, global_split_num,
-                              2 * class_num, ACTIVE_PARTY_ID, true, global_split_num, 2 * class_num);
+  debug_cipher_matrix<double>(party, global_encrypted_statistics, 10,
+                              2 * class_num, ACTIVE_PARTY_ID, true, 10, 2 * class_num);
 #endif
 
   // step 5: encrypted statistics computed finished, convert to secret shares
@@ -1135,11 +1133,15 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
     EncodedNumber *encrypted_left_sample_nums,
     EncodedNumber *encrypted_right_sample_nums,
     bool use_sample_weights, EncodedNumber *encrypted_weights) {
-  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] Compute encrypted statistics for node " + std::to_string(node_index));
-  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] sample_mask_iv precision =  " + std::to_string(std::abs(sample_mask_iv[0].getter_exponent())));
-  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] encrypted_labels precision =  " + std::to_string(std::abs(encrypted_labels[0].getter_exponent())));
-  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] encrypted_weights precision =  " + std::to_string(std::abs(encrypted_weights[0].getter_exponent())));
-  log_info("[DecisionTreeBuilder.compute_encrypted_statistics] use_sample_weights =  " + std::to_string(use_sample_weights));
+#ifdef DEBUG
+  if (use_sample_weights) {
+    log_info("[DecisionTreeBuilder.compute_encrypted_statistics] Compute encrypted statistics for node " + std::to_string(node_index));
+    log_info("[DecisionTreeBuilder.compute_encrypted_statistics] sample_mask_iv precision =  " + std::to_string(std::abs(sample_mask_iv[0].getter_exponent())));
+    log_info("[DecisionTreeBuilder.compute_encrypted_statistics] encrypted_labels precision =  " + std::to_string(std::abs(encrypted_labels[0].getter_exponent())));
+    log_info("[DecisionTreeBuilder.compute_encrypted_statistics] encrypted_weights precision =  " + std::to_string(std::abs(encrypted_weights[0].getter_exponent())));
+    log_info("[DecisionTreeBuilder.compute_encrypted_statistics] use_sample_weights =  " + std::to_string(use_sample_weights));
+  }
+#endif
   const clock_t start_time = clock();
 
   // retrieve phe pub key
@@ -1228,7 +1230,7 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
       }
       // find the first split value that larger than the current feature value, usually only step by 1
       // if ((sorted_feature_value - feature_helpers[feature_id].split_values[split_iterator]) > ROUNDED_PRECISION) {
-      while ((sorted_feature_value > feature_helpers[feature_id].split_values[split_iterator]) && (split_iterator < split_num)) {
+      while ((split_iterator < split_num) && (sorted_feature_value > feature_helpers[feature_id].split_values[split_iterator])) {
         split_iterator += 1;
       }
       if (split_iterator == split_num) {
