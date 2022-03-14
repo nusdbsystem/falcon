@@ -1,5 +1,5 @@
 {
-  "job_name": "credit_card_training",
+  "job_name": "news popularity dataset random forest model training",
   "job_info": "this is the job_decs",
   "job_fl_type": "vertical",
   "existing_key": 1,
@@ -11,9 +11,9 @@
       "addr": "127.0.0.1:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client0",
-        "data_output": "/opt/falcon/data/dataset/breast_cancer_data/client0",
-        "model_path": "/opt/falcon/data/dataset/breast_cancer_data/client0"
+        "data_input": "/opt/falcon/data/dataset/news_popularity_data/client0",
+        "data_output": "/opt/falcon/data/dataset/news_popularity_data/client0",
+        "model_path": "/opt/falcon/data/dataset/news_popularity_data/client0"
       }
     },
     {
@@ -21,9 +21,9 @@
       "addr": "127.0.0.1:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client1",
-        "data_output": "/opt/falcon/data/dataset/breast_cancer_data/client1",
-        "model_path": "/opt/falcon/data/dataset/breast_cancer_data/client1"
+        "data_input": "/opt/falcon/data/dataset/news_popularity_data/client1",
+        "data_output": "/opt/falcon/data/dataset/news_popularity_data/client1",
+        "model_path": "/opt/falcon/data/dataset/news_popularity_data/client1"
       }
     },
     {
@@ -31,9 +31,9 @@
       "addr": "127.0.0.1:30007",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client2",
-        "data_output": "/opt/falcon/data/dataset/breast_cancer_data/client2",
-        "model_path": "/opt/falcon/data/dataset/breast_cancer_data/client2"
+        "data_input": "/opt/falcon/data/dataset/news_popularity_data/client2",
+        "data_output": "/opt/falcon/data/dataset/news_popularity_data/client2",
+        "model_path": "/opt/falcon/data/dataset/news_popularity_data/client2"
       }
     }
   ],
@@ -47,25 +47,25 @@
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "n_estimator": 8,
+          "n_estimator": 2,
           "sample_rate": 0.8,
           "tree_type": "classification",
           "criterion": "gini",
           "split_strategy": "best",
-          "class_num": 2,
+          "class_num": 5,
           "max_depth": 3,
           "max_bins": 8,
           "min_samples_split": 5,
           "min_samples_leaf": 5,
-          "max_leaf_nodes": 16,
+          "max_leaf_nodes": 64,
           "min_impurity_decrease": 0.1,
           "min_impurity_split": 0.001,
           "dp_budget": 0.1
         }
       },
       "output_configs": {
-        "trained_model": "saved_model.pb",
-        "evaluation_report": "report.txt"
+        "trained_model": "202203131550_news_rf_model.pb",
+        "evaluation_report": "202203131550_news_rf_report.txt"
       }
     }
   }

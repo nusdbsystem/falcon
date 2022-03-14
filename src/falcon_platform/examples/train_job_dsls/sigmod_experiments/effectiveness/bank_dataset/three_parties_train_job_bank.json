@@ -12,8 +12,8 @@
       "party_type": "active",
       "path": {
         "data_input": "/opt/falcon/data/dataset/bank_marketing_data/client0",
-        "data_output": "/opt/falcon/data/dataset/bank_marketing_data/client0",
-        "model_path": "/opt/falcon/data/dataset/bank_marketing_data/client0"
+        "data_output": "/opt/falcon/experiments/effectiveness/falcon_lime/bank/client0",
+        "model_path": "/opt/falcon/experiments/effectiveness/falcon_lime/bank/client0"
       }
     },
     {
@@ -22,8 +22,8 @@
       "party_type": "passive",
       "path": {
         "data_input": "/opt/falcon/data/dataset/bank_marketing_data/client1",
-        "data_output": "/opt/falcon/data/dataset/bank_marketing_data/client1",
-        "model_path": "/opt/falcon/data/dataset/bank_marketing_data/client1"
+        "data_output": "/opt/falcon/experiments/effectiveness/falcon_lime/bank/client1",
+        "model_path": "/opt/falcon/experiments/effectiveness/falcon_lime/bank/client1"
       }
     },
     {
@@ -32,8 +32,8 @@
       "party_type": "passive",
       "path": {
         "data_input": "/opt/falcon/data/dataset/bank_marketing_data/client2",
-        "data_output": "/opt/falcon/data/dataset/bank_marketing_data/client2",
-        "model_path": "/opt/falcon/data/dataset/bank_marketing_data/client2"
+        "data_output": "/opt/falcon/experiments/effectiveness/falcon_lime/bank/client2",
+        "model_path": "/opt/falcon/experiments/effectiveness/falcon_lime/bank/client2"
       }
     }
   ],

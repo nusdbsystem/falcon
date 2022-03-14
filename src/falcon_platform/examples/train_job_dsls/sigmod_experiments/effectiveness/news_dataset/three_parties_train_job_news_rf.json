@@ -12,8 +12,8 @@
       "party_type": "active",
       "path": {
         "data_input": "/opt/falcon/data/dataset/news_popularity_data/client0",
-        "data_output": "/opt/falcon/data/dataset/news_popularity_data/client0",
-        "model_path": "/opt/falcon/data/dataset/news_popularity_data/client0"
+        "data_output": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client0",
+        "model_path": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client0"
       }
     },
     {
@@ -22,8 +22,8 @@
       "party_type": "passive",
       "path": {
         "data_input": "/opt/falcon/data/dataset/news_popularity_data/client1",
-        "data_output": "/opt/falcon/data/dataset/news_popularity_data/client1",
-        "model_path": "/opt/falcon/data/dataset/news_popularity_data/client1"
+        "data_output": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client1",
+        "model_path": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client1"
       }
     },
     {
@@ -32,8 +32,8 @@
       "party_type": "passive",
       "path": {
         "data_input": "/opt/falcon/data/dataset/news_popularity_data/client2",
-        "data_output": "/opt/falcon/data/dataset/news_popularity_data/client2",
-        "model_path": "/opt/falcon/data/dataset/news_popularity_data/client2"
+        "data_output": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client2",
+        "model_path": "/opt/falcon/experiments/effectiveness/falcon_lime/news/client2"
       }
     }
   ],
@@ -47,7 +47,7 @@
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "n_estimator": 2,
+          "n_estimator": 8,
           "sample_rate": 0.8,
           "tree_type": "classification",
           "criterion": "gini",
@@ -64,8 +64,8 @@
         }
       },
       "output_configs": {
-        "trained_model": "202203131550_news_rf_model.pb",
-        "evaluation_report": "202203131550_news_rf_report.txt"
+        "trained_model": "news_rf_model_202203131755.pb",
+        "evaluation_report": "news_rf_report_202203131755.txt"
       }
     }
   }

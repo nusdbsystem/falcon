@@ -62,13 +62,13 @@
             "alpha": 0.1,
             "learning_rate": 0.1,
             "decay": 0.1,
-            "penalty": "l1",
+            "penalty": "l2",
             "optimizer": "sgd",
             "metric": "mse",
             "differential_privacy_budget": 0.1,
             "fit_bias": true
           },
-          "explanation_report": "/exp_report_202203051545_lr_l1.txt"
+          "explanation_report": "/exp_report_202203051545_lr_l2.txt"
         }
       },
       "output_configs": {
