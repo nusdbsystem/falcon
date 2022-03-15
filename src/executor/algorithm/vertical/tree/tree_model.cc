@@ -235,25 +235,25 @@ void TreeModel::predict(Party &party,
       }
       // send to the next client
       std::string send_s;
-      serialize_encoded_number_array(updated_label_vector, binary_vector.size(), send_s);
+      serialize_encoded_number_array(updated_label_vector, (int) binary_vector.size(), send_s);
       party.send_long_message(party.party_id - 1, send_s);
     } else if (party.party_id > 0) {
       std::string recv_s;
       party.recv_long_message(party.party_id + 1, recv_s);
-      deserialize_encoded_number_array(updated_label_vector, binary_vector.size(), recv_s);
+      deserialize_encoded_number_array(updated_label_vector, (int) binary_vector.size(), recv_s);
       for (int j = 0; j < binary_vector.size(); j++) {
         encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
         djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
                           updated_label_vector[j], encoded_binary_vector[j]);
       }
       std::string resend_s;
-      serialize_encoded_number_array(updated_label_vector, binary_vector.size(), resend_s);
+      serialize_encoded_number_array(updated_label_vector, (int) binary_vector.size(), resend_s);
       party.send_long_message(party.party_id - 1, resend_s);
     } else {
       // the super client update the last, and aggregate before calling share decryption
       std::string final_recv_s;
       party.recv_long_message(party.party_id + 1, final_recv_s);
-      deserialize_encoded_number_array(updated_label_vector, binary_vector.size(), final_recv_s);
+      deserialize_encoded_number_array(updated_label_vector, (int) binary_vector.size(), final_recv_s);
       for (int j = 0; j < binary_vector.size(); j++) {
         encoded_binary_vector[j].set_integer(phe_pub_key->n[0], binary_vector[j]);
         djcs_t_aux_ep_mul(phe_pub_key, updated_label_vector[j],
@@ -263,6 +263,9 @@ void TreeModel::predict(Party &party,
 
     // after computing, only one element in updated_label_vector is 1, other is 0,
     // 1 corresponding to real label.
+    // TODO: ensure the saved label precision matches the following PHE_FIXED_POINT_PRECISION
+    // here only for debug purpose, need to fix
+    party.truncate_ciphers_precision(updated_label_vector, (int) binary_vector.size(), ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
 
     // aggregate
     if (party.party_type == falcon::ACTIVE_PARTY) {

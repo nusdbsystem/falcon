@@ -664,8 +664,8 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
                                      std::vector<double> secret_shares,
                                      int size, int req_party_id,
                                      int phe_precision) const {
-  LOG(INFO) << "[secret_shares_to_ciphers]: enter secret shares to ciphers func" << " --------";
-  std::cout << "[secret_shares_to_ciphers]: enter secret shares to ciphers func" << std::endl;
+//  LOG(INFO) << "[secret_shares_to_ciphers]: enter secret shares to ciphers func" << " --------";
+//  std::cout << "[secret_shares_to_ciphers]: enter secret shares to ciphers func" << std::endl;
 
   // encode and encrypt the secret shares
   // and send to req_party, who aggregates
