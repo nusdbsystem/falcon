@@ -413,6 +413,15 @@ class LimeExplainer {
 void lime_comp_pred(Party party, const std::string& params_str, const std::string& output_path_prefix);
 
 /**
+ * this function is for preparing the experimental data
+ *
+ * @param party
+ * @param params_str
+ * @param output_path_prefix
+ */
+void lime_conv_pred_plain2cipher(Party party, const std::string& params_str, const std::string& output_path_prefix);
+
+/**
  * save the aggregated generated data and encrypted predictions into files
  *
  * @param party: the participating party

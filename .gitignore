@@ -134,6 +134,5 @@ src/executor/include/message/*.h
 
 tools/ml_baseline/python/linearreg_sklearn/mlscratch/
 
-src/falcon_platform/falcon_logs
-exps/stats
-exps/
+src/falcon_platform/falcon_logs*
+experiments/

@@ -1272,6 +1272,79 @@ void lime_comp_pred(Party party, const std::string& params_str, const std::strin
   delete scaler;
 }
 
+
+void lime_conv_pred_plain2cipher(Party party, const std::string& params_str, const std::string& output_path_prefix) {
+  log_info("Begin to convert plaintext predictions to ciphertext");
+  // deserialize the LimeCompWeightsParams
+  LimeCompWeightsParams comp_weights_params;
+  // set the values for local debug
+  // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
+  //  comp_weights_params.explain_instance_idx = 0;
+  //  comp_weights_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
+  //  comp_weights_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
+  //  comp_weights_params.is_precompute = false;
+  //  comp_weights_params.num_samples = 1000;
+  //  comp_weights_params.class_num = 2;
+  //  comp_weights_params.distance_metric = "euclidean";
+  //  comp_weights_params.kernel = "exponential";
+  //  comp_weights_params.kernel_width = 0.75;
+  //  comp_weights_params.sample_weights_file = path_prefix + "/log_reg/sample_weights.txt";
+  //  comp_weights_params.selected_samples_file = path_prefix + "/log_reg/selected_sampled_data.txt";
+  //  comp_weights_params.selected_predictions_file = path_prefix + "/log_reg/selected_predictions.txt";
+
+  std::string comp_weight_params_str = base64_decode_to_pb_string(params_str);
+  deserialize_lime_comp_weights_params(comp_weights_params, comp_weight_params_str);
+  comp_weights_params.computed_prediction_file = output_path_prefix + comp_weights_params.computed_prediction_file;
+  std::string converted_prediction_file = comp_weights_params.computed_prediction_file + ".ciphertext";
+  log_info("Deserialize the lime params");
+
+  // read prediction dataset
+  char delimiter = ',';
+  std::vector<std::vector<double>> plain_predictions = read_dataset(comp_weights_params.computed_prediction_file, delimiter);
+
+  // active party encrypt the plain predictions with 2 * PHE_PRECISION and broadcast
+  int row_num = (int) plain_predictions.size();
+  int column_num = (int) plain_predictions[0].size();
+  auto** predictions = new EncodedNumber*[row_num];
+  for (int i = 0; i < row_num; i++) {
+    predictions[i] = new EncodedNumber[column_num];
+  }
+  log_info("[lime_conv_pred_plain2cipher] row_num = " + std::to_string(row_num));
+  log_info("[lime_conv_pred_plain2cipher] column_num = " + std::to_string(column_num));
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    for (int i = 0; i < row_num; i++) {
+      for (int j = 0; j < column_num; j++) {
+        predictions[i][j].set_double(phe_pub_key->n[0], plain_predictions[i][j],
+                                     2 * PHE_FIXED_POINT_PRECISION);
+        djcs_t_aux_encrypt(phe_pub_key, party.phe_random, predictions[i][j], predictions[i][j]);
+      }
+    }
+  }
+  for (int i = 0; i < row_num; i++) {
+    party.broadcast_encoded_number_array(predictions[i], column_num, ACTIVE_PARTY_ID);
+  }
+
+  // 4. save the ciphertext predictions to the corresponding file
+  write_encoded_number_matrix_to_file(predictions,
+                                      row_num,
+                                      column_num,
+                                      converted_prediction_file);
+  log_info("Save the ciphertext predictions to file");
+
+  // free information
+  for (int i = 0; i < row_num; i++) {
+    delete [] predictions[i];
+  }
+  delete [] predictions;
+  djcs_t_free_public_key(phe_pub_key);
+}
+
+
 void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>& generated_samples,
                              EncodedNumber** predictions, int cur_sample_size, int class_num,
                              const std::string& generated_sample_file,

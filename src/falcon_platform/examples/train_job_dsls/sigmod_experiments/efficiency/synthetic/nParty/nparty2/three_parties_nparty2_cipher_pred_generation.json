@@ -1,0 +1,60 @@
+{
+  "job_name": "synthetic nparty2 dataset convert plain predictions to cipher",
+  "job_info": "reuse the lime weight tape with an alternative branch",
+  "job_fl_type": "vertical",
+  "existing_key": 0,
+  "party_nums": 2,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "127.0.0.1:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty2/client0",
+        "data_output": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty2/client0",
+        "model_path": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty2/client0"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "127.0.0.1:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty2/client1",
+        "data_output": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty2/client1",
+        "model_path": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty2/client1"
+      }
+    }
+  ],
+  "tasks": {
+    "lime_weight": {
+      "mpc_algorithm_name": "lime",
+      "algorithm_name": "lime_compute_weights",
+      "input_configs": {
+        "data_input": {
+          "data": "synthesis_nclass2_nfeaturepaty20_nparty2_nsample4000_party.csv",
+          "key": "nparty2_phe_keys"
+        },
+        "algorithm_config": {
+          "explain_instance_idx": 0,
+          "generated_sample_file": "/synthesis_nclass2_nfeaturepaty20_nparty2_nsample4000_party.csv",
+          "computed_prediction_file": "/synthesis_nclass2_nfeaturepaty20_nparty2_nsample4000_targets_full.csv",
+          "is_precompute": false,
+          "num_samples": 4000,
+          "class_num": 2,
+          "distance_metric": "euclidean",
+          "kernel": "exponential",
+          "kernel_width": 0.0,
+          "sample_weights_file": "/nparty2_weights_placeholder.csv",
+          "selected_samples_file": "/synthesis_nclass2_nfeaturepaty20_nparty2_nsample4000_party.csv",
+          "selected_predictions_file": "/synthesis_nclass2_nfeaturepaty20_nparty2_nsample4000_targets_full.csv"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    }
+  }
+}
