@@ -242,6 +242,10 @@ void ForestModel::predict_proba(Party &party,
       // encrypt
       for (int i = 0; i < predicted_sample_size; i++) {
         for (int j = 0; j < class_num; j++) {
+          // for temporarily handling the extreme case that the probability is 0
+          if (samples_pred_prob[i][j] == 0.0) {
+            samples_pred_prob[i][j] = 1e-3;
+          }
           predicted_labels[i][j].set_double(phe_pub_key->n[0], samples_pred_prob[i][j], 2 * PHE_FIXED_POINT_PRECISION);
           djcs_t_aux_encrypt(phe_pub_key, party.phe_random, predicted_labels[i][j], predicted_labels[i][j]);
         }
