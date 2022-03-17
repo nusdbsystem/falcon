@@ -1918,11 +1918,13 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
       // print sample_mask_iv_right[sample_num-1] info for debug
       log_info("[DT_train_worker.distributed_train]: step 4.9, sample_num = " + to_string(sample_num));
       log_info("[DT_train_worker.distributed_train]: step 4.9, sample_mask_iv_right[sample_num-1].exponent = " + to_string(sample_mask_iv_right[sample_num-1].getter_exponent()));
+#ifdef DEBUG
       mpz_t t;
       mpz_init(t);
       sample_mask_iv_right[sample_num-1].getter_n(t);
       gmp_printf("[DT_train_worker.distributed_train]: step 4.9, sample_mask_iv_right[sample_num-1].n = %Zd", t);
       mpz_clear(t);
+#endif
 
       // compute between split_iv and encrypted_labels and update
       for (int i = 0; i < class_num; i++) {
