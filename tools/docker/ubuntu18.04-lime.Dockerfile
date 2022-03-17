@@ -160,6 +160,7 @@ RUN git config --global http.sslVerify false
 
 # Clone Falcon and init submodules
 WORKDIR /opt
+RUN echo "update and fix mpir issue"
 RUN ls -lht && \
     git clone git@github.com:lemonviv/falcon.git && \
     cd falcon && \
@@ -254,6 +255,9 @@ RUN bash make_platform.sh
 
 WORKDIR /opt/falcon/third_party/MP-SPDZ
 RUN c_rehash Player-Data/
+
+# need to copy the experiment folder in the docker folder before copy
+ADD experiments/ /opt/falcon/
 
 # Define working directory.
 WORKDIR /opt/falcon
