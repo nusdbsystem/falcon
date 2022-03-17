@@ -10,6 +10,7 @@ namespace falcon {
   // to display intermediate information
   // turn DEBUG off in the real application
   // #define DEBUG
+  // #define SAVE_BASELINE
   #define PRINT_EVERY 20  // if debug, display info at this frequency
 
   // Precision for transforming a floating-point value
@@ -79,7 +80,6 @@ namespace falcon {
   #define CERTAIN_PROBABILITY 1.0
   #define ZERO_PROBABILITY 0.0
   #define SMOOTHER 1e-3
-  #define SAVE_BASELINE 1
 
   enum FLSetting { HORIZONTAL_FL, VERTICAL_FL };
   enum PartyType { ACTIVE_PARTY, PASSIVE_PARTY };

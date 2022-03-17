@@ -524,8 +524,8 @@ void LimeExplainer::select_features(Party party,
   LinearRegressionParams linear_reg_params;
   // TODO: add feature selection parameters
   // hardcode here for doing experiments
-  linear_reg_params.batch_size = 256;
-  linear_reg_params.max_iteration = 20;
+  linear_reg_params.batch_size = 64;
+  linear_reg_params.max_iteration = 200;
   linear_reg_params.converge_threshold = 0.0001;
   linear_reg_params.with_regularization = true;
   linear_reg_params.alpha = 0.1;
