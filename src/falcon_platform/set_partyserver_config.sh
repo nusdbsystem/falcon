@@ -16,5 +16,5 @@ do
 done
 
 # copy to replace the
-cp cluster_run_configs/config_partyserver_$partyid.properties ./config_partyserver.properties
+cp cluster_run_configs/config_partyserver_$partyid.cluster.properties ./config_partyserver.properties
 bash scripts/debug_partyserver.sh --partyID $partyid
