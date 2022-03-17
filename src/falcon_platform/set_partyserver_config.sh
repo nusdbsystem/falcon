@@ -7,14 +7,14 @@ while getopts "p:" opt
 do
     case $opt in
             p)
-                party_id=${OPTARG}
+                partyid=${OPTARG}
                 ;;
             *)
-                echo "Usage: ./set_partyserver_config.sh -p <party_id>"
+                echo "Usage: ./set_partyserver_config.sh -p <partyid>"
             exit 1;;
     esac
 done
 
 # copy to replace the
-cp cluster_run_configs/config_partyserver_$party_id.properties ./config_partyserver.properties
-bash scripts/debug_partyserver.sh --partyID $party_id
+cp cluster_run_configs/config_partyserver_$partyid.properties ./config_partyserver.properties
+bash scripts/debug_partyserver.sh --partyID $partyid
