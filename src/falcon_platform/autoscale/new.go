@@ -102,8 +102,13 @@ func BruteForceSearch(W int, T float64, target string) bool {
 		}
 	}
 	if isEffective {
-		fmt.Printf("when x2=%f x3=%f x4=%f x5=%f xc =%f "+
-			"rounds45=%f timeUsed=%f, worker_used=%d \n", matchRes[0], matchRes[1], matchRes[2], matchRes[3], matchRes[4],
+		fmt.Printf("when \nx2=%d \nx3=%d \nx4=%d \nx5=%d \nxc =%d "+
+			"\nrounds45=%f timeUsed=%f, worker_used=%d \n",
+			int(matchRes[0]),
+			int(matchRes[1]),
+			int(matchRes[2]),
+			int(matchRes[3]),
+			int(matchRes[4]),
 			math.Ceil(float64(classNumber)/matchRes[4]), MinTimeUsedRecord, MinWorkerNumRecord)
 	} else {
 		//fmt.Println("Not found")
@@ -121,20 +126,20 @@ func max(a, b float64) float64 {
 
 func main() {
 
-	fmt.Println("============= Now fix deadline, for different worker number, check schedule result, ============= ")
-	target := "minLatency"
+	//fmt.Println("============= Now fix deadline, for different worker number, check schedule result, ============= ")
+	//target := "minLatency"
 	// W is worker number, 10 to 30 worker total
-	for W := 10; W < 30; W = W + 1 {
-		if BruteForceSearch(W, float64(500), target) {
-			fmt.Printf("-------- when W=%f search done -------- \n", W)
-		}
-	}
+	//for W := 70; W < 71; W = W + 1 {
+	//	if BruteForceSearch(W, float64(70), target) {
+	//		fmt.Printf("-------- when W=%f search done -------- \n", W)
+	//	}
+	//}
 
 	fmt.Println("============= Now fix worker number, for different time, check schedule result, ============= ")
 	// T is user's defined latency, 30s to 100s
-	target = "minWorkerNumber"
-	for T := 50.0; T < 200.0; T = T + 10 {
-		if BruteForceSearch(30, T, target) {
+	target := "minWorkerNumber"
+	for T := 500.0; T < 501.0; T = T + 10 {
+		if BruteForceSearch(20, T, target) {
 			fmt.Printf("-------- when T=%f search done -------- \n", T)
 		}
 	}
