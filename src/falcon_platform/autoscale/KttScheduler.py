@@ -49,7 +49,6 @@ def constraint2(x):
 
 
 def schedule():
-
     # initial guesses
     n = 5
     x0 = np.zeros(n)
