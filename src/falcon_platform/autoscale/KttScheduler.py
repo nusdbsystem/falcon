@@ -47,6 +47,11 @@ def constraint2(x):
 
 
 def schedule():
+
+    if totalWorkers>20:
+        print("Total worker number must be less than 20, since betais not defined. ")
+        return
+
     # initial guesses
     n = 5
     x0 = np.zeros(n)
