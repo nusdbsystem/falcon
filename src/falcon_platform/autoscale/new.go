@@ -152,7 +152,7 @@ func main() {
 	// T is user's defined latency, 30s to 100s
 	target := "minWorkerNumber"
 	for T := 500.0; T < 501.0; T = T + 10 {
-		if BruteForceSearch(20, T, target) {
+		if BruteForceSearch(100, T, target) {
 			fmt.Printf("-------- when T=%f search done -------- \n", T)
 		}
 	}
