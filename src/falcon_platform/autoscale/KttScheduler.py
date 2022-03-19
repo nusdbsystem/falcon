@@ -30,8 +30,10 @@ def beta(x, t):
     mapper[18] = 0.47
     mapper[19] = 0.43
     mapper[20] = 0.39
-    rk = int(round(x))
-    result = float(t) / (mapper[rk] * float(x))
+
+    y = -2.94587705*math.pow(10, -8) * x ** 7 + 2.50848776*math.pow(10, -6) * x ** 6 - 8.78441842 *math.pow(10, -5) * x**5 + \
+        0.00160672440 * x ** 4 - 0.01605 * x ** 3 + 0.08281 * x ** 2 - 0.2161 * x + 1.14976780
+    result = float(t) / (y* float(x))
     return result
 
 def objective(x):

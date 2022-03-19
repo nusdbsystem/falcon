@@ -25,7 +25,20 @@ func beta(x int, t int) float64 {
 	mapper[18] = 0.47
 	mapper[19] = 0.43
 	mapper[20] = 0.39
-	result := float64(t) / (mapper[x] * float64(x))
+
+	getY := func(xf float64) float64 {
+		y := -2.94587705*math.Pow(10.0, -8.0)*math.Pow(xf, 7) +
+			2.50848776*math.Pow(10.0, -6.0)*math.Pow(xf, 6) - 8.78441842*math.Pow(10.0, -5.0)*math.Pow(xf, 5) +
+			0.00160672440*math.Pow(xf, 4) - 0.01605*math.Pow(xf, 3) + 0.08281*math.Pow(xf, 2) - 0.2161*xf + 1.14976780
+		return y
+	}
+
+	//for k, v := range mapper {
+	//	xf := float64(k)
+	//	fmt.Println(k, v, getY(xf))
+	//}
+
+	result := float64(t) / (getY(float64(x)) * float64(x))
 	return result
 }
 
