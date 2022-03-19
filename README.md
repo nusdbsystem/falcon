@@ -100,6 +100,11 @@ MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x"
 FL_ENGINE_PATH="/opt/falcon/build/src/executor/falcon
 ```
 
+* label the swarm nodes, for example
+```shell
+docker node update --label-add name=p0 [node-name]
+```
+
 * start each party server on the corresponding machine by
 ```shell
 bash scripts/debug_partyserver.sh --partyID 0

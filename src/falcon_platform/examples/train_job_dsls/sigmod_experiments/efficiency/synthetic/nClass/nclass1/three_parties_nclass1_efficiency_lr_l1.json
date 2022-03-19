@@ -11,9 +11,9 @@
       "addr": "10.0.0.81:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client0",
-        "data_output": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client0",
-        "model_path": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client0"
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client0",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client0",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client0"
       }
     },
     {
@@ -21,19 +21,19 @@
       "addr": "10.0.0.82:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client1",
-        "data_output": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client1",
-        "model_path": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client1"
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client1",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client1",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client1"
       }
     },
     {
       "id": 2,
-      "addr": "10.0.0.84:30007",
+      "addr": "10.0.0.86:30007",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client2",
-        "data_output": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client2",
-        "model_path": "/opt/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client2"
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client2",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client2",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nClass/nclass1/client2"
       }
     }
   ],

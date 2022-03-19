@@ -160,7 +160,6 @@ RUN git config --global http.sslVerify false
 
 # Clone Falcon and init submodules
 WORKDIR /opt
-RUN echo "update and fix mpir issue"
 RUN ls -lht && \
     git clone git@github.com:lemonviv/falcon.git && \
     cd falcon && \
@@ -178,6 +177,7 @@ RUN cd third_party/libhcs && \
 # Install third_party MP-SPDZ library
 WORKDIR /opt/falcon
 RUN cd third_party/MP-SPDZ && \
+    mv CONFIG.mine.prod CONFIG.mine && \
     mv Math/Setup.h.prod Math/Setup.h && \
     make mpir && \
     bash fast-make.sh && \
@@ -262,5 +262,5 @@ ADD experiments/ /opt/falcon/
 # Define working directory.
 WORKDIR /opt/falcon
 COPY cmd_lime.sh /opt/falcon/
-RUN git pull && bash make.sh
+RUN git pull origin lime && bash make.sh
 CMD ["bash", "cmd_lime.sh"]
