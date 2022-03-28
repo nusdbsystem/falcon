@@ -19,15 +19,7 @@
 #include <thread>
 #include <future>
 
-struct LimeCompPredictionParams {
-  // vertical original model name
-  std::string original_model_name;
-  // vertical original model saved file
-  std::string original_model_saved_file;
-  // type of model task, 'regression' or 'classification'
-  std::string model_type;
-  // number of classes in classification, set to 1 if regression
-  int class_num;
+struct LimeSamplingParams {
   // the instance index for explain
   int explain_instance_idx;
   // whether sampling around the above instance
@@ -38,6 +30,19 @@ struct LimeCompPredictionParams {
   std::string sampling_method;
   // generated samples save file
   std::string generated_sample_file;
+};
+
+struct LimeCompPredictionParams {
+  // vertical original model name
+  std::string original_model_name;
+  // vertical original model saved file
+  std::string original_model_saved_file;
+  // generated samples save file
+  std::string generated_sample_file;
+  // type of model task, 'regression' or 'classification'
+  std::string model_type;
+  // number of classes in classification, set to 1 if regression
+  int class_num;
   // prediction save file
   std::string computed_prediction_file;
 };
@@ -402,6 +407,15 @@ class LimeExplainer {
       int distributed_role = 0,
       int worker_id = 0);
 };
+
+/**
+ * pre-generate the samples and compute the model predictions
+ *
+ * @param party: the participating party
+ * @param params_str: the algorithm params, aka. LimeSamplingParams
+ * @param output_path_prefix: the path of the output files
+ */
+void lime_sampling(Party party, const std::string& params_str, const std::string& output_path_prefix);
 
 /**
  * pre-generate the samples and compute the model predictions

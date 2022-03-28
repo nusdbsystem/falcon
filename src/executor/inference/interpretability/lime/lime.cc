@@ -1181,21 +1181,53 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   return local_explanations;
 }
 
+void lime_sampling(Party party, const std::string& params_str, const std::string& output_path_prefix) {
+  log_info("Begin to compute the lime required samples");
+  // 1. deserialize the LimeSamplingParams
+  LimeSamplingParams sampling_params;
+  std::string sampling_params_str = base64_decode_to_pb_string(params_str);
+  deserialize_lime_sampling_params(sampling_params, sampling_params_str);
+
+  sampling_params.generated_sample_file = output_path_prefix + sampling_params.generated_sample_file;
+
+  // 2. generate random samples
+  LimeExplainer lime_explainer;
+  int num_total_samples = sampling_params.num_total_samples;
+  std::vector<std::vector<double>> train_data, test_data;
+  std::vector<double> train_labels, test_labels;
+  split_dataset(&party, false,train_data, test_data,
+                train_labels, test_labels, SPLIT_TRAIN_TEST_RATIO);
+  auto* scaler = new StandardScaler(true, true);
+  scaler->fit(train_data, train_labels);
+  std::vector<double> data_row = train_data[sampling_params.explain_instance_idx];
+  std::vector<std::vector<double>> generated_samples = lime_explainer.generate_random_samples(
+      party,
+      scaler,
+      sampling_params.sample_around_instance,
+      data_row,
+      num_total_samples,
+      sampling_params.sampling_method
+  );
+  log_info("[lime_comp_pred] Finish generating random samples");
+
+  // save the generated samples
+  char delimiter = ',';
+  write_dataset_to_file(generated_samples,
+                        delimiter,
+                        sampling_params.generated_sample_file);
+}
+
 void lime_comp_pred(Party party, const std::string& params_str, const std::string& output_path_prefix) {
-  log_info("Begin to compute the lime required samples and predictions");
+  log_info("Begin to compute the lime predictions");
   // 1. deserialize the LimePreComputeParams
   LimeCompPredictionParams comp_prediction_params;
   // set the values for local debug
   // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
   //  comp_prediction_params.original_model_name = "logistic_regression";
   //  comp_prediction_params.original_model_saved_file = path_prefix + "/log_reg/saved_model.pb";
+  //  comp_prediction_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
   //  comp_prediction_params.model_type = "classification";
   //  comp_prediction_params.class_num = 2;
-  //  comp_prediction_params.explain_instance_idx = 0;
-  //  comp_prediction_params.sample_around_instance = true;
-  //  comp_prediction_params.num_total_samples = 1000;
-  //  comp_prediction_params.sampling_method = "gaussian";
-  //  comp_prediction_params.generated_sample_file = path_prefix + "/log_reg/sampled_data.txt";
   //  comp_prediction_params.computed_prediction_file = path_prefix + "/log_reg/predictions.txt";
 
   std::string comp_pred_params_str = base64_decode_to_pb_string(params_str);
@@ -1207,7 +1239,6 @@ void lime_comp_pred(Party party, const std::string& params_str, const std::strin
 
   // 2. generate random samples
   LimeExplainer lime_explainer;
-  int num_total_samples = comp_prediction_params.num_total_samples;
   int class_num = comp_prediction_params.class_num;
   std::vector<std::vector<double>> train_data, test_data;
   std::vector<double> train_labels, test_labels;
@@ -1215,16 +1246,9 @@ void lime_comp_pred(Party party, const std::string& params_str, const std::strin
                 train_labels, test_labels, SPLIT_TRAIN_TEST_RATIO);
   auto* scaler = new StandardScaler(true, true);
   scaler->fit(train_data, train_labels);
-  std::vector<double> data_row = train_data[comp_prediction_params.explain_instance_idx];
-  std::vector<std::vector<double>> generated_samples = lime_explainer.generate_random_samples(
-      party,
-      scaler,
-      comp_prediction_params.sample_around_instance,
-      data_row,
-      num_total_samples,
-      comp_prediction_params.sampling_method
-      );
-  log_info("[lime_comp_pred] Finish generating random samples");
+  char delimiter = ',';
+  std::vector<std::vector<double>> generated_samples = read_dataset(comp_prediction_params.generated_sample_file, delimiter);
+  log_info("[lime_comp_pred] Read generated samples finished");
 
   // 3. load model and compute model predictions
   int cur_sample_size = (int) generated_samples.size();
@@ -1243,11 +1267,7 @@ void lime_comp_pred(Party party, const std::string& params_str, const std::strin
                                            predictions);
   log_info("Load the model and compute model predictions");
 
-  // 4. save the generated samples and model predictions to the corresponding file
-  char delimiter = ',';
-  write_dataset_to_file(generated_samples,
-                        delimiter,
-                        comp_prediction_params.generated_sample_file);
+  // 4. save the model predictions to the corresponding file
   write_encoded_number_matrix_to_file(predictions,
                                       cur_sample_size,
                                       class_num,

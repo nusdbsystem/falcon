@@ -12,6 +12,22 @@
 /**
  * serialize the LimeCompPredictionParams to string
  *
+ * @param lime_sampling_params: LimeSamplingParams to be serialized
+ * @param output_message: serialized string
+ */
+void serialize_lime_sampling_params(const LimeSamplingParams& lime_sampling_params, std::string& output_message);
+
+/**
+ * deserialize LimeSamplingParams struct from an input string
+ *
+ * @param lime_sampling_params: deserialized LimeSamplingParams
+ * @param input_message: serialized string
+ */
+void deserialize_lime_sampling_params(LimeSamplingParams& lime_sampling_params, const std::string& input_message);
+
+/**
+ * serialize the LimeCompPredictionParams to string
+ *
  * @param lime_comp_pred_params: LimeCompPredictionParams to be serialized
  * @param output_message: serialized string
  */

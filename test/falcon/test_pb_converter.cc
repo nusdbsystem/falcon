@@ -1224,17 +1224,33 @@ TEST(PB_Converter, PSNetworkConfig) {
   }
 }
 
+TEST(PB_Converter, LimeSamplingParams) {
+  LimeSamplingParams lime_sampling_params;
+  lime_sampling_params.explain_instance_idx = 5;
+  lime_sampling_params.sample_around_instance = false;
+  lime_sampling_params.num_total_samples = 100000;
+  lime_sampling_params.sampling_method = "gaussian";
+  lime_sampling_params.generated_sample_file = "gen_sample_file.txt";
+
+  std::string output_message;
+  serialize_lime_sampling_params(lime_sampling_params, output_message);
+  LimeSamplingParams output_lime_sampling_params;
+  deserialize_lime_sampling_params(output_lime_sampling_params, output_message);
+
+  EXPECT_EQ(lime_sampling_params.explain_instance_idx, output_lime_sampling_params.explain_instance_idx);
+  EXPECT_EQ(lime_sampling_params.sample_around_instance, output_lime_sampling_params.sample_around_instance);
+  EXPECT_EQ(lime_sampling_params.num_total_samples, output_lime_sampling_params.num_total_samples);
+  EXPECT_TRUE(lime_sampling_params.sampling_method == output_lime_sampling_params.sampling_method);
+  EXPECT_TRUE(lime_sampling_params.generated_sample_file == output_lime_sampling_params.generated_sample_file);
+}
+
 TEST(PB_Converter, LimeCompPredParams) {
   LimeCompPredictionParams lime_comp_pred_params;
   lime_comp_pred_params.original_model_name = "logistic_regression";
   lime_comp_pred_params.original_model_saved_file = "log_reg.txt";
+  lime_comp_pred_params.generated_sample_file = "gen_sample_file.txt";
   lime_comp_pred_params.model_type = "classification";
   lime_comp_pred_params.class_num = 2;
-  lime_comp_pred_params.explain_instance_idx = 5;
-  lime_comp_pred_params.sample_around_instance = false;
-  lime_comp_pred_params.num_total_samples = 100000;
-  lime_comp_pred_params.sampling_method = "gaussian";
-  lime_comp_pred_params.generated_sample_file = "gen_sample_file.txt";
   lime_comp_pred_params.computed_prediction_file = "computed_prediction_file.txt";
 
   std::string output_message;
@@ -1243,13 +1259,9 @@ TEST(PB_Converter, LimeCompPredParams) {
   deserialize_lime_comp_pred_params(output_lime_comp_pred_params, output_message);
   EXPECT_TRUE(lime_comp_pred_params.original_model_name == output_lime_comp_pred_params.original_model_name);
   EXPECT_TRUE(lime_comp_pred_params.original_model_saved_file == output_lime_comp_pred_params.original_model_saved_file);
+  EXPECT_TRUE(lime_comp_pred_params.generated_sample_file == output_lime_comp_pred_params.generated_sample_file);
   EXPECT_TRUE(lime_comp_pred_params.model_type == output_lime_comp_pred_params.model_type);
   EXPECT_EQ(lime_comp_pred_params.class_num, output_lime_comp_pred_params.class_num);
-  EXPECT_EQ(lime_comp_pred_params.explain_instance_idx, output_lime_comp_pred_params.explain_instance_idx);
-  EXPECT_EQ(lime_comp_pred_params.sample_around_instance, output_lime_comp_pred_params.sample_around_instance);
-  EXPECT_EQ(lime_comp_pred_params.num_total_samples, output_lime_comp_pred_params.num_total_samples);
-  EXPECT_TRUE(lime_comp_pred_params.sampling_method == output_lime_comp_pred_params.sampling_method);
-  EXPECT_TRUE(lime_comp_pred_params.generated_sample_file == output_lime_comp_pred_params.generated_sample_file);
   EXPECT_TRUE(lime_comp_pred_params.computed_prediction_file == output_lime_comp_pred_params.computed_prediction_file);
 }
 

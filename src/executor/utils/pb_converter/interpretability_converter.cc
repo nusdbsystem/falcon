@@ -9,17 +9,37 @@
 #include <glog/logging.h>
 #include <google/protobuf/io/coded_stream.h>
 
+void serialize_lime_sampling_params(const LimeSamplingParams& lime_sampling_params, std::string& output_message) {
+  com::nus::dbsytem::falcon::v0::LimeSamplingParams pb_lime_sampling_params;
+  pb_lime_sampling_params.set_explain_instance_idx(lime_sampling_params.explain_instance_idx);
+  pb_lime_sampling_params.set_sample_around_instance(lime_sampling_params.sample_around_instance);
+  pb_lime_sampling_params.set_num_total_samples(lime_sampling_params.num_total_samples);
+  pb_lime_sampling_params.set_sampling_method(lime_sampling_params.sampling_method);
+  pb_lime_sampling_params.set_generated_sample_file(lime_sampling_params.generated_sample_file);
+
+  pb_lime_sampling_params.SerializeToString(&output_message);
+}
+
+void deserialize_lime_sampling_params(LimeSamplingParams& lime_sampling_params, const std::string& input_message) {
+  com::nus::dbsytem::falcon::v0::LimeSamplingParams pb_lime_sampling_params;
+  if (!pb_lime_sampling_params.ParseFromString(input_message)) {
+    LOG(ERROR) << "Deserialize lime sampling params message failed.";
+    return;
+  }
+  lime_sampling_params.explain_instance_idx = pb_lime_sampling_params.explain_instance_idx();
+  lime_sampling_params.sample_around_instance = pb_lime_sampling_params.sample_around_instance();
+  lime_sampling_params.num_total_samples = pb_lime_sampling_params.num_total_samples();
+  lime_sampling_params.sampling_method = pb_lime_sampling_params.sampling_method();
+  lime_sampling_params.generated_sample_file = pb_lime_sampling_params.generated_sample_file();
+}
+
 void serialize_lime_comp_pred_params(const LimeCompPredictionParams& lime_comp_pred_params, std::string& output_message) {
   com::nus::dbsytem::falcon::v0::LimeCompPredictionParams pb_lime_comp_pred_params;
   pb_lime_comp_pred_params.set_original_model_name(lime_comp_pred_params.original_model_name);
   pb_lime_comp_pred_params.set_original_model_saved_file(lime_comp_pred_params.original_model_saved_file);
+  pb_lime_comp_pred_params.set_generated_sample_file(lime_comp_pred_params.generated_sample_file);
   pb_lime_comp_pred_params.set_model_type(lime_comp_pred_params.model_type);
   pb_lime_comp_pred_params.set_class_num(lime_comp_pred_params.class_num);
-  pb_lime_comp_pred_params.set_explain_instance_idx(lime_comp_pred_params.explain_instance_idx);
-  pb_lime_comp_pred_params.set_sample_around_instance(lime_comp_pred_params.sample_around_instance);
-  pb_lime_comp_pred_params.set_num_total_samples(lime_comp_pred_params.num_total_samples);
-  pb_lime_comp_pred_params.set_sampling_method(lime_comp_pred_params.sampling_method);
-  pb_lime_comp_pred_params.set_generated_sample_file(lime_comp_pred_params.generated_sample_file);
   pb_lime_comp_pred_params.set_computed_prediction_file(lime_comp_pred_params.computed_prediction_file);
 
   pb_lime_comp_pred_params.SerializeToString(&output_message);
@@ -35,10 +55,6 @@ void deserialize_lime_comp_pred_params(LimeCompPredictionParams& lime_comp_pred_
   lime_comp_pred_params.original_model_saved_file = pb_lime_comp_pred_params.original_model_saved_file();
   lime_comp_pred_params.model_type = pb_lime_comp_pred_params.model_type();
   lime_comp_pred_params.class_num = pb_lime_comp_pred_params.class_num();
-  lime_comp_pred_params.explain_instance_idx = pb_lime_comp_pred_params.explain_instance_idx();
-  lime_comp_pred_params.sample_around_instance = pb_lime_comp_pred_params.sample_around_instance();
-  lime_comp_pred_params.num_total_samples = pb_lime_comp_pred_params.num_total_samples();
-  lime_comp_pred_params.sampling_method = pb_lime_comp_pred_params.sampling_method();
   lime_comp_pred_params.generated_sample_file = pb_lime_comp_pred_params.generated_sample_file();
   lime_comp_pred_params.computed_prediction_file = pb_lime_comp_pred_params.computed_prediction_file();
 }

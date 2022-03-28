@@ -160,6 +160,9 @@ int main(int argc, char *argv[]) {
           case falcon::GBDT:
             train_gbdt(party, algorithm_params, model_save_file, model_report_file);
             break;
+          case falcon::LIME_SAMPLING:
+            lime_sampling(party, algorithm_params, data_output_file);
+            break;
           case falcon::LIME_COMP_PRED:
             lime_comp_pred(party, algorithm_params, data_output_file);
             break;

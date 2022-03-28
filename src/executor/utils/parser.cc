@@ -11,6 +11,7 @@ falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
   if ("decision_tree" == name) output = falcon::DT;
   if ("random_forest" == name) output = falcon::RF;
   if ("gbdt" == name) output = falcon::GBDT;
+  if ("lime_sampling" == name) output = falcon::LIME_SAMPLING;
   if ("lime_compute_prediction" == name) output = falcon::LIME_COMP_PRED;
   if ("lime_compute_weights" == name) output = falcon::LIME_COMP_WEIGHT;
   if ("lime_feature_selection" == name) output = falcon::LIME_FEAT_SEL;

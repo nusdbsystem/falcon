@@ -5,28 +5,34 @@ option go_package = "/v0";
 
 //import public "vo.proto";
 
+// This message denotes the LIME interpretability sampling parameters
+message LimeSamplingParams {
+    // the instance index for explain
+    int32 explain_instance_idx = 1;
+    // whether sampling around the above instance
+    bool sample_around_instance = 2;
+    // number of total samples to be generated
+    int32 num_total_samples = 3;
+    // the sampling method, now only support "gaussian"
+    string sampling_method = 4;
+    // generated samples save file
+    string generated_sample_file = 5;
+}
+
 // This message denotes the LIME interpretability compute predictions parameters
 message LimeCompPredictionParams {
     // vertical original model name
     string original_model_name = 1;
     // vertical original model saved file
     string original_model_saved_file = 2;
-    // type of model task, 'regression' or 'classification'
-    string model_type = 3;
-    // number of classes in classification, set to 1 if regression
-    int32 class_num = 4;
-    // the instance index for explain
-    int32 explain_instance_idx = 5;
-    // whether sampling around the above instance
-    bool sample_around_instance = 6;
-    // number of total samples to be generated
-    int32 num_total_samples = 7;
-    // the sampling method, now only support "gaussian"
-    string sampling_method = 8;
     // generated samples save file
-    string generated_sample_file = 9;
+    string generated_sample_file = 3;
+    // type of model task, 'regression' or 'classification'
+    string model_type = 4;
+    // number of classes in classification, set to 1 if regression
+    int32 class_num = 5;
     // prediction save file
-    string computed_prediction_file = 10;
+    string computed_prediction_file = 6;
 }
 
 // This message denotes the compute sample weights parameters
