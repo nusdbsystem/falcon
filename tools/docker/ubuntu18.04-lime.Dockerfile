@@ -261,6 +261,12 @@ ADD experiments/ /opt/falcon/
 
 # Define working directory.
 WORKDIR /opt/falcon
+RUN echo "re-build third-party mp-spdz"
 COPY cmd_lime.sh /opt/falcon/
+# make third party MP-SPDZ
+RUN cd third_party/MP-SPDZ && \
+    bash fast-make.sh
+
+WORKDIR /opt/falcon
 RUN git pull origin lime && bash make.sh
 CMD ["bash", "cmd_lime.sh"]

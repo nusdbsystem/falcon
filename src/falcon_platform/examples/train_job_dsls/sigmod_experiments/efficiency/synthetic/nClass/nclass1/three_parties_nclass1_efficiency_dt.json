@@ -92,7 +92,7 @@
       }
     },
     "lime_interpret": {
-      "mpc_algorithm_name": "linear_regression",
+      "mpc_algorithm_name": "vfl_decision_tree",
       "algorithm_name": "lime_interpret",
       "input_configs": {
         "data_input": {
@@ -106,22 +106,22 @@
           "num_samples": 4000,
           "class_num": 1,
           "class_id": 0,
-          "interpret_model_name": "linear_regression",
+          "interpret_model_name": "decision_tree",
           "interpret_model_param": {
-            "batch_size": 64,
-            "max_iteration": 200,
-            "convergence_threshold": 0.0001,
-            "with_regularization": true,
-            "alpha": 0.1,
-            "learning_rate": 0.1,
-            "decay": 0.1,
-            "penalty": "l1",
-            "optimizer": "sgd",
-            "metric": "mse",
-            "differential_privacy_budget": 0.1,
-            "fit_bias": true
+            "tree_type": "regression",
+            "criterion": "mse",
+            "split_strategy": "best",
+            "class_num": 2,
+            "max_depth": 3,
+            "max_bins": 8,
+            "min_samples_split": 5,
+            "min_samples_leaf": 5,
+            "max_leaf_nodes": 64,
+            "min_impurity_decrease": 0.1,
+            "min_impurity_split": 0.001,
+            "dp_budget": 0.1
           },
-          "explanation_report": "/exp_report_synthesis_nclass1_lr_l1_.txt"
+          "explanation_report": "/exp_report_synthesis_nclass1_dt_.txt"
         }
       },
       "output_configs": {

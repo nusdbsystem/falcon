@@ -1,0 +1,143 @@
+{
+  "job_name": "synthetic nparty4 dataset lime explanation",
+  "job_info": "include weight, feature selection, and interpret stages",
+  "job_fl_type": "vertical",
+  "existing_key": 1,
+  "party_nums": 4,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "10.0.0.81:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client0",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client0",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client0"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "10.0.0.82:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client1",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client1",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client1"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "10.0.0.86:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client2",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client2",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client2"
+      }
+    },
+    {
+      "id": 3,
+      "addr": "10.0.0.87:30008",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client3",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client3",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nParty/nparty4/client3"
+      }
+    }
+  ],
+  "tasks": {
+    "lime_weight": {
+      "mpc_algorithm_name": "lime",
+      "algorithm_name": "lime_compute_weights",
+      "input_configs": {
+        "data_input": {
+          "data": "synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_party.csv",
+          "key": "nparty4_phe_keys"
+        },
+        "algorithm_config": {
+          "explain_instance_idx": 0,
+          "generated_sample_file": "/synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_party.csv",
+          "computed_prediction_file": "/synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_targets_full.csv.ciphertext",
+          "is_precompute": false,
+          "num_samples": 4000,
+          "class_num": 2,
+          "distance_metric": "euclidean",
+          "kernel": "exponential",
+          "kernel_width": 0.0,
+          "sample_weights_file": "/synthesis_nparty4_sample_weights.txt",
+          "selected_samples_file": "/selected_synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_party.csv",
+          "selected_predictions_file": "/selected_synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_targets_full.csv.ciphertext"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    },
+    "lime_feature": {
+      "mpc_algorithm_name": "linear_regression",
+      "algorithm_name": "lime_feature_selection",
+      "input_configs": {
+        "data_input": {
+          "data": "synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_party.csv",
+          "key": "nparty4_phe_keys"
+        },
+        "algorithm_config": {
+          "selected_samples_file": "/selected_synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_party.csv",
+          "selected_predictions_file": "/selected_synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_targets_full.csv.ciphertext",
+          "sample_weights_file": "/synthesis_nparty4_sample_weights.txt",
+          "num_samples": 4000,
+          "class_num": 2,
+          "class_id": 0,
+          "feature_selection": "linear_regression",
+          "num_explained_features": 20,
+          "selected_features_file": "/selected_features_synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_party.csv"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    },
+    "lime_interpret": {
+      "mpc_algorithm_name": "vfl_decision_tree",
+      "algorithm_name": "lime_interpret",
+      "input_configs": {
+        "data_input": {
+          "data": "synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_party.csv",
+          "key": "nparty4_phe_keys"
+        },
+        "algorithm_config": {
+          "selected_data_file": "/selected_features_synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_party.csv",
+          "selected_predictions_file": "/selected_synthesis_nclass2_nfeaturepaty20_nparty4_nsample4000_targets_full.csv.ciphertext",
+          "sample_weights_file": "/synthesis_nparty4_sample_weights.txt",
+          "num_samples": 4000,
+          "class_num": 2,
+          "class_id": 0,
+          "interpret_model_name": "decision_tree",
+          "interpret_model_param": {
+            "tree_type": "regression",
+            "criterion": "mse",
+            "split_strategy": "best",
+            "class_num": 2,
+            "max_depth": 3,
+            "max_bins": 8,
+            "min_samples_split": 5,
+            "min_samples_leaf": 5,
+            "max_leaf_nodes": 64,
+            "min_impurity_decrease": 0.1,
+            "min_impurity_split": 0.001,
+            "dp_budget": 0.1
+          },
+          "explanation_report": "/exp_report_synthesis_nparty4_dt_.txt"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    }
+  }
+}

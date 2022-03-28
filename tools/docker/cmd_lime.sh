@@ -11,11 +11,6 @@ git pull
 echo "---------------make executor--------"
 bash make.sh
 
-# make third party MP-SPDZ
-cd third_party/MP-SPDZ
-bash fast-make.sh
-cd ../..
-
 # make platform
 echo "---------------make platform--------"
 
