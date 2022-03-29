@@ -236,6 +236,22 @@ int main(int argc, char *argv[]) {
           case falcon::GBDT:
             log_error("Type distributed falcon::GBDT not implemented");
             exit(1);
+          case falcon::LIME_COMP_PRED:
+            lime_comp_pred(party,
+                           algorithm_params,
+                           data_output_file,
+                           ps_network_config_pb_str,
+                           is_distributed,
+                           distributed_role);
+            break;
+          case falcon::LIME_COMP_WEIGHT:
+            lime_comp_weight(party,
+                             algorithm_params,
+                             data_output_file,
+                             ps_network_config_pb_str,
+                             is_distributed,
+                             distributed_role);
+            break;
           case falcon::LIME_FEAT_SEL:
             lime_feat_sel(party,
                           algorithm_params,
@@ -333,6 +349,28 @@ int main(int argc, char *argv[]) {
             case falcon::GBDT:
               log_error("Type distributed falcon::GBDT not implemented");
               exit(1);
+            case falcon::LIME_COMP_PRED: {
+              party.init_phe_keys(use_existing_key, key_file);
+              lime_comp_pred(party,
+                             algorithm_params,
+                             data_output_file,
+                             ps_network_config_pb_str,
+                             is_distributed,
+                             distributed_role,
+                             worker_id);
+              break;
+            }
+            case falcon::LIME_COMP_WEIGHT: {
+              party.init_phe_keys(use_existing_key, key_file);
+              lime_comp_weight(party,
+                               algorithm_params,
+                               data_output_file,
+                               ps_network_config_pb_str,
+                               is_distributed,
+                               distributed_role,
+                               worker_id);
+              break;
+            }
             case falcon::LIME_FEAT_SEL: {
               party.init_phe_keys(use_existing_key, key_file);
               lime_feat_sel(party,

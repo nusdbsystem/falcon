@@ -268,6 +268,64 @@ TEST(PB_Converter, EncodedNumberArray) {
   delete [] deserialized_number_array;
 }
 
+TEST(PB_Converter, EncodedNumberMatrix) {
+  EncodedNumber** encoded_number_matrix = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    encoded_number_matrix[i] = new EncodedNumber[2];
+  }
+  mpz_t v_n;
+  mpz_t v_value;
+  mpz_init(v_n);
+  mpz_init(v_value);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
+  int v_exponent = -8;
+  EncodedNumberType v_type = Ciphertext;
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 2; j++) {
+      encoded_number_matrix[i][j].setter_n(v_n);
+      encoded_number_matrix[i][j].setter_value(v_value);
+      encoded_number_matrix[i][j].setter_exponent(v_exponent);
+      encoded_number_matrix[i][j].setter_type(v_type);
+    }
+  }
+
+  std::string out_message;
+  serialize_encoded_number_matrix(encoded_number_matrix, 3, 2, out_message);
+  EncodedNumber** deserialized_number_matrix = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    deserialized_number_matrix[i] = new EncodedNumber[2];
+  }
+  deserialize_encoded_number_matrix(deserialized_number_matrix, 3, 2, out_message);
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 2; j++) {
+      mpz_t deserialized_n, deserialized_value;
+      mpz_init(deserialized_n);
+      mpz_init(deserialized_value);
+      deserialized_number_matrix[i][j].getter_n(deserialized_n);
+      deserialized_number_matrix[i][j].getter_value(deserialized_value);
+      int n_cmp = mpz_cmp(v_n, deserialized_n);
+      int value_cmp = mpz_cmp(v_value, deserialized_value);
+      EXPECT_EQ(0, n_cmp);
+      EXPECT_EQ(0, value_cmp);
+      EXPECT_EQ(v_exponent, deserialized_number_matrix[i][j].getter_exponent());
+      EXPECT_EQ(v_type, deserialized_number_matrix[i][j].getter_type());
+      mpz_clear(deserialized_n);
+      mpz_clear(deserialized_value);
+    }
+  }
+  mpz_clear(v_n);
+  mpz_clear(v_value);
+
+  for (int i = 0; i < 3; i++) {
+    delete [] encoded_number_matrix[i];
+    delete [] deserialized_number_matrix[i];
+  }
+  delete [] encoded_number_matrix;
+  delete [] deserialized_number_matrix;
+}
+
 TEST(PB_Converter, LogisticRegressionParams) {
   LogisticRegressionParams lr_params;
   lr_params.batch_size = 32;

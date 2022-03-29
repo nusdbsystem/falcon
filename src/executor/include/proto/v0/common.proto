@@ -33,3 +33,7 @@ message FixedPointEncodedNumber{
 message EncodedNumberArray {
     repeated FixedPointEncodedNumber encoded_number = 1;
 }
+
+message EncodedNumberMatrix {
+    repeated EncodedNumberArray encoded_array = 1;
+}

@@ -91,4 +91,23 @@ void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::
  */
 void deserialize_encoded_number_array(EncodedNumber* number_array, int size, const std::string& input_message);
 
+/**
+ * serialize encoded number matrix
+ *
+ * @param number_matrix: an EncodedNumber matrix
+ * @param row_size: row number
+ * @param column_size: column number
+ * @param output_message: serialized string
+ */
+void serialize_encoded_number_matrix(EncodedNumber** number_matrix, int row_size, int column_size, std::string& output_message);
+
+/**
+ * deserialize encoded number array
+ *
+ * @param number_array: an EncodedNumber array
+ * @param size: size of array (need to specify before deserialization)
+ * @param input_message: serialized string
+ */
+void deserialize_encoded_number_matrix(EncodedNumber** number_matrix, int row_size, int column_size, const std::string& input_message);
+
 #endif //FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_COMMON_CONVERTER_H_

@@ -15,6 +15,7 @@
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_ps.h>
+#include <falcon/inference/interpretability/lime/lime_ps.h>
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/utils/base64.h>
@@ -154,21 +155,18 @@ void LimeExplainer::compute_sample_weights(
     double kernel_width,
     const std::string &sample_weights_file,
     const std::string &selected_sample_file,
-    const std::string &selected_prediction_file) {
+    const std::string &selected_prediction_file,
+    const std::string& ps_network_str,
+    int is_distributed,
+    int distributed_role,
+    int worker_id) {
   // the parties do the following steps for computing sample weights
   //  1. read the generated sample file
-  //  2. read the computed_prediction file (note that
-  //      we assume all parties have the same prediction file now)
-  //  3. check whether is_precompute is true:
-  //      if true: parties randomly select num_samples and update
-  //          selected_sample_file and selected_prediction_file
-  //      else: parties directly write the generated_sample_file
-  //          and computed_prediction_file as the above two files
-  //  4. compute the distance between the first row and the rest given
+  //  2. compute the distance between the first row and the rest given
   //      the distance metric, need to call spdz program
-  //  5. compute the sample weights based on kernel and kernel_width
+  //  3. compute the sample weights based on kernel and kernel_width
   //      also need to call spdz program
-  //  6. write the encrypted sample weights to the sample_weights_file
+  //  4. write the encrypted sample weights to the sample_weights_file
 
   // 1. read the generated sample file
   char delimiter = ',';
@@ -177,119 +175,100 @@ void LimeExplainer::compute_sample_weights(
   std::vector<double> origin_data = generated_samples[0];
   int generated_samples_size = (int) generated_samples.size();
   log_info("Read the generated samples finished");
+  auto* encrypted_weights = new EncodedNumber[generated_samples_size];
 
-  // 2. read the computed_prediction file (note that
-  //     we assume all parties have the same prediction file now)
-  auto** computed_predictions = new EncodedNumber*[generated_samples_size];
-  for (int i = 0; i < generated_samples_size; i++) {
-    computed_predictions[i] = new EncodedNumber[class_num];
+  // not distributed, directly compute and return
+  if(is_distributed == 0) {
+    //  2. compute the distance between the first row and the rest given
+    //      the distance metric, need to call spdz program
+    //  3. compute the sample weights based on kernel and kernel_width
+    //      also need to call spdz program
+    compute_dist_weights(party, encrypted_weights,generated_samples[0],
+                         generated_samples, distance_metric, kernel, kernel_width);
+    log_info("Compute dist and weights finished");
+    //  4. write the encrypted sample weights to the sample_weights_file
+    write_encoded_number_array_to_file(encrypted_weights, generated_samples_size, sample_weights_file);
+    log_info("Write encrypted sample weights finished");
   }
-  read_encoded_number_matrix_file(computed_predictions,
-                                  generated_samples_size,
-                                  class_num,
-                                  computed_prediction_file);
-  log_info("Read the computed predictions finished");
 
-  // 3. differentiate is_precompute situation
-  std::vector<std::vector<double>> selected_samples;
-  if (is_precompute && (generated_samples_size > num_samples)) {
-    // random select sample idx
-    std::vector<int> selected_samples_idx = random_select_sample_idx(
-        party, generated_samples_size, num_samples);
-    // re-aggregate selected samples, size should be num_samples + 1
-    for (int i : selected_samples_idx) {
-      selected_samples.push_back(generated_samples[i]);
+  // parameter server logic with distributed
+  if (is_distributed == 1 && distributed_role == 0) {
+    // init the ps
+    auto ps = new LimeParameterServer(party, ps_network_str);
+    // split the generated sample and broadcast to each worker
+    std::vector<int> sample_indices;
+    for (int i = 0; i < generated_samples_size; i++) {
+      sample_indices.push_back(i);
     }
-    // select the computed_predictions
-    auto** selected_predictions = new EncodedNumber*[selected_samples_idx.size()];
-    for (int i = 0; i < selected_samples_idx.size(); i++) {
-      selected_predictions[i] = new EncodedNumber[class_num];
-    }
-    for (int i = 0; i < selected_samples_idx.size(); i++) {
-      for (int j = 0; j < class_num; j++) {
-        int idx = selected_samples_idx[i];
-        selected_predictions[i][j] = computed_predictions[idx][j];
+    std::vector<int> worker_sample_sizes = ps->partition_examples(sample_indices);
+    // receive sample weights
+    std::vector<std::string> encrypted_weights_str_vec = ps->wait_worker_complete();
+    int index = 0;
+    for(int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
+      int wk_sample_size = worker_sample_sizes[wk_index];
+      auto* worker_weights = new EncodedNumber[wk_sample_size];
+      deserialize_encoded_number_array(worker_weights, wk_sample_size, encrypted_weights_str_vec[wk_index]);
+      for (int i = 0; i < wk_sample_size; i++) {
+        encrypted_weights[index + i] = worker_weights[i];
       }
+      index += wk_sample_size;
+      delete [] worker_weights;
     }
+    log_info("Receive from workers and assign the encrypted weights");
 
-    // write the selected_samples and selected_predictions
-    write_dataset_to_file(selected_samples,
-                          delimiter,
-                          selected_sample_file);
-    write_encoded_number_matrix_to_file(selected_predictions,
-                                        (int) selected_samples_idx.size(),
-                                        class_num,
-                                        selected_prediction_file);
-    // free memory
-    for (int i = 0; i < selected_samples_idx.size(); i++) {
-      delete [] selected_predictions[i];
-    }
-    delete [] selected_predictions;
-  } else {
-    // directly write the generated_samples and computed_predictions
-    selected_samples = generated_samples;
-    write_dataset_to_file(generated_samples,
-                          delimiter,
-                          selected_sample_file);
-    write_encoded_number_matrix_to_file(computed_predictions,
-                                        generated_samples_size,
-                                        class_num,
-                                        selected_prediction_file);
+    // write to file
+    write_encoded_number_array_to_file(encrypted_weights, generated_samples_size, sample_weights_file);
+    log_info("Write encrypted sample weights finished");
+
+    delete ps;
   }
-  log_info("Select samples and computed predictions finished");
 
-  //  4. compute the distance between the first row and the rest given
-  //      the distance metric, need to call spdz program
-  //  5. compute the sample weights based on kernel and kernel_width
-  //      also need to call spdz program
-  int selected_sample_size = (int) selected_samples.size();
-  auto* encrypted_weights = new EncodedNumber[selected_sample_size];
-  compute_dist_weights(party,
-                       encrypted_weights,
-                       selected_samples[0],
-                       selected_samples,
-                       distance_metric,
-                       kernel,
-                       kernel_width);
-  log_info("Compute dist and weights finished");
-
-//  // for debug
-//  auto* dec_weights = new EncodedNumber[selected_sample_size];
-//  party.collaborative_decrypt(encrypted_weights, dec_weights, selected_sample_size, ACTIVE_PARTY_ID);
-//  for (int i = 0; i < selected_sample_size; i++) {
-//    double x;
-//    dec_weights[i].decode(x);
-//    log_info("[compute_sample_weights]: dec_weights[" + std::to_string(i) + "] = " + std::to_string(x));
-//  }
-//  delete [] dec_weights;
-
-  //  6. write the encrypted sample weights to the sample_weights_file
-  write_encoded_number_array_to_file(encrypted_weights,
-                                     selected_sample_size,
-                                     sample_weights_file);
-  log_info("Write encrypted sample weights finished");
+  // worker logic with distributed
+  if (is_distributed == 1 && distributed_role == 1) {
+    // init worker
+    auto worker = new Worker(ps_network_str, worker_id);
+    // receive sample ids
+    std::string recv_sample_indices_str;
+    worker->recv_long_message_from_ps(recv_sample_indices_str);
+    std::vector<int> recv_sample_indices;
+    deserialize_int_array(recv_sample_indices, recv_sample_indices_str);
+    // aggregate the worker samples
+    std::vector<std::vector<double>> worker_samples;
+    for (int i = 0; i < recv_sample_indices.size(); i++) {
+      worker_samples.push_back(generated_samples[recv_sample_indices[i]]);
+    }
+    // compute the sample weights
+    int wk_sample_size = (int) recv_sample_indices.size();
+    auto* worker_encrypted_weights = new EncodedNumber[wk_sample_size];
+    compute_dist_weights(party, worker_encrypted_weights,generated_samples[0],
+                         worker_samples, distance_metric, kernel, kernel_width);
+    log_info("Worker " + std::to_string(worker_id) + " compute dist and weights finished");
+    // return the weights back to ps
+    std::string worker_encrypted_weights_str;
+    serialize_encoded_number_array(worker_encrypted_weights, wk_sample_size, worker_encrypted_weights_str);
+    worker->send_long_message_to_ps(worker_encrypted_weights_str);
+    delete worker;
+    delete [] worker_encrypted_weights;
+  }
 
 #ifdef SAVE_BASELINE
-  //  7. decrypt the encrypted weights and save as a plaintext file
-  std::string plaintext_weights_file = sample_weights_file + ".plaintext";
-  std::vector<double> plaintext_weights;
-  auto* decrypted_weights = new EncodedNumber[selected_sample_size];
-  party.collaborative_decrypt(encrypted_weights, decrypted_weights, selected_sample_size, ACTIVE_PARTY_ID);
-  for (int i = 0; i < selected_sample_size; i++) {
-    double w;
-    decrypted_weights[i].decode(w);
-    plaintext_weights.push_back(w);
-  }
-  std::vector<std::vector<double>> format_weights;
-  format_weights.push_back(plaintext_weights);
-  write_dataset_to_file(format_weights, delimiter, plaintext_weights_file);
-  delete [] decrypted_weights;
+  //  5. decrypt the encrypted weights and save as a plaintext file
+  if (is_distributed == 0 || (is_distributed == 1 && distributed_role == 0)) {
+    std::string plaintext_weights_file = sample_weights_file + ".plaintext";
+    std::vector<double> plaintext_weights;
+    auto* decrypted_weights = new EncodedNumber[selected_sample_size];
+    party.collaborative_decrypt(encrypted_weights, decrypted_weights, selected_sample_size, ACTIVE_PARTY_ID);
+    for (int i = 0; i < selected_sample_size; i++) {
+      double w;
+      decrypted_weights[i].decode(w);
+      plaintext_weights.push_back(w);
+    }
+    std::vector<std::vector<double>> format_weights;
+    format_weights.push_back(plaintext_weights);
+    write_dataset_to_file(format_weights, delimiter, plaintext_weights_file);
+    delete [] decrypted_weights;
+    }
 #endif
-
-  for (int i = 0; i < generated_samples_size; i++) {
-    delete [] computed_predictions[i];
-  }
-  delete [] computed_predictions;
   delete [] encrypted_weights;
 }
 
@@ -1215,9 +1194,16 @@ void lime_sampling(Party party, const std::string& params_str, const std::string
   write_dataset_to_file(generated_samples,
                         delimiter,
                         sampling_params.generated_sample_file);
+
+  delete scaler;
 }
 
-void lime_comp_pred(Party party, const std::string& params_str, const std::string& output_path_prefix) {
+void lime_comp_pred(Party party, const std::string& params_str,
+                    const std::string& output_path_prefix,
+                    const std::string& ps_network_str,
+                    int is_distributed,
+                    int distributed_role,
+                    int worker_id) {
   log_info("Begin to compute the lime predictions");
   // 1. deserialize the LimePreComputeParams
   LimeCompPredictionParams comp_prediction_params;
@@ -1237,20 +1223,14 @@ void lime_comp_pred(Party party, const std::string& params_str, const std::strin
   comp_prediction_params.computed_prediction_file = output_path_prefix + comp_prediction_params.computed_prediction_file;
   log_info("Deserialize the lime comp_prediction params");
 
-  // 2. generate random samples
+  // 2. read generated random samples
   LimeExplainer lime_explainer;
-  int class_num = comp_prediction_params.class_num;
-  std::vector<std::vector<double>> train_data, test_data;
-  std::vector<double> train_labels, test_labels;
-  split_dataset(&party, false,train_data, test_data,
-                train_labels, test_labels, SPLIT_TRAIN_TEST_RATIO);
-  auto* scaler = new StandardScaler(true, true);
-  scaler->fit(train_data, train_labels);
   char delimiter = ',';
   std::vector<std::vector<double>> generated_samples = read_dataset(comp_prediction_params.generated_sample_file, delimiter);
   log_info("[lime_comp_pred] Read generated samples finished");
 
   // 3. load model and compute model predictions
+  int class_num = comp_prediction_params.class_num;
   int cur_sample_size = (int) generated_samples.size();
   log_info("[lime_comp_pred] cur_sample_size = " + std::to_string(cur_sample_size));
   log_info("[lime_comp_pred] class_num = " + std::to_string(class_num));
@@ -1258,30 +1238,119 @@ void lime_comp_pred(Party party, const std::string& params_str, const std::strin
   for (int i = 0; i < cur_sample_size; i++) {
     predictions[i] = new EncodedNumber[class_num];
   }
-  lime_explainer.load_predict_origin_model(party,
-                                           comp_prediction_params.original_model_name,
-                                           comp_prediction_params.original_model_saved_file,
-                                           generated_samples,
-                                           comp_prediction_params.model_type,
-                                           comp_prediction_params.class_num,
-                                           predictions);
-  log_info("Load the model and compute model predictions");
 
-  // 4. save the model predictions to the corresponding file
-  write_encoded_number_matrix_to_file(predictions,
-                                      cur_sample_size,
-                                      class_num,
-                                      comp_prediction_params.computed_prediction_file);
-  log_info("Save the generated samples and predictions to file");
+  // not distributed, directly compute and return
+  if (is_distributed == 0) {
+    lime_explainer.load_predict_origin_model(party,
+                                             comp_prediction_params.original_model_name,
+                                             comp_prediction_params.original_model_saved_file,
+                                             generated_samples,
+                                             comp_prediction_params.model_type,
+                                             comp_prediction_params.class_num,
+                                             predictions);
+    log_info("Load the model and compute model predictions");
+    // 4. save the model predictions to the corresponding file
+    write_encoded_number_matrix_to_file(predictions,
+                                        cur_sample_size,
+                                        class_num,
+                                        comp_prediction_params.computed_prediction_file);
+    log_info("Save the predictions to file");
+  }
+
+  // parameter server logic with distributed
+  if (is_distributed == 1 && distributed_role == 0) {
+    // init the ps
+    auto ps = new LimeParameterServer(party, ps_network_str);
+    // split the generated sample and broadcast to each worker
+    std::vector<int> sample_indices;
+    for (int i = 0; i < cur_sample_size; i++) {
+      sample_indices.push_back(i);
+    }
+    std::vector<int> worker_sample_sizes = ps->partition_examples(sample_indices);
+    // receive sample weights
+    std::vector<std::string> encrypted_predictions_str_vec = ps->wait_worker_complete();
+    int index = 0;
+    for(int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
+      int wk_sample_size = worker_sample_sizes[wk_index];
+      auto* worker_predictions = new EncodedNumber*[wk_sample_size];
+      for (int i = 0; i < wk_sample_size; i++) {
+        worker_predictions[i] = new EncodedNumber[class_num];
+      }
+      deserialize_encoded_number_matrix(worker_predictions, wk_sample_size,
+                                        class_num, encrypted_predictions_str_vec[wk_index]);
+      for (int i = 0; i < wk_sample_size; i++) {
+        for (int j = 0; j < class_num; j++) {
+          predictions[index+i][j] = worker_predictions[i][j];
+        }
+      }
+      index += wk_sample_size;
+
+      for (int i = 0; i < wk_sample_size; i++) {
+        delete [] worker_predictions[i];
+      }
+      delete [] worker_predictions;
+    }
+    log_info("Receive from workers and assign the encrypted predictions");
+
+    // write to file
+    write_encoded_number_matrix_to_file(predictions, cur_sample_size,
+                                        class_num, comp_prediction_params.computed_prediction_file);
+    log_info("Write encrypted predictions finished");
+
+    delete ps;
+  }
+
+  // worker logic with distributed
+  if (is_distributed == 1 && distributed_role == 1) {
+    // init worker
+    auto worker = new Worker(ps_network_str, worker_id);
+    // receive sample ids
+    std::string recv_sample_indices_str;
+    worker->recv_long_message_from_ps(recv_sample_indices_str);
+    std::vector<int> recv_sample_indices;
+    deserialize_int_array(recv_sample_indices, recv_sample_indices_str);
+    // aggregate the worker samples
+    std::vector<std::vector<double>> worker_samples;
+    for (int i = 0; i < recv_sample_indices.size(); i++) {
+      worker_samples.push_back(generated_samples[recv_sample_indices[i]]);
+    }
+    // compute the sample weights
+    int wk_sample_size = (int) recv_sample_indices.size();
+    auto* worker_encrypted_predictions = new EncodedNumber*[wk_sample_size];
+    for (int i = 0; i < wk_sample_size; i++) {
+      worker_encrypted_predictions[i] = new EncodedNumber[class_num];
+    }
+    lime_explainer.load_predict_origin_model(party,
+                                             comp_prediction_params.original_model_name,
+                                             comp_prediction_params.original_model_saved_file,
+                                             worker_samples,
+                                             comp_prediction_params.model_type,
+                                             comp_prediction_params.class_num,
+                                             worker_encrypted_predictions);
+    log_info("Load the model and compute model predictions");
+    log_info("Worker " + std::to_string(worker_id) + " compute predictions finished");
+    // return the weights back to ps
+    std::string worker_encrypted_predictions_str;
+    serialize_encoded_number_matrix(worker_encrypted_predictions, wk_sample_size, class_num, worker_encrypted_predictions_str);
+    worker->send_long_message_to_ps(worker_encrypted_predictions_str);
+
+    delete worker;
+    for (int i = 0; i < wk_sample_size; i++) {
+      delete [] worker_encrypted_predictions[i];
+    }
+    delete [] worker_encrypted_predictions;
+  }
 
   // if SAVE_BASELINE is enabled, then save the aggregated sample data and plaintext predictions
   // as two additional files, say aggregated_{comp_prediction_params.generated_sample_file} and
   // plaintext_{comp_prediction_params.computed_prediction_file}
 #ifdef SAVE_BASELINE
-  save_data_pred4baseline(party, generated_samples, predictions,
+  if (is_distributed == 0 || (is_distributed == 1 && distributed_role == 0)) {
+    save_data_pred4baseline(party, generated_samples, predictions,
                             cur_sample_size, class_num,
                             comp_prediction_params.generated_sample_file,
                             comp_prediction_params.computed_prediction_file);
+  }
 #endif
 
   // free information
@@ -1289,7 +1358,6 @@ void lime_comp_pred(Party party, const std::string& params_str, const std::strin
     delete [] predictions[i];
   }
   delete [] predictions;
-  delete scaler;
 }
 
 
@@ -1448,7 +1516,12 @@ void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>
   delete [] decrypted_predictions;
 }
 
-void lime_comp_weight(Party party, const std::string& params_str, const std::string& output_path_prefix) {
+void lime_comp_weight(Party party, const std::string& params_str,
+                      const std::string& output_path_prefix,
+                      const std::string& ps_network_str,
+                      int is_distributed,
+                      int distributed_role,
+                      int worker_id) {
   log_info("Begin to compute sample weights");
   // deserialize the LimeCompWeightsParams
   LimeCompWeightsParams comp_weights_params;
@@ -1490,7 +1563,11 @@ void lime_comp_weight(Party party, const std::string& params_str, const std::str
       comp_weights_params.kernel_width,
       comp_weights_params.sample_weights_file,
       comp_weights_params.selected_samples_file,
-      comp_weights_params.selected_predictions_file);
+      comp_weights_params.selected_predictions_file,
+      ps_network_str,
+      is_distributed,
+      distributed_role,
+      worker_id);
   log_info("Finish computing sample weights");
 }
 

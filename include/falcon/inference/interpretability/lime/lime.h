@@ -188,7 +188,11 @@ class LimeExplainer {
                                double kernel_width,
                                const std::string& sample_weights_file,
                                const std::string& selected_sample_file,
-                               const std::string& selected_prediction_file);
+                               const std::string& selected_prediction_file,
+                               const std::string& ps_network_str = std::string(),
+                               int is_distributed = 0,
+                               int distributed_role = 0,
+                               int worker_id = 0);
 
   /**
    * randomly select a set of sample indexes
@@ -424,7 +428,12 @@ void lime_sampling(Party party, const std::string& params_str, const std::string
  * @param params_str: the algorithm params, aka. LimeCompPredictionParams
  * @param output_path_prefix: the path of the output files
  */
-void lime_comp_pred(Party party, const std::string& params_str, const std::string& output_path_prefix);
+void lime_comp_pred(Party party, const std::string& params_str,
+                    const std::string& output_path_prefix,
+                    const std::string& ps_network_str = std::string(),
+                    int is_distributed = 0,
+                    int distributed_role = 0,
+                    int worker_id = 0);
 
 /**
  * this function is for preparing the experimental data
@@ -458,7 +467,12 @@ void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>
  * @param params_str: the algorithm params, aka. LimeCompWeightsParams
  * @param output_path_prefix: the path of the output files
  */
-void lime_comp_weight(Party party, const std::string& params_str, const std::string& output_path_prefix);
+void lime_comp_weight(Party party, const std::string& params_str,
+                      const std::string& output_path_prefix,
+                      const std::string& ps_network_str = std::string(),
+                      int is_distributed = 0,
+                      int distributed_role = 0,
+                      int worker_id = 0);
 
 /**
  * select the features (optional)

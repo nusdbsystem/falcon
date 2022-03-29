@@ -186,3 +186,74 @@ void deserialize_encoded_number_array(EncodedNumber* number_array, int size, con
     mpz_clear(s_value);
   }
 }
+
+void serialize_encoded_number_matrix(EncodedNumber** number_matrix,
+                                     int row_size, int column_size, std::string& output_message) {
+  com::nus::dbsytem::falcon::v0::EncodedNumberMatrix encoded_number_matrix;
+  for (int i = 0; i < row_size; i++) {
+    com::nus::dbsytem::falcon::v0::EncodedNumberArray *encoded_number_array = encoded_number_matrix.add_encoded_array();
+    for (int j = 0; j < column_size; j++) {
+      com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber *encoded_number = encoded_number_array->add_encoded_number();
+      mpz_t g_n, g_value;
+      mpz_init(g_n);
+      mpz_init(g_value);
+      number_matrix[i][j].getter_n(g_n);
+      number_matrix[i][j].getter_value(g_value);
+      char *n_str_c, *value_str_c;
+      n_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_n);
+      value_str_c = mpz_get_str(NULL, PHE_STR_BASE, g_value);
+      std::string n_str(n_str_c), value_str(value_str_c);
+
+      encoded_number->set_n(n_str);
+      encoded_number->set_value(value_str);
+      encoded_number->set_exponent(number_matrix[i][j].getter_exponent());
+      encoded_number->set_type(number_matrix[i][j].getter_type());
+
+      mpz_clear(g_n);
+      mpz_clear(g_value);
+      free(n_str_c);
+      free(value_str_c);
+    }
+  }
+
+  encoded_number_matrix.SerializeToString(&output_message);
+  encoded_number_matrix.Clear();
+}
+
+
+void deserialize_encoded_number_matrix(EncodedNumber** number_matrix,
+                                       int row_size, int column_size, const std::string& input_message) {
+  com::nus::dbsytem::falcon::v0::EncodedNumberMatrix deserialized_encoded_number_matrix;
+  google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_message.c_str(), input_message.length());
+  inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
+  if (!deserialized_encoded_number_matrix.ParseFromString(input_message)) {
+    LOG(ERROR) << "Deserialize encoded number matrix message failed.";
+    exit(1);
+  }
+
+  if (row_size != deserialized_encoded_number_matrix.encoded_array_size() ||
+    column_size != deserialized_encoded_number_matrix.encoded_array(0).encoded_number_size()) {
+    LOG(ERROR) << "Deserialized encoded number array size is not expected.";
+    exit(1);
+  }
+
+  for (int i = 0; i < row_size; i++) {
+    const com::nus::dbsytem::falcon::v0::EncodedNumberArray& encoded_number_array = deserialized_encoded_number_matrix.encoded_array(i);
+    for (int j = 0; j < column_size; j++) {
+      const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& encoded_number = encoded_number_array.encoded_number(j);
+      mpz_t s_n, s_value;
+      mpz_init(s_n);
+      mpz_init(s_value);
+      mpz_set_str(s_n, encoded_number.n().c_str(), PHE_STR_BASE);
+      mpz_set_str(s_value, encoded_number.value().c_str(), PHE_STR_BASE);
+
+      number_matrix[i][j].setter_n(s_n);
+      number_matrix[i][j].setter_value(s_value);
+      number_matrix[i][j].setter_exponent(encoded_number.exponent());
+      number_matrix[i][j].setter_type(static_cast<EncodedNumberType>(encoded_number.type()));
+
+      mpz_clear(s_n);
+      mpz_clear(s_value);
+    }
+  }
+}
