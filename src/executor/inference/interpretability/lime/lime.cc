@@ -15,6 +15,7 @@
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_ps.h>
+#include <falcon/algorithm/vertical/tree/tree_ps.h>
 #include <falcon/inference/interpretability/lime/lime_ps.h>
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/logger/log_alg_params.h>
@@ -1100,60 +1101,51 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   // is_distributed == 1 and distributed_role = 0 (parameter server)
   if (is_distributed == 1 && distributed_role == 0) {
     log_info("************* Distributed LIME Interpret *************");
-//    // init linear_reg instance
-//    auto linear_reg_model_builder = new LinearRegressionBuilder (
-//        linear_reg_params,
-//        weight_size,
-//        used_train_data,
-//        dummy_test_data,
-//        dummy_train_labels,
-//        dummy_test_labels,
-//        dummy_train_accuracy,
-//        dummy_test_accuracy);
-//    log_info("[lime_linear_reg_train ps]: init linear regression model");
-//    auto ps = new LinearRegParameterServer(*linear_reg_model_builder,
-//                                           party,
-//                                           ps_network_str);
-//    log_info("[lime_linear_reg_train ps]: Init ps finished.");
-//    // start to train the task in a distributed way
-//    ps->distributed_lime_train(true, predictions,
-//                               true, sample_weights);
-//    log_info("[lime_linear_reg_train ps]: distributed train finished.");
-//    // decrypt the model weights and return
-//    local_explanations =
-//        ps->alg_builder.linear_reg_model.display_weights(party);
-//    log_info("Decrypt and display local explanations finished");
-//    delete linear_reg_model_builder;
-//    delete ps;
+    // init tree builder instance
+    auto tree_model_builder = new DecisionTreeBuilder (
+        dt_params,
+        used_train_data,
+        dummy_test_data,
+        dummy_train_labels,
+        dummy_test_labels,
+        dummy_train_accuracy,
+        dummy_test_accuracy);
+    log_info("[lime_decision_tree_train ps]: init decision tree model");
+    auto ps = new DTParameterServer(*tree_model_builder,
+                                    party,
+                                    ps_network_str);
+    log_info("[lime_decision_tree_train ps]: Init ps finished.");
+    // start to train the task in a distributed way
+    ps->distributed_lime_train(true, predictions,
+                               true, sample_weights);
+    log_info("[lime_decision_tree_train ps]: distributed train finished.");
+    // decrypt the model weights and return
+    delete tree_model_builder;
+    delete ps;
   }
 
   // is_distributed == 1 and distributed_role = 1 (worker)
   if (is_distributed == 1 && distributed_role == 1) {
-//    log_info("************* Distributed LIME Interpret *************");
-//    // init linear_reg instance
-//    auto linear_reg_model_builder = new LinearRegressionBuilder (
-//        linear_reg_params,
-//        weight_size,
-//        used_train_data,
-//        dummy_test_data,
-//        dummy_train_labels,
-//        dummy_test_labels,
-//        dummy_train_accuracy,
-//        dummy_test_accuracy);
-//    // worker is created to communicate with parameter server
-//    auto worker = new Worker(ps_network_str, worker_id);
-//
-//    log_info("[lime_linear_reg_train worker]: init linear regression model");
-//    linear_reg_model_builder->distributed_lime_train(party, *worker,
-//                                                     true, predictions,
-//                                                     true, sample_weights);
-//    log_info("[lime_linear_reg_train worker]: distributed train finished.");
-//    // decrypt the model weights and return
-//    local_explanations =
-//        linear_reg_model_builder->linear_reg_model.display_weights(party);
-//    log_info("Decrypt and display local explanations finished");
-//    delete linear_reg_model_builder;
-//    delete worker;
+    log_info("************* Distributed LIME Interpret *************");
+    // init tree builder instance
+    auto tree_model_builder = new DecisionTreeBuilder (
+        dt_params,
+        used_train_data,
+        dummy_test_data,
+        dummy_train_labels,
+        dummy_test_labels,
+        dummy_train_accuracy,
+        dummy_test_accuracy);
+    // worker is created to communicate with parameter server
+    auto worker = new Worker(ps_network_str, worker_id);
+
+    log_info("[lime_decision_tree_train worker]: init linear regression model");
+    tree_model_builder->distributed_lime_train(party, *worker,
+                                               true, predictions,
+                                               true, sample_weights);
+    log_info("[lime_decision_tree_train worker]: distributed train finished.");
+    delete tree_model_builder;
+    delete worker;
   }
   delete [] encrypted_labels;
   delete [] predictions_square;

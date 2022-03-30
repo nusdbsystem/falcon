@@ -184,6 +184,25 @@ void DTParameterServer::distributed_train(){
 
 }
 
+void DTParameterServer::distributed_lime_train(bool use_encrypted_labels,
+                                               EncodedNumber *encrypted_true_labels,
+                                               bool use_sample_weights,
+                                               EncodedNumber *encrypted_sample_weights) {
+  // should be the same as distributed_train, here duplicate and then check it later
+  log_info("************* [Ps.distributed_lime_train] Training started *************");
+  const clock_t training_start_time = clock();
+
+  /// 1. train the tree model
+  build_tree();
+  alg_builder.tree.print_tree_model();
+  /// 2. clear and log
+  const clock_t training_finish_time = clock();
+  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  log_info("[Ps.distributed_lime_train]: tree capacity = " + to_string(alg_builder.tree.capacity));
+  log_info("[Ps.distributed_lime_train]: Training time = " + to_string(training_consumed_time));
+  log_info("************* [Ps.distributed_lime_train] Training Finished *************");
+}
+
 
 void DTParameterServer::build_tree(){
 

@@ -177,6 +177,23 @@ class DecisionTreeBuilder : public ModelBuilder {
   void distributed_train(const Party& party, const Worker& worker) override;
 
   /**
+ * specific train function for lime
+ *
+ * @param party: initialized party object
+ * @param worker: worker instance for distributed training
+ * @param use_encrypted_labels: whether use encrypted labels during training
+ * @param encrypted_true_labels: encrypted labels used
+ * @param use_sample_weights: whether use encrypted sample weights
+ * @param encrypted_sample_weights: encrypted sample weights
+ */
+  void distributed_lime_train(Party party,
+                              const Worker& worker,
+                              bool use_encrypted_labels,
+                              EncodedNumber* encrypted_true_labels,
+                              bool use_sample_weights,
+                              EncodedNumber* encrypted_sample_weights);
+
+  /**
    * iteratively build tree node
    * @param party
    * @param node_index

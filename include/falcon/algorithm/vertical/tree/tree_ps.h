@@ -69,6 +69,19 @@ class DTParameterServer: public ParameterServer{
   void distributed_train() override;
 
   /**
+   * distributed lime train tree builder
+   *
+   * @param use_encrypted_labels: whether use encrypted labels during training
+   * @param encrypted_true_labels: encrypted labels used
+   * @param use_sample_weights: whether use encrypted sample weights
+   * @param encrypted_sample_weights: encrypted sample weights
+   */
+  void distributed_lime_train(bool use_encrypted_labels,
+                              EncodedNumber* encrypted_true_labels,
+                              bool use_sample_weights,
+                              EncodedNumber* encrypted_sample_weights);
+
+  /**
    * Iterately build the tree
    */
   void build_tree();
