@@ -573,9 +573,8 @@ std::vector<double> DTParameterServer::retrieve_global_best_split(const std::vec
     local_best_splits_vector.push_back(local_best_split);
   }
 
-  //todo: implement compare
-
-  std::vector<double> global_best_split = local_best_splits_vector[0];
+  //todo: implement secure compare, now assume plaintext impurity of each worker
+  std::vector<double> global_best_split = find_global_best(local_best_splits_vector);
 
   int best_split_index = (int) global_best_split[0];
   double left_impurity = global_best_split[1];
@@ -607,4 +606,17 @@ std::vector<string> DTParameterServer::wait_worker_complete(){
   return encoded_messages;
 }
 
-
+std::vector<double> find_global_best(const std::vector<std::vector<double>>& local_best_split_vec) {
+  if (local_best_split_vec.empty()) {
+    log_error("[find_global_best] local best split vector empty");
+    exit(EXIT_FAILURE);
+  }
+  std::vector<double> res = local_best_split_vec[0];
+  for (std::vector<double> local_best : local_best_split_vec) {
+    // compare (left_impurity + right_impurity)
+    if (local_best[1] + local_best[2] < res[1] + res[2]) {
+      res = local_best;
+    }
+  }
+  return res;
+}

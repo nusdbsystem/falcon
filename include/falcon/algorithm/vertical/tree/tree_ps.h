@@ -138,4 +138,6 @@ class DTParameterServer: public ParameterServer{
 
 };
 
+std::vector<double> find_global_best(const std::vector<std::vector<double>>& local_best_split_vec);
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_DT_PS_H_
