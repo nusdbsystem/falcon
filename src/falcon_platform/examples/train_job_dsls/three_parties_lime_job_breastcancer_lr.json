@@ -38,6 +38,27 @@
     }
   ],
   "tasks": {
+    "lime_sampling": {
+      "mpc_algorithm_name": "logistic_regression",
+      "algorithm_name": "lime_sampling",
+      "input_configs": {
+        "data_input": {
+          "data": "client.txt",
+          "key": "phe_keys"
+        },
+        "algorithm_config": {
+          "explain_instance_idx": 0,
+          "sample_around_instance": true,
+          "num_total_samples": 1000,
+          "sampling_method": "gaussian",
+          "generated_sample_file": "/log_reg/sampled_data.txt"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    },
     "lime_pred": {
       "mpc_algorithm_name": "logistic_regression",
       "algorithm_name": "lime_compute_prediction",
@@ -49,13 +70,9 @@
         "algorithm_config": {
           "original_model_name": "logistic_regression",
           "original_model_saved_file": "/log_reg/saved_model.pb",
+          "generated_sample_file": "/log_reg/sampled_data.txt",
           "model_type": "classification",
           "class_num": 2,
-          "explain_instance_idx": 0,
-          "sample_around_instance": true,
-          "num_total_samples": 1000,
-          "sampling_method": "gaussian",
-          "generated_sample_file": "/log_reg/sampled_data.txt",
           "computed_prediction_file": "/log_reg/predictions.txt"
         }
       },

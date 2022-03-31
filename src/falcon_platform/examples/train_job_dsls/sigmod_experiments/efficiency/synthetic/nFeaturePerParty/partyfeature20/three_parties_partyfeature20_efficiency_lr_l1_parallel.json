@@ -90,13 +90,13 @@
             "alpha": 0.1,
             "learning_rate": 0.1,
             "decay": 0.1,
-            "penalty": "l2",
+            "penalty": "l1",
             "optimizer": "sgd",
             "metric": "mse",
             "differential_privacy_budget": 0.1,
             "fit_bias": true
           },
-          "explanation_report": "/exp_report_synthesis_partyfeature20_lr_l2_para_.txt"
+          "explanation_report": "/exp_report_synthesis_partyfeature20_lr_l1_para_.txt"
         }
       },
       "output_configs": {
