@@ -577,8 +577,6 @@ void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
   // (the request party will add the summation to the share)
   // ui randomly chooses ri belongs to Zq and encrypts it as [ri]
   auto* encrypted_shares = new EncodedNumber[size];
-  omp_set_num_threads(NUM_OMP_THREADS);
-#pragma omp parallel for
   for (int i = 0; i < size; i++) {
     // TODO: check how to replace with spdz random values
     if (phe_precision != 0) {

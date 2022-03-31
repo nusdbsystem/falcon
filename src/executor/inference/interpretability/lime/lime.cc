@@ -391,8 +391,6 @@ void LimeExplainer::compute_squared_dist(const Party &party,
   int sample_size = (int) sampled_data.size();
   log_info("[compute_squared_dist]: sample_size = " + std::to_string(sample_size));
   std::vector<double> local_squared_sum;
-  omp_set_num_threads(NUM_OMP_THREADS);
-#pragma omp parallel for
   for (int i = 0; i < sample_size; i++) {
     double ss = square_sum(origin_data, sampled_data[i]);
     local_squared_sum.push_back(ss);
