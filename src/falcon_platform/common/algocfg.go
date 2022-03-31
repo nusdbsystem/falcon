@@ -129,14 +129,6 @@ type LimeCompPrediction struct {
 	ModelType string `json:"model_type"`
 	// number of classes in classification, set to 1 if regression
 	ClassNum int32 `json:"class_num"`
-	// the instance index for explain
-	ExplainInstanceIdx int32 `json:"explain_instance_idx"`
-	// whether sampling around the above instance
-	SampleAroundInstance bool `json:"sample_around_instance"`
-	// number of total samples to be generated
-	NumTotalSamples int32 `json:"num_total_samples"`
-	// the sampling method, now only support "gaussian"
-	SamplingMethod string `json:"sampling_method"`
 	// generated samples save file
 	GeneratedSampleFile string `json:"generated_sample_file"`
 	// prediction save file

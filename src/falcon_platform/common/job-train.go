@@ -50,6 +50,7 @@ type DistributedTask struct {
 type Tasks struct {
 	PreProcessing PreProcessTask    `json:"pre_processing"`
 	ModelTraining ModelTrainTask    `json:"model_training"`
+	LimeInsSample LimeInsSampleTask `json:"lime_ins_sample"`
 	LimePred      LimePredTask      `json:"lime_pred"`
 	LimeWeight    LimeWeightTask    `json:"lime_weight"`
 	LimeFeature   LimeFeatureTask   `json:"lime_feature"`
@@ -64,6 +65,13 @@ type PreProcessTask struct {
 }
 
 type ModelTrainTask struct {
+	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
+	AlgorithmName    string      `json:"algorithm_name"`
+	InputConfigs     InputConfig `json:"input_configs"`
+	OutputConfigs    ModelOutput `json:"output_configs"`
+}
+
+type LimeInsSampleTask struct {
 	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
@@ -444,10 +452,6 @@ func GenerateLimeCompPredictionParams(cfg map[string]interface{}) string {
 		OriginalModelSavedFile: res.OriginalModelSavedFile,
 		ModelType:              res.ModelType,
 		ClassNum:               res.ClassNum,
-		ExplainInstanceIdx:     res.ExplainInstanceIdx,
-		SampleAroundInstance:   res.SampleAroundInstance,
-		NumTotalSamples:        res.NumTotalSamples,
-		SamplingMethod:         res.SamplingMethod,
 		GeneratedSampleFile:    res.GeneratedSampleFile,
 		ComputedPredictionFile: res.ComputedPredictionFile,
 	}
