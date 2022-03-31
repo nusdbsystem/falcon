@@ -23,6 +23,7 @@ func initSvcName() string {
 	return res
 }
 
+// RunJobManager
 // JobManager includes one master and many workers
 // it firstly deploy and run master, master will call partyServer to deploy and run worker
 func RunJobManager(dslOjb *cache.DslObj, workerType string) {
@@ -41,6 +42,7 @@ func RunJobManager(dslOjb *cache.DslObj, workerType string) {
 	}
 }
 
+// ManageJobLifeCycle
 /**
  * @Description job manager run master and it allocates one master and
 				one or more workers to different party server
@@ -91,7 +93,7 @@ func ManageJobLifeCycle(masterAddr string, dslOjb *cache.DslObj, workerType stri
 			dataPath, modelPath, dataOutput,
 			dslOjb.DistributedTask.Enable,
 			workerPreGroup, int(dslOjb.PartyNums),
-			int(ms.LimeDecision.ClassParallelism),
+			int(ms.SchedulerPolicy.GetClassParallelism()),
 		)
 
 		reply := new(common.RunWorkerReply)
@@ -119,7 +121,7 @@ func ManageJobLifeCycle(masterAddr string, dslOjb *cache.DslObj, workerType stri
 	return masterAddr
 }
 
-// kill a job
+// KillJob kill a job
 func KillJob(masterAddr, network string) {
 	ok := client.Call(masterAddr, network, "Master.KillJob", new(struct{}), new(struct{}))
 	if ok == false {

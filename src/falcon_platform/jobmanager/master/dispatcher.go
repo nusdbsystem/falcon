@@ -24,7 +24,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	var SerializedWorker []string
 	for _, worker := range master.workers {
 		tmp := fmt.Sprintf("\n  WorkerAddr=%s, PartyID=%d, GroupID=%d, WorkerID=%d",
-					worker.Addr, worker.PartyID, worker.GroupID, worker.WorkerID)
+			worker.Addr, worker.PartyID, worker.GroupID, worker.WorkerID)
 		SerializedWorker = append(SerializedWorker, tmp)
 	}
 	logger.Log.Println("[Master.Dispatcher]: All worker found:", SerializedWorker)
@@ -87,6 +87,11 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
+	}
+
+	// 3.4 Run Lime Instance Sampling algorithm is there is the task
+	if dslOjb.Tasks.LimeInsSample.AlgorithmName != "" {
+
 	}
 
 	// 3.4 Run LimePred if there is the task
@@ -189,7 +194,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 			// generate availableGroupIds
 			var availableGroupIds []common.GroupIdType
-			for i := int32(0); i < master.LimeDecision.ClassParallelism; i++ {
+			for i := int32(0); i < master.SchedulerPolicy.classParallelism; i++ {
 				availableGroupIds = append(availableGroupIds, common.GroupIdType(i))
 			}
 
@@ -197,7 +202,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 			logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, len(availableGroupIds) = ",
 				len(availableGroupIds),
-				" max class parallelism =",master.LimeDecision.ClassParallelism,
+				" max class parallelism =", master.SchedulerPolicy.classParallelism,
 				" classNum = ", classNum)
 
 			// for each group, assign a class id
@@ -206,7 +211,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 					break
 				}
 				master.Lock()
-				if len(availableGroupIds) == 0{
+				if len(availableGroupIds) == 0 {
 					logger.Log.Println("[Master.Dispatcher]: wait until one worker group is released...")
 					time.Sleep(1 * time.Second)
 					master.Unlock()
@@ -215,8 +220,8 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 				groupId := availableGroupIds[0]
 				availableGroupIds = availableGroupIds[1:]
 				logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, assign classid=", classId,
-							" to worker group =", groupId,
-							" current len(availableGroupIds) = ", availableGroupIds)
+					" to worker group =", groupId,
+					" current len(availableGroupIds) = ", availableGroupIds)
 				master.Unlock()
 
 				// every time create a new limeWg for different worker, because different worker are running parallelism
@@ -278,13 +283,11 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 					logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, add group id back to availableGroupIds, current len = ", len(*availableGroupIds))
 					master.Unlock()
 
-
 				}(groupId, classId, &availableGroupIds, &limeWg)
 
 				// process the next task, with new classID
 				classId++
 			}
-
 
 			// wait until all task done
 			logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks done, now waiting for all lime task (for each class) finishing...")
@@ -296,12 +299,12 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 					logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks: job is killed caused by some error")
 
 					break
-				}else{
+				} else {
 					master.jobStatusLock.Unlock()
 					master.Lock()
 					logger.Log.Println("[Master.Dispatcher]: current len(len(availableGroupIds)) = ", len(availableGroupIds))
 					// all groupId has been released
-					if int32(len(availableGroupIds)) == master.LimeDecision.ClassParallelism{
+					if int32(len(availableGroupIds)) == master.SchedulerPolicy.classParallelism {
 						master.Unlock()
 						break
 					} else {
@@ -311,6 +314,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 				}
 			}
 		}
+
 	}
 
 	// 3.5 more tasks later? add later

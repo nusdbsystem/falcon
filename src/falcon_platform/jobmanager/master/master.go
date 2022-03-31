@@ -22,13 +22,6 @@ type ExtractedResource struct {
 	requiredWorkers        map[common.PartyIdType]map[common.WorkerIdType]bool
 }
 
-type LimeScheduleRes struct {
-	// alpha in paper, how many class running at the same time
-	ClassParallelism int32
-	// beta in paper, how many worker each class use
-	workerParallelism int32
-}
-
 type Master struct {
 	base.RpcBaseClass
 	// cond
@@ -44,7 +37,7 @@ type Master struct {
 	PartyNums uint
 
 	// lime
-	LimeDecision LimeScheduleRes
+	SchedulerPolicy *LimeSchedulePolicy
 
 	// tmp slice to store registered workers
 	tmpWorkers chan string
@@ -92,9 +85,7 @@ func newMaster(masterAddr string, partyNum uint) (ms *Master) {
 	ms.workerNum = 0
 	ms.PartyNums = partyNum
 	ms.RequiredResource = make([]*common.LaunchResourceReply, ms.PartyNums)
-	ms.LimeDecision = LimeScheduleRes{}
-	ms.LimeDecision.ClassParallelism = 1
-	ms.LimeDecision.workerParallelism = int32(ms.workerNum) / ms.LimeDecision.ClassParallelism
+	ms.SchedulerPolicy = newLimeSchedulePolicy()
 	return
 }
 
@@ -238,13 +229,13 @@ func (master *Master) ExtractResourceInformation() {
 					// for distributed parameter
 					if ResourceSVC.DistributedRole == common.DistributedParameterServer {
 
-						if _, ok := distPsIp[partyID]; !ok{
+						if _, ok := distPsIp[partyID]; !ok {
 							distPsIp[partyID] = make(map[common.GroupIdType]string)
 						}
 						distPsIp[partyID][ResourceSVC.GroupId] = ResourceSVC.ResourceIP
 
 						// record ps-worker ports
-						if _, ok := distPsPorts[partyID]; !ok{
+						if _, ok := distPsPorts[partyID]; !ok {
 							distPsPorts[partyID] = make(map[common.GroupIdType][]common.PortType)
 						}
 						if _, ok := distPsPorts[partyID][ResourceSVC.GroupId]; !ok {
@@ -259,7 +250,7 @@ func (master *Master) ExtractResourceInformation() {
 					// if it's distributed worker, record worker's ip to generate distributed network alter
 					if ResourceSVC.DistributedRole == common.DistributedWorker {
 
-						if _, ok := distWorkerIps[partyID]; !ok{
+						if _, ok := distWorkerIps[partyID]; !ok {
 							distWorkerIps[partyID] = make(map[common.GroupIdType][]string)
 						}
 
@@ -267,12 +258,12 @@ func (master *Master) ExtractResourceInformation() {
 						distWorkerIps[partyID][ResourceSVC.GroupId] =
 							append(distWorkerIps[partyID][ResourceSVC.GroupId], ResourceSVC.ResourceIP)
 
-						if _, ok := distWorkerPorts[partyID]; !ok{
+						if _, ok := distWorkerPorts[partyID]; !ok {
 							distWorkerPorts[partyID] = make(map[common.GroupIdType][]common.PortType)
 						}
 
 						distWorkerPorts[partyID][ResourceSVC.GroupId] =
-								append(distWorkerPorts[partyID][ResourceSVC.GroupId], ResourceSVC.ExecutorPSPort)
+							append(distWorkerPorts[partyID][ResourceSVC.GroupId], ResourceSVC.ExecutorPSPort)
 					}
 					break
 				}
@@ -280,9 +271,9 @@ func (master *Master) ExtractResourceInformation() {
 		}
 
 		// get distributed networkCfg used inside each party
-		for groupIndex := 0; groupIndex < LaunchResourceReply.GroupNum; groupIndex++{
+		for groupIndex := 0; groupIndex < LaunchResourceReply.GroupNum; groupIndex++ {
 			groupID := common.GroupIdType(groupIndex)
-			if _, ok := distributedNetworkCfg[partyID]; !ok{
+			if _, ok := distributedNetworkCfg[partyID]; !ok {
 				distributedNetworkCfg[partyID] = make(map[common.GroupIdType]string)
 			}
 
