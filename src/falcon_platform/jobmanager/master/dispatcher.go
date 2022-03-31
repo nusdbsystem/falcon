@@ -109,6 +109,11 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 		}
 	}
 
+	// 3.4 Run Lime Instance Sampling algorithm is there is the task
+	if dslOjb.Tasks.LimeInsSample.AlgorithmName != "" {
+
+	}
+
 	// 3.4 Run LimePred if there is the task
 	if stageName == common.LimePredStage {
 		if dslOjb.Tasks.LimePred.AlgorithmName == "" {
@@ -182,6 +187,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
+
 	}
 
 	// 3.6 Run LimeFeature and LimeInterpret if there is the task
