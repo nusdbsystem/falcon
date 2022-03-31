@@ -21,6 +21,7 @@
 #include <sstream>
 #include <stack>
 #include <string>
+#include "omp.h"
 
 Party::Party() {}
 
@@ -507,6 +508,8 @@ void Party::collaborative_decrypt(EncodedNumber* src_ciphers,
                                   int req_party_id) const {
   // partially decrypt the ciphertext vector
   EncodedNumber* partial_decryption = new EncodedNumber[size];
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < size; i++) {
     djcs_t_aux_partial_decrypt(phe_pub_key, phe_auth_server,
                                partial_decryption[i], src_ciphers[i]);
@@ -543,6 +546,8 @@ void Party::collaborative_decrypt(EncodedNumber* src_ciphers,
     }
 
     // share combine for decryption
+    omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
     for (int i = 0; i < size; i++) {
       djcs_t_aux_share_combine(phe_pub_key, dest_plains[i],
                                decryption_shares[i], party_num);
@@ -572,6 +577,8 @@ void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
   // (the request party will add the summation to the share)
   // ui randomly chooses ri belongs to Zq and encrypts it as [ri]
   auto* encrypted_shares = new EncodedNumber[size];
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < size; i++) {
     // TODO: check how to replace with spdz random values
     if (phe_precision != 0) {
@@ -606,6 +613,8 @@ void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
         auto* recv_encrypted_shares = new EncodedNumber[size];
         deserialize_encoded_number_array(recv_encrypted_shares, size,
                                          recv_encrypted_shares_str);
+        omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
         for (int i = 0; i < size; i++) {
           djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i],
                             aggregated_shares[i], recv_encrypted_shares[i]);
@@ -642,6 +651,8 @@ void Party::ciphers_to_secret_shares(EncodedNumber* src_ciphers,
   // if request party, add the decoded results to the secret shares
   // u1 sets [x]1 = e − r1 mod q
   if (party_id == req_party_id) {
+    omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
     for (int i = 0; i < size; i++) {
       if (phe_precision != 0) {
         double decoded_sum_i;
@@ -671,6 +682,8 @@ void Party::secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
   // and send to req_party, who aggregates
   // and send back to the other parties
   auto* encrypted_shares = new EncodedNumber[size];
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < size; i++) {
     encrypted_shares[i].set_double(phe_pub_key->n[0], secret_shares[i],
                                    phe_precision);
