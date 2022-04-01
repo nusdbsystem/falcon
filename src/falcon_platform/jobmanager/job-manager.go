@@ -57,7 +57,7 @@ func ManageJobLifeCycle(masterAddr string, dslOjb *cache.DslObj, workerType stri
 
 	logger.Log.Println("[JobManager] call master.RunMaster with dslOjb:")
 	//logger.Log.Println("dslOjb = ", dslOjb)
-	ms := master.RunMaster(masterAddr, dslOjb, workerType)
+	master := master.RunMaster(masterAddr, dslOjb, workerType)
 
 	// update job's master addr
 	if workerType == common.TrainWorker {
@@ -93,7 +93,7 @@ func ManageJobLifeCycle(masterAddr string, dslOjb *cache.DslObj, workerType stri
 			dataPath, modelPath, dataOutput,
 			dslOjb.DistributedTask.Enable,
 			workerPreGroup, int(dslOjb.PartyNums),
-			int(ms.SchedulerPolicy.GetClassParallelism()),
+			int(master.SchedulerPolicy.GetClassParallelism()),
 		)
 
 		reply := new(common.RunWorkerReply)
@@ -103,18 +103,18 @@ func ManageJobLifeCycle(masterAddr string, dslOjb *cache.DslObj, workerType stri
 		}
 
 		decodedReply := common.DecodeLaunchResourceReply(reply.EncodedStr)
-		ms.RequiredResource[partyIndex] = decodedReply
+		master.RequiredResource[partyIndex] = decodedReply
 	}
 
 	// extract necessary information
-	ms.ExtractResourceInformation()
+	master.ExtractResourceInformation()
 
 	logger.Log.Println("[JobManager] master received all partyServer's reply")
-	ms.BeginCountingWorkers.Broadcast()
+	master.BeginCountingWorkers.Broadcast()
 
 	logger.Log.Println("[JobManager] master wait here until job finish")
 	// wait this job finish
-	ms.WaitJobComplete()
+	master.WaitJobComplete()
 
 	logger.Log.Println("[JobManager] master finish all jobs")
 
