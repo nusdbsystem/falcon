@@ -119,7 +119,19 @@ type LinearRegression struct {
 	FitBias bool `json:"fit_bias"`
 }
 
-// This message denotes the LIME interpretability compute predictions parameters
+type LimeSampling struct {
+	// the instance index for explain
+	ExplainInstanceIdx int32 `json:"explain_instance_idx"`
+	// whether sampling around the above instance
+	SampleAroundInstance bool `json:"sample_around_instance"`
+	// number of total samples to be generated
+	NumTotalSamples int32 `json:"num_total_samples"`
+	// the sampling method, now only support "gaussian"
+	SamplingMethod string `json:"sampling_method"`
+	// generated samples save file
+	GeneratedSampleFile string `json:"generated_sample_file"`
+}
+
 type LimeCompPrediction struct {
 	// vertical original model name
 	OriginalModelName string `json:"original_model_name"`

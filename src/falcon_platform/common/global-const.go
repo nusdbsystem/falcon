@@ -79,6 +79,7 @@ const (
 	TotalPartyNumber       = "total-party-num"
 	WorkerGroupNumber      = "worker-group-num"
 	EnableDistributedTrain = "enable-distributed-train"
+	StageNameKey           = "stage-name"
 
 	JobName = "job_name"
 	ExtInfo = "ext_info"
@@ -135,18 +136,34 @@ const (
 	DBSqlite3 = "sqlite3"
 	DBMySQL   = "mysql"
 
-	// train sub tasks names
-	MpcSubTask                 = "mpc"
-	PreProcSubTask             = "pre_processing"
-	ModelTrainSubTask          = "model_training"
-	LimePredSubTask            = "lime_pred_task"
-	LimeWeightSubTask          = "lime_weight_task"
-	LimeFeatureSubTask         = "lime_feature_task"
-	LimeInterpretSubTask       = "lime_interpret_task"
-	RetrieveModelReportSubTask = "model_report_retrieve"
-
 	ActiveParty  = "active"
 	PassiveParty = "passive"
+)
+
+type FalconTask string
+
+const (
+	// train sub tasks names
+	MpcSubTask                 FalconTask = "mpc"
+	PreProcSubTask             FalconTask = "pre_processing"
+	ModelTrainSubTask          FalconTask = "model_training"
+	LimeInstanceSampleTask     FalconTask = "lime_instance_sample"
+	LimePredSubTask            FalconTask = "lime_pred_task"
+	LimeWeightSubTask          FalconTask = "lime_weight_task"
+	LimeFeatureSubTask         FalconTask = "lime_feature_task"
+	LimeInterpretSubTask       FalconTask = "lime_interpret_task"
+	RetrieveModelReportSubTask FalconTask = "model_report_retrieve"
+)
+
+type FalconStage string
+
+const (
+	PreProcStage            FalconStage = "pre_processing_stage"
+	ModelTrainStage         FalconStage = "model_training_stage"
+	LimeInstanceSampleStage FalconStage = "lime_instance_sample_stage"
+	LimePredStage           FalconStage = "lime_pred_task_stage"
+	LimeWeightStage         FalconStage = "lime_weight_task_stage"
+	LimeInterpretStage      FalconStage = "lime_interpret_task_stage"
 )
 
 // Algorithms names
@@ -160,12 +177,13 @@ const (
 	DecisionTreeAlgName       = "decision_tree"
 	RandomForestAlgName       = "random_forest"
 	LinearRegressionAlgName   = "linear_regression"
+	LimeSamplingAlgName       = "lime_sampling"
 	LimeCompPredictionAlgName = "lime_compute_prediction"
 	LimeCompWeightsAlgName    = "lime_compute_weights"
 	LimeFeatSelAlgName        = "lime_feature_selection"
 	LimeInterpretAlgName      = "lime_interpret"
 
-	LimeDecisionTreeAlgName = "vfl_decision_tree"
+	LimeDecisionTreeAlgName     = "vfl_decision_tree"
 	LimeLinearRegressionAlgName = "linear_regression"
 )
 
