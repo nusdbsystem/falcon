@@ -81,23 +81,25 @@ func (ds *DagScheduler) splitTaskIntoStage(dslOjb *cache.DslObj) {
 		ds.Stages[common.LimeWeightStage] = taskStage
 	}
 
-	taskStage := TaskStage{
-		common.LimeInterpretStage,
-		make(map[common.FalconTask]int),
-		0}
-
 	// stage 6
 	if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
-		taskStage.TasksParallelism[common.LimeFeatureSubTask] = ds.ParallelismPolicy.LimeFeatureSelectionParallelism
-		taskStage.AssignedWorker = ds.ParallelismPolicy.LimeFeatureSelectionParallelism
+		taskStage := TaskStage{
+			common.LimeFeatureSelectionStage,
+			map[common.FalconTask]int{
+				common.LimeFeatureSubTask: ds.ParallelismPolicy.LimeInstanceWeightParallelism},
+			ds.ParallelismPolicy.LimeInstanceWeightParallelism}
+		ds.Stages[common.LimeFeatureSelectionStage] = taskStage
+
 	}
 
 	if dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
-		taskStage.TasksParallelism[common.LimeInterpretSubTask] = ds.ParallelismPolicy.LimeVFLModelTrainParallelism
-		taskStage.AssignedWorker = ds.ParallelismPolicy.LimeVFLModelTrainParallelism
+		taskStage := TaskStage{
+			common.LimeVFLModelTrainStage,
+			map[common.FalconTask]int{
+				common.LimeInterpretSubTask: ds.ParallelismPolicy.LimeInstanceWeightParallelism},
+			ds.ParallelismPolicy.LimeInstanceWeightParallelism}
+		ds.Stages[common.LimeVFLModelTrainStage] = taskStage
 	}
-
-	ds.Stages[common.LimeInterpretStage] = taskStage
 
 	logger.Log.Printf("[DagScheduler] sages = %v\n", ds.Stages)
 }

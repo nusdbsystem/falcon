@@ -11,14 +11,14 @@ import (
 	"time"
 )
 
-func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string, stageName common.FalconStage) (master *Master) {
+func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string, stageName common.FalconStage, stageNameLog string) (master *Master) {
 	// launch 4 thread,
 	// 1. heartbeat loop, stopped by master.Cancel()
 	// 2. waiting for worker register, stopped by master.Cancel()
 	// 3. rpc server, used to get requests from worker, stopped by master.StopRPCServer
 	// 4. scheduling process, call finish to stop above threads
 
-	logFileName := common.LogPath + "/master-" + string(stageName) + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
+	logFileName := common.LogPath + "/master-" + stageNameLog + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
 	master = newMaster(masterAddr, dslOjb.PartyNums)
 	master.Logger, master.LogFile = logger.GetLogger(logFileName)
 	master.workerType = workerType
