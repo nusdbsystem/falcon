@@ -86,8 +86,8 @@ func (ds *DagScheduler) splitTaskIntoStage(dslOjb *cache.DslObj) {
 		taskStage := TaskStage{
 			common.LimeFeatureSelectionStage,
 			map[common.FalconTask]int{
-				common.LimeFeatureSubTask: ds.ParallelismPolicy.LimeInstanceWeightParallelism},
-			ds.ParallelismPolicy.LimeInstanceWeightParallelism}
+				common.LimeFeatureSubTask: ds.ParallelismPolicy.LimeFeatureSelectionParallelism},
+			ds.ParallelismPolicy.LimeFeatureSelectionParallelism}
 		ds.Stages[common.LimeFeatureSelectionStage] = taskStage
 
 	}
@@ -96,8 +96,8 @@ func (ds *DagScheduler) splitTaskIntoStage(dslOjb *cache.DslObj) {
 		taskStage := TaskStage{
 			common.LimeVFLModelTrainStage,
 			map[common.FalconTask]int{
-				common.LimeInterpretSubTask: ds.ParallelismPolicy.LimeInstanceWeightParallelism},
-			ds.ParallelismPolicy.LimeInstanceWeightParallelism}
+				common.LimeInterpretSubTask: ds.ParallelismPolicy.LimeVFLModelTrainParallelism},
+			ds.ParallelismPolicy.LimeVFLModelTrainParallelism}
 		ds.Stages[common.LimeVFLModelTrainStage] = taskStage
 	}
 
