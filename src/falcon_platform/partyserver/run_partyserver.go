@@ -75,7 +75,7 @@ func RunPartyServer() {
 		close(done)
 	}()
 
-	logger.Log.Printf("RunPartyServer: connecting to Coordinator %s to AddPort\n", common.CoordAddr)
+	logger.Log.Printf("RunPartyServer: connecting to Coordinator %s to AddPort %s\n", common.CoordAddr, common.PartyServerPort)
 	client.AddPort(common.CoordAddr, common.PartyServerPort)
 
 	logger.Log.Println("RunPartyServer: PartyServerAdd ", common.PartyServerIP)

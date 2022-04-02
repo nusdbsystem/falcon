@@ -27,7 +27,7 @@ func RunWorker(masterAddr, workerType,
 	jobId,
 	dataPath, modelPath, dataOutput string,
 	enableDistributedTrain int,
-	workerPreGroup, partyNum, workerGroupNum int) *common.LaunchResourceReply {
+	workerPreGroup, partyNum, workerGroupNum int, stageName string) *common.LaunchResourceReply {
 
 	reply := new(common.LaunchResourceReply)
 	reply.ResourceNum = workerGroupNum * workerPreGroup
@@ -77,7 +77,7 @@ func RunWorker(masterAddr, workerType,
 		} else if common.Deployment == common.Docker {
 			nodeLabel := common.PartyServerClusterLabels[nodeID]
 			jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-				dataOutput, resourceSVC, common.CentralizedWorker, nodeLabel)
+				dataOutput, resourceSVC, common.CentralizedWorker, nodeLabel, stageName)
 
 		} else if common.Deployment == common.K8S {
 			jobmanager.DeployWorkerK8s(masterAddr, workerType, jobId, dataPath, modelPath,
@@ -121,7 +121,7 @@ func RunWorker(masterAddr, workerType,
 			if common.Deployment == common.Docker {
 				nodeLabel := common.PartyServerClusterLabels[nodeID]
 				jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-					dataOutput, resourceSVC, common.DistributedParameterServer, nodeLabel)
+					dataOutput, resourceSVC, common.DistributedParameterServer, nodeLabel, stageName)
 
 			} else {
 				if common.IsDebug == common.DebugOn {
@@ -164,7 +164,7 @@ func RunWorker(masterAddr, workerType,
 				if common.Deployment == common.Docker {
 					nodeLabel := common.PartyServerClusterLabels[nodeID]
 					jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-						dataOutput, resourceSVC, common.DistributedWorker, nodeLabel)
+						dataOutput, resourceSVC, common.DistributedWorker, nodeLabel, stageName)
 
 				} else {
 

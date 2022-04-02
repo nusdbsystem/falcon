@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string) (master *Master) {
+func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string, stageName common.FalconStage) (master *Master) {
 	// launch 4 thread,
 	// 1. heartbeat loop, stopped by master.Cancel()
 	// 2. waiting for worker register, stopped by master.Cancel()
@@ -49,7 +49,7 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string) (mast
 
 	// define 3 functions, called in master.run
 	dispatcher := func() {
-		master.dispatch(dslOjb)
+		master.dispatch(dslOjb, stageName)
 	}
 	finish := func() {
 		// stop master after finishing the job
