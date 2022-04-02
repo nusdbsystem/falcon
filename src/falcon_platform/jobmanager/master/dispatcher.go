@@ -197,6 +197,12 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 			return
 		}
 
+		// Run model_training
+		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeInterpretSubTask, AlgCfg: dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig},
+			common.DefaultWorkerGroupID)
+		if ok := master.isSuccessful(); !ok {
+			return
+		}
 	}
 
 	// 3.6 Run LimeFeature and LimeInterpret if there is the task
