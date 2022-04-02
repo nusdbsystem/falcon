@@ -127,6 +127,15 @@ func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName comm
 		client.InferenceUpdateMaster(common.CoordAddr, masterAddr, dslOjb.JobId)
 	}
 
+	isDistributed := 0
+	if assignedWorker == 1 {
+		// if assignedWorker = 1 disable distributed
+		isDistributed = 0
+	} else {
+		// if assignedWorker > 1 disable distributed
+		isDistributed = 1
+	}
+
 	// default use only 1 worker in centralized way.
 	// in distributed training/inference, each party will launch multiple workers, and default use only 1 ps
 	var workerPreGroup = assignedWorker
@@ -144,7 +153,7 @@ func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName comm
 			masterAddr, workerType,
 			fmt.Sprintf("%d", dslOjb.JobId),
 			dataPath, modelPath, dataOutput,
-			dslOjb.DistributedTask.Enable,
+			isDistributed,
 			workerPreGroup, int(dslOjb.PartyNums),
 			groupNum, string(stageName),
 		)

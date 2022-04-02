@@ -8,6 +8,7 @@ import (
 	"falcon_platform/utils"
 	"fmt"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -80,7 +81,9 @@ func DeployMasterDocker(dslOjb *cache.DslObj, workerType string) {
 	nodeLabel: deploy the worker container to the server whose label is "nodeLabel"
  **/
 func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string,
-	resourceSVC *common.ResourceSVC, distributedRole uint, nodeLabel string) {
+	resourceSVC *common.ResourceSVC, distributedRole uint, nodeLabel string, stage string) {
+
+	stageName := strings.Replace(stage, "_", "-", -1)
 
 	workerAddr := resourceSVC.ToAddr(resourceSVC.WorkerPort)
 
@@ -92,7 +95,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"party" + fmt.Sprintf("%d-", common.PartyID) +
 				roleName + fmt.Sprintf("%d", resourceSVC.WorkerId) +
 				"-job" + jobId +
-				"-train"
+				"-train-" + stageName
 		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
 
 		logger.Log.Println("[JobManager]: Current in docker, TrainWorker, svcName", serviceName)
@@ -102,7 +105,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"party" + fmt.Sprintf("%d-", common.PartyID) +
 				roleName + fmt.Sprintf("%d", resourceSVC.WorkerId) +
 				"-job" + jobId +
-				"-predict"
+				"-predict-" + stageName
 		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
 
 		logger.Log.Println("[JobManager]: Current in docker, InferenceWorker, svcName", serviceName)
@@ -275,6 +278,10 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 
 	go func() {
 		defer logger.HandleErrors()
+		if common.IsDebug == "debug-on" {
+			logger.Log.Println("[JobManager]: run cmd", dockerCmd)
+			return
+		}
 		rm.CreateResources(resourcemanager.InitDockerManager(), dockerCmd)
 		rm.ReleaseResources()
 	}()
