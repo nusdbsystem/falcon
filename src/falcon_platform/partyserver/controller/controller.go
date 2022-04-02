@@ -40,7 +40,8 @@ func RunWorker(masterAddr, workerType,
 
 	logger.Log.Println(
 		"[PartyServer]: PartyServer setup workers, workerGroupNum = ", workerGroupNum,
-		" workerPreGroup = ", workerPreGroup, "totalWorkers=", totalWorkerNum)
+		" workerPreGroup = ", workerPreGroup, "totalWorkers=", totalWorkerNum, "stageName=", stageName,
+		"enableDistributedTrain=", enableDistributedTrain)
 
 	// centralized way
 	if enableDistributedTrain == 0 {
