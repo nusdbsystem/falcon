@@ -1,10 +1,8 @@
 package main
 
 import (
-	"falcon_platform/cache"
 	"falcon_platform/common"
 	"falcon_platform/coordserver"
-	"falcon_platform/jobmanager"
 	"falcon_platform/jobmanager/worker"
 	"falcon_platform/logger"
 	"falcon_platform/partyserver"
@@ -43,6 +41,19 @@ func init() {
 	}
 	common.ServiceName = os.Getenv("SERVICE_NAME")
 	common.LogPath = os.Getenv("LOG_PATH")
+
+	// default
+	if common.ServiceName == "" {
+		common.ServiceName = "coord"
+	}
+
+	if common.Deployment == "" {
+		common.Deployment = "subprocess"
+	}
+
+	if common.LogPath == "" {
+		common.LogPath = "/Users/kevin/project_golang/src/github.com/falcon/src/falcon_platform/falcon_logs/coord_debug"
+	}
 
 	fmt.Println("Currently, the Deployment method is: ", common.Deployment)
 	fmt.Println("Currently, the ServiceName is: ", common.ServiceName)
@@ -100,7 +111,7 @@ func initEnv(svcName string) {
 	switch svcName {
 	case common.CoordinatorRole:
 		// find the cluster port, call internally
-		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "")
+		common.CoordIP = common.GetEnv("COORD_SERVER_IP", "127.0.0.1")
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 		common.CoordAddr = common.CoordIP + ":" + common.CoordPort
 		common.CoordBasePath = common.GetEnv("COORD_SERVER_BASEPATH", "./falcon_logs")
@@ -353,17 +364,17 @@ func main() {
 	// 	      master and worker are isolate process, this is the entry      //
 	//////////////////////////////////////////////////////////////////////////
 
-	//those 3 is only called inside cluster,
+	//those 3 are only called inside cluster,
 	case common.JobManagerMasterRole:
 		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
-		// this should be the service name, defined at runtime,
-		masterAddr := common.MasterAddr
-		dslOjb := cache.Deserialize(cache.InitRedisClient().Get(common.MasterDslObjKey))
-		workerType := common.WorkerType
-		jobmanager.ManageJobLifeCycle(masterAddr, dslOjb, workerType)
-		// kill the related service after finish training or prediction.
-		km := resourcemanager.InitK8sManager(true, "")
-		km.DeleteResource(common.WorkerK8sSvcName)
+		//// this should be the service name, defined at runtime,
+		//masterAddr := common.MasterAddr
+		//dslOjb := cache.Deserialize(cache.InitRedisClient().Get(common.MasterDslObjKey))
+		//workerType := common.WorkerType
+		//jobmanager.ManageJobLifeCycle(masterAddr, dslOjb, workerType)
+		//// kill the related service after finish training or prediction.
+		//km := resourcemanager.InitK8sManager(true, "")
+		//km.DeleteResource(common.WorkerK8sSvcName)
 
 	case common.TrainWorker:
 		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)

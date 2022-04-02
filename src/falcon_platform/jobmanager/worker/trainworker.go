@@ -11,8 +11,6 @@ import (
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
 	"github.com/golang/protobuf/proto"
-	"strings"
-
 	// 	"falcon_platform/utils"
 	"net/rpc"
 )
@@ -85,8 +83,16 @@ func (wk *TrainWorker) Run() {
  * @Param
  * @return
  **/
-func (wk *TrainWorker) DoTask(taskName string, rep *entity.DoTaskReply) error {
+func (wk *TrainWorker) DoTask(args string, rep *entity.DoTaskReply) error {
 	// 1. decode args
+
+	taskArg, err := entity.DecodeGeneralTask([]byte(args))
+	if err != nil {
+		panic("Parser doTask args fails")
+	}
+	taskName := taskArg.TaskName
+	algCfg := taskArg.AlgCfg
+
 	logger.Log.Println("[TrainWorker] TrainWorker.DoTask called, taskName:", taskName)
 	defer func() {
 		logger.Log.Printf("[TrainWorker]: WorkerAddr %s, TrainWorker.DoTask Done for task %s \n", wk.Addr, taskName)
@@ -126,6 +132,12 @@ func (wk *TrainWorker) DoTask(taskName string, rep *entity.DoTaskReply) error {
 		// update task error msg
 		update()
 		return nil
+	} else if taskName == common.LimeInstanceSampleTask {
+		wk.printParams(wk.DslObj.Tasks.LimeInsSample.AlgorithmName)
+		wk.RunLimeInstanceSampleTask()
+		// update task error msg
+		update()
+		return nil
 	} else if taskName == common.LimePredSubTask {
 		wk.printParams(wk.DslObj.Tasks.LimePred.AlgorithmName)
 		wk.RunLimePredTask()
@@ -138,24 +150,23 @@ func (wk *TrainWorker) DoTask(taskName string, rep *entity.DoTaskReply) error {
 		// update task error msg
 		update()
 		return nil
+	} else if taskName == common.LimeFeatureSubTask {
+		// update config
+		wk.DslObj.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig = algCfg
+		wk.printParams(wk.DslObj.Tasks.LimeFeature.AlgorithmName)
+		wk.RunLimeFeatureTask()
+		// update task error msg
+		update()
+		return nil
+	} else if taskName == common.LimeInterpretSubTask {
+		wk.DslObj.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig = algCfg
+		wk.printParams(wk.DslObj.Tasks.LimeInterpret.AlgorithmName)
+		wk.RunLimeInterpretTask()
+		// update task error msg
+		update()
+		return nil
 	} else {
-		if strings.Contains(taskName, common.LimeFeatureSubTask) {
-			// update config
-			wk.DslObj.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig = taskName[len(common.LimeFeatureSubTask):]
-			wk.printParams(wk.DslObj.Tasks.LimeFeature.AlgorithmName)
-			wk.RunLimeFeatureTask()
-			// update task error msg
-			update()
-			return nil
-		}
-		if strings.Contains(taskName, common.LimeInterpretSubTask) {
-			wk.DslObj.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig = taskName[len(common.LimeInterpretSubTask):]
-			wk.printParams(wk.DslObj.Tasks.LimeInterpret.AlgorithmName)
-			wk.RunLimeInterpretTask()
-			// update task error msg
-			update()
-			return nil
-		}
+		panic("task name not found error, taskName=" + taskName)
 	}
 
 	rep.RuntimeError = true
@@ -287,6 +298,18 @@ func (w *TrainWorker) printParams(algName string) {
 
 		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig)
 		lrp := v0.LinearRegressionParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		_ = json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structed params =%v\n", out.String())
+
+	} else if algName == common.LimeSamplingAlgName {
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.LimeInsSample.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.LimeSamplingParams{}
 		_ = proto.Unmarshal(res, &lrp)
 
 		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)

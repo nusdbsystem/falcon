@@ -13,7 +13,7 @@ import (
 )
 
 // master dispatch job to multiple workers, and wait until worker finish
-func (master *Master) dispatch(dslOjb *cache.DslObj) {
+func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStage) {
 
 	// checking if the IP of worker match the dslOjb
 	master.Lock()
@@ -58,7 +58,10 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	}
 
 	// 3.2 Run pre_processing if there is the task
-	if dslOjb.Tasks.PreProcessing.AlgorithmName != "" {
+	if stageName == common.PreProcStage {
+		if dslOjb.Tasks.PreProcessing.AlgorithmName != "" {
+			panic("Stage dont have algorithm ERROR")
+		}
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.PreProcessing.MpcAlgorithmName, common.DefaultWorkerGroupID)
@@ -74,7 +77,10 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	}
 
 	// 3.3 Run model_training if there is the task
-	if dslOjb.Tasks.ModelTraining.AlgorithmName != "" {
+	if stageName == common.ModelTrainStage {
+		if dslOjb.Tasks.ModelTraining.AlgorithmName == "" {
+			panic("Stage dont have algorithm ERROR")
+		}
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.ModelTraining.MpcAlgorithmName, common.DefaultWorkerGroupID)
@@ -83,19 +89,31 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 		}
 
 		// Run model_training
-		master.dispatchGeneralTask(&wg, common.ModelTrainSubTask, common.DefaultWorkerGroupID)
+		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.ModelTrainSubTask}, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
 	}
 
 	// 3.4 Run Lime Instance Sampling algorithm is there is the task
-	if dslOjb.Tasks.LimeInsSample.AlgorithmName != "" {
+	if stageName == common.LimeInstanceSampleStage {
+		if dslOjb.Tasks.LimeInsSample.AlgorithmName == "" {
+			panic("Stage dont have algorithm ERROR")
+		}
+		logger.Log.Println("[Master.Dispatcher]: Schedule task=" + stageName)
 
+		// Run lime sampling
+		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeSamplingAlgName}, common.DefaultWorkerGroupID)
+		if ok := master.isSuccessful(); !ok {
+			return
+		}
 	}
 
 	// 3.4 Run LimePred if there is the task
-	if dslOjb.Tasks.LimePred.AlgorithmName != "" {
+	if stageName == common.LimePredStage {
+		if dslOjb.Tasks.LimePred.AlgorithmName == "" {
+			panic("Stage dont have algorithm ERROR")
+		}
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimePred.MpcAlgorithmName, common.DefaultWorkerGroupID)
@@ -103,15 +121,18 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 			return
 		}
 
-		// Run model_training
-		master.dispatchGeneralTask(&wg, common.LimePredSubTask, common.DefaultWorkerGroupID)
+		// Run lime prediction
+		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimePredSubTask}, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
 	}
 
 	// 3.5 Run LimeWeight if there is the task
-	if dslOjb.Tasks.LimeWeight.AlgorithmName != "" {
+	if stageName == common.LimeWeightStage {
+		if dslOjb.Tasks.LimeWeight.AlgorithmName == "" {
+			panic("Stage dont have algorithm ERROR")
+		}
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeWeight.MpcAlgorithmName, common.DefaultWorkerGroupID)
@@ -120,14 +141,17 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 		}
 
 		// Run model_training
-		master.dispatchGeneralTask(&wg, common.LimeWeightSubTask, common.DefaultWorkerGroupID)
+		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeWeightSubTask}, common.DefaultWorkerGroupID)
 		if ok := master.isSuccessful(); !ok {
 			return
 		}
 	}
 
 	// 3.6 Run LimeFeature and LimeInterpret if there is the task
-	if dslOjb.Tasks.LimeFeature.AlgorithmName != "" || dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
+	if stageName == common.LimeInterpretStage {
+		if dslOjb.Tasks.LimeFeature.AlgorithmName == "" && dslOjb.Tasks.LimeInterpret.AlgorithmName == "" {
+			panic("Stage dont have algorithm ERROR")
+		}
 
 		// get current class number
 		var classNum int32
@@ -158,7 +182,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 					// Run model_training
 					master.dispatchGeneralTask(&wg,
-						common.LimeFeatureSubTask+dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig,
+						&entity.GeneralTask{TaskName: common.LimeFeatureSubTask, AlgCfg: dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig},
 						common.DefaultWorkerGroupID)
 
 					if ok := master.isSuccessful(); !ok {
@@ -180,7 +204,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 					}
 
 					// Run model_training
-					master.dispatchGeneralTask(&wg, common.LimeInterpretSubTask+dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig,
+					master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeInterpretSubTask, AlgCfg: dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig},
 						common.DefaultWorkerGroupID)
 
 					if ok := master.isSuccessful(); !ok {
@@ -194,7 +218,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 			// generate availableGroupIds
 			var availableGroupIds []common.GroupIdType
-			for i := int32(0); i < master.SchedulerPolicy.classParallelism; i++ {
+			for i := 0; i < master.SchedulerPolicy.LimeClassParallelism; i++ {
 				availableGroupIds = append(availableGroupIds, common.GroupIdType(i))
 			}
 
@@ -202,7 +226,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 			logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, len(availableGroupIds) = ",
 				len(availableGroupIds),
-				" max class parallelism =", master.SchedulerPolicy.classParallelism,
+				" max class parallelism =", master.SchedulerPolicy.LimeClassParallelism,
 				" classNum = ", classNum)
 
 			// for each group, assign a class id
@@ -245,7 +269,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 						// Run model_training
 						master.dispatchGeneralTask(&limeWg,
-							common.LimeFeatureSubTask+dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig,
+							&entity.GeneralTask{TaskName: common.LimeFeatureSubTask, AlgCfg: dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig},
 							groupIdParam)
 
 						if ok := master.isSuccessful(); !ok {
@@ -269,7 +293,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 
 						// Run model_training
 						master.dispatchGeneralTask(&limeWg,
-							common.LimeInterpretSubTask+dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig,
+							&entity.GeneralTask{TaskName: common.LimeInterpretSubTask, AlgCfg: dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig},
 							groupIdParam)
 
 						if ok := master.isSuccessful(); !ok {
@@ -304,7 +328,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 					master.Lock()
 					logger.Log.Println("[Master.Dispatcher]: current len(len(availableGroupIds)) = ", len(availableGroupIds))
 					// all groupId has been released
-					if int32(len(availableGroupIds)) == master.SchedulerPolicy.classParallelism {
+					if len(availableGroupIds) == master.SchedulerPolicy.LimeClassParallelism {
 						master.Unlock()
 						break
 					} else {
@@ -318,7 +342,6 @@ func (master *Master) dispatch(dslOjb *cache.DslObj) {
 	}
 
 	// 3.5 more tasks later? add later
-
 	report := master.dispatchRetrieveModelReport()
 	logger.Log.Println("[Master.Dispatcher]: report is", report)
 	if report != "" {
@@ -355,7 +378,7 @@ func (master *Master) runtimeStatusMonitor(ctx context.Context) {
 					master.jobStatusLock.Unlock()
 					// kill all workers.
 					logger.Log.Printf("[Scheduler]: One worker failed %s in calling %s, "+
-						"kill other workers\n", status.WorkerAddr, status.RpcCallMethod)
+						"kill other workers, runTImeError=%s, RpcCallError=%s\n", status.WorkerAddr, status.RuntimeError, status.RpcCallMethod)
 					master.jobStatusLog = entity.MarshalStatus(status)
 					master.killWorkers()
 				}

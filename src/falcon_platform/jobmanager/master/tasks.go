@@ -58,7 +58,6 @@ func (master *Master) dispatchDslObj(wg *sync.WaitGroup, dslObj *cache.DslObj) {
 			common.RetrieveNetworkConfig(dslObj4sp.ExecutorPairNetworkCfg)
 			common.RetrieveDistributedNetworkConfig(dslObj4sp.DistributedExecutorPairNetworkCfg)
 
-
 			wg.Add(1)
 			// dispatch dslObj to the worker
 			go func(addr string, args []byte) {
@@ -102,7 +101,7 @@ func (master *Master) dispatchPreProcessingTask(wg *sync.WaitGroup) {
 		wg.Add(1)
 		go func(addr string) {
 			defer logger.HandleErrors()
-			master.dispatchTask(addr, common.PreProcSubTask, "DoTask", wg)
+			master.dispatchTask(addr, string(common.PreProcSubTask), "DoTask", wg)
 		}(worker.Addr)
 
 	}
@@ -118,14 +117,15 @@ func (master *Master) dispatchPreProcessingTask(wg *sync.WaitGroup) {
  * @Param
  * @return
  **/
-func (master *Master) dispatchGeneralTask(wg *sync.WaitGroup, taskName string, groupID common.GroupIdType) {
+func (master *Master) dispatchGeneralTask(wg *sync.WaitGroup, generalTask *entity.GeneralTask, groupID common.GroupIdType) {
+	args := string(entity.EncodeGeneralTask(generalTask))
 	master.Lock()
 	for _, worker := range master.workers {
 		if worker.GroupID == groupID {
 			wg.Add(1)
 			go func(addr string) {
 				defer logger.HandleErrors()
-				master.dispatchTask(addr, taskName, "DoTask", wg)
+				master.dispatchTask(addr, args, "DoTask", wg)
 			}(worker.Addr)
 		}
 	}

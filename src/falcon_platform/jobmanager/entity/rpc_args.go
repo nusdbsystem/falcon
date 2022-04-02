@@ -17,10 +17,10 @@ import (
 type DslObj4SingleWorker struct {
 
 	// those are the same as TranJob object or DslObj
-	JobFlType   string
-	ExistingKey uint
-	PartyNums   uint
-	Tasks       common.Tasks
+	JobFlType      string
+	ExistingKey    uint
+	PartyNums      uint
+	Tasks          common.Tasks
 	WorkerPreGroup int
 
 	// Only one party's information included
@@ -86,6 +86,11 @@ type RetrieveModelReportReply struct {
 	ContainsModelReport bool
 }
 
+type GeneralTask struct {
+	TaskName common.FalconTask
+	AlgCfg   string `default:""`
+}
+
 // Marshal list to string
 func MarshalStatus(trainStatuses *DoTaskReply) string {
 	jb, e := json.Marshal(trainStatuses)
@@ -149,6 +154,30 @@ func DecodeDslObj4SingleWorker(by []byte) (*DslObj4SingleWorker, error) {
 	reader := bytes.NewReader(by)
 	var decoder = gob.NewDecoder(reader)
 	var d DslObj4SingleWorker
+	err := decoder.Decode(&d)
+	return &d, err
+}
+
+func EncodeGeneralTask(args *GeneralTask) []byte {
+
+	argTypeRegister()
+
+	var buff bytes.Buffer
+
+	var encoder = gob.NewEncoder(&buff)
+
+	if err := encoder.Encode(&args); err != nil {
+		panic(err)
+	}
+	converted := buff.Bytes()
+	return converted
+}
+
+func DecodeGeneralTask(by []byte) (*GeneralTask, error) {
+	argTypeRegister()
+	reader := bytes.NewReader(by)
+	var decoder = gob.NewDecoder(reader)
+	var d GeneralTask
 	err := decoder.Decode(&d)
 	return &d, err
 }

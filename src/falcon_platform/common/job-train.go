@@ -50,7 +50,7 @@ type DistributedTask struct {
 type Tasks struct {
 	PreProcessing PreProcessTask    `json:"pre_processing"`
 	ModelTraining ModelTrainTask    `json:"model_training"`
-	LimeInsSample LimeInsSampleTask `json:"lime_ins_sample"`
+	LimeInsSample LimeInsSampleTask `json:"lime_sampling"`
 	LimePred      LimePredTask      `json:"lime_pred"`
 	LimeWeight    LimeWeightTask    `json:"lime_weight"`
 	LimeFeature   LimeFeatureTask   `json:"lime_feature"`
@@ -176,8 +176,20 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 	// if there is interpretability related task, serialize it
 
-	// LimePred
+	// LimeSampling
+	if jobInfo.Tasks.LimeInsSample.AlgorithmName == "" {
+		logger.Log.Println("ParseTrainJob: LimeSampling skip")
 
+	} else if jobInfo.Tasks.LimeInsSample.AlgorithmName == LimeSamplingAlgName {
+		logger.Log.Println("ParseTrainJob: LimeInsSample AlgorithmName match <-->", jobInfo.Tasks.LimeInsSample.AlgorithmName)
+
+		jobInfo.Tasks.LimeInsSample.InputConfigs.SerializedAlgorithmConfig =
+			GenerateLimeSamplingParams(jobInfo.Tasks.LimeInsSample.InputConfigs.AlgorithmConfig)
+	} else {
+		return errors.New("algorithm name can not be detected")
+	}
+
+	// LimePred
 	if jobInfo.Tasks.LimePred.AlgorithmName == "" {
 		logger.Log.Println("ParseTrainJob: LimePred skip")
 
@@ -427,6 +439,37 @@ func GenerateLinearRegressionParams(cfg map[string]interface{}) string {
 	out, err := proto.Marshal(&dtp)
 	if err != nil {
 		log.Fatalln("Failed to encode GenerateLinearRegressionParams:", err)
+	}
+
+	return b64.StdEncoding.EncodeToString(out)
+
+}
+
+func GenerateLimeSamplingParams(cfg map[string]interface{}) string {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateLimeSamplingParams error in doing Marshal")
+	}
+
+	res := LimeSampling{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateLimeSamplingParams error in doing Unmarshal")
+	}
+
+	dtp := v0.LimeSamplingParams{
+		ExplainInstanceIdx:   res.ExplainInstanceIdx,
+		SampleAroundInstance: res.SampleAroundInstance,
+		NumTotalSamples:      res.NumTotalSamples,
+		SamplingMethod:       res.SamplingMethod,
+		GeneratedSampleFile:  res.GeneratedSampleFile,
+	}
+
+	out, err := proto.Marshal(&dtp)
+	if err != nil {
+		log.Fatalln("Failed to encode GenerateLimeSamplingParams:", err)
 	}
 
 	return b64.StdEncoding.EncodeToString(out)

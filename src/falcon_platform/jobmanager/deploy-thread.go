@@ -5,8 +5,6 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/jobmanager/worker"
 	"falcon_platform/logger"
-	"falcon_platform/resourcemanager"
-	"fmt"
 )
 
 /**
@@ -17,15 +15,8 @@ import (
  **/
 func DeployMasterThread(dslOjb *cache.DslObj, workerType string) {
 
-	// 1. generate master address
-	masterPort := resourcemanager.GetFreePort(1)[0]
-	logger.Log.Printf("[JobManager]: Assign port %d to master\n", masterPort)
-
-	masterIP := common.CoordIP
-	masterAddr := masterIP + ":" + fmt.Sprintf("%d", masterPort)
-
-	// 2. call party server to launch workers
-	ManageJobLifeCycle(masterAddr, dslOjb, workerType)
+	// call party server to launch workers
+	ManageJobLifeCycle(dslOjb, workerType)
 }
 
 /**

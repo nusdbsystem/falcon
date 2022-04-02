@@ -147,7 +147,7 @@ const (
 	MpcSubTask                 FalconTask = "mpc"
 	PreProcSubTask             FalconTask = "pre_processing"
 	ModelTrainSubTask          FalconTask = "model_training"
-	LimeInstanceSampleTask     FalconTask = "lime_instance_sample"
+	LimeInstanceSampleTask     FalconTask = "lime_sampling"
 	LimePredSubTask            FalconTask = "lime_pred_task"
 	LimeWeightSubTask          FalconTask = "lime_weight_task"
 	LimeFeatureSubTask         FalconTask = "lime_feature_task"
