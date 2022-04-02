@@ -65,7 +65,7 @@ func RunWorker(ServerAddr string, masterAddr string,
 		common.WorkerPreGroup:         {fmt.Sprintf("%d", workerPreGroup)},
 		common.TotalPartyNumber:       {fmt.Sprintf("%d", partyNum)},
 		common.WorkerGroupNumber:      {fmt.Sprintf("%d", workerGroupNum)},
-		common.StageNameKey:           {fmt.Sprintf("%d", stageName)},
+		common.StageNameKey:           {fmt.Sprintf("%s", stageName)},
 	}
 
 	reqUrl := ServerAddr + common.RunWorker

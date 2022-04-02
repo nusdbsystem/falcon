@@ -158,12 +158,13 @@ const (
 type FalconStage string
 
 const (
-	PreProcStage            FalconStage = "pre_processing_stage"
-	ModelTrainStage         FalconStage = "model_training_stage"
-	LimeInstanceSampleStage FalconStage = "lime_instance_sample_stage"
-	LimePredStage           FalconStage = "lime_pred_task_stage"
-	LimeWeightStage         FalconStage = "lime_weight_task_stage"
-	LimeInterpretStage      FalconStage = "lime_interpret_task_stage"
+	PreProcStage              FalconStage = "lime_pre_processing_stage"
+	ModelTrainStage           FalconStage = "lime_model_training_stage"
+	LimeInstanceSampleStage   FalconStage = "lime_instance_sample_stage"
+	LimePredStage             FalconStage = "lime_pred_task_stage"
+	LimeWeightStage           FalconStage = "lime_weight_task_stage"
+	LimeFeatureSelectionStage FalconStage = "lime_feature_selection_stage"
+	LimeVFLModelTrainStage    FalconStage = "lime_vfl_train_stage"
 )
 
 // Algorithms names
@@ -221,11 +222,11 @@ const (
 
 func DistributedRoleToName(role uint) string {
 	if role == 0 {
-		return "distributed-parameter-server"
+		return "dist-ps"
 	} else if role == 1 {
-		return "distributed-worker"
+		return "dist-worker"
 	} else if role == 2 {
-		return "centralized-worker"
+		return "cent-worker"
 	} else {
 		return ""
 	}

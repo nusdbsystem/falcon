@@ -83,7 +83,7 @@ func DeployMasterDocker(dslOjb *cache.DslObj, workerType string) {
 func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string,
 	resourceSVC *common.ResourceSVC, distributedRole uint, nodeLabel string, stage string) {
 
-	stageName := strings.Replace(stage, "_", "-", -1)
+	stageName := strings.Join(strings.Split(stage, "_")[1:], "-")
 
 	workerAddr := resourceSVC.ToAddr(resourceSVC.WorkerPort)
 
@@ -92,10 +92,10 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 	roleName := common.DistributedRoleToName(distributedRole)
 	if workerType == common.TrainWorker {
 		serviceName =
-			"party" + fmt.Sprintf("%d-", common.PartyID) +
+			"pty" + fmt.Sprintf("%d-", common.PartyID) +
 				roleName + fmt.Sprintf("%d", resourceSVC.WorkerId) +
 				"-job" + jobId +
-				"-train-" + stageName
+				"-tr-" + stageName
 		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
 
 		logger.Log.Println("[JobManager]: Current in docker, TrainWorker, svcName", serviceName)
@@ -138,7 +138,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 	// such that worker process can read them from container
 	// port mapping
 	//currentPath, _ := os.Getwd()
-	currentTime := time.Now().Unix()
+	//currentTime := time.Now().Unix()
 
 	if distributedRole == common.CentralizedWorker {
 		// if CentralizedWorker, 3 port needed, one communicate with master, one for falcon, one for mpc
@@ -149,7 +149,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 
 		dockerCmd = exec.Command(
 			"docker", "service", "create",
-			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
+			"--name", fmt.Sprintf("%s", serviceName),
 			"--network", "host",
 			"--replicas", "1",
 			"--mount", "type=bind,"+
@@ -193,7 +193,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 
 		dockerCmd = exec.Command(
 			"docker", "service", "create",
-			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
+			"--name", fmt.Sprintf("%s", serviceName),
 			"--network", "host",
 			"--replicas", "1",
 			"--mount", "type=bind,"+
@@ -237,7 +237,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 
 		dockerCmd = exec.Command(
 			"docker", "service", "create",
-			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
+			"--name", fmt.Sprintf("%s", serviceName),
 			"--network", "host",
 			"--replicas", "1",
 			"--mount", "type=bind,"+
