@@ -27,7 +27,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 			worker.Addr, worker.PartyID, worker.GroupID, worker.WorkerID)
 		SerializedWorker = append(SerializedWorker, tmp)
 	}
-	logger.Log.Println("[Master.Dispatcher]: All worker found:", SerializedWorker)
+	master.Logger.Println("[Master.Dispatcher]: All worker found:", SerializedWorker)
 	master.Unlock()
 
 	// 1. generate config (MpcIp) for each party-server's mpc task
@@ -100,7 +100,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 		if dslOjb.Tasks.LimeInsSample.AlgorithmName == "" {
 			panic("Stage dont have algorithm ERROR")
 		}
-		logger.Log.Println("[Master.Dispatcher]: Schedule task=" + stageName)
+		master.Logger.Println("[Master.Dispatcher]: Schedule task=" + stageName)
 
 		// Run lime sampling
 		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeSamplingAlgName}, common.DefaultWorkerGroupID)
@@ -224,7 +224,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 
 			var classId int32 = 0
 
-			logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, len(availableGroupIds) = ",
+			master.Logger.Println("[Master.Dispatcher]: dispatch lime tasks, len(availableGroupIds) = ",
 				len(availableGroupIds),
 				" max class parallelism =", master.SchedulerPolicy.LimeClassParallelism,
 				" classNum = ", classNum)
@@ -236,14 +236,14 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 				}
 				master.Lock()
 				if len(availableGroupIds) == 0 {
-					logger.Log.Println("[Master.Dispatcher]: wait until one worker group is released...")
+					master.Logger.Println("[Master.Dispatcher]: wait until one worker group is released...")
 					time.Sleep(1 * time.Second)
 					master.Unlock()
 					continue
 				}
 				groupId := availableGroupIds[0]
 				availableGroupIds = availableGroupIds[1:]
-				logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, assign classid=", classId,
+				master.Logger.Println("[Master.Dispatcher]: dispatch lime tasks, assign classid=", classId,
 					" to worker group =", groupId,
 					" current len(availableGroupIds) = ", availableGroupIds)
 				master.Unlock()
@@ -304,7 +304,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 					master.Lock()
 					// after finishing the task, append the groupIdParam back to availableGroupIds
 					*availableGroupIds = append(*availableGroupIds, groupIdParam)
-					logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks, add group id back to availableGroupIds, current len = ", len(*availableGroupIds))
+					master.Logger.Println("[Master.Dispatcher]: dispatch lime tasks, add group id back to availableGroupIds, current len = ", len(*availableGroupIds))
 					master.Unlock()
 
 				}(groupId, classId, &availableGroupIds, &limeWg)
@@ -314,19 +314,19 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 			}
 
 			// wait until all task done
-			logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks done, now waiting for all lime task (for each class) finishing...")
+			master.Logger.Println("[Master.Dispatcher]: dispatch lime tasks done, now waiting for all lime task (for each class) finishing...")
 			for {
 				master.jobStatusLock.Lock()
 				// kill workers may cause to this,
 				if master.jobStatus == common.JobKilled {
 					master.jobStatusLock.Unlock()
-					logger.Log.Println("[Master.Dispatcher]: dispatch lime tasks: job is killed caused by some error")
+					master.Logger.Println("[Master.Dispatcher]: dispatch lime tasks: job is killed caused by some error")
 
 					break
 				} else {
 					master.jobStatusLock.Unlock()
 					master.Lock()
-					logger.Log.Println("[Master.Dispatcher]: current len(len(availableGroupIds)) = ", len(availableGroupIds))
+					master.Logger.Println("[Master.Dispatcher]: current len(len(availableGroupIds)) = ", len(availableGroupIds))
 					// all groupId has been released
 					if len(availableGroupIds) == master.SchedulerPolicy.LimeClassParallelism {
 						master.Unlock()
@@ -343,13 +343,13 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 
 	// 3.5 more tasks later? add later
 	report := master.dispatchRetrieveModelReport()
-	logger.Log.Println("[Master.Dispatcher]: report is", report)
+	master.Logger.Println("[Master.Dispatcher]: report is", report)
 	if report != "" {
 		// write to disk
 		filename := "/opt/falcon/src/falcon_platform/web/build/static/media/model_report"
 		err := utils.WriteFile(report, filename)
 		if err != nil {
-			logger.Log.Printf("[Master.Dispatcher]: write model report to disk error: %s \n", err.Error())
+			master.Logger.Printf("[Master.Dispatcher]: write model report to disk error: %s \n", err.Error())
 		}
 	}
 
@@ -362,7 +362,7 @@ func (master *Master) runtimeStatusMonitor(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Log.Println("[Scheduler]: Master finish dispatching tasks.")
+			master.Logger.Println("[Scheduler]: Master finish dispatching tasks.")
 			return
 		case status := <-master.runtimeStatus:
 			// read runtime status,
@@ -372,12 +372,12 @@ func (master *Master) runtimeStatusMonitor(ctx context.Context) {
 				if master.jobStatus == common.JobKilled {
 					master.jobStatusLock.Unlock()
 					// kill all workers.
-					logger.Log.Println("[Scheduler]: Master killed all workers")
+					master.Logger.Println("[Scheduler]: Master killed all workers")
 				} else {
 					master.jobStatus = common.JobFailed
 					master.jobStatusLock.Unlock()
 					// kill all workers.
-					logger.Log.Printf("[Scheduler]: One worker failed %s in calling %s, "+
+					master.Logger.Printf("[Scheduler]: One worker failed %s in calling %s, "+
 						"kill other workers, runTImeError=%s, RpcCallError=%s\n", status.WorkerAddr, status.RuntimeError, status.RpcCallMethod)
 					master.jobStatusLog = entity.MarshalStatus(status)
 					master.killWorkers()

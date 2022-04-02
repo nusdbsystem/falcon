@@ -47,7 +47,7 @@ func (master *Master) dispatchDslObj(wg *sync.WaitGroup, dslObj *cache.DslObj) {
 			// encode object and send to the worker
 			args := entity.EncodeDslObj4SingleWorker(dslObj4sp)
 
-			logger.Log.Println("[Master.Dispatch]: task 1. Dispatch registered worker=", workerAddr,
+			master.Logger.Println("[Master.Dispatch]: task 1. Dispatch registered worker=", workerAddr,
 				" worker_id = ", workerID, " group id = ", ResourceSVC.GroupId,
 				" with the JobInfo:",
 				"\nExecutorPairNetworkCfg= ", dslObj4sp.ExecutorPairNetworkCfg,
@@ -150,11 +150,11 @@ func (master *Master) dispatchRetrieveModelReport() string {
 		var rep entity.RetrieveModelReportReply
 		ok := client.Call(worker.Addr, master.Network, master.workerType+".RetrieveModelReport", "", &rep)
 		if !ok {
-			logger.Log.Printf("[Master.Dispatch]: Master calling %s.RetrieveModelReport error\n", worker.Addr)
+			master.Logger.Printf("[Master.Dispatch]: Master calling %s.RetrieveModelReport error\n", worker.Addr)
 			return ""
 		}
 		if rep.RuntimeError == true {
-			logger.Log.Printf("[Master.Dispatch]: Worker return error msg when calling %s.RetrieveModelReport: %s\n",
+			master.Logger.Printf("[Master.Dispatch]: Worker return error msg when calling %s.RetrieveModelReport: %s\n",
 				worker.Addr, rep.TaskMsg.RuntimeMsg)
 			return ""
 		}
@@ -187,7 +187,7 @@ func (master *Master) dispatchTask(workerAddr string, args string, rpcCallMethod
 	ok := client.Call(workerAddr, master.Network, master.workerType+"."+rpcCallMethod, args, &rep)
 
 	if !ok {
-		logger.Log.Printf("[Master.Dispatch]: Master calling %s.%s error\n", workerAddr, rpcCallMethod)
+		master.Logger.Printf("[Master.Dispatch]: Master calling %s.%s error\n", workerAddr, rpcCallMethod)
 		rep.RpcCallError = true
 		rep.TaskMsg.RpcCallMsg = "RpcCallError, one worker is probably terminated"
 

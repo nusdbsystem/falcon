@@ -9,6 +9,8 @@ import (
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"fmt"
+	"log"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -64,6 +66,10 @@ type Master struct {
 
 	// common.TrainWorker or common.InferenceWorker
 	workerType string
+
+	// logger instance
+	Logger  *log.Logger
+	LogFile *os.File
 }
 
 func newMaster(masterAddr string, partyNum uint) (ms *Master) {
@@ -97,7 +103,7 @@ func (master *Master) RegisterWorker(args *entity.WorkerInfo, _ *struct{}) error
 	var out bytes.Buffer
 	bs, _ := json.Marshal(args)
 	_ = json.Indent(&out, bs, "", "\t")
-	logger.Log.Printf("[master.RegisterWorker] one Worker registered! args: %v\n", out.String())
+	master.Logger.Printf("[master.RegisterWorker] one Worker registered! args: %v\n", out.String())
 
 	// Pass WorkerAddrIdType (addr:partyID) into tmpWorkers for pre-processing
 	// IP:Port:WorkerID
@@ -112,14 +118,14 @@ func (master *Master) forwardRegistrations() {
 	master.BeginCountingWorkers.Wait()
 	master.Unlock()
 
-	logger.Log.Printf("[Master.forwardRegistrations]: start forwardRegistrations... ")
+	master.Logger.Printf("[Master.forwardRegistrations]: start forwardRegistrations... ")
 
 loop:
 	for {
 		select {
 		case <-master.Ctx.Done():
 
-			logger.Log.Println("[Master.forwardRegistrations]: Thread-2 forwardRegistrations: exit")
+			master.Logger.Println("[Master.forwardRegistrations]: Thread-2 forwardRegistrations: exit")
 			break loop
 
 		case tmpWorker := <-master.tmpWorkers:
@@ -138,7 +144,7 @@ loop:
 				master.ExtractedResource.requiredWorkers[workerInfo.PartyID][workerInfo.WorkerID] = true
 
 			} else {
-				logger.Log.Printf("[Master]: the worker %s already registered, skip \n", tmpWorker)
+				master.Logger.Printf("[Master]: the worker %s already registered, skip \n", tmpWorker)
 			}
 
 			// 3. check if all worker registered
@@ -182,7 +188,7 @@ func (master *Master) ExtractResourceInformation() {
 		partyID := LaunchResourceReply.PartyID
 		// there are only 1 ps in each party's group in distributed train
 		trainWorkerPreGroup := LaunchResourceReply.ResourceNumPreGroup - 1
-		logger.Log.Println("[Master.extractResourceInfo] -----debug-----trainWorkerPreGroup:", trainWorkerPreGroup)
+		master.Logger.Println("[Master.extractResourceInfo] -----debug-----trainWorkerPreGroup:", trainWorkerPreGroup)
 
 		// get sorted work id
 		var orderedWorkIds []int
@@ -207,7 +213,7 @@ func (master *Master) ExtractResourceInformation() {
 						executorPairIps[workerID] = make([]string, master.PartyNums)
 					}
 					executorPairIps[workerID][partyIndex] = ResourceSVC.ResourceIP
-					//logger.Log.Println("[Master.extractResourceInfo] -----debug-----extractResourceInfo:", executorPairIps)
+					//master.Logger.Println("[Master.extractResourceInfo] -----debug-----extractResourceInfo:", executorPairIps)
 
 					// record executor-executor ports
 					if _, ok := executorPairsPorts[workerID]; !ok {
@@ -282,7 +288,7 @@ func (master *Master) ExtractResourceInformation() {
 				distPsIp[partyID][groupID], distPsPorts[partyID][groupID],
 				distWorkerIps[partyID][groupID], distWorkerPorts[partyID][groupID])
 
-			logger.Log.Println("[Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID =",
+			master.Logger.Println("[Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID =",
 				partyID, " group_id = ", groupID,
 				"distPsIp: ", distPsIp[partyID][groupID],
 				"distPsPorts: ", distPsPorts[partyID][groupID],
@@ -324,48 +330,48 @@ func (master *Master) ExtractResourceInformation() {
 		mpcPairNetworkCfg[workerID] = getMpcMpcNetworkCfg(IPs, portsMpc)
 	}
 
-	logger.Log.Println("[Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is ", executorPairNetworkCfg)
+	master.Logger.Println("[Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is ", executorPairNetworkCfg)
 
 	mpcExecutorNetworkCfg := getMpcExecutorNetworkCfg(mpcExecutorPorts)
 
-	logger.Log.Println("[Master.extractResourceInfo] -----checking configurations-----")
-	logger.Log.Printf("[Master.extractResourceInfo] master.RequiredResource is :\n")
+	master.Logger.Println("[Master.extractResourceInfo] -----checking configurations-----")
+	master.Logger.Printf("[Master.extractResourceInfo] master.RequiredResource is :\n")
 
-	logger.Log.Printf("[Master.extractResourceInfo] workerNum: %d", master.workerNum)
+	master.Logger.Printf("[Master.extractResourceInfo] workerNum: %d", master.workerNum)
 
 	for i := 0; i < len(master.RequiredResource); i++ {
-		logger.Log.Printf("[Master.extractResourceInfo] party %d PartyID: %d", i, master.RequiredResource[i].PartyID)
-		logger.Log.Printf("[Master.extractResourceInfo] party %d ResourceNum: %d", i, master.RequiredResource[i].ResourceNum)
-		logger.Log.Printf("[Master.extractResourceInfo] party %d ResourceNumPreGroup: %d", i, master.RequiredResource[i].ResourceNumPreGroup)
+		master.Logger.Printf("[Master.extractResourceInfo] party %d PartyID: %d", i, master.RequiredResource[i].PartyID)
+		master.Logger.Printf("[Master.extractResourceInfo] party %d ResourceNum: %d", i, master.RequiredResource[i].ResourceNum)
+		master.Logger.Printf("[Master.extractResourceInfo] party %d ResourceNumPreGroup: %d", i, master.RequiredResource[i].ResourceNumPreGroup)
 
 		for workerID, svc := range master.RequiredResource[i].ResourceSVCs {
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.WorkerId: %d", i, workerID, svc.GroupId, svc.WorkerId)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d", i, workerID, svc.GroupId)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.ResourceIP: %s", i, workerID, svc.GroupId, svc.ResourceIP)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.WorkerPort: %d", i, workerID, svc.GroupId, svc.WorkerPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.ExecutorExecutorPort: %d", i, workerID, svc.GroupId, svc.ExecutorExecutorPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.MpcMpcPort: %d", i, workerID, svc.GroupId, svc.MpcMpcPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.MpcExecutorPort: %d", i, workerID, svc.GroupId, svc.MpcExecutorPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.ExecutorPSPort: %d", i, workerID, svc.GroupId, svc.ExecutorPSPort)
-			logger.Log.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.DistributedRole: %s\n", i, workerID, svc.GroupId, common.DistributedRoleToName(svc.DistributedRole))
+			master.Logger.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.WorkerId: %d", i, workerID, svc.GroupId, svc.WorkerId)
+			master.Logger.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d", i, workerID, svc.GroupId)
+			master.Logger.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.ResourceIP: %s", i, workerID, svc.GroupId, svc.ResourceIP)
+			master.Logger.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.WorkerPort: %d", i, workerID, svc.GroupId, svc.WorkerPort)
+			master.Logger.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.ExecutorExecutorPort: %d", i, workerID, svc.GroupId, svc.ExecutorExecutorPort)
+			master.Logger.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.MpcMpcPort: %d", i, workerID, svc.GroupId, svc.MpcMpcPort)
+			master.Logger.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.MpcExecutorPort: %d", i, workerID, svc.GroupId, svc.MpcExecutorPort)
+			master.Logger.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.ExecutorPSPort: %d", i, workerID, svc.GroupId, svc.ExecutorPSPort)
+			master.Logger.Printf("[Master.extractResourceInfo] party %d, workerID %d, groupID %d, ResourceSVCs.DistributedRole: %s\n", i, workerID, svc.GroupId, common.DistributedRoleToName(svc.DistributedRole))
 		}
 	}
 
-	logger.Log.Println("[Master.extractResourceInfo] requiredWorkers is ", requiredWorkers)
-	logger.Log.Println("[Master.extractResourceInfo] executorPairIps is ", executorPairIps)
-	logger.Log.Println("[Master.extractResourceInfo] executorPairsPorts is ", executorPairsPorts)
-	logger.Log.Println("[Master.extractResourceInfo] mpcPairsPorts is ", mpcPairsPorts)
-	logger.Log.Println("[Master.extractResourceInfo] mpcExecutorPorts workerID:[partyPort...] is ", mpcExecutorPorts)
-	logger.Log.Println("[Master.extractResourceInfo] distPsIp is ", distPsIp)
-	logger.Log.Println("[Master.extractResourceInfo] distWorkerIps is ", distWorkerIps)
+	master.Logger.Println("[Master.extractResourceInfo] requiredWorkers is ", requiredWorkers)
+	master.Logger.Println("[Master.extractResourceInfo] executorPairIps is ", executorPairIps)
+	master.Logger.Println("[Master.extractResourceInfo] executorPairsPorts is ", executorPairsPorts)
+	master.Logger.Println("[Master.extractResourceInfo] mpcPairsPorts is ", mpcPairsPorts)
+	master.Logger.Println("[Master.extractResourceInfo] mpcExecutorPorts workerID:[partyPort...] is ", mpcExecutorPorts)
+	master.Logger.Println("[Master.extractResourceInfo] distPsIp is ", distPsIp)
+	master.Logger.Println("[Master.extractResourceInfo] distWorkerIps is ", distWorkerIps)
 
 	// network configs
-	logger.Log.Println("[Master.extractResourceInfo] mpcPairNetworkCfg workerID:partyMpcMpcAddrs is is ", mpcPairNetworkCfg)
-	logger.Log.Println("[Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is ", executorPairNetworkCfg)
-	logger.Log.Println("[Master.extractResourceInfo] mpcExecutorNetworkCfg workerID:[partyMpcExecutorPort...] is ", mpcExecutorNetworkCfg)
-	logger.Log.Println("[Master.extractResourceInfo] distributedNetworkCfg partyID:b64_Str is ", distributedNetworkCfg)
+	master.Logger.Println("[Master.extractResourceInfo] mpcPairNetworkCfg workerID:partyMpcMpcAddrs is is ", mpcPairNetworkCfg)
+	master.Logger.Println("[Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is ", executorPairNetworkCfg)
+	master.Logger.Println("[Master.extractResourceInfo] mpcExecutorNetworkCfg workerID:[partyMpcExecutorPort...] is ", mpcExecutorNetworkCfg)
+	master.Logger.Println("[Master.extractResourceInfo] distributedNetworkCfg partyID:b64_Str is ", distributedNetworkCfg)
 
-	logger.Log.Println("[Master.extractResourceInfo] -----done with checking configurations-----")
+	master.Logger.Println("[Master.extractResourceInfo] -----done with checking configurations-----")
 
 	master.ExtractedResource.mpcPairNetworkCfg = mpcPairNetworkCfg
 	master.ExtractedResource.executorPairNetworkCfg = executorPairNetworkCfg
@@ -385,13 +391,13 @@ func (master *Master) run(
 	// 3. close all resources related to this job
 
 	dispatcher()
-	logger.Log.Printf("[Master]: Finish job, update to coord, jobStatus: <%s> \n", master.jobStatus)
+	master.Logger.Printf("[Master]: Finish job, update to coord, jobStatus: <%s> \n", master.jobStatus)
 
 	updateStatus(master.jobStatusLog)
-	logger.Log.Println("[Master]: Finish job, begin to shutdown master")
+	master.Logger.Println("[Master]: Finish job, begin to shutdown master")
 
 	finish()
-	logger.Log.Printf("[Master] %s: Thread-4 master.finish, job completed\n", master.Addr)
+	master.Logger.Printf("[Master] %s: Thread-4 master.finish, job completed\n", master.Addr)
 
 }
 
@@ -411,7 +417,7 @@ loop:
 // for rpc method, must be public method, only 2 params, second one must be pointer,return err type
 func (master *Master) Shutdown(_, _ *struct{}) error {
 
-	logger.Log.Println("[Master]: Shutdown server")
+	master.Logger.Println("[Master]: Shutdown server")
 	// causes the Accept to fail, then break out the accept loop
 	_ = master.Listener.Close()
 	return nil

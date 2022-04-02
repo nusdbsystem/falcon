@@ -5,6 +5,8 @@ import (
 	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/logger"
+	"fmt"
+	"math/rand"
 	"net/rpc"
 	"time"
 )
@@ -16,7 +18,9 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string, stage
 	// 3. rpc server, used to get requests from worker, stopped by master.StopRPCServer
 	// 4. scheduling process, call finish to stop above threads
 
+	logFileName := common.LogPath + "/master-" + string(stageName) + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
 	master = newMaster(masterAddr, dslOjb.PartyNums)
+	master.Logger, master.LogFile = logger.GetLogger(logFileName)
 	master.workerType = workerType
 	master.reset()
 
@@ -33,7 +37,7 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string, stage
 	// reply type of method ... is not a pointer: "bool"
 	// all those can be ignored
 	if err != nil {
-		logger.Log.Println("rpcServer Register master Error", err)
+		master.Logger.Println("rpcServer Register master Error", err)
 		return
 	}
 
@@ -80,7 +84,7 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string, stage
 	time.AfterFunc(100*time.Minute, func() {
 		master.Lock()
 		if len(master.workers) < master.workerNum {
-			logger.Log.Printf("Master: Wait for 100 Min, No enough worker come, stop, required %d, got %d ",
+			master.Logger.Printf("Master: Wait for 100 Min, No enough worker come, stop, required %d, got %d ",
 				master.workerNum,
 				len(master.workers),
 			)

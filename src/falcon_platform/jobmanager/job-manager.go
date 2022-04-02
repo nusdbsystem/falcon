@@ -60,29 +60,21 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 
 	if stage, ok := dagScheduler.Stages[common.PreProcStage]; ok {
 		// 1. generate master address
-		logFileName := common.LogPath + "/master-" + string(stage.Name) + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
-		logger.Log, logger.LogFile = logger.GetLogger(logFileName)
 		ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker)
 	}
 
 	if stage, ok := dagScheduler.Stages[common.ModelTrainStage]; ok {
-		logFileName := common.LogPath + "/master-" + string(stage.Name) + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
-		logger.Log, logger.LogFile = logger.GetLogger(logFileName)
 		// 1. generate master address
 		ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker)
 	}
 
 	if stage, ok := dagScheduler.Stages[common.LimeInstanceSampleStage]; ok {
-		logFileName := common.LogPath + "/master-" + string(stage.Name) + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
-		logger.Log, logger.LogFile = logger.GetLogger(logFileName)
 		// 1. generate master address
 		ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker)
 	}
 
 	wg := sync.WaitGroup{}
 
-	logFileName := common.LogPath + "/master-" + string("LimePred-LimeWeight") + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
-	logger.Log, logger.LogFile = logger.GetLogger(logFileName)
 	if stage, ok := dagScheduler.Stages[common.LimePredStage]; ok {
 		wg.Add(1)
 		go func(dslOjb *cache.DslObj, workerType string, stage *DAGscheduler.TaskStage, wg *sync.WaitGroup) {
@@ -102,8 +94,6 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 	wg.Wait()
 
 	if stage, ok := dagScheduler.Stages[common.LimeInterpretStage]; ok {
-		logFileName := common.LogPath + "/master-" + string(stage.Name) + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
-		logger.Log, logger.LogFile = logger.GetLogger(logFileName)
 		// 1. generate master address
 		ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker)
 	}
@@ -123,14 +113,12 @@ func KillJob(masterAddr, network string) {
 func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName common.FalconStage, tasksParallelism map[common.FalconTask]int, groupNum int, assignedWorker int) string {
 
 	masterPort := resourcemanager.GetFreePort(1)[0]
-	logger.Log.Printf("[JobManager]: Assign port %d to master, run task=%s\n", masterPort, stageName)
 	masterAddr := common.CoordIP + ":" + fmt.Sprintf("%d", masterPort)
-
-	logger.Log.Printf("[JobManager] begin ManageJobLifeCycle, masterAddr=%s, stageName=%s, groupNum=%s, tasksParallelism=%d\n", masterAddr, stageName, groupNum, tasksParallelism)
-
-	logger.Log.Println("[JobManager] call master.RunMaster with dslOjb:")
 	//logger.Log.Println("dslOjb = ", dslOjb)
 	masterIns := master.RunMaster(masterAddr, dslOjb, workerType, stageName)
+	masterIns.Logger.Printf("[JobManager]: Assign port %d to master, run task=%s\n", masterPort, stageName)
+	masterIns.Logger.Printf("[JobManager] begin ManageJobLifeCycle, masterAddr=%s, stageName=%s, groupNum=%s, tasksParallelism=%d\n", masterAddr, stageName, groupNum, tasksParallelism)
+	masterIns.Logger.Println("[JobManager] call master.RunMaster with dslOjb")
 
 	// update job's master addr
 	if workerType == common.TrainWorker {
@@ -149,7 +137,7 @@ func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName comm
 		dataOutput := dslOjb.PartyInfoList[partyIndex].PartyPaths.DataOutput
 		modelPath := dslOjb.PartyInfoList[partyIndex].PartyPaths.ModelPath
 
-		logger.Log.Printf("[JobManager] master call partyserver %s to spawn workers \n", partyAddr)
+		masterIns.Logger.Printf("[JobManager] master call partyserver %s to spawn workers \n", partyAddr)
 
 		// call part server to launch worker to execute the task
 		rep := client.RunWorker(partyAddr,
@@ -174,14 +162,14 @@ func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName comm
 	// extract necessary information
 	masterIns.ExtractResourceInformation()
 
-	logger.Log.Println("[JobManager] master received all partyServer's reply")
+	masterIns.Logger.Println("[JobManager] master received all partyServer's reply")
 	masterIns.BeginCountingWorkers.Broadcast()
 
-	logger.Log.Println("[JobManager] master wait here until job finish")
+	masterIns.Logger.Println("[JobManager] master wait here until stage finish")
 	// wait this job finish
 	masterIns.WaitJobComplete()
 
-	logger.Log.Println("[JobManager] master finish all jobs")
+	masterIns.Logger.Println("[JobManager] master finish this stage")
 
 	return masterAddr
 }

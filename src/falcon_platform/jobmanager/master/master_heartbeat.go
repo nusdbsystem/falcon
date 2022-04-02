@@ -3,7 +3,6 @@ package master
 import (
 	"falcon_platform/client"
 	"falcon_platform/common"
-	"falcon_platform/logger"
 	"time"
 )
 
@@ -14,7 +13,7 @@ loop:
 		select {
 		case <-master.Ctx.Done():
 
-			logger.Log.Println("[Master.Heartbeat] Thread-1 heartBeatLoop exit")
+			master.Logger.Println("[Master.Heartbeat] Thread-1 heartBeatLoop exit")
 			break loop
 
 		default:
@@ -50,14 +49,14 @@ loop:
 // board cast heartbeat to current workers in worker list
 func (master *Master) broadcastHeartbeat() {
 
-	// logger.Log.Println("[broadcastHeartbeat]...")
+	// master.Logger.Println("[broadcastHeartbeat]...")
 	// update lastSendTime
 	master.reset()
 
 	for _, worker := range master.workers {
 		ok := client.Call(worker.Addr, master.Network, master.workerType+".ResetTime", new(struct{}), new(struct{}))
 		if ok == false {
-			logger.Log.Printf("[Master.Heartbeat] RPC %s send heartbeat error\n", worker.Addr)
+			master.Logger.Printf("[Master.Heartbeat] RPC %s send heartbeat error\n", worker.Addr)
 		}
 	}
 }
