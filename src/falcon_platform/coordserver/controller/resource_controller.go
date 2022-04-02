@@ -5,7 +5,6 @@ import (
 	"falcon_platform/coordserver/entity"
 	"falcon_platform/coordserver/models"
 	"falcon_platform/logger"
-	"strconv"
 	"sync"
 )
 
@@ -14,15 +13,9 @@ var currentMaxPort = 22000
 var portMutex sync.Mutex
 
 // portNum: how many port needed
-func AssignPort(ctx *entity.Context, portNum string) []common.PortType {
+func AssignPort(ctx *entity.Context, portNumInt int) []common.PortType {
 
 	var res []common.PortType
-
-	portNumInt, err := strconv.Atoi(portNum)
-
-	if err != nil {
-		panic(err)
-	}
 
 	portMutex.Lock()
 	portCount := 0

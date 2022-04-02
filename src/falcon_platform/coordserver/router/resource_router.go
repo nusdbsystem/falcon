@@ -16,7 +16,13 @@ func AssignPort(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 
 	portNum := query.Get("portNum")
 
-	portArray := controller.AssignPort(ctx, portNum)
+	portNumInt, err := strconv.Atoi(portNum)
+
+	if err != nil || portNumInt == 0 {
+		panic(err)
+	}
+
+	portArray := controller.AssignPort(ctx, portNumInt)
 
 	data, err := json.Marshal(portArray)
 
