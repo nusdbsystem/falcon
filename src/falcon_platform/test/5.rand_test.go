@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"falcon_platform/exceptions"
+	"falcon_platform/jobmanager/DAGscheduler"
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"fmt"
@@ -53,5 +54,6 @@ func TestErrors(t *testing.T) {
 }
 
 func TestFIndIp(t *testing.T) {
+	DAGscheduler.NewParallelismSchedulePolicy()
 
 }
