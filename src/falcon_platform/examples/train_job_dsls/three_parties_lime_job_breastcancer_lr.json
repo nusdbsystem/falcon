@@ -37,6 +37,10 @@
       }
     }
   ],
+  "distributed_task": {
+    "enable": 1,
+    "worker_number": 6
+  },
   "tasks": {
     "lime_sampling": {
       "mpc_algorithm_name": "logistic_regression",
