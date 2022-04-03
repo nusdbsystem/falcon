@@ -350,9 +350,6 @@ func (wk *TrainWorker) RunLimePredTask() {
 	// in distributed training situation and this worker is parameter server
 	if wk.DslObj.DistributedTask.Enable == 1 && wk.DistributedRole == common.DistributedParameterServer {
 
-		logger.Log.Println("[TrainWorker]: no ps needed in running LimePredTask task, "+
-			"current is worker=,", wk.WorkerID, "skip executing ...")
-
 		logger.Log.Println("[PartyServer]: training method: distributed, ",
 			"current distributed role: ", common.DistributedParameterServer)
 
@@ -390,11 +387,11 @@ func (wk *TrainWorker) RunLimePredTask() {
 	// in distributed training situation and this worker is train worker
 	if wk.DslObj.DistributedTask.Enable == 1 && wk.DistributedRole == common.DistributedWorker {
 
-		if wk.WorkerID != 1 {
-			logger.Log.Println("[TrainWorker]: only worker 1 will run LimePredTask task, "+
-				"current is worker=,", wk.WorkerID, "skip executing ...")
-			return
-		}
+		//if wk.WorkerID != 1 {
+		//	logger.Log.Println("[TrainWorker]: only worker 1 will run LimePredTask task, "+
+		//		"current is worker=,", wk.WorkerID, "skip executing ...")
+		//	return
+		//}
 
 		logger.Log.Println("[PartyServer]: training method: distributed, ",
 			"current distributed role: ", common.DistributedWorker)
@@ -678,11 +675,11 @@ func (wk *TrainWorker) RunLimeWeightTask() {
 	// in distributed training situation and this worker is train worker
 	if wk.DslObj.DistributedTask.Enable == 1 && wk.DistributedRole == common.DistributedWorker {
 
-		if wk.WorkerID != 1 {
-			logger.Log.Println("[TrainWorker]: only worker 1 will run LimeWeightTask task, "+
-				"current is worker=,", wk.WorkerID, "skip executing ...")
-			return
-		}
+		//if wk.WorkerID != 1 {
+		//	logger.Log.Println("[TrainWorker]: only worker 1 will run LimeWeightTask task, "+
+		//		"current is worker=,", wk.WorkerID, "skip executing ...")
+		//	return
+		//}
 
 		logger.Log.Println("[PartyServer]: training method: distributed, ",
 			"current distributed role: ", common.DistributedWorker)
