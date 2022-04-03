@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"falcon_platform/common"
-	"falcon_platform/jobmanager/DAGscheduler"
 	"falcon_platform/jobmanager/base"
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
@@ -40,7 +39,7 @@ type Master struct {
 	PartyNums uint
 
 	// lime
-	SchedulerPolicy *DAGscheduler.ParallelismSchedulePolicy
+	//SchedulerPolicy *DAGscheduler.ParallelismSchedulePolicy
 
 	// tmp slice to store registered workers
 	tmpWorkers chan string
@@ -92,7 +91,7 @@ func newMaster(masterAddr string, partyNum uint) (ms *Master) {
 	ms.workerNum = 0
 	ms.PartyNums = partyNum
 	ms.RequiredResource = make([]*common.LaunchResourceReply, ms.PartyNums)
-	ms.SchedulerPolicy = DAGscheduler.NewParallelismSchedulePolicy()
+	//ms.SchedulerPolicy = DAGscheduler.NewParallelismSchedulePolicy()
 	return
 }
 

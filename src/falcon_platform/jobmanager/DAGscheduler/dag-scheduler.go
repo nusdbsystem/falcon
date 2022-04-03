@@ -23,7 +23,7 @@ type DagScheduler struct {
 func NewDagScheduler(dslOjb *cache.DslObj) *DagScheduler {
 	ds := new(DagScheduler)
 	ds.Stages = make(map[common.FalconStage]TaskStage)
-	ds.ParallelismPolicy = NewParallelismSchedulePolicy()
+	ds.ParallelismPolicy = NewParallelismSchedulePolicy(dslOjb)
 	ds.splitTaskIntoStage(dslOjb)
 	return ds
 }

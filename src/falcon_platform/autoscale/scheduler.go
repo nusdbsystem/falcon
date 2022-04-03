@@ -18,15 +18,15 @@ func beta(x int, t int) float64 {
 	mapper[9] = 0.76
 	mapper[10] = 0.71
 	mapper[11] = 0.68
-    mapper[12] = 0.65
-    mapper[13] = 0.63
-    mapper[14] = 0.58
-    mapper[15] = 0.54
-    mapper[16] = 0.53
-    mapper[17] = 0.51
-    mapper[18] = 0.47
-    mapper[19] = 0.43
-    mapper[20] = 0.39
+	mapper[12] = 0.65
+	mapper[13] = 0.63
+	mapper[14] = 0.58
+	mapper[15] = 0.54
+	mapper[16] = 0.53
+	mapper[17] = 0.51
+	mapper[18] = 0.47
+	mapper[19] = 0.43
+	mapper[20] = 0.39
 	result := float64(t) / (mapper[x] * float64(x))
 	return result
 }
@@ -63,17 +63,17 @@ func BruteForceSearch(T float64) {
 		for x3 := 1; x3 < W; x3++ {
 			for x4 := 1; x4 < W; x4++ {
 				for x5 := 1; x5 < W; x5++ {
-					for xc := 1; xc < (c+1); xc++ {
+					for xc := 1; xc < (c + 1); xc++ {
 						// total worker
 						totalWorkerUsed := 1 + x2 + x3 + xc*(x5+x4)
 						if totalWorkerUsed > W {
 							continue
 						}
 						// time used
-						s := float64(c)/float64(xc)
+						s := float64(c) / float64(xc)
 						rs := math.Ceil(s)
-						objFunc := max(float64(t2) / float64(x2), float64(t3) / float64(x3)) +
-							(rs * (beta(x4, t4)+beta(x5, t5)))
+						objFunc := max(float64(t2)/float64(x2), float64(t3)/float64(x3)) +
+							(rs * (beta(x4, t4) + beta(x5, t5)))
 
 						// if meet user's SLO requirements
 						if objFunc < T {

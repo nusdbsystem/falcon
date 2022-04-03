@@ -4,29 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 mapper = dict()
-mapper[1] = 1.0
-mapper[2] = 0.95
-mapper[3] = 0.92
-mapper[4] = 0.91
-mapper[5] = 0.90
-mapper[6] = 0.88
-mapper[7] = 0.85
-mapper[8] = 0.80
-mapper[9] = 0.76
-mapper[10] = 0.71
-mapper[11] = 0.68
-mapper[12] = 0.65
-mapper[13] = 0.63
-mapper[14] = 0.58
-mapper[15] = 0.54
-mapper[16] = 0.53
-mapper[17] = 0.51
-mapper[18] = 0.47
-mapper[19] = 0.43
-mapper[20] = 0.39
+mapper[1] = 1
+mapper[2] = 0.7
+mapper[3] = 0.5
+mapper[4] = 0.4
 
-
-def verify (x):
+def verify(x):
     y = -2.94587705*math.pow(10, -8) * x ** 7 + 2.50848776*math.pow(10, -6) * x ** 6 - 8.78441842 *math.pow(10, -5) * x**5 + \
     0.00160672440 * x ** 4 - 0.01605 * x ** 3 + 0.08281 * x ** 2 - 0.2161 * x + 1.14976780
     return y

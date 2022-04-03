@@ -22,6 +22,7 @@ type DslObj struct {
 	DistributedTask common.DistributedTask
 	PartyInfoList   []common.PartyInfo
 	Tasks           common.Tasks
+	Stages          []common.FalconStage
 }
 
 func argTypeRegister() {

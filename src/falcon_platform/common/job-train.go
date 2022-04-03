@@ -27,6 +27,7 @@ type TrainJob struct {
 	PartyInfoList   []PartyInfo     `json:"party_info"`
 	DistributedTask DistributedTask `json:"distributed_task"`
 	Tasks           Tasks           `json:"tasks"`
+	Stages          []FalconStage
 }
 
 type PartyInfo struct {
@@ -205,6 +206,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		jobInfo.Tasks.LimePred.InputConfigs.SerializedAlgorithmConfig =
 			GenerateLimeCompPredictionParams(jobInfo.Tasks.LimePred.InputConfigs.AlgorithmConfig)
+		jobInfo.Stages = append(jobInfo.Stages, LimePredStage)
 	} else {
 		return errors.New("algorithm name can not be detected")
 	}
@@ -218,6 +220,8 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		jobInfo.Tasks.LimeWeight.InputConfigs.SerializedAlgorithmConfig =
 			GenerateLimeCompWeightsParams(jobInfo.Tasks.LimeWeight.InputConfigs.AlgorithmConfig)
+		jobInfo.Stages = append(jobInfo.Stages, LimeWeightStage)
+
 	} else {
 		return errors.New("algorithm name can not be detected")
 	}
@@ -231,6 +235,9 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		_, jobInfo.Tasks.LimeFeature.ClassNum, _ =
 			GenerateLimeFeatSelParams(jobInfo.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, 0)
+
+		jobInfo.Stages = append(jobInfo.Stages, LimeFeatureSelectionStage)
+
 	} else {
 		return errors.New("algorithm name can not be detected")
 	}
@@ -244,6 +251,9 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		_, jobInfo.Tasks.LimeInterpret.ClassNum =
 			GenerateLimeInterpretParams(jobInfo.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, 0, "", jobInfo.Tasks.LimeInterpret.MpcAlgorithmName)
+
+		jobInfo.Stages = append(jobInfo.Stages, LimeVFLModelTrainStage)
+
 	} else {
 		return errors.New("algorithm name can not be detected")
 	}
