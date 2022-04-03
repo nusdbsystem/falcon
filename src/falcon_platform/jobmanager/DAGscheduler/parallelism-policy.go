@@ -39,9 +39,9 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy() {
 	sp.ModelTrainParallelism = 1
 
 	sp.LimeInstanceSampleParallelism = 1
-	sp.LimeOriModelPredictionParallelism = 3
-	sp.LimeInstanceWeightParallelism = 3
+	sp.LimeOriModelPredictionParallelism = 2
+	sp.LimeInstanceWeightParallelism = 2
 	sp.LimeClassParallelism = 2
-	sp.LimeFeatureSelectionParallelism = 4
-	sp.LimeVFLModelTrainParallelism = 5
+	sp.LimeFeatureSelectionParallelism = 2
+	sp.LimeVFLModelTrainParallelism = 2
 }
