@@ -62,6 +62,7 @@ type PreProcessTask struct {
 	AlgorithmName    string       `json:"algorithm_name"`
 	InputConfigs     InputConfig  `json:"input_configs"`
 	OutputConfigs    PreProOutput `json:"output_configs"`
+	IsDist           bool
 }
 
 type ModelTrainTask struct {
@@ -69,6 +70,7 @@ type ModelTrainTask struct {
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
 	OutputConfigs    ModelOutput `json:"output_configs"`
+	IsDist           bool
 }
 
 type LimeInsSampleTask struct {
@@ -76,6 +78,7 @@ type LimeInsSampleTask struct {
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
 	OutputConfigs    ModelOutput `json:"output_configs"`
+	IsDist           bool
 }
 
 type LimePredTask struct {
@@ -83,6 +86,7 @@ type LimePredTask struct {
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
 	OutputConfigs    ModelOutput `json:"output_configs"`
+	IsDist           bool
 }
 
 type LimeWeightTask struct {
@@ -90,6 +94,7 @@ type LimeWeightTask struct {
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
 	OutputConfigs    ModelOutput `json:"output_configs"`
+	IsDist           bool
 }
 
 type LimeFeatureTask struct {
@@ -98,6 +103,7 @@ type LimeFeatureTask struct {
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
 	OutputConfigs    ModelOutput `json:"output_configs"`
+	IsDist           bool
 }
 
 type LimeInterpretTask struct {
@@ -106,6 +112,7 @@ type LimeInterpretTask struct {
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
 	OutputConfigs    ModelOutput `json:"output_configs"`
+	IsDist           bool
 }
 
 type ModelOutput struct {

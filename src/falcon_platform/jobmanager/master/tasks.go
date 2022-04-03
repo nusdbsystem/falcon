@@ -29,7 +29,7 @@ func (master *Master) dispatchDslObj(wg *sync.WaitGroup, dslObj *cache.DslObj) {
 		dslObj4sp.ExistingKey = dslObj.ExistingKey
 		dslObj4sp.PartyNums = dslObj.PartyNums
 		dslObj4sp.Tasks = dslObj.Tasks
-		dslObj4sp.WorkerPreGroup = dslObj.DistributedTask.WorkerNumber + 1
+		dslObj4sp.WorkerPreGroup = dslObj.DistributedTask.WorkerNumber
 
 		// store only this party's information, contains PartyType used in train task
 		dslObj4sp.PartyInfo = dslObj.PartyInfoList[partyIndex]
