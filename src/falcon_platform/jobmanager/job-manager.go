@@ -58,39 +58,52 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 	// 1. init DAG scheduler
 	dagScheduler := DAGscheduler.NewDagScheduler(dslOjb)
 
+	status := true
+
 	if stage, ok := dagScheduler.Stages[common.PreProcStage]; ok {
 		// 1. generate master address
-		ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
+		status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
+	}
+	if !status {
+		return
 	}
 
 	if stage, ok := dagScheduler.Stages[common.ModelTrainStage]; ok {
 		// 1. generate master address
-		ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
+		status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
+	}
+	if !status {
+		return
 	}
 
 	if stage, ok := dagScheduler.Stages[common.LimeInstanceSampleStage]; ok {
 		// 1. generate master address
-		ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
+		status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
+	}
+	if !status {
+		return
 	}
 
 	wg23 := sync.WaitGroup{}
 	if stage, ok := dagScheduler.Stages[common.LimePredStage]; ok {
 		wg23.Add(1)
-		go func(dslOjb *cache.DslObj, workerType string, stage *DAGscheduler.TaskStage, wg23 *sync.WaitGroup) {
-			ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
+		go func(dslOjb *cache.DslObj, workerType string, stage *DAGscheduler.TaskStage, wg23 *sync.WaitGroup, status *bool) {
+			*status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
 			wg23.Done()
-		}(dslOjb, workerType, &stage, &wg23)
+		}(dslOjb, workerType, &stage, &wg23, &status)
 	}
 
 	if stage, ok := dagScheduler.Stages[common.LimeWeightStage]; ok {
 		wg23.Add(1)
-		go func(dslOjb *cache.DslObj, workerType string, stage *DAGscheduler.TaskStage, wg23 *sync.WaitGroup) {
-			ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
+		go func(dslOjb *cache.DslObj, workerType string, stage *DAGscheduler.TaskStage, wg23 *sync.WaitGroup, status *bool) {
+			*status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
 			wg23.Done()
-		}(dslOjb, workerType, &stage, &wg23)
+		}(dslOjb, workerType, &stage, &wg23, &status)
 	}
 	wg23.Wait()
-
+	if !status {
+		return
+	}
 	var classNum int
 	if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
 		classNum = int(dslOjb.Tasks.LimeFeature.ClassNum)
@@ -166,7 +179,7 @@ func KillJob(masterAddr, network string) {
 	}
 }
 
-func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName common.FalconStage, tasksParallelism map[common.FalconTask]int, groupNum int, assignedWorker int, stageNameLog string) string {
+func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName common.FalconStage, tasksParallelism map[common.FalconTask]int, groupNum int, assignedWorker int, stageNameLog string) bool {
 
 	masterPort := resourcemanager.GetFreePort(1)[0]
 	masterAddr := common.CoordIP + ":" + fmt.Sprintf("%d", masterPort)
@@ -237,5 +250,5 @@ func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName comm
 
 	masterIns.Logger.Println("[JobManager] master finish this stage")
 
-	return masterAddr
+	return masterIns.IsSuccessful()
 }

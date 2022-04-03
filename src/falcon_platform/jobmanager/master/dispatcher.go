@@ -53,7 +53,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 
 	// 3.1 generate dslObj instance, and assign it to each worker
 	master.dispatchDslObj(&wg, dslOjb)
-	if ok := master.isSuccessful(); !ok {
+	if ok := master.IsSuccessful(); !ok {
 		return
 	}
 
@@ -65,13 +65,13 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.PreProcessing.MpcAlgorithmName, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 
 		// Run pre_processing
 		master.dispatchPreProcessingTask(&wg)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 	}
@@ -84,13 +84,13 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.ModelTraining.MpcAlgorithmName, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 
 		// Run model_training
 		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.ModelTrainSubTask}, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 	}
@@ -104,7 +104,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 
 		// Run lime sampling
 		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeSamplingAlgName}, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 	}
@@ -131,13 +131,13 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimePred.MpcAlgorithmName, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 
 		// Run lime prediction
 		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimePredSubTask}, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 	}
@@ -150,13 +150,13 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeWeight.MpcAlgorithmName, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 
 		// Run model_training
 		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeWeightSubTask}, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 	}
@@ -167,7 +167,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 		}
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeFeature.MpcAlgorithmName, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 
@@ -175,7 +175,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 		master.dispatchGeneralTask(&wg,
 			&entity.GeneralTask{TaskName: common.LimeFeatureSubTask, AlgCfg: dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig},
 			common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 	}
@@ -186,14 +186,14 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 		}
 		// Run mpc
 		master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 
 		// Run model_training
 		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeInterpretSubTask, AlgCfg: dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig},
 			common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
+		if ok := master.IsSuccessful(); !ok {
 			return
 		}
 
@@ -234,7 +234,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 	//
 	//				// Run mpc
 	//				master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeFeature.MpcAlgorithmName, common.DefaultWorkerGroupID)
-	//				if ok := master.isSuccessful(); !ok {
+	//				if ok := master.IsSuccessful(); !ok {
 	//					return
 	//				}
 	//
@@ -243,7 +243,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 	//					&entity.GeneralTask{TaskName: common.LimeFeatureSubTask, AlgCfg: dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig},
 	//					common.DefaultWorkerGroupID)
 	//
-	//				if ok := master.isSuccessful(); !ok {
+	//				if ok := master.IsSuccessful(); !ok {
 	//					return
 	//				}
 	//			}
@@ -257,7 +257,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 	//				// Run mpc
 	//				master.dispatchMpcTask(&wg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName,
 	//					common.DefaultWorkerGroupID)
-	//				if ok := master.isSuccessful(); !ok {
+	//				if ok := master.IsSuccessful(); !ok {
 	//					return
 	//				}
 	//
@@ -265,7 +265,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 	//				master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeInterpretSubTask, AlgCfg: dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig},
 	//					common.DefaultWorkerGroupID)
 	//
-	//				if ok := master.isSuccessful(); !ok {
+	//				if ok := master.IsSuccessful(); !ok {
 	//					return
 	//				}
 	//			}
@@ -319,7 +319,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 	//
 	//					// Run mpc
 	//					master.dispatchMpcTask(&limeWg, dslOjb.Tasks.LimeFeature.MpcAlgorithmName, groupIdParam)
-	//					if ok := master.isSuccessful(); !ok {
+	//					if ok := master.IsSuccessful(); !ok {
 	//						return
 	//					}
 	//
@@ -328,7 +328,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 	//						&entity.GeneralTask{TaskName: common.LimeFeatureSubTask, AlgCfg: dslOjb.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig},
 	//						groupIdParam)
 	//
-	//					if ok := master.isSuccessful(); !ok {
+	//					if ok := master.IsSuccessful(); !ok {
 	//						return
 	//					}
 	//				}
@@ -342,7 +342,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 	//					// Run mpc
 	//					master.dispatchMpcTask(&limeWg, dslOjb.Tasks.LimeInterpret.MpcAlgorithmName,
 	//						groupIdParam)
-	//					if ok := master.isSuccessful(); !ok {
+	//					if ok := master.IsSuccessful(); !ok {
 	//						return
 	//					}
 	//
@@ -351,7 +351,7 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 	//						&entity.GeneralTask{TaskName: common.LimeInterpretSubTask, AlgCfg: dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig},
 	//						groupIdParam)
 	//
-	//					if ok := master.isSuccessful(); !ok {
+	//					if ok := master.IsSuccessful(); !ok {
 	//						return
 	//					}
 	//				}
@@ -442,7 +442,7 @@ func (master *Master) runtimeStatusMonitor(ctx context.Context) {
 }
 
 // if current task has error, return false which will tell dispatcher to skip the following tasks, and return
-func (master *Master) isSuccessful() bool {
+func (master *Master) IsSuccessful() bool {
 	master.jobStatusLock.Lock()
 	if master.jobStatus == common.JobKilled || master.jobStatus == common.JobFailed {
 		master.jobStatusLock.Unlock()
