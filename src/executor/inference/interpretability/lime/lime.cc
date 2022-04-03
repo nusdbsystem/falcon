@@ -400,8 +400,6 @@ void LimeExplainer::compute_squared_dist(const Party &party,
   party.getter_phe_pub_key(phe_pub_key);
 
   auto* local_squared_dist = new EncodedNumber[sample_size];
-  omp_set_num_threads(NUM_OMP_THREADS);
-#pragma omp parallel for
   for (int i = 0; i < sample_size; i++) {
     local_squared_dist[i].set_double(phe_pub_key->n[0],
                                      local_squared_sum[i],
