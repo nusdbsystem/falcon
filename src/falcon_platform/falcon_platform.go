@@ -106,7 +106,7 @@ func initEnv(svcName string) {
 
 	common.FalconDockerImgName = common.GetEnv(
 		"FALCON_WORKER_IMAGE",
-		"lemonwyc/falcon-lime:paper")
+		"lemonwyc/falcon-lime:paper-parallel")
 
 	switch svcName {
 	case common.CoordinatorRole:
@@ -407,6 +407,6 @@ func main() {
 		}
 	}
 
-	time.Sleep(time.Minute * 60)
-
+	//time.Sleep(time.Minute * 60)
+	os.Exit(0)
 }

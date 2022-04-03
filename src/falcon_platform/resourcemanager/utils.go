@@ -66,9 +66,41 @@ func CheckPort(port common.PortType) error {
 	return nil
 }
 
-func GetMpcExecutorPort(workerID int) common.PortType {
+func GetMpcExecutorPort(workerID int, stageName string) common.PortType {
+	stagePrefix := 1
+	if stageName == string(common.PreProcStage) {
+		stagePrefix = 2
+	}
 
-	return common.PortType(common.MpcExecutorBasePort + workerID*1000)
+	if stageName == string(common.ModelTrainStage) {
+		stagePrefix = 3
+	}
+
+	if stageName == string(common.LimeInstanceSampleStage) {
+		stagePrefix = 4
+	}
+
+	if stageName == string(common.LimePredStage) {
+		stagePrefix = 5
+	}
+
+	if stageName == string(common.LimeWeightStage) {
+		stagePrefix = 6
+	}
+
+	stageName = strings.Split(stageName, "-")[0]
+
+	if stageName == string(common.LimeFeatureSelectionStage) {
+		stagePrefix = 7
+	}
+
+	if stageName == string(common.LimeVFLModelTrainStage) {
+		stagePrefix = 8
+	}
+
+	prefix := stagePrefix*10 + workerID
+
+	return common.PortType(common.MpcExecutorBasePort + prefix*10)
 }
 
 // get many ports

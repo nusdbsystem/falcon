@@ -166,12 +166,11 @@ func (wk *TrainWorker) DoTask(args string, rep *entity.DoTaskReply) error {
 		update()
 		return nil
 	} else {
+		rep.RuntimeError = true
+		rep.TaskMsg.RuntimeMsg = "TaskName wrong! only support <pre_processing, model_training," +
+			" lime_pred_task, lime_weight_task, lime_feature_task, lime_interpret_task>"
 		panic("task name not found error, taskName=" + taskName)
 	}
-
-	rep.RuntimeError = true
-	rep.TaskMsg.RuntimeMsg = "TaskName wrong! only support <pre_processing, model_training," +
-		" lime_pred_task, lime_weight_task, lime_feature_task, lime_interpret_task>"
 
 	return nil
 }

@@ -159,6 +159,7 @@ RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN git config --global http.sslVerify false
 
 # Clone Falcon and init submodules
+RUN echo "update the falcon repository"
 WORKDIR /opt
 RUN ls -lht && \
     git clone git@github.com:lemonviv/falcon.git && \
@@ -263,6 +264,7 @@ ADD experiments/ /opt/falcon/
 WORKDIR /opt/falcon
 RUN echo "re-build third-party mp-spdz"
 COPY cmd_lime.sh /opt/falcon/
+COPY cmd_lime_parallel.sh /opt/falcon/
 # make third party MP-SPDZ
 RUN cd third_party/MP-SPDZ && \
     bash fast-make.sh

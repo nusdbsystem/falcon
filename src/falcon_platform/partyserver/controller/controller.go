@@ -62,7 +62,7 @@ func RunWorker(masterAddr, workerType,
 		resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
 		resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
 		resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
-		resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId))
+		resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId), stageName)
 		resourceSVC.ExecutorPSPort = 0
 		resourceSVC.PsExecutorPorts = []common.PortType{}
 		//resourceSVC.PsPsPorts = []common.PortType{}
@@ -114,7 +114,7 @@ func RunWorker(masterAddr, workerType,
 			resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
 			resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
 			resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
-			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0)
+			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0, stageName)
 			resourceSVC.ExecutorPSPort = 0
 			resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerPreGroup - 1)
 			resourceSVC.DistributedRole = common.DistributedParameterServer
@@ -153,7 +153,7 @@ func RunWorker(masterAddr, workerType,
 				resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
 				resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
 				resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
-				resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId))
+				resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId), stageName)
 				resourceSVC.ExecutorPSPort = resourcemanager.GetFreePort(1)[0]
 				resourceSVC.PsExecutorPorts = []common.PortType{}
 				resourceSVC.DistributedRole = common.DistributedWorker

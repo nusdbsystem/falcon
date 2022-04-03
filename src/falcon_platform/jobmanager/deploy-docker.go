@@ -181,6 +181,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
 			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
 			"--constraint", fmt.Sprintf("node.labels.name==%s", nodeLabel),
+			"--restart-condition", "none",
 			usedImage,
 		)
 
@@ -225,6 +226,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
 			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
 			"--constraint", fmt.Sprintf("node.labels.name==%s", nodeLabel),
+			"--restart-condition", "none",
 			usedImage,
 		)
 
@@ -269,6 +271,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
 			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
 			"--constraint", fmt.Sprintf("node.labels.name==%s", nodeLabel),
+			"--restart-condition", "none",
 			usedImage,
 		)
 

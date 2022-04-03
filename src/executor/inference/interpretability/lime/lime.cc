@@ -86,6 +86,7 @@ void LimeExplainer::load_predict_origin_model(const Party &party,
                                               int class_num,
                                               EncodedNumber **predictions) {
   int num_total_samples = (int) generated_samples.size();
+  log_info("[load_predict_origin_model] num_total_samples = " + std::to_string(num_total_samples));
   falcon::AlgorithmName model_name = parse_algorithm_name(origin_model_name);
   switch (model_name) {
     case falcon::LOG_REG:
