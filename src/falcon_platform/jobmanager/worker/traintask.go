@@ -352,40 +352,39 @@ func (wk *TrainWorker) RunLimePredTask() {
 
 		logger.Log.Println("[TrainWorker]: no ps needed in running LimePredTask task, "+
 			"current is worker=,", wk.WorkerID, "skip executing ...")
-		return
 
-		//logger.Log.Println("[PartyServer]: training method: distributed, ",
-		//	"current distributed role: ", common.DistributedParameterServer)
-		//
-		//psLogFile := logFile + "/parameter_server"
-		//ee := os.MkdirAll(psLogFile, os.ModePerm)
-		//if ee != nil {
-		//	logger.Log.Fatalln("[PartyServer]: Creating parameter server folder error", ee)
-		//}
-		//
-		//cmd = exec.Command(
-		//	common.FLEnginePath,
-		//	"--party-id", fmt.Sprintf("%d", wk.DslObj.PartyInfo.ID),
-		//	"--party-num", fmt.Sprintf("%d", wk.DslObj.PartyNums),
-		//	"--party-type", fmt.Sprintf("%d", partyType),
-		//	"--fl-setting", fmt.Sprintf("%d", flSetting),
-		//	"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
-		//	"--log-file", psLogFile,
-		//	"--data-input-file", modelInputFile,
-		//	"--data-output-file", common.TaskDataOutput,
-		//	"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
-		//	"--key-file", KeyFile,
-		//	"--algorithm-name", wk.DslObj.Tasks.LimePred.AlgorithmName,
-		//	"--algorithm-params", wk.DslObj.Tasks.LimePred.InputConfigs.SerializedAlgorithmConfig,
-		//	"--model-save-file", modelFile,
-		//	"--model-report-file", modelReportFile,
-		//	"--is-inference", fmt.Sprintf("%d", 0),
-		//	"--inference-endpoint", common.EmptyParams,
-		//	"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
-		//	"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-		//	"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
-		//	"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
-		//)
+		logger.Log.Println("[PartyServer]: training method: distributed, ",
+			"current distributed role: ", common.DistributedParameterServer)
+
+		psLogFile := logFile + "/parameter_server"
+		ee := os.MkdirAll(psLogFile, os.ModePerm)
+		if ee != nil {
+			logger.Log.Fatalln("[PartyServer]: Creating parameter server folder error", ee)
+		}
+
+		cmd = exec.Command(
+			common.FLEnginePath,
+			"--party-id", fmt.Sprintf("%d", wk.DslObj.PartyInfo.ID),
+			"--party-num", fmt.Sprintf("%d", wk.DslObj.PartyNums),
+			"--party-type", fmt.Sprintf("%d", partyType),
+			"--fl-setting", fmt.Sprintf("%d", flSetting),
+			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
+			"--log-file", psLogFile,
+			"--data-input-file", modelInputFile,
+			"--data-output-file", common.TaskDataOutput,
+			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
+			"--key-file", KeyFile,
+			"--algorithm-name", wk.DslObj.Tasks.LimePred.AlgorithmName,
+			"--algorithm-params", wk.DslObj.Tasks.LimePred.InputConfigs.SerializedAlgorithmConfig,
+			"--model-save-file", modelFile,
+			"--model-report-file", modelReportFile,
+			"--is-inference", fmt.Sprintf("%d", 0),
+			"--inference-endpoint", common.EmptyParams,
+			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
+			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
+			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
+		)
 	}
 
 	// in distributed training situation and this worker is train worker
@@ -642,42 +641,38 @@ func (wk *TrainWorker) RunLimeWeightTask() {
 	// in distributed training situation and this worker is parameter server
 	if wk.DslObj.DistributedTask.Enable == 1 && wk.DistributedRole == common.DistributedParameterServer {
 
-		logger.Log.Println("[TrainWorker]: no ps needed in running LimeWeightTask task, "+
-			"current is worker=,", wk.WorkerID, "skip executing ...")
-		return
+		logger.Log.Println("[PartyServer]: training method: distributed, ",
+			"current distributed role: ", common.DistributedParameterServer)
 
-		//logger.Log.Println("[PartyServer]: training method: distributed, ",
-		//	"current distributed role: ", common.DistributedParameterServer)
-		//
-		//psLogFile := logFile + "/parameter_server"
-		//ee := os.MkdirAll(psLogFile, os.ModePerm)
-		//if ee != nil {
-		//	logger.Log.Fatalln("[PartyServer]: Creating parameter server folder error", ee)
-		//}
-		//
-		//cmd = exec.Command(
-		//	common.FLEnginePath,
-		//	"--party-id", fmt.Sprintf("%d", wk.DslObj.PartyInfo.ID),
-		//	"--party-num", fmt.Sprintf("%d", wk.DslObj.PartyNums),
-		//	"--party-type", fmt.Sprintf("%d", partyType),
-		//	"--fl-setting", fmt.Sprintf("%d", flSetting),
-		//	"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
-		//	"--log-file", psLogFile,
-		//	"--data-input-file", modelInputFile,
-		//	"--data-output-file", common.TaskDataOutput,
-		//	"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
-		//	"--key-file", KeyFile,
-		//	"--algorithm-name", wk.DslObj.Tasks.LimeWeight.AlgorithmName,
-		//	"--algorithm-params", wk.DslObj.Tasks.LimeWeight.InputConfigs.SerializedAlgorithmConfig,
-		//	"--model-save-file", modelFile,
-		//	"--model-report-file", modelReportFile,
-		//	"--is-inference", fmt.Sprintf("%d", 0),
-		//	"--inference-endpoint", common.EmptyParams,
-		//	"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
-		//	"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
-		//	"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
-		//	"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
-		//)
+		psLogFile := logFile + "/parameter_server"
+		ee := os.MkdirAll(psLogFile, os.ModePerm)
+		if ee != nil {
+			logger.Log.Fatalln("[PartyServer]: Creating parameter server folder error", ee)
+		}
+
+		cmd = exec.Command(
+			common.FLEnginePath,
+			"--party-id", fmt.Sprintf("%d", wk.DslObj.PartyInfo.ID),
+			"--party-num", fmt.Sprintf("%d", wk.DslObj.PartyNums),
+			"--party-type", fmt.Sprintf("%d", partyType),
+			"--fl-setting", fmt.Sprintf("%d", flSetting),
+			"--network-file", wk.DslObj.ExecutorPairNetworkCfg,
+			"--log-file", psLogFile,
+			"--data-input-file", modelInputFile,
+			"--data-output-file", common.TaskDataOutput,
+			"--existing-key", fmt.Sprintf("%d", wk.DslObj.ExistingKey),
+			"--key-file", KeyFile,
+			"--algorithm-name", wk.DslObj.Tasks.LimeWeight.AlgorithmName,
+			"--algorithm-params", wk.DslObj.Tasks.LimeWeight.InputConfigs.SerializedAlgorithmConfig,
+			"--model-save-file", modelFile,
+			"--model-report-file", modelReportFile,
+			"--is-inference", fmt.Sprintf("%d", 0),
+			"--inference-endpoint", common.EmptyParams,
+			"--is-distributed", fmt.Sprintf("%d", wk.DslObj.DistributedTask.Enable),
+			"--distributed-train-network-file", wk.DslObj.DistributedExecutorPairNetworkCfg,
+			"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%wk.DslObj.WorkerPreGroup),
+			"--distributed-role", fmt.Sprintf("%d", wk.DistributedRole),
+		)
 	}
 
 	// in distributed training situation and this worker is train worker
