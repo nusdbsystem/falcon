@@ -927,10 +927,12 @@ void LinearRegressionBuilder::train(Party party) {
     update_encrypted_weights(party, encrypted_gradients);
     log_info("-------- Iteration " + std::to_string(iter) + ", update_encrypted_weights computation success --------");
 
+#ifdef DEBUG
     linear_reg_model.display_weights(party);
     if (iter % PRINT_EVERY == 0) {
       loss_computation(party, falcon::TRAIN);
     }
+#endif
 
     const clock_t iter_finish_time = clock();
     double iter_consumed_time =
@@ -1069,10 +1071,12 @@ void LinearRegressionBuilder::lime_train(Party party,
     update_encrypted_weights(party, encrypted_gradients);
     log_info("-------- Iteration " + std::to_string(iter) + ", update_encrypted_weights computation success --------");
 
+#ifdef DEBUG
     linear_reg_model.display_weights(party);
 //    if (iter % PRINT_EVERY == 0) {
 //      loss_computation(party, falcon::TRAIN);
 //    }
+#endif
 
     const clock_t iter_finish_time = clock();
     double iter_consumed_time =

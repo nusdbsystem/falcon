@@ -196,17 +196,7 @@ std::vector<double> LinearModel::display_weights(Party party) {
         party_i_local_weights[j] = local_weights[j];
       }
     }
-    mpz_t z1;
-    mpz_init(z1);
-    party_i_local_weights[0].getter_value(z1);
-    gmp_printf("z1 = %Zd\n", z1);
-    mpz_clear(z1);
-    party.broadcast_encoded_number_array(party_i_local_weights, party_i_weight_size, i);
-    mpz_t z2;
-    mpz_init(z2);
-    party_i_local_weights[0].getter_value(z2);
-    gmp_printf("z2 = %Zd\n", z2);
-    mpz_clear(z2);
+
     party.collaborative_decrypt(party_i_local_weights, party_i_decrypted_weights,
                                 party_i_weight_size, i);
     if (i == party.party_id) {
