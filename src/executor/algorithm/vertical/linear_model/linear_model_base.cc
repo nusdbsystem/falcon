@@ -196,7 +196,7 @@ std::vector<double> LinearModel::display_weights(Party party) {
         party_i_local_weights[j] = local_weights[j];
       }
     }
-
+    party.broadcast_encoded_number_array(party_i_local_weights, party_i_weight_size, i);
     party.collaborative_decrypt(party_i_local_weights, party_i_decrypted_weights,
                                 party_i_weight_size, i);
     if (i == party.party_id) {
