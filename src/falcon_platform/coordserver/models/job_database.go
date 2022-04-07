@@ -68,9 +68,11 @@ func InitJobDB() *JobDB {
 // connect to db, and begin the transaction
 func (jobDB *JobDB) Connect() {
 
+	logger.Log.Println("JobDB: Open database ..")
+
 	var db *gorm.DB
 	var err error
-	NTimes := 20
+	NTimes := 3
 
 	for {
 		if NTimes < 0 {
@@ -87,7 +89,7 @@ func (jobDB *JobDB) Connect() {
 			return
 		}
 	}
-	return
+	panic("Connect to database fail")
 }
 
 func (jobDB *JobDB) DefineTables() {
