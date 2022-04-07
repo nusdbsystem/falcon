@@ -12,9 +12,9 @@ type Context struct {
 	UsrId    uint
 }
 
-func InitContext() *Context {
+func InitContext(db *models.JobDB) *Context {
 	ctx := new(Context)
-	ctx.JobDB = models.InitJobDB()
+	ctx.JobDB = db
 
 	ctx.HttpHost = common.CoordIP
 	ctx.HttpPort = common.CoordPort

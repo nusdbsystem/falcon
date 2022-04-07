@@ -7,18 +7,14 @@ import (
 	"strconv"
 )
 
-func CreateTables() {
-	jobDB := models.InitJobDB()
-	jobDB.Connect()
+func CreateTables(jobDB *models.JobDB) {
 	tx := jobDB.DB.Begin()
 	jobDB.DefineTables()
 	jobDB.Commit(tx, nil)
 }
 
-func CreateSysPorts() {
+func CreateSysPorts(jobDB *models.JobDB) {
 	// insert all used port to db to avoid port conflicts in future.
-	jobDB := models.InitJobDB()
-	jobDB.Connect()
 	tx := jobDB.DB.Begin()
 	var e1 error
 	var e2 error
@@ -48,17 +44,4 @@ func PartyServerDelete(ctx *entity.Context, partyserverAddr string) {
 	tx := ctx.JobDB.DB.Begin()
 	e := ctx.JobDB.PartyServerDelete(tx, partyserverAddr)
 	ctx.JobDB.Commit(tx, e)
-}
-
-func CreateSpecificSysPorts(port string) {
-	jobDB := models.InitJobDB()
-
-	jobDB.Connect()
-	tx := jobDB.DB.Begin()
-	var e1 error
-	portInt, _ := strconv.Atoi(port)
-	if !jobDB.CheckPort(uint(portInt)) {
-		e1, _ = jobDB.AddPort(tx, uint(portInt))
-	}
-	jobDB.Commit(tx, e1)
 }

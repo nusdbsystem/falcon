@@ -34,7 +34,7 @@ func AssignPort(ctx *entity.Context, portNumInt int) []common.PortType {
 		}
 	}
 
-	logger.Log.Println("AssignPort: Current Port usage: ", usedPorts)
+	//logger.Log.Println("AssignPort: Current Port usage: ", usedPorts)
 	portMutex.Unlock()
 
 	return res

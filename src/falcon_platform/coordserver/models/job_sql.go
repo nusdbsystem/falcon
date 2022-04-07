@@ -81,10 +81,7 @@ func (jobDB *JobDB) JobUpdateResInfo(tx *gorm.DB, jobId uint, jobErrMsg, jobResu
 /////////// JobInfo,  call by other internal thread ////////////
 ////////////////////////////////////////////////////////////////
 
-func JobUpdateStatus(jobId uint, status string) {
-	jobDB := InitJobDB()
-
-	jobDB.Connect()
+func JobUpdateStatus(jobId uint, status string, jobDB *JobDB) {
 	tx := jobDB.DB.Begin()
 
 	e2, _ := jobDB.JobUpdateStatus(tx, jobId, status)

@@ -68,7 +68,7 @@ func InitJobDB() *JobDB {
 // connect to db, and begin the transaction
 func (jobDB *JobDB) Connect() {
 
-	logger.Log.Println("JobDB: Open database ..")
+	logger.Log.Println("JobDB: creating database connection pool.")
 
 	var db *gorm.DB
 	var err error
@@ -86,6 +86,19 @@ func (jobDB *JobDB) Connect() {
 			NTimes--
 		} else {
 			jobDB.DB = db
+			sqlDB, err2 := db.DB()
+			if err2 != nil {
+				panic("error" + err2.Error())
+			}
+
+			// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
+			sqlDB.SetMaxIdleConns(10)
+
+			// SetMaxOpenConns sets the maximum number of open connections to the database.
+			sqlDB.SetMaxOpenConns(100)
+
+			// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
+			sqlDB.SetConnMaxLifetime(-1)
 			return
 		}
 	}

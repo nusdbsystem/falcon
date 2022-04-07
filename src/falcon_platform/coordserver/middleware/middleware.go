@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"falcon_platform/coordserver/entity"
+	"falcon_platform/coordserver/models"
 	"falcon_platform/exceptions"
 	"falcon_platform/logger"
 	"net/http"
@@ -44,9 +45,10 @@ func AddRouter(
 		r *http.Request,
 		ctx *entity.Context,
 	),
+	db *models.JobDB,
 ) http.HandlerFunc {
 
-	middlewareHandler := InitContext(f, SysLvPath)
+	middlewareHandler := InitContext(f, SysLvPath, db)
 
 	// defaultMiddleWare := []Middleware{callPanic(), verifyHTTPmethod(Method), timeUsage()}
 	// disable timeUsage

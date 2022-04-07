@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"falcon_platform/coordserver/entity"
+	"falcon_platform/coordserver/models"
 	"falcon_platform/exceptions"
 	"fmt"
 	"net/http"
@@ -9,14 +10,14 @@ import (
 
 // middleware to initiate context
 func InitContext(f func(w http.ResponseWriter, r *http.Request, c *entity.Context),
-	SysLvPath []string) http.HandlerFunc {
+	SysLvPath []string, db *models.JobDB) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		context := entity.InitContext()
+		context := entity.InitContext(db)
 
 		// connect to db
-		context.JobDB.Connect()
+		//context.JobDB.Connect()
 
 		// check if needs verify
 		var isVerify = true

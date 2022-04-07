@@ -108,6 +108,8 @@ func (wk *TrainWorker) RunPreProcessingTask() {
 	// by default, worker will launch executor resource by sub process
 	if common.IsDebug != common.DebugOn {
 		wk.Tm.CreateResources(resourcemanager.InitSubProcessManager(), cmd)
+	} else {
+		time.Sleep(10 * time.Minute)
 	}
 
 }
@@ -287,6 +289,8 @@ func (wk *TrainWorker) RunModelTrainingTask() {
 	// by default, worker will launch executor resource by sub process
 	if common.IsDebug != common.DebugOn {
 		wk.Tm.CreateResources(resourcemanager.InitSubProcessManager(), cmd)
+	} else {
+		time.Sleep(10 * time.Minute)
 	}
 
 }

@@ -38,7 +38,7 @@ func Init(nConsumer int) *Driver {
 }
 
 // Driver listen to the queue, and fetch item and call jobManager to start the task
-func (ds *Driver) Consume(consumerId int) {
+func (ds *Driver) Consume(consumerId int, jobDB *models.JobDB) {
 	defer func() {
 		err := recover()
 		logger.Log.Println("Consume: Error of this thread, ", consumerId, err)
@@ -65,7 +65,7 @@ loop:
 
 				logger.Log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from dslqueue")
 
-				models.JobUpdateStatus(dslOjb.JobId, common.JobRunning)
+				models.JobUpdateStatus(dslOjb.JobId, common.JobRunning, jobDB)
 
 				// Launching the jobManager to allocate the job
 				go func(dslOjb cache.DslObj) {
@@ -86,7 +86,7 @@ func (ds *Driver) StopConsumer() {
 }
 
 // Monitor if need to stop driver.consume loop
-func (ds *Driver) MonitorConsumers() {
+func (ds *Driver) MonitorConsumers(jobDB *models.JobDB) {
 
 loop:
 	for {
@@ -101,7 +101,7 @@ loop:
 			if ds.curConsumers < ds.nConsumer {
 				go func(curConsumers int) {
 					defer logger.HandleErrors()
-					ds.Consume(curConsumers)
+					ds.Consume(curConsumers, jobDB)
 				}(ds.curConsumers + 1)
 				ds.curConsumers += 1
 			}

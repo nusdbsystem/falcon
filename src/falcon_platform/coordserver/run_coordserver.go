@@ -4,6 +4,7 @@ import (
 	"context"
 	"falcon_platform/common"
 	"falcon_platform/coordserver/controller"
+	"falcon_platform/coordserver/models"
 	"falcon_platform/coordserver/router"
 	"falcon_platform/coordserver/view"
 	"falcon_platform/logger"
@@ -22,18 +23,22 @@ func RunCoordServer(nConsumer int) {
 	// set up views
 	view.LoadTemplates("./coordserver/view/templates/*.html")
 
+	// init database. and create connection pool
+	JobDB := models.InitJobDB()
+	JobDB.Connect()
+
 	// set up HTTP server routes
-	r := router.NewRouter()
+	r := router.NewRouter(JobDB)
 
 	// Set up Database
 	logger.Log.Println("[coordinator server]: Init DataBase...")
-	controller.CreateTables()
+	controller.CreateTables(JobDB)
 	if common.Deployment == common.K8S {
-		controller.CreateSysPorts()
+		controller.CreateSysPorts(JobDB)
 	}
 
 	logger.Log.Println("[coordinator server]: Create admin user...")
-	controller.CreateUser()
+	controller.CreateUser(JobDB)
 
 	// Set up Job Scheduler
 	logger.Log.Println("[coordinator server]: Starting multi consumers...")
@@ -43,13 +48,13 @@ func RunCoordServer(nConsumer int) {
 
 		go func(i int) {
 			defer logger.HandleErrors()
-			Driver.Consume(i)
+			Driver.Consume(i, JobDB)
 		}(i)
 
 	}
 	go func() {
 		defer logger.HandleErrors()
-		Driver.MonitorConsumers()
+		Driver.MonitorConsumers(JobDB)
 	}()
 
 	// for logging and tracing

@@ -4,10 +4,7 @@ import (
 	"falcon_platform/coordserver/models"
 )
 
-func CreateUser() {
-	jobDB := models.InitJobDB()
-
-	jobDB.Connect()
+func CreateUser(jobDB *models.JobDB) {
 	tx := jobDB.DB.Begin()
 
 	e := jobDB.CreateAdminUser(tx)
