@@ -39,7 +39,7 @@
   ],
   "distributed_task": {
     "enable": 1,
-    "worker_number": 2
+    "worker_number": 3
   },
   "tasks": {
     "lime_weight": {
