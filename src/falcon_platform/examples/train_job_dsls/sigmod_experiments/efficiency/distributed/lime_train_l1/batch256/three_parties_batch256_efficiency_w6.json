@@ -39,7 +39,7 @@
   ],
   "distributed_task": {
     "enable": 1,
-    "worker_number": 3
+    "worker_number": 7
   },
   "tasks": {
     "lime_interpret": {
@@ -59,8 +59,8 @@
           "class_id": 0,
           "interpret_model_name": "linear_regression",
           "interpret_model_param": {
-            "batch_size": 64,
-            "max_iteration": 200,
+            "batch_size": 256,
+            "max_iteration": 100,
             "convergence_threshold": 0.0001,
             "with_regularization": true,
             "alpha": 0.1,
@@ -72,7 +72,7 @@
             "differential_privacy_budget": 0.1,
             "fit_bias": true
           },
-          "explanation_report": "/exp_report_synthesis_nsample4000_lr_l1_batch_64.txt"
+          "explanation_report": "/exp_report_synthesis_nsample4000_lr_l1_batch_256.txt"
         }
       },
       "output_configs": {
