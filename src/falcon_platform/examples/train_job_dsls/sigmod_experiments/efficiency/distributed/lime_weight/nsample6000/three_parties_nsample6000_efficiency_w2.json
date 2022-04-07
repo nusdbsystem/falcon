@@ -18,7 +18,7 @@
     },
     {
       "id": 1,
-      "addr": "10.0.0.85:30006",
+      "addr": "10.0.0.86:30006",
       "party_type": "passive",
       "path": {
         "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nSample/nsample6000/client1",
