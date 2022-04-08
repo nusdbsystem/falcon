@@ -1118,7 +1118,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
                                     ps_network_str);
     log_info("[lime_decision_tree_train ps]: Init ps finished.");
     // start to train the task in a distributed way
-    ps->distributed_lime_train(true, predictions,
+    ps->distributed_lime_train(true, encrypted_labels,
                                true, sample_weights);
     log_info("[lime_decision_tree_train ps]: distributed train finished.");
     // decrypt the model weights and return
@@ -1143,7 +1143,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
 
     log_info("[lime_decision_tree_train worker]: init linear regression model");
     tree_model_builder->distributed_lime_train(party, *worker,
-                                               true, predictions,
+                                               true, encrypted_labels,
                                                true, sample_weights);
     log_info("[lime_decision_tree_train worker]: distributed train finished.");
     delete tree_model_builder;
