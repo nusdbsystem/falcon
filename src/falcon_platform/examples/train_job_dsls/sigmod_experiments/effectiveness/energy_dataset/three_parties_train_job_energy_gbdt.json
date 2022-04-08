@@ -40,7 +40,7 @@
   "tasks": {
     "model_training": {
       "mpc_algorithm_name": "vfl_decision_tree",
-      "algorithm_name": "random_forest",
+      "algorithm_name": "gbdt",
       "input_configs": {
         "data_input": {
           "data": "client.txt",

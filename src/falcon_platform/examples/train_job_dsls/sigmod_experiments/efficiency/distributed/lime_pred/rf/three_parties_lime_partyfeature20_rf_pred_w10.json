@@ -1,0 +1,68 @@
+{
+  "job_name": "credit_card_training",
+  "job_info": "this is the job_decs",
+  "job_fl_type": "vertical",
+  "existing_key": 1,
+  "party_nums": 3,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "10.0.0.80:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nFeaturePerParty/partyfeature20/client0",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nFeaturePerParty/partyfeature20/client0",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nFeaturePerParty/partyfeature20/client0"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "10.0.0.86:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nFeaturePerParty/partyfeature20/client1",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nFeaturePerParty/partyfeature20/client1",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nFeaturePerParty/partyfeature20/client1"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "10.0.0.94:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nFeaturePerParty/partyfeature20/client2",
+        "data_output": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nFeaturePerParty/partyfeature20/client2",
+        "model_path": "/users/yunchengwu/projects/falcon/experiments/efficiency/falcon_lime/synthetic/nFeaturePerParty/partyfeature20/client2"
+      }
+    }
+  ],
+  "distributed_task": {
+    "enable": 1,
+    "worker_number": 11
+  },
+  "tasks": {
+    "lime_pred": {
+      "mpc_algorithm_name": "vfl_decision_tree",
+      "algorithm_name": "lime_compute_prediction",
+      "input_configs": {
+        "data_input": {
+          "data": "synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party.csv",
+          "key": "partyfeature20_phe_keys"
+        },
+        "algorithm_config": {
+          "original_model_name": "random_forest",
+          "original_model_saved_file": "/synthetic_partyfeature20_rf.pb",
+          "generated_sample_file": "/synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party.csv",
+          "model_type": "classification",
+          "class_num": 2,
+          "computed_prediction_file": "/test_predictions_lr.txt"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    }
+  }
+}

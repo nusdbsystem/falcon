@@ -328,11 +328,19 @@ void DTParameterServer::build_tree(){
 
     /// 2.7 : receive from worker, get party_id, each worker should get the same party_id
     log_info("[Ps.build_tree]: step 2.7, ps receive party-id");
-    int best_party_id;
+    int best_party_id, best_index_star;
+    std::string party_id_str, index_star_str;
+    this->recv_long_message_from_worker(global_best_split_worker_id, party_id_str);
+    this->recv_long_message_from_worker(global_best_split_worker_id, index_star_str);
+    best_party_id = std::stoi(party_id_str);
+    best_index_star = std::stoi(index_star_str);
+    log_info("[Ps.build_tree]: best_part_id = " + std::to_string(best_party_id));
+    log_info("[Ps.build_tree]: best_index_star = " + std::to_string(best_index_star));
+
+    // broadcast the party_id_str and index_star_str
     for(int wk_index=0; wk_index< this->worker_channels.size(); wk_index++){
-      std::string party_id_str;
-      this->recv_long_message_from_worker(wk_index, party_id_str);
-      best_party_id = std::stoi(party_id_str);
+      this->send_long_message_to_worker(wk_index, party_id_str);
+      this->send_long_message_to_worker(wk_index, index_star_str);
     }
 
     /// 2.8 : best party's ps received the updated masks and labels and then it sent them to other workers

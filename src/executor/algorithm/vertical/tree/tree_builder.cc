@@ -2553,19 +2553,33 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
     int i_star = -1;
     int index_star = -1;
     int index_tmp = best_split_index;
-    for (int i = 0; i < party_split_nums.size(); i++) {
-      if (index_tmp < party_split_nums[i]) {
-        i_star = i;
-        index_star = index_tmp;
-        break;
-      } else {
-        index_tmp = index_tmp - party_split_nums[i];
-      }
-    }
-    log_info("[DT_train_worker.distributed_train]: step 4.8, Best split party: i_star = " + to_string(i_star));
 
-    // send party_id to ps
-    worker.send_long_message_to_ps(to_string(i_star));
+    if (worker.worker_id == best_split_worker_id + 1) {
+      for (int i = 0; i < party_split_nums.size(); i++) {
+        if (index_tmp < party_split_nums[i]) {
+          i_star = i;
+          index_star = index_tmp;
+          break;
+        } else {
+          index_tmp = index_tmp - party_split_nums[i];
+        }
+      }
+      log_info("[DT_train_worker.distributed_train]: step 4.8, Best split party: i_star = " + to_string(i_star));
+      log_info("[DT_train_worker.distributed_train]: step 4.8, Best split index star: index_star = " + to_string(index_star));
+
+      // send party_id to ps
+      worker.send_long_message_to_ps(to_string(i_star));
+      worker.send_long_message_to_ps(to_string(index_star));
+    }
+
+    string recv_i_star_str, recv_index_star_str;
+    worker.recv_long_message_from_ps(recv_i_star_str);
+    worker.recv_long_message_from_ps(recv_index_star_str);
+    i_star = stoi(recv_i_star_str);
+    index_star = stoi(recv_index_star_str);
+
+    log_info("[DT_train_worker.distributed_train]: step 4.8, receive from ps, Best split party: i_star = " + to_string(i_star));
+    log_info("[DT_train_worker.distributed_train]: step 4.8, receive from ps, Best split index star: index_star = " + to_string(index_star));
 
     // step 4.9: find feature-id and split-it for this global best split, logic is different for different role
     // if the party has the best split:
