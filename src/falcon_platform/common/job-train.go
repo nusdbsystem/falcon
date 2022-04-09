@@ -178,6 +178,11 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
 			GenerateLinearRegressionParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == GBDTAlgName {
+		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+
+		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+			GenerateGBDTParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	} else {
 		return errors.New("algorithm name can not be detected")
 	}
@@ -460,6 +465,51 @@ func GenerateLinearRegressionParams(cfg map[string]interface{}) string {
 
 	return b64.StdEncoding.EncodeToString(out)
 
+}
+
+func GenerateGBDTParams(cfg map[string]interface{}) string {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateGBDTParams error in doing Marshal")
+	}
+
+	res := GBDT{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateGBDTParams error in doing Unmarshal")
+	}
+
+	dtp := v0.DecisionTreeParams{
+		TreeType:            res.TreeType,
+		Criterion:           res.Criterion,
+		SplitStrategy:       res.SplitStrategy,
+		ClassNum:            res.ClassNum,
+		MaxDepth:            res.MaxDepth,
+		MaxBins:             res.MaxBins,
+		MinSamplesSplit:     res.MinSamplesSplit,
+		MinSamplesLeaf:      res.MinSamplesLeaf,
+		MaxLeafNodes:        res.MaxLeafNodes,
+		MinImpurityDecrease: res.MinImpurityDecrease,
+		MinImpuritySplit:    res.MinImpuritySplit,
+		DpBudget:            res.DpBudget,
+	}
+
+	gbdt := v0.GbdtParams{
+		NEstimator:   res.NEstimator,
+		Loss:         res.Loss,
+		LearningRate: res.LearningRate,
+		Subsample:    res.Subsample,
+		DtParam:      &dtp,
+	}
+
+	out, err := proto.Marshal(&gbdt)
+	if err != nil {
+		log.Fatalln("Failed to encode GenerateGBDTParams:", err)
+	}
+
+	return b64.StdEncoding.EncodeToString(out)
 }
 
 func GenerateLimeSamplingParams(cfg map[string]interface{}) string {

@@ -261,7 +261,7 @@ func (w *TrainWorker) printParams(algName string) {
 		bs, _ := json.Marshal(lrp)
 		var out bytes.Buffer
 		_ = json.Indent(&out, bs, "", "\t")
-		logger.Log.Printf("structed params =%v\n", out.String())
+		logger.Log.Printf("structure params =%v\n", out.String())
 
 	} else if algName == common.DecisionTreeAlgName {
 
@@ -273,7 +273,7 @@ func (w *TrainWorker) printParams(algName string) {
 		bs, _ := json.Marshal(lrp)
 		var out bytes.Buffer
 		_ = json.Indent(&out, bs, "", "\t")
-		logger.Log.Printf("structed params =%v\n", out.String())
+		logger.Log.Printf("structure params =%v\n", out.String())
 
 	} else if algName == common.RandomForestAlgName {
 
@@ -285,13 +285,13 @@ func (w *TrainWorker) printParams(algName string) {
 		bs, _ := json.Marshal(lrp)
 		var out bytes.Buffer
 		_ = json.Indent(&out, bs, "", "\t")
-		logger.Log.Printf("structed params =%v\n", out.String())
+		logger.Log.Printf("structure params =%v\n", out.String())
 
 		logger.Log.Printf("[TrainWorker]: original DtParam = %+v\n", lrp.DtParam)
 		bs2, _ := json.Marshal(lrp.DtParam)
 		var out2 bytes.Buffer
 		_ = json.Indent(&out2, bs2, "", "\t")
-		logger.Log.Printf("structed DtParam =%v\n", out2.String())
+		logger.Log.Printf("structure DtParam =%v\n", out2.String())
 
 	} else if algName == common.LinearRegressionAlgName {
 
@@ -303,7 +303,25 @@ func (w *TrainWorker) printParams(algName string) {
 		bs, _ := json.Marshal(lrp)
 		var out bytes.Buffer
 		_ = json.Indent(&out, bs, "", "\t")
-		logger.Log.Printf("structed params =%v\n", out.String())
+		logger.Log.Printf("structure params =%v\n", out.String())
+
+	} else if algName == common.GBDTAlgName {
+
+		res, _ := base64.StdEncoding.DecodeString(w.DslObj.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig)
+		lrp := v0.GbdtParams{}
+		_ = proto.Unmarshal(res, &lrp)
+
+		logger.Log.Printf("[TrainWorker]: original params = %+v\n", lrp)
+		bs, _ := json.Marshal(lrp)
+		var out bytes.Buffer
+		_ = json.Indent(&out, bs, "", "\t")
+		logger.Log.Printf("structure params =%v\n", out.String())
+
+		logger.Log.Printf("[TrainWorker]: original DtParam = %+v\n", lrp.DtParam)
+		bs2, _ := json.Marshal(lrp.DtParam)
+		var out2 bytes.Buffer
+		_ = json.Indent(&out2, bs2, "", "\t")
+		logger.Log.Printf("structure DtParam =%v\n", out2.String())
 
 	} else if algName == common.LimeSamplingAlgName {
 
@@ -315,7 +333,7 @@ func (w *TrainWorker) printParams(algName string) {
 		bs, _ := json.Marshal(lrp)
 		var out bytes.Buffer
 		_ = json.Indent(&out, bs, "", "\t")
-		logger.Log.Printf("structed params =%v\n", out.String())
+		logger.Log.Printf("structure params =%v\n", out.String())
 
 	} else if algName == common.LimeCompPredictionAlgName {
 
@@ -327,7 +345,7 @@ func (w *TrainWorker) printParams(algName string) {
 		bs, _ := json.Marshal(lrp)
 		var out bytes.Buffer
 		_ = json.Indent(&out, bs, "", "\t")
-		logger.Log.Printf("structed params =%v\n", out.String())
+		logger.Log.Printf("structure params =%v\n", out.String())
 
 	} else if algName == common.LimeCompWeightsAlgName {
 
@@ -339,7 +357,7 @@ func (w *TrainWorker) printParams(algName string) {
 		bs, _ := json.Marshal(lrp)
 		var out bytes.Buffer
 		_ = json.Indent(&out, bs, "", "\t")
-		logger.Log.Printf("structed params =%v\n", out.String())
+		logger.Log.Printf("structure params =%v\n", out.String())
 
 	} else if algName == common.LimeFeatSelAlgName {
 
@@ -351,7 +369,7 @@ func (w *TrainWorker) printParams(algName string) {
 		bs, _ := json.Marshal(lrp)
 		var out bytes.Buffer
 		_ = json.Indent(&out, bs, "", "\t")
-		logger.Log.Printf("structed params =%v\n", out.String())
+		logger.Log.Printf("structure params =%v\n", out.String())
 
 	} else if algName == common.LimeInterpretAlgName {
 
@@ -363,7 +381,7 @@ func (w *TrainWorker) printParams(algName string) {
 		bs, _ := json.Marshal(lrp)
 		var out bytes.Buffer
 		_ = json.Indent(&out, bs, "", "\t")
-		logger.Log.Printf("structed params =%v\n", out.String())
+		logger.Log.Printf("structure params =%v\n", out.String())
 
 		res2, _ := base64.StdEncoding.DecodeString(lrp.InterpretModelParam)
 		lrp2 := v0.LinearRegressionParams{}
@@ -372,7 +390,7 @@ func (w *TrainWorker) printParams(algName string) {
 		bs2, _ := json.Marshal(lrp2)
 		var out2 bytes.Buffer
 		_ = json.Indent(&out2, bs2, "", "\t")
-		logger.Log.Printf("structed LinearRegressionParams =%v\n", out2.String())
+		logger.Log.Printf("structure LinearRegressionParams =%v\n", out2.String())
 
 	} else {
 

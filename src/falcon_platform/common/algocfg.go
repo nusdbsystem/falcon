@@ -119,6 +119,48 @@ type LinearRegression struct {
 	FitBias bool `json:"fit_bias"`
 }
 
+type GBDT struct {
+	// number of estimators (note that the number of total trees in the model
+	// does not necessarily equal to the number of estimators for classification)
+	NEstimator int32 `json:"n_estimator"`
+	// loss function to be optimized
+	Loss string `json:"loss"`
+	// learning rate shrinks the contribution of each tree
+	LearningRate float64 `json:"learning_rate"`
+	// the fraction of samples to be used for fitting individual base learners
+	// default 1.0, reserved here for future usage
+	Subsample float64 `json:"subsample"`
+	// decision tree builder params (note that the tree type here may be changed
+	// when building the gbdt model as they are all regression trees in gbdt)
+
+	// This is decision tree builder params
+
+	// type of the tree, 'classification' or 'regression'
+	TreeType string `json:"tree_type"`
+	// the function to measure the quality of a split 'gini' or 'entropy'
+	Criterion string `json:"criterion"`
+	// the strategy used to choose a split at each node, 'best' or 'random'
+	SplitStrategy string `json:"split_strategy"`
+	// the number of classes in the dataset, if regression, set to 1
+	ClassNum int32 `json:"class_num"`
+	// the maximum depth of the tree
+	MaxDepth int32 `json:"max_depth"`
+	// the maximum number of bins to split a feature
+	MaxBins int32 `json:"max_bins"`
+	// the minimum number of samples required to split an internal node
+	MinSamplesSplit int32 `json:"min_samples_split"`
+	// the minimum number of samples required to be at a leaf node
+	MinSamplesLeaf int32 `json:"min_samples_leaf"`
+	// the maximum number of leaf nodes
+	MaxLeafNodes int32 `json:"max_leaf_nodes"`
+	// a node will be split if this split induces a decrease of impurity >= this value
+	MinImpurityDecrease float64 `json:"min_impurity_decrease"`
+	// threshold for early stopping in tree growth
+	MinImpuritySplit float64 `json:"min_impurity_split"`
+	// differential privacy (DP) budget, 0 denotes not use DP
+	DpBudget float64 `json:"dp_budget"`
+}
+
 type LimeSampling struct {
 	// the instance index for explain
 	ExplainInstanceIdx int32 `json:"explain_instance_idx"`
@@ -148,7 +190,6 @@ type LimeCompPrediction struct {
 }
 
 // This message denotes the compute sample weights parameters
-
 type LimeCompWeights struct {
 	// the instance index for explain
 	ExplainInstanceIdx int32 `json:"explain_instance_idx"`

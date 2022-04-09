@@ -1,0 +1,66 @@
+{
+  "job_name": "credit_card_training",
+  "job_info": "this is the job_info",
+  "job_fl_type": "vertical",
+  "existing_key": 0,
+  "party_nums": 2,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "127.0.0.1:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/Users/nailixing/Downloads/falconExp/data",
+        "data_output": "/Users/nailixing/Downloads/falconExp/dataoutput",
+        "model_path": "/Users/nailixing/Downloads/falconExp/model"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "127.0.0.1:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/Users/nailixing/Downloads/falconExp/data",
+        "data_output": "/Users/nailixing/Downloads/falconExp/dataoutput",
+        "model_path": "/Users/nailixing/Downloads/falconExp/model"
+      }
+    }
+  ],
+  "distributed_task": {
+    "enable": 0,
+    "worker_number": 2
+  },
+  "tasks": {
+    "model_training": {
+      "mpc_algorithm_name": "vfl_decision_tree",
+      "algorithm_name": "gbdt",
+      "input_configs": {
+        "data_input": {
+          "data": "client.txt",
+          "key": "phe_keys"
+        },
+        "algorithm_config": {
+          "n_estimator": 8,
+          "sample_rate": 0.8,
+          "tree_type": "regression",
+          "criterion": "mse",
+          "split_strategy": "best",
+          "class_num": 2,
+          "max_depth": 3,
+          "max_bins": 8,
+          "min_samples_split": 5,
+          "min_samples_leaf": 5,
+          "max_leaf_nodes": 64,
+          "min_impurity_decrease": 0.1,
+          "min_impurity_split": 0.001,
+          "dp_budget": 0.1
+        }
+      },
+      "output_configs": {
+        "trained_model": "energy_gbdt_model_202203132300.pb",
+        "evaluation_report": "energy_gbdt_report_202203132300.txt"
+      }
+    }
+  }
+}

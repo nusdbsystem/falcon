@@ -178,6 +178,7 @@ const (
 	DecisionTreeAlgName       = "decision_tree"
 	RandomForestAlgName       = "random_forest"
 	LinearRegressionAlgName   = "linear_regression"
+	GBDTAlgName               = "gbdt"
 	LimeSamplingAlgName       = "lime_sampling"
 	LimeCompPredictionAlgName = "lime_compute_prediction"
 	LimeCompWeightsAlgName    = "lime_compute_weights"
