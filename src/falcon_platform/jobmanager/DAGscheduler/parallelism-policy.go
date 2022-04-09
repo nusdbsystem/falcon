@@ -66,6 +66,7 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) boo
 			panic(err.Error())
 		}
 		result := strings.Split(strings.TrimSpace(string(out)), "\n")
+		logger.Log.Println("[JobManager]: KttScheduler return with:", result)
 		label := result[0]
 		if strings.Contains(label, "OK") {
 			var resultInt []int
