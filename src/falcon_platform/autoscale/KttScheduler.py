@@ -8,53 +8,61 @@ def MaxV(a, b):
     else:
         return b
 
-def beta(x, t):
-    mapper = dict()
-    mapper[1] = 1.0
-    mapper[2] = 0.95
-    mapper[3] = 0.92
-    mapper[4] = 0.91
-    mapper[5] = 0.90
-    mapper[6] = 0.88
-    mapper[7] = 0.85
-    mapper[8] = 0.80
-    mapper[9] = 0.76
-    mapper[10] = 0.71
-    mapper[11] = 0.68
-    mapper[12] = 0.65
-    mapper[13] = 0.63
-    mapper[14] = 0.58
-    mapper[15] = 0.54
-    mapper[16] = 0.53
-    mapper[17] = 0.51
-    mapper[18] = 0.47
-    mapper[19] = 0.43
-    mapper[20] = 0.39
 
-    y = -2.94587705*math.pow(10, -8) * x ** 7 + 2.50848776*math.pow(10, -6) * x ** 6 - 8.78441842 *math.pow(10, -5) * x**5 + \
-        0.00160672440 * x ** 4 - 0.01605 * x ** 3 + 0.08281 * x ** 2 - 0.2161 * x + 1.14976780
-    # print(y, float(x))
-    result = float(t) / (y* float(x))
-    # result = float(t) * (1* 1/float(x))
-    return result
+def model_prediction(x):
+    return 6.09377075279683+ 161.444662942579/x
+
+
+def instance_weighting(x):
+    return 10.569445316823112+ 325.9142691796053/x
+
+
+def feature_selection(x):
+    return 42.574153980931875+ 432.4790678336969/x
+
+
+def VFL_training(x):
+    return 66.9453565626985+ 436.11481024283364/x
+
+
+def beta(workerNum, stageName):
+
+    if stageName == "model_prediction":
+        return model_prediction(workerNum)
+    if stageName == "instance_weighting":
+        return instance_weighting(workerNum)
+    if stageName == "feature_selection":
+        return feature_selection(workerNum)
+    if stageName == "VFL_training":
+        return VFL_training(workerNum)
+
 
 def objective(x):
     return measure_total_time(x)
+
 
 def worker_constraint(x):
     #  >=0
     return totalWorkers - measure_total_worker(x)
 
+
 def time_constraint(x):
      # >=0
-    return deadLine - measure_total_time(x) -1
-
+    return deadLine - measure_total_time(x)
 
 def measure_total_worker(x):
     return 1 + x[0] + x[1] + x[2] * (x[3] + x[4])
 
+
 def measure_total_time(x):
-    return MaxV(beta(x[0], t2), beta(x[1], t3)) + math.ceil(6 / x[2]) * (beta(x[3], t4) + beta(x[4], t5))
+    prediction_time = beta(x[0], "model_prediction")
+    weight_time = beta(x[1], "instance_weighting")
+    feature_selection_time = beta(x[3], "feature_selection")
+    train_time = beta(x[4], "VFL_training")
+
+    time_used = MaxV(prediction_time, weight_time) + math.ceil(classNum / x[2]) * (feature_selection_time + train_time)
+
+    return time_used
 
 
 def schedule():
@@ -67,10 +75,13 @@ def schedule():
     x0[3] = 1.0
     x0[4] = 1.0
     x0[2] = 1.0
-    WorkerResult = x0
 
     # show initial objective
     # print('Initial SSE Objective: ' + str(objective(x0)))
+    WorkerResult = []
+
+    min_time_used = float("inf")
+    max_worker_used = 0
 
     try:
         # optimize
@@ -92,8 +103,7 @@ def schedule():
         # print('x5 = ' + str(x[4]))
         # print('xc = ' + str(x[2]))
         # print('====== Final SSE Objective, worker used=' + str(objective(x)))
-        # print('====== timeUsed = ' + str(
-        #     MaxV(beta(x[0], t2), beta(x[1], t3)) + math.ceil(6 / x[2]) * (beta(x[3], t4) + beta(x[4], t5))))
+        # print('====== timeUsed = ' + str()
 
         X0 = [math.ceil(x[0]), math.floor(x[0])]
         X1 = [math.ceil(x[1]), math.floor(x[1])]
@@ -107,46 +117,55 @@ def schedule():
                 for c in X2:
                     for d in X3:
                         for e in X4:
-                            inputX = [a,b,c,d,e]
-                            if time_constraint(inputX) >=0 and worker_constraint(inputX) >=0:
+                            inputX = [a, b, c, d, e]
+                            worker_cons = worker_constraint(inputX)
+                            time_cons = time_constraint(inputX)
+                            time_used = measure_total_time(x)
+                            worker_used = measure_total_worker(x)
+                            if time_used < min_time_used:
+                                min_time_used = time_used
+                            if worker_used > max_worker_used:
+                                max_worker_used = worker_used
+                            if time_cons >= 0 and worker_cons >= 0:
                                 if objective(inputX) < bestResult:
                                     bestResult = objective(inputX)
                                     WorkerResult = inputX
     except:
-        pass
+        print("ERROR")
         print("use default")
 
-    x = WorkerResult
-    # print(' ====== updated Solution ====== ', x)
-    print(str(int(x[0])))
-    print(str(int(x[1])))
-    print(str(int(x[3])))
-    print(str(int(x[4])))
-    print(str(int(x[2])))
-    # print('====== Final SSE Objective, worker used=' + str(measure_total_worker(x)))
-    # print('====== timeUsed = ' + str(measure_total_time(x)))
+    if len(WorkerResult) > 0:
+        print("OK")
+        print("worker_used=", measure_total_worker(WorkerResult), ", time_used=", measure_total_time(WorkerResult))
+        print(str(int(WorkerResult[0]))) # prediction
+        print(str(int(WorkerResult[1]))) # instance weighting
+        print(str(int(WorkerResult[3]))) # feature selection
+        print(str(int(WorkerResult[4]))) # vfl training
+        print(str(int(WorkerResult[2]))) # class parallelism
+    else:
+        print("ERROR")
+        print('====== max worker used=', max_worker_used)
+        print('====== min timeUsed = ', min_time_used)
+        print('====== requirement is worker < ', totalWorkers, " time < ", deadLine)
 
 def main():
     import argparse
 
+    defaultWorker = 160
+    defaultDeadline = 18901
+    defaultClass = 4
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--worker', type=int, help='total workers', default=7)
+    parser.add_argument('-w', '--worker', type=int, help='total workers', default=defaultWorker)
+    parser.add_argument('-d', '--deadline', type=int, help='deadline', default=defaultDeadline)
+    parser.add_argument('-c', '--classNum', type=int, help='classNum', default=defaultClass)
     args = parser.parse_args()
 
-    global t2, t3, t4 ,t5, classNum, totalWorkers, deadLine
-    # prediction time
-    t2 = 60
-    # // instance weighting time
-    t3 = 30
-    # // feature selection time
-    t4 = 80
-    # // VFL model training time
-    t5 = 150
-    classNum = 6
+    global classNum, totalWorkers, deadLine
 
+    classNum = args.classNum
     totalWorkers = args.worker
-    deadLine = 500
-
+    deadLine = args.deadline
     schedule()
 
 main()
