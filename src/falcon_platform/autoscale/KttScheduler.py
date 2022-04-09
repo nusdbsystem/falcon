@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from scipy.optimize import minimize
+from scipy import optimize
 
 def MaxV(a, b):
     if a > b:
@@ -64,6 +64,45 @@ def measure_total_time(x):
 
     return time_used
 
+def brute_force_search():
+    bestResult = float("inf")
+    min_time_used = float("inf")
+    max_worker_used = 0
+    WorkerResult = []
+    for x0 in range(1, totalWorkers):
+        for x1 in range(1, totalWorkers):
+            for x3 in range(1, totalWorkers):
+                for x4 in range(1, totalWorkers):
+                    for x2 in range(1, classNum+1):
+                        inputX = [x0, x1, x2, x3, x4]
+                        worker_cons = worker_constraint(inputX)
+                        time_cons = time_constraint(inputX)
+                        time_used = measure_total_time(inputX)
+                        worker_used = measure_total_worker(inputX)
+                        if time_used < min_time_used:
+                            min_time_used = time_used
+                        if worker_used > max_worker_used:
+                            max_worker_used = worker_used
+                        if time_cons >= 0 and worker_cons >= 0:
+                            if objective(inputX) < bestResult:
+                                bestResult = objective(inputX)
+                                WorkerResult = inputX
+
+    print("\n ------------ Best policy ------------")
+
+    if len(WorkerResult) > 0:
+        print("OK,", "worker_used=", measure_total_worker(WorkerResult), ", time_used=", measure_total_time(WorkerResult))
+        print(str(int(WorkerResult[0]))) # prediction
+        print(str(int(WorkerResult[1]))) # instance weighting
+        print(str(int(WorkerResult[3]))) # feature selection
+        print(str(int(WorkerResult[4]))) # vfl training
+        print(str(int(WorkerResult[2]))) # class parallelism
+    else:
+        print("ERROR")
+        print('====== max worker used=', max_worker_used)
+        print('====== min timeUsed = ', min_time_used)
+        print("worker_used=", measure_total_worker(WorkerResult), ", time_used=", measure_total_time(WorkerResult))
+        print('====== requirement is worker < ', totalWorkers, " time < ", deadLine)
 
 def schedule():
 
@@ -91,7 +130,11 @@ def schedule():
         con1 = {'type': 'ineq', 'fun': worker_constraint} # constraint1 >=0
         con2 = {'type': 'ineq', 'fun': time_constraint} # constraint1 >=0
         cons = ([con1, con2])
-        solution = minimize(fun=objective, x0=x0, method='SLSQP', bounds=bnds, constraints=cons)
+        solution = optimize.minimize(fun=objective, x0=x0, method='COBYLA', constraints=cons)
+        # solution = optimize.shgo(func=objective, bounds=bnds, constraints=cons, sampling_method='sobol')
+        # solution = optimize.shgo(func=objective, bounds=bnds, constraints=cons)
+        # solution = optimize.brute(func=objective, ranges=bnds)
+
         x = solution.x
 
         # show final objective
@@ -110,6 +153,12 @@ def schedule():
         X3 = [math.ceil(x[3]), math.floor(x[3])]
         X4 = [math.ceil(x[4]), math.floor(x[4])]
         X2 = [math.ceil(x[2]), math.floor(x[2])]
+
+        X0 = [ele for ele in X0 if ele >= 1]
+        X1 = [ele for ele in X1 if ele >= 1]
+        X2 = [ele for ele in X2 if ele >= 1]
+        X3 = [ele for ele in X3 if ele >= 1]
+        X4 = [ele for ele in X4 if ele >= 1]
 
         bestResult = float("inf")
         for a in X0:
@@ -130,9 +179,9 @@ def schedule():
                                 if objective(inputX) < bestResult:
                                     bestResult = objective(inputX)
                                     WorkerResult = inputX
-    except:
+    except Exception as e:
         print("ERROR")
-        print("use default")
+        print(e)
 
     if len(WorkerResult) > 0:
         print("OK,", "worker_used=", measure_total_worker(WorkerResult), ", time_used=", measure_total_time(WorkerResult))
@@ -150,7 +199,7 @@ def schedule():
 def main():
     import argparse
 
-    defaultWorker = 160
+    defaultWorker = 19
     defaultDeadline = 18901
     defaultClass = 4
 
@@ -166,5 +215,6 @@ def main():
     totalWorkers = args.worker
     deadLine = args.deadline
     schedule()
+    # brute_force_search()
 
 main()
