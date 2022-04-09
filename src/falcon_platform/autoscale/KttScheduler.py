@@ -135,8 +135,7 @@ def schedule():
         print("use default")
 
     if len(WorkerResult) > 0:
-        print("OK")
-        print("worker_used=", measure_total_worker(WorkerResult), ", time_used=", measure_total_time(WorkerResult))
+        print("OK,", "worker_used=", measure_total_worker(WorkerResult), ", time_used=", measure_total_time(WorkerResult))
         print(str(int(WorkerResult[0]))) # prediction
         print(str(int(WorkerResult[1]))) # instance weighting
         print(str(int(WorkerResult[3]))) # feature selection

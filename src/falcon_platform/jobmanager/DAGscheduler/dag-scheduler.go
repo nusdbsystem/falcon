@@ -24,11 +24,10 @@ func NewDagScheduler(dslOjb *cache.DslObj) *DagScheduler {
 	ds := new(DagScheduler)
 	ds.Stages = make(map[common.FalconStage]TaskStage)
 	ds.ParallelismPolicy = NewParallelismSchedulePolicy(dslOjb)
-	ds.splitTaskIntoStage(dslOjb)
 	return ds
 }
 
-func (ds *DagScheduler) splitTaskIntoStage(dslOjb *cache.DslObj) {
+func (ds *DagScheduler) SplitTaskIntoStage(dslOjb *cache.DslObj) {
 
 	// stage 1
 

@@ -88,6 +88,7 @@ func RunCoordServer(nConsumer int) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 
+	// wait for quit message
 	go func() {
 		defer logger.HandleErrors()
 		<-quit

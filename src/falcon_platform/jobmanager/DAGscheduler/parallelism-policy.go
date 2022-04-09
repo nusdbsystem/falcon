@@ -27,15 +27,17 @@ type ParallelismSchedulePolicy struct {
 	LimeFeatureSelectionParallelism int
 	// how many worker each class use
 	LimeVFLModelTrainParallelism int
+
+	IsValid bool
 }
 
 func NewParallelismSchedulePolicy(dslOjb *cache.DslObj) *ParallelismSchedulePolicy {
 	sp := new(ParallelismSchedulePolicy)
-	sp.generateNewPolicy(dslOjb)
+	sp.IsValid = sp.generateNewPolicy(dslOjb)
 	return sp
 }
 
-func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) {
+func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) bool {
 
 	// fetch user defined total worker number
 	workerNum := dslOjb.DistributedTask.WorkerNumber
@@ -47,27 +49,44 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) {
 	// if only one stage
 	if len(dslOjb.Stages) == 1 {
 		sp.updateSingleStageParallelism(dslOjb.Stages[0], workerNum)
+		logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
+		return true
+
 	} else {
 		// if many stage. run scheduler
-		cmd := exec.Command("python3", "autoscale/KttScheduler.py", "--worker", fmt.Sprintf("%d", workerNum))
+		cmd := exec.Command(
+			"python3",
+			"autoscale/KttScheduler.py",
+			"-w", fmt.Sprintf("%d", workerNum),
+			"-d", "100000",
+			"-c", fmt.Sprintf("%d", dslOjb.ClassNum))
+
 		out, err := cmd.Output()
 		if err != nil {
 			panic(err.Error())
 		}
 		result := strings.Split(strings.TrimSpace(string(out)), "\n")
-		var resultInt []int
-		for _, ele := range result {
-			re, _ := strconv.Atoi(ele)
-			resultInt = append(resultInt, re)
+		label := result[0]
+		if strings.Contains(label, "OK") {
+			var resultInt []int
+			for _, ele := range result[1:] {
+				re, _ := strconv.Atoi(ele)
+				resultInt = append(resultInt, re)
+			}
+			sp.LimeOriModelPredictionParallelism = resultInt[0]
+			sp.LimeInstanceWeightParallelism = resultInt[1]
+			sp.LimeFeatureSelectionParallelism = resultInt[2]
+			sp.LimeVFLModelTrainParallelism = resultInt[3]
+			sp.LimeClassParallelism = resultInt[4]
+			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
+			return true
+		} else if strings.Contains(label, "ERROR") {
+			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
+			return false
+		} else {
+			panic("KttScheduler.py return un-recognized result")
 		}
-
-		sp.LimeOriModelPredictionParallelism = resultInt[0]
-		sp.LimeInstanceWeightParallelism = resultInt[1]
-		sp.LimeFeatureSelectionParallelism = resultInt[2]
-		sp.LimeVFLModelTrainParallelism = resultInt[3]
-		sp.LimeClassParallelism = resultInt[4]
 	}
-	logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 }
 
 func (sp *ParallelismSchedulePolicy) updateSingleStageParallelism(stageName common.FalconStage, workerNum int) {

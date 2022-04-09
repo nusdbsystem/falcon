@@ -57,6 +57,11 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 
 	// 1. init DAG scheduler
 	dagScheduler := DAGscheduler.NewDagScheduler(dslOjb)
+	if dagScheduler.ParallelismPolicy.IsValid == false {
+		logger.Log.Println("[JobManager]: Cannot find a valid schedule policy according to current worker_num, deadline, class_number")
+		return
+	}
+	dagScheduler.SplitTaskIntoStage(dslOjb)
 
 	status := true
 

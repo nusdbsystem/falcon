@@ -28,6 +28,7 @@ type TrainJob struct {
 	DistributedTask DistributedTask `json:"distributed_task"`
 	Tasks           Tasks           `json:"tasks"`
 	Stages          []FalconStage
+	ClassNum        uint
 }
 
 type PartyInfo struct {
@@ -166,12 +167,12 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == DecisionTreeAlgName {
 		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
-		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
 			GenerateTreeParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == RandomForestAlgName {
 		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
-		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
 			GenerateRFParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == LinearRegressionAlgName {
 		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
@@ -181,7 +182,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == GBDTAlgName {
 		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
-		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
 			GenerateGBDTParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
 	} else {
 		return errors.New("algorithm name can not be detected")
@@ -209,7 +210,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 	} else if jobInfo.Tasks.LimePred.AlgorithmName == LimeCompPredictionAlgName {
 		logger.Log.Println("ParseTrainJob: LimePred AlgorithmName match <-->", jobInfo.Tasks.LimePred.AlgorithmName)
 
-		jobInfo.Tasks.LimePred.InputConfigs.SerializedAlgorithmConfig =
+		jobInfo.Tasks.LimePred.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
 			GenerateLimeCompPredictionParams(jobInfo.Tasks.LimePred.InputConfigs.AlgorithmConfig)
 		jobInfo.Stages = append(jobInfo.Stages, LimePredStage)
 	} else {
@@ -223,7 +224,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 	} else if jobInfo.Tasks.LimeWeight.AlgorithmName == LimeCompWeightsAlgName {
 		logger.Log.Println("ParseTrainJob: LimeWeight AlgorithmName match <-->", jobInfo.Tasks.LimeWeight.AlgorithmName)
 
-		jobInfo.Tasks.LimeWeight.InputConfigs.SerializedAlgorithmConfig =
+		jobInfo.Tasks.LimeWeight.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
 			GenerateLimeCompWeightsParams(jobInfo.Tasks.LimeWeight.InputConfigs.AlgorithmConfig)
 		jobInfo.Stages = append(jobInfo.Stages, LimeWeightStage)
 
@@ -240,7 +241,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		_, jobInfo.Tasks.LimeFeature.ClassNum, _ =
 			GenerateLimeFeatSelParams(jobInfo.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, 0)
-
+		jobInfo.ClassNum = uint(jobInfo.Tasks.LimeFeature.ClassNum)
 		jobInfo.Stages = append(jobInfo.Stages, LimeFeatureSelectionStage)
 
 	} else {
@@ -256,7 +257,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 		_, jobInfo.Tasks.LimeInterpret.ClassNum =
 			GenerateLimeInterpretParams(jobInfo.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, 0, "", jobInfo.Tasks.LimeInterpret.MpcAlgorithmName)
-
+		jobInfo.ClassNum = uint(jobInfo.Tasks.LimeInterpret.ClassNum)
 		jobInfo.Stages = append(jobInfo.Stages, LimeVFLModelTrainStage)
 
 	} else {
@@ -348,7 +349,7 @@ func GenerateLrParams(cfg map[string]interface{}) string {
 	return b64.StdEncoding.EncodeToString(out)
 }
 
-func GenerateTreeParams(cfg map[string]interface{}) string {
+func GenerateTreeParams(cfg map[string]interface{}) (string, uint) {
 
 	jb, err := json.Marshal(cfg)
 	if err != nil {
@@ -382,10 +383,10 @@ func GenerateTreeParams(cfg map[string]interface{}) string {
 		log.Fatalln("Failed to encode DecisionTreeParams:", err)
 	}
 
-	return b64.StdEncoding.EncodeToString(out)
+	return b64.StdEncoding.EncodeToString(out), uint(res.ClassNum)
 }
 
-func GenerateRFParams(cfg map[string]interface{}) string {
+func GenerateRFParams(cfg map[string]interface{}) (string, uint) {
 
 	jb, err := json.Marshal(cfg)
 	if err != nil {
@@ -425,7 +426,7 @@ func GenerateRFParams(cfg map[string]interface{}) string {
 		log.Fatalln("Failed to encode RandomForestParams:", err)
 	}
 
-	return b64.StdEncoding.EncodeToString(out)
+	return b64.StdEncoding.EncodeToString(out), uint(res.ClassNum)
 
 }
 
@@ -467,7 +468,7 @@ func GenerateLinearRegressionParams(cfg map[string]interface{}) string {
 
 }
 
-func GenerateGBDTParams(cfg map[string]interface{}) string {
+func GenerateGBDTParams(cfg map[string]interface{}) (string, uint) {
 
 	jb, err := json.Marshal(cfg)
 	if err != nil {
@@ -509,7 +510,7 @@ func GenerateGBDTParams(cfg map[string]interface{}) string {
 		log.Fatalln("Failed to encode GenerateGBDTParams:", err)
 	}
 
-	return b64.StdEncoding.EncodeToString(out)
+	return b64.StdEncoding.EncodeToString(out), uint(res.ClassNum)
 }
 
 func GenerateLimeSamplingParams(cfg map[string]interface{}) string {
@@ -543,7 +544,7 @@ func GenerateLimeSamplingParams(cfg map[string]interface{}) string {
 
 }
 
-func GenerateLimeCompPredictionParams(cfg map[string]interface{}) string {
+func GenerateLimeCompPredictionParams(cfg map[string]interface{}) (string, uint) {
 
 	jb, err := json.Marshal(cfg)
 	if err != nil {
@@ -571,11 +572,11 @@ func GenerateLimeCompPredictionParams(cfg map[string]interface{}) string {
 		log.Fatalln("Failed to encode GenerateLimeCompPredictionParams:", err)
 	}
 
-	return b64.StdEncoding.EncodeToString(out)
+	return b64.StdEncoding.EncodeToString(out), uint(res.ClassNum)
 
 }
 
-func GenerateLimeCompWeightsParams(cfg map[string]interface{}) string {
+func GenerateLimeCompWeightsParams(cfg map[string]interface{}) (string, uint) {
 
 	jb, err := json.Marshal(cfg)
 	if err != nil {
@@ -609,7 +610,7 @@ func GenerateLimeCompWeightsParams(cfg map[string]interface{}) string {
 		log.Fatalln("Failed to encode GenerateLimeCompWeightsParams:", err)
 	}
 
-	return b64.StdEncoding.EncodeToString(out)
+	return b64.StdEncoding.EncodeToString(out), uint(res.ClassNum)
 
 }
 

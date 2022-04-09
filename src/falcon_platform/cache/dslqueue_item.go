@@ -23,6 +23,7 @@ type DslObj struct {
 	PartyInfoList   []common.PartyInfo
 	Tasks           common.Tasks
 	Stages          []common.FalconStage
+	ClassNum        uint
 }
 
 func argTypeRegister() {

@@ -66,6 +66,7 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 	dslOjb.PartyInfoList = job.PartyInfoList
 	dslOjb.Tasks = job.Tasks
 	dslOjb.Stages = job.Stages
+	dslOjb.ClassNum = job.ClassNum
 
 	go func() {
 		defer logger.HandleErrors()
