@@ -194,7 +194,7 @@ void DTParameterServer::distributed_lime_train(bool use_encrypted_labels,
 
   /// 1. train the tree model
   build_tree();
-  alg_builder.tree.print_tree_model();
+  // alg_builder.tree.print_tree_model();
   /// 2. clear and log
   const clock_t training_finish_time = clock();
   double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
@@ -445,34 +445,6 @@ void DTParameterServer::build_tree(){
     // update index stack
     node_index_stack.push_back(left_child_index);
     node_index_stack.push_back(right_child_index);
-
-    int sample_num = alg_builder.train_data_size;
-    log_info("[DT_train_worker.distributed_train]: step 2.10, sample_mask_iv_right[sample_num-1].exponent = " + to_string(sample_mask_iv_right[sample_num-1].getter_exponent()));
-    mpz_t t;
-    mpz_init(t);
-    sample_mask_iv_right[sample_num-1].getter_n(t);
-    gmp_printf("[DT_train_worker.distributed_train]: step 2.10, sample_mask_iv_right[sample_num-1].n = %Zd", t);
-    mpz_clear(t);
-
-    // update mask stack
-    node_mask_stack.push_back(sample_mask_iv_left);
-    node_mask_stack.push_back(sample_mask_iv_right);
-
-    EncodedNumber* test1 = node_mask_stack.back();
-    EncodedNumber* test2 = node_mask_stack.back();
-    log_info("[DT_train_worker.distributed_train]: step 2.10, test1[sample_num-1].exponent = " + to_string(test1[sample_num-1].getter_exponent()));
-    mpz_t t1;
-    mpz_init(t1);
-    test1[sample_num-1].getter_n(t1);
-    gmp_printf("[DT_train_worker.distributed_train]: step 2.10, test1[sample_num-1].n = %Zd", t1);
-    mpz_clear(t1);
-
-    log_info("[DT_train_worker.distributed_train]: step 2.10, test2[sample_num-1].exponent = " + to_string(test2[sample_num-1].getter_exponent()));
-    mpz_t t2;
-    mpz_init(t2);
-    test2[sample_num-1].getter_n(t2);
-    gmp_printf("[DT_train_worker.distributed_train]: step 2.10, test2[sample_num-1].n = %Zd", t2);
-    mpz_clear(t2);
 
     // update label stack
     node_label_stack.push_back(encrypted_labels_left);
