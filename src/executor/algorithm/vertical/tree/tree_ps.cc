@@ -446,6 +446,10 @@ void DTParameterServer::build_tree(){
     node_index_stack.push_back(left_child_index);
     node_index_stack.push_back(right_child_index);
 
+    // update mask stack
+    node_mask_stack.push_back(sample_mask_iv_left);
+    node_mask_stack.push_back(sample_mask_iv_right);
+
     // update label stack
     node_label_stack.push_back(encrypted_labels_left);
     node_label_stack.push_back(encrypted_labels_right);
