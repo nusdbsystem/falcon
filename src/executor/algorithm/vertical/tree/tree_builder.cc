@@ -2603,17 +2603,17 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
           available_feature_ids_new.push_back(feature_id);
         }
       }
-      j_star += worker.get_train_feature_prefix();
+      int global_j_star = j_star + worker.get_train_feature_prefix();
       log_info("[DT_train_worker.distributed_train]: step 4.9, i_str and worker are matched with best split,"
                "the Best feature id: j_star = " + to_string(j_star) +
-          "Best split id: s_star = " + to_string(s_star));
+          "Best split id: s_star = " + to_string(s_star) + ", global_j_star = " + to_string(global_j_star));
 
       // now we have (i_*, j_*, s_*), retrieve s_*-th split ivs and update sample_ivs of two branches
       // update current node index for prediction
       tree.nodes[node_index].node_type = falcon::INTERNAL;
       tree.nodes[node_index].is_self_feature = 1;
       tree.nodes[node_index].best_party_id = i_star;
-      tree.nodes[node_index].best_feature_id = j_star;
+      tree.nodes[node_index].best_feature_id = global_j_star;
       tree.nodes[node_index].best_split_id = s_star;
       tree.nodes[node_index].split_threshold = feature_helpers[j_star].split_values[s_star];
       tree.nodes[node_index].left_child = left_child_index;
@@ -2646,7 +2646,7 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
 
       // serialize and send masks to the other clients
       std::string update_str_sample_iv;
-      serialize_update_info(party.party_id, party.party_id, j_star, s_star,
+      serialize_update_info(party.party_id, party.party_id, global_j_star, s_star,
                             encrypted_left_impurity, encrypted_right_impurity,
                             sample_mask_iv_left, sample_mask_iv_right,
                             sample_num, update_str_sample_iv);

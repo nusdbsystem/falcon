@@ -1117,6 +1117,63 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
                                     party,
                                     ps_network_str);
     log_info("[lime_decision_tree_train ps]: Init ps finished.");
+
+    // ps broadcast train data index to each worker, so that each worker only
+    // needs to train a part of the data
+
+    // ps splits the data from vertical dimention, and sends the splitted part to workers
+    std::string training_data_str;
+
+    int each_worker_features_num = used_train_data[0].size()/ps->worker_channels.size();
+
+    falcon_print(std::cout,  "[PS.broadcast_train_test_data]:",
+                 "worker num",
+                 ps->worker_channels.size(),
+                 "data size",
+                 used_train_data[0].size(),
+                 "each_worker_features_num is", each_worker_features_num);
+
+    int train_data_prev_index = 0;
+    int train_data_last_index;
+
+    std::string worker_feature_index_prefix_train_data;
+
+    for (int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
+
+      // get the last index of training_data[0].size()
+      std::vector<std::vector<double>> tmp_training_data(used_train_data.size());
+
+      if (wk_index == ps->worker_channels.size()-1){
+        train_data_last_index = used_train_data[0].size();
+        worker_feature_index_prefix_train_data += to_string(train_data_prev_index);
+      }else{
+        train_data_last_index = train_data_prev_index+each_worker_features_num; //4
+        worker_feature_index_prefix_train_data += to_string(train_data_prev_index) +" ";
+      }
+
+      // assign
+      for(int j = 0; j < used_train_data.size(); j++){
+        tmp_training_data[j].insert(tmp_training_data[j].begin(),
+                                    used_train_data[j].begin()+train_data_prev_index,
+                                    used_train_data[j].begin()+train_data_last_index);
+      }
+
+      serialize_double_matrix(tmp_training_data, training_data_str);
+      ps->send_long_message_to_worker(wk_index, training_data_str);
+
+      falcon_print(std::cout,  "[PS.broadcast_train_test_data]:",
+                   "assign",train_data_prev_index, "-", train_data_last_index,
+                   "to worker", wk_index);
+
+      train_data_prev_index = train_data_last_index;
+    }
+
+    // ps send index perfix to each worker, each worker can map local to party-global index
+    for (int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
+      ps->send_long_message_to_worker(wk_index, worker_feature_index_prefix_train_data);
+    }
+
+
     // start to train the task in a distributed way
     ps->distributed_lime_train(true, encrypted_labels,
                                true, sample_weights);
@@ -1129,17 +1186,38 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   // is_distributed == 1 and distributed_role = 1 (worker)
   if (is_distributed == 1 && distributed_role == 1) {
     log_info("************* Distributed LIME Interpret *************");
+
+    // worker is created to communicate with parameter server
+    auto worker = new Worker(ps_network_str, worker_id);
+
+    std::vector<std::vector<double>> training_data;
+
+    // receive train data from ps
+    std::string recv_training_data_str;
+    worker->recv_long_message_from_ps(recv_training_data_str);
+    deserialize_double_matrix(training_data, recv_training_data_str);
+
+    std::string recv_worker_feature_index_prefix_train_data;
+    worker->recv_long_message_from_ps(recv_worker_feature_index_prefix_train_data);
+
+    // decode worker_feature_index_prefix_train_data
+    std::stringstream iss( recv_worker_feature_index_prefix_train_data );
+    int worker_feature_index_prefix_train_data_num;
+    std::vector<int> worker_feature_index_prefix_train_data_vector;
+    while ( iss >> worker_feature_index_prefix_train_data_num )
+      worker_feature_index_prefix_train_data_vector.push_back( worker_feature_index_prefix_train_data_num );
+
+    worker->assign_train_feature_prefix(worker_feature_index_prefix_train_data_vector[worker->worker_id-1]);
+
     // init tree builder instance
     auto tree_model_builder = new DecisionTreeBuilder (
         dt_params,
-        used_train_data,
+        training_data,
         dummy_test_data,
         dummy_train_labels,
         dummy_test_labels,
         dummy_train_accuracy,
         dummy_test_accuracy);
-    // worker is created to communicate with parameter server
-    auto worker = new Worker(ps_network_str, worker_id);
 
     log_info("[lime_decision_tree_train worker]: init linear regression model");
     tree_model_builder->distributed_lime_train(party, *worker,
