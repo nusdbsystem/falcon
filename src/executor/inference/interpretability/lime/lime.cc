@@ -868,20 +868,20 @@ std::vector<double> LimeExplainer::explain_one_label(
       // deserialize decision tree params
       DecisionTreeParams dt_params;
       // create for debug
-      dt_params.tree_type = "regression";
-      dt_params.criterion = "mse";
-      dt_params.split_strategy = "best";
-      dt_params.class_num = 2;
-      dt_params.max_depth = 3;
-      dt_params.max_bins = 8;
-      dt_params.min_samples_split = 5;
-      dt_params.min_samples_leaf = 5;
-      dt_params.max_leaf_nodes = 64;
-      dt_params.min_impurity_decrease = 0.1;
-      dt_params.min_impurity_split = 0.001;
-      dt_params.dp_budget = 0.1;
-//      std::string dt_param_pb_str = base64_decode_to_pb_string(interpret_model_param);
-//      deserialize_dt_params(dt_params, dt_param_pb_str);
+//      dt_params.tree_type = "regression";
+//      dt_params.criterion = "mse";
+//      dt_params.split_strategy = "best";
+//      dt_params.class_num = 2;
+//      dt_params.max_depth = 3;
+//      dt_params.max_bins = 8;
+//      dt_params.min_samples_split = 5;
+//      dt_params.min_samples_leaf = 5;
+//      dt_params.max_leaf_nodes = 64;
+//      dt_params.min_impurity_decrease = 0.1;
+//      dt_params.min_impurity_split = 0.001;
+//      dt_params.dp_budget = 0.1;
+      std::string dt_param_pb_str = base64_decode_to_pb_string(interpret_model_param);
+      deserialize_dt_params(dt_params, dt_param_pb_str);
       log_decision_tree_params(dt_params);
       explanations = lime_decision_tree_train(
           party,
