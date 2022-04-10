@@ -137,7 +137,7 @@ func RunWorker(masterAddr, workerType,
 			workerId++
 
 			// other workers are for serving train worker
-			for ii := 1; ii < workerPreGroup; ii++ {
+			for ii := 0; ii < workerPreGroup; ii++ {
 
 				logger.Log.Printf("[PartyServer]: PartyServer setup one worker %d as train worker "+
 					"to conduct distributed training\n", workerId)
