@@ -53,39 +53,52 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) boo
 		return true
 
 	} else {
-		// if many stage. run scheduler
-		cmd := exec.Command(
-			"python3",
-			"autoscale/KttScheduler.py",
-			"-w", fmt.Sprintf("%d", workerNum),
-			"-d", "100000",
-			"-c", fmt.Sprintf("%d", dslOjb.ClassNum))
 
-		out, err := cmd.Output()
-		if err != nil {
-			panic(err.Error())
-		}
-		result := strings.Split(strings.TrimSpace(string(out)), "\n")
-		logger.Log.Println("[JobManager]: KttScheduler return with:", result)
-		label := result[0]
-		if strings.Contains(label, "OK") {
-			var resultInt []int
-			for _, ele := range result[1:] {
-				re, _ := strconv.Atoi(ele)
-				resultInt = append(resultInt, re)
-			}
-			sp.LimeOriModelPredictionParallelism = resultInt[0]
-			sp.LimeInstanceWeightParallelism = resultInt[1]
-			sp.LimeFeatureSelectionParallelism = resultInt[2]
-			sp.LimeVFLModelTrainParallelism = resultInt[3]
-			sp.LimeClassParallelism = resultInt[4]
+		if dslOjb.DistributedTask.Average == 1 {
+			averageWorker := dslOjb.DistributedTask.WorkerNumber / 5
+			sp.LimeOriModelPredictionParallelism = averageWorker
+			sp.LimeInstanceWeightParallelism = averageWorker
+			sp.LimeFeatureSelectionParallelism = averageWorker
+			sp.LimeVFLModelTrainParallelism = averageWorker
+			sp.LimeClassParallelism = averageWorker
 			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 			return true
-		} else if strings.Contains(label, "ERROR") {
-			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
-			return false
 		} else {
-			panic("KttScheduler.py return un-recognized result")
+
+			// if many stage. run scheduler
+			cmd := exec.Command(
+				"python3",
+				"autoscale/KttScheduler.py",
+				"-w", fmt.Sprintf("%d", workerNum),
+				"-d", "100000",
+				"-c", fmt.Sprintf("%d", dslOjb.ClassNum))
+
+			out, err := cmd.Output()
+			if err != nil {
+				panic(err.Error())
+			}
+			result := strings.Split(strings.TrimSpace(string(out)), "\n")
+			logger.Log.Println("[JobManager]: KttScheduler return with:", result)
+			label := result[0]
+			if strings.Contains(label, "OK") {
+				var resultInt []int
+				for _, ele := range result[1:] {
+					re, _ := strconv.Atoi(ele)
+					resultInt = append(resultInt, re)
+				}
+				sp.LimeOriModelPredictionParallelism = resultInt[0]
+				sp.LimeInstanceWeightParallelism = resultInt[1]
+				sp.LimeFeatureSelectionParallelism = resultInt[2]
+				sp.LimeVFLModelTrainParallelism = resultInt[3]
+				sp.LimeClassParallelism = resultInt[4]
+				logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
+				return true
+			} else if strings.Contains(label, "ERROR") {
+				logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
+				return false
+			} else {
+				panic("KttScheduler.py return un-recognized result")
+			}
 		}
 	}
 }

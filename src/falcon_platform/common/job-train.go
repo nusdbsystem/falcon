@@ -47,6 +47,7 @@ type PartyPath struct {
 type DistributedTask struct {
 	Enable       int `json:"enable"`
 	WorkerNumber int `json:"worker_number"`
+	Average      int `json:"average"`
 }
 
 type Tasks struct {
