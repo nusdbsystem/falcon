@@ -116,7 +116,7 @@ func RunWorker(masterAddr, workerType,
 			resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
 			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0, stageName)
 			resourceSVC.ExecutorPSPort = 0
-			resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerPreGroup - 1)
+			resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerPreGroup)
 			resourceSVC.DistributedRole = common.DistributedParameterServer
 			reply.ResourceSVCs[workerId] = resourceSVC
 			if common.Deployment == common.Docker {
