@@ -5,11 +5,9 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
-	"falcon_platform/utils"
 	"fmt"
 	"os/exec"
 	"strings"
-	"time"
 )
 
 // run master in a docker
@@ -90,13 +88,14 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 	// 1. generate service name
 	var serviceName string
 	roleName := common.DistributedRoleToName(distributedRole)
+	var localTaskRuntimeLogs string
 	if workerType == common.TrainWorker {
 		serviceName =
 			"pty" + fmt.Sprintf("%d-", common.PartyID) +
 				roleName + fmt.Sprintf("%d", resourceSVC.WorkerId) +
 				"-job" + jobId +
 				"-tr-" + stageName
-		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
+		localTaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
 
 		logger.Log.Println("[JobManager]: Current in docker, TrainWorker, svcName", serviceName)
 
@@ -106,13 +105,13 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 				roleName + fmt.Sprintf("%d", resourceSVC.WorkerId) +
 				"-job" + jobId +
 				"-predict-" + stageName
-		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
+		localTaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
 
 		logger.Log.Println("[JobManager]: Current in docker, InferenceWorker, svcName", serviceName)
 	}
 
-	logger.Log.Println("[JobManager]: common.TaskRuntimeLogs is ", common.TaskRuntimeLogs)
-	//ee := os.MkdirAll(common.TaskRuntimeLogs, os.ModePerm)
+	logger.Log.Println("[JobManager]: localTaskRuntimeLogs is ", localTaskRuntimeLogs)
+	//ee := os.MkdirAll(localTaskRuntimeLogs, os.ModePerm)
 	//if ee != nil {
 	//	logger.Log.Fatalln("[JobManager]: Creating TaskRuntimeLogs folder error", ee)
 	//}
@@ -170,7 +169,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
 			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
 			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
-			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
+			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", localTaskRuntimeLogs),
 			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
 			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
 			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
@@ -215,7 +214,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
 			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
 			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
-			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
+			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", localTaskRuntimeLogs),
 			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
 			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
 			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
@@ -260,7 +259,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
 			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
 			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
-			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
+			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", localTaskRuntimeLogs),
 			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
 			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
 			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
@@ -291,224 +290,224 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 
 }
 
-func DeployWorkerDockerContainer(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string,
-	resourceSVC *common.ResourceSVC, distributedRole uint, nodeLabel string) {
-
-	workerAddr := resourceSVC.ToAddr(resourceSVC.WorkerPort)
-
-	// 1. generate service name
-	var serviceName string
-	roleName := common.DistributedRoleToName(distributedRole)
-	if workerType == common.TrainWorker {
-		serviceName =
-			"party" + fmt.Sprintf("%d-", common.PartyID) +
-				roleName + fmt.Sprintf("%d", resourceSVC.WorkerId) +
-				"-job" + jobId +
-				"-train"
-		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
-
-		logger.Log.Println("[JobManager]: Current in docker, TrainWorker, svcName", serviceName)
-
-	} else if workerType == common.InferenceWorker {
-		serviceName =
-			"party" + fmt.Sprintf("%d-", common.PartyID) +
-				roleName + fmt.Sprintf("%d", resourceSVC.WorkerId) +
-				"-job" + jobId +
-				"-predict"
-		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
-
-		logger.Log.Println("[JobManager]: Current in docker, InferenceWorker, svcName", serviceName)
-	}
-
-	logger.Log.Println("[JobManager]: common.TaskRuntimeLogs is ", common.TaskRuntimeLogs)
-	//ee := os.MkdirAll(common.TaskRuntimeLogs, os.ModePerm)
-	//if ee != nil {
-	//	logger.Log.Fatalln("[JobManager]: Creating TaskRuntimeLogs folder error", ee)
-	//}
-
-	var usedImage string
-	if common.IsDebug == common.DebugOn {
-		fmt.Println(common.TestImgName)
-		usedImage = common.TestImgName
-	} else {
-		usedImage = common.FalconDockerImgName
-	}
-
-	var absLogPath []rune
-	absLogPath = []rune(common.LogPath)
-	if absLogPath[0] == '.' {
-		absLogPath = absLogPath[1:]
-	}
-
-	var dockerCmd *exec.Cmd
-
-	// 2. generate cmd
-	// retrieve envs from the current partyServer envs, and assign them to worker container
-	// such that worker process can read them from container
-	// port mapping
-	//currentPath, _ := os.Getwd()
-	currentTime := time.Now().Unix()
-
-	if distributedRole == common.CentralizedWorker {
-		// if CentralizedWorker, 3 port needed, one communicate with master, one for falcon, one for mpc
-		logger.Log.Println("[JobManager]: CentralizedWorker, map 2 ports to host")
-
-		logger.Log.Printf("[JobManager]: CentralizedWorker, WorkerPort is %d, ExecutorExecutorPort is %d,\n",
-			resourceSVC.WorkerPort, resourceSVC.ExecutorExecutorPort)
-
-		dockerCmd = exec.Command(
-			"docker", "run",
-			"-d",
-			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
-			"--net", "host",
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.WorkerPort, resourceSVC.WorkerPort),
-			"-p", fmt.Sprintf("%d-%d:%d-%d",
-				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort),
-				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort)),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.MpcMpcPort, resourceSVC.MpcMpcPort),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.MpcExecutorPort+common.PortType(common.PartyID), resourceSVC.MpcExecutorPort+common.PortType(common.PartyID)),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", dataPath)+
-				fmt.Sprintf(",destination=%s", common.DataPathContainer),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", dataOutput)+
-				fmt.Sprintf(",destination=%s", common.DataOutputPathContainer),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", modelPath)+
-				fmt.Sprintf(",destination=%s", common.ModelPathContainer),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", string(absLogPath))+
-				fmt.Sprintf(",destination=%s", string(absLogPath)),
-			"--env", fmt.Sprintf("ENV=%s", common.Docker),
-			"--env", fmt.Sprintf("SERVICE_NAME=%s", workerType),
-			"--env", fmt.Sprintf("LOG_PATH=%s", common.LogPath),
-			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
-			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
-			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
-			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
-			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
-			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
-			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
-			"--env", fmt.Sprintf("PARTY_ID=%s", fmt.Sprintf("%d", common.PartyID)),
-			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
-			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
-			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
-			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
-			"-e", fmt.Sprintf("constraint.labels.name==%s", nodeLabel),
-			usedImage,
-		)
-
-	} else if distributedRole == common.DistributedWorker {
-		// if DistributedWorker, 4 port needed, one communicate with master, one for falcon, one for mpc, one for ps
-		logger.Log.Println("[JobManager]: DistributedWorker, map 3 ports to host")
-
-		logger.Log.Printf("[JobManager]: DistributedWorker, WorkerPort is %d, ExecutorExecutorPort is %d, ExecutorPSPort is %d\n",
-			resourceSVC.WorkerPort, resourceSVC.ExecutorExecutorPort, resourceSVC.ExecutorPSPort)
-
-		dockerCmd = exec.Command(
-			"docker", "run",
-			"-d",
-			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
-			"--net", "host",
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.WorkerPort, resourceSVC.WorkerPort),
-			"-p", fmt.Sprintf("%d-%d:%d-%d",
-				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort),
-				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort)),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.MpcMpcPort, resourceSVC.MpcMpcPort),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.MpcExecutorPort+common.PortType(common.PartyID), resourceSVC.MpcExecutorPort+common.PortType(common.PartyID)),
-			"--publish", fmt.Sprintf("published=%d,target=%d",
-				resourceSVC.ExecutorPSPort, resourceSVC.ExecutorPSPort),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", dataPath)+
-				fmt.Sprintf(",destination=%s", common.DataPathContainer),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", dataOutput)+
-				fmt.Sprintf(",destination=%s", common.DataOutputPathContainer),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", modelPath)+
-				fmt.Sprintf(",destination=%s", common.ModelPathContainer),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", string(absLogPath))+
-				fmt.Sprintf(",destination=%s", string(absLogPath)),
-			"--env", fmt.Sprintf("ENV=%s", common.LocalThread),
-			"--env", fmt.Sprintf("SERVICE_NAME=%s", workerType),
-			"--env", fmt.Sprintf("LOG_PATH=%s", common.LogPath),
-			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
-			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
-			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
-			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
-			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
-			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
-			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
-			"--env", fmt.Sprintf("PARTY_ID=%s", fmt.Sprintf("%d", common.PartyID)),
-			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
-			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
-			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
-			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
-			"-e", fmt.Sprintf("constraint.labels.name==%s", nodeLabel),
-			usedImage,
-		)
-
-	} else if distributedRole == common.DistributedParameterServer {
-		// if DistributedParameterServer, 2 port needed, one communicate with master, one train worker
-		logger.Log.Println("[JobManager]: DistributedParameterServer, map 2 ports to host")
-
-		logger.Log.Printf("[JobManager]: DistributedParameterServer, WorkerPort is %d, PsExecutorPorts is %v \n",
-			resourceSVC.WorkerPort, resourceSVC.PsExecutorPorts)
-
-		dockerCmd = exec.Command(
-			"docker", "run",
-			"-d",
-			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
-			"--net", "host",
-			"-p", fmt.Sprintf("%d-%d:%d-%d",
-				utils.MinV(resourceSVC.PsExecutorPorts), utils.MaxV(resourceSVC.PsExecutorPorts),
-				utils.MinV(resourceSVC.PsExecutorPorts), utils.MaxV(resourceSVC.PsExecutorPorts)),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", dataPath)+
-				fmt.Sprintf(",destination=%s", common.DataPathContainer),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", dataOutput)+
-				fmt.Sprintf(",destination=%s", common.DataOutputPathContainer),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", modelPath)+
-				fmt.Sprintf(",destination=%s", common.ModelPathContainer),
-			"--mount", "type=bind,"+
-				fmt.Sprintf("source=%s", string(absLogPath))+
-				fmt.Sprintf(",destination=%s", string(absLogPath)),
-			"--env", fmt.Sprintf("ENV=%s", common.LocalThread),
-			"--env", fmt.Sprintf("SERVICE_NAME=%s", workerType),
-			"--env", fmt.Sprintf("LOG_PATH=%s", common.LogPath),
-			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
-			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
-			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
-			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", common.TaskRuntimeLogs),
-			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
-			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
-			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
-			"--env", fmt.Sprintf("PARTY_ID=%s", fmt.Sprintf("%d", common.PartyID)),
-			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
-			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
-			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
-			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
-			"-e", fmt.Sprintf("constraint.labels.name==%s", nodeLabel),
-			usedImage,
-		)
-
-	}
-
-	rm := resourcemanager.InitResourceManager()
-
-	go func() {
-		defer logger.HandleErrors()
-		rm.CreateResources(resourcemanager.InitDockerManager(), dockerCmd)
-		rm.ReleaseResources()
-	}()
-
-}
+//func DeployWorkerDockerContainer(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string,
+//	resourceSVC *common.ResourceSVC, distributedRole uint, nodeLabel string) {
+//
+//	workerAddr := resourceSVC.ToAddr(resourceSVC.WorkerPort)
+//
+//	// 1. generate service name
+//	var serviceName string
+//	roleName := common.DistributedRoleToName(distributedRole)
+//	if workerType == common.TrainWorker {
+//		serviceName =
+//			"party" + fmt.Sprintf("%d-", common.PartyID) +
+//				roleName + fmt.Sprintf("%d", resourceSVC.WorkerId) +
+//				"-job" + jobId +
+//				"-train"
+//		localTaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
+//
+//		logger.Log.Println("[JobManager]: Current in docker, TrainWorker, svcName", serviceName)
+//
+//	} else if workerType == common.InferenceWorker {
+//		serviceName =
+//			"party" + fmt.Sprintf("%d-", common.PartyID) +
+//				roleName + fmt.Sprintf("%d", resourceSVC.WorkerId) +
+//				"-job" + jobId +
+//				"-predict"
+//		localTaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
+//
+//		logger.Log.Println("[JobManager]: Current in docker, InferenceWorker, svcName", serviceName)
+//	}
+//
+//	logger.Log.Println("[JobManager]: localTaskRuntimeLogs is ", localTaskRuntimeLogs)
+//	//ee := os.MkdirAll(localTaskRuntimeLogs, os.ModePerm)
+//	//if ee != nil {
+//	//	logger.Log.Fatalln("[JobManager]: Creating TaskRuntimeLogs folder error", ee)
+//	//}
+//
+//	var usedImage string
+//	if common.IsDebug == common.DebugOn {
+//		fmt.Println(common.TestImgName)
+//		usedImage = common.TestImgName
+//	} else {
+//		usedImage = common.FalconDockerImgName
+//	}
+//
+//	var absLogPath []rune
+//	absLogPath = []rune(common.LogPath)
+//	if absLogPath[0] == '.' {
+//		absLogPath = absLogPath[1:]
+//	}
+//
+//	var dockerCmd *exec.Cmd
+//
+//	// 2. generate cmd
+//	// retrieve envs from the current partyServer envs, and assign them to worker container
+//	// such that worker process can read them from container
+//	// port mapping
+//	//currentPath, _ := os.Getwd()
+//	currentTime := time.Now().Unix()
+//
+//	if distributedRole == common.CentralizedWorker {
+//		// if CentralizedWorker, 3 port needed, one communicate with master, one for falcon, one for mpc
+//		logger.Log.Println("[JobManager]: CentralizedWorker, map 2 ports to host")
+//
+//		logger.Log.Printf("[JobManager]: CentralizedWorker, WorkerPort is %d, ExecutorExecutorPort is %d,\n",
+//			resourceSVC.WorkerPort, resourceSVC.ExecutorExecutorPort)
+//
+//		dockerCmd = exec.Command(
+//			"docker", "run",
+//			"-d",
+//			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
+//			"--net", "host",
+//			"--publish", fmt.Sprintf("published=%d,target=%d",
+//				resourceSVC.WorkerPort, resourceSVC.WorkerPort),
+//			"-p", fmt.Sprintf("%d-%d:%d-%d",
+//				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort),
+//				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort)),
+//			"--publish", fmt.Sprintf("published=%d,target=%d",
+//				resourceSVC.MpcMpcPort, resourceSVC.MpcMpcPort),
+//			"--publish", fmt.Sprintf("published=%d,target=%d",
+//				resourceSVC.MpcExecutorPort+common.PortType(common.PartyID), resourceSVC.MpcExecutorPort+common.PortType(common.PartyID)),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", dataPath)+
+//				fmt.Sprintf(",destination=%s", common.DataPathContainer),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", dataOutput)+
+//				fmt.Sprintf(",destination=%s", common.DataOutputPathContainer),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", modelPath)+
+//				fmt.Sprintf(",destination=%s", common.ModelPathContainer),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", string(absLogPath))+
+//				fmt.Sprintf(",destination=%s", string(absLogPath)),
+//			"--env", fmt.Sprintf("ENV=%s", common.Docker),
+//			"--env", fmt.Sprintf("SERVICE_NAME=%s", workerType),
+//			"--env", fmt.Sprintf("LOG_PATH=%s", common.LogPath),
+//			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
+//			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
+//			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
+//			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", localTaskRuntimeLogs),
+//			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
+//			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
+//			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
+//			"--env", fmt.Sprintf("PARTY_ID=%s", fmt.Sprintf("%d", common.PartyID)),
+//			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
+//			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
+//			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
+//			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
+//			"-e", fmt.Sprintf("constraint.labels.name==%s", nodeLabel),
+//			usedImage,
+//		)
+//
+//	} else if distributedRole == common.DistributedWorker {
+//		// if DistributedWorker, 4 port needed, one communicate with master, one for falcon, one for mpc, one for ps
+//		logger.Log.Println("[JobManager]: DistributedWorker, map 3 ports to host")
+//
+//		logger.Log.Printf("[JobManager]: DistributedWorker, WorkerPort is %d, ExecutorExecutorPort is %d, ExecutorPSPort is %d\n",
+//			resourceSVC.WorkerPort, resourceSVC.ExecutorExecutorPort, resourceSVC.ExecutorPSPort)
+//
+//		dockerCmd = exec.Command(
+//			"docker", "run",
+//			"-d",
+//			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
+//			"--net", "host",
+//			"--publish", fmt.Sprintf("published=%d,target=%d",
+//				resourceSVC.WorkerPort, resourceSVC.WorkerPort),
+//			"-p", fmt.Sprintf("%d-%d:%d-%d",
+//				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort),
+//				utils.MinV(resourceSVC.ExecutorExecutorPort), utils.MaxV(resourceSVC.ExecutorExecutorPort)),
+//			"--publish", fmt.Sprintf("published=%d,target=%d",
+//				resourceSVC.MpcMpcPort, resourceSVC.MpcMpcPort),
+//			"--publish", fmt.Sprintf("published=%d,target=%d",
+//				resourceSVC.MpcExecutorPort+common.PortType(common.PartyID), resourceSVC.MpcExecutorPort+common.PortType(common.PartyID)),
+//			"--publish", fmt.Sprintf("published=%d,target=%d",
+//				resourceSVC.ExecutorPSPort, resourceSVC.ExecutorPSPort),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", dataPath)+
+//				fmt.Sprintf(",destination=%s", common.DataPathContainer),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", dataOutput)+
+//				fmt.Sprintf(",destination=%s", common.DataOutputPathContainer),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", modelPath)+
+//				fmt.Sprintf(",destination=%s", common.ModelPathContainer),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", string(absLogPath))+
+//				fmt.Sprintf(",destination=%s", string(absLogPath)),
+//			"--env", fmt.Sprintf("ENV=%s", common.LocalThread),
+//			"--env", fmt.Sprintf("SERVICE_NAME=%s", workerType),
+//			"--env", fmt.Sprintf("LOG_PATH=%s", common.LogPath),
+//			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
+//			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
+//			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
+//			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", localTaskRuntimeLogs),
+//			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
+//			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
+//			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
+//			"--env", fmt.Sprintf("PARTY_ID=%s", fmt.Sprintf("%d", common.PartyID)),
+//			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
+//			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
+//			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
+//			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
+//			"-e", fmt.Sprintf("constraint.labels.name==%s", nodeLabel),
+//			usedImage,
+//		)
+//
+//	} else if distributedRole == common.DistributedParameterServer {
+//		// if DistributedParameterServer, 2 port needed, one communicate with master, one train worker
+//		logger.Log.Println("[JobManager]: DistributedParameterServer, map 2 ports to host")
+//
+//		logger.Log.Printf("[JobManager]: DistributedParameterServer, WorkerPort is %d, PsExecutorPorts is %v \n",
+//			resourceSVC.WorkerPort, resourceSVC.PsExecutorPorts)
+//
+//		dockerCmd = exec.Command(
+//			"docker", "run",
+//			"-d",
+//			"--name", fmt.Sprintf("%s-time-%d", serviceName, currentTime),
+//			"--net", "host",
+//			"-p", fmt.Sprintf("%d-%d:%d-%d",
+//				utils.MinV(resourceSVC.PsExecutorPorts), utils.MaxV(resourceSVC.PsExecutorPorts),
+//				utils.MinV(resourceSVC.PsExecutorPorts), utils.MaxV(resourceSVC.PsExecutorPorts)),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", dataPath)+
+//				fmt.Sprintf(",destination=%s", common.DataPathContainer),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", dataOutput)+
+//				fmt.Sprintf(",destination=%s", common.DataOutputPathContainer),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", modelPath)+
+//				fmt.Sprintf(",destination=%s", common.ModelPathContainer),
+//			"--mount", "type=bind,"+
+//				fmt.Sprintf("source=%s", string(absLogPath))+
+//				fmt.Sprintf(",destination=%s", string(absLogPath)),
+//			"--env", fmt.Sprintf("ENV=%s", common.LocalThread),
+//			"--env", fmt.Sprintf("SERVICE_NAME=%s", workerType),
+//			"--env", fmt.Sprintf("LOG_PATH=%s", common.LogPath),
+//			"--env", fmt.Sprintf("TASK_DATA_PATH=%s", common.DataPathContainer),
+//			"--env", fmt.Sprintf("TASK_MODEL_PATH=%s", common.ModelPathContainer),
+//			"--env", fmt.Sprintf("TASK_DATA_OUTPUT=%s", common.DataOutputPathContainer),
+//			"--env", fmt.Sprintf("RUN_TIME_LOGS=%s", localTaskRuntimeLogs),
+//			"--env", fmt.Sprintf("WORKER_ADDR=%s", workerAddr),
+//			"--env", fmt.Sprintf("MASTER_ADDR=%s", masterAddr),
+//			"--env", fmt.Sprintf("WORKER_ID=%s", fmt.Sprintf("%d", resourceSVC.WorkerId)),
+//			"--env", fmt.Sprintf("PARTY_ID=%s", fmt.Sprintf("%d", common.PartyID)),
+//			"--env", fmt.Sprintf("DISTRIBUTED_ROLE=%s", fmt.Sprintf("%d", distributedRole)),
+//			"--env", fmt.Sprintf("EXECUTOR_TYPE=%s", workerType),
+//			"--env", fmt.Sprintf("MPC_EXE_PATH=%s", common.MpcExePath),
+//			"--env", fmt.Sprintf("FL_ENGINE_PATH=%s", common.FLEnginePath),
+//			"-e", fmt.Sprintf("constraint.labels.name==%s", nodeLabel),
+//			usedImage,
+//		)
+//
+//	}
+//
+//	rm := resourcemanager.InitResourceManager()
+//
+//	go func() {
+//		defer logger.HandleErrors()
+//		rm.CreateResources(resourcemanager.InitDockerManager(), dockerCmd)
+//		rm.ReleaseResources()
+//	}()
+//
+//}
