@@ -5,7 +5,6 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/jobmanager/worker"
 	"falcon_platform/logger"
-	"falcon_platform/resourcemanager"
 )
 
 /**
@@ -19,7 +18,7 @@ func DeployMasterThread(dslOjb *cache.DslObj, workerType string) {
 	// call party server to launch workers
 	ManageJobLifeCycle(dslOjb, workerType)
 
-	resourcemanager.DeleteAll()
+	//resourcemanager.DeleteAll()
 }
 
 /**
