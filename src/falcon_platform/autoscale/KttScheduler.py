@@ -51,7 +51,16 @@ def time_constraint(x):
     return deadLine - measure_total_time(x)
 
 def measure_total_worker(x):
-    return 1 + x[0] + x[1] + x[2] * (x[3] + x[4])
+    ps_num = 0
+    if x[0] > 1:
+        ps_num += 1
+    if x[1] > 1:
+        ps_num += 1
+    if x[3] > 1:
+        ps_num += classNum
+    if x[4] > 1:
+        ps_num += classNum
+    return ps_num + 1 + x[0] + x[1] + x[2] * (x[3] + x[4])
 
 
 def measure_total_time(x):
@@ -199,7 +208,7 @@ def schedule():
 def main():
     import argparse
 
-    defaultWorker = 19
+    defaultWorker = 40
     defaultDeadline = 18901
     defaultClass = 4
 
