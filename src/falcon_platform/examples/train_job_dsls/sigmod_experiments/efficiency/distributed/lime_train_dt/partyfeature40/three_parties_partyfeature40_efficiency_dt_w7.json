@@ -51,8 +51,8 @@
           "key": "partyfeature40_phe_keys"
         },
         "algorithm_config": {
-          "selected_data_file": "/synthesis_nclass2_nfeaturepaty30_nparty3_nsample4000_party.csv",
-          "selected_predictions_file": "/synthesis_nclass2_nfeaturepaty30_nparty3_nsample4000_targets_full.csv.ciphertext",
+          "selected_data_file": "/synthesis_nclass2_nfeaturepaty40_nparty3_nsample4000_party.csv",
+          "selected_predictions_file": "/synthesis_nclass2_nfeaturepaty40_nparty3_nsample4000_targets_full.csv.ciphertext",
           "sample_weights_file": "/synthesis_partyfeature40_sample_weights.txt",
           "num_samples": 4000,
           "class_num": 2,
