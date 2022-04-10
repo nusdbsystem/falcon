@@ -273,7 +273,7 @@ func (mngr *DockerSdkMngr) DeleteResource(resource interface{}) {
  * @Param resource:
  * @return
  **/
-func (mngr *DockerSdkMngr) DeleteAll() {
+func DeleteAll() {
 	// stop all containers
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
