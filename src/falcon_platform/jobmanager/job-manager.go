@@ -92,13 +92,15 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 		return
 	}
 
+	statusPrediction := true
+	statusWeight := true
 	wg23 := sync.WaitGroup{}
 	if stage, ok := dagScheduler.Stages[common.LimePredStage]; ok {
 		wg23.Add(1)
 		go func(dslOjb *cache.DslObj, workerType string, stage *DAGscheduler.TaskStage, wg23 *sync.WaitGroup, status *bool) {
 			*status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
 			wg23.Done()
-		}(dslOjb, workerType, &stage, &wg23, &status)
+		}(dslOjb, workerType, &stage, &wg23, &statusPrediction)
 	}
 
 	if stage, ok := dagScheduler.Stages[common.LimeWeightStage]; ok {
@@ -106,11 +108,11 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 		go func(dslOjb *cache.DslObj, workerType string, stage *DAGscheduler.TaskStage, wg23 *sync.WaitGroup, status *bool) {
 			*status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
 			wg23.Done()
-		}(dslOjb, workerType, &stage, &wg23, &status)
+		}(dslOjb, workerType, &stage, &wg23, &statusWeight)
 	}
 	wg23.Wait()
-	logger.Log.Printf("[JobManager]: stage LimeWeightStage or LimePredStage status = %d\n", status)
-	if !status {
+	logger.Log.Printf("[JobManager]: stage LimeWeightStage or LimePredStage status = %d\n", statusPrediction && statusWeight)
+	if !(statusPrediction && statusWeight) {
 		return
 	}
 	var classNum int
