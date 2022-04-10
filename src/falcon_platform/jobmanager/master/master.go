@@ -186,7 +186,7 @@ func (master *Master) ExtractResourceInformation() {
 	for partyIndex, LaunchResourceReply := range master.RequiredResource {
 		partyID := LaunchResourceReply.PartyID
 		// there are only 1 ps in each party's group in distributed train
-		trainWorkerPreGroup := LaunchResourceReply.ResourceNumPreGroup
+		trainWorkerPreGroup := LaunchResourceReply.ResourceNumPreGroup - 1
 		master.Logger.Println("[Master.extractResourceInfo] -----debug-----trainWorkerPreGroup:", trainWorkerPreGroup)
 
 		// get sorted work id

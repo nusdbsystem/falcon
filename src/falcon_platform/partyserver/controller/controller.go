@@ -29,6 +29,7 @@ func RunWorker(masterAddr, workerType,
 	enableDistributedTrain int,
 	workerPreGroup, partyNum, workerGroupNum int, stageName string) *common.LaunchResourceReply {
 
+	// add 1 ps to each worker group
 	reply := new(common.LaunchResourceReply)
 	reply.ResourceNum = workerGroupNum * workerPreGroup
 	reply.ResourceNumPreGroup = workerPreGroup
@@ -116,7 +117,7 @@ func RunWorker(masterAddr, workerType,
 			resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
 			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0, stageName)
 			resourceSVC.ExecutorPSPort = 0
-			resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerPreGroup)
+			resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerPreGroup - 1)
 			resourceSVC.DistributedRole = common.DistributedParameterServer
 			reply.ResourceSVCs[workerId] = resourceSVC
 			if common.Deployment == common.Docker {
@@ -137,7 +138,7 @@ func RunWorker(masterAddr, workerType,
 			workerId++
 
 			// other workers are for serving train worker
-			for ii := 0; ii < workerPreGroup; ii++ {
+			for ii := 1; ii < workerPreGroup; ii++ {
 
 				logger.Log.Printf("[PartyServer]: PartyServer setup one worker %d as train worker "+
 					"to conduct distributed training\n", workerId)

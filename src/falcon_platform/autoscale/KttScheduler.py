@@ -51,16 +51,19 @@ def time_constraint(x):
     return deadLine - measure_total_time(x)
 
 def measure_total_worker(x):
-    ps_num = 0
+    ps0 = 0
+    ps1 = 0
+    ps3 = 0
+    ps4 = 0
     if x[0] > 1:
-        ps_num += 1
+        ps0 += 1
     if x[1] > 1:
-        ps_num += 1
+        ps1 += 1
     if x[3] > 1:
-        ps_num += classNum
+        ps3 += 1
     if x[4] > 1:
-        ps_num += classNum
-    return ps_num + 1 + x[0] + x[1] + x[2] * (x[3] + x[4])
+        ps4 += 1
+    return 1 + x[0]+ps0 + x[1]+ps1 + x[2] * (x[3]+ps3 + x[4]+ps4)
 
 
 def measure_total_time(x):
@@ -194,10 +197,30 @@ def schedule():
 
     if len(WorkerResult) > 0:
         print("OK,", "worker_used=", measure_total_worker(WorkerResult), ", time_used=", measure_total_time(WorkerResult))
-        print(str(int(WorkerResult[0]))) # prediction
-        print(str(int(WorkerResult[1]))) # instance weighting
-        print(str(int(WorkerResult[3]))) # feature selection
-        print(str(int(WorkerResult[4]))) # vfl training
+        # prediction
+        if int(WorkerResult[0]) > 1:
+            print(str(int(WorkerResult[0])+1))
+        else:
+            print(str(int(WorkerResult[0])))
+
+        # instance weighting
+        if int(WorkerResult[1]) > 1:
+            print(str(int(WorkerResult[1])+1))
+        else:
+            print(str(int(WorkerResult[1])))
+
+        # feature selection
+        if int(WorkerResult[3]) > 1:
+            print(str(int(WorkerResult[3])+1))
+        else:
+            print(str(int(WorkerResult[3])))
+
+        # vfl training
+        if int(WorkerResult[4]) > 1:
+            print(str(int(WorkerResult[4])+1))
+        else:
+            print(str(int(WorkerResult[4])))
+
         print(str(int(WorkerResult[2]))) # class parallelism
     else:
         print("ERROR")
@@ -208,7 +231,7 @@ def schedule():
 def main():
     import argparse
 
-    defaultWorker = 40
+    defaultWorker = 14
     defaultDeadline = 18901
     defaultClass = 4
 
