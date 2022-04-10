@@ -69,6 +69,7 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 		// 1. generate master address
 		status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
 	}
+	logger.Log.Printf("[JobManager]: stage PreProcStage status = %d\n", status)
 	if !status {
 		return
 	}
@@ -77,6 +78,7 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 		// 1. generate master address
 		status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
 	}
+	logger.Log.Printf("[JobManager]: stage ModelTrainStage status = %d\n", status)
 	if !status {
 		return
 	}
@@ -85,6 +87,7 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 		// 1. generate master address
 		status = ManageTaskLifeCycle(dslOjb, workerType, stage.Name, stage.TasksParallelism, len(stage.TasksParallelism), stage.AssignedWorker, string(stage.Name))
 	}
+	logger.Log.Printf("[JobManager]: stage LimeInstanceSampleStage status = %d\n", status)
 	if !status {
 		return
 	}
@@ -106,6 +109,7 @@ func ManageJobLifeCycle(dslOjb *cache.DslObj, workerType string) {
 		}(dslOjb, workerType, &stage, &wg23, &status)
 	}
 	wg23.Wait()
+	logger.Log.Printf("[JobManager]: stage LimeWeightStage or LimePredStage status = %d\n", status)
 	if !status {
 		return
 	}
