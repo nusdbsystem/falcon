@@ -83,7 +83,7 @@ func (rm *ResourceManager) CreateResources(mngr ManagerInterface, cmd interface{
 		&rm.TaskStatus, &rm.RunTimeErrorLog)
 
 	if len(rm.RunTimeErrorLog) != 0 {
-		logger.Log.Printf("[ResourceManager]: CreateResources error msg is: \n============> \n%s \n<============\n", rm.RunTimeErrorLog)
+		logger.Log.Printf("[ResourceManager]: TaskStatus is marked as = %s, CreateResources error msg is: \n============> \n%s \n<============\n", rm.TaskStatus, rm.RunTimeErrorLog)
 	}
 }
 
