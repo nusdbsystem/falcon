@@ -194,7 +194,17 @@ func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName comm
 
 	masterPort := resourcemanager.GetFreePort(1)[0]
 	masterAddr := common.CoordIP + ":" + fmt.Sprintf("%d", masterPort)
-	//logger.Log.Println("dslOjb = ", dslOjb)
+
+	// update distributed information
+	if assignedWorker == 1 {
+		// if assignedWorker = 1 disable distributed
+		dslOjb.DistributedTask.Enable = 0
+	} else {
+		// if assignedWorker > 1 disable distributed
+		dslOjb.DistributedTask.Enable = 1
+	}
+	dslOjb.DistributedTask.WorkerNumber = assignedWorker
+
 	masterIns := master.RunMaster(masterAddr, dslOjb, workerType, stageName, stageNameLog)
 	masterIns.Logger.Printf("[JobManager]: Assign port %d to master, run task=%s\n", masterPort, stageName)
 	masterIns.Logger.Printf("[JobManager] begin ManageJobLifeCycle, masterAddr=%s, stageName=%s, groupNum=%s, tasksParallelism=%d\n", masterAddr, stageNameLog, groupNum, tasksParallelism)
@@ -206,16 +216,6 @@ func ManageTaskLifeCycle(dslOjb *cache.DslObj, workerType string, stageName comm
 	} else if workerType == common.InferenceWorker {
 		client.InferenceUpdateMaster(common.CoordAddr, masterAddr, dslOjb.JobId)
 	}
-
-	// update distributed information
-	if assignedWorker == 1 {
-		// if assignedWorker = 1 disable distributed
-		dslOjb.DistributedTask.Enable = 0
-	} else {
-		// if assignedWorker > 1 disable distributed
-		dslOjb.DistributedTask.Enable = 1
-	}
-	dslOjb.DistributedTask.WorkerNumber = assignedWorker
 
 	// default use only 1 worker in centralized way.
 	// in distributed training/inference, each party will launch multiple workers, and default use only 1 ps
