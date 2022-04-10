@@ -27,7 +27,7 @@ func RunWorker(masterAddr, workerType,
 	jobId,
 	dataPath, modelPath, dataOutput string,
 	enableDistributedTrain int,
-	workerPreGroup, partyNum, workerGroupNum int, stageName string) *common.LaunchResourceReply {
+	workerPreGroup, partyNum, workerGroupNum int, stageName string, classId int) *common.LaunchResourceReply {
 
 	// add 1 ps to each worker group
 	reply := new(common.LaunchResourceReply)
@@ -63,7 +63,7 @@ func RunWorker(masterAddr, workerType,
 		resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
 		resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
 		resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
-		resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId), stageName)
+		resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId), stageName, classId)
 		resourceSVC.ExecutorPSPort = 0
 		resourceSVC.PsExecutorPorts = []common.PortType{}
 		//resourceSVC.PsPsPorts = []common.PortType{}
@@ -115,7 +115,7 @@ func RunWorker(masterAddr, workerType,
 			resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
 			resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
 			resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
-			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0, stageName)
+			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0, stageName, classId)
 			resourceSVC.ExecutorPSPort = 0
 			resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerPreGroup - 1)
 			resourceSVC.DistributedRole = common.DistributedParameterServer
@@ -154,7 +154,7 @@ func RunWorker(masterAddr, workerType,
 				resourceSVC.WorkerPort = resourcemanager.GetFreePort(1)[0]
 				resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
 				resourceSVC.MpcMpcPort = resourcemanager.GetFreePort(1)[0]
-				resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId), stageName)
+				resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId), stageName, classId)
 				resourceSVC.ExecutorPSPort = resourcemanager.GetFreePort(1)[0]
 				resourceSVC.PsExecutorPorts = []common.PortType{}
 				resourceSVC.DistributedRole = common.DistributedWorker

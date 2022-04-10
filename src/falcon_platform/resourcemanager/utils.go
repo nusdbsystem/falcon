@@ -66,7 +66,7 @@ func CheckPort(port common.PortType) error {
 	return nil
 }
 
-func GetMpcExecutorPort(workerID int, stageName string) common.PortType {
+func GetMpcExecutorPort(workerID int, stageName string, classID int) common.PortType {
 	stagePrefix := 1
 	if stageName == string(common.PreProcStage) {
 		stagePrefix = 2
@@ -98,9 +98,9 @@ func GetMpcExecutorPort(workerID int, stageName string) common.PortType {
 		stagePrefix = 8
 	}
 
-	prefix := stagePrefix*10 + workerID
+	prefix := stagePrefix*1000 + workerID*100 + classID*10
 
-	return common.PortType(common.MpcExecutorBasePort + prefix*10)
+	return common.PortType(common.MpcExecutorBasePort + prefix)
 }
 
 // get many ports

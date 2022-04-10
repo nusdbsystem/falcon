@@ -111,7 +111,7 @@ func (mngr *SubProcessManager) CreateResource(
 		mux.Lock()
 		*TaskStatus = common.TaskFailed
 		mux.Unlock()
-		logger.Log.Printf("[subProcessMngr]: cmd.Process is Nil, start error")
+		logger.Log.Printf("[subProcessMngr]: running %s\n, cmd.Process is Nil, start error\n", cmd.String())
 
 		// if start successfully
 	} else if cmd.Process != nil {
@@ -141,7 +141,7 @@ func (mngr *SubProcessManager) CreateResource(
 			mux.Lock()
 			*TaskStatus = common.TaskFailed
 			mux.Unlock()
-			logger.Log.Printf("[subProcessMngr]: subprocess exit status: << %s >> \n", executeError.Error())
+			logger.Log.Printf("[subProcessMngr]: running cmd = %s\n subprocess exit status: << %s >> \n", cmd.String(), executeError.Error())
 			//logger.Log.Printf("[subProcessMngr]: subprocess error logs: \n"+
 			//	"<<<<<<<<<<\n "+
 			//	"%s \n"+

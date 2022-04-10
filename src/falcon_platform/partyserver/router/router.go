@@ -51,12 +51,13 @@ func RunWorker() func(w http.ResponseWriter, r *http.Request) {
 		workerGroupNum, err := strconv.Atoi(r.FormValue(common.WorkerGroupNumber))
 		enableDistributedTrain, err := strconv.Atoi(r.FormValue(common.EnableDistributedTrain))
 		stageName := r.FormValue(common.StageNameKey)
+		classID, _ := strconv.Atoi(r.FormValue(common.ClassIDKey))
 
 		if err != nil {
 			panic(err)
 		}
 
-		resIns := controller.RunWorker(masterAddr, workerTypeKey, jobId, dataPath, modelPath, dataOutput, enableDistributedTrain, workerPreGroup, partyNum, workerGroupNum, stageName)
+		resIns := controller.RunWorker(masterAddr, workerTypeKey, jobId, dataPath, modelPath, dataOutput, enableDistributedTrain, workerPreGroup, partyNum, workerGroupNum, stageName, classID)
 
 		// return to job manager
 		w.WriteHeader(http.StatusOK)

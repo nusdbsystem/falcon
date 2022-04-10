@@ -52,7 +52,7 @@ func RunWorker(ServerAddr string, masterAddr string,
 	jobId string,
 	dataPath, modelPath, dataOutput string,
 	enableDistributedTrain int,
-	workerPreGroup, partyNum, workerGroupNum int, stageName string,
+	workerPreGroup, partyNum, workerGroupNum int, stageName string, classID int,
 ) []byte {
 	data := url.Values{
 		common.MasterAddrKey:          {masterAddr},
@@ -66,6 +66,7 @@ func RunWorker(ServerAddr string, masterAddr string,
 		common.TotalPartyNumber:       {fmt.Sprintf("%d", partyNum)},
 		common.WorkerGroupNumber:      {fmt.Sprintf("%d", workerGroupNum)},
 		common.StageNameKey:           {fmt.Sprintf("%s", stageName)},
+		common.ClassIDKey:             {fmt.Sprintf("%d", classID)},
 	}
 
 	reqUrl := ServerAddr + common.RunWorker

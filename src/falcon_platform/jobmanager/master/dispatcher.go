@@ -430,7 +430,7 @@ func (master *Master) runtimeStatusMonitor(ctx context.Context) {
 					master.jobStatusLock.Unlock()
 					// kill all workers.
 					master.Logger.Printf("[Scheduler]: One worker failed %s in calling %s, "+
-						"kill other workers, runTImeError=%s, RpcCallError=%s\n", status.WorkerAddr, status.RuntimeError, status.RpcCallMethod)
+						"kill other workers, runTimeError=%s, RpcCallError=%s\n", status.WorkerAddr, status.RuntimeError, status.RpcCallMethod)
 					master.jobStatusLog = entity.MarshalStatus(status)
 					master.killWorkers()
 				}

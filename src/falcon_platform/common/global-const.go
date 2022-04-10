@@ -80,6 +80,7 @@ const (
 	WorkerGroupNumber      = "worker-group-num"
 	EnableDistributedTrain = "enable-distributed-train"
 	StageNameKey           = "stage-name"
+	ClassIDKey             = "class-id-key"
 
 	JobName = "job_name"
 	ExtInfo = "ext_info"
@@ -193,7 +194,7 @@ const (
 const (
 	MpcExecutorPortFilePrefix = "Programs/Public-Input/"
 
-	MpcExecutorBasePort = 54000
+	MpcExecutorBasePort = 44000
 )
 
 // Distributed role
