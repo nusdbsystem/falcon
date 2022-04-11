@@ -55,14 +55,21 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) boo
 	} else {
 
 		if dslOjb.DistributedTask.Average == 1 {
-			averageWorker := dslOjb.DistributedTask.WorkerNumber / 5
+			averageWorker := (dslOjb.DistributedTask.WorkerNumber - 1) / int(1+1+dslOjb.ClassNum*(1+1))
+
+			if averageWorker == 2 {
+				averageWorker = 1
+			}
+
 			sp.LimeOriModelPredictionParallelism = averageWorker
 			sp.LimeInstanceWeightParallelism = averageWorker
 			sp.LimeFeatureSelectionParallelism = averageWorker
 			sp.LimeVFLModelTrainParallelism = averageWorker
-			sp.LimeClassParallelism = averageWorker
+
+			sp.LimeClassParallelism = int(dslOjb.ClassNum)
 			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 			return true
+
 		} else {
 
 			// if many stage. run scheduler
