@@ -97,7 +97,7 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) boo
 				sp.LimeInstanceWeightParallelism = resultInt[1]
 				sp.LimeFeatureSelectionParallelism = resultInt[2]
 				sp.LimeVFLModelTrainParallelism = resultInt[3]
-				sp.LimeClassParallelism = resultInt[4]
+				sp.LimeClassParallelism = int(dslOjb.ClassNum)
 				logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 				return true
 			} else if strings.Contains(label, "ERROR") {
