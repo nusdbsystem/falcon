@@ -39,7 +39,7 @@
   ],
   "distributed_task": {
     "enable": 1,
-    "worker_number": 35,
+    "worker_number": 38,
     "average": 1
   },
   "tasks": {

@@ -39,8 +39,7 @@
   ],
   "distributed_task": {
     "enable": 1,
-    "worker_number": 45,
-    "average": 1
+    "worker_number": 32
   },
   "tasks": {
     "lime_sampling": {
