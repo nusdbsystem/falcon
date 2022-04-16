@@ -109,20 +109,6 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 		}
 	}
 
-	// 3.4 Run Lime Instance Sampling algorithm is there is the task
-	if stageName == common.LimeInstanceSampleStage {
-		if dslOjb.Tasks.LimeInsSample.AlgorithmName == "" {
-			panic("Stage dont have algorithm ERROR")
-		}
-		logger.Log.Println("[Master.Dispatcher]: Schedule task=" + stageName)
-
-		// Run lime sampling
-		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeSamplingAlgName}, common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
-			return
-		}
-	}
-
 	// 3.4 Run LimePred if there is the task
 	if stageName == common.LimePredStage {
 		if dslOjb.Tasks.LimePred.AlgorithmName == "" {
@@ -194,13 +180,6 @@ func (master *Master) dispatch(dslOjb *cache.DslObj, stageName common.FalconStag
 		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeInterpretSubTask, AlgCfg: dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig},
 			common.DefaultWorkerGroupID)
 		if ok := master.IsSuccessful(); !ok {
-			return
-		}
-
-		// Run model_training
-		master.dispatchGeneralTask(&wg, &entity.GeneralTask{TaskName: common.LimeInterpretSubTask, AlgCfg: dslOjb.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig},
-			common.DefaultWorkerGroupID)
-		if ok := master.isSuccessful(); !ok {
 			return
 		}
 	}

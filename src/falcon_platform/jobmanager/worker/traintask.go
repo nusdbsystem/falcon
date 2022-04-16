@@ -1131,7 +1131,6 @@ func (wk *TrainWorker) mpc(algName string) {
 	 * @Description
 	 * @Date 2:52 下午 12/12/20
 	 * @Param
-
 		./semi-party.x -F -N 3 -p 0 -I -h 10.0.0.33 -pn 6000 algorithm_name
 			-N party_num
 			-p party_id
@@ -1139,15 +1138,11 @@ func (wk *TrainWorker) mpc(algName string) {
 			-pn port
 			-ip: network file path
 			algorithm_name
-
 		-h is IP of part-0, all semi-party use the same port
 		-h each mpc process only requires IP of party-0
-
 		-h 是party_0的IP 端口目前只有一个 各个端口都相同就可以
 		-h 每个mpc进程的启动输入都是party_0的IP
-
 		-14000 端口用于和所有executor通信，默认是14000，
-
 		if there is -ip, no need host ip?
 	 * @return
 	 **/

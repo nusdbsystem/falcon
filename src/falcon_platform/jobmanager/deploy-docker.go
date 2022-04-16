@@ -19,10 +19,8 @@ func DeployMasterDocker(dslOjb *cache.DslObj, workerType string) {
 /**
  * @Description: run worker in docker container, for testing distributed training.
 				 run the following cmd:
-
 	target: port inside docker
 	published: port of the host
-
 	docker run --name centralized-worker-1-job-1-train-party-1
 				-p 13990-14010:13990-14010
 				-p 4990-5010:4990-5010
@@ -43,7 +41,6 @@ func DeployMasterDocker(dslOjb *cache.DslObj, workerType string) {
 				--env DISTRIBUTED_ROLE=2
 				-e constraint:labels.name==party-server
 				redis:5.0.3-alpine3.8
-
 	docker service create --name centralized-worker-1-job-1-train-party-1
 						  --replicas 1 -p 13990-14010:13990-14010
 						  -p 4990-5010:4990-5010
@@ -65,7 +62,6 @@ func DeployMasterDocker(dslOjb *cache.DslObj, workerType string) {
 						  --env DISTRIBUTED_ROLE=2
 						  --constraint node.labels.name==party-server
 						  redis:5.0.3-alpine3.8
-
  * @Date 2:14 下午 1/12/20
  * @Param
  	masterAddr： IP of the masterAddr addr
