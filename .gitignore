@@ -136,3 +136,4 @@ tools/ml_baseline/python/linearreg_sklearn/mlscratch/
 
 src/falcon_platform/falcon_logs*
 experiments/
+src/falcon_platform/examples/train_job_dsls/sigmod_experiments/
