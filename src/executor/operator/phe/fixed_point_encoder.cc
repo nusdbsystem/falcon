@@ -9,7 +9,6 @@
 #include <cmath>
 #include <iostream>
 
-#include <glog/logging.h>
 #include <falcon/utils/logger/logger.h>
 
 EncodedNumber::EncodedNumber()
@@ -83,8 +82,8 @@ void EncodedNumber::set_double(mpz_t pn, double v, int precision) {
 void EncodedNumber::decrease_exponent(int new_exponent)
 {
   if (new_exponent > exponent) {
-    LOG(ERROR) << "New exponent should be more negative than old exponent.";
-    return;
+    log_error("New exponent should be more negative than old exponent.");
+    exit(EXIT_FAILURE);
   }
 
   if (new_exponent == exponent) return;
@@ -102,8 +101,8 @@ void EncodedNumber::decrease_exponent(int new_exponent)
 void EncodedNumber::increase_exponent(int new_exponent)
 {
   if (new_exponent < exponent) {
-    LOG(ERROR) << "New exponent should be more positive than old exponent.";
-    return;
+    log_error("New exponent should be more positive than old exponent.");
+    exit(EXIT_FAILURE);
   }
 
   if (new_exponent == exponent) return;
@@ -126,8 +125,8 @@ void EncodedNumber::decode(long &v)
 {
   if (exponent != 0) {
     // not integer, should not call this decode function
-    LOG(ERROR) << "Exponent is not zero, failed, should call decode with double.";
-    return;
+    log_error("Exponent is not zero, failed, should call decode with double.");
+    exit(EXIT_FAILURE);
   }
 
   switch (check_encoded_number()) {
@@ -139,11 +138,11 @@ void EncodedNumber::decode(long &v)
       fixed_pointed_decode(v, value);
       break;
     case Overflow:
-      LOG(ERROR) << "Encoded number is overflow.";
-      break;
+      log_error("Encoded number is overflow.");
+      exit(EXIT_FAILURE);
     default:
-      LOG(ERROR) << "Encoded number is corrupted.";
-      return;
+      log_error("Encoded number is corrupted.");
+      exit(EXIT_FAILURE);
   }
 }
 
@@ -158,11 +157,11 @@ void EncodedNumber::decode(double &v)
       fixed_pointed_decode(v, value, exponent);
       break;
     case Overflow:
-      LOG(ERROR) << "Encoded number is overflow.";
-      break;
+      log_error("Encoded number is overflow.");
+      exit(EXIT_FAILURE);
     default:
-      LOG(ERROR) << "Encoded number is corrupted.";
-      return;
+      log_error("Encoded number is corrupted.");
+      exit(EXIT_FAILURE);
   }
 }
 
@@ -177,11 +176,11 @@ void EncodedNumber::decode_with_truncation(double &v, int truncated_exponent)
       fixed_pointed_decode_truncated(v, value, exponent, truncated_exponent);
       break;
     case Overflow:
-      LOG(ERROR) << "Encoded number is overflow.";
-      break;
+      log_error("Encoded number is overflow.");
+      exit(EXIT_FAILURE);
     default:
-      LOG(ERROR) << "Encoded number is corrupted.";
-      return;
+      log_error("Encoded number is corrupted.");
+      exit(EXIT_FAILURE);
   }
 }
 
@@ -210,7 +209,6 @@ EncodedNumberState EncodedNumber::check_encoded_number()
   }
 
   // printf("state is %d\n", state);
-
   mpz_clear(max_int);
   mpz_clear(neg_int);
   return state;
@@ -258,12 +256,13 @@ EncodedNumberType EncodedNumber::getter_type() const {
 }
 
 // helper functions bellow
-long long fixed_pointed_integer_representation(double value, int precision){
-  long long ex = (long long) pow(PHE_FIXED_POINT_BASE, precision);
+long long fixed_pointed_integer_representation(double value, int precision) {
+  auto ex = (long long) pow(PHE_FIXED_POINT_BASE, precision);
   std::stringstream ss;
   ss << std::fixed << std::setprecision(precision) << value;
   std::string s = ss.str();
-  long long r = (long long) (::atof(s.c_str()) * ex);
+//  auto r = (long long) (::atof(s.c_str()) * ex);
+  auto r = (long long) (std::stold(s) * ex);
   return r;
 }
 
@@ -273,8 +272,25 @@ void fixed_pointed_encode(long value, mpz_t res, int & exponent) {
 }
 
 void fixed_pointed_encode(double value, int precision, mpz_t res, int & exponent) {
-  long long r = fixed_pointed_integer_representation(value, precision);
-  mpz_set_si(res, r);
+  // if precision < PHE_MAXIMUM_FIXED_POINT_PRECISION, encode it directly
+  // else, first encode the double value by PHE_MAXIMUM_FIXED_POINT_PRECISION
+  //       then pow precision - PHE_MAXIMUM_FIXED_POINT_PRECISION
+  long long r;
+  if (precision <= PHE_MAXIMUM_FIXED_POINT_PRECISION) {
+    r = fixed_pointed_integer_representation(value, precision);
+    mpz_set_si(res, r);
+  } else {
+    r = fixed_pointed_integer_representation(value, PHE_MAXIMUM_FIXED_POINT_PRECISION);
+    mpz_set_si(res, r);
+    // set base^{rest_precision}
+    int rest_precision = precision - PHE_MAXIMUM_FIXED_POINT_PRECISION;
+    mpz_t tmp;
+    mpz_init(tmp);
+    mpz_ui_pow_ui(tmp, PHE_FIXED_POINT_BASE, rest_precision);
+    // multiply to res
+    mpz_mul(res, res, tmp);
+    mpz_clear(tmp);
+  }
   exponent = 0 - precision;
 }
 
@@ -284,19 +300,20 @@ void fixed_pointed_decode(long & value, mpz_t res) {
 
 void fixed_pointed_decode(double & value, mpz_t res, int exponent) {
   if (exponent >= 0) {
-    LOG(ERROR) << "Decode mpz_t for double value failed.";
-    return;
+    log_error("Decode mpz_t for double value failed.");
+    exit(EXIT_FAILURE);
   }
   if (exponent < 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION) {
-    fixed_pointed_decode_truncated(value, res, exponent, 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
+    fixed_pointed_decode_truncated(value, res, exponent,
+                                   0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
   } else {
     char *t = mpz_get_str(NULL, PHE_STR_BASE, res);
-    long long v = ::atol(t);
+    long long v = ::atoll(t);
 
     if (v == 0) {
       value = 0;
     } else {
-      value = (double) (v * pow(PHE_FIXED_POINT_BASE, exponent));
+      value = ((double) v * pow(PHE_FIXED_POINT_BASE, exponent));
     }
     free(t);
   }
@@ -304,20 +321,31 @@ void fixed_pointed_decode(double & value, mpz_t res, int exponent) {
 
 void fixed_pointed_decode_truncated(double & value, mpz_t res, int exponent, int truncated_exponent) {
   if (exponent >= 0 || truncated_exponent >= 0) {
-    LOG(ERROR) << "Decode mpz_t for double value failed.";
-    return;
+    log_error("Decode mpz_t for double value failed.");
+    exit(EXIT_FAILURE);
   }
 //  gmp_printf("res = %Zd\n", res);
 //  log_info("exponent = " + std::to_string(exponent));
 //  log_info("truncated_exponent = " + std::to_string(truncated_exponent));
+
+  // check whether the truncated precision is larger than PHE_MAXIMUM_FIXED_POINT_PRECISION
+  // if so, set the truncated exponent to (0 - PHE_MAXIMUM_FIXED_POINT_PRECISION)
+  // else, continue to do the following steps
+  if (abs(truncated_exponent) > PHE_MAXIMUM_FIXED_POINT_PRECISION) {
+    truncated_exponent = 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION;
+  }
+//  std::cout << "exponent = " << exponent << std::endl;
+//  std::cout << "truncated_exponent = " << truncated_exponent << std::endl;
+
+  // the true precision is acceptable, no need to truncate
   if (exponent >= truncated_exponent) {
     char *t = mpz_get_str(NULL, PHE_STR_BASE, res);
-    long long v = ::atol(t);
-
+    long long v = ::atoll(t);
     if (v == 0) {
       value = 0;
     } else {
-      value = (double) (v * pow(PHE_FIXED_POINT_BASE, exponent));
+      double multiplier = pow(PHE_FIXED_POINT_BASE, exponent);
+      value = ((double) v) * multiplier;
       // printf("decoded value = %f\n", value);
     }
     free(t);
@@ -335,14 +363,13 @@ void fixed_pointed_decode_truncated(double & value, mpz_t res, int exponent, int
 
     // decode with new_value
     char *t_new = mpz_get_str(NULL, PHE_STR_BASE, new_value);
-    long long v_new = ::atol(t_new);
-
-    // printf("v_new = %ld\n", v_new);
+    long long v_new = ::atoll(t_new);
 
     if (v_new == 0) {
       value = 0;
     } else {
-      value = (double) (v_new * pow(PHE_FIXED_POINT_BASE, truncated_exponent));
+      double multiplier = pow(PHE_FIXED_POINT_BASE, truncated_exponent);
+      value = ((double) v_new) * multiplier;
     }
     free(t_new);
     mpz_clear(tmp);

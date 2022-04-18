@@ -291,19 +291,65 @@ TEST(FixedPoint, ExponentChange){
   mpz_clear(g_value);
 }
 
-TEST(FixedPoint, DecodeTruncation){
+TEST(FixedPoint, DecodeTruncationCase1){
   mpz_t v_n;
   mpz_init(v_n);
   mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
-
   EncodedNumber number;
   number.set_double(v_n, -0.00105, 32);
   double x_decoded, x_decoded_truncation;
   number.decode(x_decoded);
   number.decode_with_truncation(x_decoded_truncation, -16);
   EXPECT_NEAR(x_decoded, x_decoded_truncation, 1e-3);
-  // printf("x_decoded = %f\n", x_decoded);
-  // printf("x_decoded_truncation = %f\n", x_decoded_truncation);
+//  std::cout << "x_decoded = " << x_decoded << std::endl;
+//  std::cout << "x_decoded_truncation = " << x_decoded_truncation << std::endl;
+  mpz_clear(v_n);
+}
 
+TEST(FixedPoint, DecodeTruncationCase2) {
+  mpz_t v_n;
+  mpz_init(v_n);
+  mpz_set_str(v_n, "100000000000000000000000000000000"
+                   "000000000000000000000000000000000", PHE_STR_BASE);
+  EncodedNumber number;
+  number.set_double(v_n, 0.985, 64);
+  double x_decoded, x_decoded_truncation;
+  number.decode(x_decoded);
+  number.decode_with_truncation(x_decoded_truncation, 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
+//  std::cout << "x_decoded = " << x_decoded << std::endl;
+//  std::cout << "x_decoded_truncation = " << x_decoded_truncation << std::endl;
+  EXPECT_NEAR(x_decoded, x_decoded_truncation, 1e-3);
+  mpz_clear(v_n);
+}
+
+TEST(FixedPoint, DecodeTruncationCase3) {
+  mpz_t v_n;
+  mpz_init(v_n);
+  mpz_set_str(v_n, "100000000000000000000000000000000"
+                   "000000000000000000000000000000000", PHE_STR_BASE);
+  EncodedNumber number;
+  number.set_double(v_n, 0.985, 36);
+  double x_decoded, x_decoded_truncation;
+  number.decode(x_decoded);
+  number.decode_with_truncation(x_decoded_truncation, 0 - 2 * PHE_MAXIMUM_FIXED_POINT_PRECISION);
+//  std::cout << "x_decoded = " << x_decoded << std::endl;
+//  std::cout << "x_decoded_truncation = " << x_decoded_truncation << std::endl;
+  EXPECT_NEAR(x_decoded, x_decoded_truncation, 1e-3);
+  mpz_clear(v_n);
+}
+
+TEST(FixedPoint, DecodeTruncationCase4) {
+  mpz_t v_n;
+  mpz_init(v_n);
+  mpz_set_str(v_n, "100000000000000000000000000000000"
+                   "000000000000000000000000000000000", PHE_STR_BASE);
+  EncodedNumber number;
+  number.set_double(v_n, 0.985, 16);
+  double x_decoded, x_decoded_truncation;
+  number.decode(x_decoded);
+  number.decode_with_truncation(x_decoded_truncation, 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
+//  std::cout << "x_decoded = " << x_decoded << std::endl;
+//  std::cout << "x_decoded_truncation = " << x_decoded_truncation << std::endl;
+  EXPECT_NEAR(x_decoded, x_decoded_truncation, 1e-3);
   mpz_clear(v_n);
 }
