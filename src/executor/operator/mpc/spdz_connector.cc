@@ -8,7 +8,7 @@
 #include "math.h"
 
 #include <glog/logging.h>
-
+#include <falcon/utils/logger/logger.h>
 
 std::vector<ssl_socket*> setup_sockets(int n_parties,
     int my_party_id,
@@ -33,9 +33,9 @@ std::vector<ssl_socket*> setup_sockets(int n_parties,
       specification.Receive(sockets[0]);
     }
     LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
-                                                          " sockets = " << sockets[i] << ", port_num = " << port_bases[i] + i << ".";
+              " sockets = " << sockets[i] << ", port_num = " << port_bases[i] + i << ".";
   }
-  LOG(INFO) << "Finish setup socket connections to spdz engines.";
+  log_info("Finish setup socket connections to spdz engines.");
 
   int type = specification.get<int>();
   switch (type)
@@ -47,10 +47,10 @@ std::vector<ssl_socket*> setup_sockets(int n_parties,
       break;
     }
     default:
-      LOG(ERROR) << "Type " << type << " not implemented";
-      exit(1);
+      log_error("Type " + std::to_string(type) + " not implemented");
+      exit(EXIT_FAILURE);
   }
-  LOG(INFO) << "Finish initializing gfp field.";
+  log_info("Finish initializing gfp field.");
 
   return sockets;
 }
@@ -79,9 +79,9 @@ void setup_sockets(int n_parties,
       specification.Receive(sockets[0]);
     }
     LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
-                                                          " sockets = " << sockets[i] << ", port_num = " << port_bases[i] + i << ".";
+              " sockets = " << sockets[i] << ", port_num = " << port_bases[i] + i << ".";
   }
-  LOG(INFO) << "Finish setup socket connections to spdz engines.";
+  log_info("Finish setup socket connections to spdz engines.");
   int type = specification.get<int>();
   switch (type)
   {
@@ -92,10 +92,10 @@ void setup_sockets(int n_parties,
       break;
     }
     default:
-      LOG(ERROR) << "Type " << type << " not implemented";
-      exit(1);
+      log_error("Type " + std::to_string(type) + " not implemented");
+      exit(EXIT_FAILURE);
   }
-  LOG(INFO) << "Finish initializing gfp field.";
+  log_info("Finish initializing gfp field.");
 }
 
 void send_private_values(std::vector<gfp> values, vector<ssl_socket*>& sockets, int n_parties)
@@ -126,9 +126,8 @@ void send_private_values(std::vector<gfp> values, vector<ssl_socket*>& sockets, 
   {
     if (triples[i][0] * triples[i][1] != triples[i][2])
     {
-      LOG(ERROR) << "Incorrect triple at " << i << ", aborting.";
-      // cerr << "Incorrect triple at " << i << ", aborting\n";
-      exit(1);
+      log_error("Incorrect triple at " + std::to_string(i) + ", aborting.");
+      exit(EXIT_FAILURE);
     }
   }
 
@@ -145,7 +144,7 @@ void send_private_values(std::vector<gfp> values, vector<ssl_socket*>& sockets, 
 
 std::vector<double> receive_result(vector<ssl_socket*>& sockets, int n_parties, int size)
 {
-  LOG(INFO) << "Receive mpc computation result from the SPDZ engine";
+  log_info("Receive mpc computation result from the SPDZ engine");
   std::vector<gfp> output_values(size);
   octetStream os;
   for (int i = 0; i < n_parties; i++)
@@ -161,7 +160,6 @@ std::vector<double> receive_result(vector<ssl_socket*>& sockets, int n_parties, 
   }
 
   std::vector<double> res_shares(size);
-
   for (int i = 0; i < size; i++) {
     gfp val = output_values[i];
     bigint aa;

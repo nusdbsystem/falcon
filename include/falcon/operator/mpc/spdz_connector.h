@@ -25,6 +25,7 @@
 #include <cstring>
 
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 
 /**
  * setup sockets to communicate with spdz parties
@@ -81,11 +82,9 @@ void send_public_values(std::vector<T> values, vector<ssl_socket*>& sockets, int
       parameters[i].pack(os);
     }
   } else {
-    LOG(ERROR) << "Public values other than int type are not supported, aborting.";
-    // cerr << "Public values other than int type are not supported, aborting.\n";
-    exit(1);
+    log_error("Public values other than int type are not supported, aborting.");
+    exit(EXIT_FAILURE);
   }
-
   for (int i = 0; i < n_parties; i++) {
     os.Send(sockets[i]);
   }
@@ -115,19 +114,16 @@ void send_private_inputs(const std::vector<T>& inputs, vector<ssl_socket*>& sock
 {
   // now only support double type
   if (!std::is_same<T, double >::value) {
-    LOG(ERROR) << "Private inputs other than double type are not supported, aborting.";
-    // cerr << "Private inputs other than int type are not supported, aborting.\n";
-    exit(1);
+    log_error("Private inputs other than double type are not supported, aborting.");
+    exit(EXIT_FAILURE);
   }
 
   int size = inputs.size();
   std::vector<int64_t> long_shares(size);
-
   // step 1: convert to int or long according to the fixed precision
   for (int i = 0; i < size; ++i) {
     long_shares[i] = static_cast<int64_t>(round(inputs[i] * pow(2, SPDZ_FIXED_POINT_PRECISION)));
   }
-
   // step 2: convert to the gfp value and call send_private_inputs
   // Map inputs into gfp
   vector<gfp> input_values_gfp(size);
@@ -135,7 +131,6 @@ void send_private_inputs(const std::vector<T>& inputs, vector<ssl_socket*>& sock
     bigint::tmp = long_shares[i];
     input_values_gfp[i] = gfpvar(bigint::tmp);
   }
-
   // call sending values
   send_private_values(input_values_gfp, sockets, n_parties);
 }
@@ -145,7 +140,7 @@ void send_private_inputs(const std::vector<T>& inputs, vector<ssl_socket*>& sock
  *
  * @param sockets: the ssl sockets of the spdz parties
  * @param nparties: the number of parties
- * @param size: size of recieved results
+ * @param size: size of received results
  */
 std::vector<double> receive_result(vector<ssl_socket*>& sockets, int n_parties, int size);
 
