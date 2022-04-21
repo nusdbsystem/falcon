@@ -23,8 +23,7 @@ TEST(IO_Util, ReadWriteData) {
     write_data.push_back(row);
   }
   // write data to file
-  std::string file_name =
-      std::string(TEST_IO_OUTDIR) + "/test_io_util_data.txt";
+  std::string file_name = "./test_io_util_data.txt";
   write_dataset_to_file(write_data, delimiter, file_name);
 
   // read data and compare
@@ -52,8 +51,7 @@ TEST(IO_Util, WriteShuffledDataIndexes) {
   // std::cout << "data_indexes[1] = " << data_indexes[1] << std::endl;
   // std::cout << "data_indexes[2] = " << data_indexes[2] << std::endl;
 
-  std::string file_name =
-      std::string(TEST_IO_OUTDIR) + "/test_write_shuffled_data_indexes.txt";
+  std::string file_name = "./test_write_shuffled_data_indexes.txt";
   write_shuffled_data_indexes_to_file(data_indexes, file_name);
 
   // read data and compare
@@ -89,8 +87,7 @@ TEST(IO_Util, ReadWriteKeys) {
     std::string write_message;
     serialize_phe_keys(phe_pub_key, phe_auth_server[i], write_message);
 
-    std::string key_file_name = std::string(TEST_IO_OUTDIR) + "/test_key_file" +
-                                std::to_string(i) + ".pem";
+    std::string key_file_name = "./test_key_file" + std::to_string(i) + ".pem";
     write_key_to_file(write_message, key_file_name);
 
     std::string read_message = read_key_file(key_file_name);

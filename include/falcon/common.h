@@ -28,7 +28,7 @@ namespace falcon {
   #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024
   #define MAXIMUM_RAND_VALUE 32767
   #define ROUNDED_PRECISION 1e-3
-  #define NETWORK_CONFIG_PROTO 1
+  #define NETWORK_CONFIG_PROTO
 
   /** for linear models */
   #define SPDZ_PORT_BASE 14000
@@ -73,9 +73,6 @@ namespace falcon {
 
   // for inference service
   # define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
-
-  // gtest IO folder
-  #define TEST_IO_OUTDIR "/opt/falcon/test/falcon/io"
 
   #define CERTAIN_PROBABILITY 1.0
   #define ZERO_PROBABILITY 0.0
