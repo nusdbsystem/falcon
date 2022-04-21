@@ -8,15 +8,15 @@
 #include <cstdlib>
 
 #include <glog/logging.h>
-#include <iostream>
+#include <falcon/utils/logger/logger.h>
 
 void djcs_t_aux_encrypt(djcs_t_public_key* pk,
     hcs_random* hr,
     EncodedNumber & res,
-    EncodedNumber plain) {
+    const EncodedNumber& plain) {
   if (plain.getter_type() != Plaintext) {
-    LOG(ERROR) << "The plain should not be encrypted.";
-    return;
+    log_error("The plain should not be encrypted.");
+    exit(EXIT_FAILURE);
   }
 
   mpz_t t1, t2, t3;
@@ -41,10 +41,10 @@ void djcs_t_aux_encrypt(djcs_t_public_key* pk,
 void djcs_t_aux_partial_decrypt(djcs_t_public_key* pk,
     djcs_t_auth_server* au,
     EncodedNumber & res,
-    EncodedNumber cipher) {
+    const EncodedNumber& cipher) {
   if (cipher.getter_type() != Ciphertext) {
-    LOG(ERROR) << "The value is not ciphertext and cannot be decrypted.";
-    return;
+    log_error("The value is not ciphertext and cannot be decrypted.");
+    exit(EXIT_FAILURE);
   }
 
   mpz_t t1, t2, t3;
@@ -69,7 +69,7 @@ void djcs_t_aux_share_combine(djcs_t_public_key* pk,
     EncodedNumber & res,
     EncodedNumber* shares,
     int size) {
-  mpz_t* shares_value = (mpz_t *) malloc (size * sizeof(mpz_t));
+  auto* shares_value = (mpz_t *) malloc (size * sizeof(mpz_t));
   for (int i = 0; i < size; i++) {
     mpz_init(shares_value[i]);
     shares[i].getter_value(shares_value[i]);
@@ -85,7 +85,6 @@ void djcs_t_aux_share_combine(djcs_t_public_key* pk,
   res.setter_type(Plaintext);
   res.setter_exponent(shares[0].getter_exponent());
 
-
   for (int i = 0; i < size; i++) {
     mpz_clear(shares_value[i]);
   }
@@ -96,11 +95,11 @@ void djcs_t_aux_share_combine(djcs_t_public_key* pk,
 
 void djcs_t_aux_ee_add(djcs_t_public_key* pk,
     EncodedNumber & res,
-    EncodedNumber cipher1,
-    EncodedNumber cipher2) {
+    const EncodedNumber& cipher1,
+    const EncodedNumber& cipher2) {
   if (cipher1.getter_type() != Ciphertext || cipher2.getter_type() != Ciphertext){
-    LOG(ERROR) << "The two inputs need be ciphertexts for homomorphic addition.";
-    exit(1);
+    log_error("The two inputs need be ciphertexts for homomorphic addition.");
+    exit(EXIT_FAILURE);
   }
 
   mpz_t t1, t2;
@@ -110,12 +109,12 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
   cipher2.getter_n(t2);
 
   if (mpz_cmp(t1, t2) != 0) {
-    LOG(ERROR) << "Two ciphertexts are not with the same public key.";
-    exit(1);
+    log_error("Two ciphertexts are not with the same public key.");
+    exit(EXIT_FAILURE);
   }
 
   if (cipher1.getter_exponent() != cipher2.getter_exponent()) {
-    LOG(ERROR) << "Two ciphertexts do not have the same exponents.";
+    log_error("Two ciphertexts do not have the same exponents.");
     exit(1);
   }
 
@@ -141,11 +140,11 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
 
 void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
     EncodedNumber & res,
-    EncodedNumber cipher,
-    EncodedNumber plain) {
+    const EncodedNumber& cipher,
+    const EncodedNumber& plain) {
   if (cipher.getter_type() != Ciphertext || plain.getter_type() != Plaintext) {
-    LOG(ERROR) << "The input types do not match ciphertext or plaintext.";
-    exit(1);
+    log_error("The input types do not match ciphertext or plaintext.");
+    exit(EXIT_FAILURE);
   }
 
   mpz_t t1, t2;
@@ -155,8 +154,8 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
   plain.getter_n(t2);
 
   if (mpz_cmp(t1, t2) != 0) {
-    LOG(ERROR) << "The two inputs are not with the same public key.";
-    exit(1);
+    log_error("The two inputs are not with the same public key.");
+    exit(EXIT_FAILURE);
   }
 
   mpz_t t3, t4, mult;
@@ -186,8 +185,8 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
     EncodedNumber* plains,
     int size) {
   if (size == 0) {
-    LOG(ERROR) << "The size of two vectors is zero.";
-    return;
+    log_error("The size of two vectors is zero.");
+    exit(EXIT_FAILURE);
   }
 
   mpz_t t1, t2;
@@ -197,8 +196,8 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
   plains[0].getter_n(t2);
 
   if (mpz_cmp(t1, t2) != 0) {
-    LOG(ERROR) << "The two vectors are not with the same public key.";
-    exit(1);
+    log_error("The two vectors are not with the same public key.");
+    exit(EXIT_FAILURE);
   }
 
   // assume the elements in the plains have the same exponent, so does ciphers
@@ -206,8 +205,8 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
   res.setter_exponent(ciphers[0].getter_exponent() + plains[0].getter_exponent());
   res.setter_type(Ciphertext);
 
-  mpz_t *mpz_ciphers = (mpz_t *) malloc (size * sizeof(mpz_t));
-  mpz_t *mpz_plains = (mpz_t *) malloc (size * sizeof(mpz_t));
+  auto *mpz_ciphers = (mpz_t *) malloc (size * sizeof(mpz_t));
+  auto *mpz_plains = (mpz_t *) malloc (size * sizeof(mpz_t));
   for (int i = 0; i < size; i++) {
     mpz_init(mpz_ciphers[i]);
     mpz_init(mpz_plains[i]);
@@ -258,42 +257,24 @@ void djcs_t_aux_matrix_mult(djcs_t_public_key* pk,
     int row_size,
     int column_size) {
   if (row_size == 0 || column_size == 0) {
-    LOG(ERROR) << "The size of the vector or matrix is zero.";
-    return;
+    log_error("The size of the vector or matrix is zero.");
+    exit(EXIT_FAILURE);
   }
 
   mpz_t t1, t2;
   mpz_init(t1);
   mpz_init(t2);
 
-  LOG(INFO) << "[djcs_t_aux_matrix_mult]: mpz_init success" << " --------";
-  std::cout << "[djcs_t_aux_matrix_mult]: mpz_init success" << std::endl;
-
   // the first element of both array is used to store the public key
   ciphers[0].getter_n(t1);
-
-  LOG(INFO) << "[djcs_t_aux_matrix_mult]: ciphers getter success" << " --------";
-  std::cout << "[djcs_t_aux_matrix_mult]: ciphers getter success" << std::endl;
-
   plains[0][0].getter_n(t2);
-
-  LOG(INFO) << "[djcs_t_aux_matrix_mult]: getter_n success" << " --------";
-  std::cout << "[djcs_t_aux_matrix_mult]: getter_n success" << std::endl;
-
   if (mpz_cmp(t1, t2) != 0) {
-    LOG(ERROR) << "The vector and the matrix are not with the same public key.";
-    exit(1);
+    log_error("The vector and the matrix are not with the same public key.");
+    exit(EXIT_FAILURE);
   }
-
-  LOG(INFO) << "[djcs_t_aux_matrix_mult]: mpz_cmp success" << " --------";
-  std::cout << "[djcs_t_aux_matrix_mult]: mpz_cmp success" << std::endl;
-
   for (int i = 0; i < row_size; i++) {
     djcs_t_aux_inner_product(pk, hr, res[i], ciphers, plains[i], column_size);
   }
-  LOG(INFO) << "[djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success" << " --------";
-  std::cout << "[djcs_t_aux_matrix_mult]: djcs_t_aux_inner_product success" << std::endl;
-
 
   mpz_clear(t1);
   mpz_clear(t2);
@@ -317,6 +298,6 @@ void djcs_t_auth_server_copy(djcs_t_auth_server* src, djcs_t_auth_server* dest) 
 }
 
 void djcs_t_hcs_random_copy(hcs_random* src, hcs_random* dest) {
-  // TODO: probably this function causes memory leak, can examine in the future
+  // TODO: probably this function causes memory leak, need further examination
   gmp_randinit_set(dest->rstate, src->rstate);
 }

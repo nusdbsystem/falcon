@@ -23,7 +23,7 @@
 void djcs_t_aux_encrypt(djcs_t_public_key* pk,
     hcs_random* hr,
     EncodedNumber & res,
-    EncodedNumber plain);
+    const EncodedNumber& plain);
 
 /**
  * decrypt a ciphertext EncodedNumber
@@ -36,7 +36,7 @@ void djcs_t_aux_encrypt(djcs_t_public_key* pk,
 void djcs_t_aux_partial_decrypt(djcs_t_public_key* pk,
     djcs_t_auth_server* au,
     EncodedNumber & res,
-    EncodedNumber cipher);
+    const EncodedNumber& cipher);
 
 /**
  * combine partially decrypted EncodedNumbers
@@ -61,8 +61,8 @@ void djcs_t_aux_share_combine(djcs_t_public_key* pk,
  */
 void djcs_t_aux_ee_add(djcs_t_public_key* pk,
     EncodedNumber & res,
-    EncodedNumber cipher1,
-    EncodedNumber cipher2);
+    const EncodedNumber& cipher1,
+    const EncodedNumber& cipher2);
 
 /**
  * homomorphic multiplication of a cipher and a plain
@@ -75,8 +75,8 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
  */
 void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
     EncodedNumber & res,
-    EncodedNumber cipher,
-    EncodedNumber plain);
+    const EncodedNumber& cipher,
+    const EncodedNumber& plain);
 
 /**
  * homomorphic inner product of a cipher vector and a plain vector
