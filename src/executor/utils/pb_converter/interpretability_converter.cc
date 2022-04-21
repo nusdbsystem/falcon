@@ -7,6 +7,7 @@
 #include "../../include/message/interpretability.pb.h"
 
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 #include <google/protobuf/io/coded_stream.h>
 
 void serialize_lime_sampling_params(const LimeSamplingParams& lime_sampling_params, std::string& output_message) {
@@ -23,8 +24,8 @@ void serialize_lime_sampling_params(const LimeSamplingParams& lime_sampling_para
 void deserialize_lime_sampling_params(LimeSamplingParams& lime_sampling_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::LimeSamplingParams pb_lime_sampling_params;
   if (!pb_lime_sampling_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize lime sampling params message failed.";
-    return;
+    log_error("Deserialize lime sampling params message failed.");
+    exit(EXIT_FAILURE);
   }
   lime_sampling_params.explain_instance_idx = pb_lime_sampling_params.explain_instance_idx();
   lime_sampling_params.sample_around_instance = pb_lime_sampling_params.sample_around_instance();
@@ -48,8 +49,8 @@ void serialize_lime_comp_pred_params(const LimeCompPredictionParams& lime_comp_p
 void deserialize_lime_comp_pred_params(LimeCompPredictionParams& lime_comp_pred_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::LimeCompPredictionParams pb_lime_comp_pred_params;
   if (!pb_lime_comp_pred_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize lime comp_prediction params message failed.";
-    return;
+    log_error("Deserialize lime comp_prediction params message failed.");
+    exit(EXIT_FAILURE);
   }
   lime_comp_pred_params.original_model_name = pb_lime_comp_pred_params.original_model_name();
   lime_comp_pred_params.original_model_saved_file = pb_lime_comp_pred_params.original_model_saved_file();
@@ -80,8 +81,8 @@ void serialize_lime_comp_weights_params(const LimeCompWeightsParams& lime_comp_w
 void deserialize_lime_comp_weights_params(LimeCompWeightsParams& lime_comp_weights_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::LimeCompWeightsParams pb_lime_comp_weights_params;
   if (!pb_lime_comp_weights_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize lime comp_weights params message failed.";
-    return;
+    log_error("Deserialize lime comp_weights params message failed.");
+    exit(EXIT_FAILURE);
   }
   lime_comp_weights_params.explain_instance_idx = pb_lime_comp_weights_params.explain_instance_idx();
   lime_comp_weights_params.generated_sample_file = pb_lime_comp_weights_params.generated_sample_file();
@@ -115,8 +116,8 @@ void serialize_lime_feat_sel_params(const LimeFeatSelParams& lime_feat_sel_param
 void deserialize_lime_feat_sel_params(LimeFeatSelParams& lime_feat_sel_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::LimeFeatSelParams pb_lime_feat_sel_params;
   if (!pb_lime_feat_sel_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize lime feature selection params message failed.";
-    return;
+    log_error("Deserialize lime feature selection params message failed.");
+    exit(EXIT_FAILURE);
   }
   lime_feat_sel_params.selected_samples_file = pb_lime_feat_sel_params.selected_samples_file();
   lime_feat_sel_params.selected_predictions_file = pb_lime_feat_sel_params.selected_predictions_file();
@@ -148,8 +149,8 @@ void serialize_lime_interpret_params(const LimeInterpretParams& lime_interpret_p
 void deserialize_lime_interpret_params(LimeInterpretParams& lime_interpret_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::LimeInterpretParams pb_lime_interpret_params;
   if (!pb_lime_interpret_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize lime interpret params message failed.";
-    return;
+    log_error("Deserialize lime interpret params message failed.");
+    exit(EXIT_FAILURE);
   }
   lime_interpret_params.selected_data_file = pb_lime_interpret_params.selected_data_file();
   lime_interpret_params.selected_predictions_file = pb_lime_interpret_params.selected_predictions_file();

@@ -63,7 +63,7 @@ void deserialize_double_matrix(std::vector< std::vector<double> >& mat, const st
  * @param number: an EncodedNumber
  * @param output_message: serialized string
  */
-void serialize_encoded_number(EncodedNumber number, std::string& output_message);
+void serialize_encoded_number(const EncodedNumber& number, std::string& output_message);
 
 /**
  * deserialize encoded number

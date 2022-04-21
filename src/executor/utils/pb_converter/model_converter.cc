@@ -8,6 +8,7 @@
 
 #include <google/protobuf/io/coded_stream.h>
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 #include "../../include/message/model.pb.h"
 
 void serialize_model_publish_request(int model_id,
@@ -28,8 +29,8 @@ void deserialize_model_publish_request(int & model_id,
 {
   com::nus::dbsystem::falcon::v0::ModelPublishRequest pb_request;
   if (!pb_request.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize model publish request failed.";
-    return;
+    log_error("Deserialize model publish request failed.");
+    exit(EXIT_FAILURE);
   }
 
   model_id = pb_request.model_id();
@@ -40,7 +41,7 @@ void serialize_model_publish_response(int model_id,
     int initiator_party_id,
     int is_success,
     int error_code,
-    std::string error_msg,
+    const std::string& error_msg,
     std::string & output_message)
 {
   com::nus::dbsystem::falcon::v0::ModelPublishResponse pb_response;
@@ -59,12 +60,12 @@ void deserialize_model_publish_response(int & model_id,
     int & is_success,
     int & error_code,
     std::string & error_msg,
-    std::string input_message)
+    const std::string& input_message)
 {
   com::nus::dbsystem::falcon::v0::ModelPublishResponse pb_response;
   if (!pb_response.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize model publish response failed.";
-    return;
+    log_error("Deserialize model publish response failed.");
+    exit(EXIT_FAILURE);
   }
 
   model_id = pb_response.model_id();

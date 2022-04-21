@@ -7,6 +7,7 @@
 #include <google/protobuf/io/coded_stream.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 #include <google/protobuf/message_lite.h>
 #include "../../include/message/lr.pb.h"
 
@@ -46,8 +47,8 @@ void deserialize_lr_model(LinearModel& lr_model, std::string input_str) {
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_lr_model.ParseFromString(input_str)) {
-    LOG(ERROR) << "Deserialize logistic regression model message failed.";
-    return;
+    log_error("Deserialize logistic regression model message failed.");
+    exit(EXIT_FAILURE);
   }
 
   lr_model.weight_size = deserialized_lr_model.weight_size();

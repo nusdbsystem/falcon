@@ -6,6 +6,7 @@
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 #include <google/protobuf/io/coded_stream.h>
 
 void serialize_lr_params(const LogisticRegressionParams& lr_params, std::string& output_message) {
@@ -30,8 +31,8 @@ void serialize_lr_params(const LogisticRegressionParams& lr_params, std::string&
 void deserialize_lr_params(LogisticRegressionParams& lr_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::LogisticRegressionParams logistic_regression_params;
   if (!logistic_regression_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize logistic regression params message failed.";
-    return;
+    log_error("Deserialize logistic regression params message failed.");
+    exit(EXIT_FAILURE);
   }
   lr_params.batch_size = logistic_regression_params.batch_size();
   lr_params.max_iteration = logistic_regression_params.max_iteration();
@@ -69,8 +70,8 @@ void serialize_lir_params(const LinearRegressionParams& lir_params, std::string&
 void deserialize_lir_params(LinearRegressionParams& lir_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::LinearRegressionParams linear_regression_params;
   if (!linear_regression_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize linear regression params message failed.";
-    return;
+    log_error("Deserialize linear regression params message failed.");
+    exit(EXIT_FAILURE);
   }
   lir_params.batch_size = linear_regression_params.batch_size();
   lir_params.max_iteration = linear_regression_params.max_iteration();
@@ -107,8 +108,8 @@ void serialize_dt_params(DecisionTreeParams dt_params, std::string& output_messa
 void deserialize_dt_params(DecisionTreeParams& dt_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::DecisionTreeParams decision_tree_params;
   if (!decision_tree_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize decision tree params message failed.";
-    return;
+    log_error("Deserialize decision tree params message failed.");
+    exit(EXIT_FAILURE);
   }
   dt_params.tree_type = decision_tree_params.tree_type();
   dt_params.criterion = decision_tree_params.criterion();
@@ -128,8 +129,7 @@ void serialize_rf_params(RandomForestParams rf_params, std::string& output_messa
   com::nus::dbsytem::falcon::v0::RandomForestParams random_forest_params;
   random_forest_params.set_n_estimator(rf_params.n_estimator);
   random_forest_params.set_sample_rate(rf_params.sample_rate);
-  com::nus::dbsytem::falcon::v0::DecisionTreeParams *decision_tree_params =
-      new com::nus::dbsytem::falcon::v0::DecisionTreeParams;
+  auto *decision_tree_params = new com::nus::dbsytem::falcon::v0::DecisionTreeParams;
   decision_tree_params->set_tree_type(rf_params.dt_param.tree_type);
   decision_tree_params->set_criterion(rf_params.dt_param.criterion);
   decision_tree_params->set_split_strategy(rf_params.dt_param.split_strategy);
@@ -150,8 +150,8 @@ void serialize_rf_params(RandomForestParams rf_params, std::string& output_messa
 void deserialize_rf_params(RandomForestParams& rf_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::RandomForestParams random_forest_params;
   if (!random_forest_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize random forest params message failed.";
-    return;
+    log_error("Deserialize random forest params message failed.");
+    exit(EXIT_FAILURE);
   }
   rf_params.n_estimator = random_forest_params.n_estimator();
   rf_params.sample_rate = random_forest_params.sample_rate();
@@ -175,8 +175,7 @@ void serialize_gbdt_params(GbdtParams gbdt_params, std::string& output_message) 
   gradient_boosting_params.set_loss(gbdt_params.loss);
   gradient_boosting_params.set_learning_rate(gbdt_params.learning_rate);
   gradient_boosting_params.set_subsample(gbdt_params.subsample);
-  com::nus::dbsytem::falcon::v0::DecisionTreeParams *decision_tree_params =
-      new com::nus::dbsytem::falcon::v0::DecisionTreeParams;
+  auto *decision_tree_params = new com::nus::dbsytem::falcon::v0::DecisionTreeParams;
   decision_tree_params->set_tree_type(gbdt_params.dt_param.tree_type);
   decision_tree_params->set_criterion(gbdt_params.dt_param.criterion);
   decision_tree_params->set_split_strategy(gbdt_params.dt_param.split_strategy);
@@ -197,8 +196,8 @@ void serialize_gbdt_params(GbdtParams gbdt_params, std::string& output_message) 
 void deserialize_gbdt_params(GbdtParams& gbdt_params, const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::GbdtParams gradient_boosting_params;
   if (!gradient_boosting_params.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize gradient boosting decision tree params message failed.";
-    return;
+    log_error("Deserialize gradient boosting decision tree params message failed.");
+    exit(EXIT_FAILURE);
   }
   gbdt_params.n_estimator = gradient_boosting_params.n_estimator();
   gbdt_params.loss = gradient_boosting_params.loss();

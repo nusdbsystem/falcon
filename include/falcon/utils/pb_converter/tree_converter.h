@@ -53,7 +53,7 @@ void deserialize_encrypted_statistics(int & client_id,
     EncodedNumber * & left_sample_nums,
     EncodedNumber * & right_sample_nums,
     EncodedNumber ** & encrypted_statistics,
-    std::string input_str);
+    const std::string& input_str);
 
 /**
  * serialize update information

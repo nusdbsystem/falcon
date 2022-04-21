@@ -6,6 +6,7 @@
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 #include <falcon/common.h>
 
 void serialize_phe_keys(djcs_t_public_key* phe_pub_key,
@@ -48,8 +49,8 @@ void deserialize_phe_keys(djcs_t_public_key* phe_pub_key,
     std::string input_message) {
   com::nus::dbsystem::falcon::v0::PHEKeys deserialized_phe_keys;
   if (!deserialized_phe_keys.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize phe keys message failed.";
-    return;
+    log_error("Deserialize phe keys message failed.");
+    exit(EXIT_FAILURE);
   }
   // set public key
   phe_pub_key->s = deserialized_phe_keys.public_key_s();

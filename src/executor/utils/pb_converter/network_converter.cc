@@ -7,6 +7,7 @@
 #include <falcon/utils/pb_converter/network_converter.h>
 
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <iostream>
 
@@ -15,9 +16,9 @@ void serialize_network_configs(std::vector<std::string> ips,
                                const std::vector<int>& executor_mpc_port_array,
                                std::string& output_message) {
   if ((ips.size() != executor_executor_port_arrays.size()) || (ips.size() != executor_mpc_port_array.size())) {
-    LOG(ERROR) << "Serialize network config failed:"
-                  " the number of ip addresses and port arrays do not match";
-    return;
+    log_error("Serialize network config failed:"
+              " the number of ip addresses and port arrays do not match");
+    exit(EXIT_FAILURE);
   }
   com::nus::dbsytem::falcon::v0::NetworkConfig network_config;
   for (int i = 0; i < ips.size(); i++) {
@@ -42,21 +43,18 @@ void deserialize_network_configs(std::vector<std::string>& ips,
                                  const std::string& input_message) {
   com::nus::dbsytem::falcon::v0::NetworkConfig network_config;
   if (!network_config.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize NetworkConfig message failed.";
-    return;
+    log_error("Deserialize NetworkConfig message failed.");
+    exit(EXIT_FAILURE);
   }
   int ips_size = network_config.ips_size();
   int executors_port_array_size = network_config.executor_executor_port_arrays_size();
   const com::nus::dbsytem::falcon::v0::PortArray& mpc_port_array = network_config.executor_mpc_port_array();
   int mpc_port_array_size = mpc_port_array.ports_size();
 
-  LOG(INFO) << "[deserialize_network_configs]: mpc_port_array_size: " << mpc_port_array_size <<" --------";
-  std::cout << "[deserialize_network_configs]: mpc_port_array_size: " << mpc_port_array_size << std::endl;
-
   if ((ips_size != executors_port_array_size) || (ips_size != mpc_port_array_size)) {
-    LOG(ERROR) << "Deserialize network config failed: "
-                  "the number of ip address and port arrays do not match";
-    return;
+    log_error("Deserialize network config failed: "
+              "the number of ip address and port arrays do not match");
+    exit(EXIT_FAILURE);
   }
   for (int i = 0; i < ips_size; i++) {
     ips.push_back(network_config.ips(i));
@@ -81,9 +79,9 @@ void serialize_ps_network_configs(
   if ((worker_ips.size() != worker_ports.size())
     || (ps_ips.size() != ps_ports.size())
     || (worker_ips.size() != ps_ips.size())) {
-    LOG(ERROR) << "Serialize ps network config failed:"
-                  " the ip or port arrays do not match";
-    return;
+    log_error("Serialize ps network config failed:"
+              " the ip or port arrays do not match");
+    exit(EXIT_FAILURE);
   }
   com::nus::dbsytem::falcon::v0::PSNetworkConfig ps_network_config;
   for (int i = 0; i < worker_ips.size(); i++) {
@@ -106,27 +104,23 @@ void deserialize_ps_network_configs(
 
   com::nus::dbsytem::falcon::v0::PSNetworkConfig ps_network_config;
   if (!ps_network_config.ParseFromString(input_message)) {
-    LOG(ERROR) << "Deserialize NetworkConfig message failed.";
-    exit(1);
+    log_error("Deserialize NetworkConfig message failed.");
+    exit(EXIT_FAILURE);
   }
   int workers_size = ps_network_config.workers_size();
   int ps_size = ps_network_config.ps_size();
 
   // worker size should equal to ps size
   if (workers_size != ps_size) {
-    LOG(ERROR) << "PS NetworkConfig worker size does not match ps size.";
-    exit(1);
+    log_error("PS NetworkConfig worker size does not match ps size.");
+    exit(EXIT_FAILURE);
   }
-  LOG(INFO) << "worker size = " << workers_size;
-  std::cout << "worker size = " << workers_size << std::endl;
-  google::FlushLogFiles(google::INFO);
 
   for (int i = 0; i < workers_size; i++) {
     // get follower ip
     worker_ips.push_back(ps_network_config.workers(i).worker_ip());
     // get follower ports, index0:send port, index1:receive port
     worker_ports.push_back(ps_network_config.workers(i).worker_port());
-
     // get PS ip
     ps_ips.push_back(ps_network_config.ps(i).ps_ip());
     // get PS ports

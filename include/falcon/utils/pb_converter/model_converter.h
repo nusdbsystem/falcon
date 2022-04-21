@@ -43,7 +43,7 @@ void serialize_model_publish_response(int model_id,
     int initiator_party_id,
     int is_success,
     int error_code,
-    std::string error_msg,
+    const std::string& error_msg,
     std::string & output_message);
 
 /**
@@ -61,6 +61,6 @@ void deserialize_model_publish_response(int & model_id,
     int & is_success,
     int & error_code,
     std::string & error_msg,
-    std::string input_message);
+    const std::string& input_message);
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_MODEL_PB_CONVERTER_H_

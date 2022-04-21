@@ -6,6 +6,7 @@
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 #include <google/protobuf/message_lite.h>
 #include "../../include/message/tree.pb.h"
 
@@ -28,7 +29,6 @@ void serialize_encrypted_statistics(int client_id,
   if (split_num != 0) {
     // local feature is not used up
     for (int i = 0; i < split_num; i++) {
-
       com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber *pb_number_left =
           pb_encrypted_statistics.add_left_sample_nums_of_splits();
       com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber *pb_number_right =
@@ -108,14 +108,14 @@ void deserialize_encrypted_statistics(int & client_id,
     EncodedNumber * & left_sample_nums,
     EncodedNumber * & right_sample_nums,
     EncodedNumber ** & encrypted_statistics,
-    std::string input_str) {
+    const std::string& input_str) {
   com::nus::dbsytem::falcon::v0::EncryptedStatistics deserialized_encrypted_statistics;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
 
   if (!deserialized_encrypted_statistics.ParseFromCodedStream(&inputStream)) {
-    LOG(ERROR) << "Failed to parse PB_EncryptedStatistics from string";
-    exit(1);
+    log_error("Failed to parse PB_EncryptedStatistics from string");
+    exit(EXIT_FAILURE);
   }
 
   client_id = deserialized_encrypted_statistics.client_id();
@@ -136,7 +136,7 @@ void deserialize_encrypted_statistics(int & client_id,
       left_sample_nums[i].setter_n(g_n);
       left_sample_nums[i].setter_value(g_value);
       left_sample_nums[i].setter_exponent(pb_number.exponent());
-      EncodedNumberType type = (EncodedNumberType) pb_number.type();
+      auto type = (EncodedNumberType) pb_number.type();
       left_sample_nums[i].setter_type(type);
       mpz_clear(g_n);
       mpz_clear(g_value);
@@ -153,7 +153,7 @@ void deserialize_encrypted_statistics(int & client_id,
       right_sample_nums[i].setter_n(g_n);
       right_sample_nums[i].setter_value(g_value);
       right_sample_nums[i].setter_exponent(pb_number.exponent());
-      EncodedNumberType type = (EncodedNumberType) pb_number.type();
+      auto type = (EncodedNumberType) pb_number.type();
       right_sample_nums[i].setter_type(type);
       mpz_clear(g_n);
       mpz_clear(g_value);
@@ -172,7 +172,7 @@ void deserialize_encrypted_statistics(int & client_id,
         encrypted_statistics[i][j].setter_n(g_n);
         encrypted_statistics[i][j].setter_value(g_value);
         encrypted_statistics[i][j].setter_exponent(pb_number.exponent());
-        EncodedNumberType type = (EncodedNumberType) pb_number.type();
+        auto type = (EncodedNumberType) pb_number.type();
         encrypted_statistics[i][j].setter_type(type);
         mpz_clear(g_n);
         mpz_clear(g_value);
@@ -197,10 +197,8 @@ void serialize_update_info(int source_party_id,
   pb_update_info.set_best_feature_id(best_feature_id);
   pb_update_info.set_best_split_id(best_split_id);
 
-  com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber *pb_left_impurity =
-      new com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber;
-  com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber *pb_right_impurity =
-      new com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber;
+  auto *pb_left_impurity = new com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber;
+  auto *pb_right_impurity = new com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber;
 
   char * n_str_left_c, * value_str_left_c, * n_str_right_c, * value_str_right_c;
   mpz_t g_n_l, g_value_l;
@@ -303,8 +301,8 @@ void deserialize_update_info(int & source_client_id,
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
 
   if (!deserialized_update_info.ParseFromCodedStream(&inputStream)) {
-    LOG(ERROR) << "Failed to parse PB_UpdateInfo from string";
-    exit(1);
+    log_error("Failed to parse PB_UpdateInfo from string");
+    exit(EXIT_FAILURE);
   }
 
   source_client_id = deserialized_update_info.source_client_id();
@@ -325,7 +323,7 @@ void deserialize_update_info(int & source_client_id,
   left_branch_impurity.setter_n(g_n_l);
   left_branch_impurity.setter_value(g_value_l);
   left_branch_impurity.setter_exponent(pb_number_left.exponent());
-  EncodedNumberType type_l = (EncodedNumberType) pb_number_left.type();
+  auto type_l = (EncodedNumberType) pb_number_left.type();
   left_branch_impurity.setter_type(type_l);
 
   mpz_t g_n_r, g_value_r;
@@ -336,7 +334,7 @@ void deserialize_update_info(int & source_client_id,
   right_branch_impurity.setter_n(g_n_r);
   right_branch_impurity.setter_value(g_value_r);
   right_branch_impurity.setter_exponent(pb_number_right.exponent());
-  EncodedNumberType type_r = (EncodedNumberType) pb_number_right.type();
+  auto type_r = (EncodedNumberType) pb_number_right.type();
   right_branch_impurity.setter_type(type_r);
 
   int sample_size = deserialized_update_info.left_branch_sample_ivs_size();
@@ -357,7 +355,7 @@ void deserialize_update_info(int & source_client_id,
     left_branch_sample_iv[i].setter_n(g_n_ll);
     left_branch_sample_iv[i].setter_value(g_value_ll);
     left_branch_sample_iv[i].setter_exponent(pb_number_left_iv.exponent());
-    EncodedNumberType type_ll = (EncodedNumberType) pb_number_left_iv.type();
+    auto type_ll = (EncodedNumberType) pb_number_left_iv.type();
     left_branch_sample_iv[i].setter_type(type_ll);
 
     mpz_t g_n_rr, g_value_rr;
@@ -368,7 +366,7 @@ void deserialize_update_info(int & source_client_id,
     right_branch_sample_iv[i].setter_n(g_n_rr);
     right_branch_sample_iv[i].setter_value(g_value_rr);
     right_branch_sample_iv[i].setter_exponent(pb_number_right_iv.exponent());
-    EncodedNumberType type_rr = (EncodedNumberType) pb_number_right_iv.type();
+    auto type_rr = (EncodedNumberType) pb_number_right_iv.type();
     right_branch_sample_iv[i].setter_type(type_rr);
     mpz_clear(g_n_ll);
     mpz_clear(g_value_ll);
@@ -402,8 +400,8 @@ void deserialize_split_info(int & global_split_num,
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_split_info.ParseFromCodedStream(&inputStream)) {
-    LOG(ERROR) << "Failed to parse PB_SplitInfo from string";
-    exit(1);
+    log_error("Failed to parse PB_SplitInfo from string");
+    exit(EXIT_FAILURE);
   }
   global_split_num = deserialized_split_info.global_split_num();
   for (int i = 0; i < deserialized_split_info.split_num_vec_size(); i++) {
@@ -491,8 +489,8 @@ void deserialize_tree_model(TreeModel& tree_model, std::string input_str) {
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_tree.ParseFromCodedStream(&inputStream)) {
-    LOG(ERROR) << "Failed to parse PB_Tree from string";
-    exit(1);
+    log_error("Failed to parse PB_Tree from string");
+    exit(EXIT_FAILURE);
   }
   tree_model.type = (falcon::TreeType) deserialized_tree.tree_type();
   tree_model.class_num = deserialized_tree.class_num();
@@ -534,13 +532,13 @@ void deserialize_tree_model(TreeModel& tree_model, std::string input_str) {
     tree_model.nodes[i].impurity.setter_n(g_n_impurity);
     tree_model.nodes[i].impurity.setter_value(g_value_impurity);
     tree_model.nodes[i].impurity.setter_exponent(pb_impurity.exponent());
-    EncodedNumberType type_impurity = (EncodedNumberType) pb_impurity.type();
+    auto type_impurity = (EncodedNumberType) pb_impurity.type();
     tree_model.nodes[i].impurity.setter_type(type_impurity);
 
     tree_model.nodes[i].label.setter_n(g_n_label);
     tree_model.nodes[i].label.setter_value(g_value_label);
     tree_model.nodes[i].label.setter_exponent(pb_label.exponent());
-    EncodedNumberType type_label = (EncodedNumberType) pb_label.type();
+    auto type_label = (EncodedNumberType) pb_label.type();
     tree_model.nodes[i].label.setter_type(type_label);
 
     mpz_clear(g_n_impurity);
@@ -635,8 +633,8 @@ void deserialize_random_forest_model(ForestModel& forest_model, std::string inpu
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_random_forest.ParseFromCodedStream(&inputStream)) {
-    LOG(ERROR) << "Failed to parse PB_RandomForest from string";
-    exit(1);
+    log_error("Failed to parse PB_RandomForest from string");
+    exit(EXIT_FAILURE);
   }
   forest_model.tree_size = deserialized_random_forest.tree_size();
   forest_model.tree_type = (falcon::TreeType) deserialized_random_forest.tree_type();
@@ -684,13 +682,13 @@ void deserialize_random_forest_model(ForestModel& forest_model, std::string inpu
       tree.nodes[i].impurity.setter_n(g_n_impurity);
       tree.nodes[i].impurity.setter_value(g_value_impurity);
       tree.nodes[i].impurity.setter_exponent(pb_impurity.exponent());
-      EncodedNumberType type_impurity = (EncodedNumberType) pb_impurity.type();
+      auto type_impurity = (EncodedNumberType) pb_impurity.type();
       tree.nodes[i].impurity.setter_type(type_impurity);
 
       tree.nodes[i].label.setter_n(g_n_label);
       tree.nodes[i].label.setter_value(g_value_label);
       tree.nodes[i].label.setter_exponent(pb_label.exponent());
-      EncodedNumberType type_label = (EncodedNumberType) pb_label.type();
+      auto type_label = (EncodedNumberType) pb_label.type();
       tree.nodes[i].label.setter_type(type_label);
 
       mpz_clear(g_n_impurity);
@@ -792,8 +790,8 @@ void deserialize_gbdt_model(GbdtModel& gbdt_model, std::string input_str) {
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_gbdt.ParseFromCodedStream(&inputStream)) {
-    LOG(ERROR) << "Failed to parse PB_RandomForest from string";
-    exit(1);
+    log_error("Failed to parse PB_RandomForest from string");
+    exit(EXIT_FAILURE);
   }
   gbdt_model.tree_size = deserialized_gbdt.tree_size();
   gbdt_model.tree_type = (falcon::TreeType) deserialized_gbdt.tree_type();
@@ -845,13 +843,13 @@ void deserialize_gbdt_model(GbdtModel& gbdt_model, std::string input_str) {
       tree.nodes[i].impurity.setter_n(g_n_impurity);
       tree.nodes[i].impurity.setter_value(g_value_impurity);
       tree.nodes[i].impurity.setter_exponent(pb_impurity.exponent());
-      EncodedNumberType type_impurity = (EncodedNumberType) pb_impurity.type();
+      auto type_impurity = (EncodedNumberType) pb_impurity.type();
       tree.nodes[i].impurity.setter_type(type_impurity);
 
       tree.nodes[i].label.setter_n(g_n_label);
       tree.nodes[i].label.setter_value(g_value_label);
       tree.nodes[i].label.setter_exponent(pb_label.exponent());
-      EncodedNumberType type_label = (EncodedNumberType) pb_label.type();
+      auto type_label = (EncodedNumberType) pb_label.type();
       tree.nodes[i].label.setter_type(type_label);
 
       mpz_clear(g_n_impurity);
