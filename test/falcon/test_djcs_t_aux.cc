@@ -16,8 +16,8 @@ TEST(PHE, ThresholdPaillierScheme) {
   hcs_random *hr = hcs_init_random();
   djcs_t_public_key *pk = djcs_t_init_public_key();
   djcs_t_private_key *vk = djcs_t_init_private_key();
-  djcs_t_auth_server **au = (djcs_t_auth_server **)malloc(client_num * sizeof(djcs_t_auth_server *));
-  mpz_t *si = (mpz_t *)malloc(client_num * sizeof(mpz_t));
+  auto **au = (djcs_t_auth_server **)malloc(client_num * sizeof(djcs_t_auth_server *));
+  auto *si = (mpz_t *)malloc(client_num * sizeof(mpz_t));
 
   // generate key pair
   djcs_t_generate_key_pair(pk, vk, hr, 1, 1024, client_num, client_num);
@@ -39,7 +39,7 @@ TEST(PHE, ThresholdPaillierScheme) {
   EncodedNumber encrypted_number, decrypted_number;
   djcs_t_aux_encrypt(pk, hr, encrypted_number, number);
 
-  EncodedNumber* partially_decryption = new EncodedNumber[client_num];
+  auto* partially_decryption = new EncodedNumber[client_num];
   for (int i = 0; i < client_num; i++) {
     djcs_t_aux_partial_decrypt(pk, au[i], partially_decryption[i], encrypted_number);
   }
@@ -65,7 +65,7 @@ TEST(PHE, ThresholdPaillierScheme) {
   EncodedNumber encrypted_sum, decrypted_sum;
   djcs_t_aux_ee_add(pk, encrypted_sum, encrypted_number_a1, encrypted_number_a2);
 
-  EncodedNumber* partially_sum_decryption = new EncodedNumber[client_num];
+  auto* partially_sum_decryption = new EncodedNumber[client_num];
   for (int i = 0; i < client_num; i++) {
     djcs_t_aux_partial_decrypt(pk, au[i], partially_sum_decryption[i], encrypted_sum);
   }
@@ -90,7 +90,7 @@ TEST(PHE, ThresholdPaillierScheme) {
   EncodedNumber encrypted_product, decrypted_product;
   djcs_t_aux_ep_mul(pk, encrypted_product, encrypted_number_b1, number_b2);
 
-  EncodedNumber* partially_product_decryption = new EncodedNumber[client_num];
+  auto* partially_product_decryption = new EncodedNumber[client_num];
   for (int i = 0; i < client_num; i++) {
     djcs_t_aux_partial_decrypt(pk, au[i], partially_product_decryption[i], encrypted_product);
   }
@@ -105,13 +105,13 @@ TEST(PHE, ThresholdPaillierScheme) {
   //////////////////////////////////////
   double c1[5] = {0.1, -0.2, 0.3, -0.4, 0.5};
   double c2[5] = {0.9, 0.8, -0.7, 0.6, 0.5};
-  EncodedNumber* number_c1 = new EncodedNumber[5];
-  EncodedNumber* number_c2 = new EncodedNumber[5];
+  auto* number_c1 = new EncodedNumber[5];
+  auto* number_c2 = new EncodedNumber[5];
   for (int i = 0; i < 5; i++) {
-    number_c1[i].set_double(pk->n[0], c1[i], 16);
-    number_c2[i].set_double(pk->n[0], c2[i], 16);
+    number_c1[i].set_double(pk->n[0], c1[i], 32);
+    number_c2[i].set_double(pk->n[0], c2[i], 32);
   }
-  EncodedNumber* encrypted_number_c1 = new EncodedNumber[5];
+  auto* encrypted_number_c1 = new EncodedNumber[5];
   for (int i = 0; i < 5; i++) {
     djcs_t_aux_encrypt(pk, hr, encrypted_number_c1[i], number_c1[i]);
   }
@@ -119,7 +119,7 @@ TEST(PHE, ThresholdPaillierScheme) {
   EncodedNumber encrypted_inner_product, decrypted_inner_product;
   djcs_t_aux_inner_product(pk, hr, encrypted_inner_product, encrypted_number_c1, number_c2, 5);
 
-  EncodedNumber* partially_inner_prod_decryption = new EncodedNumber[client_num];
+  auto* partially_inner_prod_decryption = new EncodedNumber[client_num];
   for (int i = 0; i < client_num; i++) {
     djcs_t_aux_partial_decrypt(pk, au[i], partially_inner_prod_decryption[i], encrypted_inner_product);
   }
@@ -145,8 +145,8 @@ TEST(PHE, ThresholdPaillierScheme) {
       {0.7, -0.6, 0.5, -0.4, 0.3}
   };
 
-  EncodedNumber* number_d1 = new EncodedNumber[5];
-  EncodedNumber** number_d2 = new EncodedNumber*[3];
+  auto* number_d1 = new EncodedNumber[5];
+  auto** number_d2 = new EncodedNumber*[3];
   for (int i = 0; i < 3; i++) {
     number_d2[i] = new EncodedNumber[5];
   }
@@ -159,17 +159,17 @@ TEST(PHE, ThresholdPaillierScheme) {
     }
   }
 
-  EncodedNumber* encrypted_number_d1 = new EncodedNumber[5];
+  auto* encrypted_number_d1 = new EncodedNumber[5];
   for (int i = 0; i < 5; i++) {
     djcs_t_aux_encrypt(pk, hr, encrypted_number_d1[i], number_d1[i]);
   }
 
-  EncodedNumber* encrypted_mat_result = new EncodedNumber[3];
-  EncodedNumber* decrypted_mat_result = new EncodedNumber[3];
-  djcs_t_aux_matrix_mult(pk, hr, encrypted_mat_result, encrypted_number_d1, number_d2, 3, 5);
+  auto* encrypted_mat_result = new EncodedNumber[3];
+  auto* decrypted_mat_result = new EncodedNumber[3];
+  djcs_t_aux_vec_mat_ep_mult(pk, hr, encrypted_mat_result, encrypted_number_d1, number_d2, 3, 5);
 
   for (int j = 0; j < 3; j++) {
-    EncodedNumber* partially_decryption_mat_res_j = new EncodedNumber[client_num];
+    auto* partially_decryption_mat_res_j = new EncodedNumber[client_num];
     for (int i = 0; i < client_num; i++) {
       djcs_t_aux_partial_decrypt(pk, au[i], partially_decryption_mat_res_j[i], encrypted_mat_result[j]);
     }
@@ -177,7 +177,7 @@ TEST(PHE, ThresholdPaillierScheme) {
 
     double decrypted_decoded_mat_res_j;
     decrypted_mat_result[j].decode(decrypted_decoded_mat_res_j);
-    float mat_mult_j = 0.0;
+    double mat_mult_j = 0.0;
     for (int i = 0; i < 5; i++) {
       mat_mult_j = mat_mult_j + d1[i] * d2[j][i];
     }
@@ -185,15 +185,253 @@ TEST(PHE, ThresholdPaillierScheme) {
     delete [] partially_decryption_mat_res_j;
   }
 
+  ///////////////////////////////////////////
+  /// Test homomorphic vector aggregation ///
+  ///////////////////////////////////////////
+  double e[5] = {0.1, -0.2, 0.3, -0.4, 0.5};
+  auto* number_e = new EncodedNumber[5];
+  for (int i = 0; i < 5; i++) {
+    number_e[i].set_double(pk->n[0], e[i], 16);
+  }
+  auto* encrypted_number_e = new EncodedNumber[5];
+  for (int i = 0; i < 5; i++) {
+    djcs_t_aux_encrypt(pk, hr, encrypted_number_e[i], number_e[i]);
+  }
+
+  EncodedNumber encrypted_agg, decrypted_agg;
+  djcs_t_aux_vec_aggregate(pk, encrypted_agg, encrypted_number_e, 5);
+
+  auto* partially_agg_decryption = new EncodedNumber[client_num];
+  for (int i = 0; i < client_num; i++) {
+    djcs_t_aux_partial_decrypt(pk, au[i], partially_agg_decryption[i], encrypted_agg);
+  }
+  djcs_t_aux_share_combine(pk, decrypted_agg, partially_agg_decryption, client_num);
+
+  double decrypted_decoded_agg;
+  decrypted_agg.decode(decrypted_decoded_agg);
+  double agg = 0.0;
+  for (double i : e) {
+    agg += i;
+  }
+  EXPECT_NEAR(agg, decrypted_decoded_agg, 1e-3);
+  //printf("inner_product = %f\n", inner_product);
+
+  ///////////////////////////////////////////
+  /// Test homomorphic vector ele-wise add ///
+  ///////////////////////////////////////////
+  double f1[5] = {0.1, -0.2, 0.3, -0.4, 0.5};
+  double f2[5] = {0.9, 0.8, -0.7, 0.6, 0.5};
+  auto* number_f1 = new EncodedNumber[5];
+  auto* number_f2 = new EncodedNumber[5];
+  for (int i = 0; i < 5; i++) {
+    number_f1[i].set_double(pk->n[0], f1[i], 16);
+    number_f2[i].set_double(pk->n[0], f2[i], 16);
+  }
+  for (int i = 0; i < 5; i++) {
+    djcs_t_aux_encrypt(pk, hr, number_f1[i], number_f1[i]);
+    djcs_t_aux_encrypt(pk, hr, number_f2[i], number_f2[i]);
+  }
+  auto* res_ele_wise_add_vec = new EncodedNumber[5];
+  auto* dec_res_ele_wise_add_vec = new EncodedNumber[5];
+  djcs_t_aux_vec_ele_wise_ee_add(pk, res_ele_wise_add_vec, number_f1, number_f2, 5);
+  for (int j = 0; j < 5; j++) {
+    auto* partially_ele_wise_add = new EncodedNumber[client_num];
+    for (int i = 0; i < client_num; i++) {
+      djcs_t_aux_partial_decrypt(pk, au[i], partially_ele_wise_add[i], res_ele_wise_add_vec[j]);
+    }
+    djcs_t_aux_share_combine(pk, dec_res_ele_wise_add_vec[j], partially_ele_wise_add, client_num);
+
+    double decoded_res_add_j;
+    dec_res_ele_wise_add_vec[j].decode(decoded_res_add_j);
+    double res_add_j = f1[j] + f2[j];
+    EXPECT_NEAR(res_add_j, decoded_res_add_j, 1e-3);
+    delete [] partially_ele_wise_add;
+  }
+
+  ////////////////////////////////////////////////
+  /// Test homomorphic vector ele-wise ep mult ///
+  ////////////////////////////////////////////////
+  double g1[5] = {0.1, -0.2, 0.3, -0.4, 0.5};
+  double g2[5] = {0.9, 0.8, -0.7, 0.6, 0.5};
+  auto* number_g1 = new EncodedNumber[5];
+  auto* number_g2 = new EncodedNumber[5];
+  for (int i = 0; i < 5; i++) {
+    number_g1[i].set_double(pk->n[0], g1[i], 16);
+    number_g2[i].set_double(pk->n[0], g2[i], 16);
+  }
+  for (int i = 0; i < 5; i++) {
+    djcs_t_aux_encrypt(pk, hr, number_g1[i], number_g1[i]);
+  }
+  auto* res_ele_wise_ep_vec = new EncodedNumber[5];
+  auto* dec_res_ele_wise_ep_vec = new EncodedNumber[5];
+  djcs_t_aux_vec_ele_wise_ep_mul(pk, res_ele_wise_ep_vec, number_g1, number_g2, 5);
+  for (int j = 0; j < 5; j++) {
+    auto* partially_ele_wise_ep_mul = new EncodedNumber[client_num];
+    for (int i = 0; i < client_num; i++) {
+      djcs_t_aux_partial_decrypt(pk, au[i], partially_ele_wise_ep_mul[i], res_ele_wise_ep_vec[j]);
+    }
+    djcs_t_aux_share_combine(pk, dec_res_ele_wise_ep_vec[j], partially_ele_wise_ep_mul, client_num);
+
+    double decoded_res_ep_j;
+    dec_res_ele_wise_ep_vec[j].decode(decoded_res_ep_j);
+    double res_mul_j = g1[j] * g2[j];
+    EXPECT_NEAR(res_mul_j, decoded_res_ep_j, 1e-3);
+    delete [] partially_ele_wise_ep_mul;
+  }
+
+  ////////////////////////////////////////////
+  /// Test homomorphic matrix ele-wise add ///
+  ////////////////////////////////////////////
+  double h1[3][5] = {
+      {0.1, -0.2, 0.3, -0.4, 0.5},
+      {0.2, -0.3, 0.4, -0.5, 0.6},
+      {-0.3, 0.4, -0.5, 0.6, -0.7}
+  };
+  double h2[3][5] = {
+      {0.9, 0.8, -0.7, 0.6, 0.5},
+      {-0.8, 0.7, -0.6, 0.5, -0.4},
+      {0.7, -0.6, 0.5, -0.4, 0.3}
+  };
+
+  auto** number_h1 = new EncodedNumber*[3];
+  auto** number_h2 = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    number_h1[i] = new EncodedNumber[5];
+    number_h2[i] = new EncodedNumber[5];
+  }
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 5; j++) {
+      number_h1[i][j].set_double(pk->n[0], h1[i][j], 16);
+      number_h2[i][j].set_double(pk->n[0], h2[i][j], 16);
+    }
+  }
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 5; j++) {
+      djcs_t_aux_encrypt(pk, hr, number_h1[i][j], number_h1[i][j]);
+      djcs_t_aux_encrypt(pk, hr, number_h2[i][j], number_h2[i][j]);
+    }
+  }
+
+  auto** encrypted_mat_ele_wise_add = new EncodedNumber*[3];
+  auto** decrypted_mat_ele_wise_add = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    encrypted_mat_ele_wise_add[i] = new EncodedNumber[5];
+    decrypted_mat_ele_wise_add[i] = new EncodedNumber[5];
+  }
+
+  djcs_t_aux_matrix_ele_wise_ee_add(pk, encrypted_mat_ele_wise_add, number_h1, number_h2, 3, 5);
+
+  for (int j = 0; j < 3; j++) {
+    for (int k = 0; k < 5; k++) {
+      auto* partially_decryption_mat_res_jk = new EncodedNumber[client_num];
+      for (int i = 0; i < client_num; i++) {
+        djcs_t_aux_partial_decrypt(pk, au[i], partially_decryption_mat_res_jk[i], encrypted_mat_ele_wise_add[j][k]);
+      }
+      djcs_t_aux_share_combine(pk, decrypted_mat_ele_wise_add[j][k], partially_decryption_mat_res_jk, client_num);
+
+      double decrypted_decoded_mat_res_jk;
+      decrypted_mat_ele_wise_add[j][k].decode(decrypted_decoded_mat_res_jk);
+      double mat_add_jk = h1[j][k] + h2[j][k];
+      EXPECT_NEAR(mat_add_jk, decrypted_decoded_mat_res_jk, 1e-3);
+      delete [] partially_decryption_mat_res_jk;
+    }
+  }
+
+  ///////////////////////////////////////////////////////////
+  /// Test homomorphic matrix cipher/plain multiplication ///
+  ///////////////////////////////////////////////////////////
+  double o1[3][5] = {
+      {0.1, -0.2, 0.3, -0.4, 0.5},
+      {0.2, -0.3, 0.4, -0.5, 0.6},
+      {-0.3, 0.4, -0.5, 0.6, -0.7}
+  };
+  double o2[5][3] = {
+      {0.9, 0.8, -0.7},
+      {0.6, 0.5, -0.8},
+      {0.7, -0.6, 0.5},
+      {-0.4, 0.7, -0.6},
+      {0.5, -0.4, 0.3}
+  };
+
+  auto** number_o1 = new EncodedNumber*[3];
+  auto** number_o2 = new EncodedNumber*[5];
+  for (int i = 0; i < 3; i++) {
+    number_o1[i] = new EncodedNumber[5];
+  }
+  for (int i = 0; i < 5; i++) {
+    number_o2[i] = new EncodedNumber[3];
+  }
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 5; j++) {
+      number_o1[i][j].set_double(pk->n[0], o1[i][j], 16);
+    }
+  }
+  for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < 3; j++) {
+      number_o2[i][j].set_double(pk->n[0], o2[i][j], 16);
+      djcs_t_aux_encrypt(pk, hr, number_o2[i][j], number_o2[i][j]);
+    }
+  }
+
+  auto** encrypted_mat_ep_mult = new EncodedNumber*[3];
+  auto** decrypted_mat_ep_mult = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    encrypted_mat_ep_mult[i] = new EncodedNumber[3];
+    decrypted_mat_ep_mult[i] = new EncodedNumber[3];
+  }
+
+  djcs_t_aux_mat_mat_ep_mult(pk, hr, encrypted_mat_ep_mult, number_o2, number_o1,
+                             5, 3, 3, 5);
+
+  double mat_mult_res[3][3];
+  for (int j = 0; j < 3; j++) {
+    for (int k = 0; k < 3; k++) {
+      double s = 0.0;
+      for (int i = 0; i < 5; i++) {
+        s += (o1[j][i] * o2[i][k]);
+      }
+      mat_mult_res[j][k] = s;
+//      std::cout << "j = " << j << ", k = " << k << ", mat_mult_res = " << mat_mult_res[j][k] << std::endl;
+    }
+  }
+
+  for (int j = 0; j < 3; j++) {
+    for (int k = 0; k < 3; k++) {
+      auto* partially_decryption_mat_ep_mult_res_jk = new EncodedNumber[client_num];
+      for (int i = 0; i < client_num; i++) {
+        djcs_t_aux_partial_decrypt(pk, au[i], partially_decryption_mat_ep_mult_res_jk[i], encrypted_mat_ep_mult[j][k]);
+      }
+      djcs_t_aux_share_combine(pk, decrypted_mat_ep_mult[j][k], partially_decryption_mat_ep_mult_res_jk, client_num);
+
+      double decrypted_decoded_mat_ep_res_jk;
+      decrypted_mat_ep_mult[j][k].decode(decrypted_decoded_mat_ep_res_jk);
+//      std::cout << "decrypted[" << j << "][" << k << "] = " << decrypted_decoded_mat_ep_res_jk << std::endl;
+      EXPECT_NEAR(mat_mult_res[j][k], decrypted_decoded_mat_ep_res_jk, 1e-3);
+      delete [] partially_decryption_mat_ep_mult_res_jk;
+    }
+  }
+
   // free memory
   delete [] partially_decryption;
   delete [] partially_sum_decryption;
   delete [] partially_product_decryption;
   delete [] partially_inner_prod_decryption;
+  delete [] partially_agg_decryption;
   delete [] number_c1;
   delete [] number_c2;
   delete [] encrypted_number_c1;
   delete [] number_d1;
+  delete [] number_e;
+  delete [] number_f1;
+  delete [] number_f2;
+  delete [] number_g1;
+  delete [] number_g2;
+  delete [] encrypted_number_e;
+  delete [] res_ele_wise_add_vec;
+  delete [] dec_res_ele_wise_add_vec;
+  delete [] res_ele_wise_ep_vec;
+  delete [] dec_res_ele_wise_ep_vec;
   delete [] encrypted_number_d1;
   delete [] encrypted_mat_result;
   delete [] decrypted_mat_result;
@@ -201,6 +439,28 @@ TEST(PHE, ThresholdPaillierScheme) {
     delete [] number_d2[i];
   }
   delete [] number_d2;
+  for (int i = 0; i < 3; i++) {
+    delete [] number_h1[i];
+    delete [] number_h2[i];
+    delete [] encrypted_mat_ele_wise_add[i];
+    delete [] decrypted_mat_ele_wise_add[i];
+  }
+  delete [] number_h1;
+  delete [] number_h2;
+  delete [] encrypted_mat_ele_wise_add;
+  delete [] decrypted_mat_ele_wise_add;
+  for (int i = 0; i < 3; i++) {
+    delete [] number_o1[i];
+    delete [] encrypted_mat_ep_mult[i];
+    delete [] decrypted_mat_ep_mult[i];
+  }
+  delete [] number_o1;
+  delete [] encrypted_mat_ep_mult;
+  delete [] decrypted_mat_ep_mult;
+  for (int i = 0; i < 5; i++) {
+    delete [] number_o2[i];
+  }
+  delete [] number_o2;
 
   hcs_free_random(hr);
   djcs_t_free_public_key(pk);

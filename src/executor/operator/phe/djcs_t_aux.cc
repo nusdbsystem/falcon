@@ -102,30 +102,21 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
     exit(EXIT_FAILURE);
   }
 
-  mpz_t t1, t2;
+  check_ee_add_exponent(cipher1, cipher2);
+  check_encoded_public_key(cipher1, cipher2);
+
+  mpz_t t1;
   mpz_init(t1);
-  mpz_init(t2);
   cipher1.getter_n(t1);
-  cipher2.getter_n(t2);
 
-  if (mpz_cmp(t1, t2) != 0) {
-    log_error("Two ciphertexts are not with the same public key.");
-    exit(EXIT_FAILURE);
-  }
-
-  if (cipher1.getter_exponent() != cipher2.getter_exponent()) {
-    log_error("Two ciphertexts do not have the same exponents.");
-    exit(1);
-  }
-
-  mpz_t t3, t4, sum;
+  mpz_t t2, t3, sum;
+  mpz_init(t2);
   mpz_init(t3);
-  mpz_init(t4);
   mpz_init(sum);
 
-  cipher1.getter_value(t3);
-  cipher2.getter_value(t4);
-  djcs_t_ee_add(pk, sum, t3, t4);
+  cipher1.getter_value(t2);
+  cipher2.getter_value(t3);
+  djcs_t_ee_add(pk, sum, t2, t3);
   res.setter_n(t1);
   res.setter_value(sum);
   res.setter_type(Ciphertext);
@@ -134,7 +125,6 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
   mpz_clear(t1);
   mpz_clear(t2);
   mpz_clear(t3);
-  mpz_clear(t4);
   mpz_clear(sum);
 }
 
@@ -147,24 +137,19 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
     exit(EXIT_FAILURE);
   }
 
-  mpz_t t1, t2;
+  check_encoded_public_key(cipher, plain);
+
+  mpz_t t1;
   mpz_init(t1);
-  mpz_init(t2);
   cipher.getter_n(t1);
-  plain.getter_n(t2);
 
-  if (mpz_cmp(t1, t2) != 0) {
-    log_error("The two inputs are not with the same public key.");
-    exit(EXIT_FAILURE);
-  }
-
-  mpz_t t3, t4, mult;
+  mpz_t t2, t3, mult;
+  mpz_init(t2);
   mpz_init(t3);
-  mpz_init(t4);
   mpz_init(mult);
-  cipher.getter_value(t3);
-  plain.getter_value(t4);
-  djcs_t_ep_mul(pk, mult, t3, t4);
+  cipher.getter_value(t2);
+  plain.getter_value(t3);
+  djcs_t_ep_mul(pk, mult, t2, t3);
 
   res.setter_n(t1);
   res.setter_value(mult);
@@ -174,8 +159,34 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
   mpz_clear(t1);
   mpz_clear(t2);
   mpz_clear(t3);
-  mpz_clear(t4);
   mpz_clear(mult);
+}
+
+void djcs_t_aux_vec_aggregate(djcs_t_public_key* pk,
+    EncodedNumber& res,
+    EncodedNumber* ciphers,
+    int size) {
+  check_size(size);
+  res = ciphers[0];
+  for (int i = 1; i < size; i++) {
+    djcs_t_aux_ee_add(pk, res, res, ciphers[i]);
+  }
+}
+
+void djcs_t_aux_vec_ele_wise_ee_add(
+    djcs_t_public_key* pk,
+    EncodedNumber* res,
+    EncodedNumber* ciphers1,
+    EncodedNumber* ciphers2,
+    int size) {
+  check_size(size);
+  check_ee_add_exponent(ciphers1[0], ciphers2[0]);
+  check_encoded_public_key(ciphers1[0], ciphers2[0]);
+  // element-wise phe addition
+  for (int i = 0; i < size; i++) {
+    res[i] = ciphers1[i];
+    djcs_t_aux_ee_add(pk, res[i], res[i], ciphers2[i]);
+  }
 }
 
 void djcs_t_aux_inner_product(djcs_t_public_key* pk,
@@ -184,21 +195,12 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
     EncodedNumber* ciphers,
     EncodedNumber* plains,
     int size) {
-  if (size == 0) {
-    log_error("The size of two vectors is zero.");
-    exit(EXIT_FAILURE);
-  }
+  check_size(size);
+  check_encoded_public_key(ciphers[0], plains[0]);
 
-  mpz_t t1, t2;
+  mpz_t t1;
   mpz_init(t1);
-  mpz_init(t2);
   ciphers[0].getter_n(t1);
-  plains[0].getter_n(t2);
-
-  if (mpz_cmp(t1, t2) != 0) {
-    log_error("The two vectors are not with the same public key.");
-    exit(EXIT_FAILURE);
-  }
 
   // assume the elements in the plains have the same exponent, so does ciphers
   res.setter_n(t1);
@@ -215,11 +217,11 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
   }
 
   // homomorphic dot product
-  mpz_t sum, t3;   // why need another sum1 that can only be correct? weired
+  mpz_t sum, t2;   // why need another sum1 that can only be correct? weired
   mpz_init(sum);
-  mpz_init(t3);
-  mpz_set_si(t3, 0);
-  djcs_t_encrypt(pk, hr, sum, t3);
+  mpz_init(t2);
+  mpz_set_si(t2, 0);
+  djcs_t_encrypt(pk, hr, sum, t2);
 
   for (int j = 0; j < size; j++) {
     // store the encrypted_exact_answer
@@ -232,15 +234,12 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
 
     mpz_clear(tmp);
   }
-
   res.setter_value(sum);
 
   // clear everything
   mpz_clear(t1);
   mpz_clear(t2);
-  mpz_clear(t3);
   mpz_clear(sum);
-
   for (int i = 0; i < size; i++) {
     mpz_clear(mpz_ciphers[i]);
     mpz_clear(mpz_plains[i]);
@@ -249,35 +248,78 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
   free(mpz_plains);
 }
 
-void djcs_t_aux_matrix_mult(djcs_t_public_key* pk,
+void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
+    EncodedNumber* res,
+    EncodedNumber* ciphers,
+    EncodedNumber* plains,
+    int size) {
+  check_size(size);
+  check_encoded_public_key(ciphers[0], plains[0]);
+  for (int i = 0; i < size; i++) {
+    djcs_t_aux_ep_mul(pk, res[i], ciphers[i], plains[i]);
+  }
+}
+
+void djcs_t_aux_matrix_ele_wise_ee_add(
+    djcs_t_public_key* pk,
+    EncodedNumber** res,
+    EncodedNumber** cipher_mat1,
+    EncodedNumber** cipher_mat2,
+    int row_size,
+    int column_size) {
+  check_size(row_size);
+  check_size(column_size);
+  check_ee_add_exponent(cipher_mat1[0][0], cipher_mat2[0][0]);
+  check_encoded_public_key(cipher_mat1[0][0], cipher_mat2[0][0]);
+  for (int i = 0; i < row_size; i++) {
+    djcs_t_aux_vec_ele_wise_ee_add(pk, res[i], cipher_mat1[i], cipher_mat2[i], column_size);
+  }
+}
+
+void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key* pk,
     hcs_random* hr,
     EncodedNumber* res,
     EncodedNumber* ciphers,
     EncodedNumber** plains,
     int row_size,
     int column_size) {
-  if (row_size == 0 || column_size == 0) {
-    log_error("The size of the vector or matrix is zero.");
-    exit(EXIT_FAILURE);
-  }
-
-  mpz_t t1, t2;
-  mpz_init(t1);
-  mpz_init(t2);
-
-  // the first element of both array is used to store the public key
-  ciphers[0].getter_n(t1);
-  plains[0][0].getter_n(t2);
-  if (mpz_cmp(t1, t2) != 0) {
-    log_error("The vector and the matrix are not with the same public key.");
-    exit(EXIT_FAILURE);
-  }
+  check_size(row_size);
+  check_size(column_size);
+  check_encoded_public_key(ciphers[0], plains[0][0]);
   for (int i = 0; i < row_size; i++) {
     djcs_t_aux_inner_product(pk, hr, res[i], ciphers, plains[i], column_size);
   }
+}
 
-  mpz_clear(t1);
-  mpz_clear(t2);
+void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
+    hcs_random* hr,
+    EncodedNumber** res,
+    EncodedNumber** cipher_mat,
+    EncodedNumber** plain_mat,
+    int cipher_row_size,
+    int cipher_column_size,
+    int plain_row_size,
+    int plain_column_size) {
+  check_size(cipher_row_size);
+  check_size(cipher_column_size);
+  check_size(plain_row_size);
+  check_size(plain_column_size);
+  if (plain_column_size != cipher_row_size) {
+    log_error("The plaintext column size is not equal to ciphertext row size");
+    exit(EXIT_FAILURE);
+  }
+  // matrix multiplication
+  for (int i = 0; i < plain_row_size; i++) {
+    for (int j = 0; j < cipher_column_size; j++) {
+      // re-arrange the ciphertext vector for calling inner product
+      auto* cipher_vec_j = new EncodedNumber[cipher_row_size];
+      for (int k = 0; k < cipher_row_size; k++) {
+        cipher_vec_j[k] = cipher_mat[k][j];
+      }
+      djcs_t_aux_inner_product(pk, hr, res[i][j], cipher_vec_j, plain_mat[i], cipher_row_size);
+      delete [] cipher_vec_j;
+    }
+  }
 }
 
 void djcs_t_public_key_copy(djcs_t_public_key* src, djcs_t_public_key* dest) {
@@ -300,4 +342,34 @@ void djcs_t_auth_server_copy(djcs_t_auth_server* src, djcs_t_auth_server* dest) 
 void djcs_t_hcs_random_copy(hcs_random* src, hcs_random* dest) {
   // TODO: probably this function causes memory leak, need further examination
   gmp_randinit_set(dest->rstate, src->rstate);
+}
+
+void check_size(int size) {
+  if (size == 0) {
+    log_error("The vector size is zero.");
+    exit(EXIT_FAILURE);
+  }
+}
+
+void check_encoded_public_key(const EncodedNumber& num1, const EncodedNumber& num2) {
+  mpz_t t1, t2;
+  mpz_init(t1);
+  mpz_init(t2);
+  num1.getter_n(t1);
+  num2.getter_n(t2);
+  if (mpz_cmp(t1, t2) != 0) {
+    log_error("The two EncodedNumbers are not with the same public key.");
+    exit(EXIT_FAILURE);
+  }
+  mpz_clear(t1);
+  mpz_clear(t2);
+}
+
+void check_ee_add_exponent(const EncodedNumber& num1, const EncodedNumber& num2) {
+  int num1_exponent = num1.getter_exponent();
+  int num2_exponent = num2.getter_exponent();
+  if (num1_exponent != num2_exponent) {
+    log_error("The two EncodedNumbers have different exponents, cannot add.");
+    exit(EXIT_FAILURE);
+  }
 }

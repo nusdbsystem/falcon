@@ -55,11 +55,11 @@ void LinearModel::compute_batch_phe_aggregation(const Party &party,
 
   // each party compute local homomorphic aggregation
   auto* local_batch_phe_aggregation = new EncodedNumber[cur_batch_size];
-  djcs_t_aux_matrix_mult(phe_pub_key, party.phe_random,
+  djcs_t_aux_vec_mat_ep_mult(phe_pub_key, party.phe_random,
                          local_batch_phe_aggregation, local_weights,
                          encoded_batch_samples, cur_batch_size, weight_size);
 
-  log_info("[LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_matrix_mult success");
+  log_info("[LogisticRegressionModel.compute_batch_phe_aggregation]: djcs_t_aux_vec_mat_ep_mult success");
 
   // every party sends the local aggregation to the active party
   if (party.party_type == falcon::ACTIVE_PARTY) {
