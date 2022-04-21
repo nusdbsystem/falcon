@@ -14,6 +14,7 @@
 #include <falcon/model/model_io.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/logger/log_alg_params.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <ctime>
 #include <random>
@@ -167,10 +168,10 @@ void LogisticRegressionBuilder::backward_computation(
                           encoded_constant);
       }
       // then truncate the regularized gradients to common_gradients_precision
-      party.truncate_ciphers_precision(regularized_gradients,
-                                       log_reg_model.weight_size,
-                                       ACTIVE_PARTY_ID,
-                                       common_gradients_precision);
+      truncate_ciphers_precision(party, regularized_gradients,
+                                 log_reg_model.weight_size,
+                                 ACTIVE_PARTY_ID,
+                                 common_gradients_precision);
       // lastly, add the regularized gradients to common gradients, and assign back
       for (int j = 0; j < log_reg_model.weight_size; j++) {
         djcs_t_aux_ee_add(phe_pub_key,
@@ -233,10 +234,10 @@ void LogisticRegressionBuilder::backward_computation(
     party.recv_long_message(ACTIVE_PARTY_ID, recv_global_enc_grad_str);
     deserialize_encoded_number_array(global_encrypted_gradients, global_weight_size, recv_global_enc_grad_str);
   }
-  party.truncate_ciphers_precision(global_encrypted_gradients,
-                                   global_weight_size,
-                                   ACTIVE_PARTY_ID,
-                                   dest_precision);
+  truncate_ciphers_precision(party, global_encrypted_gradients,
+                             global_weight_size,
+                             ACTIVE_PARTY_ID,
+                             dest_precision);
   // find the corresponding encrypted gradients needed
   int start_idx_in_global = 0;
   for (int i = 0; i < party.party_num; i++) {
@@ -451,20 +452,19 @@ void LogisticRegressionBuilder::train(Party party) {
         party.broadcast_encoded_number_array(encrypted_gradients,
                                              log_reg_model.weight_size,
                                              party.party_id);
-        party.truncate_ciphers_precision(encrypted_gradients,
-                                         log_reg_model.weight_size,
-                                         party.party_id,
-                                         encrypted_weights_precision);
+        truncate_ciphers_precision(party, encrypted_gradients,
+                                   log_reg_model.weight_size,
+                                   party.party_id,
+                                   encrypted_weights_precision);
       } else {
         int party_i_weight_size = log_reg_model.party_weight_sizes[i];
         auto* party_i_enc_grad = new EncodedNumber[party_i_weight_size];
         party.broadcast_encoded_number_array(party_i_enc_grad,
                                              party_i_weight_size,
                                              i);
-        party.truncate_ciphers_precision(party_i_enc_grad,
-                                         party_i_weight_size,
-                                         i,
-                                         encrypted_weights_precision);
+        truncate_ciphers_precision(party, party_i_enc_grad,
+                                   party_i_weight_size,
+                                   i, encrypted_weights_precision);
         delete [] party_i_enc_grad;
       }
     }
@@ -741,7 +741,7 @@ void LogisticRegressionBuilder::eval(Party party,
 
   // step 3: active party aggregates and call collaborative decryption
   auto* decrypted_labels = new EncodedNumber[dataset_size];
-  party.collaborative_decrypt(predicted_labels,
+  collaborative_decrypt(party, predicted_labels,
       decrypted_labels,
       dataset_size,
       ACTIVE_PARTY_ID);
@@ -801,10 +801,10 @@ void LogisticRegressionBuilder::distributed_eval(
 
   // 4: active party aggregates and call collaborative decryption
   auto* decrypted_labels = new EncodedNumber[cur_used_samples_size];
-  party.collaborative_decrypt(predicted_labels,
-                              decrypted_labels,
-                              cur_used_samples_size,
-                              ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, predicted_labels,
+                        decrypted_labels,
+                        cur_used_samples_size,
+                        ACTIVE_PARTY_ID);
 
   log_info("decrypt the predicted labels finished");
 
@@ -919,8 +919,8 @@ void LogisticRegressionBuilder::loss_computation(Party party, falcon::DatasetTyp
 
   // step 3: active party aggregates and call collaborative decryption
   auto* decrypted_aggregation = new EncodedNumber[dataset_size];
-  party.collaborative_decrypt(encrypted_aggregation, decrypted_aggregation,
-                              dataset_size, ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, encrypted_aggregation, decrypted_aggregation,
+                        dataset_size, ACTIVE_PARTY_ID);
 
   // step 4: active party computes the logistic function
   // and compare the accuracy
@@ -1022,7 +1022,7 @@ void LogisticRegressionBuilder::display_one_ciphertext(Party party, EncodedNumbe
         party.send_long_message(i, ciphertext_str);
       }
     }
-    party.collaborative_decrypt(number, decrypted_number, 1, ACTIVE_PARTY_ID);
+    collaborative_decrypt(party, number, decrypted_number, 1, ACTIVE_PARTY_ID);
     double v;
     decrypted_number[0].decode(v);
     std::cout << "plaintext " << std::setprecision(17) << v << std::endl;
@@ -1034,8 +1034,7 @@ void LogisticRegressionBuilder::display_one_ciphertext(Party party, EncodedNumbe
     auto* recv_ciphertext = new EncodedNumber[1];
     auto* decrypted_ciphertext = new EncodedNumber[1];
     deserialize_encoded_number_array(recv_ciphertext, 1, recv_ciphertext_str);
-    party.collaborative_decrypt(recv_ciphertext, decrypted_ciphertext, 1,
-                                ACTIVE_PARTY_ID);
+    collaborative_decrypt(party, recv_ciphertext, decrypted_ciphertext, 1, ACTIVE_PARTY_ID);
     delete[] recv_ciphertext;
     delete[] decrypted_ciphertext;
   }

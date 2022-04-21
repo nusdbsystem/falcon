@@ -4,6 +4,7 @@
 
 #include <falcon/algorithm/vertical/tree/gbdt_loss.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <glog/logging.h>
 
@@ -458,7 +459,7 @@ void update_raw_predictions_with_learning_rate(Party party,
   google::FlushLogFiles(google::INFO);
   // broadcast the assists and truncate the precision to PHE
   party.broadcast_encoded_number_array(assists, size, ACTIVE_PARTY_ID);
-  party.truncate_ciphers_precision(assists, size, ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  truncate_ciphers_precision(party, assists, size, ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   for (int i = 0; i < size; i++) {
     djcs_t_aux_ee_add(phe_pub_key, raw_predictions[i],
                       raw_predictions[i], assists[i]);
@@ -480,8 +481,8 @@ void compute_raw_predictions_expit(Party party,
                                    int phe_precision) {
   // step 1: convert the raw_predictions into secret shares
   std::vector<double> raw_predictions_shares;
-  party.ciphers_to_secret_shares(raw_predictions, raw_predictions_shares,
-                                 size, ACTIVE_PARTY_ID, phe_precision);
+  ciphers_to_secret_shares(party, raw_predictions, raw_predictions_shares,
+                           size, ACTIVE_PARTY_ID, phe_precision);
   // step 2: send to mpc for computing logistic function
   std::vector<int> public_values;
   public_values.push_back(size);
@@ -507,11 +508,11 @@ void compute_raw_predictions_expit(Party party,
   spdz_pruning_check_thread.join();
   // step 3: convert the resulted shares back into ciphers,
   // which is encrypted expit raw predictions
-  party.secret_shares_to_ciphers(expit_raw_predictions,
-                                 expit_raw_predictions_shares,
-                                 size,
-                                 ACTIVE_PARTY_ID,
-                                 phe_precision);
+  secret_shares_to_ciphers(party, expit_raw_predictions,
+                           expit_raw_predictions_shares,
+                           size,
+                           ACTIVE_PARTY_ID,
+                           phe_precision);
 }
 
 void compute_raw_predictions_softmax(Party party,
@@ -523,8 +524,8 @@ void compute_raw_predictions_softmax(Party party,
   // step 1: convert the raw_predictions into secret shares, the size is sample_size * class_num
   int size = sample_size * class_num;
   std::vector<double> raw_predictions_shares;
-  party.ciphers_to_secret_shares(raw_predictions, raw_predictions_shares,
-                                 size, ACTIVE_PARTY_ID, phe_precision);
+  ciphers_to_secret_shares(party, raw_predictions, raw_predictions_shares,
+                           size, ACTIVE_PARTY_ID, phe_precision);
   // step 2: send to mpc for computing softmax
   std::vector<int> public_values;
   public_values.push_back(sample_size);
@@ -550,11 +551,11 @@ void compute_raw_predictions_softmax(Party party,
   spdz_pruning_check_thread.join();
   // step 3: convert the resulted shares back into ciphers,
   // which is encrypted expit raw predictions
-  party.secret_shares_to_ciphers(softmax_raw_predictions,
-                                 softmax_raw_predictions_shares,
-                                 size,
-                                 ACTIVE_PARTY_ID,
-                                 phe_precision);
+  secret_shares_to_ciphers(party, softmax_raw_predictions,
+                           softmax_raw_predictions_shares,
+                           size,
+                           ACTIVE_PARTY_ID,
+                           phe_precision);
 }
 
 void update_terminal_regions_for_classification(Party party,
@@ -570,21 +571,21 @@ void update_terminal_regions_for_classification(Party party,
   party.getter_phe_pub_key(phe_pub_key);
   // step 1: convert the residual to secret shares
   std::vector<double> residuals_shares;
-  party.ciphers_to_secret_shares(residuals, residuals_shares, sample_size,
-                                 ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  ciphers_to_secret_shares(party, residuals, residuals_shares, sample_size,
+                           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   LOG(INFO) << "Compute residual secret shares finished";
   // step 2: compute ground-truth label secret shares y
   std::vector<double> ground_truth_labels_shares;
-  party.ciphers_to_secret_shares(ground_truth_labels, ground_truth_labels_shares, sample_size,
-                                 ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  ciphers_to_secret_shares(party, ground_truth_labels, ground_truth_labels_shares, sample_size,
+                           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   LOG(INFO) << "Compute ground truth labels secret shares finished";
   // step 3: predict based on current tree, for terminal region check using mpc
   EncodedNumber* pre_predictions = new EncodedNumber[sample_size];
   decision_tree_builder.tree.predict(party, decision_tree_builder.getter_training_data(),
                                      sample_size, pre_predictions);
   std::vector<double> pre_predictions_shares;
-  party.ciphers_to_secret_shares(pre_predictions, pre_predictions_shares, sample_size,
-                                 ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  ciphers_to_secret_shares(party, pre_predictions, pre_predictions_shares, sample_size,
+                           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   LOG(INFO) << "Predict on the current tree model finished";
   // step 4: find the match between leaf node index and tree node index
   int leaf_node_num = decision_tree_builder.tree.internal_node_num + 1;
@@ -596,8 +597,8 @@ void update_terminal_regions_for_classification(Party party,
   LOG(INFO) << "Compute label vector and index map finished";
   // step 5: convert the encrypted labels to secret shares
   std::vector<double> leaf_lables_shares;
-  party.ciphers_to_secret_shares(leaf_labels, leaf_lables_shares, leaf_node_num,
-                                 ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  ciphers_to_secret_shares(party, leaf_labels, leaf_lables_shares, leaf_node_num,
+                           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   LOG(INFO) << "Compute leaf label shares finished";
   // step 6: call the GBDT_UPDATE_TERMINAL_REGION mpc program to compute
   // the new leaf node label
@@ -639,8 +640,8 @@ void update_terminal_regions_for_classification(Party party,
   LOG(INFO) << "Compute mpc update terminal region finished";
   // step 7: convert the returned new leaf label shares to ciphers
   EncodedNumber* updated_leaf_labels = new EncodedNumber[leaf_node_num];
-  party.secret_shares_to_ciphers(updated_leaf_labels, updated_leaf_label_shares,
-                                 leaf_node_num, ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  secret_shares_to_ciphers(party, updated_leaf_labels, updated_leaf_label_shares,
+                           leaf_node_num, ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   LOG(INFO) << "Convert new label shares to ciphers finished";
   // step 8: update the tree model
   for (int i = 0; i < leaf_node_num; i++) {

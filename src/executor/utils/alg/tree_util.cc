@@ -104,8 +104,8 @@ double lime_reg_tree_root_impurity(Party& party, bool use_encrypted_labels,
   party.broadcast_encoded_number_array(enc_weight_sum, 1, ACTIVE_PARTY_ID);
 
   // decrypt the sums
-  party.collaborative_decrypt(enc_label_sum, dec_label_sum, 2, ACTIVE_PARTY_ID);
-  party.collaborative_decrypt(enc_weight_sum, dec_weight_sum, 1, ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, enc_label_sum, dec_label_sum, 2, ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, enc_weight_sum, dec_weight_sum, 1, ACTIVE_PARTY_ID);
   double root_impurity;
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // compute impurity

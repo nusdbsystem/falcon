@@ -15,6 +15,7 @@
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/utils/metric/regression.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <ctime>
 #include <random>
@@ -273,10 +274,10 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
     party.recv_long_message(ACTIVE_PARTY_ID, recv_global_enc_grad_str);
     deserialize_encoded_number_array(global_encrypted_gradients, global_weight_size, recv_global_enc_grad_str);
   }
-  party.truncate_ciphers_precision(global_encrypted_gradients,
-                                   global_weight_size,
-                                   ACTIVE_PARTY_ID,
-                                   dest_precision);
+  truncate_ciphers_precision(party, global_encrypted_gradients,
+                             global_weight_size,
+                             ACTIVE_PARTY_ID,
+                             dest_precision);
   // find the corresponding encrypted gradients needed
   int start_idx_in_global = 0;
   for (int i = 0; i < party.party_num; i++) {
@@ -404,11 +405,11 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
 //  }
 
 
-  party.ciphers_multi(encrypted_batch_losses,
-                      encrypted_batch_losses,
-                      batch_sample_weights,
-                      cur_batch_size,
-                      ACTIVE_PARTY_ID);
+  ciphers_multi(party, encrypted_batch_losses,
+                encrypted_batch_losses,
+                batch_sample_weights,
+                cur_batch_size,
+                ACTIVE_PARTY_ID);
   log_info("[lime_backward_computation]: finish compute cipher multiplication");
 
 //  // for debug
@@ -424,10 +425,10 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
 //  delete [] batch_weights;
 //  delete [] updated_batch_losses;
 
-  party.truncate_ciphers_precision(encrypted_batch_losses,
-                                   cur_batch_size,
-                                   ACTIVE_PARTY_ID,
-                                   loss_precision);
+  truncate_ciphers_precision(party, encrypted_batch_losses,
+                             cur_batch_size,
+                             ACTIVE_PARTY_ID,
+                             loss_precision);
   log_info("[lime_backward_computation]: finish truncate ciphers");
 
   // after calculate loss, compute [loss_i] * x_{ij}
@@ -573,10 +574,10 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
     party.recv_long_message(ACTIVE_PARTY_ID, recv_global_enc_grad_str);
     deserialize_encoded_number_array(global_encrypted_gradients, global_weight_size, recv_global_enc_grad_str);
   }
-  party.truncate_ciphers_precision(global_encrypted_gradients,
-                                   global_weight_size,
-                                   ACTIVE_PARTY_ID,
-                                   dest_precision);
+  truncate_ciphers_precision(party, global_encrypted_gradients,
+                             global_weight_size,
+                             ACTIVE_PARTY_ID,
+                             dest_precision);
   // find the corresponding encrypted gradients needed
   int start_idx_in_global = 0;
   for (int i = 0; i < party.party_num; i++) {
@@ -656,8 +657,8 @@ void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, En
   // step 3
   std::vector<double> global_weights_shares;
   int phe_precision = abs(global_weights[0].getter_exponent());
-  party.ciphers_to_secret_shares(global_weights, global_weights_shares,
-                                 global_weight_size, ACTIVE_PARTY_ID, phe_precision);
+  ciphers_to_secret_shares(party, global_weights, global_weights_shares,
+                           global_weight_size, ACTIVE_PARTY_ID, phe_precision);
 
   log_info("[compute_l1_regularized_grad]: finish convert to secret shares");
 
@@ -684,8 +685,8 @@ void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, En
 
   // step 5
   auto* global_regularized_grad = new EncodedNumber[global_weight_size];
-  party.secret_shares_to_ciphers(global_regularized_grad, global_regularized_sign_shares,
-                                 global_weight_size, ACTIVE_PARTY_ID, phe_precision);
+  secret_shares_to_ciphers(party, global_regularized_grad, global_regularized_sign_shares,
+                           global_weight_size, ACTIVE_PARTY_ID, phe_precision);
 
   log_info("[compute_l1_regularized_grad]: finish convert regularized gradient shares to ciphers");
 
@@ -1433,10 +1434,10 @@ void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, c
 
   // step 3: active party aggregates and call collaborative decryption
   auto* decrypted_labels = new EncodedNumber[dataset_size];
-  party.collaborative_decrypt(predicted_labels,
-                              decrypted_labels,
-                              dataset_size,
-                              ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, predicted_labels,
+                        decrypted_labels,
+                        dataset_size,
+                        ACTIVE_PARTY_ID);
 
   // std::cout << "Print predicted class" << std::endl;
 
@@ -1511,8 +1512,8 @@ double LinearRegressionBuilder::loss_computation(const Party& party,
 
   // step 3: active party aggregates and call collaborative decryption
   auto* decrypted_aggregation = new EncodedNumber[dataset_size];
-  party.collaborative_decrypt(encrypted_aggregation, decrypted_aggregation,
-                              dataset_size, ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, encrypted_aggregation, decrypted_aggregation,
+                        dataset_size, ACTIVE_PARTY_ID);
 
   // step 4: compute common loss
   double loss = 0.0;
@@ -1610,10 +1611,10 @@ void LinearRegressionBuilder::distributed_eval(
 
   // 4: active party aggregates and call collaborative decryption
   auto* decrypted_labels = new EncodedNumber[cur_used_samples_size];
-  party.collaborative_decrypt(predicted_labels,
-                              decrypted_labels,
-                              cur_used_samples_size,
-                              ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, predicted_labels,
+                        decrypted_labels,
+                        cur_used_samples_size,
+                        ACTIVE_PARTY_ID);
 
   log_info("decrypt the predicted labels finished");
 

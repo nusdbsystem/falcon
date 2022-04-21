@@ -8,6 +8,7 @@
 #include <falcon/algorithm/vertical/tree/forest_model.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/operator/mpc/spdz_connector.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <cmath>
 #include <glog/logging.h>
@@ -108,11 +109,11 @@ void ForestModel::predict(Party &party,
     std::vector< std::vector<double> > forest_label_secret_shares;
     for (int tree_id = 0; tree_id < tree_size; tree_id++) {
       std::vector<double> tree_label_secret_shares;
-      party.ciphers_to_secret_shares(predicted_forest_labels[tree_id],
-                                     tree_label_secret_shares,
-                                     predicted_sample_size,
-                                     ACTIVE_PARTY_ID,
-                                     cipher_precision);
+      ciphers_to_secret_shares(party, predicted_forest_labels[tree_id],
+                               tree_label_secret_shares,
+                               predicted_sample_size,
+                               ACTIVE_PARTY_ID,
+                               cipher_precision);
       forest_label_secret_shares.push_back(tree_label_secret_shares);
     }
     // pack to private values for sending to mpc parties
@@ -144,11 +145,11 @@ void ForestModel::predict(Party &party,
     spdz_pruning_check_thread.join();
 
     // convert the secret shares to ciphertext, which is the predicted labels
-    party.secret_shares_to_ciphers(predicted_labels,
-                                   predicted_sample_shares,
-                                   predicted_sample_size,
-                                   ACTIVE_PARTY_ID,
-                                   cipher_precision);
+    secret_shares_to_ciphers(party, predicted_labels,
+                             predicted_sample_shares,
+                             predicted_sample_size,
+                             ACTIVE_PARTY_ID,
+                             cipher_precision);
   }
 
   // free memory
@@ -205,7 +206,7 @@ void ForestModel::predict_proba(Party &party,
       decrypted_forest_labels[tree_id] = new EncodedNumber[predicted_sample_size];
     }
     for (int i = 0; i < tree_size; i++) {
-      party.collaborative_decrypt(predicted_forest_labels[i], decrypted_forest_labels[i], predicted_sample_size, ACTIVE_PARTY_ID);
+      collaborative_decrypt(party, predicted_forest_labels[i], decrypted_forest_labels[i], predicted_sample_size, ACTIVE_PARTY_ID);
     }
     // active party compute prediction probabilities and encrypt
     if (party.party_type == falcon::ACTIVE_PARTY) {

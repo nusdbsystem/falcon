@@ -18,6 +18,7 @@
 #include <falcon/utils/io_util.h>
 
 #include <glog/logging.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 static int IS_MODEL_LOADED = 0;
 static LogisticRegressionModel saved_lr_model;
@@ -101,10 +102,7 @@ void lr_inference_logic(
   saved_lr_model.predict(const_cast<Party &>(party), batch_samples, predicted_labels);
 
   // step 3: active party aggregates and call collaborative decryption
-  party.collaborative_decrypt(predicted_labels,
-                              decrypted_labels,
-                              sample_num,
-                              ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, predicted_labels, decrypted_labels, sample_num, ACTIVE_PARTY_ID);
 
   std::cout << "Collaboratively decryption finished" << std::endl;
   LOG(INFO) << "Collaboratively decryption finished";

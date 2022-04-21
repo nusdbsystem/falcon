@@ -13,6 +13,7 @@
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/alg/tree_util.h>
 #include <falcon/utils/alg/debug_util.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <map>
 #include <stack>
@@ -375,8 +376,8 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
       assist_encrypted_weights[i] = encrypted_weights[i];
       assist_encrypted_weights[i+sample_num] = encrypted_weights[i];
     }
-    party.ciphers_multi(weighted_encrypted_true_labels, encrypted_true_labels,
-                        assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
+    ciphers_multi(party, weighted_encrypted_true_labels, encrypted_true_labels,
+                  assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
     party.broadcast_encoded_number_array(weighted_encrypted_true_labels, class_num * sample_num, ACTIVE_PARTY_ID);
     delete [] assist_encrypted_weights;
   } else {
@@ -387,8 +388,8 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
 
   // TODO: make the label precision automatically match
   // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
-  party.truncate_ciphers_precision(weighted_encrypted_true_labels, label_size,
-                                   ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  truncate_ciphers_precision(party, weighted_encrypted_true_labels, label_size,
+                             ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
 
   // init the root node info
   tree.nodes[0].depth = 0;
@@ -673,15 +674,15 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
     branch_sample_nums_prec = std::stoi(recv_prec);
   }
   log_info("[DecisionTreeBuilder.build_node]: branch_sample_nums_prec = " + std::to_string(branch_sample_nums_prec));
-  party.ciphers_to_secret_shares(global_left_branch_sample_nums,
+  ciphers_to_secret_shares(party, global_left_branch_sample_nums,
       left_sample_nums_shares, global_split_num,
       ACTIVE_PARTY_ID, branch_sample_nums_prec);
-  party.ciphers_to_secret_shares(global_right_branch_sample_nums,
+  ciphers_to_secret_shares(party, global_right_branch_sample_nums,
       right_sample_nums_shares, global_split_num,
       ACTIVE_PARTY_ID, branch_sample_nums_prec);
   for (int i = 0; i < global_split_num; i++) {
     std::vector<double> tmp;
-    party.ciphers_to_secret_shares(global_encrypted_statistics[i],tmp, 2 * class_num,
+    ciphers_to_secret_shares(party, global_encrypted_statistics[i],tmp, 2 * class_num,
         ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
     stats_shares.push_back(tmp);
   }
@@ -969,14 +970,14 @@ bool DecisionTreeBuilder::check_pruning_conditions(Party &party, int node_index,
           encrypted_sample_count[0], sample_mask_iv[i]);
     }
     encrypted_impurity[0] = tree.nodes[node_index].impurity;
-    party.ciphers_to_secret_shares(encrypted_sample_count, condition_shares1, 1,
+    ciphers_to_secret_shares(party, encrypted_sample_count, condition_shares1, 1,
         ACTIVE_PARTY_ID, 0);
-    party.ciphers_to_secret_shares(encrypted_impurity, condition_shares2, 1,
+    ciphers_to_secret_shares(party, encrypted_impurity, condition_shares2, 1,
         ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   } else {
-    party.ciphers_to_secret_shares(encrypted_sample_count, condition_shares1, 1,
+    ciphers_to_secret_shares(party, encrypted_sample_count, condition_shares1, 1,
         ACTIVE_PARTY_ID, 0);
-    party.ciphers_to_secret_shares(encrypted_impurity, condition_shares2, 1,
+    ciphers_to_secret_shares(party, encrypted_impurity, condition_shares2, 1,
         ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   }
   private_values.push_back(condition_shares1[0]);
@@ -1045,7 +1046,7 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party, int node_index,
               class_sample_nums[c], encrypted_labels[c * sample_num + j]);
         }
       }
-      party.ciphers_to_secret_shares(class_sample_nums, private_values,
+      ciphers_to_secret_shares(party, class_sample_nums, private_values,
           class_num, ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
       delete [] class_sample_nums;
     } else {
@@ -1064,9 +1065,9 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party, int node_index,
         djcs_t_aux_ee_add(phe_pub_key, encrypted_sample_num_aux[0],
             encrypted_sample_num_aux[0], sample_mask_iv[i]);
       }
-      party.ciphers_to_secret_shares(label_info, shares1, 1,
+      ciphers_to_secret_shares(party, label_info, shares1, 1,
           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-      party.ciphers_to_secret_shares(encrypted_sample_num_aux, shares2, 1,
+      ciphers_to_secret_shares(party, encrypted_sample_num_aux, shares2, 1,
           ACTIVE_PARTY_ID, 0);
       private_values.push_back(shares1[0]);
       private_values.push_back(shares2[0]);
@@ -1076,15 +1077,15 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party, int node_index,
   } else { // PASSIVE PARTY
     if (tree_type == falcon::CLASSIFICATION) {
       EncodedNumber *class_sample_nums = new EncodedNumber[class_num];
-      party.ciphers_to_secret_shares(class_sample_nums, private_values,
+      ciphers_to_secret_shares(party, class_sample_nums, private_values,
           class_num, ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
       delete [] class_sample_nums;
     } else { // REGRESSION
       EncodedNumber *label_info = new EncodedNumber[1];
       EncodedNumber *encrypted_sample_num_aux = new EncodedNumber[1];
-      party.ciphers_to_secret_shares(label_info, shares1, 1,
+      ciphers_to_secret_shares(party, label_info, shares1, 1,
           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-      party.ciphers_to_secret_shares(encrypted_sample_num_aux, shares2, 1,
+      ciphers_to_secret_shares(party, encrypted_sample_num_aux, shares2, 1,
           ACTIVE_PARTY_ID, 0);
       private_values.push_back(shares1[0]);
       private_values.push_back(shares2[0]);
@@ -1154,8 +1155,8 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
   auto* weighted_sample_mask_iv = new EncodedNumber[sample_num];
   if (use_sample_weights) {
     // if use encrypted weights, need to execute an element-wise cipher multiplication
-    party.ciphers_multi(weighted_sample_mask_iv, sample_mask_iv, encrypted_weights,
-                        sample_num, ACTIVE_PARTY_ID);
+    ciphers_multi(party, weighted_sample_mask_iv, sample_mask_iv, encrypted_weights,
+                  sample_num, ACTIVE_PARTY_ID);
   } else {
     for (int i = 0; i < sample_num; i++) {
       weighted_sample_mask_iv[i] = sample_mask_iv[i];
@@ -1355,7 +1356,7 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type,
 
   // step 3: active party aggregates and call collaborative decryption
   auto* decrypted_labels = new EncodedNumber[dataset_size];
-  party.collaborative_decrypt(predicted_labels, decrypted_labels, dataset_size, ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, predicted_labels, decrypted_labels, dataset_size, ACTIVE_PARTY_ID);
 
   // compute accuracy by the super client
   if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -1698,17 +1699,17 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
       branch_sample_nums_prec = std::stoi(recv_prec);
     }
     log_info("[build_node]: branch_sample_nums_prec = " + std::to_string(branch_sample_nums_prec));
-    party.ciphers_to_secret_shares(global_left_branch_sample_nums,
-                                   left_sample_nums_shares, global_split_num,
-                                   ACTIVE_PARTY_ID, branch_sample_nums_prec);
-    party.ciphers_to_secret_shares(global_right_branch_sample_nums,
-                                   right_sample_nums_shares, global_split_num,
-                                   ACTIVE_PARTY_ID, branch_sample_nums_prec);
+    ciphers_to_secret_shares(party, global_left_branch_sample_nums,
+                             left_sample_nums_shares, global_split_num,
+                             ACTIVE_PARTY_ID, branch_sample_nums_prec);
+    ciphers_to_secret_shares(party, global_right_branch_sample_nums,
+                             right_sample_nums_shares, global_split_num,
+                             ACTIVE_PARTY_ID, branch_sample_nums_prec);
     for (int i = 0; i < global_split_num; i++) {
       std::vector<double> tmp;
-      party.ciphers_to_secret_shares(global_encrypted_statistics[i],
-                                     tmp, 2 * class_num,
-                                     ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+      ciphers_to_secret_shares(party, global_encrypted_statistics[i],
+                               tmp, 2 * class_num,
+                               ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
       stats_shares.push_back(tmp);
     }
 
@@ -2181,8 +2182,8 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
       assist_encrypted_weights[i] = encrypted_sample_weights[i];
       assist_encrypted_weights[i+sample_num] = encrypted_sample_weights[i];
     }
-    party.ciphers_multi(init_encrypted_labels, encrypted_true_labels,
-                        assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
+    ciphers_multi(party, init_encrypted_labels, encrypted_true_labels,
+                  assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
     party.broadcast_encoded_number_array(init_encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
     delete [] assist_encrypted_weights;
   } else {
@@ -2193,8 +2194,8 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
 
   // TODO: make the label precision automatically match
   // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
-  party.truncate_ciphers_precision(init_encrypted_labels, label_size,
-                                   ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  truncate_ciphers_precision(party, init_encrypted_labels, label_size,
+                             ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
 
   // init map to main node_index: encrypted_label and encrypted_mask_iv
   map<int, EncodedNumber*> node_index_sample_mask_iv;
@@ -2428,17 +2429,17 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
       branch_sample_nums_prec = std::stoi(recv_prec);
     }
     log_info("[build_node]: branch_sample_nums_prec = " + std::to_string(branch_sample_nums_prec));
-    party.ciphers_to_secret_shares(global_left_branch_sample_nums,
-                                   left_sample_nums_shares, global_split_num,
-                                   ACTIVE_PARTY_ID, branch_sample_nums_prec);
-    party.ciphers_to_secret_shares(global_right_branch_sample_nums,
-                                   right_sample_nums_shares, global_split_num,
-                                   ACTIVE_PARTY_ID, branch_sample_nums_prec);
+    ciphers_to_secret_shares(party, global_left_branch_sample_nums,
+                             left_sample_nums_shares, global_split_num,
+                             ACTIVE_PARTY_ID, branch_sample_nums_prec);
+    ciphers_to_secret_shares(party, global_right_branch_sample_nums,
+                             right_sample_nums_shares, global_split_num,
+                             ACTIVE_PARTY_ID, branch_sample_nums_prec);
     for (int i = 0; i < global_split_num; i++) {
       std::vector<double> tmp;
-      party.ciphers_to_secret_shares(global_encrypted_statistics[i],
-                                     tmp, 2 * class_num,
-                                     ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+      ciphers_to_secret_shares(party, global_encrypted_statistics[i],
+                               tmp, 2 * class_num,
+                               ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
       stats_shares.push_back(tmp);
     }
 
@@ -2929,10 +2930,10 @@ void DecisionTreeBuilder::distributed_eval(Party &party, const Worker &worker, f
   // step 3: active party aggregates and call collaborative decryption
   log_info("[DT_train_worker.distributed_eval]: step 4 active party aggregates and call collaborative decryption");
   auto *decrypted_labels = new EncodedNumber[sample_size];
-  party.collaborative_decrypt(predicted_labels,
-                              decrypted_labels,
-                              sample_size,
-                              ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, predicted_labels,
+                        decrypted_labels,
+                        sample_size,
+                        ACTIVE_PARTY_ID);
 
   // step 4 compute accuracy by the super client
   log_info("[DT_train_worker.distributed_eval]: step 5.1 super client computes accuracy by the super client");
@@ -3294,7 +3295,7 @@ TreeModel DecisionTreeBuilder::aggregate_decrypt_tree_model(Party& party) {
       auto* dec = new EncodedNumber[1];
       enc[0] = agg_model.nodes[idx].impurity;
       log_info("[DecisionTreeBuilder: aggregate_decrypt_tree_model] internal node impurity type = " + std::to_string(enc[0].getter_type()));
-      party.collaborative_decrypt(enc, dec, 1, ACTIVE_PARTY_ID);
+      collaborative_decrypt(party, enc, dec, 1, ACTIVE_PARTY_ID);
       agg_model.nodes[idx].impurity = dec[0];
 
       int left_node_index = idx * 2 + 1;
@@ -3313,7 +3314,7 @@ TreeModel DecisionTreeBuilder::aggregate_decrypt_tree_model(Party& party) {
       enc[1] = agg_model.nodes[idx].label;
       log_info("[DecisionTreeBuilder: aggregate_decrypt_tree_model] leaf node impurity type = " + std::to_string(enc[0].getter_type()));
       log_info("[DecisionTreeBuilder: aggregate_decrypt_tree_model] leaf node label type = " + std::to_string(enc[1].getter_type()));
-      party.collaborative_decrypt(enc, dec, 2, ACTIVE_PARTY_ID);
+      collaborative_decrypt(party, enc, dec, 2, ACTIVE_PARTY_ID);
       agg_model.nodes[idx].impurity = dec[0];
       agg_model.nodes[idx].label = dec[1];
 

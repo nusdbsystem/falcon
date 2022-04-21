@@ -6,6 +6,7 @@
 #include <falcon/algorithm/vertical/linear_model/linear_model_base.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <cmath>
 #include <glog/logging.h>
@@ -197,8 +198,8 @@ std::vector<double> LinearModel::display_weights(Party party) {
       }
     }
     party.broadcast_encoded_number_array(party_i_local_weights, party_i_weight_size, i);
-    party.collaborative_decrypt(party_i_local_weights, party_i_decrypted_weights,
-                                party_i_weight_size, i);
+    collaborative_decrypt(party, party_i_local_weights, party_i_decrypted_weights,
+                          party_i_weight_size, i);
     if (i == party.party_id) {
       for (int j = 0; j < party_i_weight_size; j++) {
         double weight;

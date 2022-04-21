@@ -10,6 +10,7 @@
 #include <falcon/operator/phe/djcs_t_aux.h>
 #include <falcon/party/party.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 /**
  * This function implements debug of cipher array for check
@@ -31,7 +32,7 @@ std::vector<T> debug_cipher_array(const Party& party, EncodedNumber* cipher_arra
   party.broadcast_encoded_number_array(cipher_array, size, req_party_id);
   // call collaborative decrypt function
   auto *plain_array = new EncodedNumber[size];
-  party.collaborative_decrypt(cipher_array, plain_array, size, req_party_id);
+  collaborative_decrypt(party, cipher_array, plain_array, size, req_party_id);
   // request party should broadcast the plain array
   party.broadcast_encoded_number_array(plain_array, size, req_party_id);
   // decode the values and return

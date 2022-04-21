@@ -15,6 +15,7 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/io_util.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <glog/logging.h>
 #include <falcon/utils/math/math_ops.h>
@@ -83,10 +84,10 @@ void run_active_server_gbdt(const std::string& endpoint,
 
     // step 3: active party aggregates and call collaborative decryption
     EncodedNumber* decrypted_labels = new EncodedNumber[prediction_result_size];
-    party.collaborative_decrypt(predicted_labels,
-                                decrypted_labels,
-                                prediction_result_size,
-                                ACTIVE_PARTY_ID);
+    collaborative_decrypt(party, predicted_labels,
+                          decrypted_labels,
+                          prediction_result_size,
+                          ACTIVE_PARTY_ID);
     std::cout << "Collaboratively decryption finished" << std::endl;
     LOG(INFO) << "Collaboratively decryption finished";
 
@@ -222,10 +223,10 @@ void run_passive_server_gbdt(const std::string& saved_model_file,
 
     // step 3: active party aggregates and call collaborative decryption
     EncodedNumber* decrypted_labels = new EncodedNumber[prediction_result_size];
-    party.collaborative_decrypt(predicted_labels,
-                                decrypted_labels,
-                                prediction_result_size,
-                                ACTIVE_PARTY_ID);
+    collaborative_decrypt(party, predicted_labels,
+                          decrypted_labels,
+                          prediction_result_size,
+                          ACTIVE_PARTY_ID);
     std::cout << "Collaboratively decryption finished" << std::endl;
     LOG(INFO) << "Collaboratively decryption finished";
 

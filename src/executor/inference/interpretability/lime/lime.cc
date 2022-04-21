@@ -20,6 +20,7 @@
 #include <falcon/utils/pb_converter/alg_params_converter.h>
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/utils/base64.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <glog/logging.h>
 #include "omp.h"
@@ -342,8 +343,7 @@ void LimeExplainer::compute_dist_weights(const Party &party,
   compute_squared_dist(party, origin_data, sampled_data, squared_dist);
   log_info("[compute_dist_weights]: finish to compute square dist.");
   std::vector<double> squared_dist_shares;
-  party.ciphers_to_secret_shares(
-      squared_dist,
+  ciphers_to_secret_shares(party, squared_dist,
       squared_dist_shares,
       sample_size,
       ACTIVE_PARTY_ID,
@@ -379,8 +379,8 @@ void LimeExplainer::compute_dist_weights(const Party &party,
   log_info("[compute_dist_weights]: res.size = " + std::to_string(res.size()));
 
   // 5. convert to cipher and return
-  party.secret_shares_to_ciphers(weights, res, sample_size,
-                                 ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  secret_shares_to_ciphers(party, weights, res, sample_size,
+                           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   log_info("[compute_dist_weights]: shares to ciphers finished");
   delete [] squared_dist;
 }
@@ -1039,17 +1039,17 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   int label_size = REGRESSION_TREE_CLASS_NUM * cur_sample_size;
   auto* encrypted_labels = new EncodedNumber[label_size];
   auto* predictions_square = new EncodedNumber[cur_sample_size];
-  party.ciphers_multi(predictions_square,
-                      predictions,
-                      predictions,
-                      cur_sample_size,
-                      ACTIVE_PARTY_ID);
+  ciphers_multi(party, predictions_square,
+                predictions,
+                predictions,
+                cur_sample_size,
+                ACTIVE_PARTY_ID);
   int predictions_prec = std::abs(predictions[0].getter_exponent());
   log_info("[lime_decision_tree_train]: predictions_prec = " + std::to_string(predictions_prec));
-  party.truncate_ciphers_precision(predictions_square,
-                                   cur_sample_size,
-                                   ACTIVE_PARTY_ID,
-                                   predictions_prec);
+  truncate_ciphers_precision(party, predictions_square,
+                             cur_sample_size,
+                             ACTIVE_PARTY_ID,
+                             predictions_prec);
   int predictions_square_prec = std::abs(predictions_square[0].getter_exponent());
   log_info("[lime_decision_tree_train]: predictions_square_prec = " + std::to_string(predictions_square_prec));
   for (int i = 0; i < cur_sample_size; i++) {
@@ -1557,7 +1557,7 @@ void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>
   }
 
   for (int i = 0; i < cur_sample_size; i++) {
-    party.collaborative_decrypt(predictions[i], decrypted_predictions[i], class_num, ACTIVE_PARTY_ID);
+    collaborative_decrypt(party, predictions[i], decrypted_predictions[i], class_num, ACTIVE_PARTY_ID);
     if (party.party_type == falcon::ACTIVE_PARTY) {
       std::vector<double> sample_i_prediction;
       for (int j = 0; j < class_num; j++) {

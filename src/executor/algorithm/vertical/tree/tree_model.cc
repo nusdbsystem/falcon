@@ -12,6 +12,7 @@
 #include <stack>
 #include <numeric>
 #include <queue>
+#include <falcon/operator/conversion/op_conv.h>
 
 TreeModel::TreeModel() {}
 
@@ -265,7 +266,8 @@ void TreeModel::predict(Party &party,
     // 1 corresponding to real label.
     // TODO: ensure the saved label precision matches the following PHE_FIXED_POINT_PRECISION
     // here only for debug purpose, need to fix
-    party.truncate_ciphers_precision(updated_label_vector, (int) binary_vector.size(), ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+    truncate_ciphers_precision(party, updated_label_vector,
+                               (int) binary_vector.size(), ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
 
     // aggregate
     if (party.party_type == falcon::ACTIVE_PARTY) {

@@ -183,49 +183,6 @@ class Party {
                              std::vector<double>& testing_labels) const;
 
   /**
-   * parties jointly decrypt a ciphertext vector,
-   * assume that the parties have already have the same src_ciphers.
-   * The request party obtains the decrypted plaintext while
-   * the other parties obtain nothing plaintext.
-   *
-   * @param src_ciphers: ciphertext vector to be decrypted
-   * @param dest_plains: decrypted plaintext vector
-   * @param size: size of the vector
-   * @param req_party_id: party that initiate decryption
-   */
-  void collaborative_decrypt(EncodedNumber* src_ciphers,
-                             EncodedNumber* dest_plains, int size,
-                             int req_party_id) const;
-
-  /**
-   * convert ciphertext vector to secret shares securely,
-   * Algorithm 1: Conversion to secretly shared value in paper
-   * <Privacy Preserving Vertical Federated Learning for Tree-based Models>
-   *
-   * @param src_ciphers: ciphertext vector to be decrypted
-   * @param secret_shares: decrypted and decoded secret shares
-   * @param size: size of the vector
-   * @param req_party_id: party that initiate decryption
-   * @param phe_precision: fixed point precision when encoding
-   */
-  void ciphers_to_secret_shares(EncodedNumber* src_ciphers,
-                                std::vector<double>& secret_shares, int size,
-                                int req_party_id, int phe_precision) const;
-
-  /**
-   * convert secret shares back to ciphertext vector
-   *
-   * @param dest_ciphers: ciphertext vector to be recovered
-   * @param secret_shares: secret shares received from spdz parties
-   * @param size: size of the vector
-   * @param req_party_id: party that initiate conversion
-   * @param phe_precision: ciphertext vector precision, need careful design
-   */
-  void secret_shares_to_ciphers(EncodedNumber* dest_ciphers,
-                                std::vector<double> secret_shares, int size,
-                                int req_party_id, int phe_precision) const;
-
-  /**
    * broadcast an encoded vector to other parties
    *
    * @param vec: the encoded vector to be broadcast
@@ -234,32 +191,6 @@ class Party {
    */
   void broadcast_encoded_number_array(EncodedNumber *vec,
                                       int size, int req_party_id) const;
-
-  /**
-   * truncate the ciphertext precision to a lower one
-   *
-   * @param ciphers: the ciphertexts to be truncated precision
-   * @param size: the size of the vector
-   * @param req_party_id: the party who has the ciphertexts
-   * @param dest_precision: the destination precision
-   */
-  void truncate_ciphers_precision(EncodedNumber *ciphers, int size,
-                                  int req_party_id, int dest_precision) const;
-
-  /**
-   * compute the multiplication of two cipher vectors
-   *
-   * @param res: the resulted cipher vector
-   * @param ciphers1: the first cipher vector
-   * @param ciphers2: the second cipher vector
-   * @param size: the size of the two vectors
-   * @param req_party_id: the party who request the multiplication
-   */
-  void ciphers_multi(EncodedNumber* res,
-                     EncodedNumber* ciphers1,
-                     EncodedNumber* ciphers2,
-                     int size,
-                     int req_party_id) const;
 
   /**
    * each party has a int value, sync up to obtain a int array
@@ -295,11 +226,6 @@ class Party {
     djcs_t_auth_server_copy(s_phe_auth_server, phe_auth_server);
   }
 
-  /** set party's phe hcs random generator */
-  void setter_phe_random(hcs_random* s_phe_random) {
-    djcs_t_hcs_random_copy(s_phe_random, phe_random);
-  }
-
   /** get party's local sample number */
   int getter_sample_num() const { return sample_num; }
 
@@ -322,11 +248,6 @@ class Party {
   /** get party's phe authenticate server (i.e., private key share) */
   void getter_phe_auth_server(djcs_t_auth_server* g_phe_auth_server) const {
     djcs_t_auth_server_copy(phe_auth_server, g_phe_auth_server);
-  }
-
-  /** get party's phe hcs random generator */
-  void getter_phe_random(hcs_random* g_phe_random) const {
-    djcs_t_hcs_random_copy(phe_random, g_phe_random);
   }
 };
 

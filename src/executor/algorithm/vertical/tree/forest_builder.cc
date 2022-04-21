@@ -9,6 +9,7 @@
 #include <falcon/utils/math/math_ops.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/logger/log_alg_params.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <glog/logging.h>
 
@@ -152,10 +153,10 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
 
   // step 3: active party aggregates and call collaborative decryption
   EncodedNumber* decrypted_labels = new EncodedNumber[dataset_size];
-  party.collaborative_decrypt(predicted_labels,
-                              decrypted_labels,
-                              dataset_size,
-                              ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, predicted_labels,
+                        decrypted_labels,
+                        dataset_size,
+                        ACTIVE_PARTY_ID);
 
   // calculate accuracy by the active party
   std::vector<double> predictions;

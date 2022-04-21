@@ -7,6 +7,7 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <cmath>
 #include <glog/logging.h>
@@ -135,7 +136,7 @@ void LogisticRegressionModel::forward_computation(
   // in order to do the exponential calculation
   // use 2 * fixed precision, encrypted_weights_precision + plaintext_samples_precision
   std::vector<double> batch_aggregation_shares;
-  party.ciphers_to_secret_shares(
+  ciphers_to_secret_shares(party,
       encrypted_batch_aggregation,
       batch_aggregation_shares,
       cur_batch_size,
@@ -168,12 +169,12 @@ void LogisticRegressionModel::forward_computation(
   // active party receive all shares from other party and do the aggregation,
   // and board-cast predicted labels to other party.
   // use 2 * fixed precision
-//  int update_precision = (encrypted_batch_aggregation_precision - PHE_FIXED_POINT_PRECISION) / 2;
-  party.secret_shares_to_ciphers(predicted_labels,
-                                 batch_logistic_shares,
-                                 cur_batch_size,
-                                 ACTIVE_PARTY_ID,
-                                 encrypted_batch_aggregation_precision);
+  //  int update_precision = (encrypted_batch_aggregation_precision - PHE_FIXED_POINT_PRECISION) / 2;
+  secret_shares_to_ciphers(party, predicted_labels,
+                           batch_logistic_shares,
+                           cur_batch_size,
+                           ACTIVE_PARTY_ID,
+                           encrypted_batch_aggregation_precision);
   log_info("[forward_computation]: secret_shares_to_ciphers success");
   log_info("step 2: forward_computation success");
 

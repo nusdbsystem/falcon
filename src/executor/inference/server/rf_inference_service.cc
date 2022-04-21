@@ -18,7 +18,7 @@
 
 #include <glog/logging.h>
 #include <falcon/utils/math/math_ops.h>
-
+#include <falcon/operator/conversion/op_conv.h>
 
 void run_active_server_rf(const std::string& endpoint,
                           const std::string& saved_model_file,
@@ -76,10 +76,7 @@ void run_active_server_rf(const std::string& endpoint,
 
         // step 3: active party aggregates and call collaborative decryption
         EncodedNumber* decrypted_labels = new EncodedNumber[sample_num];
-        party.collaborative_decrypt(predicted_labels,
-                                    decrypted_labels,
-                                    sample_num,
-                                    ACTIVE_PARTY_ID);
+        collaborative_decrypt(party, predicted_labels, decrypted_labels, sample_num, ACTIVE_PARTY_ID);
         std::cout << "Collaboratively decryption finished" << std::endl;
         LOG(INFO) << "Collaboratively decryption finished";
 
@@ -174,10 +171,7 @@ void run_passive_server_rf(const std::string& saved_model_file,
 
     // step 3: active party aggregates and call collaborative decryption
     EncodedNumber* decrypted_labels = new EncodedNumber[cur_batch_size];
-    party.collaborative_decrypt(predicted_labels,
-                                decrypted_labels,
-                                cur_batch_size,
-                                ACTIVE_PARTY_ID);
+    collaborative_decrypt(party, predicted_labels, decrypted_labels, cur_batch_size, ACTIVE_PARTY_ID);
     std::cout << "Collaboratively decryption finished" << std::endl;
     LOG(INFO) << "Collaboratively decryption finished";
 

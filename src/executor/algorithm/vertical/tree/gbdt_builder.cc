@@ -11,6 +11,7 @@
 #include <falcon/model/model_io.h>
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <glog/logging.h>
 
@@ -474,11 +475,11 @@ void GbdtBuilder::square_encrypted_residual(Party party,
   // convert the encrypted residuals into secret shares
   // the structure is one-dimensional vector, [tree_1 * sample_size] ... [tree_n * sample_size]
   std::vector<double> residuals_shares;
-  party.ciphers_to_secret_shares(residuals,
-                                 residuals_shares,
-                                 size,
-                                 ACTIVE_PARTY_ID,
-                                 phe_precision);
+  ciphers_to_secret_shares(party, residuals,
+                           residuals_shares,
+                           size,
+                           ACTIVE_PARTY_ID,
+                           phe_precision);
   // pack to private values for sending to mpc parties
   for (int i = 0; i < size; i++) {
     private_values.push_back(residuals_shares[i]);
@@ -506,11 +507,11 @@ void GbdtBuilder::square_encrypted_residual(Party party,
   spdz_pruning_check_thread.join();
 
   // convert the secret shares to ciphertext, which is encrypted square residuals
-  party.secret_shares_to_ciphers(squared_residuals,
-                                 squared_residuals_shares,
-                                 size,
-                                 ACTIVE_PARTY_ID,
-                                 phe_precision);
+  secret_shares_to_ciphers(party, squared_residuals,
+                           squared_residuals_shares,
+                           size,
+                           ACTIVE_PARTY_ID,
+                           phe_precision);
 }
 
 void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string &report_save_path) {
@@ -536,10 +537,10 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
 
   // step 3: active party aggregates and call collaborative decryption
   EncodedNumber* decrypted_labels = new EncodedNumber[prediction_result_size];
-  party.collaborative_decrypt(predicted_labels,
-                              decrypted_labels,
-                              prediction_result_size,
-                              ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, predicted_labels,
+                        decrypted_labels,
+                        prediction_result_size,
+                        ACTIVE_PARTY_ID);
 
   // calculate accuracy by the active party
   std::vector<double> predictions;
