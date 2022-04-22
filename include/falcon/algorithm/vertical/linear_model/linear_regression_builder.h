@@ -48,20 +48,20 @@ struct LinearRegressionParams {
 class LinearRegressionBuilder : public ModelBuilder {
  public:
   // size of mini-batch in each iteration
-  int batch_size;
+  int batch_size{};
   // maximum number of iterations for training
-  int max_iteration;
+  int max_iteration{};
   // tolerance of convergence
-  double converge_threshold;
+  double converge_threshold{};
   // whether use regularization or not
-  bool with_regularization;
+  bool with_regularization{};
   // regularization parameter
-  double alpha;
+  double alpha{};
   // learning rate for parameter updating
-  double learning_rate;
+  double learning_rate{};
   // decay rate for learning rate, following lr = lr0 / (1 + decay*t),
   // t is #iteration
-  double decay;
+  double decay{};
   // penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
   std::string penalty;
   // optimization method, default 'sgd', currently support 'sgd'
@@ -69,9 +69,9 @@ class LinearRegressionBuilder : public ModelBuilder {
   // evaluation metric for training and testing, 'mse'
   std::string metric;
   // differential privacy (DP) budget, 0 denotes not use DP
-  double dp_budget;
+  double dp_budget{};
   // whether to fit the bias term
-  bool fit_bias;
+  bool fit_bias{};
 
  public:
   // linear regression model
@@ -93,7 +93,7 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param m_training_accuracy: training accuracy
    * @param m_testing_accuracy: testing accuracy
    */
-  LinearRegressionBuilder(LinearRegressionParams linear_reg_params,
+  LinearRegressionBuilder(const LinearRegressionParams& linear_reg_params,
                           int m_weight_size,
                           std::vector< std::vector<double> > m_training_data,
                           std::vector< std::vector<double> > m_testing_data,
@@ -206,7 +206,7 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param use_sample_weights: whether use encrypted sample weights
    * @param encrypted_sample_weights: encrypted sample weights
    */
-  void distributed_lime_train(Party party,
+  void distributed_lime_train(const Party& party,
                               const Worker& worker,
                               bool use_encrypted_labels,
                               EncodedNumber* encrypted_true_labels,

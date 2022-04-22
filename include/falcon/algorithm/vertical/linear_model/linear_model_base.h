@@ -15,7 +15,7 @@
 class LinearModel {
  public:
   // number of weights in the model
-  int weight_size;
+  int weight_size{};
   // model weights vector, encrypted values during training, size equals to weight_size
   EncodedNumber *local_weights{};
   // parties' weight size vector
@@ -81,7 +81,7 @@ class LinearModel {
    *
    * @param party: initialized party object
    */
-  std::vector<double> display_weights(Party party);
+  std::vector<double> display_weights(const Party& party);
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BASE_H_

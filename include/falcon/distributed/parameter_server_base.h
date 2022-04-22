@@ -37,7 +37,7 @@ class ParameterServer {
   /**
    * abstract method of distributed_train
    */
-  virtual void distributed_train()=0;
+  virtual void distributed_train() = 0;
 
   /**
    * abstract distributed evaluation
@@ -46,7 +46,7 @@ class ParameterServer {
    * @param report_save_path: the path to save evaluation matrix
    */
   virtual void distributed_eval(falcon::DatasetType eval_type,
-      const std::string& report_save_path)=0;
+      const std::string& report_save_path) = 0;
 
   /**
    * abstract distributed prediction
@@ -56,14 +56,14 @@ class ParameterServer {
    */
   virtual void distributed_predict(
       const std::vector<int>& cur_test_data_indexes,
-      EncodedNumber* predicted_labels)=0;
+      EncodedNumber* predicted_labels) = 0;
 
   /**
    * abstract method of saving the trained model
    *
    * @param model_save_file: vector of index
    */
-  virtual void save_model(const std::string& model_save_file)=0;
+  virtual void save_model(const std::string& model_save_file) = 0;
 };
 
 

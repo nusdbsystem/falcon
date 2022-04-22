@@ -469,7 +469,7 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
   }
   party.broadcast_encoded_number_array(encrypted_node_num, 1, ACTIVE_PARTY_ID);
   // decrypt
-  party.collaborative_decrypt(encrypted_node_num, decrypted_node_num, 1, ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, encrypted_node_num, decrypted_node_num, 1, ACTIVE_PARTY_ID);
   long node_sample_num;
   if (party.party_type == falcon::ACTIVE_PARTY) {
     decrypted_node_num[0].decode(node_sample_num);

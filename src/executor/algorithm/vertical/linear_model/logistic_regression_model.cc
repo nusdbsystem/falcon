@@ -34,15 +34,13 @@ void LogisticRegressionModel::predict(
     const Party &party,
     const std::vector<std::vector<double> >& predicted_samples,
     EncodedNumber *predicted_labels) const {
-
-  /// the prediction workflow is as follows:
-  ///     step 1: every party computes partial phe summation and sends to active party
-  ///     step 2: active party aggregates and send the predicted_labels to other parties
-  ///     step 3: convert to secret shares and send to mpc parties to compute logistic function
-  ///     step 4: convert the secret shared results back to ciphertexts
-
+  // the prediction workflow is as follows:
+  //     step 1: every party computes partial phe summation and sends to active party
+  //     step 2: active party aggregates and send the predicted_labels to other parties
+  //     step 3: convert to secret shares and send to mpc parties to compute logistic function
+  //     step 4: convert the secret shared results back to ciphertexts
   EncodedNumber** encoded_batch_samples;
-  int cur_sample_size = predicted_samples.size();
+  int cur_sample_size = (int) predicted_samples.size();
   encoded_batch_samples = new EncodedNumber*[cur_sample_size];
   for (int i = 0; i < cur_sample_size; i++) {
     encoded_batch_samples[i] = new EncodedNumber[weight_size];
@@ -53,11 +51,8 @@ void LogisticRegressionModel::predict(
   int plaintext_precision = 0 - encoded_batch_samples[0][0].getter_exponent();
   int encrypted_batch_aggregation_precision = ciphertext_precision + plaintext_precision;
 
-  forward_computation(party,
-      predicted_samples.size(),
-      encoded_batch_samples,
-      encrypted_batch_aggregation_precision,
-      predicted_labels);
+  forward_computation(party, cur_sample_size, encoded_batch_samples,
+                      encrypted_batch_aggregation_precision, predicted_labels);
 
   for (int i = 0; i < cur_sample_size; i++) {
     delete[] encoded_batch_samples[i];
@@ -117,20 +112,15 @@ void LogisticRegressionModel::forward_computation(
     EncodedNumber** encoded_batch_samples,
     int& encrypted_batch_aggregation_precision,
     EncodedNumber* predicted_labels) const{
-
   // step 2.1: homomorphic batch aggregation
   // every party computes partial phe summation and sends to active party
   auto encrypted_batch_aggregation = new EncodedNumber[cur_batch_size];
-
   compute_batch_phe_aggregation(party,
       cur_batch_size,
       encoded_batch_samples,
       PHE_FIXED_POINT_PRECISION,
       encrypted_batch_aggregation);
-
   log_info("[forward_computation]: batch phe aggregation success");
-
-  // std::cout << "step 2.1 success" << std::endl;
 
   // step 2.2: convert the encrypted batch aggregation into secret shares
   // in order to do the exponential calculation
@@ -142,7 +132,6 @@ void LogisticRegressionModel::forward_computation(
       cur_batch_size,
       ACTIVE_PARTY_ID,
       encrypted_batch_aggregation_precision);
-
   log_info("[forward_computation]: ciphers_to_secret_shares success");
 
   // step 2.3: communicate with spdz parties and receive results
@@ -159,11 +148,9 @@ void LogisticRegressionModel::forward_computation(
                           batch_aggregation_shares,
                           cur_batch_size,
                           &promise_values);
-
   vector< double> batch_logistic_shares = future_values.get();
   // main thread wait spdz_thread to finish
   spdz_thread.join();
-
   log_info("[forward_computation]: call spdz_logistic_function_computation to do 1/(1+e^(wx)) operation success");
 
   // active party receive all shares from other party and do the aggregation,
@@ -204,7 +191,7 @@ void retrieve_prediction_result(
 void spdz_logistic_function_computation(int party_num,
                                         int party_id,
                                         std::vector<int> mpc_port_bases,
-                                        std::string mpc_player_path,
+                                        const std::string& mpc_player_path,
                                         std::vector<std::string> party_host_names,
                                         std::vector<double> batch_aggregation_shares,
                                         int cur_batch_size,

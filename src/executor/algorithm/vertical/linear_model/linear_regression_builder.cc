@@ -29,7 +29,7 @@
 
 LinearRegressionBuilder::LinearRegressionBuilder() = default;
 
-LinearRegressionBuilder::LinearRegressionBuilder(LinearRegressionParams linear_reg_params,
+LinearRegressionBuilder::LinearRegressionBuilder(const LinearRegressionParams& linear_reg_params,
                                                  int m_weight_size,
                                                  std::vector<std::vector<double>> m_training_data,
                                                  std::vector<std::vector<double>> m_testing_data,
@@ -74,18 +74,20 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
   int cur_batch_size = (int) batch_indexes.size();
   auto* encrypted_batch_losses = new EncodedNumber[cur_batch_size];
 
-//  // for debug
-//  auto* decrypted_batch_predictions = new EncodedNumber[cur_batch_size];
-//  party.collaborative_decrypt(predicted_labels, decrypted_batch_predictions,
-//                              cur_batch_size, ACTIVE_PARTY_ID);
-//  if (party.party_type == falcon::ACTIVE_PARTY) {
-//    for (int i = 0; i < cur_batch_size; i++) {
-//      double loss_i;
-//      decrypted_batch_predictions[i].decode(loss_i);
-//      log_info("prediction_[" + std::to_string(i) +"] = " + std::to_string(loss_i));
-//    }
-//  }
-//  delete [] decrypted_batch_predictions;
+#ifdef DEBUG
+  // for debug
+  auto* decrypted_batch_predictions = new EncodedNumber[cur_batch_size];
+  collaborative_decrypt(party, predicted_labels, decrypted_batch_predictions,
+                        cur_batch_size, ACTIVE_PARTY_ID);
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    for (int i = 0; i < 3; i++) {
+      double loss_i;
+      decrypted_batch_predictions[i].decode(loss_i);
+      log_info("prediction_[" + std::to_string(i) +"] = " + std::to_string(loss_i));
+    }
+  }
+  delete [] decrypted_batch_predictions;
+#endif
 
   // compute the residual [f_t - y_t] of the batch samples
   // for linear regression, here precision should be
@@ -104,18 +106,20 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
   compute_encrypted_residual(party, batch_indexes, batch_true_labels,
                              precision, predicted_labels, encrypted_batch_losses);
 
-//  // for debug
-//  auto* decrypted_batch_losses = new EncodedNumber[cur_batch_size];
-//  party.collaborative_decrypt(encrypted_batch_losses, decrypted_batch_losses,
-//                              cur_batch_size, ACTIVE_PARTY_ID);
-//  if (party.party_type == falcon::ACTIVE_PARTY) {
-//    for (int i = 0; i < cur_batch_size; i++) {
-//      double loss_i;
-//      decrypted_batch_losses[i].decode(loss_i);
-//      log_info("loss_[" + std::to_string(i) +"] = " + std::to_string(loss_i));
-//    }
-//  }
-//  delete [] decrypted_batch_losses;
+#ifdef DEBUG
+  // for debug
+  auto* decrypted_batch_losses = new EncodedNumber[cur_batch_size];
+  collaborative_decrypt(party, encrypted_batch_losses, decrypted_batch_losses,
+                        cur_batch_size, ACTIVE_PARTY_ID);
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    for (int i = 0; i < 3; i++) {
+      double loss_i;
+      decrypted_batch_losses[i].decode(loss_i);
+      log_info("loss_[" + std::to_string(i) +"] = " + std::to_string(loss_i));
+    }
+  }
+  delete [] decrypted_batch_losses;
+#endif
 
   // notice that the update formulas are different for different settings
   // (1) without regularization:
@@ -129,7 +133,6 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
   //    [w_j] = [w_j] - lr * { 2/|B| * \sum_{i=1}^{|B|} [loss_i] * x_{ij} - \alpha} (if w_j < 0)
   //        where [w_j] precision is: PHE_FIXED_POINT_PRECISION, and
   //        the conditional check need use spdz computation
-
 
   // after calculate loss, compute [loss_i]*x_{ij}
   auto** encoded_batch_samples = new EncodedNumber*[cur_batch_size];
@@ -783,7 +786,7 @@ void spdz_linear_regression_computation(int party_num,
     }
     default:
       LOG(ERROR) << "Type " << type << " not implemented";
-      exit(1);
+      exit(EXIT_FAILURE);
   }
   log_info("Finish initializing gfp field.");
   // std::cout << "Finish initializing gfp field." << std::endl;
@@ -840,7 +843,7 @@ void LinearRegressionBuilder::train(Party party) {
 
   if (optimizer != "sgd") {
     log_error("The " + optimizer + " optimizer does not supported");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   // step 1: init encrypted local weights
@@ -981,7 +984,7 @@ void LinearRegressionBuilder::lime_train(Party party,
 
   if (optimizer != "sgd") {
     log_error("The " + optimizer + " optimizer does not supported");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   // step 1: init encrypted local weights
@@ -1109,7 +1112,7 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
 
   if (optimizer != "sgd") {
     log_error("The " + optimizer + " optimizer does not supported");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   // required by spdz connector and mpc computation
@@ -1247,7 +1250,7 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
 }
 
 void LinearRegressionBuilder::distributed_lime_train(
-    Party party,
+    const Party& party,
     const Worker &worker,
     bool use_encrypted_labels,
     EncodedNumber *encrypted_true_labels,
@@ -1262,7 +1265,7 @@ void LinearRegressionBuilder::distributed_lime_train(
 
   if (optimizer != "sgd") {
     log_error("The " + optimizer + " optimizer does not supported");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   // required by spdz connector and mpc computation
@@ -1406,12 +1409,11 @@ void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, c
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   log_info("************* Evaluation on " + dataset_str + " Start *************");
   const clock_t testing_start_time = clock();
-
-  /// the testing workflow is as follows:
-  ///     step 1: init test data
-  ///     step 2: the parties call the model.predict function to compute predicted labels
-  ///     step 3: active party aggregates and call collaborative decryption
-  ///     step 4: active party computes mse metrics
+  // the testing workflow is as follows:
+  //     step 1: init test data
+  //     step 2: the parties call the model.predict function to compute predicted labels
+  //     step 3: active party aggregates and call collaborative decryption
+  //     step 4: active party computes mse metrics
 
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
@@ -1419,13 +1421,15 @@ void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, c
 
   // step 1: init test data
   int dataset_size =
-      (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
+      (eval_type == falcon::TRAIN) ? (int) training_data.size() : (int) testing_data.size();
   std::vector<std::vector<double>> cur_test_dataset =
       (eval_type == falcon::TRAIN) ? training_data : testing_data;
 
   log_info("dataset_size = " + std::to_string(dataset_size));
-  // Temporary decrypt for debug
+
+#ifdef DEBUG
   linear_reg_model.display_weights(party);
+#endif
 
   // step 2: every party do the prediction, since all examples are required to
   // computed, there is no need communications of data index between different parties
@@ -1438,8 +1442,6 @@ void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, c
                         decrypted_labels,
                         dataset_size,
                         ACTIVE_PARTY_ID);
-
-  // std::cout << "Print predicted class" << std::endl;
 
   // step 4: active party computes the metrics
   if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -1479,8 +1481,8 @@ double LinearRegressionBuilder::loss_computation(const Party& party,
   party.getter_phe_pub_key(phe_pub_key);
 
   // step 1: init test data
-  int dataset_size = (dataset_type == falcon::TRAIN) ? training_data.size()
-                                                     : testing_data.size();
+  int dataset_size = (dataset_type == falcon::TRAIN) ? (int) training_data.size()
+                                                     : (int) testing_data.size();
   std::vector<std::vector<double>> cur_test_dataset =
       (dataset_type == falcon::TRAIN) ? training_data : testing_data;
   std::vector<double> cur_test_labels =
@@ -1639,17 +1641,11 @@ void LinearRegressionBuilder::eval_predictions_and_save(EncodedNumber *decrypted
   // we print these metrics together for better debug
   if (metric != "mse") {
     log_error("The " + metric + " metric is not supported");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   // Regression Metrics for performance evaluation
   RegressionMetrics reg_metrics;
-  // decode decrypted labels
-  mpz_t v;
-  mpz_init(v);
-  decrypted_labels[0].getter_value(v);
-  gmp_printf("decrypted label = %Zd\n", v);
-  mpz_clear(v);
   std::vector<double> decoded_predicted_labels;
   for (int i = 0; i < sample_number; i++) {
     double decode_pred;

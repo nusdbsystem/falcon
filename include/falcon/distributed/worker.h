@@ -36,19 +36,19 @@ class Worker {
   void recv_long_message_from_ps(std::string& message) const;
 
 
-  void assign_train_feature_prefix(int train_feature_prefix_m){
+  void assign_train_feature_prefix(int train_feature_prefix_m) {
     train_feature_prefix = train_feature_prefix_m;
   };
 
-  void assign_test_feature_prefix(int test_feature_prefix_m){
+  void assign_test_feature_prefix(int test_feature_prefix_m) {
     test_feature_prefix = test_feature_prefix_m;
   };
 
-  int get_test_feature_prefix() const{
+  int get_test_feature_prefix() const {
     return test_feature_prefix;
   };
 
-  int get_train_feature_prefix() const{
+  int get_train_feature_prefix() const {
     return train_feature_prefix;
   };
 
@@ -56,7 +56,6 @@ class Worker {
   // feature prefix, used in tree， default to be 0
   int train_feature_prefix = 0;
   int test_feature_prefix = 0;
-
 };
 
 

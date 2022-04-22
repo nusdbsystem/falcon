@@ -32,11 +32,7 @@ LogRegParameterServer::LogRegParameterServer(
         const string &ps_network_config_pb_str):
         LinearParameterServer(m_party, ps_network_config_pb_str),
         alg_builder(m_alg_builder) {
-  log_info("[LogRegParameterServer::LogRegParameterServer]: constructor. Test party's content.");
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  party.getter_phe_pub_key(phe_pub_key);
-  log_info("[LogRegParameterServer::LogRegParameterServer]: okay.");
-  djcs_t_free_public_key(phe_pub_key);
+  log_info("[LogRegParameterServer::LogRegParameterServer]: constructor.");
 }
 
 LogRegParameterServer::LogRegParameterServer(
@@ -47,7 +43,6 @@ LogRegParameterServer::LogRegParameterServer(
 LogRegParameterServer::~LogRegParameterServer() = default;
 
 void LogRegParameterServer::distributed_train(){
-
   // step 1: init encrypted local weights
   // (here use precision for consistence in the following)
   int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;

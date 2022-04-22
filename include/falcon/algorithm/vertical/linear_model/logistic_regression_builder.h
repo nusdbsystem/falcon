@@ -219,14 +219,6 @@ class LogisticRegressionBuilder : public ModelBuilder {
    */
   void loss_computation(Party party, falcon::DatasetType dataset_type,
                         double& loss);
-
-  /**
-   * print one ciphertext for debug
-   *
-   * @param party: initialized party object
-   * @param number: ciphertext to be decrypted
-   */
-  void display_one_ciphertext(Party party, EncodedNumber *number);
 };
 
 

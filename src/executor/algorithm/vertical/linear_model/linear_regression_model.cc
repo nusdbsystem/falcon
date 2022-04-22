@@ -53,7 +53,7 @@ void LinearRegressionModel::predict(const Party &party,
                       encrypted_batch_aggregation_precision,
                       predicted_labels);
 
-  log_info("predicted_labels[0] = " + std::to_string(abs(predicted_labels[0].getter_exponent())));
+  log_info("predicted_labels[0]'s precision = " + std::to_string(abs(predicted_labels[0].getter_exponent())));
 
   for (int i = 0; i < cur_sample_size; i++) {
     delete[] encoded_batch_samples[i];

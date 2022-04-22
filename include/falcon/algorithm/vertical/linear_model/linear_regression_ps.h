@@ -18,20 +18,31 @@
 
 using namespace std;
 
-
 class LinearRegParameterServer : public LinearParameterServer{
  public:
   // LR model builder
   LinearRegressionBuilder alg_builder;
-//  // party
-//  Party party;
- public:
-  LinearRegParameterServer(const LinearRegressionBuilder& m_alg_builder,
-                          const Party& m_party,
-                          const std::string& ps_network_config_pb_str);
 
+ public:
+  /**
+   * constructor
+   *
+   * @param m_alg_builder: created algorithm builder
+   * @param m_party: the participating party
+   * @param ps_network_config_pb_str: the network config between ps and workers
+   */
+  LinearRegParameterServer(const LinearRegressionBuilder& m_alg_builder,
+                           const Party& m_party,
+                           const std::string& ps_network_config_pb_str);
+
+  /**
+   * constructor
+   *
+   * @param m_party: the participating party
+   * @param ps_network_config_pb_str: the network config between ps and workers
+   */
   LinearRegParameterServer(const Party& m_party,
-                          const std::string& ps_network_config_pb_str);
+                           const std::string& ps_network_config_pb_str);
 
   /**
    * copy constructor
@@ -39,10 +50,12 @@ class LinearRegParameterServer : public LinearParameterServer{
    */
   LinearRegParameterServer(const LinearRegParameterServer& obj);
 
+  /**
+   * default destructor
+   */
   ~LinearRegParameterServer();
 
  public:
-
   /**
    * distributed training process, partition data, collect result, update weights
    */

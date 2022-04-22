@@ -6,10 +6,9 @@
 #define FALCON_INCLUDE_COMMON_H_
 
 namespace falcon {
-  // for DEBUG
-  // to display intermediate information
+  // for DEBUG to display intermediate information
   // turn DEBUG off in the real application
-  // #define DEBUG
+//  #define DEBUG
   // #define SAVE_BASELINE
   #define PRINT_EVERY 20  // if debug, display info at this frequency
 

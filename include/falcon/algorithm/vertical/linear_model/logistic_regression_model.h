@@ -33,13 +33,13 @@ class LogisticRegressionModel : public LinearModel {
   LogisticRegressionModel &operator=(const LogisticRegressionModel &log_reg_model);
 
   /**
- * given the logistic regression model, predict on samples
- * @param party
- * @param predicted_samples
- * @param predicted_sample_size
- * @param predicted_labels
- * @return predicted labels (encrypted)
- */
+   * given the logistic regression model, predict on samples
+   * @param party
+   * @param predicted_samples
+   * @param predicted_sample_size
+   * @param predicted_labels
+   * @return predicted labels (encrypted)
+   */
   void predict(const Party &party,
       const std::vector<std::vector<double> >& predicted_samples,
       EncodedNumber *predicted_labels) const;
@@ -104,7 +104,7 @@ void retrieve_prediction_result(
 void spdz_logistic_function_computation(int party_num,
     int party_id,
     std::vector<int> mpc_port_bases,
-    std::string mpc_player_path,
+    const std::string& mpc_player_path,
     std::vector<std::string> party_host_names,
     std::vector<double> batch_aggregation_shares,
     int cur_batch_size,

@@ -10,9 +10,7 @@
 #include <falcon/utils/base64.h>
 
 Worker::Worker(const std::string& ps_network_config_pb_str, int m_worker_id){
-
   worker_id = m_worker_id;
-
   std::vector<std::string> worker_ips;
   std::vector< int > worker_ports;
   std::vector<std::string> ps_ips;
@@ -28,13 +26,14 @@ Worker::Worker(const std::string& ps_network_config_pb_str, int m_worker_id){
       ps_network_config_pb_str);
   log_info("Establish network communications with parameter server, current worker id = " + to_string(worker_id));
 
+#ifdef DEBUG
   for (int i = 0; i < worker_ips.size(); i++) {
     log_info("worker_ips[" + std::to_string(i) + "] = " + worker_ips[i]);
     log_info("worker_ports[" + std::to_string(i) + "] = " + std::to_string(worker_ports[i]));
     log_info("ps_ips[" + std::to_string(i) + "] = " + ps_ips[i]);
     log_info("ps_ports[" + std::to_string(i) + "] = " + std::to_string(ps_ports[i]));
   }
-  google::FlushLogFiles(google::INFO);
+#endif
 
   // 2. establish communication connections between worker and parameter server
   // current party instance is created at worker, only build channel with ps
@@ -50,7 +49,6 @@ Worker::Worker(const std::string& ps_network_config_pb_str, int m_worker_id){
   log_info("Communication channel established with ps " + ps_ips[worker_id - 1]
                + ", port is " + std::to_string(ps_ports[worker_id - 1]));
 }
-
 
 Worker::~Worker() {
   io_service.stop();

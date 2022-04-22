@@ -22,19 +22,32 @@ class LinearParameterServer : public ParameterServer {
   // party
   Party party;
  public:
+  /**
+   * default constructor
+   */
   LinearParameterServer() = default;
+
+  /**
+   * constructor
+   *
+   * @param m_party: the party object
+   * @param ps_network_config_pb_str: the network config between ps and worker
+   */
   LinearParameterServer(const Party& m_party,const std::string& ps_network_config_pb_str);
 
   /**
    * copy constructor
+   *
    * @param LinearParameterServer
    */
   LinearParameterServer(const LinearParameterServer& obj);
 
+  /**
+   * destructor
+   */
   ~LinearParameterServer();
 
  public:
-
   /**
   * send the split training data and testing data to workers
   *
@@ -64,22 +77,10 @@ class LinearParameterServer : public ParameterServer {
       EncodedNumber* predicted_labels) override;
 
  public:
-
   /**
    * send encrypted weights to workers
    */
-  void broadcast_encrypted_weights(LinearModel linear_model);
-
-//  /**
-//   * select batch indexes for each iteration
-//   *
-//   * @param party: initialized party object
-//   * @param data_indexes: the original training data indexes. need shuffle so pass by value
-//   * @param batch_size: the batch size for each training iteration
-//   * @return
-//   */
-//  std::vector<int> select_batch_idx(std::vector<int> data_indexes,
-//                                    int batch_size) const;
+  void broadcast_encrypted_weights(const LinearModel& linear_model);
 
   /**
    * partition examples according to number of workers
@@ -107,7 +108,6 @@ class LinearParameterServer : public ParameterServer {
       int weight_size,
       int weight_phe_precision,
       EncodedNumber* updated_weights) const;
-
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_PS_H_

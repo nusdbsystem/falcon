@@ -23,13 +23,24 @@ class LogRegParameterServer : public LinearParameterServer{
  private:
   // LR model builder
   LogisticRegressionBuilder alg_builder;
-//  // party
-//  Party party;
  public:
+  /**
+   * constructor
+   *
+   * @param m_alg_builder: created algorithm builder
+   * @param m_party: the participating party
+   * @param ps_network_config_pb_str: the network config between ps and workers
+   */
   LogRegParameterServer(const LogisticRegressionBuilder& m_alg_builder,
                         const Party& m_party,
                         const std::string& ps_network_config_pb_str);
 
+  /**
+   * constructor
+   *
+   * @param m_party: the participating party
+   * @param ps_network_config_pb_str: the network config between ps and workers
+   */
   LogRegParameterServer(const Party& m_party,
                         const std::string& ps_network_config_pb_str);
 
@@ -39,10 +50,12 @@ class LogRegParameterServer : public LinearParameterServer{
    */
   LogRegParameterServer(const LogRegParameterServer& obj);
 
+  /**
+   * default destructor
+   */
   ~LogRegParameterServer();
 
  public:
-
   /**
    * distributed training process, partition data, collect result, update weights
    */
