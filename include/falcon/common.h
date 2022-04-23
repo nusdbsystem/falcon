@@ -77,8 +77,14 @@ namespace falcon {
   #define ZERO_PROBABILITY 0.0
   #define SMOOTHER 1e-3
 
+  // horizontal FL: parties have the same feature and label space
+  // vertical FL: parties have different feature spaces
   enum FLSetting { HORIZONTAL_FL, VERTICAL_FL };
+  // when vertical fl is used,
+  // active party has label and features while passive party only has features
   enum PartyType { ACTIVE_PARTY, PASSIVE_PARTY };
+  // when distributed training is enabled
+  enum ExecutorRole {DistPS, DistWorker};
   enum AlgorithmName {
     LOG_REG,
     LINEAR_REG,

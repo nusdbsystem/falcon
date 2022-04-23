@@ -69,20 +69,7 @@ class DTParameterServer: public ParameterServer{
   void distributed_train() override;
 
   /**
-   * distributed lime train tree builder
-   *
-   * @param use_encrypted_labels: whether use encrypted labels during training
-   * @param encrypted_true_labels: encrypted labels used
-   * @param use_sample_weights: whether use encrypted sample weights
-   * @param encrypted_sample_weights: encrypted sample weights
-   */
-  void distributed_lime_train(bool use_encrypted_labels,
-                              EncodedNumber* encrypted_true_labels,
-                              bool use_sample_weights,
-                              EncodedNumber* encrypted_sample_weights);
-
-  /**
-   * Iterately build the tree
+   * Iteratively build the tree
    */
   void build_tree();
 
@@ -114,7 +101,6 @@ class DTParameterServer: public ParameterServer{
   void save_model(const std::string& model_save_file) override;
 
  private:
-
   /**
    * partition examples according to number of workers
    *
@@ -128,16 +114,20 @@ class DTParameterServer: public ParameterServer{
    */
   std::vector<string> wait_worker_complete();
 
-
   /**
  * partition examples according to number of workers
  *
  * @param batch_indexes: batch's sample index
  */
   std::vector<int> partition_examples(std::vector<int> batch_indexes);
-
 };
 
+/**
+ * find the global best split
+ *
+ * @param local_best_split_vec: each worker's local best split vector
+ * @return
+ */
 std::vector<double> find_global_best(const std::vector<std::vector<double>>& local_best_split_vec);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_DT_PS_H_

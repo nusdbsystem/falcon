@@ -298,7 +298,6 @@ class DecisionTreeBuilder : public ModelBuilder {
    * @return: return the resulted tree model
    */
   TreeModel aggregate_decrypt_tree_model(Party& party);
-
 };
 
 /**

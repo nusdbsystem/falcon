@@ -15,13 +15,13 @@
 class FeatureHelper {
  public:
   // index of party's local feature
-  int id;
+  int id{};
   // the number of splits of the current feature, should <= max_bins - 1
-  int num_splits;
+  int num_splits{};
   // the maximum number of bins (read from the config file)
-  int max_bins;
+  int max_bins{};
   // 0: not used, 1: used, -1: not decided
-  int is_used;
+  int is_used{};
   // feature type, default continuous
   falcon::TreeFeatureType feature_type;
   // the split threshold values of the features
@@ -29,9 +29,9 @@ class FeatureHelper {
   // the original data of this feature in the training dataset
   std::vector<double> origin_feature_values;
   // maximum value of this feature
-  double maximum_value;
+  double maximum_value{};
   // minimum value of this feature
-  double minimum_value;
+  double minimum_value{};
   // the values of this feature are sorted, the re-sorted indexes are recorded
   std::vector<int> sorted_indexes;
   // pre-compute 0 1 ivs for each split in the left branch, before re-sorting

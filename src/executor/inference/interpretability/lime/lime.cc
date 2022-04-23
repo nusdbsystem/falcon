@@ -197,7 +197,7 @@ void LimeExplainer::compute_sample_weights(
   }
 
   // parameter server logic with distributed
-  if (is_distributed == 1 && distributed_role == 0) {
+  if (is_distributed == 1 && distributed_role == falcon::DistPS) {
     // init the ps
     auto ps = new LimeParameterServer(party, ps_network_str);
     // split the generated sample and broadcast to each worker
@@ -229,7 +229,7 @@ void LimeExplainer::compute_sample_weights(
   }
 
   // worker logic with distributed
-  if (is_distributed == 1 && distributed_role == 1) {
+  if (is_distributed == 1 && distributed_role == falcon::DistWorker) {
     // init worker
     auto worker = new Worker(ps_network_str, worker_id);
     // receive sample ids
@@ -258,7 +258,7 @@ void LimeExplainer::compute_sample_weights(
 
 #ifdef SAVE_BASELINE
   //  5. decrypt the encrypted weights and save as a plaintext file
-  if (is_distributed == 0 || (is_distributed == 1 && distributed_role == 0)) {
+  if (is_distributed == 0 || (is_distributed == 1 && distributed_role == falcon::DistPS)) {
     std::string plaintext_weights_file = sample_weights_file + ".plaintext";
     std::vector<double> plaintext_weights;
     auto* decrypted_weights = new EncodedNumber[selected_sample_size];
@@ -954,7 +954,7 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
   }
 
   // is_distributed == 1 and distributed_role = 0 (parameter server)
-  if (is_distributed == 1 && distributed_role == 0) {
+  if (is_distributed == 1 && distributed_role == falcon::DistPS) {
     log_info("************* Distributed LIME Interpret *************");
     // init linear_reg instance
     auto linear_reg_model_builder = new LinearRegressionBuilder (
@@ -972,8 +972,7 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
                                            ps_network_str);
     log_info("[lime_linear_reg_train ps]: Init ps finished.");
     // start to train the task in a distributed way
-    ps->distributed_lime_train(true, predictions,
-                               true, sample_weights);
+    ps->distributed_train();
     log_info("[lime_linear_reg_train ps]: distributed train finished.");
     // decrypt the model weights and return
     local_explanations =
@@ -984,7 +983,7 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
   }
 
   // is_distributed == 1 and distributed_role = 1 (worker)
-  if (is_distributed == 1 && distributed_role == 1) {
+  if (is_distributed == 1 && distributed_role == falcon::DistWorker) {
     log_info("************* Distributed LIME Interpret *************");
     // init linear_reg instance
     auto linear_reg_model_builder = new LinearRegressionBuilder (
@@ -1102,7 +1101,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   }
 
   // is_distributed == 1 and distributed_role = 0 (parameter server)
-  if (is_distributed == 1 && distributed_role == 0) {
+  if (is_distributed == 1 && distributed_role == falcon::DistPS) {
     log_info("************* Distributed LIME Interpret *************");
     // init tree builder instance
     auto tree_model_builder = new DecisionTreeBuilder (
@@ -1176,8 +1175,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
 
 
     // start to train the task in a distributed way
-    ps->distributed_lime_train(true, encrypted_labels,
-                               true, sample_weights);
+    ps->distributed_train();
     log_info("[lime_decision_tree_train ps]: distributed train finished.");
     // decrypt the model weights and return
     delete tree_model_builder;
@@ -1185,7 +1183,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   }
 
   // is_distributed == 1 and distributed_role = 1 (worker)
-  if (is_distributed == 1 && distributed_role == 1) {
+  if (is_distributed == 1 && distributed_role == falcon::DistWorker) {
     log_info("************* Distributed LIME Interpret *************");
 
     // worker is created to communicate with parameter server
@@ -1331,7 +1329,7 @@ void lime_comp_pred(Party party, const std::string& params_str,
   }
 
   // parameter server logic with distributed
-  if (is_distributed == 1 && distributed_role == 0) {
+  if (is_distributed == 1 && distributed_role == falcon::DistPS) {
     // init the ps
     auto ps = new LimeParameterServer(party, ps_network_str);
     // split the generated sample and broadcast to each worker
@@ -1374,7 +1372,7 @@ void lime_comp_pred(Party party, const std::string& params_str,
   }
 
   // worker logic with distributed
-  if (is_distributed == 1 && distributed_role == 1) {
+  if (is_distributed == 1 && distributed_role == falcon::DistWorker) {
     // init worker
     auto worker = new Worker(ps_network_str, worker_id);
     // receive sample ids
@@ -1418,7 +1416,7 @@ void lime_comp_pred(Party party, const std::string& params_str,
   // as two additional files, say aggregated_{comp_prediction_params.generated_sample_file} and
   // plaintext_{comp_prediction_params.computed_prediction_file}
 #ifdef SAVE_BASELINE
-  if (is_distributed == 0 || (is_distributed == 1 && distributed_role == 0)) {
+  if (is_distributed == 0 || (is_distributed == 1 && distributed_role == falcon::DistPS)) {
     save_data_pred4baseline(party, generated_samples, predictions,
                             cur_sample_size, class_num,
                             comp_prediction_params.generated_sample_file,

@@ -62,19 +62,6 @@ class LinearRegParameterServer : public LinearParameterServer{
   void distributed_train() override;
 
   /**
-   * distributed lime train linear regression
-   *
-   * @param use_encrypted_labels: whether use encrypted labels during training
-   * @param encrypted_true_labels: encrypted labels used
-   * @param use_sample_weights: whether use encrypted sample weights
-   * @param encrypted_sample_weights: encrypted sample weights
-   */
-  void distributed_lime_train(bool use_encrypted_labels,
-                              EncodedNumber* encrypted_true_labels,
-                              bool use_sample_weights,
-                              EncodedNumber* encrypted_sample_weights);
-
-  /**
    * distributed evaluation, partition data, collect result, compute evaluation matrix
    *
    * @param eval_type: train data or test data

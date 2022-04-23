@@ -8,13 +8,9 @@
 #include <glog/logging.h>
 #include <falcon/utils/logger/logger.h>
 
-FeatureHelper::FeatureHelper() {
-  // empty constructor
-}
+FeatureHelper::FeatureHelper() = default;
 
-FeatureHelper::~FeatureHelper() {
-  // empty destructor
-}
+FeatureHelper::~FeatureHelper() = default;
 
 FeatureHelper::FeatureHelper(const FeatureHelper &feature_helper) {
   id = feature_helper.id;
@@ -65,7 +61,7 @@ void FeatureHelper::set_feature_data(std::vector<double> values, int size) {
 
 std::vector<double> FeatureHelper::compute_distinct_values() {
   // now the feature values are sorted, the sorted indexes are stored in sorted_indexes
-  int sample_num = origin_feature_values.size();
+  int sample_num = (int) origin_feature_values.size();
   int distinct_value_num = 0;
   std::vector<double> distinct_values;
   for (int i = 0; i < sample_num; i++) {
@@ -112,7 +108,7 @@ void FeatureHelper::find_splits() {
   /// note: currently assume that the feature values is sorted, treat categorical
   /// feature as label encoder sortable values
 
-  int n_samples = origin_feature_values.size();
+  int n_samples = (int) origin_feature_values.size();
   std::vector<double> distinct_values = compute_distinct_values();
 
   log_info("The number of distinct values of this feature is " + std::to_string(distinct_values.size()));
@@ -138,8 +134,8 @@ void FeatureHelper::find_splits() {
   }
   else {
     // the distinct values is equal to 1, which is suspicious for the input dataset
-    LOG(INFO) << "This feature has only one distinct value, please check it again";
-    num_splits = distinct_values.size();
+    log_info("This feature has only one distinct value, please check it again");
+    num_splits = (int) distinct_values.size();
     split_values.push_back(distinct_values[0]);
   }
 }
@@ -150,7 +146,7 @@ void FeatureHelper::compute_split_ivs() {
   for (int i = 0; i < num_splits; i++) {
     // read split value i
     double split_value_i = split_values[i];
-    int n_samples = origin_feature_values.size();
+    int n_samples = (int) origin_feature_values.size();
     std::vector<int> indicator_vec_left;
     indicator_vec_left.reserve(n_samples);
     std::vector<int> indicator_vec_right;

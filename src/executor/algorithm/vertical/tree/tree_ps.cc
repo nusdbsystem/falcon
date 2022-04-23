@@ -15,7 +15,10 @@
 #include <falcon/model/model_io.h>
 #include <falcon/operator/mpc/spdz_connector.h>
 
-DTParameterServer::DTParameterServer(const DTParameterServer &obj) {}
+DTParameterServer::DTParameterServer(const DTParameterServer &obj) {
+  alg_builder = obj.alg_builder;
+  party = obj.party;
+}
 
 DTParameterServer::~DTParameterServer() = default;
 
@@ -25,19 +28,16 @@ void DTParameterServer::broadcast_train_test_data(
     const std::vector<double> &training_labels,
     const std::vector<double> &testing_labels){
 
-  // ps splits the data from vertical dimention, and sends the splitted part to workers
+  // ps splits the data from vertical dimension, and sends the split part to workers
   std::string training_data_str, testing_data_str, training_labels_str, testing_labels_str;
 
   assert(training_data[0].size() > this->worker_channels.size());
 
-  int each_worker_features_num = training_data[0].size()/this->worker_channels.size();
-
-  falcon_print(std::cout,  "[PS.broadcast_train_test_data]:",
-      "worker num",
-      this->worker_channels.size(),
-      "data size",
-      training_data[0].size(),
-      "each_worker_features_num is", each_worker_features_num);
+  int each_worker_features_num = training_data[0].size() / this->worker_channels.size();
+  log_info("[PS.broadcast_train_test_data]: worker num = "
+    + std::to_string(this->worker_channels.size())
+    + " data size = " + std::to_string(training_data[0].size())
+    + " each_worker_features_num = " + std::to_string(each_worker_features_num));
 
   int train_data_prev_index = 0;
   int train_data_last_index;
@@ -54,18 +54,17 @@ void DTParameterServer::broadcast_train_test_data(
     std::vector<std::vector<double>> tmp_training_data(training_data.size());
     std::vector<std::vector<double>> tmp_testing_data(testing_data.size());
 
-    if (wk_index == this->worker_channels.size()-1){
-      train_data_last_index = training_data[0].size();
-      test_data_last_index = testing_data[0].size();
+    if (wk_index == this->worker_channels.size()-1) {
+      train_data_last_index = (int) training_data[0].size();
+      test_data_last_index = (int) testing_data[0].size();
       worker_feature_index_prefix_train_data += to_string(train_data_prev_index);
       worker_feature_index_prefix_test_data += to_string(train_data_prev_index);
-    }else{
+    } else {
       train_data_last_index = train_data_prev_index+each_worker_features_num; //4
       test_data_last_index = test_data_prev_index+each_worker_features_num; //4
-      worker_feature_index_prefix_train_data += to_string(train_data_prev_index) +" ";
-      worker_feature_index_prefix_test_data += to_string(train_data_prev_index)+" ";
+      worker_feature_index_prefix_train_data += to_string(train_data_prev_index) + " ";
+      worker_feature_index_prefix_test_data += to_string(train_data_prev_index) + " ";
     }
-
 
     // assign
     for(int j = 0; j < training_data.size(); j++){
@@ -85,9 +84,10 @@ void DTParameterServer::broadcast_train_test_data(
     this->send_long_message_to_worker(wk_index, training_data_str);
     this->send_long_message_to_worker(wk_index, testing_data_str);
 
-    falcon_print(std::cout,  "[PS.broadcast_train_test_data]:",
-                 "assign",train_data_prev_index, "-", train_data_last_index,
-                 "to worker", wk_index);
+    log_info("[PS.broadcast_train_test_data]: assign "
+      + std::to_string(train_data_prev_index) + "-"
+      + std::to_string(train_data_last_index) + " to worker"
+      + std::to_string(wk_index));
 
     train_data_prev_index = train_data_last_index;
     test_data_prev_index = test_data_last_index;
@@ -108,9 +108,7 @@ void DTParameterServer::broadcast_train_test_data(
       this->send_long_message_to_worker(wk_index, testing_labels_str);
     }
   }
-
 }
-
 
 std::vector<int> DTParameterServer::partition_examples(std::vector<int> batch_indexes){
 
@@ -124,7 +122,6 @@ std::vector<int> DTParameterServer::partition_examples(std::vector<int> batch_in
   // deterministic partition given the batch indexes
   int index = 0;
   for(int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++){
-
     // generate mini-batch for this worker
     std::vector<int>::const_iterator first1 = batch_indexes.begin() + index;
     std::vector<int>::const_iterator last1  = batch_indexes.begin() + index + mini_batch_size;
@@ -156,7 +153,6 @@ std::vector<int> DTParameterServer::partition_examples(std::vector<int> batch_in
   log_info("[PS.partition_examples]: Broadcast client's batch requests to other workers");
 
   return message_sizes;
-
 }
 
 void DTParameterServer::broadcast_phe_keys(){
@@ -166,49 +162,24 @@ void DTParameterServer::broadcast_phe_keys(){
   }
 }
 
-
 void DTParameterServer::distributed_train(){
-
   log_info("************* [Ps.distributed_train] Training started *************");
   const clock_t training_start_time = clock();
 
-  /// 1. train the tree model
+  // train the tree model
   build_tree();
   alg_builder.tree.print_tree_model();
-  /// 2. clear and log
+
   const clock_t training_finish_time = clock();
   double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
   log_info("[Ps.distributed_train]: tree capacity = " + to_string(alg_builder.tree.capacity));
   log_info("[Ps.distributed_train]: Training time = " + to_string(training_consumed_time));
   log_info("************* [Ps.distributed_train] Training Finished *************");
-
 }
-
-void DTParameterServer::distributed_lime_train(bool use_encrypted_labels,
-                                               EncodedNumber *encrypted_true_labels,
-                                               bool use_sample_weights,
-                                               EncodedNumber *encrypted_sample_weights) {
-  // should be the same as distributed_train, here duplicate and then check it later
-  log_info("************* [Ps.distributed_lime_train] Training started *************");
-  const clock_t training_start_time = clock();
-
-  /// 1. train the tree model
-  build_tree();
-  // alg_builder.tree.print_tree_model();
-  /// 2. clear and log
-  const clock_t training_finish_time = clock();
-  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("[Ps.distributed_lime_train]: tree capacity = " + to_string(alg_builder.tree.capacity));
-  log_info("[Ps.distributed_lime_train]: Training time = " + to_string(training_consumed_time));
-  log_info("************* [Ps.distributed_lime_train] Training Finished *************");
-}
-
 
 void DTParameterServer::build_tree(){
-
   /// 0. init depth and impurity for root node
   alg_builder.tree.nodes[0].depth = 0;
-
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
   EncodedNumber max_impurity;
@@ -231,8 +202,7 @@ void DTParameterServer::build_tree(){
   std::vector< EncodedNumber* > used_encoded_nums;
 
   /// 2. start training
-  while (!node_index_stack.empty()){
-
+  while (!node_index_stack.empty()) {
     /// 2.1 get the current node index
     // get the last element of the stack
     int node_index = node_index_stack.back();
@@ -246,15 +216,15 @@ void DTParameterServer::build_tree(){
 
     /// 2.2 check if stopping the training
     if (node_index >= alg_builder.tree.capacity) {
-      log_info("[Ps.build_tree]: step 2.2, Node index exceeds the maximum tree depth, boardcast stop to workers");
+      log_info("[Ps.build_tree]: step 2.2, Node index exceeds the maximum "
+               "tree depth, broadcast stop to workers");
       for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
         this->send_long_message_to_worker(wk_index, "stop");
       }
       break;
     }
     // check if stopping the training
-    if (node_index > 0){
-
+    if (node_index > 0) {
       log_info("[Ps.build_tree]: step 2.2, check if stopping the training");
 
       EncodedNumber* sample_mask_iv = node_mask_stack.back();
@@ -262,44 +232,31 @@ void DTParameterServer::build_tree(){
       EncodedNumber* encrypted_labels = node_label_stack.back();
       node_label_stack.pop_back();
 
-      // print sample_mask_iv[sample_num-1] info for debug
-//      int sample_num = alg_builder.train_data_size;
-//      log_info("[Ps.build_tree]: step 2.2, sample_num = " + to_string(sample_num));
-//      log_info("[Ps.build_tree]: step 2.2, sample_mask_iv[sample_num-1].exponent = " + to_string(sample_mask_iv[sample_num-1].getter_exponent()));
-//      mpz_t t;
-//      mpz_init(t);
-//      sample_mask_iv[sample_num-1].getter_n(t);
-//      gmp_printf("[Ps.build_tree]: step 2.2, sample_mask_iv[sample_num-1].n = %Zd", t);
-//      mpz_clear(t);
-
       /// step 1: check pruning condition via spdz computation
       bool is_satisfied = alg_builder.check_pruning_conditions(
           party, node_index, sample_mask_iv);
-
       log_info("[Ps.build_tree]: step 2.2, is_satisfied = " + to_string(is_satisfied));
 
       /// step 2: if satisfied, compute label via spdz computation
       if (is_satisfied) {
         alg_builder.compute_leaf_statistics(party, node_index, sample_mask_iv, encrypted_labels);
-        log_info("[Ps.build_tree]: step 2.2, Node is satisfied, boardcast stop to workers");
-
+        log_info("[Ps.build_tree]: step 2.2, Node is satisfied, broadcast stop to workers");
         string serialized_label;
         auto label = alg_builder.tree.nodes[node_index].label;
         serialize_encoded_number(label, serialized_label);
-
         for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
           this->send_long_message_to_worker(wk_index, "LEAF");
           this->send_long_message_to_worker(wk_index, to_string(node_index));
           this->send_long_message_to_worker(wk_index, serialized_label);
         }
         continue;
-      }else{
+      } else {
         log_info("[Ps.build_tree]: step 2.2, Node is not satisfied, continue training");
       }
     }
 
     /// 2.3 send node index to worker
-    log_info("[Ps.build_tree]: step 2.3, ps boardcast node index = " + to_string(node_index) + "to workers");
+    log_info("[Ps.build_tree]: step 2.3, ps broadcast node index = " + to_string(node_index) + "to workers");
     std::string node_index_str = to_string(node_index);
     for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
       this->send_long_message_to_worker(wk_index, node_index_str);
@@ -313,13 +270,10 @@ void DTParameterServer::build_tree(){
     log_info("[Ps.build_tree]: step 2.5, ps begin to compare and get the best split");
     vector<double> final_decision_res = retrieve_global_best_split(encoded_message);
     log_info("[Ps.build_tree]: step 2.5, size of final_decision_res " +  to_string(final_decision_res.size()));
-//    assert(final_decision_res.size() == 4);
-
-    int global_best_split_worker_id = final_decision_res[3];
-    //int global_best_split_party_id = final_decision_res[4];
+    int global_best_split_worker_id = (int) final_decision_res[3];
 
     /// 2.6 : send the best split to workers
-    log_info("[Ps.build_tree]: step 2.6, ps boardcast global best to other workers");
+    log_info("[Ps.build_tree]: step 2.6, ps broadcast global best to other workers");
     std::string final_decision_str;
     serialize_double_array(final_decision_res, final_decision_str);
     for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
@@ -344,16 +298,16 @@ void DTParameterServer::build_tree(){
     }
 
     /// 2.8 : best party's ps received the updated masks and labels and then it sent them to other workers
-    log_info("[Ps.build_tree]: step 2.8, best party's ps received the updated masks and labels and then it sent them to other workers");
+    log_info("[Ps.build_tree]: step 2.8, best party's ps received the updated "
+             "masks and labels and then it sent them to other workers");
     std::string recv_update_str_sample_iv, recv_update_str_encrypted_labels_left, recv_update_str_encrypted_labels_right;
 
     if (party.party_id == best_party_id){
-      log_info("[Ps.build_tree]: step 2.8, party id is matched, receive updated info from ps and send them to other worker");
-
+      log_info("[Ps.build_tree]: step 2.8, party id is matched, receive updated "
+               "info from ps and send them to other worker");
       // only receive from matched worker
       for(int wk_index=0; wk_index< this->worker_channels.size(); wk_index++){
         if (wk_index == global_best_split_worker_id){
-
           recv_long_message_from_worker(wk_index,  recv_update_str_sample_iv);
           recv_long_message_from_worker(wk_index,  recv_update_str_encrypted_labels_left);
           recv_long_message_from_worker(wk_index,  recv_update_str_encrypted_labels_right);
@@ -361,9 +315,12 @@ void DTParameterServer::build_tree(){
         }
       }
 
-      log_info("[Ps.build_tree]: step 2.8, ps receive from match worker recv_update_str_sample_iv size: " + to_string(recv_update_str_sample_iv.size() ));
-      log_info("[Ps.build_tree]: step 2.8, ps receive from match worker recv_update_str_encrypted_labels_left size: " + to_string(recv_update_str_encrypted_labels_left.size() ));
-      log_info("[Ps.build_tree]: step 2.8, ps receive from match worker recv_update_str_encrypted_labels_right size: " + to_string(recv_update_str_encrypted_labels_right.size() ));
+      log_info("[Ps.build_tree]: step 2.8, ps receive from match worker "
+               "recv_update_str_sample_iv size: " + to_string(recv_update_str_sample_iv.size()));
+      log_info("[Ps.build_tree]: step 2.8, ps receive from match worker "
+               "recv_update_str_encrypted_labels_left size: " + to_string(recv_update_str_encrypted_labels_left.size()));
+      log_info("[Ps.build_tree]: step 2.8, ps receive from match worker "
+               "recv_update_str_encrypted_labels_right size: " + to_string(recv_update_str_encrypted_labels_right.size()));
 
       // send received masks and labels to other workers at this party
       for(int wk_index=0; wk_index< this->worker_channels.size(); wk_index++){
@@ -376,17 +333,20 @@ void DTParameterServer::build_tree(){
     }
 
     else {
-      log_info("[Ps.build_tree]: step 2.8, party id is not matched, receive updated info from other party's worker");
-
+      log_info("[Ps.build_tree]: step 2.8, party id is not matched, receive "
+               "updated info from other party's worker");
       for(int wk_index=0; wk_index< this->worker_channels.size(); wk_index++){
         recv_long_message_from_worker(wk_index,  recv_update_str_sample_iv);
         recv_long_message_from_worker(wk_index,  recv_update_str_encrypted_labels_left);
         recv_long_message_from_worker(wk_index,  recv_update_str_encrypted_labels_right);
-
-        log_info("[Ps.build_tree]: step 2.8, other party's ps receive from worker index: "+ to_string(wk_index));
-        log_info("[Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_sample_iv size: " + to_string(recv_update_str_sample_iv.size() ));
-        log_info("[Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_left size: " + to_string(recv_update_str_encrypted_labels_left.size() ));
-        log_info("[Ps.build_tree]: step 2.8, other party's ps receive from worker recv_update_str_encrypted_labels_right size: " + to_string(recv_update_str_encrypted_labels_right.size() ));
+        log_info("[Ps.build_tree]: step 2.8, other party's ps receive from "
+                 "worker index: "+ to_string(wk_index));
+        log_info("[Ps.build_tree]: step 2.8, other party's ps receive from worker "
+                 "recv_update_str_sample_iv size: " + to_string(recv_update_str_sample_iv.size()));
+        log_info("[Ps.build_tree]: step 2.8, other party's ps receive from worker "
+                 "recv_update_str_encrypted_labels_left size: " + to_string(recv_update_str_encrypted_labels_left.size()));
+        log_info("[Ps.build_tree]: step 2.8, other party's ps receive from worker "
+                 "recv_update_str_encrypted_labels_right size: " + to_string(recv_update_str_encrypted_labels_right.size()));
       }
     }
 
@@ -411,15 +371,15 @@ void DTParameterServer::build_tree(){
                             sample_mask_iv_left, sample_mask_iv_right,
                             recv_update_str_sample_iv);
 
-    log_info("[Ps.build_tree]: step 2.9, class num: " + to_string(alg_builder.class_num ));
-    log_info("[Ps.build_tree]: step 2.9, sample_num: " + to_string(alg_builder.train_data_size ));
-    log_info("[Ps.build_tree]: step 2.9, size of encrypted_labels_right: " + to_string(alg_builder.class_num * alg_builder.train_data_size));
+    log_info("[Ps.build_tree]: step 2.9, class num: " + to_string(alg_builder.class_num));
+    log_info("[Ps.build_tree]: step 2.9, sample_num: " + to_string(alg_builder.train_data_size));
+    log_info("[Ps.build_tree]: step 2.9, size of encrypted_labels_right: "
+      + to_string(alg_builder.class_num * alg_builder.train_data_size));
 
     deserialize_encoded_number_array(encrypted_labels_left, alg_builder.class_num * alg_builder.train_data_size,
                                      recv_update_str_encrypted_labels_left);
     deserialize_encoded_number_array(encrypted_labels_right, alg_builder.class_num * alg_builder.train_data_size,
                                      recv_update_str_encrypted_labels_right);
-
 
     /// 2.10 : update current node index for prediction
     alg_builder.tree.nodes[node_index].node_type = falcon::INTERNAL;
@@ -464,13 +424,11 @@ void DTParameterServer::build_tree(){
   for (int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++) {
     this->send_long_message_to_worker(wk_index, "stop");
   }
-
 }
 
 void DTParameterServer::distributed_eval(
     falcon::DatasetType eval_type,
     const std::string& report_save_path) {
-
   // step 1: init test data
   int dataset_size =
       (eval_type == falcon::TRAIN) ?
@@ -493,22 +451,17 @@ void DTParameterServer::distributed_eval(
     save_model(report_save_path);
   }
   delete [] decrypted_labels;
-
 }
-
 
 void DTParameterServer::distributed_predict(
     const std::vector<int>& cur_test_data_indexes,
     EncodedNumber* predicted_labels){
-
   log_info("[Ps.distributed_predict]: 1. current channel size = " + std::to_string(this->worker_channels.size()));
 
   // step 1: partition sample ids, every ps partition in the same way
   std::vector<int> message_sizes = this->partition_examples(cur_test_data_indexes);
-
   log_info("[Ps.distributed_predict]: 2. cur_test_data_indexes.size = " + std::to_string(cur_test_data_indexes.size()));
   for (int i = 0; i < message_sizes.size(); i++) {
-
     log_info("[PS.distributed_predict]: 3. check message size, send worker" +
         std::to_string(i) +
         " with message size " + std::to_string(message_sizes[i]));
@@ -518,39 +471,28 @@ void DTParameterServer::distributed_predict(
   // step 2: if active party, wait worker finish execution
   if (party.party_type == falcon::ACTIVE_PARTY) {
     std::vector< string > encoded_messages = this->wait_worker_complete();
-
     // deserialize encrypted predicted labels
     for (auto & encoded_message : encoded_messages){
       log_info("[Ps.distributed_predict]: 4. active party receive accuracy from worker, acc = " + encoded_message);
-
       cur_accuracy += std::stof(encoded_message);
     }
-
     log_info("[Ps.distributed_predict]: 4. active party calculate training accuracy = " + std::to_string(cur_accuracy));
   }
 }
 
-
 void DTParameterServer::save_model(const std::string& model_save_file){
-
   log_info("[Ps.distributed_predict]: active party save tree model and report to  " + model_save_file);
-
   std::string pb_dt_model_string;
   serialize_tree_model(alg_builder.tree, pb_dt_model_string);
   save_pb_model_string(pb_dt_model_string, model_save_file);
   save_training_report(alg_builder.getter_training_accuracy(),
                        alg_builder.getter_testing_accuracy(),
                        model_save_file);
-
 }
-
 
 std::vector<double> DTParameterServer::retrieve_global_best_split(const std::vector<string>& encoded_msgs){
   log_info("[Ps.retrieve_global_best_split]: compare and get global best splits");
-
-
   std::vector< vector <double> > local_best_splits_vector;
-
   for ( const auto& encoded_msg: encoded_msgs){
     std::vector<double> local_best_split;
     deserialize_double_array(local_best_split, encoded_msg);
@@ -563,8 +505,7 @@ std::vector<double> DTParameterServer::retrieve_global_best_split(const std::vec
   int best_split_index = (int) global_best_split[0];
   double left_impurity = global_best_split[1];
   double right_impurity = global_best_split[2];
-  int best_split_worker_id = global_best_split[3];
-
+  int best_split_worker_id = (int) global_best_split[3];
 
   log_info("[Ps.retrieve_global_best_split]: received the best from worker: "
       "\nbest_split_index is " + to_string(best_split_index) +

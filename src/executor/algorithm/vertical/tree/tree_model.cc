@@ -66,30 +66,18 @@ std::vector<int> TreeModel::comp_predict_vector(std::vector<double> sample,
   // traverse the whole tree iteratively, and compute binary_vector
   std::stack<PredictHelper> traverse_prediction_objs;
   // add root node to stack
-  PredictHelper prediction_obj((bool) nodes[0].node_type,
-                               (bool) nodes[0].is_self_feature,
-                               nodes[0].best_party_id,
-                               nodes[0].best_feature_id,
-                               nodes[0].best_split_id,
-                               1,
-                               0);
+  PredictHelper prediction_obj((bool) nodes[0].node_type,(bool) nodes[0].is_self_feature,
+                               nodes[0].best_party_id, nodes[0].best_feature_id,
+                               nodes[0].best_split_id,1,0);
   traverse_prediction_objs.push(prediction_obj);
   while (!traverse_prediction_objs.empty()) {
     PredictHelper pred_obj = traverse_prediction_objs.top();
     if (pred_obj.is_leaf == 1) {
-
-      // log_info("[DT_train_worker.comp_predict_vector]: current pred_obj is leaf node, index ="+
-      //    to_string(pred_obj.index));
-
       // find leaf index and record
       int leaf_index = node_index_2_leaf_index_map.find(pred_obj.index)->second;
       binary_vector[leaf_index] = pred_obj.mark;
       traverse_prediction_objs.pop();
     } else if (pred_obj.is_self_feature != 1) {
-
-      // log_info("[DT_train_worker.comp_predict_vector]: current pred_obj is not my feature, node index ="+
-      //    to_string(pred_obj.index));
-
       // both left and right branches are marked as 1 * current_mark
       traverse_prediction_objs.pop();
       int left_node_index = pred_obj.index * 2 + 1;
@@ -100,22 +88,16 @@ std::vector<int> TreeModel::comp_predict_vector(std::vector<double> sample,
                          nodes[left_node_index].best_party_id,
                          nodes[left_node_index].best_feature_id,
                          nodes[left_node_index].best_split_id,
-                         pred_obj.mark,
-                         left_node_index);
+                         pred_obj.mark, left_node_index);
       PredictHelper right((bool) nodes[right_node_index].node_type,
                           (bool) nodes[right_node_index].is_self_feature,
                           nodes[right_node_index].best_party_id,
                           nodes[right_node_index].best_feature_id,
                           nodes[right_node_index].best_split_id,
-                          pred_obj.mark,
-                          right_node_index);
+                          pred_obj.mark, right_node_index);
       traverse_prediction_objs.push(left);
       traverse_prediction_objs.push(right);
     } else {
-
-      // log_info("[DT_train_worker.comp_predict_vector]: current pred_obj is my feature, node index ="+
-      //    to_string(pred_obj.index));
-
       // is self feature, retrieve split value and compare
       traverse_prediction_objs.pop();
       int node_index = pred_obj.index;
@@ -123,9 +105,6 @@ std::vector<int> TreeModel::comp_predict_vector(std::vector<double> sample,
       int split_id = pred_obj.best_split_id;
       double split_value = nodes[node_index].split_threshold;
       int left_mark, right_mark;
-
-      // log_info("[DT_train_worker.comp_predict_vector]: check feature_id="+to_string(feature_id) +
-      // " sample features size=" + to_string(sample.size()));
 
       if (sample[feature_id] <= split_value) {
         left_mark = pred_obj.mark * 1;
@@ -142,15 +121,13 @@ std::vector<int> TreeModel::comp_predict_vector(std::vector<double> sample,
                          nodes[left_node_index].best_party_id,
                          nodes[left_node_index].best_feature_id,
                          nodes[left_node_index].best_split_id,
-                         left_mark,
-                         left_node_index);
+                         left_mark, left_node_index);
       PredictHelper right((bool) nodes[right_node_index].node_type,
                           (bool) nodes[right_node_index].is_self_feature,
                           nodes[right_node_index].best_party_id,
                           nodes[right_node_index].best_feature_id,
                           nodes[right_node_index].best_split_id,
-                          right_mark,
-                          right_node_index);
+                          right_mark, right_node_index);
       traverse_prediction_objs.push(left);
       traverse_prediction_objs.push(right);
     }
@@ -202,11 +179,11 @@ void TreeModel::predict(Party &party,
   party.getter_phe_pub_key(phe_pub_key);
 
   // step 1: organize the leaf label vector, compute the map
-  LOG(INFO) << "Tree internal node num = " << internal_node_num;
+  log_info("Tree internal node num = " + std::to_string(internal_node_num));
   auto* label_vector = new EncodedNumber[internal_node_num + 1];
   std::map<int, int> node_index_2_leaf_index_map;
   compute_label_vec_and_index_map(label_vector, node_index_2_leaf_index_map);
-  LOG(INFO) << "Compute label vector and index map finished";
+  log_info("Compute label vector and index map finished");
 
   // step 2: compute prediction for each sample
   // for each sample
@@ -300,7 +277,7 @@ void TreeModel::predict(Party &party,
 
   delete [] label_vector;
   djcs_t_free_public_key(phe_pub_key);
-  LOG(INFO) << "Compute predictions on samples finished";
+  log_info("Compute predictions on samples finished");
 }
 
 
@@ -363,9 +340,7 @@ std::vector<double> TreeModel::comp_feature_importance(
 
 
 void TreeModel::print_tree_model() {
-
   log_info("============== print the tree =============");
-
   log_info("[TreeModel.print_tree_model]: tree.class_num = " + to_string(class_num));
   log_info("[TreeModel.print_tree_model]: tree.max_depth = " + to_string(max_depth));
   log_info("[TreeModel.print_tree_model]: tree.internal_node_num = " + to_string(internal_node_num));

@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
     }
 
     // if distributed train or inference, and distributed_role = parameter server
-    if (is_distributed == 1 && distributed_role == 0){
+    if (is_distributed == 1 && distributed_role == falcon::DistPS) {
       log_info("Execute as parameter server");
       if (is_inference) {
         log_info("Execute distributed inference logic");
@@ -278,7 +278,7 @@ int main(int argc, char *argv[]) {
     }
 
     // if distributed train or inference, and distributed_role = worker
-    if (is_distributed == 1 && distributed_role == 1){
+    if (is_distributed == 1 && distributed_role == falcon::DistWorker){
       // if distributed workers, need to init the network channels
       // but workers do not init phe keys but will receive it from ps
       party.init_network_channels(network_config_pb_str);
@@ -313,7 +313,7 @@ int main(int argc, char *argv[]) {
         delete worker;
       } else{
         log_info("Execute distributed training logic");
-        if (distributed_role==1){
+        if (distributed_role == falcon::DistWorker) {
           log_info("Execute as worker");
           switch(parsed_algorithm_name) {
             case falcon::LOG_REG: {

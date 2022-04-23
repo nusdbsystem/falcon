@@ -3019,38 +3019,6 @@ void DecisionTreeBuilder::distributed_eval(Party &party, const Worker &worker, f
   djcs_t_free_public_key(phe_pub_key);
 }
 
-
-//void DecisionTreeBuilder::retrieve_global_best_split(const Worker &worker){
-//
-//  std::string received_str;
-//  worker.recv_long_message_from_ps(received_str);
-//
-//  log_info("[DT_train_worker.retrieve_global_best_split]: number of workers:" + received_str);
-//
-//  std::vector< vector <double> > local_best_splits_vector;
-//
-//  for ( int i = 0; i< std::stoi(received_str); i++){
-//    std::string received_encoded_msg;
-//    std::vector<double> local_best_split;
-//
-//    worker.recv_long_message_from_ps(received_encoded_msg);
-//    deserialize_double_array(local_best_split, received_encoded_msg);
-//    local_best_splits_vector.push_back(local_best_split);
-//
-//  }
-//
-//  log_info("[DT_train_worker.retrieve_global_best_split]: begin to compare and get global best split");
-//
-//  //todo: implement compare
-//
-//  std::vector<double> global_best_split = local_best_splits_vector[0];
-//
-//  std::string send_str;
-//  serialize_double_array(global_best_split, send_str);
-//  worker.send_long_message_to_ps(send_str);
-//}
-
-
 void spdz_tree_computation(int party_num,
     int party_id,
     std::vector<int> mpc_tree_port_bases,
