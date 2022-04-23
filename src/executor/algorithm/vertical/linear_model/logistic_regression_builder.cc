@@ -15,6 +15,7 @@
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 #include <ctime>
 #include <random>
@@ -434,9 +435,9 @@ void LogisticRegressionBuilder::train(Party party) {
 
     for (int i = 0; i < party.party_num; i++) {
       if (i == party.party_id) {
-        party.broadcast_encoded_number_array(encrypted_gradients,
-                                             log_reg_model.weight_size,
-                                             party.party_id);
+        broadcast_encoded_number_array(party, encrypted_gradients,
+                                       log_reg_model.weight_size,
+                                       party.party_id);
         truncate_ciphers_precision(party, encrypted_gradients,
                                    log_reg_model.weight_size,
                                    party.party_id,
@@ -444,9 +445,8 @@ void LogisticRegressionBuilder::train(Party party) {
       } else {
         int party_i_weight_size = log_reg_model.party_weight_sizes[i];
         auto* party_i_enc_grad = new EncodedNumber[party_i_weight_size];
-        party.broadcast_encoded_number_array(party_i_enc_grad,
-                                             party_i_weight_size,
-                                             i);
+        broadcast_encoded_number_array(party, party_i_enc_grad,
+                                       party_i_weight_size, i);
         truncate_ciphers_precision(party, party_i_enc_grad,
                                    party_i_weight_size,
                                    i, encrypted_weights_precision);

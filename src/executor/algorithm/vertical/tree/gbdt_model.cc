@@ -4,6 +4,7 @@
 
 #include <falcon/algorithm/vertical/tree/gbdt_model.h>
 #include <falcon/algorithm/vertical/tree/gbdt_loss.h>
+#include <falcon/party/info_exchange.h>
 
 #include <glog/logging.h>
 #include <falcon/utils/logger/logger.h>
@@ -88,7 +89,7 @@ void GbdtModel::predict_single_estimator(Party &party,
                          raw_predictions[i], raw_predictions[i]);
     }
   }
-  party.broadcast_encoded_number_array(raw_predictions, predicted_sample_size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, raw_predictions, predicted_sample_size, ACTIVE_PARTY_ID);
   // iterate for each tree in gbdt_trees and predict
   for (int t = 0; t < tree_size; t++) {
     // predict for tree t, obtain the predicted labels, should be precision
@@ -152,9 +153,9 @@ void GbdtModel::predict_multi_estimator(Party &party,
       }
     }
   }
-  party.broadcast_encoded_number_array(raw_predictions,
-                                       predicted_sample_size * class_num,
-                                       ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, raw_predictions,
+                                 predicted_sample_size * class_num,
+                                 ACTIVE_PARTY_ID);
   // iterate for each tree in gbdt_trees and predict
   for (int tree_id = 0; tree_id < n_estimator; tree_id++) {
     for (int c = 0; c < class_num; c++) {

@@ -5,6 +5,7 @@
 #include <falcon/operator/conversion/op_conv.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/party/info_exchange.h>
 
 void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
                            EncodedNumber* dest_plains, int size, int req_party_id) {
@@ -315,7 +316,7 @@ void ciphers_multi(const Party& party, EncodedNumber *res, EncodedNumber *cipher
     serialize_encoded_number_array(local_aggregation, size, local_aggregation_str);
     party.send_long_message(req_party_id, local_aggregation_str);
   }
-  party.broadcast_encoded_number_array(global_aggregation, size, req_party_id);
+  broadcast_encoded_number_array(party, global_aggregation, size, req_party_id);
 
   // step 3: write to result vector
   for (int i = 0; i < size; i++) {

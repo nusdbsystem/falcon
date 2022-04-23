@@ -5,6 +5,7 @@
 #include <falcon/algorithm/vertical/tree/gbdt_loss.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 #include <glog/logging.h>
 
@@ -94,7 +95,7 @@ void LeastSquareError::negative_gradient(Party party,
     djcs_t_free_public_key(phe_pub_key);
   }
   // active party broadcasts the residuals
-  party.broadcast_encoded_number_array(residuals, size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, residuals, size, ACTIVE_PARTY_ID);
 }
 
 void LeastSquareError::update_terminal_regions(Party party,
@@ -142,7 +143,7 @@ void LeastSquareError::get_init_raw_predictions(Party party,
     djcs_t_free_public_key(phe_pub_key);
   }
   // active party broadcasts the raw_predictions to other parties
-  party.broadcast_encoded_number_array(raw_predictions, size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, raw_predictions, size, ACTIVE_PARTY_ID);
 }
 
 
@@ -254,7 +255,7 @@ void BinomialDeviance::get_init_raw_predictions(Party party,
     djcs_t_free_public_key(phe_pub_key);
   }
   // active party broadcasts the raw_predictions to other parties
-  party.broadcast_encoded_number_array(raw_predictions, size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, raw_predictions, size, ACTIVE_PARTY_ID);
 }
 
 void BinomialDeviance::raw_predictions_to_probas(Party party,
@@ -394,7 +395,7 @@ void MultinomialDeviance::get_init_raw_predictions(Party party,
     djcs_t_free_public_key(phe_pub_key);
   }
   // active party broadcasts the raw_predictions to other parties
-  party.broadcast_encoded_number_array(raw_predictions, size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, raw_predictions, size, ACTIVE_PARTY_ID);
 }
 
 void MultinomialDeviance::raw_predictions_to_probas(Party party,
@@ -458,7 +459,7 @@ void update_raw_predictions_with_learning_rate(Party party,
   LOG(INFO) << "begin truncate the ciphers precision";
   google::FlushLogFiles(google::INFO);
   // broadcast the assists and truncate the precision to PHE
-  party.broadcast_encoded_number_array(assists, size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, assists, size, ACTIVE_PARTY_ID);
   truncate_ciphers_precision(party, assists, size, ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   for (int i = 0; i < size; i++) {
     djcs_t_aux_ee_add(phe_pub_key, raw_predictions[i],

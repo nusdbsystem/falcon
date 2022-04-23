@@ -11,6 +11,7 @@
 #include <falcon/party/party.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 /**
  * This function implements debug of cipher array for check
@@ -29,12 +30,12 @@ std::vector<T> debug_cipher_array(const Party& party, EncodedNumber* cipher_arra
                                   int size, int req_party_id,
                                   bool print_flag = false, int print_size = 0) {
   // request party broadcast the cipher array
-  party.broadcast_encoded_number_array(cipher_array, size, req_party_id);
+  broadcast_encoded_number_array(party, cipher_array, size, req_party_id);
   // call collaborative decrypt function
   auto *plain_array = new EncodedNumber[size];
   collaborative_decrypt(party, cipher_array, plain_array, size, req_party_id);
   // request party should broadcast the plain array
-  party.broadcast_encoded_number_array(plain_array, size, req_party_id);
+  broadcast_encoded_number_array(party, plain_array, size, req_party_id);
   // decode the values and return
   std::vector<T> decoded_array;
   for (int i = 0; i < size; i++) {

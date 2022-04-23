@@ -401,56 +401,6 @@ void Party::split_train_test_data(
   }
 }
 
-void Party::broadcast_encoded_number_array(EncodedNumber *vec,
-                                           int size, int req_party_id) const {
-  if (party_id == req_party_id) {
-    // serialize the encoded number vector and send to other parties
-    std::string vec_str;
-    serialize_encoded_number_array(vec, size, vec_str);
-    for (int id = 0; id < party_num; id++) {
-      if (id != party_id) {
-        send_long_message(id, vec_str);
-      }
-    }
-  } else {
-    // receive the message from req_party_id and set to vec
-    std::string recv_vec_str;
-    recv_long_message(req_party_id, recv_vec_str);
-    deserialize_encoded_number_array(vec, size, recv_vec_str);
-  }
-}
-
-std::vector<int> Party::sync_up_int_arr(int v) const {
-  std::vector<int> sync_arr;
-  if (party_type == falcon::ACTIVE_PARTY) {
-    // first set its own weight size and receive other parties' weight sizes
-    sync_arr.push_back(v);
-    for (int i = 0; i < party_num; i++) {
-      if (i != party_id) {
-        std::string recv_weight_size;
-        recv_long_message(i, recv_weight_size);
-        sync_arr.push_back(std::stoi(recv_weight_size));
-      }
-    }
-    // then broadcast the vector
-    std::string party_weight_sizes_str;
-    serialize_int_array(sync_arr, party_weight_sizes_str);
-    for (int i = 0; i < party_num; i++) {
-      if (i != party_id) {
-        send_long_message(i, party_weight_sizes_str);
-      }
-    }
-  } else {
-    // first send the weight size to active party
-    send_long_message(ACTIVE_PARTY_ID, std::to_string(v));
-    // then receive and deserialize the party_weight_sizes array
-    std::string recv_party_weight_sizes_str;
-    recv_long_message(ACTIVE_PARTY_ID, recv_party_weight_sizes_str);
-    deserialize_int_array(sync_arr, recv_party_weight_sizes_str);
-  }
-  return sync_arr;
-}
-
 Party::~Party() {
   // if does not reset channels[i] to nullptr,
   // there will be a heap-use-after-free crash

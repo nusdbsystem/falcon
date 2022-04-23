@@ -16,6 +16,7 @@
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/utils/metric/regression.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 #include <ctime>
 #include <random>
@@ -653,7 +654,7 @@ void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, En
     party.send_long_message(ACTIVE_PARTY_ID, local_weights_str);
   }
   // active party broadcast the global weights vector
-  party.broadcast_encoded_number_array(global_weights, global_weight_size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, global_weights, global_weight_size, ACTIVE_PARTY_ID);
 
   log_info("[compute_l1_regularized_grad]: finish aggregate and broadcast global weights");
 

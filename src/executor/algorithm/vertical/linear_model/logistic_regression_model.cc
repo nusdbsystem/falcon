@@ -8,6 +8,7 @@
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 #include <cmath>
 #include <glog/logging.h>
@@ -96,7 +97,7 @@ void LogisticRegressionModel::predict_proba(
       predicted_labels_neg[i] = label_neg;
     }
   }
-  party.broadcast_encoded_number_array(predicted_labels_neg, cur_sample_size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, predicted_labels_neg, cur_sample_size, ACTIVE_PARTY_ID);
   for (int i = 0; i < cur_sample_size; i++) {
     predicted_labels[i][0] = predicted_labels_neg[i];
     predicted_labels[i][1] = predicted_labels_pos[i];

@@ -14,6 +14,7 @@
 #include <falcon/utils/alg/tree_util.h>
 #include <falcon/utils/alg/debug_util.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 #include <map>
 #include <stack>
@@ -233,7 +234,7 @@ void DecisionTreeBuilder::train(Party party) {
     }
   }
   // active party broadcast the encrypted labels
-  party.broadcast_encoded_number_array(encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
   log_info("[DecisionTreeBuilder.train] Finish broadcasting the encrypted label info");
 
 #ifdef DEBUG
@@ -250,7 +251,7 @@ void DecisionTreeBuilder::train(Party party) {
     log_info("[DecisionTreeBuilder.train] root_impu = " + std::to_string(impu));
     root_impu[0].set_double(phe_pub_key->n[0], impu, PHE_FIXED_POINT_PRECISION);
   }
-  party.broadcast_encoded_number_array(root_impu, 1, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, root_impu, 1, ACTIVE_PARTY_ID);
   djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, root_impu[0]);
   delete [] root_impu;
 
@@ -378,7 +379,7 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
     }
     ciphers_multi(party, weighted_encrypted_true_labels, encrypted_true_labels,
                   assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
-    party.broadcast_encoded_number_array(weighted_encrypted_true_labels, class_num * sample_num, ACTIVE_PARTY_ID);
+    broadcast_encoded_number_array(party, weighted_encrypted_true_labels, class_num * sample_num, ACTIVE_PARTY_ID);
     delete [] assist_encrypted_weights;
   } else {
     for (int i = 0; i < label_size; i++) {
@@ -467,7 +468,7 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
       djcs_t_aux_ee_add(phe_pub_key_tmp, encrypted_node_num[0], encrypted_node_num[0], sample_mask_iv[i]);
     }
   }
-  party.broadcast_encoded_number_array(encrypted_node_num, 1, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, encrypted_node_num, 1, ACTIVE_PARTY_ID);
   // decrypt
   collaborative_decrypt(party, encrypted_node_num, decrypted_node_num, 1, ACTIVE_PARTY_ID);
   long node_sample_num;
@@ -1465,7 +1466,7 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
       }
     }
   }
-  party.broadcast_encoded_number_array(init_encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, init_encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
   log_info("[DT_train_worker.distributed_train]: step 2, finished broadcasting the encrypted label info and init mask vector");
 
   // init map to main node_index: encrypted_label and encrypted_mask_iv
@@ -1487,7 +1488,7 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
     log_info("[DecisionTreeBuilder.distributed_train] root_impu = " + std::to_string(impu));
     root_impu[0].set_double(phe_pub_key->n[0], impu, PHE_FIXED_POINT_PRECISION);
   }
-  party.broadcast_encoded_number_array(root_impu, 1, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, root_impu, 1, ACTIVE_PARTY_ID);
   djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, root_impu[0]);
   delete [] root_impu;
   log_info("[DT_train_worker.distributed_train]: step 3, finished init root node info");
@@ -2184,7 +2185,7 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
     }
     ciphers_multi(party, init_encrypted_labels, encrypted_true_labels,
                   assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
-    party.broadcast_encoded_number_array(init_encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
+    broadcast_encoded_number_array(party, init_encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
     delete [] assist_encrypted_weights;
   } else {
     for (int i = 0; i < label_size; i++) {
@@ -3214,7 +3215,7 @@ TreeModel DecisionTreeBuilder::aggregate_decrypt_tree_model(Party& party) {
   log_info("[DecisionTreeBuilder: aggregate_decrypt_tree_model] start aggregating the tree model");
   TreeModel agg_model;
   int maximum_nodes = (int) pow(2, max_depth + 1) - 1;
-  std::vector<int> parties_feature_nums = party.sync_up_int_arr(local_feature_num);
+  std::vector<int> parties_feature_nums = sync_up_int_arr(party, local_feature_num);
   for (int i = 0; i < (int) parties_feature_nums.size(); i++) {
     log_info("[DecisionTreeBuilder: aggregate_decrypt_tree_model] parties_features_nums["
       + std::to_string(i) + "] = " + std::to_string(parties_feature_nums[i]));

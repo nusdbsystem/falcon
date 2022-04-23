@@ -12,6 +12,7 @@
 #include <falcon/common.h>
 #include <falcon/model/model_io.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/party/info_exchange.h>
 
 #include <ctime>
 #include <random>
@@ -200,8 +201,8 @@ void compute_encrypted_residual(const Party& party,
                         batch_true_labels[i]);
     }
   }
-  party.broadcast_encoded_number_array(encrypted_batch_losses,
-                                       cur_batch_size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, encrypted_batch_losses,
+                                 cur_batch_size, ACTIVE_PARTY_ID);
   log_info("Finish compute encrypted loss and sync up with all parties");
 
   djcs_t_free_public_key(phe_pub_key);

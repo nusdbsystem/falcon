@@ -12,6 +12,7 @@
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 #include <glog/logging.h>
 
@@ -122,7 +123,7 @@ void GbdtBuilder::train_regression_task(Party party) {
     }
   }
   // active party broadcasts the encrypted true labels
-  party.broadcast_encoded_number_array(encrypted_true_labels, sample_size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, encrypted_true_labels, sample_size, ACTIVE_PARTY_ID);
 
   // iteratively train the regression trees
   LOG(INFO) << "tree_size = " << gbdt_model.tree_size;
@@ -248,7 +249,7 @@ void GbdtBuilder::train_classification_task(Party party) {
       }
     }
     // active party broadcasts the encrypted true labels
-    party.broadcast_encoded_number_array(encrypted_true_labels, sample_size, ACTIVE_PARTY_ID);
+    broadcast_encoded_number_array(party, encrypted_true_labels, sample_size, ACTIVE_PARTY_ID);
 
     // iteratively train the regression trees
     LOG(INFO) << "tree_size = " << gbdt_model.tree_size;
@@ -355,8 +356,8 @@ void GbdtBuilder::train_classification_task(Party party) {
       }
     }
     // active party broadcasts the encrypted true labels
-    party.broadcast_encoded_number_array(encrypted_true_labels,
-                                         sample_size * gbdt_model.class_num, ACTIVE_PARTY_ID);
+    broadcast_encoded_number_array(party, encrypted_true_labels,
+                                   sample_size * gbdt_model.class_num, ACTIVE_PARTY_ID);
 
     // iteratively train the regression trees, tree_size = n_estimator * class_num
     LOG(INFO) << "tree_size = " << gbdt_model.tree_size;

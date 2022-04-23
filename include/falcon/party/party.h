@@ -182,24 +182,6 @@ class Party {
                              std::vector<double>& training_labels,
                              std::vector<double>& testing_labels) const;
 
-  /**
-   * broadcast an encoded vector to other parties
-   *
-   * @param vec: the encoded vector to be broadcast
-   * @param size: the size of the vector
-   * @param req_party_id: the party who has the vector to be broadcast
-   */
-  void broadcast_encoded_number_array(EncodedNumber *vec,
-                                      int size, int req_party_id) const;
-
-  /**
-   * each party has a int value, sync up to obtain a int array
-   *
-   * @param v: the value to be sync up
-   * @return
-   */
-  std::vector<int> sync_up_int_arr(int v) const;
-
   /** set party's local sample number */
   void setter_sample_num(int s_sample_num) { sample_num = s_sample_num; }
 

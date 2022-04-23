@@ -100,8 +100,8 @@ double lime_reg_tree_root_impurity(Party& party, bool use_encrypted_labels,
       djcs_t_aux_ee_add(phe_pub_key, enc_weight_sum[0], enc_weight_sum[0], encrypted_weights[i]);
     }
   }
-  party.broadcast_encoded_number_array(enc_label_sum, 2, ACTIVE_PARTY_ID);
-  party.broadcast_encoded_number_array(enc_weight_sum, 1, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, enc_label_sum, 2, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, enc_weight_sum, 1, ACTIVE_PARTY_ID);
 
   // decrypt the sums
   collaborative_decrypt(party, enc_label_sum, dec_label_sum, 2, ACTIVE_PARTY_ID);

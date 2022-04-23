@@ -9,6 +9,7 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 #include <cmath>
 #include <glog/logging.h>
@@ -97,7 +98,7 @@ void ForestModel::predict(Party &party,
         delete[] aggregation;
       }
     }
-    party.broadcast_encoded_number_array(predicted_labels, predicted_sample_size, ACTIVE_PARTY_ID);
+    broadcast_encoded_number_array(party, predicted_labels, predicted_sample_size, ACTIVE_PARTY_ID);
   } else {
     std::vector<int> public_values;
     std::vector<double> private_values;
@@ -255,7 +256,7 @@ void ForestModel::predict_proba(Party &party,
 
     // active party broadcast the predicted labels
     for (int i = 0; i < predicted_sample_size; i++) {
-      party.broadcast_encoded_number_array(predicted_labels[i], class_num, ACTIVE_PARTY_ID);
+      broadcast_encoded_number_array(party, predicted_labels[i], class_num, ACTIVE_PARTY_ID);
     }
 
     // free memory

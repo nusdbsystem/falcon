@@ -21,6 +21,7 @@
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/utils/base64.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 #include <glog/logging.h>
 #include "omp.h"
@@ -333,7 +334,7 @@ void LimeExplainer::compute_dist_weights(const Party &party,
   // do the following steps to compute the distance and sample weights
   //  1. parties locally compute \sum_{i=1}^{d_i} (x[i] - s[i])^2
   int feature_size = (int) origin_data.size();
-  std::vector<int> feature_sizes = party.sync_up_int_arr(feature_size);
+  std::vector<int> feature_sizes = sync_up_int_arr(party, feature_size);
   int total_feature_size = std::accumulate(feature_sizes.begin(), feature_sizes.end(), 0);
 
   //  2. parties aggregate and convert to secret shares
@@ -441,7 +442,7 @@ void LimeExplainer::compute_squared_dist(const Party &party,
     party.send_long_message(ACTIVE_PARTY_ID, local_squared_dist_str);
   }
   // broadcast squared_dist array
-  party.broadcast_encoded_number_array(squared_dist, sample_size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, squared_dist, sample_size, ACTIVE_PARTY_ID);
 
   delete [] local_squared_dist;
   djcs_t_free_public_key(phe_pub_key);
@@ -1086,7 +1087,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
     // to aggregate, decrypt, and print the tree for comparison
     TreeModel global_tree_model = decision_tree_builder.aggregate_decrypt_tree_model(party);
     // to calculate the feature importance based on the plaintext tree
-    std::vector<int> parties_feature_nums = party.sync_up_int_arr(decision_tree_builder.local_feature_num);
+    std::vector<int> parties_feature_nums = sync_up_int_arr(party, decision_tree_builder.local_feature_num);
     if (party.party_type == falcon::ACTIVE_PARTY) {
       std::vector<double> feature_importance_vec = global_tree_model.comp_feature_importance(
         parties_feature_nums,
@@ -1486,7 +1487,7 @@ void lime_conv_pred_plain2cipher(Party party, const std::string& params_str, con
     }
   }
   for (int i = 0; i < row_num; i++) {
-    party.broadcast_encoded_number_array(predictions[i], column_num, ACTIVE_PARTY_ID);
+    broadcast_encoded_number_array(party, predictions[i], column_num, ACTIVE_PARTY_ID);
   }
 
   // 4. save the ciphertext predictions to the corresponding file

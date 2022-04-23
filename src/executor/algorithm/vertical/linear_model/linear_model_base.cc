@@ -7,6 +7,7 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <falcon/party/info_exchange.h>
 
 #include <cmath>
 #include <glog/logging.h>
@@ -139,7 +140,7 @@ void LinearModel::encode_samples(const Party &party,
 }
 
 void LinearModel::sync_up_weight_sizes(const Party &party) {
-  std::vector<int> sync_arr = party.sync_up_int_arr(weight_size);
+  std::vector<int> sync_arr = sync_up_int_arr(party, weight_size);
   party_weight_sizes = sync_arr;
 }
 
@@ -161,7 +162,7 @@ std::vector<double> LinearModel::display_weights(const Party& party) {
         party_i_local_weights[j] = local_weights[j];
       }
     }
-    party.broadcast_encoded_number_array(party_i_local_weights, party_i_weight_size, i);
+    broadcast_encoded_number_array(party, party_i_local_weights, party_i_weight_size, i);
     collaborative_decrypt(party, party_i_local_weights, party_i_decrypted_weights,
                           party_i_weight_size, i);
     if (i == party.party_id) {
