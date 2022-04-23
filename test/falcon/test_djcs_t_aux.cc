@@ -412,6 +412,78 @@ TEST(PHE, ThresholdPaillierScheme) {
     }
   }
 
+  /////////////////////////////////////
+  /// Test vector double encryption ///
+  /////////////////////////////////////
+  std::vector<double> p{0.9, 0.8, -0.7, 0.6, 0.5};
+  auto* number_p = new EncodedNumber[5];
+  djcs_t_aux_double_vec_encryption(pk, hr, number_p, 5, p, PHE_FIXED_POINT_PRECISION);
+  auto* decrypted_number_p = new EncodedNumber[5];
+  for (int j = 0; j < 5; j++) {
+    auto* partially_decrypt_j = new EncodedNumber[client_num];
+    for (int i = 0; i < client_num; i++) {
+      djcs_t_aux_partial_decrypt(pk, au[i], partially_decrypt_j[i], number_p[j]);
+    }
+    djcs_t_aux_share_combine(pk, decrypted_number_p[j], partially_decrypt_j, client_num);
+
+    double decoded_number_pj;
+    decrypted_number_p[j].decode(decoded_number_pj);
+    EXPECT_NEAR(p[j], decoded_number_pj, 1e-3);
+    delete [] partially_decrypt_j;
+  }
+
+  //////////////////////////////////
+  /// Test vector int encryption ///
+  //////////////////////////////////
+  std::vector<int> q{1, 2, 3, 4, 5};
+  auto* number_q = new EncodedNumber[5];
+  djcs_t_aux_int_vec_encryption(pk, hr, number_q, 5, q, PHE_FIXED_POINT_PRECISION);
+  auto* decrypted_number_q = new EncodedNumber[5];
+  for (int j = 0; j < 5; j++) {
+    auto* partially_decrypt_j = new EncodedNumber[client_num];
+    for (int i = 0; i < client_num; i++) {
+      djcs_t_aux_partial_decrypt(pk, au[i], partially_decrypt_j[i], number_q[j]);
+    }
+    djcs_t_aux_share_combine(pk, decrypted_number_q[j], partially_decrypt_j, client_num);
+
+    long decoded_number_qj;
+    decrypted_number_q[j].decode(decoded_number_qj);
+    EXPECT_EQ(q[j], decoded_number_qj);
+    delete [] partially_decrypt_j;
+  }
+
+  /////////////////////////////////////
+  /// Test matrix double encryption ///
+  /////////////////////////////////////
+  std::vector<std::vector<double>> r;
+  std::vector<double> r1{0.9, 0.8, -0.7, 0.6, 0.5};
+  std::vector<double> r2{0.1, 0.2, -0.3, 0.4, 0.5};
+  std::vector<double> r3{0.8, 0.6, -0.7, 0.6, 0.3};
+  r.push_back(r1);
+  r.push_back(r2);
+  r.push_back(r3);
+  auto* number_mat_r = new EncodedNumber*[3];
+  auto* decrypted_number_mat_r = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    number_mat_r[i] = new EncodedNumber[5];
+    decrypted_number_mat_r[i] = new EncodedNumber[5];
+  }
+  djcs_t_aux_double_mat_encryption(pk, hr, number_mat_r, 3, 5, r, PHE_FIXED_POINT_PRECISION);
+  for (int j = 0; j < 3; j++) {
+    for (int k = 0; k < 5; k++) {
+      auto* partially_decrypt_jk = new EncodedNumber[client_num];
+      for (int i = 0; i < client_num; i++) {
+        djcs_t_aux_partial_decrypt(pk, au[i], partially_decrypt_jk[i], number_mat_r[j][k]);
+      }
+      djcs_t_aux_share_combine(pk, decrypted_number_mat_r[j][k], partially_decrypt_jk, client_num);
+
+      double decoded_number_rjk;
+      decrypted_number_mat_r[j][k].decode(decoded_number_rjk);
+      EXPECT_NEAR(r[j][k], decoded_number_rjk, 1e-3);
+      delete [] partially_decrypt_jk;
+    }
+  }
+
   // free memory
   delete [] partially_decryption;
   delete [] partially_sum_decryption;
@@ -461,6 +533,16 @@ TEST(PHE, ThresholdPaillierScheme) {
     delete [] number_o2[i];
   }
   delete [] number_o2;
+  delete [] number_p;
+  delete [] decrypted_number_p;
+  delete [] number_q;
+  delete [] decrypted_number_q;
+  for (int i = 0; i < 3; i++) {
+    delete [] number_mat_r[i];
+    delete [] decrypted_number_mat_r[i];
+  }
+  delete [] number_mat_r;
+  delete [] decrypted_number_mat_r;
 
   hcs_free_random(hr);
   djcs_t_free_public_key(pk);

@@ -88,6 +88,40 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
 /***********************************************************/
 
 /**
+ * encrypt a double vector based on pk and phe precision
+ *
+ * @param pk: public key
+ * @param hr: djcs_t random
+ * @param res: resulted ciphertext vector
+ * @param size: the size of the vector
+ * @param vec: values to be encrypted
+ * @param phe_precision: the precision to be used
+ */
+void djcs_t_aux_double_vec_encryption(djcs_t_public_key* pk,
+    hcs_random* hr,
+    EncodedNumber* res,
+    int size,
+    const std::vector<double>& vec,
+    int phe_precision = PHE_FIXED_POINT_PRECISION);
+
+/**
+ * encrypt a int vector based on pk and phe precision
+ *
+ * @param pk: public key
+ * @param hr: djcs_t random
+ * @param res: resulted ciphertext vector
+ * @param size: the size of the vector
+ * @param vec: values to be encrypted
+ * @param phe_precision: the precision to be used
+ */
+void djcs_t_aux_int_vec_encryption(djcs_t_public_key* pk,
+                               hcs_random* hr,
+                               EncodedNumber* res,
+                               int size,
+                               const std::vector<int>& vec,
+                               int phe_precision = PHE_FIXED_POINT_PRECISION);
+
+/**
  * homomorphic aggregate a cipher vector and return the result
  *
  * @param pk: public key
@@ -153,6 +187,25 @@ void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
 /***********************************************************/
 /***************** matrix related operations ***************/
 /***********************************************************/
+
+/**
+ * encrypt a double matrix based on pk and phe precision
+ *
+ * @param pk: public key
+ * @param hr: djcs_t random
+ * @param res: resulted ciphertext matrix
+ * @param row_size: the row size of the matrix
+ * @param column_size: the column size of the matrix
+ * @param mat: values to be encrypted
+ * @param phe_precision: the precision to be used
+ */
+void djcs_t_aux_double_mat_encryption(djcs_t_public_key* pk,
+    hcs_random* hr,
+    EncodedNumber** res,
+    int row_size,
+    int column_size,
+    const std::vector<std::vector<double>>& mat,
+    int phe_precision = PHE_FIXED_POINT_PRECISION);
 
 /**
  * element-wise homomorphic addition of two cipher matrices

@@ -162,6 +162,42 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
   mpz_clear(mult);
 }
 
+void djcs_t_aux_double_vec_encryption(djcs_t_public_key* pk,
+                                      hcs_random* hr,
+                                      EncodedNumber* res,
+                                      int size,
+                                      const std::vector<double>& vec,
+                                      int phe_precision) {
+  check_size(size);
+  int vec_size = (int) vec.size();
+  if (size != vec_size) {
+    log_error("The result size is not equal to vec size.");
+    exit(EXIT_FAILURE);
+  }
+  for (int i = 0; i < size; i++) {
+    res[i].set_double(pk->n[0], vec[i], phe_precision);
+    djcs_t_aux_encrypt(pk, hr, res[i], res[i]);
+  }
+}
+
+void djcs_t_aux_int_vec_encryption(djcs_t_public_key* pk,
+                                   hcs_random* hr,
+                                   EncodedNumber* res,
+                                   int size,
+                                   const std::vector<int>& vec,
+                                   int phe_precision) {
+  check_size(size);
+  int vec_size = (int) vec.size();
+  if (size != vec_size) {
+    log_error("The result size is not equal to vec size.");
+    exit(EXIT_FAILURE);
+  }
+  for (int i = 0; i < size; i++) {
+    res[i].set_integer(pk->n[0], vec[i]);
+    djcs_t_aux_encrypt(pk, hr, res[i], res[i]);
+  }
+}
+
 void djcs_t_aux_vec_aggregate(djcs_t_public_key* pk,
     EncodedNumber& res,
     EncodedNumber* ciphers,
@@ -257,6 +293,29 @@ void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
   check_encoded_public_key(ciphers[0], plains[0]);
   for (int i = 0; i < size; i++) {
     djcs_t_aux_ep_mul(pk, res[i], ciphers[i], plains[i]);
+  }
+}
+
+void djcs_t_aux_double_mat_encryption(djcs_t_public_key* pk,
+                                      hcs_random* hr,
+                                      EncodedNumber** res,
+                                      int row_size,
+                                      int column_size,
+                                      const std::vector<std::vector<double>>& mat,
+                                      int phe_precision) {
+  check_size(row_size);
+  check_size(column_size);
+  int vec_row_size = (int) mat.size();
+  int vec_column_size = (int) mat[0].size();
+  if ((row_size != vec_row_size) || (column_size != vec_column_size)) {
+    log_error("The result size is not equal to mat size");
+    exit(EXIT_FAILURE);
+  }
+  for (int i = 0; i < row_size; i++) {
+    for (int j = 0; j < column_size; j++) {
+      res[i][j].set_double(pk->n[0], mat[i][j], phe_precision);
+      djcs_t_aux_encrypt(pk, hr, res[i][j], res[i][j]);
+    }
   }
 }
 
