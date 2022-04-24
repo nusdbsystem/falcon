@@ -243,6 +243,19 @@ class DecisionTreeBuilder : public ModelBuilder {
                                       EncodedNumber *encrypted_weights = nullptr);
 
   /**
+   * encrypt the left and right impurity
+   *
+   * @param party: initialized party object
+   * @param left_impurity: plaintext left impurity
+   * @param right_impurity: plaintext right impurity
+   * @param encrypted_left_impurity: returned encrypted left impurity
+   * @param encrypted_right_impurity: returned encrypted right impurity
+   */
+  void encrypt_left_right_impu(const Party& party, double left_impurity, double right_impurity,
+                               EncodedNumber& encrypted_left_impurity,
+                               EncodedNumber& encrypted_right_impurity);
+
+  /**
    * compute encrypted impurity gain for each feature and each split
    * @param party: initialized party object
    * @param node_index: the index of tree node to be computed
@@ -256,16 +269,93 @@ class DecisionTreeBuilder : public ModelBuilder {
    * @param encrypted_weights: the encrypted weights (for LIME)
    */
   void compute_encrypted_statistics(const Party &party, int node_index,
-      std::vector<int> available_feature_ids,
-      EncodedNumber *sample_mask_iv,
-      EncodedNumber ** encrypted_statistics,
-      EncodedNumber * encrypted_labels,
-      EncodedNumber * encrypted_left_sample_nums,
-      EncodedNumber * encrypted_right_sample_nums,
-      bool use_sample_weights = false,
-      EncodedNumber *encrypted_weights = nullptr);
+                                    std::vector<int> available_feature_ids,
+                                    EncodedNumber *sample_mask_iv,
+                                    EncodedNumber ** encrypted_statistics,
+                                    EncodedNumber * encrypted_labels,
+                                    EncodedNumber * encrypted_left_sample_nums,
+                                    EncodedNumber * encrypted_right_sample_nums,
+                                    bool use_sample_weights = false,
+                                    EncodedNumber *encrypted_weights = nullptr);
 
   /**
+   * find the party id that has the best split
+   *
+   * @param best_split_index: the global best split index
+   * @param party_split_nums: the split numbers of parties
+   * @return
+   */
+  void best_split_party_idx(int best_split_index, std::vector<int> party_split_nums,
+                            int& i_star, int& index_star);
+
+  /**
+   * find the feature id and split id of the best split
+   *
+   * @param index_star: the local split index star
+   * @param available_feature_ids: the available features of the current node
+   * @param j_star: the best feature id
+   * @param s_star: the best split id
+   */
+  void best_feature_split_idx(int index_star, std::vector<int> available_feature_ids,
+                              int& j_star, int& s_star);
+
+  /**
+   * update the node info when building a tree node
+   *
+   * @param node_index: the current node index
+   * @param node_type: the type of the current node
+   * @param is_self_feature: whether the split is from self feature
+   * @param best_party_id: the party id that has the best split
+   * @param best_feature_id: the feature id of the best split
+   * @param best_split_id: the best split index
+   * @param split_threshold: the split threshold, only set if is_self_feature
+   * @param left_child_index: the left child of the current node
+   * @param right_child_index: the right child of the current node
+   * @param encrypted_left_impurity: the encrypted impurity of the left child
+   * @param encrypted_right_impurity: the encrypted impurity of the right child
+   */
+  void update_node_info(int node_index, falcon::TreeNodeType node_type,
+                        int is_self_feature, int best_party_id, int best_feature_id,
+                        int best_split_id, double split_threshold,
+                        int left_child_index, int right_child_index,
+                        EncodedNumber encrypted_left_impurity,
+                        EncodedNumber encrypted_right_impurity);
+
+  /**
+   * update the encrypted mask iv and encrypted labels for the left and right child
+   * (only executed by the party who has the best split)
+   *
+   * @param party: initialized party object
+   * @param j_star: the feature id of the best split
+   * @param s_star: the best split index
+   * @param sample_num: the number of samples
+   * @param sample_mask_iv: the sample mask iv of the current node
+   * @param encrypted_labels: the encrypted labels of the current node
+   * @param encrypted_left_impurity: the impurity of the left child
+   * @param encrypted_right_impurity: the impurity of the right child
+   * @param sample_mask_iv_left: the returned mask iv of the left child
+   * @param sample_mask_iv_right: the returned mask iv of the right child
+   * @param encrypted_labels_left: the returned encrypted labels of the left child
+   * @param encrypted_labels_right: the returned encrypted labels of the right child
+   * @param update_str_sample_iv: the updated iv string returned for sending to other parties
+   * @param update_str_encrypted_labels_left: the updated label string left returned for sending to other parties
+   * @param update_str_encrypted_labels_right: the updated label string left returned for sending to other parties
+   */
+  void update_mask_iv_and_labels(const Party& party,
+                                 int j_star, int s_star, int sample_num,
+                                 EncodedNumber *sample_mask_iv,
+                                 EncodedNumber *encrypted_labels,
+                                 EncodedNumber encrypted_left_impurity,
+                                 EncodedNumber encrypted_right_impurity,
+                                 EncodedNumber *sample_mask_iv_left,
+                                 EncodedNumber *sample_mask_iv_right,
+                                 EncodedNumber *encrypted_labels_left,
+                                 EncodedNumber *encrypted_labels_right,
+                                 std::string& update_str_sample_iv,
+                                 std::string& update_str_encrypted_labels_left,
+                                 std::string& update_str_encrypted_labels_right);
+
+ /**
  * specific train function for lime
  *
  * @param party: initialized party object
@@ -302,6 +392,27 @@ class DecisionTreeBuilder : public ModelBuilder {
                               EncodedNumber* encrypted_true_labels,
                               bool use_sample_weights,
                               EncodedNumber* encrypted_sample_weights);
+
+  /**
+   * build the tree nodes for distributed train
+   *
+   * @param party: initialized party object
+   * @param worker: worker instance for distributed training
+   * @param sample_num: the number of samples
+   * @param init_available_feature_ids: initial available feature ids
+   * @param init_sample_mask_iv: init sample mask iv
+   * @param init_encrypted_labels: init encrypted labels
+   * @param use_sample_weights: whether use sample weights
+   * @param encrypted_sample_weights: the encrypted sample weights if use_sample_weights is true
+   */
+  void distributed_build_nodes(const Party& party, const Worker &worker,
+                               int sample_num,
+                               std::vector<int> init_available_feature_ids,
+                               EncodedNumber* init_sample_mask_iv,
+                               EncodedNumber* init_encrypted_labels,
+                               bool use_sample_weights,
+                               EncodedNumber* encrypted_sample_weights
+                               );
 
   /**
    * evaluate the accuracy on the dataset

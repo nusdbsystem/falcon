@@ -56,7 +56,8 @@ double root_impurity(const std::vector<double>& labels, falcon::TreeType tree_ty
 }
 
 
-double lime_reg_tree_root_impurity(Party& party, bool use_encrypted_labels,
+double lime_reg_tree_root_impurity(Party& party, EncodedNumber& enc_root_impurity,
+                                   bool use_encrypted_labels,
                                    EncodedNumber* weighted_encrypted_true_labels, int size, int class_num,
                                    bool use_sample_weights, EncodedNumber* encrypted_weights) {
   log_info("[lime_reg_tree_root_impurity] compute encrypted root impurity");
@@ -107,6 +108,7 @@ double lime_reg_tree_root_impurity(Party& party, bool use_encrypted_labels,
   collaborative_decrypt(party, enc_label_sum, dec_label_sum, 2, ACTIVE_PARTY_ID);
   collaborative_decrypt(party, enc_weight_sum, dec_weight_sum, 1, ACTIVE_PARTY_ID);
   double root_impurity;
+  auto* encrypted_root_impurity = new EncodedNumber[1];
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // compute impurity
     double weight_sum, label_sum, label_square_sum;
@@ -117,7 +119,9 @@ double lime_reg_tree_root_impurity(Party& party, bool use_encrypted_labels,
     log_info("[lime_reg_tree_root_impurity] label_sum = " + std::to_string(label_sum));
     log_info("[lime_reg_tree_root_impurity] label_square_sum = " + std::to_string(label_square_sum));
     root_impurity = (label_square_sum / weight_sum) - (label_sum / weight_sum) * (label_sum / weight_sum);
-
+    // encrypt the root impurity
+    encrypted_root_impurity[0].set_double(phe_pub_key->n[0], root_impurity, PHE_FIXED_POINT_PRECISION);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, encrypted_root_impurity[0], encrypted_root_impurity[0]);
     for (int i = 0; i < party.party_num; i++) {
       if (i != party.party_id) {
         party.send_long_message(i, std::to_string(root_impurity));
@@ -129,6 +133,9 @@ double lime_reg_tree_root_impurity(Party& party, bool use_encrypted_labels,
     root_impurity = std::stod(root_impurity_str);
   }
   log_info("[lime_reg_tree_root_impurity] root_impurity = " + std::to_string(root_impurity));
+
+  broadcast_encoded_number_array(party, encrypted_root_impurity, 1, ACTIVE_PARTY_ID);
+  enc_root_impurity = encrypted_root_impurity[0];
 
   djcs_t_free_public_key(phe_pub_key);
   delete [] enc_label_sum;
