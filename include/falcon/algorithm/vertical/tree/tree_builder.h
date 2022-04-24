@@ -223,9 +223,31 @@ class DecisionTreeBuilder : public ModelBuilder {
       EncodedNumber *encrypted_weights = nullptr);
 
   /**
+   * the core logic for finding the best split securely
+   *
+   * @param party: initialized party object
+   * @param node_index: the index of tree node to be computed
+   * @param available_feature_ids: the available features of the current node
+   * @param sample_mask_iv: the encrypted mask iv of the samples
+   * @param encrypted_labels: the encrypted labels of the training data
+   * @param party_split_nums: the returned vector of each party's split numbers
+   * @param use_sample_weights: whether use sample weights (for LIME)
+   * @param encrypted_weights: the encrypted weights (for LIME)
+   */
+  std::vector<double> find_best_split(const Party& party, int node_index,
+                                      std::vector<int> available_feature_ids,
+                                      EncodedNumber* sample_mask_iv,
+                                      EncodedNumber* encrypted_labels,
+                                      std::vector<int>& party_split_nums,
+                                      bool use_sample_weights = false,
+                                      EncodedNumber *encrypted_weights = nullptr);
+
+  /**
    * compute encrypted impurity gain for each feature and each split
    * @param party: initialized party object
    * @param node_index: the index of tree node to be computed
+   * @param available_feature_ids: the available features of the current node
+   * @param sample_mask_iv: the encrypted mask iv of the samples
    * @param encrypted_statistics: the encrypted statistics to be returned
    * @param encrypted_labels: the encrypted labels of the training data
    * @param encrypted_left_sample_nums: the encrypted left sample numbers
