@@ -15,15 +15,15 @@
 class GbdtModel {
  public:
   // number of trees in the model
-  int tree_size;
+  int tree_size{};
   // type of the tree, 'classification' or 'regression'
   falcon::TreeType tree_type;
   // number of estimator for the gbdt model
-  int n_estimator;
+  int n_estimator{};
   // number of classes in the model, 1 for regression
-  int class_num;
+  int class_num{};
   // shrinkage (learning rate)
-  double learning_rate;
+  double learning_rate{};
   // dummy predictors, for the initial prediction
   // if tree_size == n_estimator, only one predictor, otherwise,
   // multi-class classification, with class_num predictors
@@ -46,7 +46,7 @@ class GbdtModel {
    * @param m_learning_rate
    */
   GbdtModel(int m_tree_size,
-      std::string m_tree_type,
+      const std::string& m_tree_type,
       int m_n_estimator,
       int m_class_num,
       double m_learning_rate);
@@ -78,7 +78,7 @@ class GbdtModel {
  * @return predicted labels (encrypted)
  */
   void predict(Party& party,
-               std::vector< std::vector<double> > predicted_samples,
+               const std::vector< std::vector<double> >& predicted_samples,
                int predicted_sample_size,
                EncodedNumber* predicted_labels);
 
@@ -92,7 +92,7 @@ class GbdtModel {
     * @return predicted labels (encrypted)
     */
   void predict_single_estimator(Party& party,
-                                std::vector< std::vector<double> > predicted_samples,
+                                const std::vector< std::vector<double> >& predicted_samples,
                                 int predicted_sample_size,
                                 EncodedNumber* predicted_labels);
 
@@ -105,7 +105,7 @@ class GbdtModel {
   * @return predicted labels (encrypted)
   */
   void predict_multi_estimator(Party& party,
-                              std::vector< std::vector<double> > predicted_samples,
+                              const std::vector< std::vector<double> >& predicted_samples,
                               int predicted_sample_size,
                               EncodedNumber* predicted_labels);
 };

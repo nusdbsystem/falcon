@@ -10,9 +10,9 @@
 
 struct RandomForestParams {
   // number of trees in the forest
-  int n_estimator;
+  int n_estimator{};
   // sample rate for each tree in the forest
-  double sample_rate;
+  double sample_rate{};
   // decision tree builder params
   DecisionTreeParams dt_param;
 };

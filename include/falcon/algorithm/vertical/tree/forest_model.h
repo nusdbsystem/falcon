@@ -23,7 +23,7 @@ class ForestModel {
 
  public:
   ForestModel();
-  ForestModel(int m_tree_size, std::string m_tree_type);
+  ForestModel(int m_tree_size, const std::string& m_tree_type);
   ~ForestModel();
 
   /**

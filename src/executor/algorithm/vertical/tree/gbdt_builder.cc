@@ -15,6 +15,7 @@
 #include <falcon/party/info_exchange.h>
 
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 
 #include <iomanip>
 #include <random>
@@ -30,13 +31,11 @@
 
 #include <Networking/ssl_sockets.h>
 
-GbdtBuilder::GbdtBuilder() {}
+GbdtBuilder::GbdtBuilder() = default;
 
-GbdtBuilder::~GbdtBuilder() {
-  // automatically memory free
-}
+GbdtBuilder::~GbdtBuilder() = default;
 
-GbdtBuilder::GbdtBuilder(GbdtParams gbdt_params,
+GbdtBuilder::GbdtBuilder(const GbdtParams& gbdt_params,
     std::vector<std::vector<double> > m_training_data,
     std::vector<std::vector<double> > m_testing_data,
     std::vector<double> m_training_labels,
@@ -63,12 +62,12 @@ GbdtBuilder::GbdtBuilder(GbdtParams gbdt_params,
   gbdt_model = GbdtModel(tree_size, dt_param.tree_type,
       n_estimator, dt_param.class_num, learning_rate);
   tree_builders.reserve(tree_size);
-  local_feature_num = training_data[0].size();
+  local_feature_num = (int) training_data[0].size();
 }
 
 void GbdtBuilder::train(Party party) {
   // two branches for training gbdt model: regression and classification
-  LOG(INFO) << "************ Begin to train the GBDT model ************";
+  log_info("************ Begin to train the GBDT model ************");
   // required by spdz connector and mpc computation
   // bigint::init_thread();
   if (gbdt_model.tree_type == falcon::REGRESSION) {
@@ -76,8 +75,7 @@ void GbdtBuilder::train(Party party) {
   } else {
     train_classification_task(party);
   }
-  LOG(INFO) << "End train the GBDT model";
-  google::FlushLogFiles(google::INFO);
+  log_info("End train the GBDT model");
 }
 
 void GbdtBuilder::distributed_train(const Party &party, const Worker &worker) {}
@@ -94,15 +92,15 @@ void GbdtBuilder::train_regression_task(Party party) {
 
   // check loss function
   if (loss != "ls") {
-    LOG(ERROR) << "The loss function is not supported, need to use the least "
-                  "square error loss function.";
-    exit(1);
+    log_error("The loss function is not supported, need to use the least "
+              "square error loss function.");
+    exit(EXIT_FAILURE);
   }
   // step 1
   // init the dummy estimator and compute raw_predictions:
   // for regression, using the mean label
   int sample_size = (int) training_data.size();
-  EncodedNumber *raw_predictions = new EncodedNumber[sample_size];
+  auto *raw_predictions = new EncodedNumber[sample_size];
   // retrieve phe pub key
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
@@ -114,7 +112,7 @@ void GbdtBuilder::train_regression_task(Party party) {
   // add the dummy mean prediction to the gbdt_model
   gbdt_model.dummy_predictors.emplace_back(least_square_error.dummy_prediction);
   // init the encrypted labels, only the active party can init
-  EncodedNumber *encrypted_true_labels = new EncodedNumber[sample_size];
+  auto *encrypted_true_labels = new EncodedNumber[sample_size];
   if (party.party_type == falcon::ACTIVE_PARTY) {
     for (int i = 0; i < sample_size; i++) {
       encrypted_true_labels[i].set_double(phe_pub_key->n[0], training_labels[i]);
@@ -126,19 +124,19 @@ void GbdtBuilder::train_regression_task(Party party) {
   broadcast_encoded_number_array(party, encrypted_true_labels, sample_size, ACTIVE_PARTY_ID);
 
   // iteratively train the regression trees
-  LOG(INFO) << "tree_size = " << gbdt_model.tree_size;
+  log_info("tree_size = " + std::to_string(gbdt_model.tree_size));
   for (int tree_id = 0; tree_id < gbdt_model.tree_size; ++tree_id) {
-    LOG(INFO) << "------------- build the " << tree_id << "-th tree -------------";
+    log_info("------------- build the " + std::to_string(tree_id) + "-th tree -------------");
     // step 2
     // compute the encrypted residual, i.e., negative gradient
-    EncodedNumber *residuals = new EncodedNumber[sample_size];
+    auto *residuals = new EncodedNumber[sample_size];
     least_square_error.negative_gradient(party,
                                          encrypted_true_labels,
                                          raw_predictions,
                                          residuals,
                                          sample_size);
-    LOG(INFO) << "negative gradient computed finished";
-    EncodedNumber *squared_residuals = new EncodedNumber[sample_size];
+    log_info("negative gradient computed finished");
+    auto *squared_residuals = new EncodedNumber[sample_size];
     square_encrypted_residual(party,
                               residuals,
                               squared_residuals,
@@ -146,13 +144,13 @@ void GbdtBuilder::train_regression_task(Party party) {
                               PHE_FIXED_POINT_PRECISION);
     // flatten the residuals and squared_residuals into one vector for calling
     // the train_with_encrypted_labels in cart_tree.h
-    EncodedNumber *flatten_residuals = new
+    auto *flatten_residuals = new
         EncodedNumber[REGRESSION_TREE_CLASS_NUM * sample_size];
     for (int i = 0; i < sample_size; i++) {
       flatten_residuals[i] = residuals[i];
       flatten_residuals[sample_size + i] = squared_residuals[i];
     }
-    LOG(INFO) << "compute squared residuals finished";
+    log_info("compute squared residuals finished");
     // step 3
     // init a tree builder and train the model with flatten_residuals
     tree_builders.emplace_back(dt_param,
@@ -160,8 +158,7 @@ void GbdtBuilder::train_regression_task(Party party) {
                                training_labels, testing_labels,
                                training_accuracy, testing_accuracy);
     tree_builders[tree_id].train(party, flatten_residuals);
-    LOG(INFO) << "tree builder = " << tree_id << " train finished";
-    google::FlushLogFiles(google::INFO);
+    log_info("tree builder = " + std::to_string(tree_id) + " train finished");
     // step 4
     // after training the model, update the terminal regions, for least
     // square error, only need to update the raw_predictions
@@ -169,8 +166,7 @@ void GbdtBuilder::train_regression_task(Party party) {
                                                encrypted_true_labels,
                                                residuals, raw_predictions,
                                                sample_size, learning_rate, 0);
-    LOG(INFO) << "update terminal regions and raw predictions finished";
-    google::FlushLogFiles(google::INFO);
+    log_info("update terminal regions and raw predictions finished");
     // save the trained regression tree model to gbdt_model
     gbdt_model.gbdt_trees.emplace_back(tree_builders[tree_id].tree);
 
@@ -178,7 +174,6 @@ void GbdtBuilder::train_regression_task(Party party) {
     delete [] residuals;
     delete [] squared_residuals;
     delete [] flatten_residuals;
-    google::FlushLogFiles(google::INFO);
   }
   // free retrieved public key
   djcs_t_free_public_key(phe_pub_key);
@@ -214,13 +209,12 @@ void GbdtBuilder::train_classification_task(Party party) {
 
   // check loss function
   if (loss != "deviance") {
-    LOG(ERROR) << "The loss function is not supported, need to use the deviance "
-                  "loss function.";
-    exit(1);
+    log_error("The loss function is not supported, need to use the deviance "
+              "loss function.");
+    exit(EXIT_FAILURE);
   }
-  LOG(INFO) << "Begin train a gbdt classification task";
-  LOG(INFO) << "gbdt_model.class_num = " << gbdt_model.class_num;
-  google::FlushLogFiles(google::INFO);
+  log_info("Begin train a gbdt classification task");
+  log_info("gbdt_model.class_num = " + std::to_string(gbdt_model.class_num));
   // retrieve phe pub key
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
@@ -231,7 +225,7 @@ void GbdtBuilder::train_classification_task(Party party) {
     // step 1
     // init the dummy estimator and compute raw_predictions:
     // for binary classification, using the log(odds) for the raw_predictions
-    EncodedNumber *raw_predictions = new EncodedNumber[sample_size];
+    auto *raw_predictions = new EncodedNumber[sample_size];
     // init loss function, for regression loss, class num is set to 1
     BinomialDeviance binomial_deviance(gbdt_model.tree_type, dt_param.class_num);
     // get the initial encrypted raw_predictions, all parties obtain raw_predictions
@@ -240,7 +234,7 @@ void GbdtBuilder::train_classification_task(Party party) {
     // add the dummy mean prediction to the gbdt_model
     gbdt_model.dummy_predictors.emplace_back(binomial_deviance.dummy_prediction);
     // init the encrypted labels, only the active party can init
-    EncodedNumber *encrypted_true_labels = new EncodedNumber[sample_size];
+    auto *encrypted_true_labels = new EncodedNumber[sample_size];
     if (party.party_type == falcon::ACTIVE_PARTY) {
       for (int i = 0; i < sample_size; i++) {
         encrypted_true_labels[i].set_double(phe_pub_key->n[0], training_labels[i]);
@@ -252,19 +246,19 @@ void GbdtBuilder::train_classification_task(Party party) {
     broadcast_encoded_number_array(party, encrypted_true_labels, sample_size, ACTIVE_PARTY_ID);
 
     // iteratively train the regression trees
-    LOG(INFO) << "tree_size = " << gbdt_model.tree_size;
+    log_info("tree_size = " + std::to_string(gbdt_model.tree_size));
     for (int tree_id = 0; tree_id < gbdt_model.tree_size; ++tree_id) {
-      LOG(INFO) << "------------- build the " << tree_id << "-th tree -------------";
+      log_info("------------- build the " + std::to_string(tree_id) + "-th tree -------------");
       // step 2
       // compute the encrypted residual, i.e., negative gradient
-      EncodedNumber *residuals = new EncodedNumber[sample_size];
+      auto *residuals = new EncodedNumber[sample_size];
       binomial_deviance.negative_gradient(party,
                                           encrypted_true_labels,
                                           raw_predictions,
                                           residuals,
                                           sample_size);
-      LOG(INFO) << "negative gradient computed finished";
-      EncodedNumber *squared_residuals = new EncodedNumber[sample_size];
+      log_info("negative gradient computed finished");
+      auto *squared_residuals = new EncodedNumber[sample_size];
       square_encrypted_residual(party,
                                 residuals,
                                 squared_residuals,
@@ -272,13 +266,13 @@ void GbdtBuilder::train_classification_task(Party party) {
                                 PHE_FIXED_POINT_PRECISION);
       // flatten the residuals and squared_residuals into one vector for calling
       // the train_with_encrypted_labels in cart_tree.h
-      EncodedNumber *flatten_residuals = new
+      auto *flatten_residuals = new
           EncodedNumber[REGRESSION_TREE_CLASS_NUM * sample_size];
       for (int i = 0; i < sample_size; i++) {
         flatten_residuals[i] = residuals[i];
         flatten_residuals[sample_size + i] = squared_residuals[i];
       }
-      LOG(INFO) << "compute squared residuals finished";
+      log_info("compute squared residuals finished");
       // step 3
       // init a tree builder and train the model with flatten_residuals
       // check gbdt task type, note that the gbdt type can be classification, but
@@ -291,8 +285,7 @@ void GbdtBuilder::train_classification_task(Party party) {
                                  training_labels, testing_labels,
                                  training_accuracy, testing_accuracy);
       tree_builders[tree_id].train(party, flatten_residuals);
-      LOG(INFO) << "tree builder = " << tree_id << " train finished";
-      google::FlushLogFiles(google::INFO);
+      log_info("tree builder = " + std::to_string(tree_id) + " train finished");
       // step 4
       // after training the model, update the terminal regions, for least
       // square error, only need to update the raw_predictions
@@ -300,8 +293,7 @@ void GbdtBuilder::train_classification_task(Party party) {
                                                 encrypted_true_labels,
                                                 residuals, raw_predictions,
                                                 sample_size, learning_rate, 0);
-      LOG(INFO) << "update terminal regions and raw predictions finished";
-      google::FlushLogFiles(google::INFO);
+      log_info("update terminal regions and raw predictions finished");
       // save the trained regression tree model to gbdt_model
       gbdt_model.gbdt_trees.emplace_back(tree_builders[tree_id].tree);
 
@@ -319,7 +311,7 @@ void GbdtBuilder::train_classification_task(Party party) {
     // step 1
     // init the dummy estimator and compute raw_predictions: for multi-class
     // classification, using the log(odds) for the raw_predictions of each tree
-    EncodedNumber *raw_predictions = new EncodedNumber[sample_size * gbdt_model.class_num];
+    auto *raw_predictions = new EncodedNumber[sample_size * gbdt_model.class_num];
     // init loss function, for regression loss, class num is set to 1
     MultinomialDeviance multinomial_deviance(gbdt_model.tree_type, gbdt_model.class_num);
     // get the initial encrypted raw_predictions, all parties obtain raw_predictions
@@ -328,7 +320,7 @@ void GbdtBuilder::train_classification_task(Party party) {
                                                training_data, training_labels);
     // init the encrypted labels, only the active party can init,
     // for multi-class classification, init one-hot labels for each class
-    EncodedNumber *encrypted_true_labels = new EncodedNumber[sample_size * gbdt_model.class_num];
+    auto *encrypted_true_labels = new EncodedNumber[sample_size * gbdt_model.class_num];
     if (party.party_type == falcon::ACTIVE_PARTY) {
       // add the dummy mean prediction to the gbdt_model
       for (int i = 0; i < gbdt_model.class_num; i++) {
@@ -360,12 +352,11 @@ void GbdtBuilder::train_classification_task(Party party) {
                                    sample_size * gbdt_model.class_num, ACTIVE_PARTY_ID);
 
     // iteratively train the regression trees, tree_size = n_estimator * class_num
-    LOG(INFO) << "tree_size = " << gbdt_model.tree_size;
-    LOG(INFO) << "n_estimator = " << gbdt_model.n_estimator;
-    LOG(INFO) << "class_num = " << gbdt_model.class_num;
-    google::FlushLogFiles(google::INFO);
+    log_info("tree_size = " + std::to_string(gbdt_model.tree_size));
+    log_info("n_estimator = " + std::to_string(gbdt_model.n_estimator));
+    log_info("class_num = " + std::to_string(gbdt_model.class_num));
     for (int tree_id = 0; tree_id < gbdt_model.n_estimator; tree_id++) {
-      LOG(INFO) << "------------- build the " << tree_id << "-th tree -------------";
+      log_info("------------- build the " + std::to_string(tree_id) + "-th tree -------------");
       // step 2
       // compute the encrypted residual, i.e., negative gradient
       EncodedNumber *residuals = new EncodedNumber[sample_size * gbdt_model.class_num];
@@ -374,7 +365,7 @@ void GbdtBuilder::train_classification_task(Party party) {
                                              raw_predictions,
                                              residuals,
                                              sample_size * gbdt_model.class_num);
-      LOG(INFO) << "negative gradient computed finished";
+      log_info("negative gradient computed finished");
       EncodedNumber *squared_residuals = new EncodedNumber[sample_size * gbdt_model.class_num];
       square_encrypted_residual(party,
                                 residuals,
@@ -384,7 +375,7 @@ void GbdtBuilder::train_classification_task(Party party) {
 
       // build a tree for each class
       for (int c = 0; c < gbdt_model.class_num; c++) {
-        LOG(INFO) << "------ build the " << tree_id << "-th tree ------ with class ------" << c;
+        log_info("------ build the " + std::to_string(tree_id) + "-th tree ------ with class ------" + std::to_string(c));
         // this is the tree id in the gbdt_model.trees
         int read_tree_id = tree_id * gbdt_model.class_num + c;
         // flatten the residuals and squared_residuals into one vector for calling
@@ -396,7 +387,7 @@ void GbdtBuilder::train_classification_task(Party party) {
           flatten_residuals[i] = residuals[real_sample_id];
           flatten_residuals[sample_size + i] = squared_residuals[real_sample_id];
         }
-        LOG(INFO) << "compute squared residuals finished";
+        log_info("compute squared residuals finished");
 
         // step 3
         // init a tree builder and train the model with flatten_residuals
@@ -410,17 +401,16 @@ void GbdtBuilder::train_classification_task(Party party) {
                                    training_labels, testing_labels,
                                    training_accuracy, testing_accuracy);
         tree_builders[read_tree_id].train(party, flatten_residuals);
-        LOG(INFO) << "tree builder = " << read_tree_id << " train finished";
-        google::FlushLogFiles(google::INFO);
+        log_info("tree builder = " + std::to_string(read_tree_id) + " train finished");
 
         // step 4
         // after training the model, update the terminal regions,
         // note that we need to copy the read_tree_raw_predictions and
         // read_tree_encrypted_truth_labels for this real_tree_id from the
         // original raw_predictions and encrypted_truth_labels before update terminal regions
-        EncodedNumber *real_tree_encrypted_truth_labels = new EncodedNumber[sample_size];
-        EncodedNumber *real_tree_raw_predictions = new EncodedNumber[sample_size];
-        EncodedNumber *real_tree_residuals = new EncodedNumber[sample_size];
+        auto *real_tree_encrypted_truth_labels = new EncodedNumber[sample_size];
+        auto *real_tree_raw_predictions = new EncodedNumber[sample_size];
+        auto *real_tree_residuals = new EncodedNumber[sample_size];
         for (int i = 0; i < sample_size; i++) {
           int real_sample_id = c * sample_size + i;
           real_tree_encrypted_truth_labels[i] = encrypted_true_labels[real_sample_id];
@@ -437,8 +427,7 @@ void GbdtBuilder::train_classification_task(Party party) {
           int real_sample_id = c * sample_size + i;
           raw_predictions[real_sample_id] = real_tree_raw_predictions[i];
         }
-        LOG(INFO) << "update terminal regions and raw predictions finished";
-        google::FlushLogFiles(google::INFO);
+        log_info("update terminal regions and raw predictions finished");
         // save the trained regression tree model to gbdt_model
         gbdt_model.gbdt_trees.emplace_back(tree_builders[read_tree_id].tree);
         delete [] flatten_residuals;
@@ -469,10 +458,8 @@ void GbdtBuilder::square_encrypted_residual(Party party,
   int class_num_for_regression = 1;
   public_values.push_back(size);
   public_values.push_back(class_num_for_regression);
-  std::cout << "size = " << size << std::endl;
-  std::cout << "class_num = " << class_num_for_regression << std::endl;
-  LOG(INFO) << "size = " << size;
-  LOG(INFO) << "class_num = " << class_num_for_regression;
+  log_info("size = " + std::to_string(size));
+  log_info("class_num = " + std::to_string(class_num_for_regression));
   // convert the encrypted residuals into secret shares
   // the structure is one-dimensional vector, [tree_1 * sample_size] ... [tree_n * sample_size]
   std::vector<double> residuals_shares;
@@ -517,7 +504,7 @@ void GbdtBuilder::square_encrypted_residual(Party party,
 
 void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string &report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
-  LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
+  log_info("************* Evaluation on " + dataset_str + " Start *************");
   const clock_t testing_start_time = clock();
 
   // init test data
@@ -533,11 +520,11 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
   if (gbdt_model.tree_type == falcon::CLASSIFICATION && gbdt_model.class_num > 2) {
     prediction_result_size = dataset_size * gbdt_model.class_num;
   }
-  EncodedNumber* predicted_labels = new EncodedNumber[prediction_result_size];
+  auto* predicted_labels = new EncodedNumber[prediction_result_size];
   gbdt_model.predict(party, cur_test_dataset, dataset_size, predicted_labels);
 
   // step 3: active party aggregates and call collaborative decryption
-  EncodedNumber* decrypted_labels = new EncodedNumber[prediction_result_size];
+  auto* decrypted_labels = new EncodedNumber[prediction_result_size];
   collaborative_decrypt(party, predicted_labels,
                         decrypted_labels,
                         prediction_result_size,
@@ -559,9 +546,9 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
       if (gbdt_model.class_num == 2) {
         // binary classification
         for (int i = 0; i < prediction_result_size; i++) {
-          LOG(INFO) << "before predictions[" << i << "] = " << predictions[i];
-          predictions[i] = (predictions[i] > LOGREG_THRES) ? 1.0 : 0.0;
-          LOG(INFO) << "after predictions[" << i << "] = " << predictions[i];
+          log_info("before predictions[" + std::to_string(i) + "] = " + std::to_string(predictions[i]));
+          predictions[i] = (predictions[i] > LOGREG_THRES) ? CERTAIN_PROBABILITY : ZERO_PROBABILITY;
+          log_info("after predictions[" + std::to_string(i) + "] = " + std::to_string(predictions[i]));
           if (predictions[i] == cur_test_dataset_labels[i]) {
             correct_num += 1;
           }
@@ -572,7 +559,8 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
         for (int i = 0; i < dataset_size; i++) {
           std::vector<double> predictions_per_sample;
           for (int c = 0; c < gbdt_model.class_num; c++) {
-            LOG(INFO) << "prediction " << i << ": class num " << c << " = " << predictions[c * dataset_size + i];
+            log_info("prediction " + std::to_string(i) + ": class num "
+              + std::to_string(c) + " = " + std::to_string(predictions[c * dataset_size + i]));
             predictions_per_sample.push_back(predictions[c * dataset_size + i]);
           }
           // find argmax class label
@@ -584,22 +572,24 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
       }
       if (eval_type == falcon::TRAIN) {
         training_accuracy = (double) correct_num / dataset_size;
-        LOG(INFO) << "Dataset size = " << dataset_size << ", correct predicted num = "
-        << correct_num << ", training accuracy = " << training_accuracy;
+        log_info("[GbdtBuilder.eval] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", training accuracy = " + std::to_string(training_accuracy));
       }
       if (eval_type == falcon::TEST) {
         testing_accuracy = (double) correct_num / dataset_size;
-        LOG(INFO) << "Dataset size = " << dataset_size << ", correct predicted num = "
-        << correct_num << ", testing accuracy = " << testing_accuracy;
+        log_info("[GbdtBuilder.eval] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", testing accuracy = " + std::to_string(testing_accuracy));
       }
     } else {
       if (eval_type == falcon::TRAIN) {
         training_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
-        LOG(INFO) << "Training accuracy = " << training_accuracy;
+        log_info("[GbdtBuilder.eval] Training accuracy = " + std::to_string(training_accuracy));
       }
       if (eval_type == falcon::TEST) {
         testing_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
-        LOG(INFO) << "Testing accuracy = " << testing_accuracy;
+        log_info("[GbdtBuilder.eval] Testing accuracy = " + std::to_string(testing_accuracy));
       }
     }
   }
@@ -610,8 +600,7 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
 
   const clock_t testing_finish_time = clock();
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  LOG(INFO) << "Evaluation time = " << testing_consumed_time;
-  LOG(INFO) << "************* Evaluation on " << dataset_str << " Finished *************";
-  google::FlushLogFiles(google::INFO);
+  log_info("Evaluation time = " + std::to_string(testing_consumed_time));
+  log_info("************* Evaluation on " + dataset_str + " Finished *************");
 }
 

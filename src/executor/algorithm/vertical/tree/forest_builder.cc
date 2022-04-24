@@ -74,7 +74,7 @@ void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
     std::vector<double> &sampled_training_labels) {
   int sampled_training_data_size = (int) (training_data.size() * sample_rate);
   std::vector<int> sampled_data_indexes;
-  LOG(INFO) << "Sampled training data size = " << sampled_training_data_size;
+  log_info("Sampled training data size = " + std::to_string(sampled_training_data_size));
   // for active party
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // store the indexes of the training dataset for random batch selection
@@ -116,27 +116,25 @@ void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
       sampled_training_data.push_back(training_data[sampled_data_indexes[i]]);
     }
   }
-  LOG(INFO) << "Shuffle training data and init dataset for tree " << tree_id << " finished";
+  log_info("Shuffle training data and init dataset for tree " + std::to_string(tree_id));
 }
 
 void RandomForestBuilder::train(Party party) {
-  LOG(INFO) << "************ Begin to train the random forest model ************";
+  log_info("************ Begin to train the random forest model ************");
   init_forest_builder(party);
-  LOG(INFO) << "Init " << n_estimator << " tree builders in the random forest";
+  log_info("Init " + std::to_string(n_estimator) + " tree builders in the random forest");
   for (int tree_id = 0; tree_id < n_estimator; ++tree_id) {
-    LOG(INFO) << "------------- build the " << tree_id << "-th tree -------------";
+    log_info("------------- build the " + std::to_string(tree_id) + "-th tree -------------");
     tree_builders[tree_id].train(party);
     forest_model.forest_trees.emplace_back(tree_builders[tree_id].tree);
-    google::FlushLogFiles(google::INFO);
   }
-  LOG(INFO) << "End train the random forest";
-  google::FlushLogFiles(google::INFO);
+  log_info("End train the random forest");
 }
 
 void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
     const std::string& report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
-  LOG(INFO) << "************* Evaluation on " << dataset_str << " Start *************";
+  log_info("************* Evaluation on " + dataset_str + " Start *************");
   const clock_t testing_start_time = clock();
 
   // init test data
@@ -148,11 +146,11 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
 
   // compute predictions
   // now the predicted labels are computed by mpc, thus it is already the final label
-  EncodedNumber* predicted_labels = new EncodedNumber[dataset_size];
+  auto* predicted_labels = new EncodedNumber[dataset_size];
   forest_model.predict(party, cur_test_dataset, dataset_size, predicted_labels);
 
   // step 3: active party aggregates and call collaborative decryption
-  EncodedNumber* decrypted_labels = new EncodedNumber[dataset_size];
+  auto* decrypted_labels = new EncodedNumber[dataset_size];
   collaborative_decrypt(party, predicted_labels,
                         decrypted_labels,
                         dataset_size,
@@ -183,22 +181,24 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
       }
       if (eval_type == falcon::TRAIN) {
         training_accuracy = (double) correct_num / dataset_size;
-        LOG(INFO) << "Dataset size = " << dataset_size << ", correct predicted num = "
-                  << correct_num << ", training accuracy = " << training_accuracy;
+        log_info("[RandomForestBuilder.eval] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", training accuracy = " + std::to_string(training_accuracy));
       }
       if (eval_type == falcon::TEST) {
         testing_accuracy = (double) correct_num / dataset_size;
-        LOG(INFO) << "Dataset size = " << dataset_size << ", correct predicted num = "
-                  << correct_num << ", testing accuracy = " << testing_accuracy;
+        log_info("[RandomForestBuilder.eval] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", testing accuracy = " + std::to_string(testing_accuracy));
       }
     } else {
       if (eval_type == falcon::TRAIN) {
         training_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
-        LOG(INFO) << "Training accuracy = " << training_accuracy;
+        log_info("[RandomForestBuilder.eval] Training accuracy = " + std::to_string(training_accuracy));
       }
       if (eval_type == falcon::TEST) {
         testing_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
-        LOG(INFO) << "Testing accuracy = " << testing_accuracy;
+        log_info("[RandomForestBuilder.eval] Testing accuracy = " + std::to_string(testing_accuracy));
       }
     }
   }
@@ -209,9 +209,8 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
 
   const clock_t testing_finish_time = clock();
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  LOG(INFO) << "Evaluation time = " << testing_consumed_time;
-  LOG(INFO) << "************* Evaluation on " << dataset_str << " Finished *************";
-  google::FlushLogFiles(google::INFO);
+  log_info("Evaluation time = " + std::to_string(testing_consumed_time));
+  log_info("************* Evaluation on " + dataset_str + " Finished *************");
 }
 
 void RandomForestBuilder::distributed_train(const Party &party, const Worker &worker) {}

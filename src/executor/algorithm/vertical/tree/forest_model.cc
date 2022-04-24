@@ -17,9 +17,9 @@
 #include <falcon/utils/alg/tree_util.h>
 #include <iostream>
 
-ForestModel::ForestModel() {}
+ForestModel::ForestModel() = default;
 
-ForestModel::ForestModel(int m_tree_size, std::string m_tree_type) {
+ForestModel::ForestModel(int m_tree_size, const std::string& m_tree_type) {
   tree_size = m_tree_size;
   // copy builder parameters
   if (m_tree_type == "classification") {
@@ -30,7 +30,7 @@ ForestModel::ForestModel(int m_tree_size, std::string m_tree_type) {
   forest_trees.reserve(tree_size);
 }
 
-ForestModel::~ForestModel() {}
+ForestModel::~ForestModel() = default;
 
 ForestModel::ForestModel(const ForestModel &forest_model) {
   tree_size = forest_model.tree_size;
@@ -74,8 +74,7 @@ void ForestModel::predict(Party &party,
         predicted_forest_labels[tree_id]);
   }
   int cipher_precision = abs(predicted_forest_labels[0][0].getter_exponent());
-  LOG(INFO) << "cipher_precision = " << cipher_precision;
-  std::cout << "cipher_precision = " << cipher_precision << std::endl;
+  log_info("cipher_precision = " + std::to_string(cipher_precision));
 
   // if classification, needs to communicate with mpc
   // otherwise, compute average of the prediction
@@ -226,19 +225,23 @@ void ForestModel::predict_proba(Party &party,
       for (int j = 0; j < predicted_sample_size; j++) {
         std::vector<double> pred;
         for (int i = 0; i < tree_size; i++) {
+#ifdef DEBUG
           if (j == 0) {
             log_info("[ForestModel.predict_proba] print the first sample's tree predicted labels");
             log_info("[ForestModel.predict_proba] dec_predicted_labels[" + std::to_string(i) + "][0] = " + std::to_string(dec_predicted_labels[i][j]));
           }
+#endif
           pred.push_back(dec_predicted_labels[i][j]);
         }
         std::vector<double> prob = rf_pred2prob(class_num, pred);
+#ifdef DEBUG
         if (j == 0) {
           log_info("[ForestModel.predict_proba] print the first sample's class probabilities");
           for (int i = 0; i < prob.size(); i++) {
             log_info("[ForestModel.predict_proba] prob[" + std::to_string(i) + "]" + std::to_string(prob[i]));
           }
         }
+#endif
         samples_pred_prob.push_back(prob);
       }
       // encrypt

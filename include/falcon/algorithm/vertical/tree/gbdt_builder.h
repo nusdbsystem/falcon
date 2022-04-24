@@ -59,7 +59,7 @@ class GbdtBuilder : public ModelBuilder {
   ~GbdtBuilder();
 
   /** constructor */
-  GbdtBuilder(GbdtParams gbdt_params,
+  GbdtBuilder(const GbdtParams& gbdt_params,
               std::vector< std::vector<double> > m_training_data,
               std::vector< std::vector<double> > m_testing_data,
               std::vector<double> m_training_labels,

@@ -8,6 +8,7 @@
 #include <falcon/party/info_exchange.h>
 
 #include <glog/logging.h>
+#include <falcon/utils/logger/logger.h>
 
 #include <numeric>
 #include <cmath>
@@ -39,8 +40,8 @@ RegressionLossFunction::RegressionLossFunction(falcon::TreeType m_tree_type,
                                                int m_class_num) :
                                                LossFunction(m_tree_type, m_class_num) {
   if (m_tree_type != falcon::REGRESSION) {
-    LOG(ERROR) << "gbdt task type must be regression to use this loss function";
-    exit(1);
+    log_error("gbdt task type must be regression to use this loss function");
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -52,8 +53,8 @@ ClassificationLossFunction::ClassificationLossFunction(falcon::TreeType m_tree_t
                                                        int m_class_num) :
                                                        LossFunction(m_tree_type, m_class_num) {
   if (m_tree_type != falcon::CLASSIFICATION) {
-    LOG(ERROR) << "gbdt task type must be classification to use this loss function";
-    exit(1);
+    log_error("gbdt task type must be classification to use this loss function");
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -65,8 +66,8 @@ LeastSquareError::LeastSquareError(falcon::TreeType m_tree_type,
                                    int m_class_num) :
                                    RegressionLossFunction(m_tree_type, m_class_num) {
   if (m_class_num != 1) {
-    LOG(ERROR) << "regression class num should be 1.";
-    exit(1);
+    log_error("regression class num should be 1.");
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -106,8 +107,7 @@ void LeastSquareError::update_terminal_regions(Party party,
                                                int size,
                                                double learning_rate,
                                                int estimator_index) {
-  LOG(INFO) << "begin to update terminal regions";
-  google::FlushLogFiles(google::INFO);
+  log_error("begin to update terminal regions");
   // for least square error loss function, there is no need to update the
   // terminal regions, but need to update the raw_predictions
   // i.e., raw_predictions += learning_rate * tree.predict()
@@ -154,8 +154,8 @@ BinomialDeviance::BinomialDeviance(falcon::TreeType m_tree_type,
                                    int m_class_num) :
                                    ClassificationLossFunction(m_tree_type, m_class_num) {
   if (m_class_num != 2) {
-    LOG(ERROR) << "binary classification class num should be 2.";
-    exit(1);
+    log_error("binary classification class num should be 2.");
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -168,7 +168,7 @@ void BinomialDeviance::negative_gradient(Party party,
   // where expit = 1/(1 + exp(-x)), i.e., the logistic function, which needs
   // the help of mpc for the computation
   int binary_classification_class_num = 1;
-  EncodedNumber* expit_raw_predictions = new EncodedNumber[size];
+  auto* expit_raw_predictions = new EncodedNumber[size];
   compute_raw_predictions_expit(party, raw_predictions,
                                 expit_raw_predictions, size,
                                 binary_classification_class_num,
@@ -289,8 +289,8 @@ MultinomialDeviance::MultinomialDeviance(falcon::TreeType m_tree_type,
                                          ClassificationLossFunction(m_tree_type,
                                                                     m_class_num) {
   if (m_class_num <= 2) {
-    LOG(ERROR) << "multi-class classification class num should > 2.";
-    exit(1);
+    log_error("multi-class classification class num should > 2.");
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -301,7 +301,7 @@ void MultinomialDeviance::negative_gradient(Party party,
                                             int size) {
   // for multinomial deviance, the negative gradient is y - softmax(raw_predictions)
   // which needs the help of mpc for the computation
-  EncodedNumber* softmax_raw_predictions = new EncodedNumber[size];
+  auto* softmax_raw_predictions = new EncodedNumber[size];
   int sample_size = size / num_trees_per_estimator;
   compute_raw_predictions_softmax(party, raw_predictions,
                                   softmax_raw_predictions, sample_size,
@@ -359,7 +359,7 @@ void MultinomialDeviance::get_init_raw_predictions(Party party,
     // for multinomial deviance, use the probability of #event / (#event + #non-event)
     // as the dummy prediction for each class, and the raw prediction is log(odds) = log(p/1-p)
     int sample_size = size / num_trees_per_estimator;
-    LOG(INFO) << "sample size = " << sample_size;
+    log_info("sample size = " + std::to_string(sample_size));
     // retrieve phe pub key
     djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
     party.getter_phe_pub_key(phe_pub_key);
@@ -427,7 +427,7 @@ void update_raw_predictions_with_learning_rate(Party party,
                                                int size,
                                                double learning_rate) {
   // first predict based on the current tree builder
-  EncodedNumber *cur_predictions = new EncodedNumber[size];
+  auto *cur_predictions = new EncodedNumber[size];
   decision_tree_builder.tree.predict(party,
                                      decision_tree_builder.getter_training_data(),
                                      size, cur_predictions);
@@ -435,17 +435,16 @@ void update_raw_predictions_with_learning_rate(Party party,
   // should be PHE_FIXED_POINT_PRECISION, otherwise, the rest of computations
   // would be problematic, thus, add a check here
   if (cur_predictions[0].getter_exponent() != 0 - PHE_FIXED_POINT_PRECISION) {
-    LOG(ERROR) << "The precision of tree_predicted_labels is not expected!";
-    exit(1);
+    log_error("The precision of tree_predicted_labels is not expected!");
+    exit(EXIT_FAILURE);
   }
 
-  LOG(INFO) << "finish current tree model prediction";
-  google::FlushLogFiles(google::INFO);
+  log_info("finish current tree model prediction");
 
   // retrieve phe pub key
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
-  EncodedNumber *assists = new EncodedNumber[size];
+  auto *assists = new EncodedNumber[size];
   // if active party, update the raw_predictions
   if (party.party_type == falcon::ACTIVE_PARTY) {
     EncodedNumber encoded_learning_rate;
@@ -456,8 +455,7 @@ void update_raw_predictions_with_learning_rate(Party party,
                         cur_predictions[i], encoded_learning_rate);
     }
   }
-  LOG(INFO) << "begin truncate the ciphers precision";
-  google::FlushLogFiles(google::INFO);
+  log_info("begin truncate the ciphers precision");
   // broadcast the assists and truncate the precision to PHE
   broadcast_encoded_number_array(party, assists, size, ACTIVE_PARTY_ID);
   truncate_ciphers_precision(party, assists, size, ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
@@ -465,8 +463,7 @@ void update_raw_predictions_with_learning_rate(Party party,
     djcs_t_aux_ee_add(phe_pub_key, raw_predictions[i],
                       raw_predictions[i], assists[i]);
   }
-  LOG(INFO) << "finish truncate the cipher precision";
-  google::FlushLogFiles(google::INFO);
+  log_info("finish truncate the cipher precision");
 
   // free retrieved public key
   djcs_t_free_public_key(phe_pub_key);
@@ -574,33 +571,33 @@ void update_terminal_regions_for_classification(Party party,
   std::vector<double> residuals_shares;
   ciphers_to_secret_shares(party, residuals, residuals_shares, sample_size,
                            ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-  LOG(INFO) << "Compute residual secret shares finished";
+  log_info("Compute residual secret shares finished");
   // step 2: compute ground-truth label secret shares y
   std::vector<double> ground_truth_labels_shares;
   ciphers_to_secret_shares(party, ground_truth_labels, ground_truth_labels_shares, sample_size,
                            ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-  LOG(INFO) << "Compute ground truth labels secret shares finished";
+  log_info("Compute ground truth labels secret shares finished");
   // step 3: predict based on current tree, for terminal region check using mpc
-  EncodedNumber* pre_predictions = new EncodedNumber[sample_size];
+  auto* pre_predictions = new EncodedNumber[sample_size];
   decision_tree_builder.tree.predict(party, decision_tree_builder.getter_training_data(),
                                      sample_size, pre_predictions);
   std::vector<double> pre_predictions_shares;
   ciphers_to_secret_shares(party, pre_predictions, pre_predictions_shares, sample_size,
                            ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-  LOG(INFO) << "Predict on the current tree model finished";
+  log_info("Predict on the current tree model finished");
   // step 4: find the match between leaf node index and tree node index
   int leaf_node_num = decision_tree_builder.tree.internal_node_num + 1;
-  LOG(INFO) << "leaf node num = " << leaf_node_num;
-  EncodedNumber* leaf_labels = new EncodedNumber[leaf_node_num];
+  log_info("leaf node num = " + std::to_string(leaf_node_num));
+  auto* leaf_labels = new EncodedNumber[leaf_node_num];
   std::map<int, int> node_index_2_leaf_index_map;
   decision_tree_builder.tree.compute_label_vec_and_index_map(leaf_labels,
                                                              node_index_2_leaf_index_map);
-  LOG(INFO) << "Compute label vector and index map finished";
+  log_info("Compute label vector and index map finished");
   // step 5: convert the encrypted labels to secret shares
   std::vector<double> leaf_lables_shares;
   ciphers_to_secret_shares(party, leaf_labels, leaf_lables_shares, leaf_node_num,
                            ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-  LOG(INFO) << "Compute leaf label shares finished";
+  log_info("Compute leaf label shares finished");
   // step 6: call the GBDT_UPDATE_TERMINAL_REGION mpc program to compute
   // the new leaf node label
   std::vector<int> public_values;
@@ -638,12 +635,12 @@ void update_terminal_regions_for_classification(Party party,
                                         &promise_values);
   std::vector<double> updated_leaf_label_shares = future_values.get();
   spdz_pruning_check_thread.join();
-  LOG(INFO) << "Compute mpc update terminal region finished";
+  log_info("Compute mpc update terminal region finished");
   // step 7: convert the returned new leaf label shares to ciphers
-  EncodedNumber* updated_leaf_labels = new EncodedNumber[leaf_node_num];
+  auto* updated_leaf_labels = new EncodedNumber[leaf_node_num];
   secret_shares_to_ciphers(party, updated_leaf_labels, updated_leaf_label_shares,
                            leaf_node_num, ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-  LOG(INFO) << "Convert new label shares to ciphers finished";
+  log_info("Convert new label shares to ciphers finished");
   // step 8: update the tree model
   for (int i = 0; i < leaf_node_num; i++) {
     // find the corresponding node index in the tree model and update
@@ -655,7 +652,7 @@ void update_terminal_regions_for_classification(Party party,
     }
     decision_tree_builder.tree.nodes[node_index].label = updated_leaf_labels[i];
   }
-  LOG(INFO) << "Update the current tree model finished";
+  log_info("Update the current tree model finished");
   // step 9: after update the terminal regions, execute another predict to get the
   // current tree prediction, update the raw_predictions by:
   // raw_predictions += current_prediction * learning_rate
@@ -665,7 +662,7 @@ void update_terminal_regions_for_classification(Party party,
                                             raw_predictions,
                                             sample_size,
                                             learning_rate);
-  LOG(INFO) << "Update the raw predictions finished";
+  log_info("Update the raw predictions finished");
   // free retrieved public key
   djcs_t_free_public_key(phe_pub_key);
   delete [] pre_predictions;

@@ -9,7 +9,7 @@
 #include <glog/logging.h>
 #include <falcon/utils/logger/logger.h>
 
-GbdtModel::GbdtModel(int m_tree_size, std::string m_tree_type,
+GbdtModel::GbdtModel(int m_tree_size, const std::string& m_tree_type,
     int m_n_estimator, int m_class_num, double m_learning_rate) {
   tree_size = m_tree_size;
   // copy builder parameters
@@ -50,7 +50,7 @@ GbdtModel& GbdtModel::operator=(const GbdtModel &gbdt_model) {
 }
 
 void GbdtModel::predict(Party &party,
-                        std::vector<std::vector<double>> predicted_samples,
+                        const std::vector<std::vector<double>>& predicted_samples,
                         int predicted_sample_size,
                         EncodedNumber *predicted_labels) {
   // the prediction method for regression and classification are different
@@ -64,7 +64,7 @@ void GbdtModel::predict(Party &party,
 }
 
 void GbdtModel::predict_single_estimator(Party &party,
-                                         std::vector<std::vector<double>> predicted_samples,
+                                         const std::vector<std::vector<double>>& predicted_samples,
                                          int predicted_sample_size,
                                          EncodedNumber *predicted_labels) {
   /// the predict method works as follows:
@@ -79,9 +79,9 @@ void GbdtModel::predict_single_estimator(Party &party,
   log_info("[GbdtModel.predict_single_estimator] predicted_sample_size = " + std::to_string(predicted_sample_size));
   // if active party, compute the encrypted dummy predictor and broadcast
   // init the encrypted predicted_labels with dummy prediction by 2 * precision
-  EncodedNumber* raw_predictions = new EncodedNumber[predicted_sample_size];
+  auto* raw_predictions = new EncodedNumber[predicted_sample_size];
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    LOG(INFO) << "dummy predictor = " << dummy_predictors[0];
+    log_info("dummy predictor = " + std::to_string(dummy_predictors[0]));
     for (int i = 0; i < predicted_sample_size; i++) {
       raw_predictions[i].set_double(phe_pub_key->n[0], dummy_predictors[0],
                                      2 * PHE_FIXED_POINT_PRECISION);
@@ -93,13 +93,13 @@ void GbdtModel::predict_single_estimator(Party &party,
   // iterate for each tree in gbdt_trees and predict
   for (int t = 0; t < tree_size; t++) {
     // predict for tree t, obtain the predicted labels, should be precision
-    EncodedNumber *predicted_labels_tree_t = new EncodedNumber[predicted_sample_size];
+    auto *predicted_labels_tree_t = new EncodedNumber[predicted_sample_size];
     gbdt_trees[t].predict(party, predicted_samples,
                           predicted_sample_size, predicted_labels_tree_t);
     // add the current predicted labels
     EncodedNumber encoded_learning_rate;
     encoded_learning_rate.set_double(phe_pub_key->n[0], learning_rate);
-    LOG(INFO) << "learning_rate = " << learning_rate;
+    log_info("learning_rate = " + std::to_string(learning_rate));
     for (int i = 0; i < predicted_sample_size; i++) {
       djcs_t_aux_ep_mul(phe_pub_key, predicted_labels_tree_t[i],
                         predicted_labels_tree_t[i], encoded_learning_rate);
@@ -126,7 +126,7 @@ void GbdtModel::predict_single_estimator(Party &party,
 }
 
 void GbdtModel::predict_multi_estimator(Party &party,
-                                        std::vector<std::vector<double>> predicted_samples,
+                                        const std::vector<std::vector<double>>& predicted_samples,
                                         int predicted_sample_size,
                                         EncodedNumber *predicted_labels) {
   /// the predict method works as follows:
@@ -140,10 +140,10 @@ void GbdtModel::predict_multi_estimator(Party &party,
   party.getter_phe_pub_key(phe_pub_key);
   // if active party, compute the encrypted dummy predictors and broadcast
   // init the encrypted predicted_labels with dummy prediction by 2 * precision
-  EncodedNumber* raw_predictions = new EncodedNumber[predicted_sample_size * class_num];
+  auto* raw_predictions = new EncodedNumber[predicted_sample_size * class_num];
   if (party.party_type == falcon::ACTIVE_PARTY) {
     for (int c = 0; c < class_num; c++) {
-      LOG(INFO) << "dummy predictor " << c << " = " <<  dummy_predictors[c];
+      log_info("dummy predictor " + std::to_string(c) + " = " + std::to_string(dummy_predictors[c]));
       for (int i = 0; i < predicted_sample_size; i++) {
         int real_id = c * predicted_sample_size + i;
         raw_predictions[real_id].set_double(phe_pub_key->n[0], dummy_predictors[0],
@@ -162,13 +162,13 @@ void GbdtModel::predict_multi_estimator(Party &party,
       // this is the tree id in the gbdt_model.trees
       int read_tree_id = tree_id * class_num + c;
       // predict for tree t, obtain the predicted labels, should be precision
-      EncodedNumber *predicted_labels_tree_t = new EncodedNumber[predicted_sample_size];
+      auto *predicted_labels_tree_t = new EncodedNumber[predicted_sample_size];
       gbdt_trees[read_tree_id].predict(party, predicted_samples,
                             predicted_sample_size, predicted_labels_tree_t);
       // add the current predicted labels
       EncodedNumber encoded_learning_rate;
       encoded_learning_rate.set_double(phe_pub_key->n[0], learning_rate);
-      LOG(INFO) << "learning_rate = " << learning_rate;
+      log_info("learning_rate = " + std::to_string(learning_rate));
       for (int i = 0; i < predicted_sample_size; i++) {
         djcs_t_aux_ep_mul(phe_pub_key, predicted_labels_tree_t[i],
                           predicted_labels_tree_t[i], encoded_learning_rate);

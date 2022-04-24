@@ -244,7 +244,6 @@ void DecisionTreeBuilder::train(Party party) {
   double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
   log_info("[DecisionTreeBuilder.train] Training time = " + std::to_string(training_consumed_time));
   log_info("[DecisionTreeBuilder.train] ************* Training Finished *************");
-  google::FlushLogFiles(google::INFO);
 
   delete [] sample_mask_iv;
   delete [] encrypted_labels;
@@ -1171,7 +1170,6 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
   const clock_t finish_time = clock();
   double consumed_time = double(finish_time - start_time) / CLOCKS_PER_SEC;
   log_info("[DecisionTreeBuilder.compute_encrypted_statistics] Node encrypted statistics computation time = " + std::to_string(consumed_time));
-  google::FlushLogFiles(google::INFO);
 }
 
 void DecisionTreeBuilder::best_split_party_idx(int best_split_index,
@@ -1378,7 +1376,6 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
   double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
   log_info("[DecisionTreeBuilder.lime_train] Training time = " + std::to_string(training_consumed_time));
   log_info("[DecisionTreeBuilder.lime_train] ************* Training Finished *************");
-  google::FlushLogFiles(google::INFO);
 
   delete [] sample_mask_iv;
   delete [] weighted_encrypted_true_labels;
@@ -1834,7 +1831,6 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type,
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
   log_info("[DecisionTreeBuilder.eval] Evaluation time = " + std::to_string(testing_consumed_time));
   log_info("[DecisionTreeBuilder.eval] ************* Evaluation on " + dataset_str + " Finished *************");
-  google::FlushLogFiles(google::INFO);
 }
 
 void DecisionTreeBuilder::distributed_eval(Party &party, const Worker &worker, falcon::DatasetType eval_type) {
@@ -1896,7 +1892,6 @@ void DecisionTreeBuilder::distributed_eval(Party &party, const Worker &worker, f
   double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
   log_info("[DT_train_worker.distributed_eval]: Evaluation time = " + std::to_string(testing_consumed_time));
   log_info("[DT_train_worker.distributed_eval] ************* Evaluation on " + dataset_str + " Finished *************");
-  google::FlushLogFiles(google::INFO);
 }
 
 void DecisionTreeBuilder::calc_eval_accuracy(Party &party,
