@@ -180,13 +180,15 @@ void DTParameterServer::distributed_train(){
 void DTParameterServer::build_tree(){
   /// 0. init depth and impurity for root node
   alg_builder.tree.nodes[0].depth = 0;
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  party.getter_phe_pub_key(phe_pub_key);
-  EncodedNumber max_impurity;
-  max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
-  djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-                     alg_builder.tree.nodes[0].impurity, max_impurity);
-  djcs_t_free_public_key(phe_pub_key);
+  alg_builder.calc_root_impurity(party);
+
+//  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+//  party.getter_phe_pub_key(phe_pub_key);
+//  EncodedNumber max_impurity;
+//  max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
+//  djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+//                     alg_builder.tree.nodes[0].impurity, max_impurity);
+//  djcs_t_free_public_key(phe_pub_key);
 
   /// 1. create dynamic stacks and init the value
   std::vector<int> node_index_stack;

@@ -147,8 +147,10 @@ void DecisionTreeBuilder::precompute_label_helper(falcon::PartyType party_type) 
     for (int i = 0; i < training_labels.size(); i++) {
       label_square_vec.push_back(training_labels[i] * training_labels[i]);
     }
-    variance_stat_vecs.push_back(training_labels); // the first vector is the actual label vector
-    variance_stat_vecs.push_back(label_square_vec);     // the second vector is the squared label vector
+    // the first vector is the actual label vector
+    variance_stat_vecs.push_back(training_labels);
+    // the second vector is the squared label vector
+    variance_stat_vecs.push_back(label_square_vec);
   }
 }
 
@@ -179,6 +181,23 @@ void DecisionTreeBuilder::precompute_feature_helpers() {
   }
 }
 
+void DecisionTreeBuilder::calc_root_impurity(const Party& party) {
+  // retrieve phe pub key
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  auto* root_impu = new EncodedNumber[1];
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    double impu = root_impurity(training_labels, tree_type, class_num);
+    log_info("[DecisionTreeBuilder.train] root_impu = " + std::to_string(impu));
+    root_impu[0].set_double(phe_pub_key->n[0], impu, PHE_FIXED_POINT_PRECISION);
+  }
+  broadcast_encoded_number_array(party, root_impu, 1, ACTIVE_PARTY_ID);
+  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, root_impu[0]);
+
+  delete [] root_impu;
+  djcs_t_free_public_key(phe_pub_key);
+}
+
 void DecisionTreeBuilder::train(Party party) {
   // To avoid each tree node disclose which samples are on available,
   // we use an encrypted mask vector to protect the information
@@ -189,31 +208,108 @@ void DecisionTreeBuilder::train(Party party) {
   // and sends the encrypted label info to other parties.
   log_info("[DecisionTreeBuilder.train] ************* Training Start *************");
   const clock_t training_start_time = clock();
-  // retrieve phe pub key
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  party.getter_phe_pub_key(phe_pub_key);
 
   // pre-compute label helper and feature helper
   precompute_label_helper(party.party_type);
   precompute_feature_helpers();
 
   int sample_num = training_data.size();
-  // label_size = len(indicator_class_vecs), len([r1, r2])
-  int label_size = class_num * sample_num;
   std::vector<int> available_feature_ids;
   for (int i = 0; i < local_feature_num; i++) {
     available_feature_ids.push_back(i);
   }
   EncodedNumber * sample_mask_iv = new EncodedNumber[sample_num];
+  // label_size = class_num * sample_num;
   EncodedNumber * encrypted_labels = new EncodedNumber[class_num * sample_num];
+  initialize_sample_mask_iv(party, sample_mask_iv, sample_num);
+  initialize_encrypted_labels(party, encrypted_labels, sample_num);
 
-  // because all samples are available at the beginning of the training, init with 1
+#ifdef DEBUG
+  debug_cipher_array<long>(party, sample_mask_iv, 10, ACTIVE_PARTY_ID, true, 10);
+  debug_cipher_array<double>(party, encrypted_labels, 10, ACTIVE_PARTY_ID, true, 10);
+#endif
+
+  // init the root node info
+  tree.nodes[0].depth = 0;
+  tree.nodes[0].node_sample_num = train_data_size;
+  calc_root_impurity(party);
+
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+  // recursively build the tree
+  build_node(party, 0, available_feature_ids, sample_mask_iv, encrypted_labels);
+  log_info("[DecisionTreeBuilder.train] tree capacity = " + std::to_string(tree.capacity));
+
+  const clock_t training_finish_time = clock();
+  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  log_info("[DecisionTreeBuilder.train] Training time = " + std::to_string(training_consumed_time));
+  log_info("[DecisionTreeBuilder.train] ************* Training Finished *************");
+  google::FlushLogFiles(google::INFO);
+
+  delete [] sample_mask_iv;
+  delete [] encrypted_labels;
+}
+
+void DecisionTreeBuilder::train(Party party, EncodedNumber *encrypted_labels) {
+  // To avoid each tree node disclose which samples are on available,
+  // we use an encrypted mask vector to protect the information
+  // while ensure that the training can still be processed.
+  // Note that for the root node, all the samples are available and every
+  // party can initialize an encrypted mask vector with [1]
+  // for the labels, the format should be encrypted (with size class_num * sample_num),
+  // and is known to other parties as well (should be sent before calling this train method)
+  log_info("[DecisionTreeBuilder.train-with-enc-labels] ************* Training Start *************");
+  const clock_t training_start_time = clock();
+  // pre-compute label helper and feature helper
+  precompute_label_helper(party.party_type);
+  precompute_feature_helpers();
+  log_info("[DecisionTreeBuilder.train-with-enc-labels]: finished init label and features");
+  int sample_num = training_data.size();
+  int label_size = class_num * sample_num;
+  std::vector<int> available_feature_ids;
+  for (int i = 0; i < local_feature_num; i++) {
+    available_feature_ids.push_back(i);
+  }
+  // init sample mask iv
+  auto *sample_mask_iv = new EncodedNumber[sample_num];
+  initialize_sample_mask_iv(party, sample_mask_iv, sample_num);
+  // init the root node info
+  tree.nodes[0].depth = 0;
+  tree.nodes[0].node_sample_num = train_data_size;
+  calc_root_impurity(party);
+
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+  // recursively build the tree
+  build_node(party, 0, available_feature_ids, sample_mask_iv, encrypted_labels);
+
+  log_info("[DecisionTreeBuilder.train-with-enc-labels] tree capacity = " + std::to_string(tree.capacity));
+  const clock_t training_finish_time = clock();
+  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  log_info("[DecisionTreeBuilder.train-with-enc-labels] Training time = " + std::to_string(training_consumed_time));
+  log_info("[DecisionTreeBuilder.train-with-enc-labels] ************* Training Finished *************");
+
+  delete [] sample_mask_iv;
+}
+
+void DecisionTreeBuilder::initialize_sample_mask_iv(Party party, EncodedNumber *sample_mask_iv, int sample_num) {
+  // retrieve phe pub key
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  // as the samples are available at the beginning of the training, init with 1
   EncodedNumber tmp;
   tmp.set_integer(phe_pub_key->n[0], 1);
   // init encrypted mask vector on the root node
   for (int i = 0; i < sample_num; i++) {
     djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sample_mask_iv[i], tmp);
   }
+  djcs_t_free_public_key(phe_pub_key);
+}
+
+void DecisionTreeBuilder::initialize_encrypted_labels(Party party, EncodedNumber *encrypted_labels, int sample_num) {
+  // retrieve phe pub key
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
 
   // if active party, compute the encrypted label info and broadcast
   if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -237,189 +333,6 @@ void DecisionTreeBuilder::train(Party party) {
   broadcast_encoded_number_array(party, encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
   log_info("[DecisionTreeBuilder.train] Finish broadcasting the encrypted label info");
 
-#ifdef DEBUG
-  debug_cipher_array<long>(party, sample_mask_iv, 10, ACTIVE_PARTY_ID, true, 10);
-  debug_cipher_array<double>(party, encrypted_labels, 10, ACTIVE_PARTY_ID, true, 10);
-#endif
-
-  // init the root node info
-  tree.nodes[0].depth = 0;
-  tree.nodes[0].node_sample_num = train_data_size;
-  auto* root_impu = new EncodedNumber[1];
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    double impu = root_impurity(training_labels, tree_type, class_num);
-    log_info("[DecisionTreeBuilder.train] root_impu = " + std::to_string(impu));
-    root_impu[0].set_double(phe_pub_key->n[0], impu, PHE_FIXED_POINT_PRECISION);
-  }
-  broadcast_encoded_number_array(party, root_impu, 1, ACTIVE_PARTY_ID);
-  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, root_impu[0]);
-  delete [] root_impu;
-
-  // required by spdz connector and mpc computation
-  bigint::init_thread();
-  // recursively build the tree
-  build_node(party, 0, available_feature_ids, sample_mask_iv, encrypted_labels);
-  log_info("[DecisionTreeBuilder.train] tree capacity = " + std::to_string(tree.capacity));
-
-  const clock_t training_finish_time = clock();
-  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("[DecisionTreeBuilder.train] Training time = " + std::to_string(training_consumed_time));
-  log_info("[DecisionTreeBuilder.train] ************* Training Finished *************");
-  google::FlushLogFiles(google::INFO);
-
-  delete [] sample_mask_iv;
-  delete [] encrypted_labels;
-  djcs_t_free_public_key(phe_pub_key);
-}
-
-void DecisionTreeBuilder::train(Party party, EncodedNumber *encrypted_labels) {
-  // To avoid each tree node disclose which samples are on available,
-  // we use an encrypted mask vector to protect the information
-  // while ensure that the training can still be processed.
-  // Note that for the root node, all the samples are available and every
-  // party can initialize an encrypted mask vector with [1]
-  // for the labels, the format should be encrypted (with size class_num * sample_num),
-  // and is known to other parties as well (should be sent before calling this train method)
-  log_info("[DecisionTreeBuilder.train-with-enc-labels] ************* Training Start *************");
-  const clock_t training_start_time = clock();
-  // retrieve phe pub key
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  party.getter_phe_pub_key(phe_pub_key);
-
-  // pre-compute label helper and feature helper
-  precompute_label_helper(party.party_type);
-  precompute_feature_helpers();
-  log_info("[DecisionTreeBuilder.train-with-enc-labels]: finished init label and features");
-
-  int sample_num = training_data.size();
-  int label_size = class_num * sample_num;
-  std::vector<int> available_feature_ids;
-  for (int i = 0; i < local_feature_num; i++) {
-    available_feature_ids.push_back(i);
-  }
-  auto *sample_mask_iv = new EncodedNumber[sample_num];
-
-  // as the samples are available at the beginning of the training, init with 1
-  EncodedNumber tmp;
-  tmp.set_integer(phe_pub_key->n[0], 1);
-  // init encrypted mask vector on the root node
-  for (int i = 0; i < sample_num; i++) {
-    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sample_mask_iv[i], tmp);
-  }
-
-  // init the root node info
-  tree.nodes[0].depth = 0;
-  tree.nodes[0].node_sample_num = train_data_size;
-  EncodedNumber max_impurity;
-  max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
-  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, max_impurity);
-
-  // required by spdz connector and mpc computation
-  bigint::init_thread();
-  // recursively build the tree
-  build_node(party, 0, available_feature_ids, sample_mask_iv, encrypted_labels);
-  log_info("[DecisionTreeBuilder.train-with-enc-labels] tree capacity = " + std::to_string(tree.capacity));
-
-  const clock_t training_finish_time = clock();
-  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("[DecisionTreeBuilder.train-with-enc-labels] Training time = " + std::to_string(training_consumed_time));
-  log_info("[DecisionTreeBuilder.train-with-enc-labels] ************* Training Finished *************");
-  google::FlushLogFiles(google::INFO);
-
-  delete [] sample_mask_iv;
-  djcs_t_free_public_key(phe_pub_key);
-}
-
-void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
-    EncodedNumber *encrypted_true_labels, bool use_sample_weights,
-    EncodedNumber *encrypted_weights) {
-  // To avoid each tree node disclose which samples are on available,
-  // we use an encrypted mask vector to protect the information
-  // while ensure that the training can still be processed.
-  // Note that for the root node, all the samples are available and every
-  // party can initialize an encrypted mask vector with [1]
-  // for the labels, the format should be encrypted (with size class_num * sample_num),
-  // and is known to other parties as well (should be sent before calling this train method)
-  log_info("[DecisionTreeBuilder.lime_train] ************* Training Start *************");
-  const clock_t training_start_time = clock();
-  // retrieve phe pub key
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  party.getter_phe_pub_key(phe_pub_key);
-
-  // pre-compute label helper and feature helper
-  precompute_label_helper(party.party_type);
-  precompute_feature_helpers();
-  log_info("[DecisionTreeBuilder.lime_train]: finished init label and features");
-
-  int sample_num = (int) training_data.size();
-  int label_size = class_num * sample_num;
-  log_info("[DecisionTreeBuilder.lime_train]: sample_num = "
-    + std::to_string(sample_num) + ", label_size = " + std::to_string(label_size));
-  std::vector<int> available_feature_ids;
-  for (int i = 0; i < local_feature_num; i++) {
-    available_feature_ids.push_back(i);
-  }
-  auto * sample_mask_iv = new EncodedNumber[sample_num];
-
-  // as the samples are available at the beginning of the training, init with 1
-  EncodedNumber tmp;
-  tmp.set_integer(phe_pub_key->n[0], 1);
-  // init encrypted mask vector on the root node
-  for (int i = 0; i < sample_num; i++) {
-    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sample_mask_iv[i], tmp);
-  }
-
-  // check whether use sample_weights, if so, compute cipher multi
-  auto* weighted_encrypted_true_labels = new EncodedNumber[label_size];
-  if (use_sample_weights) {
-    auto* assist_encrypted_weights = new EncodedNumber[label_size];
-    for (int i = 0; i < sample_num; i++) {
-      assist_encrypted_weights[i] = encrypted_weights[i];
-      assist_encrypted_weights[i+sample_num] = encrypted_weights[i];
-    }
-    ciphers_multi(party, weighted_encrypted_true_labels, encrypted_true_labels,
-                  assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
-    broadcast_encoded_number_array(party, weighted_encrypted_true_labels, class_num * sample_num, ACTIVE_PARTY_ID);
-    delete [] assist_encrypted_weights;
-  } else {
-    for (int i = 0; i < label_size; i++) {
-      weighted_encrypted_true_labels[i] = encrypted_true_labels[i];
-    }
-  }
-
-  // TODO: make the label precision automatically match
-  // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
-  truncate_ciphers_precision(party, weighted_encrypted_true_labels, label_size,
-                             ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-
-  // init the root node info
-  tree.nodes[0].depth = 0;
-  tree.nodes[0].node_sample_num = train_data_size;
-  //  EncodedNumber max_impurity;
-  //  max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
-  //  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, max_impurity);
-  double root_impurity = lime_reg_tree_root_impurity(
-      party, use_encrypted_labels, weighted_encrypted_true_labels,
-      sample_num, class_num, use_sample_weights, encrypted_weights);
-  EncodedNumber enc_root_impurity;
-  enc_root_impurity.set_double(phe_pub_key->n[0], root_impurity, PHE_FIXED_POINT_PRECISION);
-  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, enc_root_impurity);
-
-  // required by spdz connector and mpc computation
-  bigint::init_thread();
-  // recursively build the tree
-  build_node(party,0,available_feature_ids, sample_mask_iv,
-             weighted_encrypted_true_labels, use_sample_weights, encrypted_weights);
-  log_info("[DecisionTreeBuilder.lime_train] tree capacity = " + std::to_string(tree.capacity));
-
-  const clock_t training_finish_time = clock();
-  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("[DecisionTreeBuilder.lime_train] Training time = " + std::to_string(training_consumed_time));
-  log_info("[DecisionTreeBuilder.lime_train] ************* Training Finished *************");
-  google::FlushLogFiles(google::INFO);
-
-  delete [] sample_mask_iv;
-  delete [] weighted_encrypted_true_labels;
   djcs_t_free_public_key(phe_pub_key);
 }
 
@@ -1303,115 +1216,91 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
   google::FlushLogFiles(google::INFO);
 }
 
-std::vector<int> DecisionTreeBuilder::compute_binary_vector(int sample_id,
-    std::map<int, int> node_index_2_leaf_index,
-    falcon::DatasetType eval_type) {
-  std::vector< std::vector<double> > cur_test_dataset =
-      (eval_type == falcon::TRAIN) ? training_data : testing_data;
-  std::vector<double> sample_values = cur_test_dataset[sample_id];
-  std::vector<int> binary_vector = tree.comp_predict_vector(sample_values, node_index_2_leaf_index);
-  return binary_vector;
-}
-
-void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type,
-    const std::string& report_save_path) {
-  // Testing procedure:
-  // 1. Organize the leaf label vector, and record the map
-  //     between tree node index and leaf index
-  // 2. For each sample in the testing dataset, search the whole tree
-  //     and do the following:
-  //     2.1 if meet feature that not belong to self, mark 1,
-  //         and iteratively search left and right branches with 1
-  //     2.2 if meet feature that belongs to self, compare with the split value,
-  //         mark satisfied branch with 1 while the other branch with 0,
-  //         and iteratively search left and right branches
-  //     2.3 if meet the leaf node, record the corresponding leaf index
-  //         with current value
-  // 3. After each client obtaining a 0-1 vector of leaf nodes, do the following:
-  //     3.1 the "party_num-1"-th party element-wise multiply with leaf
-  //         label vector, and encrypt the vector, send to the next party
-  //     3.2 every party on the Robin cycle updates the vector
-  //         by element-wise homomorphic multiplication, and send to the next
-  //     3.3 the last party, i.e., client 0 get the final encrypted vector
-  //         and homomorphic add together, call share decryption
-  // 4. If label is matched, correct_num += 1, otherwise, continue
-  // 5. Return the final test accuracy by correct_num / dataset.size()
-
-  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
-  log_info("[DecisionTreeBuilder.eval] ************* Evaluation on " + dataset_str + " Start *************");
-  const clock_t testing_start_time = clock();
-  // retrieve phe pub key and phe random
+void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
+                                     EncodedNumber *encrypted_true_labels, bool use_sample_weights,
+                                     EncodedNumber *encrypted_weights) {
+  // To avoid each tree node disclose which samples are on available,
+  // we use an encrypted mask vector to protect the information
+  // while ensure that the training can still be processed.
+  // Note that for the root node, all the samples are available and every
+  // party can initialize an encrypted mask vector with [1]
+  // for the labels, the format should be encrypted (with size class_num * sample_num),
+  // and is known to other parties as well (should be sent before calling this train method)
+  log_info("[DecisionTreeBuilder.lime_train] ************* Training Start *************");
+  const clock_t training_start_time = clock();
+  // retrieve phe pub key
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
-  // step 1: init test data
-  int dataset_size = (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
-  std::vector< std::vector<double> > cur_test_dataset =
-      (eval_type == falcon::TRAIN) ? training_data : testing_data;
-  std::vector<double> cur_test_dataset_labels =
-      (eval_type == falcon::TRAIN) ? training_labels : testing_labels;
+  // pre-compute label helper and feature helper
+  precompute_label_helper(party.party_type);
+  precompute_feature_helpers();
+  log_info("[DecisionTreeBuilder.lime_train]: finished init label and features");
 
-  // step 2: call tree model predict function to obtain predicted_labels
-  auto* predicted_labels = new EncodedNumber[dataset_size];
-  tree.predict(party, cur_test_dataset, dataset_size, predicted_labels);
+  int sample_num = (int) training_data.size();
+  int label_size = class_num * sample_num;
+  log_info("[DecisionTreeBuilder.lime_train]: sample_num = "
+               + std::to_string(sample_num) + ", label_size = " + std::to_string(label_size));
+  std::vector<int> available_feature_ids;
+  for (int i = 0; i < local_feature_num; i++) {
+    available_feature_ids.push_back(i);
+  }
+  auto * sample_mask_iv = new EncodedNumber[sample_num];
+  initialize_sample_mask_iv(party, sample_mask_iv, sample_num);
 
-  // step 3: active party aggregates and call collaborative decryption
-  auto* decrypted_labels = new EncodedNumber[dataset_size];
-  collaborative_decrypt(party, predicted_labels, decrypted_labels, dataset_size, ACTIVE_PARTY_ID);
-
-  // compute accuracy by the super client
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    // init predicted_label_vector
-    std::vector<double> predicted_label_vector;
-    for (int i = 0; i < dataset_size; i++) {
-      predicted_label_vector.push_back(0.0);
+  // check whether use sample_weights, if so, compute cipher multi
+  auto* weighted_encrypted_true_labels = new EncodedNumber[label_size];
+  if (use_sample_weights) {
+    auto* assist_encrypted_weights = new EncodedNumber[label_size];
+    for (int i = 0; i < sample_num; i++) {
+      assist_encrypted_weights[i] = encrypted_weights[i];
+      assist_encrypted_weights[i+sample_num] = encrypted_weights[i];
     }
-    for (int i = 0; i < dataset_size; i++) {
-      decrypted_labels[i].decode(predicted_label_vector[i]);
-    }
-
-    if (tree_type == falcon::CLASSIFICATION) {
-      int correct_num = 0;
-      for (int i = 0; i < dataset_size; i++) {
-        if (predicted_label_vector[i] == cur_test_dataset_labels[i]) {
-          correct_num += 1;
-        }
-      }
-      if (eval_type == falcon::TRAIN) {
-        training_accuracy = (double) correct_num / dataset_size;
-        log_info("[DecisionTreeBuilder.eval] Dataset size = " + std::to_string(dataset_size)
-          + ", correct predicted num = " + std::to_string(correct_num)
-          + ", training accuracy = " + std::to_string(training_accuracy));
-      }
-      if (eval_type == falcon::TEST) {
-        testing_accuracy = (double) correct_num / dataset_size;
-        log_info("[DecisionTreeBuilder.eval] Dataset size = " + std::to_string(dataset_size)
-                     + ", correct predicted num = " + std::to_string(correct_num)
-                     + ", testing accuracy = " + std::to_string(testing_accuracy));
-      }
-    } else {
-      if (eval_type == falcon::TRAIN) {
-        training_accuracy = mean_squared_error(predicted_label_vector, cur_test_dataset_labels);
-        log_info("[DecisionTreeBuilder.eval] Training accuracy = " + std::to_string(training_accuracy));
-      }
-      if (eval_type == falcon::TEST) {
-        testing_accuracy = mean_squared_error(predicted_label_vector, cur_test_dataset_labels);
-        log_info("[DecisionTreeBuilder.eval] Testing accuracy = " + std::to_string(testing_accuracy));
-      }
+    ciphers_multi(party, weighted_encrypted_true_labels, encrypted_true_labels,
+                  assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
+    broadcast_encoded_number_array(party, weighted_encrypted_true_labels, class_num * sample_num, ACTIVE_PARTY_ID);
+    delete [] assist_encrypted_weights;
+  } else {
+    for (int i = 0; i < label_size; i++) {
+      weighted_encrypted_true_labels[i] = encrypted_true_labels[i];
     }
   }
 
-  const clock_t testing_finish_time = clock();
-  double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  log_info("[DecisionTreeBuilder.eval] Evaluation time = " + std::to_string(testing_consumed_time));
-  log_info("[DecisionTreeBuilder.eval] ************* Evaluation on " + dataset_str + " Finished *************");
+  // TODO: make the label precision automatically match
+  // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
+  truncate_ciphers_precision(party, weighted_encrypted_true_labels, label_size,
+                             ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+
+  // init the root node info
+  tree.nodes[0].depth = 0;
+  tree.nodes[0].node_sample_num = train_data_size;
+  //  EncodedNumber max_impurity;
+  //  max_impurity.set_double(phe_pub_key->n[0], MAX_IMPURITY, PHE_FIXED_POINT_PRECISION);
+  //  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, max_impurity);
+  double root_impurity = lime_reg_tree_root_impurity(
+      party, use_encrypted_labels, weighted_encrypted_true_labels,
+      sample_num, class_num, use_sample_weights, encrypted_weights);
+  EncodedNumber enc_root_impurity;
+  enc_root_impurity.set_double(phe_pub_key->n[0], root_impurity, PHE_FIXED_POINT_PRECISION);
+  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, enc_root_impurity);
+
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+  // recursively build the tree
+  build_node(party,0,available_feature_ids, sample_mask_iv,
+             weighted_encrypted_true_labels, use_sample_weights, encrypted_weights);
+  log_info("[DecisionTreeBuilder.lime_train] tree capacity = " + std::to_string(tree.capacity));
+
+  const clock_t training_finish_time = clock();
+  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  log_info("[DecisionTreeBuilder.lime_train] Training time = " + std::to_string(training_consumed_time));
+  log_info("[DecisionTreeBuilder.lime_train] ************* Training Finished *************");
   google::FlushLogFiles(google::INFO);
 
-  delete [] predicted_labels;
-  delete [] decrypted_labels;
+  delete [] sample_mask_iv;
+  delete [] weighted_encrypted_true_labels;
   djcs_t_free_public_key(phe_pub_key);
 }
-
 
 void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &worker) {
   log_info("************* [DT_train_worker.distributed_train]: distributed train Start *************");
@@ -1434,40 +1323,15 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
   log_info("[DT_train_worker.distributed_train]: step 1, finished init label and features");
 
   // 2. init mask vector and encrypted labels
+  auto * init_sample_mask_iv = new EncodedNumber[sample_num];
+  initialize_sample_mask_iv(party, init_sample_mask_iv, sample_num);
+  // if active party, compute the encrypted label info and broadcast and if passive, receive it
+  auto * init_encrypted_labels = new EncodedNumber[class_num * sample_num];
+  initialize_encrypted_labels(party, init_encrypted_labels, sample_num);
+
   // retrieve phe pub key
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
-
-  auto * init_sample_mask_iv = new EncodedNumber[sample_num];
-  // because all samples are available at the beginning of the training, init with 1
-  EncodedNumber tmp_mask;
-  tmp_mask.set_integer(phe_pub_key->n[0], 1);
-  // init encrypted mask vector on the root node
-  for (int i = 0; i < sample_num; i++) {
-    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, init_sample_mask_iv[i], tmp_mask);
-  }
-
-  // if active party, compute the encrypted label info and broadcast and if passive, receive it
-  auto * init_encrypted_labels = new EncodedNumber[class_num * sample_num];
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    std::string encrypted_labels_str;
-    for (int i = 0; i < class_num; i++) {
-      for (int j = 0; j < sample_num; j++) {
-        EncodedNumber tmp_label;
-        // classification use indicator_class_vecs, regression use variance_stat_vecs
-        if (tree_type == falcon::CLASSIFICATION) {
-          tmp_label.set_double(phe_pub_key->n[0], indicator_class_vecs[i][j]);
-        } else {
-          tmp_label.set_double(phe_pub_key->n[0], variance_stat_vecs[i][j]);
-        }
-        // encrypt the label
-        djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-                           init_encrypted_labels[i * sample_num + j], tmp_label);
-      }
-    }
-  }
-  broadcast_encoded_number_array(party, init_encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
-  log_info("[DT_train_worker.distributed_train]: step 2, finished broadcasting the encrypted label info and init mask vector");
 
   // init map to main node_index: encrypted_label and encrypted_mask_iv
   map<int, EncodedNumber*> node_index_sample_mask_iv;
@@ -1482,15 +1346,7 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
   // 3. init the root node info
   tree.nodes[0].depth = 0;
   tree.nodes[0].node_sample_num = train_data_size;
-  auto* root_impu = new EncodedNumber[1];
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    double impu = root_impurity(training_labels, tree_type, class_num);
-    log_info("[DecisionTreeBuilder.distributed_train] root_impu = " + std::to_string(impu));
-    root_impu[0].set_double(phe_pub_key->n[0], impu, PHE_FIXED_POINT_PRECISION);
-  }
-  broadcast_encoded_number_array(party, root_impu, 1, ACTIVE_PARTY_ID);
-  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, tree.nodes[0].impurity, root_impu[0]);
-  delete [] root_impu;
+  calc_root_impurity(party);
   log_info("[DT_train_worker.distributed_train]: step 3, finished init root node info");
 
   // 4. begin to distributed train
@@ -2167,13 +2023,7 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
   // 2. init mask vector and encrypted labels
 
   auto * init_sample_mask_iv = new EncodedNumber[sample_num];
-  // because all samples are available at the beginning of the training, init with 1
-  EncodedNumber tmp_mask;
-  tmp_mask.set_integer(phe_pub_key->n[0], 1);
-  // init encrypted mask vector on the root node
-  for (int i = 0; i < sample_num; i++) {
-    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, init_sample_mask_iv[i], tmp_mask);
-  }
+  initialize_sample_mask_iv(party, init_sample_mask_iv, sample_num);
 
   // check whether use sample_weights, if so, compute cipher multi
   auto* init_encrypted_labels = new EncodedNumber[label_size];
@@ -2878,14 +2728,32 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
   djcs_t_free_public_key(phe_pub_key);
 }
 
+void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type,
+                               const std::string& report_save_path) {
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  log_info("[DecisionTreeBuilder.eval] ************* Evaluation on " + dataset_str + " Start *************");
+  const clock_t testing_start_time = clock();
+
+  // step 1: init test data
+  int dataset_size = (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
+  std::vector< std::vector<double> > cur_test_dataset =
+      (eval_type == falcon::TRAIN) ? training_data : testing_data;
+  std::vector<double> cur_test_dataset_labels =
+      (eval_type == falcon::TRAIN) ? training_labels : testing_labels;
+
+  calc_eval_accuracy(party, eval_type, cur_test_dataset, cur_test_dataset_labels);
+
+  const clock_t testing_finish_time = clock();
+  double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
+  log_info("[DecisionTreeBuilder.eval] Evaluation time = " + std::to_string(testing_consumed_time));
+  log_info("[DecisionTreeBuilder.eval] ************* Evaluation on " + dataset_str + " Finished *************");
+  google::FlushLogFiles(google::INFO);
+}
 
 void DecisionTreeBuilder::distributed_eval(Party &party, const Worker &worker, falcon::DatasetType eval_type) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   log_info("[DT_train_worker.distributed_eval]: ----- Evaluation on " + dataset_str + "Start -----");
   const clock_t testing_start_time = clock();
-  // retrieve phe pub key and phe random
-  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
-  party.getter_phe_pub_key(phe_pub_key);
 
   // step 1: init full dataset, used dataset.
   log_info("[DT_train_worker.distributed_eval]: step 1 init full dataset, used dataset ");
@@ -2906,104 +2774,33 @@ void DecisionTreeBuilder::distributed_eval(Party &party, const Worker &worker, f
   log_info("[DT_train_worker.distributed_eval]: step 2 Worker received batch_size " +
       std::to_string(sample_indexes.size()) +
       ", current worker id" + std::to_string(worker.worker_id) +
-      ", first last index are [" + to_string(sample_indexes[0]) + ", " +to_string(sample_indexes.back()) + "]");
+      ", first last index are [" + to_string(sample_indexes[0]) + ", " + to_string(sample_indexes.back()) + "]");
 
   // generate used vector
+  int dataset_size = sample_indexes.size();
   std::vector<std::vector<double> > cur_test_dataset;
+  std::vector<double> cur_test_dataset_labels;
   for (int index : sample_indexes) {
-//    log_info("[DT_train_worker.distributed_eval]: step 2 Worker push data, index =" + to_string(index)
-//    + " read from full dataset with size="+to_string(full_dataset.size()));
     cur_test_dataset.push_back(full_dataset[index]);
-  }
-
-  // get dataset_size
-  int sample_size = sample_indexes.size();
-
-  // step 2: call tree model predict function to obtain predicted_labels
-  log_info("[DT_train_worker.distributed_eval]: step 3 call tree model predict function to obtain predicted_labels");
-  auto *predicted_labels = new EncodedNumber[sample_size];
-  log_info("[DT_train_worker.distributed_eval]: step 3 check if dataset size full_dataset_size:"+
-      to_string(full_dataset_size) +
-      " cur_test_dataset size: " + to_string(cur_test_dataset.size()) +
-      " sample_size size: " + to_string(sample_size));
-  tree.predict(party, cur_test_dataset, sample_size, predicted_labels);
-
-  // step 3: active party aggregates and call collaborative decryption
-  log_info("[DT_train_worker.distributed_eval]: step 4 active party aggregates and call collaborative decryption");
-  auto *decrypted_labels = new EncodedNumber[sample_size];
-  collaborative_decrypt(party, predicted_labels,
-                        decrypted_labels,
-                        sample_size,
-                        ACTIVE_PARTY_ID);
-
-  // step 4 compute accuracy by the super client
-  log_info("[DT_train_worker.distributed_eval]: step 5.1 super client computes accuracy by the super client");
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    log_info("[DT_train_worker.distributed_eval]: step 5.2 super client init real labels");
-    std::vector<double> cur_test_dataset_labels;
-    for (int index : sample_indexes) {
-//      log_info("[DT_train_worker.distributed_eval]: step 5.2 Worker push label, index =" + to_string(index)
-//                   + " read from full labelset with size="+to_string(full_dataset_labels.size()));
+    if (party.party_type == falcon::ACTIVE_PARTY) {
       cur_test_dataset_labels.push_back(full_dataset_labels[index]);
     }
+  }
 
-    // init predicted_label_vector
-    log_info("[DT_train_worker.distributed_eval]: step 5.3 super client decode label");
-    std::vector<double> predicted_label_vector;
-    for (int i = 0; i < sample_size; i++) {
-      predicted_label_vector.push_back(0.0);
-    }
-    for (int i = 0; i < sample_size; i++) {
-      decrypted_labels[i].decode(predicted_label_vector[i]);
-    }
+  calc_eval_accuracy(party, eval_type, cur_test_dataset, cur_test_dataset_labels);
 
-    if (tree_type == falcon::CLASSIFICATION) {
-      int correct_num = 0;
-      for (int i = 0; i < sample_size; i++) {
-        if (predicted_label_vector[i] == cur_test_dataset_labels[i]) {
-          correct_num += 1;
-        }
-      }
-      if (eval_type == falcon::TRAIN) {
-        training_accuracy = (double) correct_num / full_dataset_size;
-
-        log_info("[DT_train_worker.distributed_eval]: step 5.4 full_dataset_size = " +
-            to_string(full_dataset_size) + ", correct predicted num = "
-                     + to_string(correct_num) + ", testing accuracy = " + to_string(training_accuracy));
-
-      }
-      if (eval_type == falcon::TEST) {
-        testing_accuracy = (double) correct_num / full_dataset_size;
-        log_info("[DT_train_worker.distributed_eval]: step 5.4 full_dataset_size = " +
-                      to_string(full_dataset_size) + ", correct predicted num = "
-                     + to_string(correct_num) + ", testing accuracy = " + to_string(testing_accuracy));
-
-      }
-    } else {
-      assert(predicted_label_vector.size() == cur_test_dataset_labels.size());
-      double squared_error = 0.0;
-      for (int i = 0; i < sample_size; i++) {
-        squared_error = squared_error + (predicted_label_vector[i] - cur_test_dataset_labels[i]) *
-            (predicted_label_vector[i] - cur_test_dataset_labels[i]);
-      }
-      if (eval_type == falcon::TRAIN) {
-        training_accuracy = squared_error / full_dataset_size;
-        log_info("[DT_train_worker.distributed_eval]: step 5.4 Training accuracy = " + to_string(training_accuracy));
-      }
-      if (eval_type == falcon::TEST) {
-        testing_accuracy = squared_error / full_dataset_size;
-        log_info("[DT_train_worker.distributed_eval]: step 5.4 Testing accuracy = " + to_string(testing_accuracy));
-      }
-    }
-
+  if (party.party_type == falcon::ACTIVE_PARTY) {
     log_info("[DT_train_worker.distributed_eval]: step 5.6 send training_accuracy = " +
-                to_string(training_accuracy) + " and test accuracy = " +
-                to_string(testing_accuracy) + " to ps");
-
+        to_string(training_accuracy) + " and test accuracy = " +
+        to_string(testing_accuracy) + " to ps");
     if (eval_type == falcon::TRAIN) {
+      // map back to the full dataset size level
+      training_accuracy = (training_accuracy * dataset_size) / full_dataset_size;
       worker.send_long_message_to_ps(to_string(training_accuracy));
     }
     if (eval_type == falcon::TEST) {
+      // map back to the full dataset size level
+      testing_accuracy = (testing_accuracy * dataset_size) / full_dataset_size;
       worker.send_long_message_to_ps(to_string(testing_accuracy));
     }
   }
@@ -3013,9 +2810,91 @@ void DecisionTreeBuilder::distributed_eval(Party &party, const Worker &worker, f
   log_info("[DT_train_worker.distributed_eval]: Evaluation time = " + std::to_string(testing_consumed_time));
   log_info("[DT_train_worker.distributed_eval] ************* Evaluation on " + dataset_str + " Finished *************");
   google::FlushLogFiles(google::INFO);
+}
 
-  delete[] predicted_labels;
-  delete[] decrypted_labels;
+void DecisionTreeBuilder::calc_eval_accuracy(Party &party,
+    falcon::DatasetType eval_type,
+    const std::vector<std::vector<double>> &eval_dataset,
+    const std::vector<double> &eval_dataset_labels) {
+  // Testing procedure:
+  // 1. Organize the leaf label vector, and record the map
+  //     between tree node index and leaf index
+  // 2. For each sample in the testing dataset, search the whole tree
+  //     and do the following:
+  //     2.1 if meet feature that not belong to self, mark 1,
+  //         and iteratively search left and right branches with 1
+  //     2.2 if meet feature that belongs to self, compare with the split value,
+  //         mark satisfied branch with 1 while the other branch with 0,
+  //         and iteratively search left and right branches
+  //     2.3 if meet the leaf node, record the corresponding leaf index
+  //         with current value
+  // 3. After each client obtaining a 0-1 vector of leaf nodes, do the following:
+  //     3.1 the "party_num-1"-th party element-wise multiply with leaf
+  //         label vector, and encrypt the vector, send to the next party
+  //     3.2 every party on the Robin cycle updates the vector
+  //         by element-wise homomorphic multiplication, and send to the next
+  //     3.3 the last party, i.e., client 0 get the final encrypted vector
+  //         and homomorphic add together, call share decryption
+  // 4. If label is matched, correct_num += 1, otherwise, continue
+  // 5. Return the final test accuracy by correct_num / dataset.size()
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  int dataset_size = (int) eval_dataset.size();
+
+  // step 2: call tree model predict function to obtain predicted_labels
+  auto* predicted_labels = new EncodedNumber[dataset_size];
+  tree.predict(party, eval_dataset, dataset_size, predicted_labels);
+
+  // step 3: active party aggregates and call collaborative decryption
+  auto* decrypted_labels = new EncodedNumber[dataset_size];
+  collaborative_decrypt(party, predicted_labels, decrypted_labels, dataset_size, ACTIVE_PARTY_ID);
+
+  // compute accuracy by the super client
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // init predicted_label_vector
+    std::vector<double> predicted_label_vector;
+    for (int i = 0; i < dataset_size; i++) {
+      predicted_label_vector.push_back(0.0);
+    }
+    for (int i = 0; i < dataset_size; i++) {
+      decrypted_labels[i].decode(predicted_label_vector[i]);
+    }
+
+    if (tree_type == falcon::CLASSIFICATION) {
+      int correct_num = 0;
+      for (int i = 0; i < dataset_size; i++) {
+        if (predicted_label_vector[i] == eval_dataset_labels[i]) {
+          correct_num += 1;
+        }
+      }
+      if (eval_type == falcon::TRAIN) {
+        training_accuracy = (double) correct_num / dataset_size;
+        log_info("[DecisionTreeBuilder.calc_eval_accuracy] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", training accuracy = " + std::to_string(training_accuracy));
+      }
+      if (eval_type == falcon::TEST) {
+        testing_accuracy = (double) correct_num / dataset_size;
+        log_info("[DecisionTreeBuilder.calc_eval_accuracy] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", testing accuracy = " + std::to_string(testing_accuracy));
+      }
+    } else {
+      if (eval_type == falcon::TRAIN) {
+        training_accuracy = mean_squared_error(predicted_label_vector, eval_dataset_labels);
+        log_info("[DecisionTreeBuilder.calc_eval_accuracy] Training accuracy = " + std::to_string(training_accuracy));
+      }
+      if (eval_type == falcon::TEST) {
+        testing_accuracy = mean_squared_error(predicted_label_vector, eval_dataset_labels);
+        log_info("[DecisionTreeBuilder.calc_eval_accuracy] Testing accuracy = " + std::to_string(testing_accuracy));
+      }
+    }
+  }
+
+  delete [] predicted_labels;
+  delete [] decrypted_labels;
   djcs_t_free_public_key(phe_pub_key);
 }
 

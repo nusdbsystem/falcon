@@ -88,7 +88,7 @@ class TreeModel {
   /**
    * print the tree model (assume that the node impurity is plaintext)
    */
-  void print_tree_model();
+  void print_tree_model() const;
 };
 
 

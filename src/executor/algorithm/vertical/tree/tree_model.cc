@@ -339,7 +339,7 @@ std::vector<double> TreeModel::comp_feature_importance(
 }
 
 
-void TreeModel::print_tree_model() {
+void TreeModel::print_tree_model() const {
   log_info("============== print the tree =============");
   log_info("[TreeModel.print_tree_model]: tree.class_num = " + to_string(class_num));
   log_info("[TreeModel.print_tree_model]: tree.max_depth = " + to_string(max_depth));

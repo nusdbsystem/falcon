@@ -41,7 +41,6 @@ class DTParameterServer: public ParameterServer{
   ~DTParameterServer();
 
  public:
-
   /**
   * partition data by features, and send partitioned data to workers
   *
