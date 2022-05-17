@@ -1,5 +1,5 @@
 //
-// Created by nai li xing on 04/07/21.
+// Created by 04/07/21.
 //
 
 #include "falcon/distributed/parameter_server_base.h"

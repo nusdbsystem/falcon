@@ -8,42 +8,9 @@ import (
 	fl_comms "falcon_platform/jobmanager/fl_comms_pattern"
 	"falcon_platform/logger"
 	"fmt"
-	"reflect"
 	"strconv"
 	"strings"
 )
-
-// TrainJob4SingleWorker parsed from TrainJob, sent to each worker with all related information
-// add NetWorkFile, MpcIP, MpcPort
-type TrainJob4SingleWorker struct {
-
-	// those are the same as TranJob object or TrainJob
-	JobFlType      string
-	ExistingKey    uint
-	PartyNums      uint
-	Tasks          common.Tasks
-	WorkerPreParty int
-
-	// Only one party's information included
-	PartyInfo common.PartyInfo
-
-	// Proto file for falconMl tasks communication
-	ExecutorPairNetworkCfg string
-
-	// distributed training information
-	DistributedTask common.DistributedTask
-
-	// Proto file for distributed falconMl tasks communication
-	DistributedExecutorPairNetworkCfg string
-
-	// This is for mpc
-
-	// mpc accepts a file defined as falcon/data/networks/mpc_executor.txt, mpc_mpc_ports_inputs.txt
-	// this is the content of the file, each worker will write it to local disk
-	MpcPairNetworkCfg string
-
-	MpcExecutorNetworkCfg string
-}
 
 // WorkerInfo is the argument passed when a worker registers with the master.
 // the worker's UNIX-domain socket name, i.e. its RPC addr
@@ -135,30 +102,6 @@ func DecodeWorkerInfo(encodedStr string) *WorkerInfo {
 	return args
 }
 
-func EncodeTrainJob4SingleWorker(args *TrainJob4SingleWorker) []byte {
-
-	ArgTypeRegister()
-
-	var buff bytes.Buffer
-
-	var encoder = gob.NewEncoder(&buff)
-
-	if err := encoder.Encode(&args); err != nil {
-		panic(err)
-	}
-	converted := buff.Bytes()
-	return converted
-}
-
-func DecodeTrainJob4SingleWorker(by []byte) (*TrainJob4SingleWorker, error) {
-	ArgTypeRegister()
-	reader := bytes.NewReader(by)
-	var decoder = gob.NewDecoder(reader)
-	var d TrainJob4SingleWorker
-	err := decoder.Decode(&d)
-	return &d, err
-}
-
 func SerializeTask(args *TaskContext) []byte {
 
 	ArgTypeRegister()
@@ -181,93 +124,4 @@ func DeserializeTask(by []byte) (*TaskContext, error) {
 	var d TaskContext
 	err := decoder.Decode(&d)
 	return &d, err
-}
-
-func EncodeTrainJob4SingleWorkerGeneral(args interface{}) []byte {
-
-	ArgTypeRegister()
-
-	var buff bytes.Buffer
-
-	var encoder = gob.NewEncoder(&buff)
-
-	switch t := args.(type) {
-	default:
-		logger.Log.Println(t)
-	case *ShutdownReply:
-		args = args.(*ShutdownReply)
-	case *TrainJob4SingleWorker:
-		args = args.(*TrainJob4SingleWorker)
-	case *DoTaskReply:
-		args = args.(*DoTaskReply)
-	}
-
-	if err := encoder.Encode(args); err != nil {
-		panic(err)
-	}
-	converted := buff.Bytes()
-	return converted
-}
-
-func DecodeTrainJob4SingleWorkerGeneral(by []byte, reply interface{}) {
-
-	v := reflect.ValueOf(reply).Elem()
-
-	func(by []byte) {
-
-		ArgTypeRegister()
-
-		reader := bytes.NewReader(by)
-
-		var decoder = gob.NewDecoder(reader)
-
-		switch t := reply.(type) {
-		default:
-			logger.Log.Println(t)
-		case *ShutdownReply:
-
-			var d ShutdownReply
-			err := decoder.Decode(&d)
-			if err != nil {
-				panic(err)
-			}
-
-			var elem = reflect.ValueOf(d)
-			var relType = reflect.TypeOf(d)
-
-			for i := 0; i < elem.NumField(); i++ {
-				name := relType.Field(i).Name
-				v.FieldByName(name).Set(elem.FieldByName(name))
-			}
-		case *TrainJob4SingleWorker:
-			var d TrainJob4SingleWorker
-			err := decoder.Decode(&d)
-			if err != nil {
-				panic(err)
-			}
-
-			var elem = reflect.ValueOf(d)
-			var relType = reflect.TypeOf(d)
-
-			for i := 0; i < elem.NumField(); i++ {
-				name := relType.Field(i).Name
-				v.FieldByName(name).Set(elem.FieldByName(name))
-			}
-		case *DoTaskReply:
-			var d DoTaskReply
-			err := decoder.Decode(&d)
-			if err != nil {
-				panic(err)
-			}
-
-			var elem = reflect.ValueOf(d)
-			var relType = reflect.TypeOf(d)
-
-			for i := 0; i < elem.NumField(); i++ {
-				name := relType.Field(i).Name
-				v.FieldByName(name).Set(elem.FieldByName(name))
-			}
-		}
-
-	}(by)
 }
