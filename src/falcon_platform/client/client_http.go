@@ -5,6 +5,7 @@ package client
 import (
 	"encoding/json"
 	"falcon_platform/common"
+	"falcon_platform/logger"
 	"fmt"
 	"io/ioutil"
 	"net/url"
@@ -215,7 +216,8 @@ func AddPort(ServerAddr, port string) {
 		}
 	}()
 	if err != nil || resp.StatusCode != 200 {
-		panic(fmt.Sprintf("[Client]: Requesting 'AddPort' Error, %s\n", err))
+		//panic(fmt.Sprintf("[Client]: Requesting 'AddPort' Error, %s\n", err))
+		logger.Log.Println("[Client]: Requesting 'AddPort' Error, %s, it probably already exist. \n", err)
 	}
 }
 
