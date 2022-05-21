@@ -13,10 +13,8 @@ import (
 
 // init register all existing tasks.
 func init() {
-	if AllTasks == nil {
-		AllTasks = make(map[common.FalconTask]Task)
-	}
-	AllTasks[common.MpcTaskKey] = new(MpcTaskArgs)
+	allTasks = GetAllTasks()
+	allTasks[common.MpcTaskKey] = new(MpcTaskArgs)
 }
 
 // MpcTaskArgs used to run the Mpc tasks

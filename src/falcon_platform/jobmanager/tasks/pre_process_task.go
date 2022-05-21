@@ -11,10 +11,8 @@ import (
 
 // init register all existing tasks.
 func init() {
-	if AllTasks == nil {
-		AllTasks = make(map[common.FalconTask]Task)
-	}
-	AllTasks[common.PreProcTaskKey] = new(PreProcessTask)
+	allTasks = GetAllTasks()
+	allTasks[common.PreProcTaskKey] = new(PreProcessTask)
 }
 
 type PreProcessTask struct {

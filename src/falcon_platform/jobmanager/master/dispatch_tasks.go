@@ -17,7 +17,7 @@ func (master *Master) dispatchMpcTask(wg *sync.WaitGroup, mpcAlgorithmName strin
 		wg.Add(1)
 		go func(wk *entity.WorkerInfo) {
 			defer logger.HandleErrors()
-			task := tasks.AllTasks[common.MpcTaskKey]
+			task := tasks.GetAllTasks()[common.MpcTaskKey]
 			// master send this to each worker, and worker will use it to generate command line.
 
 			generalTask := &entity.TaskContext{TaskName: common.MpcTaskKey,
@@ -42,7 +42,7 @@ func (master *Master) dispatchTask(wg *sync.WaitGroup, taskName common.FalconTas
 		wg.Add(1)
 		go func(wk *entity.WorkerInfo) {
 			defer logger.HandleErrors()
-			task := tasks.AllTasks[taskName]
+			task := tasks.GetAllTasks()[taskName]
 			// master send this to each worker, and worker will use it to generate command line.
 			generalTask := &entity.TaskContext{TaskName: taskName,
 				Wk:              wk,

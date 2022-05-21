@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestDslQueue(t *testing.T) {
+func TestJobQueue(t *testing.T) {
 
 	a := cache.TrainJob{}
 

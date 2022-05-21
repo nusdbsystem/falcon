@@ -22,7 +22,7 @@ func deployJobManagerK8s(job *common.TrainJob, workerType string) {
 
 	serviceName := "master-" + itemKey + "-" + strings.ToLower(workerType)
 
-	// put to the dslqueue, assign key to env
+	// put to the jobQueue, assign key to env
 	logger.Log.Println("[JobManager]: Writing item to redis")
 
 	//cache.InitRedisClient().Set(itemKey, cache.Serialize(job))

@@ -11,10 +11,8 @@ import (
 
 // init register all existing tasks.
 func init() {
-	if AllTasks == nil {
-		AllTasks = make(map[common.FalconTask]Task)
-	}
-	AllTasks[common.LimeFeatureTaskKey] = new(LimeInterpretTask)
+	allTasks = GetAllTasks()
+	allTasks[common.LimeFeatureTaskKey] = new(LimeInterpretTask)
 }
 
 type LimeInterpretTask struct {

@@ -40,7 +40,7 @@ type JobModelReportReply struct {
 	EvaluationReportPath string `json:"evaluation_report_path"`
 }
 
-// receive a job from jsonbody or file, parse it, put in dslqueue
+// receive a job from jsonbody or file, parse it, put in jobQueue
 func SubmitTrainJob(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// declare the job as train job type
 	var job common.TrainJob

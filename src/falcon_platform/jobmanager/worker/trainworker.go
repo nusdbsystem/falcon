@@ -101,7 +101,7 @@ func (wk *TrainWorker) DoTask(args string, rep *entity.DoTaskReply) error {
 	}
 
 	// if the task is registered,
-	if task, ok := tasks.AllTasks[taskName]; ok {
+	if task, ok := tasks.GetAllTasks()[taskName]; ok {
 		wk.runTask(task, taskArg)
 		update()
 		return nil
@@ -155,7 +155,7 @@ func (wk *TrainWorker) RunMpc(args string, rep *entity.DoTaskReply) error {
 		wk.MpcTm.Mux.Unlock()
 	}
 
-	task := tasks.AllTasks[taskName]
+	task := tasks.GetAllTasks()[taskName]
 
 	// clear the existing mpc resources if exist
 	wk.MpcTm.DeleteResources()

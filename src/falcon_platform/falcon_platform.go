@@ -209,7 +209,7 @@ func initEnv(svcName string) {
 	case common.JobManagerMasterRole:
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 
-		// master needs dslqueue item, tasks type
+		// master needs jobQueue item, tasks type
 		common.MasterTrainJobKey = common.GetEnv("ITEM_KEY", "")
 		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")

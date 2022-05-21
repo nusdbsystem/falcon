@@ -59,11 +59,11 @@ loop:
 			}
 		default:
 
-			//logger.Log.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the dslqueue...")
+			//logger.Log.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the jobQueue...")
 
-			if job, ok := cache.JobDslQueue.Pop(); ok {
+			if job, ok := cache.GetJobQueue().Pop(); ok {
 
-				logger.Log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from dslqueue")
+				logger.Log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from jobQueue")
 
 				models.JobUpdateStatus(job.JobId, common.JobRunning, jobDB)
 
