@@ -553,7 +553,7 @@ type GbdtParams struct {
 	Loss string `protobuf:"bytes,2,opt,name=loss,proto3" json:"loss,omitempty"`
 	// learning rate shrinks the contribution of each tree
 	LearningRate float64 `protobuf:"fixed64,3,opt,name=learning_rate,json=learningRate,proto3" json:"learning_rate,omitempty"`
-	// the fraction of samples to be used for fitting individual base learners
+	// the fraction of samples to be used for fitting individual rpcbase learners
 	// default 1.0, reserved here for future usage
 	Subsample float64 `protobuf:"fixed64,4,opt,name=subsample,proto3" json:"subsample,omitempty"`
 	// decision tree builder params (note that the tree type here may be changed

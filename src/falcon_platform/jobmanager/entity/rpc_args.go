@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"falcon_platform/common"
+	fl_comms "falcon_platform/jobmanager/fl_comms_pattern"
 	"falcon_platform/logger"
 	"fmt"
 	"reflect"
@@ -12,27 +13,27 @@ import (
 	"strings"
 )
 
-// parsed from DslObj, sent to each worker with all related information
+// TrainJob4SingleWorker parsed from TrainJob, sent to each worker with all related information
 // add NetWorkFile, MpcIP, MpcPort
-type DslObj4SingleWorker struct {
+type TrainJob4SingleWorker struct {
 
-	// those are the same as TranJob object or DslObj
+	// those are the same as TranJob object or TrainJob
 	JobFlType      string
 	ExistingKey    uint
 	PartyNums      uint
 	Tasks          common.Tasks
-	WorkerPreGroup int
+	WorkerPreParty int
 
 	// Only one party's information included
 	PartyInfo common.PartyInfo
 
-	// Proto file for falconMl task communication
+	// Proto file for falconMl tasks communication
 	ExecutorPairNetworkCfg string
 
 	// distributed training information
 	DistributedTask common.DistributedTask
 
-	// Proto file for distributed falconMl task communication
+	// Proto file for distributed falconMl tasks communication
 	DistributedExecutorPairNetworkCfg string
 
 	// This is for mpc
@@ -54,7 +55,8 @@ type WorkerInfo struct {
 
 	WorkerID common.WorkerIdType
 
-	GroupID common.GroupIdType
+	// inter partyID
+	PartyIndex int
 }
 
 type ShutdownReply struct {
@@ -62,7 +64,7 @@ type ShutdownReply struct {
 }
 
 type DoTaskReply struct {
-	// base info of this rpc call
+	// rpcbase info of this rpc call
 	RpcCallMethod string
 	WorkerAddr    string
 
@@ -86,9 +88,12 @@ type RetrieveModelReportReply struct {
 	ContainsModelReport bool
 }
 
-type GeneralTask struct {
-	TaskName common.FalconTask
-	AlgCfg   string `default:""`
+type TaskContext struct {
+	TaskName        common.FalconTask
+	FLNetworkConfig *fl_comms.FLNetworkConfig
+	Job             *common.TrainJob
+	Wk              *WorkerInfo
+	MpcAlgName      string
 }
 
 // Marshal list to string
@@ -100,7 +105,7 @@ func MarshalStatus(trainStatuses *DoTaskReply) string {
 	return string(jb)
 }
 
-func argTypeRegister() {
+func ArgTypeRegister() {
 	gob.Register([]interface{}{})
 	gob.Register(map[string]interface{}{})
 }
@@ -110,9 +115,7 @@ func EncodeWorkerInfo(args *WorkerInfo) string {
 		":" +
 		fmt.Sprintf("%d", args.PartyID) + // 2
 		":" +
-		fmt.Sprintf("%d", args.WorkerID) + // 3
-		":" +
-		fmt.Sprintf("%d", args.GroupID) // 4
+		fmt.Sprintf("%d", args.WorkerID) // 3
 
 	return encodedStr
 }
@@ -124,43 +127,17 @@ func DecodeWorkerInfo(encodedStr string) *WorkerInfo {
 	tmpAddr := workerTmpList[0] + ":" + workerTmpList[1]
 	tmpPartyID, _ := strconv.Atoi(workerTmpList[2])
 	tmpWorkerID, _ := strconv.Atoi(workerTmpList[3])
-	tmpWorkerGroupID, _ := strconv.Atoi(workerTmpList[4])
 
 	args := new(WorkerInfo)
 	args.Addr = tmpAddr
 	args.PartyID = common.PartyIdType(tmpPartyID)
 	args.WorkerID = common.WorkerIdType(tmpWorkerID)
-	args.GroupID = common.GroupIdType(tmpWorkerGroupID)
 	return args
 }
 
-func EncodeDslObj4SingleWorker(args *DslObj4SingleWorker) []byte {
+func EncodeTrainJob4SingleWorker(args *TrainJob4SingleWorker) []byte {
 
-	argTypeRegister()
-
-	var buff bytes.Buffer
-
-	var encoder = gob.NewEncoder(&buff)
-
-	if err := encoder.Encode(&args); err != nil {
-		panic(err)
-	}
-	converted := buff.Bytes()
-	return converted
-}
-
-func DecodeDslObj4SingleWorker(by []byte) (*DslObj4SingleWorker, error) {
-	argTypeRegister()
-	reader := bytes.NewReader(by)
-	var decoder = gob.NewDecoder(reader)
-	var d DslObj4SingleWorker
-	err := decoder.Decode(&d)
-	return &d, err
-}
-
-func EncodeGeneralTask(args *GeneralTask) []byte {
-
-	argTypeRegister()
+	ArgTypeRegister()
 
 	var buff bytes.Buffer
 
@@ -173,18 +150,42 @@ func EncodeGeneralTask(args *GeneralTask) []byte {
 	return converted
 }
 
-func DecodeGeneralTask(by []byte) (*GeneralTask, error) {
-	argTypeRegister()
+func DecodeTrainJob4SingleWorker(by []byte) (*TrainJob4SingleWorker, error) {
+	ArgTypeRegister()
 	reader := bytes.NewReader(by)
 	var decoder = gob.NewDecoder(reader)
-	var d GeneralTask
+	var d TrainJob4SingleWorker
 	err := decoder.Decode(&d)
 	return &d, err
 }
 
-func EncodeDslObj4SingleWorkerGeneral(args interface{}) []byte {
+func SerializeTask(args *TaskContext) []byte {
 
-	argTypeRegister()
+	ArgTypeRegister()
+
+	var buff bytes.Buffer
+
+	var encoder = gob.NewEncoder(&buff)
+
+	if err := encoder.Encode(&args); err != nil {
+		panic(err)
+	}
+	converted := buff.Bytes()
+	return converted
+}
+
+func DeserializeTask(by []byte) (*TaskContext, error) {
+	ArgTypeRegister()
+	reader := bytes.NewReader(by)
+	var decoder = gob.NewDecoder(reader)
+	var d TaskContext
+	err := decoder.Decode(&d)
+	return &d, err
+}
+
+func EncodeTrainJob4SingleWorkerGeneral(args interface{}) []byte {
+
+	ArgTypeRegister()
 
 	var buff bytes.Buffer
 
@@ -195,8 +196,8 @@ func EncodeDslObj4SingleWorkerGeneral(args interface{}) []byte {
 		logger.Log.Println(t)
 	case *ShutdownReply:
 		args = args.(*ShutdownReply)
-	case *DslObj4SingleWorker:
-		args = args.(*DslObj4SingleWorker)
+	case *TrainJob4SingleWorker:
+		args = args.(*TrainJob4SingleWorker)
 	case *DoTaskReply:
 		args = args.(*DoTaskReply)
 	}
@@ -208,13 +209,13 @@ func EncodeDslObj4SingleWorkerGeneral(args interface{}) []byte {
 	return converted
 }
 
-func DecodeDslObj4SingleWorkerGeneral(by []byte, reply interface{}) {
+func DecodeTrainJob4SingleWorkerGeneral(by []byte, reply interface{}) {
 
 	v := reflect.ValueOf(reply).Elem()
 
 	func(by []byte) {
 
-		argTypeRegister()
+		ArgTypeRegister()
 
 		reader := bytes.NewReader(by)
 
@@ -238,8 +239,8 @@ func DecodeDslObj4SingleWorkerGeneral(by []byte, reply interface{}) {
 				name := relType.Field(i).Name
 				v.FieldByName(name).Set(elem.FieldByName(name))
 			}
-		case *DslObj4SingleWorker:
-			var d DslObj4SingleWorker
+		case *TrainJob4SingleWorker:
+			var d TrainJob4SingleWorker
 			err := decoder.Decode(&d)
 			if err != nil {
 				panic(err)

@@ -1,71 +1,62 @@
-package common
+package fl_comms_pattern
 
 import (
 	"bytes"
 	"encoding/gob"
+	"falcon_platform/common"
 	"fmt"
 )
 
-/**
- * @Description: partyServer reply this to jobManager,
-				 the struct contains multiple resource and each resource have many services.
- * @File:  job-mngr
- * @Version: 1.0.0
- * @Params:
- * @Date: 23/08/21 1:50
-*/
+// LaunchResourceReply
+// * @Description: partyServer reply this to jobManager,
+//				 the struct contains multiple resource and each resource have many services.
+// * @File:  job-mngr
+// * @Version: 1.0.0
+// * @Params:
+// * @Date: 23/08/21 1:50
 type LaunchResourceReply struct {
 
 	// partyID
-	PartyID PartyIdType
+	PartyID common.PartyIdType
 
 	// how many resources created by this partyServer
 	ResourceNum int
 
 	// key workerID, value: *ResourceSVC
-	ResourceSVCs map[WorkerIdType]*ResourceSVC
-
-	//group number, how many worker groups in this partyServer
-	GroupNum int
-
-	//group number, how many workers in this group
-	ResourceNumPreGroup int
+	ResourceSVCs map[common.WorkerIdType]*ResourceSVC
 }
 
 type ResourceSVC struct {
 	// worker id
-	WorkerId WorkerIdType
-
-	// group id, this is used by lime, lime can be trained in distributed way
-	GroupId GroupIdType
+	WorkerId common.WorkerIdType
 
 	// Ip of the service running in this resource
 	ResourceIP string
 
 	// Each worker's port, listen master's requests
-	WorkerPort PortType
+	WorkerPort common.PortType
 
 	// Each Executor's port array, i-th element is listening requests from i-th party's executor
-	ExecutorExecutorPort []PortType
+	ExecutorExecutorPort []common.PortType
 
 	// Each Mpc listen two ports,
-	// mpc port1, listen requests from other party's mpc
-	MpcMpcPort PortType
-	// mpc port2, listen requests from other party's executor
-	MpcExecutorPort PortType
+	// mpc port1, listening requests from other party's mpc
+	MpcMpcPort common.PortType
+	// mpc port2, listening requests from other party's executor
+	MpcExecutorPort common.PortType
 
 	// used in distributed training
 
 	// if this worker is Executor, this port listen requests sent from current party's parameter server
-	ExecutorPSPort PortType // workerId: Executor port
+	ExecutorPSPort common.PortType // workerId: Executor port
 	// if this worker is parameter server, listen requests sent from current party's executor
-	PsExecutorPorts []PortType
+	PsExecutorPorts []common.PortType
 
 	// each worker will spawn a subprocess, which can be a train-worker or a parameter server
 	DistributedRole uint
 }
 
-func (rs *ResourceSVC) ToAddr(port PortType) (address string) {
+func (rs *ResourceSVC) ToAddr(port common.PortType) (address string) {
 	return rs.ResourceIP + ":" + fmt.Sprintf("%d", port)
 }
 

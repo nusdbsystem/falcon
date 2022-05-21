@@ -26,8 +26,8 @@ type ManagerInterface interface {
 		resourceRelease context.Context, // control if release resource or not
 		mux *sync.Mutex, // lock
 		resourceNum *int, // store number of sub-processes
-		TaskStatus *string, // store task status
-		runTimeErrorLog *string, // store task error logs
+		TaskStatus *string, // store tasks status
+		runTimeErrorLog *string, // store tasks error logs
 	)
 
 	// delete resources
@@ -39,9 +39,9 @@ type ResourceManager struct {
 	// public variables
 	// lock
 	Mux sync.Mutex
-	// task status, record status of tasks created by "ResourceManager.CreateResources"
+	// tasks status, record status of tasks created by "ResourceManager.CreateResources"
 	TaskStatus string
-	// record executing error logs of task created by "ResourceManager.CreateResources",
+	// record executing error logs of tasks created by "ResourceManager.CreateResources",
 	// if no error, it;s ""
 	RunTimeErrorLog string
 

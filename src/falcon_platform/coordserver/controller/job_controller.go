@@ -18,11 +18,6 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 ) {
 
 	//logger.Log.Println("HTTP server: in SubmitJob, put to the JobDslQueue")
-
-	// generate.sh item pushed to the dslqueue
-
-	addresses := common.ParseAddress(job.PartyInfoList)
-
 	// generate.sh strings used to write to db
 	partyIds, err := json.Marshal(job.PartyInfoList)
 	TaskInfo, err := json.Marshal(job.Tasks)
@@ -55,22 +50,12 @@ func JobSubmit(job *common.TrainJob, ctx *entity.Context) (
 
 	ctx.JobDB.Commit(tx, []error{err1, err2, err3, err4})
 
-	dslOjb := new(cache.DslObj)
-	dslOjb.PartyAddrList = addresses
-	dslOjb.JobId = u2.JobId
-	dslOjb.JobName = job.JobName
-	dslOjb.JobFlType = job.JobFlType
-	dslOjb.ExistingKey = job.ExistingKey
-	dslOjb.PartyNums = job.PartyNums
-	dslOjb.DistributedTask = job.DistributedTask
-	dslOjb.PartyInfoList = job.PartyInfoList
-	dslOjb.Tasks = job.Tasks
-	dslOjb.Stages = job.Stages
-	dslOjb.ClassNum = job.ClassNum
+	job.JobId = u2.JobId
+	job.PartyAddrList = common.ParseAddress(job.PartyInfoList)
 
 	go func() {
 		defer logger.HandleErrors()
-		cache.JobDslQueue.Push(dslOjb)
+		cache.JobDslQueue.Push(job)
 	}()
 
 	return u2.JobId, u1.JobName, u2.UserID, u1.TaskNum, u2.Status

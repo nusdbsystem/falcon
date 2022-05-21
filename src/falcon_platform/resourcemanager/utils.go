@@ -9,10 +9,11 @@ import (
 	"math/rand"
 	"net"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
-// try with the port, if it's available, use it, otherwise retry until find an available port
+// GetFreePort try with the port, if it's available, use it, otherwise retry until find an available port
 func GetFreePort(portNum int) []common.PortType {
 	Ntime := 5
 	var portRes []common.PortType
@@ -45,6 +46,10 @@ func GetFreePort(portNum int) []common.PortType {
 	return portRes
 }
 
+func GetOneFreePort() common.PortType {
+	return GetFreePort(1)[0]
+}
+
 func CheckPort(port common.PortType) error {
 	// try the port,
 	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("localhost:%d", port))
@@ -66,35 +71,37 @@ func CheckPort(port common.PortType) error {
 	return nil
 }
 
-func GetMpcExecutorPort(workerID int, stageName string, classID int) common.PortType {
+func GetMpcExecutorPort(workerID int, TaskClassIDName string) common.PortType {
+
+	TaskName := strings.Split(TaskClassIDName, "-")[0]
+	classID, _ := strconv.Atoi(strings.Split(TaskClassIDName, "-")[1])
+
 	stagePrefix := 1
-	if stageName == string(common.PreProcStage) {
+	if TaskName == string(common.PreProcTaskKey) {
 		stagePrefix = 2
 	}
 
-	if stageName == string(common.ModelTrainStage) {
+	if TaskName == string(common.ModelTrainTaskKey) {
 		stagePrefix = 3
 	}
 
-	if stageName == string(common.LimeInstanceSampleStage) {
+	if TaskName == string(common.LimeInstanceSampleTask) {
 		stagePrefix = 4
 	}
 
-	if stageName == string(common.LimePredStage) {
+	if TaskName == string(common.LimePredTaskKey) {
 		stagePrefix = 5
 	}
 
-	if stageName == string(common.LimeWeightStage) {
+	if TaskName == string(common.LimeWeightTaskKey) {
 		stagePrefix = 6
 	}
 
-	stageName = strings.Split(stageName, "-")[0]
-
-	if stageName == string(common.LimeFeatureSelectionStage) {
+	if TaskName == string(common.LimeFeatureTaskKey) {
 		stagePrefix = 7
 	}
 
-	if stageName == string(common.LimeVFLModelTrainStage) {
+	if TaskName == string(common.LimeInterpretTaskKey) {
 		stagePrefix = 8
 	}
 

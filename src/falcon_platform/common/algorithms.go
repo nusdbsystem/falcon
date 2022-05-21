@@ -127,7 +127,7 @@ type GBDT struct {
 	Loss string `json:"loss"`
 	// learning rate shrinks the contribution of each tree
 	LearningRate float64 `json:"learning_rate"`
-	// the fraction of samples to be used for fitting individual base learners
+	// the fraction of samples to be used for fitting individual rpcbase learners
 	// default 1.0, reserved here for future usage
 	Subsample float64 `json:"subsample"`
 	// decision tree builder params (note that the tree type here may be changed
@@ -179,7 +179,7 @@ type LimeCompPrediction struct {
 	OriginalModelName string `json:"original_model_name"`
 	// vertical original model saved file
 	OriginalModelSavedFile string `json:"original_model_saved_file"`
-	// type of model task, 'regression' or 'classification'
+	// type of model tasks, 'regression' or 'classification'
 	ModelType string `json:"model_type"`
 	// number of classes in classification, set to 1 if regression
 	ClassNum int32 `json:"class_num"`
@@ -189,7 +189,7 @@ type LimeCompPrediction struct {
 	ComputedPredictionFile string `json:"computed_prediction_file"`
 }
 
-// This message denotes the compute sample weights parameters
+// LimeCompWeights This message denotes the compute sample weights parameters
 type LimeCompWeights struct {
 	// the instance index for explain
 	ExplainInstanceIdx int32 `json:"explain_instance_idx"`
@@ -218,7 +218,7 @@ type LimeCompWeights struct {
 	SelectedPredictionsFile string `json:"selected_predictions_file"`
 }
 
-// This message denotes the LIME feature selection parameters
+// LimeFeatSel This message denotes the LIME feature selection parameters
 type LimeFeatSel struct {
 	// selected samples file
 	SelectedSamplesFile string `json:"selected_samples_file"`
@@ -240,7 +240,7 @@ type LimeFeatSel struct {
 	SelectedFeaturesFile string `json:"selected_features_file"`
 }
 
-// This message denotes the LIME interpret model training parameters
+// LimeInterpretLR This message denotes the LIME interpret model training parameters
 type LimeInterpretLR struct {
 	// selected data file, either selected_samples_file or selected_features_file
 	SelectedDataFile string `json:"selected_data_file"`
@@ -262,7 +262,7 @@ type LimeInterpretLR struct {
 	ExplanationReport string `json:"explanation_report"`
 }
 
-// This message denotes the LIME interpret model training parameters
+// LimeInterpretDT This message denotes the LIME interpret model training parameters
 type LimeInterpretDT struct {
 	// selected data file, either selected_samples_file or selected_features_file
 	SelectedDataFile string `json:"selected_data_file"`

@@ -1,16 +1,17 @@
 package cache
 
 import (
+	"falcon_platform/common"
 	"sync"
 )
 
 type DslQueue struct {
 	sync.Mutex
 
-	dslqueue []*DslObj
+	dslqueue []*common.TrainJob
 }
 
-func (q *DslQueue) Push(item *DslObj) {
+func (q *DslQueue) Push(item *common.TrainJob) {
 
 	q.Lock()
 
@@ -20,7 +21,7 @@ func (q *DslQueue) Push(item *DslObj) {
 
 }
 
-func (q *DslQueue) Pop() (*DslObj, bool) {
+func (q *DslQueue) Pop() (*common.TrainJob, bool) {
 	q.Lock()
 	defer q.Unlock()
 
@@ -34,14 +35,14 @@ func (q *DslQueue) Pop() (*DslObj, bool) {
 
 	} else {
 
-		return &DslObj{}, false
+		return &common.TrainJob{}, false
 
 	}
 }
 
 func (q *DslQueue) Clear() {
 	q.Lock()
-	q.dslqueue = []*DslObj{}
+	q.dslqueue = []*common.TrainJob{}
 	q.Unlock()
 }
 

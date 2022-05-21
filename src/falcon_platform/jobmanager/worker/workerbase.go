@@ -1,36 +1,27 @@
-// implement the abstract class of Worker with interface + struct
-package base
+package worker
 
 import (
 	"falcon_platform/client"
 	"falcon_platform/common"
 	_ "falcon_platform/common"
 	"falcon_platform/jobmanager/entity"
+	"falcon_platform/jobmanager/rpcbase"
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
 	"time"
 )
 
-type Worker interface {
-	// run worker rpc server
-	Run()
-	// DoTask rpc call
-	DoTask(arg string, rep *entity.DoTaskReply) error
-	// receive job information
-	ReceiveJobInfo(arg string, rep *entity.DoTaskReply) error
-}
-
-// worker server will do 2 things:
+// WorkerBase worker server will do 2 things:
 // 1. call c++ code to train /predict
 // 2. response to master's request to either report heartbeat or shutdown the training subprocess
 type WorkerBase struct {
-	RpcBaseClass
+	base.RpcBaseClass
 
 	// resource manager to manage resource of tasks like preprocess, model training,
 	// init at beginning of each doTask call, delete when dotask finish
 	Tm *resourcemanager.ResourceManager
 
-	// global mpcTM, manage multi mpc, record global mpc status in multi mpcs
+	// global mpcTM, manage multi mpc, record global mpc status in multi MPCs
 	MpcTm *resourcemanager.ResourceManager
 
 	// used for heartbeat
@@ -45,28 +36,12 @@ type WorkerBase struct {
 
 	// each worker is linked to the PartyID
 	PartyID common.PartyIdType
-
-	// each worker is linked to the PartyID
-	GroupID common.GroupIdType
-
-	// DistributedRole=1 worker, DistributedRole=0 parameter sever
-	DistributedRole uint
-
-	// each worker store full job information,
-	DslObj entity.DslObj4SingleWorker
 }
 
-func (w *WorkerBase) RunWorker(worker Worker) {
-	logger.Log.Println("[WorkerBase]: RunWorker called")
-
-	worker.Run()
-}
-
+// InitWorkerBase Addr is the worker ip+port
+// name is the worker name
+// manager: each worker have a tasks manager, which can be either docker, or native subprocess
 func (w *WorkerBase) InitWorkerBase(workerAddr, name string) {
-
-	// work addr Addr is the worker ip+port
-	// name is the worker name
-	// manager: each worker have a task manager, which can be either docker, or native subprocess
 
 	w.InitRpcBase(workerAddr)
 	w.Name = name
@@ -75,24 +50,11 @@ func (w *WorkerBase) InitWorkerBase(workerAddr, name string) {
 	w.reset()
 }
 
-func (w *WorkerBase) ReceiveJobInfo(arg string, rep *entity.DoTaskReply) error {
-	// receive job information, called by master
-	dslObj, err := entity.DecodeDslObj4SingleWorker([]byte(arg))
-	if err != nil {
-		rep.RuntimeError = true
-		rep.TaskMsg.RuntimeMsg = err.Error()
-	} else {
-		w.DslObj = *dslObj
-	}
-	return nil
-}
-
-// call the master's register method to tell master i'm(worker) ready,
+// RegisterToMaster call the master's register method to tell master I'm(worker) ready,
 func (w *WorkerBase) RegisterToMaster(MasterAddr string) {
 	worker := new(entity.WorkerInfo)
 	worker.Addr = w.Addr
 	worker.PartyID = w.PartyID
-	worker.GroupID = w.GroupID
 	worker.WorkerID = w.WorkerID
 
 	logger.Log.Printf("[WorkerBase]: call Master.RegisterWorker to register WorkerAddr: %s \n", worker.Addr)
@@ -125,7 +87,7 @@ func (w *WorkerBase) Shutdown(_, _ *struct{}) error {
 	return nil
 }
 
-// hearbeat loop
+// HeartBeatLoop loop
 func (w *WorkerBase) HeartBeatLoop() {
 
 	// wait for 5 second before counting down
@@ -156,13 +118,11 @@ loop:
 			}
 
 			time.Sleep(time.Millisecond * common.WorkerTimeout / 5)
-
-			//fmt.Printf("%s: CountDown:....... %d \n", w.Name, int(elapseTime/int64(time.Millisecond)))
 		}
 	}
 }
 
-// called by master to reset worker base time
+// ResetTime called by master to reset worker rpcbase time
 func (w *WorkerBase) ResetTime(_ *struct{}, _ *struct{}) error {
 	w.reset()
 	return nil

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"falcon_platform/cache"
 	"falcon_platform/common"
 	"falcon_platform/coordserver/entity"
 	"falcon_platform/jobmanager"
@@ -86,21 +85,9 @@ func CreateInference(inferenceJob common.InferenceJob, ctx *entity.Context) (boo
 	logger.Log.Printf("CreateInference: JobType: %s, parsed partInfo : ", JobInfo.FlSetting)
 	logger.Log.Println(inferencePartyInfo)
 
-	addresses := common.ParseAddress(inferencePartyInfo)
-
-	dslOjb := new(cache.DslObj)
-	dslOjb.PartyAddrList = addresses
-	dslOjb.JobId = inference.ID
-	dslOjb.JobName = JobInfo.JobName
-	dslOjb.JobFlType = JobInfo.FlSetting
-	dslOjb.ExistingKey = JobInfo.ExistingKey
-	dslOjb.PartyNums = JobInfo.PartyNum
-	dslOjb.PartyInfoList = inferencePartyInfo
-	dslOjb.Tasks = TaskInfo
-
 	go func() {
 		defer logger.HandleErrors()
-		jobmanager.RunJobManager(dslOjb, common.InferenceWorker)
+		//jobmanager.RunJobManager(job, common.InferenceWorker)
 	}()
 
 	return true, inference.ID

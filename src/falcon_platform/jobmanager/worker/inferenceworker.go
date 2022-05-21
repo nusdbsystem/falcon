@@ -2,17 +2,16 @@ package worker
 
 import (
 	"falcon_platform/common"
-	"falcon_platform/jobmanager/base"
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"net/rpc"
 )
 
 type InferenceWorker struct {
-	base.WorkerBase
+	WorkerBase
 }
 
-func InitInferenceWorker(masterAddr, workerAddr string, PartyID common.PartyIdType, WorkerID common.WorkerIdType, DistributedRole uint) *InferenceWorker {
+func InitInferenceWorker(masterAddr, workerAddr string, PartyID common.PartyIdType, WorkerID common.WorkerIdType) *InferenceWorker {
 	wk := InferenceWorker{}
 	wk.InitWorkerBase(workerAddr, common.InferenceWorker)
 	wk.MasterAddr = masterAddr

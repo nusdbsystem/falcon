@@ -72,8 +72,8 @@ func (mngr *SubProcessManager) CreateResource(
 	isRealeaseCtx context.Context, // control if release resource or not
 	mux *sync.Mutex, // lock
 	TotResources *int, // store number of sub-processes
-	TaskStatus *string, // store task status
-	runTimeErrorLog *string, // store task error logs
+	TaskStatus *string, // store tasks status
+	runTimeErrorLog *string, // store tasks error logs
 ) {
 	var cmd *exec.Cmd = incmd.(*exec.Cmd)
 

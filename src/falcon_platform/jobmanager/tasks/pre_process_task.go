@@ -1,4 +1,4 @@
-package task
+package tasks
 
 import (
 	"falcon_platform/common"
@@ -9,10 +9,16 @@ import (
 	"os/exec"
 )
 
+// init register all existing tasks.
+func init() {
+	if AllTasks == nil {
+		AllTasks = make(map[common.FalconTask]Task)
+	}
+	AllTasks[common.PreProcTaskKey] = new(PreProcessTask)
+}
+
 type PreProcessTask struct {
-	DistributedRole uint
-	WorkerID        common.WorkerIdType
-	DslObj          *entity.DslObj4SingleWorker
+	TaskAbstract
 }
 
 // GetCommand FL Engine requires:
@@ -38,35 +44,41 @@ type PreProcessTask struct {
 //		("distributed-train-network-file", po::value<string>(&distributed_network_file), "ps network file");
 //		("worker-id", po::value<int>(&worker_id), "worker id");
 //		("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0");
-func (this *PreProcessTask) GetCommand() *exec.Cmd {
+func (this *PreProcessTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 
-	logger.Log.Println("[TrainWorker]: begin task pre-processing")
+	wk := taskInfo.Wk
+	fLConfig := taskInfo.FLNetworkConfig
+	job := taskInfo.Job
 
-	partyType := common.ConvertPartyType2Int(this.DslObj.PartyInfo.PartyType)
-	flSetting := common.ConvertPartyType2Int(this.DslObj.JobFlType)
+	this.printParams(job.Tasks.PreProcessing.AlgorithmName, job)
+
+	logger.Log.Println("[TrainWorker]: begin tasks pre-processing")
+
+	partyType := common.ConvertPartyType2Int(job.PartyInfoList[wk.PartyIndex].PartyType)
+	flSetting := common.ConvertPartyType2Int(job.JobFlType)
 
 	// 3. generate many files store etc
-	dataInputFile := common.TaskDataPath + "/" + this.DslObj.Tasks.PreProcessing.InputConfigs.DataInput.Data
-	dataOutFile := common.TaskDataOutput + "/" + this.DslObj.Tasks.PreProcessing.OutputConfigs.DataOutput
-	logFile := common.TaskRuntimeLogs + "-" + this.DslObj.Tasks.PreProcessing.AlgorithmName
-	KeyFile := common.TaskDataPath + "/" + this.DslObj.Tasks.PreProcessing.InputConfigs.DataInput.Key
+	dataInputFile := common.TaskDataPath + "/" + job.Tasks.PreProcessing.InputConfigs.DataInput.Data
+	dataOutFile := common.TaskDataOutput + "/" + job.Tasks.PreProcessing.OutputConfigs.DataOutput
+	logFile := common.TaskRuntimeLogs + "-" + job.Tasks.PreProcessing.AlgorithmName
+	KeyFile := common.TaskDataPath + "/" + job.Tasks.PreProcessing.InputConfigs.DataInput.Key
 
 	_ = os.MkdirAll(logFile, os.ModePerm)
 
 	// 3. generate command line
-	// this is not defined yet, since there is no such task right now
+	// this is not defined yet, since there is no such tasks right now
 	cmd := exec.Command(
 		common.FLEnginePath,
-		"--party-id", fmt.Sprintf("%d", this.DslObj.PartyInfo.ID),
-		"--party-num", fmt.Sprintf("%d", this.DslObj.PartyNums),
+		"--party-id", fmt.Sprintf("%d", job.PartyInfoList[wk.PartyIndex].ID),
+		"--party-num", fmt.Sprintf("%d", job.PartyNums),
 		"--party-type", fmt.Sprintf("%d", partyType),
 		"--fl-setting", fmt.Sprintf("%d", flSetting),
-		"--existing-key", fmt.Sprintf("%d", this.DslObj.ExistingKey),
+		"--existing-key", fmt.Sprintf("%d", job.ExistingKey),
 		"--key-file", KeyFile,
-		"--network-file", this.DslObj.ExecutorPairNetworkCfg,
+		"--network-file", fLConfig.ExecutorPairNetworkCfg[wk.WorkerID],
 
-		"--algorithm-name", this.DslObj.Tasks.PreProcessing.AlgorithmName,
-		"--algorithm-params", this.DslObj.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig,
+		"--algorithm-name", job.Tasks.PreProcessing.AlgorithmName,
+		"--algorithm-params", job.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig,
 		"--log-file", logFile,
 		"--data-input-file", dataInputFile,
 		"--data-output-file", dataOutFile,
@@ -79,7 +91,7 @@ func (this *PreProcessTask) GetCommand() *exec.Cmd {
 	logger.Log.Printf("---------------------------------------------------------------------------------\n")
 
 	// 4. execute cmd
-	logger.Log.Println("[TrainWorker]: task pre processing start")
+	logger.Log.Println("[TrainWorker]: tasks pre processing start")
 
 	return cmd
 }

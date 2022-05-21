@@ -5,6 +5,7 @@ import (
 	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/exceptions"
+	"falcon_platform/jobmanager/fl_comms_pattern"
 	"falcon_platform/logger"
 	"falcon_platform/partyserver/controller"
 	"fmt"
@@ -24,12 +25,11 @@ func NewRouter() *mux.Router {
 	return r
 }
 
-/**
- * @Description Called by job manager to launch one or multiple workers
- * @Date 下午2:51 23/08/21
- * @Param
- * @return  Return job manager with resources' information, eg. address etc, defined in common.LaunchResourceReply
- **/
+// RunWorker
+// * @Description Called by job manager to launch one or multiple workers
+// * @Date 下午2:51 23/08/21
+// * @Param
+// * @return  Return job manager with resources' information, eg. address etc, defined in common.LaunchResourceReply
 func RunWorker() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -46,24 +46,21 @@ func RunWorker() func(w http.ResponseWriter, r *http.Request) {
 		dataPath := r.FormValue(common.TrainDataPath)
 		modelPath := r.FormValue(common.ModelPath)
 		dataOutput := r.FormValue(common.TrainDataOutput)
-		workerPreGroup, err := strconv.Atoi(r.FormValue(common.WorkerPreGroup))
+		WorkerPreParty, err := strconv.Atoi(r.FormValue(common.WorkerPreParty))
 		partyNum, err := strconv.Atoi(r.FormValue(common.TotalPartyNumber))
-		workerGroupNum, err := strconv.Atoi(r.FormValue(common.WorkerGroupNumber))
-		enableDistributedTrain, err := strconv.Atoi(r.FormValue(common.EnableDistributedTrain))
-		stageName := r.FormValue(common.StageNameKey)
-		classID, _ := strconv.Atoi(r.FormValue(common.ClassIDKey))
+		stageName := r.FormValue(common.StageClassIDKey)
 
 		if err != nil {
 			panic(err)
 		}
 
-		resIns := controller.RunWorker(masterAddr, workerTypeKey, jobId, dataPath, modelPath, dataOutput, enableDistributedTrain, workerPreGroup, partyNum, workerGroupNum, stageName, classID)
+		resIns := controller.RunFLWorker(masterAddr, workerTypeKey, jobId, dataPath, modelPath, dataOutput, WorkerPreParty, partyNum, stageName)
 
 		// return to job manager
 		w.WriteHeader(http.StatusOK)
 
-		reply := common.RunWorkerReply{
-			EncodedStr: common.EncodeLaunchResourceReply(resIns),
+		reply := fl_comms_pattern.RunWorkerReply{
+			EncodedStr: fl_comms_pattern.EncodeLaunchResourceReply(resIns),
 		}
 
 		err = json.NewEncoder(w).Encode(reply)
@@ -76,7 +73,7 @@ func RunWorker() func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// sanity check
+// HelloPartyServer sanity check
 func HelloPartyServer(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprintf(w, "hello from falcon party server~\n")

@@ -9,6 +9,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/go-redis/redis/v8 v8.4.0
 	github.com/golang/protobuf v1.5.0
+	github.com/golangci/golangci-lint v1.32.2 // indirect
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect

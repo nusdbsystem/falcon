@@ -1,8 +1,8 @@
 package jobmanager
 
 import (
-	"falcon_platform/cache"
 	"falcon_platform/common"
+	"falcon_platform/jobmanager/fl_comms_pattern"
 	"falcon_platform/jobmanager/worker"
 	"falcon_platform/logger"
 )
@@ -13,30 +13,28 @@ import (
  * @Param workerType: trainWorker or inferenceWorker
  * @return
  **/
-func DeployMasterThread(dslOjb *cache.DslObj, workerType string) {
+func deployJobManagerThread(job *common.TrainJob, workerType string) {
 
 	// call party server to launch workers
-	ManageJobLifeCycle(dslOjb, workerType)
-
+	manageJobLifeCycle(job, workerType)
 	//resourcemanager.DeleteAll()
 }
 
-/**
- * @Description: this func is only called by partyServer, run worker in local thread
- * @Date 2:14 下午 1/12/20
- * @Param
- 	masterAddr： IP of the masterAddr addr
-	workerType： train or inference worker
-	jobId： jobId
-	dataPath： data folder path of this party
-	modelPath： the path to save trained model
-	dataOutput： path to store processed data
-	workerID： id of the worker, mainly used to distinguish workers in distributed training
-	distributedRole： 0: ps, 1: worker
- **/
+// DeployWorkerThread
+// * @Description: this func is only called by partyServer, run worker in local thread
+// * @Date 2:14 下午 1/12/20
+// * @Param
+// 	masterAddr： IP of the masterAddr addr
+//	workerType： train or inference worker
+//	jobId： jobId
+//	dataPath： data folder path of this party
+//	modelPath： the path to save trained model
+//	dataOutput： path to store processed data
+//	workerID： id of the worker, mainly used to distinguish workers in distributed training
+//	distributedRole： 0: ps, 1: worker
 func DeployWorkerThread(masterAddr, workerType, jobId,
 	dataPath, modelPath, dataOutput string,
-	resourceSVCs *common.ResourceSVC, distributedRole uint) {
+	resourceSVCs *fl_comms_pattern.ResourceSVC) {
 
 	workerAddr := resourceSVCs.ToAddr(resourceSVCs.WorkerPort)
 
@@ -53,23 +51,21 @@ func DeployWorkerThread(masterAddr, workerType, jobId,
 
 		serviceName = "job-" + jobId + "-train"
 		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
-		wk := worker.InitTrainWorker(masterAddr, workerAddr,
-			common.PartyID, resourceSVCs.WorkerId, resourceSVCs.GroupId,
-			distributedRole)
+		wk := worker.InitTrainWorker(masterAddr, workerAddr, common.PartyID, resourceSVCs.WorkerId)
 
 		go func() {
 			defer logger.HandleErrors()
-			wk.RunWorker(wk)
+			worker.RunWorker(wk)
 		}()
 
 	} else if workerType == common.InferenceWorker {
 
 		serviceName = "job-" + jobId + "-inference"
 		common.TaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
-		wk := worker.InitInferenceWorker(masterAddr, workerAddr, common.PartyID, resourceSVCs.WorkerId, distributedRole)
+		wk := worker.InitInferenceWorker(masterAddr, workerAddr, common.PartyID, resourceSVCs.WorkerId)
 		go func() {
 			defer logger.HandleErrors()
-			wk.RunWorker(wk)
+			worker.RunWorker(wk)
 		}()
 	}
 }

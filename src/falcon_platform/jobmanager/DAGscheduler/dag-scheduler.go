@@ -1,7 +1,6 @@
 package DAGscheduler
 
 import (
-	"falcon_platform/cache"
 	"falcon_platform/common"
 	"falcon_platform/logger"
 )
@@ -9,95 +8,80 @@ import (
 // define a type
 
 type TaskStage struct {
-	Name             common.FalconStage
-	TasksParallelism map[common.FalconTask]int
-	AssignedWorker   int
+	Name           common.FalconTask
+	AssignedWorker int
 }
 
 type DagScheduler struct {
 	// stage, each stage has many tasks,
-	Stages            map[common.FalconStage]TaskStage
+	Stages            map[common.FalconTask]TaskStage
 	ParallelismPolicy *ParallelismSchedulePolicy
 }
 
-func NewDagScheduler(dslOjb *cache.DslObj) *DagScheduler {
+func NewDagScheduler(job *common.TrainJob) *DagScheduler {
 	ds := new(DagScheduler)
-	ds.Stages = make(map[common.FalconStage]TaskStage)
-	ds.ParallelismPolicy = NewParallelismSchedulePolicy(dslOjb)
+	ds.Stages = make(map[common.FalconTask]TaskStage)
+	ds.ParallelismPolicy = NewParallelismSchedulePolicy(job)
 	return ds
 }
 
-func (ds *DagScheduler) SplitTaskIntoStage(dslOjb *cache.DslObj) {
+func (ds *DagScheduler) SplitTaskIntoStage(job *common.TrainJob) {
 
 	// stage 1
-
-	if dslOjb.Tasks.PreProcessing.AlgorithmName != "" {
+	if job.Tasks.PreProcessing.AlgorithmName != "" {
 		taskStage := TaskStage{
-			common.PreProcStage,
-			map[common.FalconTask]int{
-				common.PreProcSubTask: ds.ParallelismPolicy.PreProcessingParallelism},
+			common.PreProcTaskKey,
 			ds.ParallelismPolicy.PreProcessingParallelism}
-		ds.Stages[common.PreProcStage] = taskStage
+		ds.Stages[common.PreProcTaskKey] = taskStage
 	}
 
 	// stage 2
-	if dslOjb.Tasks.ModelTraining.AlgorithmName != "" {
+	if job.Tasks.ModelTraining.AlgorithmName != "" {
 		taskStage := TaskStage{
-			common.ModelTrainStage,
-			map[common.FalconTask]int{
-				common.ModelTrainSubTask: ds.ParallelismPolicy.ModelTrainParallelism},
+			common.ModelTrainTaskKey,
 			ds.ParallelismPolicy.ModelTrainParallelism}
-		ds.Stages[common.ModelTrainStage] = taskStage
+		ds.Stages[common.ModelTrainTaskKey] = taskStage
 	}
 
 	// stage 3
-	if dslOjb.Tasks.LimeInsSample.AlgorithmName != "" {
+	if job.Tasks.LimeInsSample.AlgorithmName != "" {
 		taskStage := TaskStage{
-			common.LimeInstanceSampleStage,
-			map[common.FalconTask]int{
-				common.LimeInstanceSampleTask: ds.ParallelismPolicy.LimeInstanceSampleParallelism},
+			common.LimeInstanceSampleTask,
 			ds.ParallelismPolicy.LimeInstanceSampleParallelism}
-		ds.Stages[common.LimeInstanceSampleStage] = taskStage
+		ds.Stages[common.LimeInstanceSampleTask] = taskStage
 	}
 
 	// stage 4
-	if dslOjb.Tasks.LimePred.AlgorithmName != "" {
+	if job.Tasks.LimePred.AlgorithmName != "" {
 		taskStage := TaskStage{
-			common.LimePredStage,
-			map[common.FalconTask]int{
-				common.LimePredSubTask: ds.ParallelismPolicy.LimeOriModelPredictionParallelism},
+			common.LimePredTaskKey,
 			ds.ParallelismPolicy.LimeOriModelPredictionParallelism}
-		ds.Stages[common.LimePredStage] = taskStage
+		ds.Stages[common.LimePredTaskKey] = taskStage
 	}
 
 	// stage 5
-	if dslOjb.Tasks.LimeWeight.AlgorithmName != "" {
+	if job.Tasks.LimeWeight.AlgorithmName != "" {
 		taskStage := TaskStage{
-			common.LimeWeightStage,
-			map[common.FalconTask]int{
-				common.LimeWeightSubTask: ds.ParallelismPolicy.LimeInstanceWeightParallelism},
+			common.LimeWeightTaskKey,
 			ds.ParallelismPolicy.LimeInstanceWeightParallelism}
-		ds.Stages[common.LimeWeightStage] = taskStage
+		ds.Stages[common.LimeWeightTaskKey] = taskStage
 	}
 
 	// stage 6
-	if dslOjb.Tasks.LimeFeature.AlgorithmName != "" {
+	if job.Tasks.LimeFeature.AlgorithmName != "" {
 		taskStage := TaskStage{
-			common.LimeFeatureSelectionStage,
-			map[common.FalconTask]int{
-				common.LimeFeatureSubTask: ds.ParallelismPolicy.LimeFeatureSelectionParallelism},
+			common.LimeFeatureTaskKey,
 			ds.ParallelismPolicy.LimeFeatureSelectionParallelism}
-		ds.Stages[common.LimeFeatureSelectionStage] = taskStage
+		ds.Stages[common.LimeFeatureTaskKey] = taskStage
 
 	}
 
-	if dslOjb.Tasks.LimeInterpret.AlgorithmName != "" {
+	if job.Tasks.LimeInterpret.AlgorithmName != "" {
 		taskStage := TaskStage{
-			common.LimeVFLModelTrainStage,
-			map[common.FalconTask]int{
-				common.LimeInterpretSubTask: ds.ParallelismPolicy.LimeVFLModelTrainParallelism},
+			common.LimeInterpretTaskKey,
 			ds.ParallelismPolicy.LimeVFLModelTrainParallelism}
-		ds.Stages[common.LimeVFLModelTrainStage] = taskStage
+
+		ds.Stages[common.LimeInterpretTaskKey] = taskStage
 	}
 
 	logger.Log.Printf("[DagScheduler] sages = %v\n", ds.Stages)

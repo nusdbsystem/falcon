@@ -1,7 +1,6 @@
 package master
 
 import (
-	"falcon_platform/cache"
 	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/logger"
@@ -11,15 +10,15 @@ import (
 	"time"
 )
 
-func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string, stageName common.FalconStage, stageNameLog string) (master *Master) {
+func RunMaster(masterAddr string, job *common.TrainJob, workerType string, taskName common.FalconTask, taskNameLog string) (master *Master) {
 	// launch 4 thread,
 	// 1. heartbeat loop, stopped by master.Cancel()
 	// 2. waiting for worker register, stopped by master.Cancel()
 	// 3. rpc server, used to get requests from worker, stopped by master.StopRPCServer
 	// 4. scheduling process, call finish to stop above threads
 
-	logFileName := common.LogPath + "/master-" + stageNameLog + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
-	master = newMaster(masterAddr, dslOjb.PartyNums)
+	logFileName := common.LogPath + "/master-" + taskNameLog + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
+	master = newMaster(masterAddr, job.PartyNums)
 	master.Logger, master.LogFile = logger.GetLogger(logFileName)
 	master.workerType = workerType
 	master.reset()
@@ -53,7 +52,7 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string, stage
 
 	// define 3 functions, called in master.run
 	dispatcher := func() {
-		master.dispatch(dslOjb, stageName)
+		master.dispatch(job, taskName)
 	}
 	finish := func() {
 		// stop master after finishing the job
@@ -67,25 +66,25 @@ func RunMaster(masterAddr string, dslOjb *cache.DslObj, workerType string, stage
 	if workerType == common.TrainWorker {
 		updateStatus = func(jsonString string) {
 			// call coordinator to update status
-			client.JobUpdateResInfo(common.CoordAddr, "", jsonString, "", dslOjb.JobId)
+			client.JobUpdateResInfo(common.CoordAddr, "", jsonString, "", job.JobId)
 			master.jobStatusLock.Lock()
 			jobStatus := master.jobStatus
 			master.jobStatusLock.Unlock()
-			client.JobUpdateStatus(common.CoordAddr, jobStatus, dslOjb.JobId)
-			client.ModelUpdate(common.CoordAddr, 1, dslOjb.JobId)
+			client.JobUpdateStatus(common.CoordAddr, jobStatus, job.JobId)
+			client.ModelUpdate(common.CoordAddr, 1, job.JobId)
 		}
 	} else if workerType == common.InferenceWorker {
 		updateStatus = func(jsonString string) {
-			client.InferenceUpdateStatus(common.CoordAddr, master.jobStatus, dslOjb.JobId)
+			client.InferenceUpdateStatus(common.CoordAddr, master.jobStatus, job.JobId)
 		}
 	}
 
 	// set time out, no worker comes within 1 min, stop master
 	time.AfterFunc(100*time.Minute, func() {
 		master.Lock()
-		if len(master.workers) < master.workerNum {
+		if len(master.workers) < master.WorkerNum {
 			master.Logger.Printf("Master: Wait for 100 Min, No enough worker come, stop, required %d, got %d ",
-				master.workerNum,
+				master.WorkerNum,
 				len(master.workers),
 			)
 			master.Unlock()

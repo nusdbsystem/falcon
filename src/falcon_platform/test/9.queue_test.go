@@ -8,7 +8,7 @@ import (
 
 func TestDslQueue(t *testing.T) {
 
-	a := cache.DslObj{}
+	a := cache.TrainJob{}
 
 	res := cache.Serialize(&a)
 

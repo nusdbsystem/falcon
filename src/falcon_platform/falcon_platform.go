@@ -209,8 +209,8 @@ func initEnv(svcName string) {
 	case common.JobManagerMasterRole:
 		common.CoordPort = common.GetEnv("COORD_SERVER_PORT", "30004")
 
-		// master needs dslqueue item, task type
-		common.MasterDslObjKey = common.GetEnv("ITEM_KEY", "")
+		// master needs dslqueue item, tasks type
+		common.MasterTrainJobKey = common.GetEnv("ITEM_KEY", "")
 		common.WorkerType = common.GetEnv("EXECUTOR_TYPE", "")
 		common.MasterAddr = common.GetEnv("MASTER_ADDR", "")
 
@@ -256,9 +256,6 @@ func initEnv(svcName string) {
 
 		workerId, _ := strconv.Atoi(common.GetEnv("WORKER_ID", ""))
 		common.WorkerID = common.WorkerIdType(workerId)
-
-		GroupId, _ := strconv.Atoi(common.GetEnv("GROUP_ID", ""))
-		common.GroupID = common.GroupIdType(GroupId)
 
 		partyId, _ := strconv.Atoi(common.GetEnv("PARTY_ID", ""))
 		common.PartyID = common.PartyIdType(partyId)
@@ -369,9 +366,9 @@ func main() {
 		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 		//// this should be the service name, defined at runtime,
 		//masterAddr := common.MasterAddr
-		//dslOjb := cache.Deserialize(cache.InitRedisClient().Get(common.MasterDslObjKey))
+		//job := cache.Deserialize(cache.InitRedisClient().Get(common.MasterTrainJobKey))
 		//workerType := common.WorkerType
-		//jobmanager.ManageJobLifeCycle(masterAddr, dslOjb, workerType)
+		//jobmanager.ManageJobLifeCycle(masterAddr, job, workerType)
 		//// kill the related service after finish training or prediction.
 		//km := resourcemanager.InitK8sManager(true, "")
 		//km.DeleteResource(common.WorkerK8sSvcName)
@@ -380,10 +377,9 @@ func main() {
 		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 		// init the train worker with addresses of master and worker, also the partyID
 		// this is the entry of prod model, in prod, only use NativeProcessMngr right now
-		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr, common.PartyID,
-			common.WorkerID, common.GroupID, uint(common.DistributedRole))
+		wk := worker.InitTrainWorker(common.MasterAddr, common.WorkerAddr, common.PartyID, common.WorkerID)
 
-		wk.RunWorker(wk)
+		worker.RunWorker(wk)
 
 		if common.Deployment == common.K8S {
 			// once  worker is killed by master, clear the resources.
@@ -395,10 +391,9 @@ func main() {
 		logger.Log.Println("Launching falcon_platform, the common.WorkerType", common.WorkerType)
 		// init the train worker with addresses of master and worker, also the partyID
 		// this is the entry of prod model, in prod, only use NativeProcessMngr right now
-		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr, common.PartyID,
-			common.WorkerID, uint(common.DistributedRole))
+		wk := worker.InitInferenceWorker(common.MasterAddr, common.WorkerAddr, common.PartyID, common.WorkerID)
 
-		wk.RunWorker(wk)
+		worker.RunWorker(wk)
 
 		if common.Deployment == common.K8S {
 			// once worker is killed by master, clear the resources.

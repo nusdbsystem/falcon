@@ -14,7 +14,7 @@ fi
 # the config_.properties files, such as paths IP and Ports
 source config_coord.properties
 
-# if Coordinator server base path is not supplied in the config.properties
+# if Coordinator server rpcbase path is not supplied in the config.properties
 # then use "./falcon_logs"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
 if [ $COORD_SERVER_BASEPATH ];then

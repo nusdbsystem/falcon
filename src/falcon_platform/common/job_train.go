@@ -1,7 +1,9 @@
 package common
 
 import (
+	"bytes"
 	b64 "encoding/base64"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"falcon_platform/common/proto/v0"
@@ -9,15 +11,15 @@ import (
 	"fmt"
 	"google.golang.org/protobuf/proto"
 	"log"
-	"strings"
 )
 
 // TODO: make the train job field consistent with wyc executor flags!
 // TODO: jobFLtype wyc side expects int
 // TODO: partyType wyc side expects int
 
-// TranJob object parsed from dsl file
+// TrainJob object parsed from dsl file
 type TrainJob struct {
+	// get form dsl.json
 	JobName         string          `json:"job_name"`
 	JobInfo         string          `json:"job_info"` // job's description
 	JobFlType       string          `json:"job_fl_type"`
@@ -27,8 +29,14 @@ type TrainJob struct {
 	PartyInfoList   []PartyInfo     `json:"party_info"`
 	DistributedTask DistributedTask `json:"distributed_task"`
 	Tasks           Tasks           `json:"tasks"`
-	Stages          []FalconStage
-	ClassNum        uint
+
+	// allocate by system for scheduling
+	// train job_id, or inference jobId, index of the job in db,
+	JobId uint
+	// party-addr [ip+port..]
+	PartyAddrList []string
+	ExecutedTasks map[FalconTask]interface{}
+	ClassNum      uint
 }
 
 type PartyInfo struct {
@@ -59,6 +67,8 @@ type Tasks struct {
 	LimeFeature   LimeFeatureTask   `json:"lime_feature"`
 	LimeInterpret LimeInterpretTask `json:"lime_interpret"`
 }
+
+// MpcAlgorithmName must the first variable in following tasks
 
 type PreProcessTask struct {
 	MpcAlgorithmName string       `json:"mpc_algorithm_name"`
@@ -139,6 +149,9 @@ type DataInput struct {
 }
 
 func ParseTrainJob(contents string, jobInfo *TrainJob) error {
+
+	jobInfo.ExecutedTasks = make(map[FalconTask]interface{})
+
 	// the error here can only check if field type is correct or not.
 	// if the field is not filled, still pass, default to 0
 	marshalErr := json.Unmarshal([]byte(contents), jobInfo)
@@ -153,116 +166,108 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 	if jobInfo.Tasks.PreProcessing.AlgorithmName != "" {
 		logger.Log.Println("ParseTrainJob: PreProcessing AlgorithmName match <-->", jobInfo.Tasks.PreProcessing.AlgorithmName)
 		jobInfo.Tasks.PreProcessing.InputConfigs.SerializedAlgorithmConfig =
-			GeneratePreProcessparams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+			GeneratePreProcessParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+		jobInfo.ExecutedTasks[PreProcTaskKey] = &jobInfo.Tasks.PreProcessing
 	}
 
 	// if there is ModelTraining, serialize it
-	if jobInfo.Tasks.ModelTraining.AlgorithmName == "" {
-		logger.Log.Println("ParseTrainJob: ModelTraining skip")
+	if jobInfo.Tasks.ModelTraining.AlgorithmName != "" {
+		if jobInfo.Tasks.ModelTraining.AlgorithmName == LogisticRegressAlgName {
+			logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
-	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == LogisticRegressAlgName {
-		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+			jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+				GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+		} else if jobInfo.Tasks.ModelTraining.AlgorithmName == DecisionTreeAlgName {
+			logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
-		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
-			GenerateLrParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
-	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == DecisionTreeAlgName {
-		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+			jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
+				GenerateTreeParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+		} else if jobInfo.Tasks.ModelTraining.AlgorithmName == RandomForestAlgName {
+			logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
-		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
-			GenerateTreeParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
-	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == RandomForestAlgName {
-		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+			jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
+				GenerateRFParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+		} else if jobInfo.Tasks.ModelTraining.AlgorithmName == LinearRegressionAlgName {
+			logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
-		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
-			GenerateRFParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
-	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == LinearRegressionAlgName {
-		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+			jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+				GenerateLinearRegressionParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+		} else if jobInfo.Tasks.ModelTraining.AlgorithmName == GBDTAlgName {
+			logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
 
-		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
-			GenerateLinearRegressionParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
-	} else if jobInfo.Tasks.ModelTraining.AlgorithmName == GBDTAlgName {
-		logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
-
-		jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
-			GenerateGBDTParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
-	} else {
-		return errors.New("algorithm name can not be detected")
+			jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
+				GenerateGBDTParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+		} else {
+			return errors.New("algorithm name can not be detected")
+		}
+		jobInfo.ExecutedTasks[ModelTrainTaskKey] = &jobInfo.Tasks.ModelTraining
 	}
 
-	// if there is interpretability related task, serialize it
+	// if there is interpretability related tasks, serialize it
 
 	// LimeSampling
-	if jobInfo.Tasks.LimeInsSample.AlgorithmName == "" {
-		logger.Log.Println("ParseTrainJob: LimeSampling skip")
-
-	} else if jobInfo.Tasks.LimeInsSample.AlgorithmName == LimeSamplingAlgName {
-		logger.Log.Println("ParseTrainJob: LimeInsSample AlgorithmName match <-->", jobInfo.Tasks.LimeInsSample.AlgorithmName)
-
-		jobInfo.Tasks.LimeInsSample.InputConfigs.SerializedAlgorithmConfig =
-			GenerateLimeSamplingParams(jobInfo.Tasks.LimeInsSample.InputConfigs.AlgorithmConfig)
-	} else {
-		return errors.New("algorithm name can not be detected")
+	if jobInfo.Tasks.LimeInsSample.AlgorithmName != "" {
+		if jobInfo.Tasks.LimeInsSample.AlgorithmName == LimeSamplingAlgName {
+			logger.Log.Println("ParseTrainJob: LimeInsSample AlgorithmName match <-->", jobInfo.Tasks.LimeInsSample.AlgorithmName)
+			jobInfo.Tasks.LimeInsSample.InputConfigs.SerializedAlgorithmConfig =
+				GenerateLimeSamplingParams(jobInfo.Tasks.LimeInsSample.InputConfigs.AlgorithmConfig)
+		} else {
+			return errors.New("algorithm name can not be detected")
+		}
+		jobInfo.ExecutedTasks[LimeInstanceSampleTask] = &jobInfo.Tasks.LimeInsSample
 	}
 
 	// LimePred
-	if jobInfo.Tasks.LimePred.AlgorithmName == "" {
-		logger.Log.Println("ParseTrainJob: LimePred skip")
-
-	} else if jobInfo.Tasks.LimePred.AlgorithmName == LimeCompPredictionAlgName {
-		logger.Log.Println("ParseTrainJob: LimePred AlgorithmName match <-->", jobInfo.Tasks.LimePred.AlgorithmName)
-
-		jobInfo.Tasks.LimePred.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
-			GenerateLimeCompPredictionParams(jobInfo.Tasks.LimePred.InputConfigs.AlgorithmConfig)
-		jobInfo.Stages = append(jobInfo.Stages, LimePredStage)
-	} else {
-		return errors.New("algorithm name can not be detected")
+	if jobInfo.Tasks.LimePred.AlgorithmName != "" {
+		if jobInfo.Tasks.LimePred.AlgorithmName == LimeCompPredictionAlgName {
+			logger.Log.Println("ParseTrainJob: LimePred AlgorithmName match <-->", jobInfo.Tasks.LimePred.AlgorithmName)
+			jobInfo.Tasks.LimePred.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
+				GenerateLimeCompPredictionParams(jobInfo.Tasks.LimePred.InputConfigs.AlgorithmConfig)
+		} else {
+			return errors.New("algorithm name can not be detected")
+		}
+		jobInfo.ExecutedTasks[LimePredTaskKey] = &jobInfo.Tasks.LimePred
 	}
 
 	// LimeWeight
-	if jobInfo.Tasks.LimeWeight.AlgorithmName == "" {
-		logger.Log.Println("ParseTrainJob: LimeWeight skip")
-
-	} else if jobInfo.Tasks.LimeWeight.AlgorithmName == LimeCompWeightsAlgName {
-		logger.Log.Println("ParseTrainJob: LimeWeight AlgorithmName match <-->", jobInfo.Tasks.LimeWeight.AlgorithmName)
-
-		jobInfo.Tasks.LimeWeight.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
-			GenerateLimeCompWeightsParams(jobInfo.Tasks.LimeWeight.InputConfigs.AlgorithmConfig)
-		jobInfo.Stages = append(jobInfo.Stages, LimeWeightStage)
-
-	} else {
-		return errors.New("algorithm name can not be detected")
+	if jobInfo.Tasks.LimeWeight.AlgorithmName != "" {
+		if jobInfo.Tasks.LimeWeight.AlgorithmName == LimeCompWeightsAlgName {
+			logger.Log.Println("ParseTrainJob: LimeWeight AlgorithmName match <-->", jobInfo.Tasks.LimeWeight.AlgorithmName)
+			jobInfo.Tasks.LimeWeight.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
+				GenerateLimeCompWeightsParams(jobInfo.Tasks.LimeWeight.InputConfigs.AlgorithmConfig)
+		} else {
+			return errors.New("algorithm name can not be detected")
+		}
+		jobInfo.ExecutedTasks[LimeWeightTaskKey] = &jobInfo.Tasks.LimeWeight
 	}
 
 	// LimeFeature
-	if jobInfo.Tasks.LimeFeature.AlgorithmName == "" {
-		logger.Log.Println("ParseTrainJob: LimeFeature skip")
+	if jobInfo.Tasks.LimeFeature.AlgorithmName != "" {
 
-	} else if jobInfo.Tasks.LimeFeature.AlgorithmName == LimeFeatSelAlgName {
-		logger.Log.Println("ParseTrainJob: LimeFeature AlgorithmName match <-->", jobInfo.Tasks.LimeFeature.AlgorithmName)
+		if jobInfo.Tasks.LimeFeature.AlgorithmName == LimeFeatSelAlgName {
+			logger.Log.Println("ParseTrainJob: LimeFeature AlgorithmName match <-->", jobInfo.Tasks.LimeFeature.AlgorithmName)
 
-		_, jobInfo.Tasks.LimeFeature.ClassNum, _ =
-			GenerateLimeFeatSelParams(jobInfo.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, 0)
-		jobInfo.ClassNum = uint(jobInfo.Tasks.LimeFeature.ClassNum)
-		jobInfo.Stages = append(jobInfo.Stages, LimeFeatureSelectionStage)
+			_, jobInfo.Tasks.LimeFeature.ClassNum, _ =
+				GenerateLimeFeatSelParams(jobInfo.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, 0)
+			jobInfo.ClassNum = uint(jobInfo.Tasks.LimeFeature.ClassNum)
 
-	} else {
-		return errors.New("algorithm name can not be detected")
+		} else {
+			return errors.New("algorithm name can not be detected")
+		}
+		jobInfo.ExecutedTasks[LimeFeatureTaskKey] = &jobInfo.Tasks.LimeFeature
 	}
 
 	// LimeInterpret
 	if jobInfo.Tasks.LimeInterpret.AlgorithmName == "" {
-		logger.Log.Println("ParseTrainJob: LimeInterpret skip")
-
-	} else if jobInfo.Tasks.LimeInterpret.AlgorithmName == LimeInterpretAlgName {
-		logger.Log.Println("ParseTrainJob: LimeInterpret AlgorithmName match <-->", jobInfo.Tasks.LimeInterpret.AlgorithmName)
-
-		_, jobInfo.Tasks.LimeInterpret.ClassNum =
-			GenerateLimeInterpretParams(jobInfo.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, 0, "", jobInfo.Tasks.LimeInterpret.MpcAlgorithmName)
-		jobInfo.ClassNum = uint(jobInfo.Tasks.LimeInterpret.ClassNum)
-		jobInfo.Stages = append(jobInfo.Stages, LimeVFLModelTrainStage)
-
-	} else {
-		return errors.New("algorithm name can not be detected")
+		if jobInfo.Tasks.LimeInterpret.AlgorithmName == LimeInterpretAlgName {
+			logger.Log.Println("ParseTrainJob: LimeInterpret AlgorithmName match <-->", jobInfo.Tasks.LimeInterpret.AlgorithmName)
+			_, jobInfo.Tasks.LimeInterpret.ClassNum =
+				GenerateLimeInterpretParams(jobInfo.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig, 0, "", jobInfo.Tasks.LimeInterpret.MpcAlgorithmName)
+			jobInfo.ClassNum = uint(jobInfo.Tasks.LimeInterpret.ClassNum)
+		} else {
+			return errors.New("algorithm name can not be detected")
+		}
+		jobInfo.ExecutedTasks[LimeInterpretTaskKey] = &jobInfo.Tasks.LimeInterpret
 	}
 
 	verifyErr := trainJobVerify(jobInfo)
@@ -784,106 +789,33 @@ func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, sele
 
 }
 
-func GeneratePreProcessparams(cfg map[string]interface{}) string {
+func GeneratePreProcessParams(cfg map[string]interface{}) string {
 	return ""
 }
 
-// executorPortArray : 2-dim array, r1 demote receiver 1's port,
-//	   [ [na, r2, r3],
-//		 [r1, na, r3 ],
-//		 [r1, r2, na ] ]
-// mpcPortArray: each party's mpc port
-func GenerateNetworkConfig(mIps []string, executorPortArray [][]int32, mpcPortArray []int32) string {
+func argTypeRegister() {
+	gob.Register([]interface{}{})
+	gob.Register(map[string]interface{}{})
+}
 
-	//logger.Log.Println("Scheduler: Assigned IP and ports are: ", Addresses, portArray)
-
-	partyNums := len(mIps)
-	var IPs []string
-	for _, v := range mIps {
-		IPs = append(IPs, strings.Split(v, ":")[0])
-	}
-
-	cfg := v0.NetworkConfig{
-		Ips:                        IPs,
-		ExecutorExecutorPortArrays: []*v0.PortArray{},
-		ExecutorMpcPortArray:       nil,
-	}
-
-	// for each IP Url
-	for i := 0; i < partyNums; i++ {
-		p := &v0.PortArray{Ports: executorPortArray[i]}
-		cfg.ExecutorExecutorPortArrays = append(cfg.ExecutorExecutorPortArrays, p)
-	}
-
-	// each executor knows other mpc's port
-	cfg.ExecutorMpcPortArray = &v0.PortArray{Ports: mpcPortArray}
-
-	out, err := proto.Marshal(&cfg)
-	if err != nil {
-		logger.Log.Println("Generate NetworkCfg failed ", err)
+func Serialize(job *TrainJob) string {
+	argTypeRegister()
+	var buffer bytes.Buffer
+	var encoder = gob.NewEncoder(&buffer)
+	if err := encoder.Encode(job); err != nil {
 		panic(err)
 	}
-	return b64.StdEncoding.EncodeToString(out)
-
+	return string(buffer.Bytes())
 }
 
-func GenerateDistributedNetworkConfig(psIp string, psPort []int32, workerIps []string, workerPorts []int32) string {
-
-	// each port corresponding to one worker
-	var psWorkers []*v0.PS
-	for i := 0; i < len(psPort); i++ {
-		ps := v0.PS{
-			PsIp:   psIp,
-			PsPort: psPort[i],
-		}
-		psWorkers = append(psWorkers, &ps)
-	}
-
-	//  worker address
-	var workers []*v0.Worker
-	for i := 0; i < len(workerIps); i++ {
-		worker := v0.Worker{
-			WorkerIp:   workerIps[i],
-			WorkerPort: workerPorts[i]}
-		workers = append(workers, &worker)
-	}
-	//  network config
-	psCfg := v0.PSNetworkConfig{
-		Ps:      psWorkers,
-		Workers: workers,
-	}
-
-	out, err := proto.Marshal(&psCfg)
+func Deserialize(qs string) (job *TrainJob) {
+	argTypeRegister()
+	reader := bytes.NewReader([]byte(qs))
+	var decoder = gob.NewDecoder(reader)
+	var d TrainJob
+	err := decoder.Decode(&d)
 	if err != nil {
-		logger.Log.Println("Generate Distributed NetworkCfg failed ", err)
 		panic(err)
 	}
-
-	return b64.StdEncoding.EncodeToString(out)
-}
-
-func RetrieveDistributedNetworkConfig(a string) {
-
-	res, _ := b64.StdEncoding.DecodeString(a)
-
-	cfg := v0.PSNetworkConfig{}
-
-	_ = proto.Unmarshal(res, &cfg)
-
-	logger.Log.Println("[RetrieveDistributedNetworkConfig]: cfg.Ps", cfg.Ps)
-	logger.Log.Println("[RetrieveDistributedNetworkConfig]: cfg.Workers", cfg.Workers)
-
-}
-
-func RetrieveNetworkConfig(a string) {
-	res, _ := b64.StdEncoding.DecodeString(a)
-
-	cfg := v0.NetworkConfig{}
-
-	_ = proto.Unmarshal(res, &cfg)
-
-	logger.Log.Println("[RetrieveNetworkConfig]: cfg.Ips", cfg.Ips)
-	logger.Log.Println("[RetrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays", cfg.ExecutorExecutorPortArrays)
-	logger.Log.Println("[RetrieveNetworkConfig]: cfg.ExecutorMpcPortArray", cfg.ExecutorMpcPortArray)
-
+	return &d
 }

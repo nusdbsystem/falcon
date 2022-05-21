@@ -94,7 +94,7 @@ func (rb *RpcBaseClass) StartRPCServer(rpcSvc *rpc.Server, isBlocking bool) {
 	}
 }
 
-// stopRPCServer stops the master RPC server.
+// StopRPCServer  stops the master RPC server.
 // This must be done through an RPC to avoid
 // race conditions between the RPC server thread and the current thread.
 func (rb *RpcBaseClass) StopRPCServer(addr, targetSvc string) {

@@ -1,7 +1,6 @@
 package DAGscheduler
 
 import (
-	"falcon_platform/cache"
 	"falcon_platform/common"
 	"falcon_platform/logger"
 	"fmt"
@@ -31,31 +30,32 @@ type ParallelismSchedulePolicy struct {
 	IsValid bool
 }
 
-func NewParallelismSchedulePolicy(dslOjb *cache.DslObj) *ParallelismSchedulePolicy {
+func NewParallelismSchedulePolicy(job *common.TrainJob) *ParallelismSchedulePolicy {
 	sp := new(ParallelismSchedulePolicy)
-	sp.IsValid = sp.generateNewPolicy(dslOjb)
+	sp.IsValid = sp.generateNewPolicy(job)
 	return sp
 }
 
-func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) bool {
+func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) bool {
 
 	// fetch user defined total worker number
-	workerNum := dslOjb.DistributedTask.WorkerNumber
+	workerNum := job.DistributedTask.WorkerNumber
 
 	sp.PreProcessingParallelism = 1
 	sp.ModelTrainParallelism = 1
 	sp.LimeInstanceSampleParallelism = 1
 
 	// if only one stage
-	if len(dslOjb.Stages) == 1 {
-		sp.updateSingleStageParallelism(dslOjb.Stages[0], workerNum)
-		logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
+	if len(job.ExecutedTasks) == 1 {
+		for k := range job.ExecutedTasks {
+			sp.updateSingleStageParallelism(k, workerNum)
+			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
+		}
 		return true
-
 	} else {
 
-		if dslOjb.DistributedTask.Average == 1 {
-			averageWorker := (dslOjb.DistributedTask.WorkerNumber - 1) / int(1+1+dslOjb.ClassNum*(1+1))
+		if job.DistributedTask.Average == 1 {
+			averageWorker := (job.DistributedTask.WorkerNumber - 1) / int(1+1+job.ClassNum*(1+1))
 
 			if averageWorker == 2 {
 				averageWorker = 1
@@ -66,7 +66,7 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) boo
 			sp.LimeFeatureSelectionParallelism = averageWorker
 			sp.LimeVFLModelTrainParallelism = averageWorker
 
-			sp.LimeClassParallelism = int(dslOjb.ClassNum)
+			sp.LimeClassParallelism = int(job.ClassNum)
 			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 			return true
 
@@ -78,7 +78,7 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) boo
 				"autoscale/KttScheduler.py",
 				"-w", fmt.Sprintf("%d", workerNum),
 				"-d", "100000",
-				"-c", fmt.Sprintf("%d", dslOjb.ClassNum))
+				"-c", fmt.Sprintf("%d", job.ClassNum))
 
 			out, err := cmd.Output()
 			if err != nil {
@@ -97,7 +97,7 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) boo
 				sp.LimeInstanceWeightParallelism = resultInt[1]
 				sp.LimeFeatureSelectionParallelism = resultInt[2]
 				sp.LimeVFLModelTrainParallelism = resultInt[3]
-				sp.LimeClassParallelism = int(dslOjb.ClassNum)
+				sp.LimeClassParallelism = int(job.ClassNum)
 				logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 				return true
 			} else if strings.Contains(label, "ERROR") {
@@ -110,17 +110,17 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(dslOjb *cache.DslObj) boo
 	}
 }
 
-func (sp *ParallelismSchedulePolicy) updateSingleStageParallelism(stageName common.FalconStage, workerNum int) {
-	if stageName == common.LimePredStage {
+func (sp *ParallelismSchedulePolicy) updateSingleStageParallelism(stageName common.FalconTask, workerNum int) {
+	if stageName == common.LimePredTaskKey {
 		sp.LimeOriModelPredictionParallelism = workerNum
 	}
-	if stageName == common.LimeWeightStage {
+	if stageName == common.LimeWeightTaskKey {
 		sp.LimeInstanceWeightParallelism = workerNum
 	}
-	if stageName == common.LimeFeatureSelectionStage {
+	if stageName == common.LimeFeatureTaskKey {
 		sp.LimeFeatureSelectionParallelism = workerNum
 	}
-	if stageName == common.LimeVFLModelTrainStage {
+	if stageName == common.LimeInterpretTaskKey {
 		sp.LimeVFLModelTrainParallelism = workerNum
 	}
 }

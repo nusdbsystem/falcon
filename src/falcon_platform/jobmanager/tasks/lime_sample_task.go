@@ -1,4 +1,4 @@
-package task
+package tasks
 
 import (
 	"falcon_platform/common"
@@ -9,10 +9,16 @@ import (
 	"os/exec"
 )
 
+// init register all existing tasks.
+func init() {
+	if AllTasks == nil {
+		AllTasks = make(map[common.FalconTask]Task)
+	}
+	AllTasks[common.LimeInstanceSampleTask] = new(LimeSampleTask)
+}
+
 type LimeSampleTask struct {
-	DistributedRole uint
-	WorkerID        common.WorkerIdType
-	DslObj          *entity.DslObj4SingleWorker
+	TaskAbstract
 }
 
 //GetCommand
@@ -39,21 +45,28 @@ type LimeSampleTask struct {
 //	("distributed-train-network-file", po::value<string>(&distributed_network_file), "ps network file");
 //	("worker-id", po::value<int>(&worker_id), "worker id");
 //	("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0");
-func (this *LimeSampleTask) GetCommand() *exec.Cmd {
+func (this *LimeSampleTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 
-	logger.Log.Println("[TrainWorker]: begin task lime instance_sample")
+	wk := taskInfo.Wk
+	fLConfig := taskInfo.FLNetworkConfig
+	job := taskInfo.Job
 
-	partyType := common.ConvertPartyType2Int(this.DslObj.PartyInfo.PartyType)
-	flSetting := common.ConvertPartyType2Int(this.DslObj.JobFlType)
+	this.printParams(job.Tasks.LimeInsSample.AlgorithmName, job)
+
+	logger.Log.Println("[TrainWorker]: begin tasks lime instance_sample")
+	distRole := fLConfig.WorkerRole[wk.PartyID][wk.WorkerID]
+
+	partyType := common.ConvertPartyType2Int(job.PartyInfoList[wk.PartyIndex].PartyType)
+	flSetting := common.ConvertPartyType2Int(job.JobFlType)
 
 	// 3. generate many files store etc
-	modelInputFile := common.TaskDataPath + "/" + this.DslObj.Tasks.LimeInsSample.InputConfigs.DataInput.Data
-	modelFile := common.TaskModelPath + "/" + this.DslObj.Tasks.LimeInsSample.OutputConfigs.TrainedModel
-	logFile := common.TaskRuntimeLogs + "-" + this.DslObj.Tasks.LimeInsSample.AlgorithmName
-	KeyFile := common.TaskDataPath + "/" + this.DslObj.Tasks.LimeInsSample.InputConfigs.DataInput.Key
-	modelReportFile := common.TaskModelPath + "/" + this.DslObj.Tasks.LimeInsSample.OutputConfigs.EvaluationReport
+	modelInputFile := common.TaskDataPath + "/" + job.Tasks.LimeInsSample.InputConfigs.DataInput.Data
+	modelFile := common.TaskModelPath + "/" + job.Tasks.LimeInsSample.OutputConfigs.TrainedModel
+	logFile := common.TaskRuntimeLogs + "-" + job.Tasks.LimeInsSample.AlgorithmName
+	KeyFile := common.TaskDataPath + "/" + job.Tasks.LimeInsSample.InputConfigs.DataInput.Key
+	modelReportFile := common.TaskModelPath + "/" + job.Tasks.LimeInsSample.OutputConfigs.EvaluationReport
 
-	// in centralized training, this task don't support distributed.
+	// in centralized training, this tasks don't support distributed.
 	logger.Log.Println("[PartyServer]: training method: centralized")
 
 	wkLogFile := logFile + "/centralized_worker"
@@ -64,26 +77,26 @@ func (this *LimeSampleTask) GetCommand() *exec.Cmd {
 
 	cmd := exec.Command(
 		common.FLEnginePath,
-		"--party-id", fmt.Sprintf("%d", this.DslObj.PartyInfo.ID),
-		"--party-num", fmt.Sprintf("%d", this.DslObj.PartyNums),
+		"--party-id", fmt.Sprintf("%d", job.PartyInfoList[wk.PartyIndex].ID),
+		"--party-num", fmt.Sprintf("%d", job.PartyNums),
 		"--party-type", fmt.Sprintf("%d", partyType),
 		"--fl-setting", fmt.Sprintf("%d", flSetting),
-		"--network-file", this.DslObj.ExecutorPairNetworkCfg,
+		"--network-file", fLConfig.ExecutorPairNetworkCfg[wk.WorkerID],
 		"--log-file", wkLogFile,
 		"--data-input-file", modelInputFile,
 		"--data-output-file", common.TaskDataOutput,
-		"--existing-key", fmt.Sprintf("%d", this.DslObj.ExistingKey),
+		"--existing-key", fmt.Sprintf("%d", job.ExistingKey),
 		"--key-file", KeyFile,
-		"--algorithm-name", this.DslObj.Tasks.LimeInsSample.AlgorithmName,
-		"--algorithm-params", this.DslObj.Tasks.LimeInsSample.InputConfigs.SerializedAlgorithmConfig,
+		"--algorithm-name", job.Tasks.LimeInsSample.AlgorithmName,
+		"--algorithm-params", job.Tasks.LimeInsSample.InputConfigs.SerializedAlgorithmConfig,
 		"--model-save-file", modelFile,
 		"--model-report-file", modelReportFile,
 		"--is-inference", fmt.Sprintf("%d", 0),
 		"--inference-endpoint", common.EmptyParams,
-		"--is-distributed", fmt.Sprintf("%d", this.DslObj.DistributedTask.Enable),
+		"--is-distributed", fmt.Sprintf("%d", job.DistributedTask.Enable),
 		"--distributed-train-network-file", common.EmptyParams,
-		"--worker-id", fmt.Sprintf("%d", int(this.WorkerID)%this.DslObj.WorkerPreGroup),
-		"--distributed-role", fmt.Sprintf("%d", this.DistributedRole),
+		"--worker-id", fmt.Sprintf("%d", int(wk.WorkerID)%job.DistributedTask.WorkerNumber),
+		"--distributed-role", fmt.Sprintf("%d", distRole),
 	)
 
 	logger.Log.Printf("---------------------------------------------------------------------------------\n")

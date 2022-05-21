@@ -12,8 +12,6 @@ type WorkerIdType uint
 
 type PortType int32
 
-type GroupIdType uint
-
 // ConvertPartyType2Int 1. convert party-type to int, partyType 1=Passive, 0=Active
 func ConvertPartyType2Int(partyTypeStr string) int {
 	var partyType int

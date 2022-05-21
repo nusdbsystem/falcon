@@ -35,7 +35,7 @@ echo "PARTY_ID = ${PARTY_ID}"
 # the config_.properties files, such as paths IP and Ports
 source config_partyserver.properties
 
-# if Party server base path is not supplied in the config.properties
+# if Party server rpcbase path is not supplied in the config.properties
 # then use falcon_logs/
 if [ $PARTY_SERVER_BASEPATH ];then
 	echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"

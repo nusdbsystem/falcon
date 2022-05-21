@@ -37,7 +37,7 @@ func Init(nConsumer int) *Driver {
 	return ds
 }
 
-// Driver listen to the queue, and fetch item and call jobManager to start the task
+// Consume listen to the queue, and fetch item and call jobManager to start the tasks
 func (ds *Driver) Consume(consumerId int, jobDB *models.JobDB) {
 	defer func() {
 		err := recover()
@@ -61,17 +61,17 @@ loop:
 
 			//logger.Log.Println("Consume:" +fmt.Sprintf("%d",consumerId)+" Getting job from the dslqueue...")
 
-			if dslOjb, ok := cache.JobDslQueue.Pop(); ok {
+			if job, ok := cache.JobDslQueue.Pop(); ok {
 
 				logger.Log.Println("Consume:" + fmt.Sprintf("%d", consumerId) + " Got from dslqueue")
 
-				models.JobUpdateStatus(dslOjb.JobId, common.JobRunning, jobDB)
+				models.JobUpdateStatus(job.JobId, common.JobRunning, jobDB)
 
 				// Launching the jobManager to allocate the job
-				go func(dslOjb cache.DslObj) {
+				go func(job common.TrainJob) {
 					defer logger.HandleErrors()
-					jobmanager.RunJobManager(&dslOjb, common.TrainWorker)
-				}(*dslOjb)
+					jobmanager.RunJobManager(&job, common.TrainWorker)
+				}(*job)
 			}
 
 		}
@@ -80,12 +80,12 @@ loop:
 	logger.Log.Println("Consumer stopped")
 }
 
-// Stop the consumer
+// StopConsumer Stop the consumer
 func (ds *Driver) StopConsumer() {
 	ds.isStop <- true
 }
 
-// Monitor if need to stop driver.consume loop
+// MonitorConsumers Monitor if need to stop driver.consume loop
 func (ds *Driver) MonitorConsumers(jobDB *models.JobDB) {
 
 loop:

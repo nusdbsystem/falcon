@@ -217,7 +217,7 @@ func main() {
 	killed, e, el, ol := pm.ExecuteSubProc(dir, stdIn, commend, args, envs)
 	fmt.Println(killed, e, el, ol)
 
-	//fmt.Println("Worker:task model training start")
+	//fmt.Println("Worker:tasks model training start")
 	//args = []string{"plot_out_of_core_classification.py", "-a 1 -b 1"}
 	////
 	//killed, e, el, ol = pm.ExecuteSubProc(dir, stdIn, commend, args, envs)

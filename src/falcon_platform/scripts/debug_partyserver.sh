@@ -36,7 +36,7 @@ echo "PARTY_ID = ${PARTY_ID}"
 # the config_.properties files, such as paths IP and Ports
 source config_partyserver.properties
 
-# if Party server base path is not supplied in the config.properties
+# if Party server rpcbase path is not supplied in the config.properties
 # then use falcon_logs/
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
 if [ $PARTY_SERVER_BASEPATH ];then
@@ -49,10 +49,10 @@ fi
 mkdir -p "$USED_LOG_PATH"
 
 # decide which deployment the partyServer will use to spawn worker
-#export ENV="subprocess"
-export ENV="docker"
-#export IS_DEBUG="debug-on"
-export IS_DEBUG="debug-off"
+export ENV="subprocess"
+#export ENV="docker"
+export IS_DEBUG="debug-on"
+#export IS_DEBUG="debug-off"
 export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT

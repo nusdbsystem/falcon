@@ -4,32 +4,31 @@ package common
 // and then, add to here, Since userdefined.properties is environment varialbes
 // and vars are read from envs
 
-// read from user input, is debug or not
+// IsDebug read from user input, is debug or not
 var (
 	IsDebug string
 )
 
 // system init config
 var (
-	// Deployment
 	Deployment string
-	// which service to run
+	// ServiceName which service to run
 	ServiceName string
-	// logPath
+	// LogPath logPath
 	LogPath string
 )
 
 // vars of coordinator
 var (
-	// Coord user-defined variables
+	// CoordIP Coord user-defined variables
 	CoordIP       string
 	CoordPort     string
 	CoordBasePath string
-	// later concatenated by falcon_platform.go
+	// CoordAddr later concatenated by falcon_platform.go
 	CoordAddr string
-	// number of consumers used in coord http server
+	// NbConsumers number of consumers used in coord http server
 	NbConsumers string
-	// enable other service access master with clusterIP+clusterPort, from inside the cluster
+	// CoordK8sSvcName enable other service access master with clusterIP+clusterPort, from inside the cluster
 	CoordK8sSvcName string
 )
 
@@ -40,7 +39,7 @@ var (
 	PartyServerPort string
 	PartyID         PartyIdType
 	//PartyType           string
-	PartyServerBasePath string
+	//PartyServerBasePath string
 
 	// when party has a cluster, list all nodes' Ip address
 	PartyServerClusterIPs []string
@@ -80,7 +79,6 @@ var (
 
 var (
 	WorkerID WorkerIdType
-	GroupID  GroupIdType
 	// used in distributed training, ps, worker, or centralized
 	DistributedRole int
 
@@ -99,8 +97,8 @@ var (
 	// this is the worker's k8s service name,
 	WorkerK8sSvcName string
 
-	// key of DslObj in cache
-	MasterDslObjKey string
+	// key of TrainJob in cache
+	MasterTrainJobKey string
 )
 
 // falcon executor related vars

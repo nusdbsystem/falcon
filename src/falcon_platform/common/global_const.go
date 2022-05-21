@@ -59,28 +59,25 @@ const (
 	PartyServerAddrKey = "psAddr"
 	MasterAddrKey      = "masterAddr"
 	PartyServerPortKey = "psPort"
-
-	JobId      = "job_id"
-	JobErrMsg  = "error_msg"
-	JobResult  = "job_result"
-	JobExtInfo = "ext_info"
+	JobId              = "job_id"
+	JobErrMsg          = "error_msg"
+	JobResult          = "job_result"
+	JobExtInfo         = "ext_info"
 
 	JobStatus = "status"
 
 	TrainJobFileKey = "train-job-file"
 
-	TaskTypeKey = "task-type"
+	TaskTypeKey = "tasks-type"
 
 	TrainDataPath          = "train-data-path"
 	TrainDataOutput        = "train-data-output"
 	ModelPath              = "model-path"
-	WorkerPreGroup         = "worker-num-pre-group"
+	WorkerPreParty         = "worker-num-pre-party"
 	IsTrained              = "is_trained"
 	TotalPartyNumber       = "total-party-num"
-	WorkerGroupNumber      = "worker-group-num"
 	EnableDistributedTrain = "enable-distributed-train"
-	StageNameKey           = "stage-name"
-	ClassIDKey             = "class-id-key"
+	StageClassIDKey        = "stage-classId"
 
 	JobName = "job_name"
 	ExtInfo = "ext_info"
@@ -118,7 +115,7 @@ const (
 	ModelPathContainer      = "/modelPath"
 )
 
-// Job or task status,
+// Job or tasks status,
 const (
 	// job status
 	JobInit    = "initializing"
@@ -128,10 +125,10 @@ const (
 	JobFailed     = "failed"
 	JobKilled     = "killed"
 
-	// one job contains multi tasks, this is task status
-	TaskRunning    = "task-running"
-	TaskSuccessful = "task-finished"
-	TaskFailed     = "task-failed"
+	// one job contains multi tasks, this is tasks status
+	TaskRunning    = "tasks-running"
+	TaskSuccessful = "tasks-finished"
+	TaskFailed     = "tasks-failed"
 
 	// for DB engine names
 	DBSqlite3 = "sqlite3"
@@ -143,43 +140,30 @@ const (
 
 type FalconTask string
 
+// train sub tasks names
 const (
-	// train sub tasks names
-	MpcSubTask                 FalconTask = "mpc"
-	PreProcSubTask             FalconTask = "pre_processing"
-	ModelTrainSubTask          FalconTask = "model_training"
+	MpcTaskKey                 FalconTask = "mpc"
+	PreProcTaskKey             FalconTask = "pre_processing"
+	ModelTrainTaskKey          FalconTask = "model_training"
 	LimeInstanceSampleTask     FalconTask = "lime_sampling"
-	LimePredSubTask            FalconTask = "lime_pred_task"
-	LimeWeightSubTask          FalconTask = "lime_weight_task"
-	LimeFeatureSubTask         FalconTask = "lime_feature_task"
-	LimeInterpretSubTask       FalconTask = "lime_interpret_task"
-	RetrieveModelReportSubTask FalconTask = "model_report_retrieve"
-)
-
-type FalconStage string
-
-const (
-	PreProcStage              FalconStage = "lime_pre_processing_stage"
-	ModelTrainStage           FalconStage = "lime_model_training_stage"
-	LimeInstanceSampleStage   FalconStage = "lime_instance_sample_stage"
-	LimePredStage             FalconStage = "lime_pred_task_stage"
-	LimeWeightStage           FalconStage = "lime_weight_task_stage"
-	LimeFeatureSelectionStage FalconStage = "lime_feature_selection_stage"
-	LimeVFLModelTrainStage    FalconStage = "lime_vfl_train_stage"
+	LimePredTaskKey            FalconTask = "lime_pred_task"
+	LimeWeightTaskKey          FalconTask = "lime_weight_task"
+	LimeFeatureTaskKey         FalconTask = "lime_feature_task"
+	LimeInterpretTaskKey       FalconTask = "lime_interpret_task"
+	RetrieveModelReportTaskKey FalconTask = "model_report_retrieve"
 )
 
 // Algorithms names
 const (
-
-	// algorithms type names
 	HorizontalFl = "horizontal"
 	VerticalFl   = "vertical"
 
-	LogisticRegressAlgName    = "logistic_regression"
-	DecisionTreeAlgName       = "decision_tree"
-	RandomForestAlgName       = "random_forest"
-	LinearRegressionAlgName   = "linear_regression"
-	GBDTAlgName               = "gbdt"
+	LogisticRegressAlgName  = "logistic_regression"
+	DecisionTreeAlgName     = "decision_tree"
+	RandomForestAlgName     = "random_forest"
+	LinearRegressionAlgName = "linear_regression"
+	GBDTAlgName             = "gbdt"
+
 	LimeSamplingAlgName       = "lime_sampling"
 	LimeCompPredictionAlgName = "lime_compute_prediction"
 	LimeCompWeightsAlgName    = "lime_compute_weights"
@@ -202,10 +186,6 @@ const (
 	DistributedParameterServer = 0
 	DistributedWorker          = 1
 	CentralizedWorker          = 2
-)
-
-const (
-	DefaultWorkerGroupID = 0
 )
 
 // if pass empty params in cmd. pass "0" to avoid error

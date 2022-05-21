@@ -117,7 +117,7 @@ type LimeCompPredictionParams struct {
 	OriginalModelSavedFile string `protobuf:"bytes,2,opt,name=original_model_saved_file,json=originalModelSavedFile,proto3" json:"original_model_saved_file,omitempty"`
 	// generated samples save file
 	GeneratedSampleFile string `protobuf:"bytes,3,opt,name=generated_sample_file,json=generatedSampleFile,proto3" json:"generated_sample_file,omitempty"`
-	// type of model task, 'regression' or 'classification'
+	// type of model tasks, 'regression' or 'classification'
 	ModelType string `protobuf:"bytes,4,opt,name=model_type,json=modelType,proto3" json:"model_type,omitempty"`
 	// number of classes in classification, set to 1 if regression
 	ClassNum int32 `protobuf:"varint,5,opt,name=class_num,json=classNum,proto3" json:"class_num,omitempty"`
