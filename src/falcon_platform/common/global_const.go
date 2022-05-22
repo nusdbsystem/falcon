@@ -78,6 +78,7 @@ const (
 	TotalPartyNumber       = "total-party-num"
 	EnableDistributedTrain = "enable-distributed-train"
 	StageClassIDKey        = "stage-classId"
+	JobTypeKey             = "job-type-key"
 
 	JobName = "job_name"
 	ExtInfo = "ext_info"

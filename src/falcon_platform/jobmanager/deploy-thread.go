@@ -2,7 +2,7 @@ package jobmanager
 
 import (
 	"falcon_platform/common"
-	"falcon_platform/jobmanager/fl_comms_pattern"
+	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/jobmanager/worker"
 	"falcon_platform/logger"
 )
@@ -34,7 +34,7 @@ func deployJobManagerThread(job *common.TrainJob, workerType string) {
 //	distributedRole： 0: ps, 1: worker
 func DeployWorkerThread(masterAddr, workerType, jobId,
 	dataPath, modelPath, dataOutput string,
-	resourceSVCs *fl_comms_pattern.ResourceSVC) {
+	resourceSVCs *comms_pattern.ResourceSVC) {
 
 	workerAddr := resourceSVCs.ToAddr(resourceSVCs.WorkerPort)
 

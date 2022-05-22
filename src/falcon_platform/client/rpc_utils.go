@@ -7,15 +7,8 @@ import (
 	"time"
 )
 
+// Rpc call
 func Call(address string, network string, rpcname string, args interface{}, reply interface{}) bool {
-	/**
-	 * @Description if connection error, retry, otherwise, return false
-	 * @Date 3:01 下午 13/12/20
-	 * @Param
-	 * @return,
-			true: successfully,
-			false: error happens
-	 **/
 
 	NTimes := 3
 	for {

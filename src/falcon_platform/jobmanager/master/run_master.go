@@ -18,7 +18,7 @@ func RunMaster(masterAddr string, job *common.TrainJob, workerType string, taskN
 	// 4. scheduling process, call finish to stop above threads
 
 	logFileName := common.LogPath + "/master-" + taskNameLog + "-" + fmt.Sprintf("%d", rand.Intn(90000)) + ".log"
-	master = newMaster(masterAddr, job.PartyNums)
+	master = newMaster(masterAddr, job.PartyNums, job.JobFlType)
 	master.Logger, master.LogFile = logger.GetLogger(logFileName)
 	master.workerType = workerType
 	master.reset()

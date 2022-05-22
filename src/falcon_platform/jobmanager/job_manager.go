@@ -10,7 +10,7 @@ import (
 	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/jobmanager/DAGscheduler"
-	"falcon_platform/jobmanager/fl_comms_pattern"
+	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/jobmanager/master"
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
@@ -191,7 +191,7 @@ func manageTaskLifeCycle(job common.TrainJob, workerType string, taskName common
 	}
 
 	// partyServer reply to jobManager-master after deploying resources.
-	var requiredResource []*fl_comms_pattern.LaunchResourceReply
+	var requiredResource [][]byte
 	// default use only 1 worker in centralized way.
 	// in distributed training/inference, each party will launch multiple workers, and default use only 1 ps
 	// master will call party server's endpoint to launch worker, to train or predict
@@ -209,21 +209,20 @@ func manageTaskLifeCycle(job common.TrainJob, workerType string, taskName common
 			fmt.Sprintf("%d", job.JobId),
 			dataPath, modelPath, dataOutput,
 			assignedWorker, int(job.PartyNums),
-			taskClassID,
+			taskClassID, job.JobFlType,
 		)
 
-		reply := new(fl_comms_pattern.RunWorkerReply)
+		reply := new(comms_pattern.RunWorkerReply)
 		err := json.Unmarshal(rep, reply)
 		if err != nil {
 			panic(err)
 		}
 
-		decodedReply := fl_comms_pattern.DecodeLaunchResourceReply(reply.EncodedStr)
-		requiredResource[partyIndex] = decodedReply
+		requiredResource[partyIndex] = reply.EncodedStr
 	}
 
 	// extract necessary information
-	masterIns.FLNetworkConfig.Constructor(requiredResource, masterIns.PartyNums, masterIns.Logger)
+	masterIns.JobNetCfg.Constructor(requiredResource, masterIns.PartyNums, masterIns.Logger)
 	masterIns.WorkerNum = assignedWorker * int(masterIns.PartyNums)
 
 	masterIns.Logger.Printf("[JobManager] master received all partyServer's reply, expected workerNum = %d\n", masterIns.WorkerNum)

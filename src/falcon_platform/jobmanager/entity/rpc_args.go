@@ -5,7 +5,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"falcon_platform/common"
-	fl_comms "falcon_platform/jobmanager/fl_comms_pattern"
+	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/logger"
 	"fmt"
 	"strconv"
@@ -27,7 +27,6 @@ type WorkerInfo struct {
 }
 
 type ShutdownReply struct {
-	// todo, no need to collect shutdown reply message?
 }
 
 type DoTaskReply struct {
@@ -56,14 +55,14 @@ type RetrieveModelReportReply struct {
 }
 
 type TaskContext struct {
-	TaskName        common.FalconTask
-	FLNetworkConfig *fl_comms.FLNetworkConfig
-	Job             *common.TrainJob
-	Wk              *WorkerInfo
-	MpcAlgName      string
+	TaskName     common.FalconTask
+	FLNetworkCfg *comms_pattern.JobNetworkConfig
+	Job          *common.TrainJob
+	Wk           *WorkerInfo
+	MpcAlgName   string
 }
 
-// Marshal list to string
+// MarshalStatus list to string
 func MarshalStatus(trainStatuses *DoTaskReply) string {
 	jb, e := json.Marshal(trainStatuses)
 	if e != nil {

@@ -42,17 +42,17 @@ loop:
 
 			// 1. decode tmpWorker
 			workerInfo := entity.DecodeWorkerInfo(tmpWorker)
-			workerInfo.PartyIndex = master.FLNetworkConfig.PartyIdToIndex[workerInfo.PartyID]
+			workerInfo.PartyIndex = master.JobNetCfg.GetPartyIdToIndex()[workerInfo.PartyID]
 
 			// 2. check if this work already exist
-			if master.FLNetworkConfig.RequiredWorkers[workerInfo.PartyID][workerInfo.WorkerID] == false {
+			if master.JobNetCfg.GetRequiredWorkers()[workerInfo.PartyID][workerInfo.WorkerID] == false {
+
 				master.Lock()
-
 				master.workers = append(master.workers, workerInfo)
-
 				master.Unlock()
+
 				master.beginCountDown.Broadcast()
-				master.FLNetworkConfig.RequiredWorkers[workerInfo.PartyID][workerInfo.WorkerID] = true
+				master.JobNetCfg.GetRequiredWorkers()[workerInfo.PartyID][workerInfo.WorkerID] = true
 
 			} else {
 				master.Logger.Printf("[Master]: the worker %s already registered, skip \n", tmpWorker)

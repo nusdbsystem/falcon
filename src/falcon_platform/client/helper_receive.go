@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// send by file=
+//ReceiveFile send by file=
 func ReceiveFile(r *http.Request, buf bytes.Buffer, key string) (error, string) {
 	// FormFile returns the first file for the given key
 	// it also returns the FileHeader so we can get the Filename,
@@ -30,7 +30,7 @@ func ReceiveFile(r *http.Request, buf bytes.Buffer, key string) (error, string) 
 	return nil, buf.String()
 }
 
-// send by data=
+// ReceiveForm send by data=
 func ReceiveForm(r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		logger.Log.Printf("ParseForm() err: %v", err)

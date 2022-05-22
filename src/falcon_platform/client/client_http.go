@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-// add partyServer's address to
+// PartyServerAdd partyServer's address to
 func PartyServerAdd(ServerAddr, partyserverAddr, partyserverPort string) {
 	data := url.Values{
 		common.PartyServerAddrKey: {partyserverAddr},
@@ -52,7 +52,7 @@ func RunWorker(ServerAddr string, masterAddr string,
 	workerType string,
 	jobId string,
 	dataPath, modelPath, dataOutput string,
-	WorkerPreParty, partyNum int, stageName string,
+	WorkerPreParty, partyNum int, stageName string, jobType string,
 ) []byte {
 	data := url.Values{
 		common.MasterAddrKey:    {masterAddr},
@@ -64,6 +64,7 @@ func RunWorker(ServerAddr string, masterAddr string,
 		common.WorkerPreParty:   {fmt.Sprintf("%d", WorkerPreParty)},
 		common.TotalPartyNumber: {fmt.Sprintf("%d", partyNum)},
 		common.StageClassIDKey:  {fmt.Sprintf("%s", stageName)},
+		common.JobTypeKey:       {jobType},
 	}
 
 	reqUrl := ServerAddr + common.RunWorker
@@ -217,7 +218,7 @@ func AddPort(ServerAddr, port string) {
 	}
 }
 
-////////////////////////////////////
+//GetFreePort //////////////////////////////////
 /////////// Get  ////////////
 ////////////////////////////////////
 func GetFreePort(ServerAddr string, portNum int) []common.PortType {

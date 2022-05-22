@@ -1,4 +1,4 @@
-package fl_comms_pattern
+package comms_pattern
 
 import (
 	"bytes"
@@ -7,21 +7,18 @@ import (
 	"fmt"
 )
 
-// LaunchResourceReply
+// PartyRunWorkerReply
 // * @Description: partyServer reply this to jobManager,
 //				 the struct contains multiple resource and each resource have many services.
 // * @File:  job-mngr
 // * @Version: 1.0.0
 // * @Params:
 // * @Date: 23/08/21 1:50
-type LaunchResourceReply struct {
-
+type PartyRunWorkerReply struct {
 	// partyID
 	PartyID common.PartyIdType
-
 	// how many resources created by this partyServer
 	ResourceNum int
-
 	// key workerID, value: *ResourceSVC
 	ResourceSVCs map[common.WorkerIdType]*ResourceSVC
 }
@@ -29,31 +26,12 @@ type LaunchResourceReply struct {
 type ResourceSVC struct {
 	// worker id
 	WorkerId common.WorkerIdType
-
 	// Ip of the service running in this resource
 	ResourceIP string
-
 	// Each worker's port, listen master's requests
 	WorkerPort common.PortType
-
-	// Each Executor's port array, i-th element is listening requests from i-th party's executor
-	ExecutorExecutorPort []common.PortType
-
-	// Each Mpc listen two ports,
-	// mpc port1, listening requests from other party's mpc
-	MpcMpcPort common.PortType
-	// mpc port2, listening requests from other party's executor
-	MpcExecutorPort common.PortType
-
-	// used in distributed training
-
-	// if this worker is Executor, this port listen requests sent from current party's parameter server
-	ExecutorPSPort common.PortType // workerId: Executor port
-	// if this worker is parameter server, listen requests sent from current party's executor
-	PsExecutorPorts []common.PortType
-
-	// each worker will spawn a subprocess, which can be a train-worker or a parameter server
-	DistributedRole uint
+	// network config pattern for a specific job.
+	JobNetCfg PartyNetworkConfig
 }
 
 func (rs *ResourceSVC) ToAddr(port common.PortType) (address string) {
@@ -64,7 +42,7 @@ type RunWorkerReply struct {
 	EncodedStr []byte
 }
 
-func EncodeLaunchResourceReply(args *LaunchResourceReply) []byte {
+func EncodePartyRunWorkerReply(args *PartyRunWorkerReply) []byte {
 
 	var buff bytes.Buffer
 
@@ -77,10 +55,10 @@ func EncodeLaunchResourceReply(args *LaunchResourceReply) []byte {
 	return converted
 }
 
-func DecodeLaunchResourceReply(by []byte) *LaunchResourceReply {
+func DecodePartyRunWorkerReply(by []byte) *PartyRunWorkerReply {
 	reader := bytes.NewReader(by)
 	var decoder = gob.NewDecoder(reader)
-	var d LaunchResourceReply
+	var d PartyRunWorkerReply
 	err := decoder.Decode(&d)
 	if err != nil {
 		panic(err)

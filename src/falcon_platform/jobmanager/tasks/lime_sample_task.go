@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"falcon_platform/common"
+	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"fmt"
@@ -46,7 +47,7 @@ type LimeSampleTask struct {
 func (this *LimeSampleTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 
 	wk := taskInfo.Wk
-	fLConfig := taskInfo.FLNetworkConfig
+	fLConfig := (*taskInfo.FLNetworkCfg).(*comms_pattern.FLNetworkCfg)
 	job := taskInfo.Job
 
 	this.printParams(job.Tasks.LimeInsSample.AlgorithmName, job)

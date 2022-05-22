@@ -1,10 +1,11 @@
-package fl_comms_pattern
+package comms_pattern
 
 import (
 	b64 "encoding/base64"
 	"falcon_platform/common"
 	v0 "falcon_platform/common/proto/v0"
 	"falcon_platform/logger"
+	"falcon_platform/resourcemanager"
 	"fmt"
 	"google.golang.org/protobuf/proto"
 	"log"
@@ -12,7 +13,75 @@ import (
 	"strings"
 )
 
-type FLNetworkConfig struct {
+// init register all network config pattern for each job.
+func init() {
+	GetAllNetworkCfg()["vertical"] = new(FLNetworkCfgPerParty)
+	GetJobNetCfg()["vertical"] = new(FLNetworkCfg)
+}
+
+// FLNetworkCfgPerParty Each worker will has following cfg under FL task
+type FLNetworkCfgPerParty struct {
+
+	// Each Executor's port array, i-th element is listening requests from i-th party's executor
+	ExecutorExecutorPort []common.PortType
+
+	// Each Mpc listen two ports,
+	// mpc port1, listening requests from other party's mpc
+	MpcMpcPort common.PortType
+	// mpc port2, listening requests from other party's executor
+	MpcExecutorPort common.PortType
+
+	// used in distributed training
+
+	// if this worker is Executor, this port listen requests sent from current party's parameter server
+	ExecutorPSPort common.PortType // workerId: Executor port
+	// if this worker is parameter server, listen requests sent from current party's executor
+	PsExecutorPorts []common.PortType
+
+	// each worker will spawn a subprocess, which can be a train-worker or a parameter server
+	DistributedRole uint
+}
+
+func (this *FLNetworkCfgPerParty) Constructor(partyNum int, workerId common.WorkerIdType, taskClassIDName string,
+	role int, workerNum int) PartyNetworkConfig {
+
+	newCfg := new(FLNetworkCfgPerParty)
+
+	if role == common.CentralizedWorker {
+		newCfg.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
+		newCfg.MpcMpcPort = resourcemanager.GetOneFreePort()
+		newCfg.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(workerId), taskClassIDName)
+		newCfg.ExecutorPSPort = 0
+		newCfg.PsExecutorPorts = []common.PortType{}
+		//resourceSVC.PsPsPorts = []common.PortType{}
+		newCfg.DistributedRole = common.CentralizedWorker
+		return newCfg
+	}
+
+	if role == common.DistributedParameterServer {
+		newCfg.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
+		newCfg.MpcMpcPort = resourcemanager.GetOneFreePort()
+		newCfg.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0, taskClassIDName)
+		newCfg.ExecutorPSPort = 0
+		newCfg.PsExecutorPorts = resourcemanager.GetFreePort(workerNum - 1)
+		newCfg.DistributedRole = common.DistributedParameterServer
+		return newCfg
+	}
+
+	if role == common.DistributedWorker {
+		newCfg.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
+		newCfg.MpcMpcPort = resourcemanager.GetOneFreePort()
+		newCfg.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(workerId), taskClassIDName)
+		newCfg.ExecutorPSPort = resourcemanager.GetOneFreePort()
+		newCfg.PsExecutorPorts = []common.PortType{}
+		newCfg.DistributedRole = common.DistributedWorker
+		return newCfg
+	}
+	panic("Generatt FLNetworkCfgPerParty fail, role not match any ")
+}
+
+// FLNetworkCfg aggregate from all party, and generate this summarty.
+type FLNetworkCfg struct {
 	// each worker or ps has a mpc, and they will communicate with each other
 	MpcPairNetworkCfg        map[common.WorkerIdType]string
 	ExecutorPairNetworkCfg   map[common.WorkerIdType]string
@@ -28,7 +97,12 @@ type FLNetworkConfig struct {
 	PartyIdToIndex map[common.PartyIdType]int
 }
 
-func (this *FLNetworkConfig) Constructor(requiredResource []*LaunchResourceReply, PartyNums uint, masLogger *log.Logger) {
+func (this *FLNetworkCfg) Constructor(encodeStr [][]byte, PartyNums uint, masLogger *log.Logger) {
+
+	var requiredResource []*PartyRunWorkerReply
+	for _, ele := range encodeStr {
+		requiredResource = append(requiredResource, DecodePartyRunWorkerReply(ele))
+	}
 
 	this.PartyIdToIndex = make(map[common.PartyIdType]int)
 	this.WorkerRole = make(map[common.PartyIdType]map[common.WorkerIdType]uint)
@@ -59,16 +133,16 @@ func (this *FLNetworkConfig) Constructor(requiredResource []*LaunchResourceReply
 	// 2-dim to record required workers, each worker is labeled with partyID, workerID
 	var requiredWorkers = make(map[common.PartyIdType]map[common.WorkerIdType]bool)
 
-	// for each party's replied "LaunchResourceReply" struct
-	for partyIndex, LaunchResourceReply := range requiredResource {
-		partyID := LaunchResourceReply.PartyID
+	// for each party's replied "PartyRunWorkerReply" struct
+	for partyIndex, PartyRunWorkerReply := range requiredResource {
+		partyID := PartyRunWorkerReply.PartyID
 		this.PartyIdToIndex[partyID] = partyIndex
 		// there are only 1 ps in each party's group in distributed train
-		trainWorkerPreParty := LaunchResourceReply.ResourceNum - 1
+		trainWorkerPreParty := PartyRunWorkerReply.ResourceNum - 1
 
 		// get sorted work id
 		var orderedWorkIds []int
-		for workerID, _ := range LaunchResourceReply.ResourceSVCs {
+		for workerID, _ := range PartyRunWorkerReply.ResourceSVCs {
 			orderedWorkIds = append(orderedWorkIds, int(workerID))
 		}
 		sort.Ints(orderedWorkIds)
@@ -76,14 +150,16 @@ func (this *FLNetworkConfig) Constructor(requiredResource []*LaunchResourceReply
 		// for each resource in single party, force counting start from 0
 		for _, orderedWorkId := range orderedWorkIds {
 			// gather all resource
-			for workerID, ResourceSVC := range LaunchResourceReply.ResourceSVCs {
+			for workerID, ResourceSVC := range PartyRunWorkerReply.ResourceSVCs {
 				if orderedWorkId == int(workerID) {
+
+					flConfig := ResourceSVC.JobNetCfg.(*FLNetworkCfgPerParty)
 
 					// store role of each worker
 					if _, ok := this.WorkerRole[partyID][workerID]; !ok {
 						this.WorkerRole[partyID] = make(map[common.WorkerIdType]uint)
 					}
-					this.WorkerRole[partyID][workerID] = ResourceSVC.DistributedRole
+					this.WorkerRole[partyID][workerID] = flConfig.DistributedRole
 
 					// required workers id
 					if _, ok := requiredWorkers[partyID]; !ok {
@@ -101,37 +177,37 @@ func (this *FLNetworkConfig) Constructor(requiredResource []*LaunchResourceReply
 					if _, ok := executorPairsPorts[workerID]; !ok {
 						executorPairsPorts[workerID] = make([][]common.PortType, PartyNums)
 					}
-					executorPairsPorts[workerID][partyIndex] = ResourceSVC.ExecutorExecutorPort
+					executorPairsPorts[workerID][partyIndex] = flConfig.ExecutorExecutorPort
 
 					// record mpc-mpc ports
 					if _, ok := mpcPairsPorts[workerID]; !ok {
 						mpcPairsPorts[workerID] = make([]common.PortType, PartyNums)
 					}
-					mpcPairsPorts[workerID][partyIndex] = ResourceSVC.MpcMpcPort
+					mpcPairsPorts[workerID][partyIndex] = flConfig.MpcMpcPort
 
 					// mpc-executor ports
 					if _, ok := mpcExecutorPorts[workerID]; !ok {
 						mpcExecutorPorts[workerID] = make([]common.PortType, PartyNums)
 					}
-					mpcExecutorPorts[workerID][partyIndex] = ResourceSVC.MpcExecutorPort
+					mpcExecutorPorts[workerID][partyIndex] = flConfig.MpcExecutorPort
 
 					// for distributed parameter
-					if ResourceSVC.DistributedRole == common.DistributedParameterServer {
+					if flConfig.DistributedRole == common.DistributedParameterServer {
 						distPsIp[partyID] = ResourceSVC.ResourceIP
 						if _, ok := distPsPorts[partyID]; !ok {
 							// len = number of train workers
 							distPsPorts[partyID] = make([]common.PortType, trainWorkerPreParty)
 						}
-						for wIndex, port := range ResourceSVC.PsExecutorPorts {
+						for wIndex, port := range flConfig.PsExecutorPorts {
 							distPsPorts[partyID][wIndex] = port
 						}
 					}
 
 					// if it's distributed worker, record worker's ip to generate distributed network alter
-					if ResourceSVC.DistributedRole == common.DistributedWorker {
+					if flConfig.DistributedRole == common.DistributedWorker {
 						//which is in order
 						distWorkerIps[partyID] = append(distWorkerIps[partyID], ResourceSVC.ResourceIP)
-						distWorkerPorts[partyID] = append(distWorkerPorts[partyID], ResourceSVC.ExecutorPSPort)
+						distWorkerPorts[partyID] = append(distWorkerPorts[partyID], flConfig.ExecutorPSPort)
 					}
 					break
 				}
@@ -195,15 +271,16 @@ func (this *FLNetworkConfig) Constructor(requiredResource []*LaunchResourceReply
 		masLogger.Printf("[Master.extractResourceInfo] party %d ResourceNum: %d", i, requiredResource[i].ResourceNum)
 
 		for workerID, svc := range requiredResource[i].ResourceSVCs {
+			flConfig := svc.JobNetCfg.(*FLNetworkCfgPerParty)
 			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.WorkerId: %d", i, workerID, svc, svc.WorkerId)
 			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d", i, workerID, svc)
 			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ResourceIP: %s", i, workerID, svc, svc.ResourceIP)
 			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.WorkerPort: %d", i, workerID, svc, svc.WorkerPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorExecutorPort: %d", i, workerID, svc, svc.ExecutorExecutorPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcMpcPort: %d", i, workerID, svc, svc.MpcMpcPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcExecutorPort: %d", i, workerID, svc, svc.MpcExecutorPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorPSPort: %d", i, workerID, svc, svc.ExecutorPSPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.DistributedRole: %s\n", i, workerID, svc, common.DistributedRoleToName(svc.DistributedRole))
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorExecutorPort: %d", i, workerID, svc, flConfig.ExecutorExecutorPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcMpcPort: %d", i, workerID, svc, flConfig.MpcMpcPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcExecutorPort: %d", i, workerID, svc, flConfig.MpcExecutorPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorPSPort: %d", i, workerID, svc, flConfig.ExecutorPSPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.DistributedRole: %s\n", i, workerID, svc, common.DistributedRoleToName(flConfig.DistributedRole))
 		}
 	}
 
@@ -228,6 +305,14 @@ func (this *FLNetworkConfig) Constructor(requiredResource []*LaunchResourceReply
 	this.MpcExecutorNetworkCfg = mpcExecutorNetworkCfg
 	this.DistributedNetworkCfg = distributedNetworkCfg
 	this.RequiredWorkers = requiredWorkers
+}
+
+func (this *FLNetworkCfg) GetPartyIdToIndex() map[common.PartyIdType]int {
+	return this.PartyIdToIndex
+}
+
+func (this *FLNetworkCfg) GetRequiredWorkers() map[common.PartyIdType]map[common.WorkerIdType]bool {
+	return this.RequiredWorkers
 }
 
 // generate network config for executor-parameter server communication

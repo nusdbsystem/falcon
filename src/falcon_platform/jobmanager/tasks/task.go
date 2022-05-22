@@ -6,23 +6,12 @@ import (
 	"encoding/json"
 	v0 "falcon_platform/common/proto/v0"
 	"github.com/golang/protobuf/proto"
-	"sync"
 
 	"falcon_platform/common"
 	"falcon_platform/jobmanager/entity"
 	"falcon_platform/logger"
 	"os/exec"
 )
-
-var allTasksOnce sync.Once
-var allTasks map[common.FalconTask]Task
-
-func GetAllTasks() map[common.FalconTask]Task {
-	allTasksOnce.Do(func() {
-		allTasks = make(map[common.FalconTask]Task)
-	})
-	return allTasks
-}
 
 // init register all existing tasks.
 func init() {

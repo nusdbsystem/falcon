@@ -3,7 +3,7 @@ package controller
 import (
 	"falcon_platform/common"
 	"falcon_platform/jobmanager"
-	"falcon_platform/jobmanager/fl_comms_pattern"
+	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
 	"strconv"
@@ -24,18 +24,19 @@ func schedule(workerId common.WorkerIdType) (nodeId int) {
 
 // RunWorker party Run workers to do tasks, partyServer can deploy works in 3 ways according to user's setting,
 // namely subprocess, docker, or k8s
-func RunFLWorker(masterAddr, workerType,
+func RunWorker(masterAddr, workerType,
 	jobId,
 	dataPath, modelPath, dataOutput string, // some vars used in FLengine
 	workerNum, // how many worker to spawn
 	partyNum int, //  how many party in this execution
 	TaskClassIDName string, // used to generate MPC port
-) *fl_comms_pattern.LaunchResourceReply {
+	jobNetCfg comms_pattern.PartyNetworkConfig,
+) *comms_pattern.PartyRunWorkerReply {
 
-	reply := new(fl_comms_pattern.LaunchResourceReply)
+	reply := new(comms_pattern.PartyRunWorkerReply)
 	reply.PartyID = common.PartyID
 	reply.ResourceNum = workerNum
-	reply.ResourceSVCs = make(map[common.WorkerIdType]*fl_comms_pattern.ResourceSVC)
+	reply.ResourceSVCs = make(map[common.WorkerIdType]*comms_pattern.ResourceSVC)
 
 	logger.Log.Println(
 		"[PartyServer]: PartyServer setup workers,  = ",
@@ -53,17 +54,13 @@ func RunFLWorker(masterAddr, workerType,
 		nodeIP := common.PartyServerClusterIPs[nodeID]
 
 		// init resourceSVC information
-		resourceSVC := new(fl_comms_pattern.ResourceSVC)
+		resourceSVC := new(comms_pattern.ResourceSVC)
 		resourceSVC.WorkerId = workerId
 		resourceSVC.ResourceIP = nodeIP
 		resourceSVC.WorkerPort = resourcemanager.GetOneFreePort()
-		resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
-		resourceSVC.MpcMpcPort = resourcemanager.GetOneFreePort()
-		resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId), TaskClassIDName)
-		resourceSVC.ExecutorPSPort = 0
-		resourceSVC.PsExecutorPorts = []common.PortType{}
-		//resourceSVC.PsPsPorts = []common.PortType{}
-		resourceSVC.DistributedRole = common.CentralizedWorker
+
+		resourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, TaskClassIDName, common.CentralizedWorker, workerNum)
+
 		reply.ResourceSVCs[workerId] = resourceSVC
 
 		if common.Deployment == common.LocalThread {
@@ -101,16 +98,13 @@ func RunFLWorker(masterAddr, workerType,
 		nodeID := schedule(workerId)
 		nodeIP := common.PartyServerClusterIPs[nodeID]
 		// init resourceSVC information
-		resourceSVC := new(fl_comms_pattern.ResourceSVC)
+		resourceSVC := new(comms_pattern.ResourceSVC)
 		resourceSVC.WorkerId = workerId
 		resourceSVC.ResourceIP = nodeIP
 		resourceSVC.WorkerPort = resourcemanager.GetOneFreePort()
-		resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
-		resourceSVC.MpcMpcPort = resourcemanager.GetOneFreePort()
-		resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(0, TaskClassIDName)
-		resourceSVC.ExecutorPSPort = 0
-		resourceSVC.PsExecutorPorts = resourcemanager.GetFreePort(workerNum - 1)
-		resourceSVC.DistributedRole = common.DistributedParameterServer
+
+		resourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, TaskClassIDName, common.DistributedParameterServer, workerNum)
+
 		reply.ResourceSVCs[workerId] = resourceSVC
 		if common.Deployment == common.Docker {
 			nodeLabel := common.PartyServerClusterLabels[nodeID]
@@ -139,16 +133,13 @@ func RunFLWorker(masterAddr, workerType,
 			nodeIP := common.PartyServerClusterIPs[nodeID]
 
 			// init resourceSVC information
-			resourceSVC := new(fl_comms_pattern.ResourceSVC)
+			resourceSVC := new(comms_pattern.ResourceSVC)
 			resourceSVC.WorkerId = workerId
 			resourceSVC.ResourceIP = nodeIP
 			resourceSVC.WorkerPort = resourcemanager.GetOneFreePort()
-			resourceSVC.ExecutorExecutorPort = resourcemanager.GetFreePort(partyNum)
-			resourceSVC.MpcMpcPort = resourcemanager.GetOneFreePort()
-			resourceSVC.MpcExecutorPort = resourcemanager.GetMpcExecutorPort(int(resourceSVC.WorkerId), TaskClassIDName)
-			resourceSVC.ExecutorPSPort = resourcemanager.GetOneFreePort()
-			resourceSVC.PsExecutorPorts = []common.PortType{}
-			resourceSVC.DistributedRole = common.DistributedWorker
+
+			resourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, TaskClassIDName, common.DistributedWorker, workerNum)
+
 			reply.ResourceSVCs[workerId] = resourceSVC
 
 			logger.Log.Printf("[PartyServer]: PartyServer setup one worker as train worker with workerID=%d to "+
@@ -177,7 +168,7 @@ func RunFLWorker(masterAddr, workerType,
 	return reply
 }
 
-func printAllocatedResources(reply *fl_comms_pattern.LaunchResourceReply) {
+func printAllocatedResources(reply *comms_pattern.PartyRunWorkerReply) {
 	logger.Log.Printf("[PartyServer]: Deployment %s not supported in distributed training\n", common.Deployment)
 
 }

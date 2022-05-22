@@ -5,7 +5,7 @@ import (
 	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/exceptions"
-	"falcon_platform/jobmanager/fl_comms_pattern"
+	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/logger"
 	"falcon_platform/partyserver/controller"
 	"fmt"
@@ -29,7 +29,7 @@ func NewRouter() *mux.Router {
 // * @Description Called by job manager to launch one or multiple workers
 // * @Date 下午2:51 23/08/21
 // * @Param
-// * @return  Return job manager with resources' information, eg. address etc, defined in common.LaunchResourceReply
+// * @return  Return job manager with resources' information, eg. address etc, defined in common.PartyRunWorkerReply
 func RunWorker() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -43,24 +43,30 @@ func RunWorker() func(w http.ResponseWriter, r *http.Request) {
 		masterAddr := r.FormValue(common.MasterAddrKey)
 		workerTypeKey := r.FormValue(common.TaskTypeKey)
 		jobId := r.FormValue(common.JobId)
+		// task input path, model path, output path,
 		dataPath := r.FormValue(common.TrainDataPath)
 		modelPath := r.FormValue(common.ModelPath)
 		dataOutput := r.FormValue(common.TrainDataOutput)
+		// numbers
 		WorkerPreParty, err := strconv.Atoi(r.FormValue(common.WorkerPreParty))
 		partyNum, err := strconv.Atoi(r.FormValue(common.TotalPartyNumber))
 		stageName := r.FormValue(common.StageClassIDKey)
+		jobType := r.FormValue(common.JobTypeKey)
 
 		if err != nil {
 			panic(err)
 		}
 
-		resIns := controller.RunFLWorker(masterAddr, workerTypeKey, jobId, dataPath, modelPath, dataOutput, WorkerPreParty, partyNum, stageName)
+		// retrieve global cfg for this job.
+		jobNetCfg := comms_pattern.GetAllNetworkCfg()[jobType]
+
+		resIns := controller.RunWorker(masterAddr, workerTypeKey, jobId, dataPath, modelPath, dataOutput, WorkerPreParty, partyNum, stageName, jobNetCfg)
 
 		// return to job manager
 		w.WriteHeader(http.StatusOK)
 
-		reply := fl_comms_pattern.RunWorkerReply{
-			EncodedStr: fl_comms_pattern.EncodeLaunchResourceReply(resIns),
+		reply := comms_pattern.RunWorkerReply{
+			EncodedStr: comms_pattern.EncodePartyRunWorkerReply(resIns),
 		}
 
 		err = json.NewEncoder(w).Encode(reply)

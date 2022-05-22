@@ -258,7 +258,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 	}
 
 	// LimeInterpret
-	if jobInfo.Tasks.LimeInterpret.AlgorithmName == "" {
+	if jobInfo.Tasks.LimeInterpret.AlgorithmName != "" {
 		if jobInfo.Tasks.LimeInterpret.AlgorithmName == LimeInterpretAlgName {
 			logger.Log.Println("ParseTrainJob: LimeInterpret AlgorithmName match <-->", jobInfo.Tasks.LimeInterpret.AlgorithmName)
 			_, jobInfo.Tasks.LimeInterpret.ClassNum =

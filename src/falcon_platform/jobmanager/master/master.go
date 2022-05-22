@@ -3,8 +3,8 @@ package master
 import (
 	"falcon_platform/client"
 	"falcon_platform/common"
+	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/jobmanager/entity"
-	fl_comms "falcon_platform/jobmanager/fl_comms_pattern"
 	"falcon_platform/jobmanager/rpcbase"
 	"log"
 	"os"
@@ -50,11 +50,11 @@ type Master struct {
 	Logger  *log.Logger
 	LogFile *os.File
 
-	// fl configurations
-	FLNetworkConfig fl_comms.FLNetworkConfig
+	// network configurations
+	JobNetCfg comms_pattern.JobNetworkConfig
 }
 
-func newMaster(masterAddr string, partyNum uint) (ms *Master) {
+func newMaster(masterAddr string, partyNum uint, jobType string) (ms *Master) {
 	ms = new(Master)
 	ms.InitRpcBase(masterAddr)
 	ms.Name = common.Master
@@ -73,7 +73,7 @@ func newMaster(masterAddr string, partyNum uint) (ms *Master) {
 	ms.heartbeatTimeout = common.MasterTimeout
 	ms.WorkerNum = 0
 	ms.PartyNums = partyNum
-	ms.FLNetworkConfig = fl_comms.FLNetworkConfig{}
+	ms.JobNetCfg = comms_pattern.GetJobNetCfg()[jobType]
 	return
 }
 

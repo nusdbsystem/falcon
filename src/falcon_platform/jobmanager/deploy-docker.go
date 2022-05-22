@@ -2,7 +2,7 @@ package jobmanager
 
 import (
 	"falcon_platform/common"
-	fl_comms_pattern "falcon_platform/jobmanager/fl_comms_pattern"
+	fl_comms_pattern "falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
 	"fmt"
