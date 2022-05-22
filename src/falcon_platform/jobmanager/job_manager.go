@@ -41,7 +41,7 @@ func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 
 	status := true
 
-	if stage, ok := dagScheduler.Stages[common.PreProcTaskKey]; ok {
+	if stage, ok := dagScheduler.DagTasks[common.PreProcTaskKey]; ok {
 		// 1. generate master address
 		status = manageTaskLifeCycle(*job, workerType, stage.Name, stage.AssignedWorker, 0)
 	}
@@ -50,7 +50,7 @@ func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 		return
 	}
 
-	if stage, ok := dagScheduler.Stages[common.ModelTrainTaskKey]; ok {
+	if stage, ok := dagScheduler.DagTasks[common.ModelTrainTaskKey]; ok {
 		// 1. generate master address
 		status = manageTaskLifeCycle(*job, workerType, stage.Name, stage.AssignedWorker, 0)
 	}
@@ -59,7 +59,7 @@ func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 		return
 	}
 
-	if stage, ok := dagScheduler.Stages[common.LimeInstanceSampleTask]; ok {
+	if stage, ok := dagScheduler.DagTasks[common.LimeInstanceSampleTask]; ok {
 		// 1. generate master address
 		status = manageTaskLifeCycle(*job, workerType, stage.Name, stage.AssignedWorker, 0)
 	}
@@ -72,7 +72,7 @@ func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 	statusPrediction := true
 	statusWeight := true
 	wg23 := sync.WaitGroup{}
-	if stage, ok := dagScheduler.Stages[common.LimePredTaskKey]; ok {
+	if stage, ok := dagScheduler.DagTasks[common.LimePredTaskKey]; ok {
 		wg23.Add(1)
 		go func(job common.TrainJob, workerType string, stage *DAGscheduler.TaskStage, wg23 *sync.WaitGroup, status *bool) {
 			*status = manageTaskLifeCycle(job, workerType, stage.Name, stage.AssignedWorker, 0)
@@ -80,7 +80,7 @@ func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 		}(*job, workerType, &stage, &wg23, &statusPrediction)
 	}
 
-	if stage, ok := dagScheduler.Stages[common.LimeWeightTaskKey]; ok {
+	if stage, ok := dagScheduler.DagTasks[common.LimeWeightTaskKey]; ok {
 		wg23.Add(1)
 		go func(job common.TrainJob, workerType string, stage *DAGscheduler.TaskStage, wg23 *sync.WaitGroup, status *bool) {
 			*status = manageTaskLifeCycle(job, workerType, stage.Name, stage.AssignedWorker, 0)
@@ -116,14 +116,14 @@ func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 		go func(classIdParam int, classParallelismParam *int, wgParam *sync.WaitGroup, job common.TrainJob) {
 			var selectFeatureFile = ""
 			// feature selection
-			if stage, ok := dagScheduler.Stages[common.LimeFeatureTaskKey]; ok {
+			if stage, ok := dagScheduler.DagTasks[common.LimeFeatureTaskKey]; ok {
 				job.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
 					common.GenerateLimeFeatSelParams(job.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, int32(classIdParam))
 				manageTaskLifeCycle(job, workerType, stage.Name, stage.AssignedWorker, classIdParam)
 			}
 
 			// model training
-			if stage, ok := dagScheduler.Stages[common.LimeInterpretTaskKey]; ok {
+			if stage, ok := dagScheduler.DagTasks[common.LimeInterpretTaskKey]; ok {
 				// generate SerializedAlgorithmConfig
 				job.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
 					common.GenerateLimeInterpretParams(job.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig,

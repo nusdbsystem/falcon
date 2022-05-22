@@ -15,10 +15,10 @@ func (master *Master) RegisterWorker(args *entity.WorkerInfo, _ *struct{}) error
 	_ = json.Indent(&out, bs, "", "\t")
 	master.Logger.Printf("[master.RegisterWorker] one Worker registered! args: %v\n", out.String())
 
-	// Pass WorkerAddrIdType (addr:partyID) into tmpWorkers for pre-processing
+	// Pass WorkerAddrIdType (addr:partyID) into workerRegisterChan for pre-processing
 	// IP:Port:WorkerID
 	encodedStr := entity.EncodeWorkerInfo(args)
-	master.tmpWorkers <- encodedStr
+	master.workerRegisterChan <- encodedStr
 	return nil
 }
 
@@ -38,7 +38,7 @@ loop:
 			master.Logger.Println("[Master.forwardRegistrations]: Thread-2 forwardRegistrations: exit")
 			break loop
 
-		case tmpWorker := <-master.tmpWorkers:
+		case tmpWorker := <-master.workerRegisterChan:
 
 			// 1. decode tmpWorker
 			workerInfo := entity.DecodeWorkerInfo(tmpWorker)

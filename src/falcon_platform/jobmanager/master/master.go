@@ -22,11 +22,12 @@ type Master struct {
 	// total party number
 	PartyNums uint
 
-	// For Worker management
+	// For Worker discover
 	// tmp slice to store registered workers
-	tmpWorkers chan string
+	workerRegisterChan chan string
 	// slice to store valid workers
-	workers   []*entity.WorkerInfo
+	workers []*entity.WorkerInfo
+	// required worker number
 	WorkerNum int
 	// check if at least one worker found, decide when to board cast heartbeat
 	foundWorker bool
@@ -64,7 +65,7 @@ func newMaster(masterAddr string, partyNum uint, jobType string) (ms *Master) {
 
 	// default cache 100 workers at most,
 	// use cache to allow workers to register before master running forwardRegistrations to consume worker's information
-	ms.tmpWorkers = make(chan string, 100)
+	ms.workerRegisterChan = make(chan string, 100)
 
 	//default to successful, update at runtime, record to db after job finishing
 	ms.jobStatus = common.JobSuccessful

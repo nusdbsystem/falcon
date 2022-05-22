@@ -14,8 +14,10 @@ type ParallelismSchedulePolicy struct {
 	// prediction
 	PreProcessingParallelism int
 
+	// Training
 	ModelTrainParallelism int
 
+	// Sampling
 	LimeInstanceSampleParallelism int
 
 	// prediction

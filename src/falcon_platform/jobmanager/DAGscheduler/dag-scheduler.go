@@ -14,13 +14,13 @@ type TaskStage struct {
 
 type DagScheduler struct {
 	// stage, each stage has many tasks,
-	Stages            map[common.FalconTask]TaskStage
+	DagTasks          map[common.FalconTask]TaskStage
 	ParallelismPolicy *ParallelismSchedulePolicy
 }
 
 func NewDagScheduler(job *common.TrainJob) *DagScheduler {
 	ds := new(DagScheduler)
-	ds.Stages = make(map[common.FalconTask]TaskStage)
+	ds.DagTasks = make(map[common.FalconTask]TaskStage)
 	ds.ParallelismPolicy = NewParallelismSchedulePolicy(job)
 	return ds
 }
@@ -32,7 +32,7 @@ func (ds *DagScheduler) SplitTaskIntoStage(job *common.TrainJob) {
 		taskStage := TaskStage{
 			common.PreProcTaskKey,
 			ds.ParallelismPolicy.PreProcessingParallelism}
-		ds.Stages[common.PreProcTaskKey] = taskStage
+		ds.DagTasks[common.PreProcTaskKey] = taskStage
 	}
 
 	// stage 2
@@ -40,7 +40,7 @@ func (ds *DagScheduler) SplitTaskIntoStage(job *common.TrainJob) {
 		taskStage := TaskStage{
 			common.ModelTrainTaskKey,
 			ds.ParallelismPolicy.ModelTrainParallelism}
-		ds.Stages[common.ModelTrainTaskKey] = taskStage
+		ds.DagTasks[common.ModelTrainTaskKey] = taskStage
 	}
 
 	// stage 3
@@ -48,7 +48,7 @@ func (ds *DagScheduler) SplitTaskIntoStage(job *common.TrainJob) {
 		taskStage := TaskStage{
 			common.LimeInstanceSampleTask,
 			ds.ParallelismPolicy.LimeInstanceSampleParallelism}
-		ds.Stages[common.LimeInstanceSampleTask] = taskStage
+		ds.DagTasks[common.LimeInstanceSampleTask] = taskStage
 	}
 
 	// stage 4
@@ -56,7 +56,7 @@ func (ds *DagScheduler) SplitTaskIntoStage(job *common.TrainJob) {
 		taskStage := TaskStage{
 			common.LimePredTaskKey,
 			ds.ParallelismPolicy.LimeOriModelPredictionParallelism}
-		ds.Stages[common.LimePredTaskKey] = taskStage
+		ds.DagTasks[common.LimePredTaskKey] = taskStage
 	}
 
 	// stage 5
@@ -64,7 +64,7 @@ func (ds *DagScheduler) SplitTaskIntoStage(job *common.TrainJob) {
 		taskStage := TaskStage{
 			common.LimeWeightTaskKey,
 			ds.ParallelismPolicy.LimeInstanceWeightParallelism}
-		ds.Stages[common.LimeWeightTaskKey] = taskStage
+		ds.DagTasks[common.LimeWeightTaskKey] = taskStage
 	}
 
 	// stage 6
@@ -72,7 +72,7 @@ func (ds *DagScheduler) SplitTaskIntoStage(job *common.TrainJob) {
 		taskStage := TaskStage{
 			common.LimeFeatureTaskKey,
 			ds.ParallelismPolicy.LimeFeatureSelectionParallelism}
-		ds.Stages[common.LimeFeatureTaskKey] = taskStage
+		ds.DagTasks[common.LimeFeatureTaskKey] = taskStage
 
 	}
 
@@ -81,8 +81,8 @@ func (ds *DagScheduler) SplitTaskIntoStage(job *common.TrainJob) {
 			common.LimeInterpretTaskKey,
 			ds.ParallelismPolicy.LimeVFLModelTrainParallelism}
 
-		ds.Stages[common.LimeInterpretTaskKey] = taskStage
+		ds.DagTasks[common.LimeInterpretTaskKey] = taskStage
 	}
 
-	logger.Log.Printf("[DagScheduler] sages = %v\n", ds.Stages)
+	logger.Log.Printf("[DagScheduler] sages = %v\n", ds.DagTasks)
 }
