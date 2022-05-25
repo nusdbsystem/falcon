@@ -226,7 +226,7 @@ TEST(PB_Converter, FixedPointEncodedNumber) {
 }
 
 TEST(PB_Converter, EncodedNumberArray) {
-  EncodedNumber* encoded_number_array = new EncodedNumber[3];
+  auto* encoded_number_array = new EncodedNumber[3];
   mpz_t v_n;
   mpz_t v_value;
   mpz_init(v_n);
@@ -244,7 +244,7 @@ TEST(PB_Converter, EncodedNumberArray) {
 
   std::string out_message;
   serialize_encoded_number_array(encoded_number_array, 3, out_message);
-  EncodedNumber* deserialized_number_array = new EncodedNumber[3];
+  auto* deserialized_number_array = new EncodedNumber[3];
   deserialize_encoded_number_array(deserialized_number_array, 3, out_message);
 
   for (int i = 0; i < 3; i++) {
@@ -269,7 +269,7 @@ TEST(PB_Converter, EncodedNumberArray) {
 }
 
 TEST(PB_Converter, EncodedNumberMatrix) {
-  EncodedNumber** encoded_number_matrix = new EncodedNumber*[3];
+  auto** encoded_number_matrix = new EncodedNumber*[3];
   for (int i = 0; i < 3; i++) {
     encoded_number_matrix[i] = new EncodedNumber[2];
   }
@@ -292,7 +292,7 @@ TEST(PB_Converter, EncodedNumberMatrix) {
 
   std::string out_message;
   serialize_encoded_number_matrix(encoded_number_matrix, 3, 2, out_message);
-  EncodedNumber** deserialized_number_matrix = new EncodedNumber*[3];
+  auto** deserialized_number_matrix = new EncodedNumber*[3];
   for (int i = 0; i < 3; i++) {
     deserialized_number_matrix[i] = new EncodedNumber[2];
   }
@@ -553,14 +553,62 @@ TEST(PB_Converter, GbdtParams) {
   EXPECT_TRUE(gbdt_params.dt_param.split_strategy == deserialized_gbdt_params.dt_param.split_strategy);
 }
 
+TEST(PB_Converter, MlpParams) {
+  MlpParams mlp_params;
+  mlp_params.batch_size = 32;
+  mlp_params.max_iteration = 100;
+  mlp_params.converge_threshold = 1e-3;
+  mlp_params.with_regularization = false;
+  mlp_params.alpha = 0.5;
+  mlp_params.learning_rate = 0.1;
+  mlp_params.decay = 0.8;
+  mlp_params.penalty = "l2";
+  mlp_params.optimizer = "sgd";
+  mlp_params.metric = "acc";
+  mlp_params.dp_budget = 0;
+  mlp_params.fit_bias = true;
+  mlp_params.num_layers_neurons.push_back(20);
+  mlp_params.num_layers_neurons.push_back(100);
+  mlp_params.num_layers_neurons.push_back(100);
+  mlp_params.num_layers_neurons.push_back(2);
+  mlp_params.layers_activation_funcs.emplace_back("sigmoid");
+  mlp_params.layers_activation_funcs.emplace_back("sigmoid");
+  mlp_params.layers_activation_funcs.emplace_back("linear");
+  std::string output_message;
+  serialize_mlp_params(mlp_params, output_message);
+
+  MlpParams deserialized_mlp_params;
+  deserialize_mlp_params(deserialized_mlp_params, output_message);
+  EXPECT_EQ(mlp_params.batch_size, deserialized_mlp_params.batch_size);
+  EXPECT_EQ(mlp_params.max_iteration, deserialized_mlp_params.max_iteration);
+  EXPECT_EQ(mlp_params.converge_threshold, deserialized_mlp_params.converge_threshold);
+  EXPECT_EQ(mlp_params.with_regularization, deserialized_mlp_params.with_regularization);
+  EXPECT_EQ(mlp_params.alpha, deserialized_mlp_params.alpha);
+  EXPECT_EQ(mlp_params.learning_rate, deserialized_mlp_params.learning_rate);
+  EXPECT_EQ(mlp_params.decay, deserialized_mlp_params.decay);
+  EXPECT_EQ(mlp_params.dp_budget, deserialized_mlp_params.dp_budget);
+  EXPECT_EQ(mlp_params.fit_bias, deserialized_mlp_params.fit_bias);
+  EXPECT_TRUE(mlp_params.penalty == deserialized_mlp_params.penalty);
+  EXPECT_TRUE(mlp_params.optimizer == deserialized_mlp_params.optimizer);
+  EXPECT_TRUE(mlp_params.metric == deserialized_mlp_params.metric);
+  int layer_size = (int) mlp_params.num_layers_neurons.size();
+  int hidden_layer_size = (int) mlp_params.layers_activation_funcs.size();
+  for (int i = 0; i < layer_size; i++) {
+    EXPECT_EQ(mlp_params.num_layers_neurons[i], deserialized_mlp_params.num_layers_neurons[i]);
+  }
+  for (int i = 0; i < hidden_layer_size; i++) {
+    EXPECT_TRUE(mlp_params.layers_activation_funcs[i] == deserialized_mlp_params.layers_activation_funcs[i]);
+  }
+}
+
 TEST(PB_Converter, TreeEncryptedStatistics) {
   int client_id = 0;
   int node_index = 1;
   int split_num = 3;
   int classes_num = 2;
-  EncodedNumber *left_sample_nums = new EncodedNumber[3];
-  EncodedNumber *right_sample_nums = new EncodedNumber[3];
-  EncodedNumber ** encrypted_statistics = new EncodedNumber*[3];
+  auto *left_sample_nums = new EncodedNumber[3];
+  auto *right_sample_nums = new EncodedNumber[3];
+  auto ** encrypted_statistics = new EncodedNumber*[3];
   for (int i = 0; i < 3; i++) {
     encrypted_statistics[i] = new EncodedNumber[2*2];
   }
@@ -601,9 +649,9 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
   int deserialized_node_index = 1;
   int deserialized_split_num = 3;
   int deserialized_classes_num = 2;
-  EncodedNumber *deserialized_left_sample_nums = new EncodedNumber[3];
-  EncodedNumber *deserialized_right_sample_nums = new EncodedNumber[3];
-  EncodedNumber ** deserialized_encrypted_statistics = new EncodedNumber*[3];
+  auto *deserialized_left_sample_nums = new EncodedNumber[3];
+  auto *deserialized_right_sample_nums = new EncodedNumber[3];
+  auto ** deserialized_encrypted_statistics = new EncodedNumber*[3];
   for (int i = 0; i < 3; i++) {
     deserialized_encrypted_statistics[i] = new EncodedNumber[2*2];
   }
@@ -683,8 +731,8 @@ TEST(PB_Converter, TreeUpdateInfo) {
   int best_feature_id = 1;
   int best_split_id = 2;
   EncodedNumber left_impurity, right_impurity;
-  EncodedNumber *left_sample_iv = new EncodedNumber[3];
-  EncodedNumber *right_sample_iv = new EncodedNumber[3];
+  auto *left_sample_iv = new EncodedNumber[3];
+  auto *right_sample_iv = new EncodedNumber[3];
   mpz_t v_n;
   mpz_t v_value;
   mpz_init(v_n);
@@ -719,8 +767,8 @@ TEST(PB_Converter, TreeUpdateInfo) {
   int deserialized_source_party_id, deserialized_best_party_id;
   int deserialized_best_feature_id, deserialized_best_split_id;
   EncodedNumber deserialized_left_impurity, deserialized_right_impurity;
-  EncodedNumber* deserialized_left_sample_iv = new EncodedNumber[3];
-  EncodedNumber* deserialized_right_sample_iv = new EncodedNumber[3];
+  auto* deserialized_left_sample_iv = new EncodedNumber[3];
+  auto* deserialized_right_sample_iv = new EncodedNumber[3];
   deserialize_update_info(deserialized_source_party_id,
       deserialized_best_party_id, deserialized_best_feature_id,
       deserialized_best_split_id, deserialized_left_impurity,

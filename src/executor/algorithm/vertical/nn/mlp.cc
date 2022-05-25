@@ -4,7 +4,7 @@
 
 #include <falcon/algorithm/vertical/nn/mlp.h>
 
-MLP::MLP() {
+MlpModel::MlpModel() {
   m_num_inputs = 0;
   m_num_outputs = 0;
   m_num_hidden_layers = 0;
@@ -12,7 +12,7 @@ MLP::MLP() {
   m_layers.clear();
 }
 
-MLP::MLP(bool with_bias, const std::vector<int>& num_layers_neurons, const std::vector<std::string>& layers_activation_funcs) {
+MlpModel::MlpModel(bool with_bias, const std::vector<int>& num_layers_neurons, const std::vector<std::string>& layers_activation_funcs) {
   assert(num_layers_neurons.size() >= 2);
   assert(layers_activation_funcs.size() + 1 == num_layers_neurons.size());
   m_num_layers_neurons = num_layers_neurons;
@@ -27,7 +27,7 @@ MLP::MLP(bool with_bias, const std::vector<int>& num_layers_neurons, const std::
   }
 }
 
-MLP::~MLP() {
+MlpModel::~MlpModel() {
   m_num_inputs = 0;
   m_num_outputs = 0;
   m_num_hidden_layers = 0;

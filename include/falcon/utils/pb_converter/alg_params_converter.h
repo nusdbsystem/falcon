@@ -11,6 +11,7 @@
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/algorithm/vertical/tree/gbdt_builder.h>
+#include <falcon/algorithm/vertical/nn/mlp_builder.h>
 
 /**
  * serialize the logistic regression param struct to string
@@ -50,7 +51,7 @@ void deserialize_lir_params(LinearRegressionParams& lir_params, const std::strin
  * @param dt_params: DecisionTreeParams to be serialized
  * @param output_message: serialized string
  */
-void serialize_dt_params(DecisionTreeParams dt_params, std::string& output_message);
+void serialize_dt_params(const DecisionTreeParams& dt_params, std::string& output_message);
 
 /**
  * deserialize decision tree param struct from an input string
@@ -66,7 +67,7 @@ void deserialize_dt_params(DecisionTreeParams& dt_params, const std::string& inp
  * @param rf_params: RandomForestParams to be serialized
  * @param output_message: serialized string
  */
-void serialize_rf_params(RandomForestParams rf_params, std::string& output_message);
+void serialize_rf_params(const RandomForestParams& rf_params, std::string& output_message);
 
 /**
  * deserialize random forest param struct from an input string
@@ -79,17 +80,33 @@ void deserialize_rf_params(RandomForestParams& rf_params, const std::string& inp
 /**
  * serialize the gbdt param struct to string
  *
- * @param rf_params: GbdtParams to be serialized
+ * @param gbdt_params: GbdtParams to be serialized
  * @param output_message: serialized string
  */
-void serialize_gbdt_params(GbdtParams gbdt_params, std::string& output_message);
+void serialize_gbdt_params(const GbdtParams& gbdt_params, std::string& output_message);
 
 /**
  * deserialize gbdt param struct from an input string
  *
- * @param rf_params: deserialized GbdtParams
+ * @param gbdt_params: deserialized GbdtParams
  * @param input_message: serialized string
  */
 void deserialize_gbdt_params(GbdtParams& gbdt_params, const std::string& input_message);
+
+/**
+ * serialize the mlp param struct to string
+ *
+ * @param mlp_params: MlpParams to be serialized
+ * @param output_message: serialized string
+ */
+void serialize_mlp_params(const MlpParams& mlp_params, std::string& output_message);
+
+/**
+ * deserialize mlp param struct from an input string
+ *
+ * @param mlp_params: deserialized MlpParams
+ * @param input_message: serialized string
+ */
+void deserialize_mlp_params(MlpParams& mlp_params, const std::string& input_message);
 
 #endif //FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_LR_PARAMS_CONVERTER_H_

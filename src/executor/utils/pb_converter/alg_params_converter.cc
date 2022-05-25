@@ -87,7 +87,7 @@ void deserialize_lir_params(LinearRegressionParams& lir_params, const std::strin
   lir_params.fit_bias = linear_regression_params.fit_bias();
 }
 
-void serialize_dt_params(DecisionTreeParams dt_params, std::string& output_message) {
+void serialize_dt_params(const DecisionTreeParams& dt_params, std::string& output_message) {
   com::nus::dbsytem::falcon::v0::DecisionTreeParams decision_tree_params;
   decision_tree_params.set_tree_type(dt_params.tree_type);
   decision_tree_params.set_criterion(dt_params.criterion);
@@ -125,7 +125,7 @@ void deserialize_dt_params(DecisionTreeParams& dt_params, const std::string& inp
   dt_params.dp_budget = decision_tree_params.dp_budget();
 }
 
-void serialize_rf_params(RandomForestParams rf_params, std::string& output_message) {
+void serialize_rf_params(const RandomForestParams& rf_params, std::string& output_message) {
   com::nus::dbsytem::falcon::v0::RandomForestParams random_forest_params;
   random_forest_params.set_n_estimator(rf_params.n_estimator);
   random_forest_params.set_sample_rate(rf_params.sample_rate);
@@ -169,7 +169,7 @@ void deserialize_rf_params(RandomForestParams& rf_params, const std::string& inp
   rf_params.dt_param.dp_budget = random_forest_params.dt_param().dp_budget();
 }
 
-void serialize_gbdt_params(GbdtParams gbdt_params, std::string& output_message) {
+void serialize_gbdt_params(const GbdtParams& gbdt_params, std::string& output_message) {
   com::nus::dbsytem::falcon::v0::GbdtParams gradient_boosting_params;
   gradient_boosting_params.set_n_estimator(gbdt_params.n_estimator);
   gradient_boosting_params.set_loss(gbdt_params.loss);
@@ -215,4 +215,58 @@ void deserialize_gbdt_params(GbdtParams& gbdt_params, const std::string& input_m
   gbdt_params.dt_param.min_impurity_decrease = gradient_boosting_params.dt_param().min_impurity_decrease();
   gbdt_params.dt_param.min_impurity_split = gradient_boosting_params.dt_param().min_impurity_split();
   gbdt_params.dt_param.dp_budget = gradient_boosting_params.dt_param().dp_budget();
+}
+
+void serialize_mlp_params(const MlpParams& mlp_params, std::string& output_message) {
+  com::nus::dbsytem::falcon::v0::MlpParams pb_mlp_params;
+  pb_mlp_params.set_batch_size(mlp_params.batch_size);
+  pb_mlp_params.set_max_iteration(mlp_params.max_iteration);
+  pb_mlp_params.set_converge_threshold(mlp_params.converge_threshold);
+  pb_mlp_params.set_with_regularization(mlp_params.with_regularization);
+  pb_mlp_params.set_alpha(mlp_params.alpha);
+  pb_mlp_params.set_learning_rate(mlp_params.learning_rate);
+  pb_mlp_params.set_decay(mlp_params.decay);
+  pb_mlp_params.set_penalty(mlp_params.penalty);
+  pb_mlp_params.set_optimizer(mlp_params.optimizer);
+  pb_mlp_params.set_metric(mlp_params.metric);
+  pb_mlp_params.set_dp_budget(mlp_params.dp_budget);
+  pb_mlp_params.set_fit_bias(mlp_params.fit_bias);
+  int layer_size = (int) mlp_params.num_layers_neurons.size();
+  int hidden_layer_size = (int) mlp_params.layers_activation_funcs.size();
+  for (int i = 0; i < layer_size; i++) {
+    pb_mlp_params.add_num_layers_neurons(mlp_params.num_layers_neurons[i]);
+  }
+  for (int i = 0; i < hidden_layer_size; i++) {
+    pb_mlp_params.add_layers_activation_funcs(mlp_params.layers_activation_funcs[i]);
+  }
+  pb_mlp_params.SerializeToString(&output_message);
+  pb_mlp_params.Clear();
+}
+
+void deserialize_mlp_params(MlpParams& mlp_params, const std::string& input_message) {
+  com::nus::dbsytem::falcon::v0::MlpParams pb_mlp_params;
+  if (!pb_mlp_params.ParseFromString(input_message)) {
+    log_error("Deserialize mlp params message failed.");
+    exit(EXIT_FAILURE);
+  }
+  mlp_params.batch_size = pb_mlp_params.batch_size();
+  mlp_params.max_iteration = pb_mlp_params.max_iteration();
+  mlp_params.converge_threshold = pb_mlp_params.converge_threshold();
+  mlp_params.with_regularization = pb_mlp_params.with_regularization();
+  mlp_params.alpha = pb_mlp_params.alpha();
+  mlp_params.learning_rate = pb_mlp_params.learning_rate();
+  mlp_params.decay = pb_mlp_params.decay();
+  mlp_params.penalty = pb_mlp_params.penalty();
+  mlp_params.optimizer = pb_mlp_params.optimizer();
+  mlp_params.metric = pb_mlp_params.metric();
+  mlp_params.dp_budget = pb_mlp_params.dp_budget();
+  mlp_params.fit_bias = pb_mlp_params.fit_bias();
+  int layer_size = pb_mlp_params.num_layers_neurons_size();
+  int hidden_layer_size = pb_mlp_params.layers_activation_funcs_size();
+  for (int i = 0; i < layer_size; i++) {
+    mlp_params.num_layers_neurons.push_back(pb_mlp_params.num_layers_neurons(i));
+  }
+  for (int i = 0; i < hidden_layer_size; i++) {
+    mlp_params.layers_activation_funcs.push_back(pb_mlp_params.layers_activation_funcs(i));
+  }
 }

@@ -14,7 +14,7 @@ class Neuron {
   // number of inputs to this neuron
   int m_num_inputs;
   // whether this neuron has bias (default true)
-  bool m_with_bias;
+  bool m_fit_bias;
   // encrypted bias (size = 1)
   EncodedNumber* m_bias{};
   // weights vector, encrypted values during training, size = m_num_inputs
@@ -29,9 +29,9 @@ class Neuron {
   /**
    * constructor
    * @param num_inputs: the number of inputs of this neuron
-   * @param with_bias: whether this neuron has bias
+   * @param fit_bias: whether this neuron has bias
    */
-  Neuron(int num_inputs, bool with_bias);
+  Neuron(int num_inputs, bool fit_bias);
 
   /**
    * default destructor

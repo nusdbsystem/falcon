@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package com.nus.dbsytem.falcon.v0;
+
+import public "common.proto";
+
+message Neuron {
+  // the number of inputs to this neuron
+  int32 num_inputs = 1;
+  // whether this neuron has bias (default true)
+  bool fit_bias = 2;
+  // the encrypted bias (default size = 1)
+  repeated FixedPointEncodedNumber bias = 3;
+  // the encrypted weights vector
+  repeated FixedPointEncodedNumber weights = 4;
+}
+
+message Layer {
+  // the number of neurons of this layer
+  int32 num_neurons = 1;
+  // the number of inputs for each neuron
+  int32 num_inputs_per_neuron = 2;
+  // the neurons vector
+  repeated Neuron neurons = 3;
+  // the activation function string
+  string activation_func_str = 4;
+}
+
+message MlpModel {
+  // the number of inputs (input layer size)
+  int32 num_inputs = 1;
+  // the number of outputs (output layer size)
+  int32 num_outputs = 2;
+  // the number of hidden_layers
+  int32 num_hidden_layers = 3;
+  // the number of neurons in each layer
+  repeated int32 num_layers_neurons = 4;
+  // the vector of layers
+  repeated Layer layers = 5;
+}

@@ -11,7 +11,7 @@
 #include <falcon/algorithm/vertical/nn/layer.h>
 
 // the mlp model
-class MLP {
+class MlpModel {
  public:
   // the number of inputs (input layer size)
   int m_num_inputs;
@@ -28,7 +28,7 @@ class MLP {
   /**
    * default constructor
    */
-  MLP();
+  MlpModel();
 
   /**
    * constructor
@@ -36,12 +36,12 @@ class MLP {
    * @param num_layers_neurons: the vector of layers neuron numbers
    * @param layers_activation_funcs: the vector of layers activation functions
    */
-  MLP(bool with_bias, const std::vector<int>& num_layers_neurons, const std::vector<std::string>& layers_activation_funcs);
+  MlpModel(bool with_bias, const std::vector<int>& num_layers_neurons, const std::vector<std::string>& layers_activation_funcs);
 
   /**
    * default destructor
    */
-  ~MLP();
+  ~MlpModel();
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_NN_MLP_H_
