@@ -34,6 +34,19 @@ class Neuron {
   Neuron(int num_inputs, bool fit_bias);
 
   /**
+   * copy constructor
+   * @param neuron
+   */
+  Neuron(const Neuron &neuron);
+
+  /**
+   * assignment constructor
+   * @param neuron
+   * @return
+   */
+  Neuron &operator=(const Neuron &neuron);
+
+  /**
    * default destructor
    */
   ~Neuron();

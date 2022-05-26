@@ -79,6 +79,74 @@ class MlpBuilder : public ModelBuilder {
  public:
   // the mlp model
   MlpModel mlp_model;
+
+ public:
+  /** default constructor */
+  MlpBuilder();
+
+  /**
+   * Mlp builder constructor
+   *
+   * @param mlp_params: the parameters of the mlp builder
+   * @param m_training_data: training data
+   * @param m_testing_data: testing data
+   * @param m_training_labels: training labels
+   * @param m_testing_labels: testing labels
+   * @param m_training_accuracy: training accuracy
+   * @param m_testing_accuracy: testing accuracy
+   */
+  MlpBuilder(const MlpParams& mlp_params,
+             std::vector< std::vector<double> > m_training_data,
+             std::vector< std::vector<double> > m_testing_data,
+             std::vector<double> m_training_labels,
+             std::vector<double> m_testing_labels,
+             double m_training_accuracy = 0.0,
+             double m_testing_accuracy = 0.0);
+
+  /** destructor */
+  ~MlpBuilder();
+
+  /**
+   * train an mlp model
+   *
+   * @param party: initialized party object
+   */
+  void train(Party party) override;
+
+  /**
+   * train an mlp model
+   *
+   * @param party: initialized party object
+   * @param worker: worker instance for distributed training
+   */
+  void distributed_train(const Party& party, const Worker& worker) override;
+
+  /**
+   * evaluate an mlp model
+   *
+   * @param party: initialized party object
+   * @param eval_type: falcon::DatasetType, TRAIN for training data and TEST for
+   *   testing data will output both a pretty_print of confusion matrix
+   *   as well as a classification metrics report
+   * @param report_save_path: save the report into path
+   */
+  void eval(Party party,
+            falcon::DatasetType eval_type,
+            const std::string& report_save_path = std::string()) override;
+
+  /**
+   * mlp model eval
+   *
+   * @param party: initialized party object
+   * @param eval_type: falcon::DatasetType, TRAIN for training data and TEST for
+   *   testing data will output both a pretty_print of confusion matrix
+   *   as well as a classification metrics report
+   * @param report_save_path: save the report into path
+   */
+  void distributed_eval(
+      const Party &party,
+      const Worker &worker,
+      falcon::DatasetType eval_type);
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_NN_MLP_BUILDER_H_

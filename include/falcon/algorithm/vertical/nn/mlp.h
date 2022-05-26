@@ -39,6 +39,19 @@ class MlpModel {
   MlpModel(bool with_bias, const std::vector<int>& num_layers_neurons, const std::vector<std::string>& layers_activation_funcs);
 
   /**
+   * copy constructor
+   * @param mlp_model
+   */
+  MlpModel(const MlpModel &mlp_model);
+
+  /**
+   * assignment constructor
+   * @param mlp_model
+   * @return
+   */
+  MlpModel &operator=(const MlpModel &mlp_model);
+
+  /**
    * default destructor
    */
   ~MlpModel();

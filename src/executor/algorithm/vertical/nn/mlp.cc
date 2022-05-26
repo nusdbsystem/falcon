@@ -27,6 +27,22 @@ MlpModel::MlpModel(bool with_bias, const std::vector<int>& num_layers_neurons, c
   }
 }
 
+MlpModel::MlpModel(const MlpModel &mlp_model) {
+  m_num_inputs = mlp_model.m_num_inputs;
+  m_num_outputs = mlp_model.m_num_outputs;
+  m_num_hidden_layers = mlp_model.m_num_hidden_layers;
+  m_num_layers_neurons = mlp_model.m_num_layers_neurons;
+  m_layers = mlp_model.m_layers;
+}
+
+MlpModel &MlpModel::operator=(const MlpModel &mlp_model) {
+  m_num_inputs = mlp_model.m_num_inputs;
+  m_num_outputs = mlp_model.m_num_outputs;
+  m_num_hidden_layers = mlp_model.m_num_hidden_layers;
+  m_num_layers_neurons = mlp_model.m_num_layers_neurons;
+  m_layers = mlp_model.m_layers;
+}
+
 MlpModel::~MlpModel() {
   m_num_inputs = 0;
   m_num_outputs = 0;

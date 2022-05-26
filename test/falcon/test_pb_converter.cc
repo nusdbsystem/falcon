@@ -13,6 +13,7 @@
 #include <falcon/utils/pb_converter/network_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/utils/pb_converter/lr_converter.h>
+#include <falcon/utils/pb_converter/nn_converter.h>
 #include <falcon/utils/pb_converter/interpretability_converter.h>
 #include <falcon/utils/base64.h>
 
@@ -1264,6 +1265,106 @@ TEST(PB_Converter, GbdtModel) {
       mpz_clear(deserialized_label_value);
     }
   }
+  mpz_clear(v_n);
+  mpz_clear(v_value);
+}
+
+TEST(PB_Converter, MlpModel) {
+  MlpModel mlp_model;
+  mlp_model.m_num_inputs = 3;
+  mlp_model.m_num_outputs = 2;
+  mlp_model.m_num_hidden_layers = 2;
+  mlp_model.m_num_layers_neurons.push_back(3);
+  mlp_model.m_num_layers_neurons.push_back(3);
+  mpz_t v_n;
+  mpz_t v_value;
+  mpz_init(v_n);
+  mpz_init(v_value);
+  mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
+  mpz_set_str(v_value, "100", PHE_STR_BASE);
+  int v_exponent = -8;
+  EncodedNumberType v_type = Ciphertext;
+  for (int i = 0; i < 2; i++) {
+    Layer layer;
+    layer.m_num_neurons = 3;
+    layer.m_num_inputs_per_neuron = 3;
+    layer.m_activation_func_str = "sigmoid";
+    for (int j = 0; j < 3; j++) {
+      Neuron neuron(3, false);
+//      neuron.m_num_inputs = 3;
+//      neuron.m_fit_bias = false;
+//      neuron.m_bias = new EncodedNumber[1];
+//      neuron.m_weights = new EncodedNumber[3];
+      neuron.m_bias[0].setter_n(v_n);
+      neuron.m_bias[0].setter_value(v_value);
+      neuron.m_bias[0].setter_exponent(v_exponent);
+      neuron.m_bias[0].setter_type(v_type);
+      for (int k = 0; k < 3; k++) {
+        neuron.m_weights[k].setter_n(v_n);
+        neuron.m_weights[k].setter_value(v_value);
+        neuron.m_weights[k].setter_exponent(v_exponent);
+        neuron.m_weights[k].setter_type(v_type);
+      }
+      layer.m_neurons.push_back(neuron);
+    }
+    mlp_model.m_layers.push_back(layer);
+  }
+
+  std::string pb_str;
+  serialize_mlp_model(mlp_model, pb_str);
+
+  MlpModel des_mlp_model;
+  deserialize_mlp_model(des_mlp_model, pb_str);
+
+  EXPECT_EQ(mlp_model.m_num_inputs, des_mlp_model.m_num_inputs);
+  EXPECT_EQ(mlp_model.m_num_outputs, des_mlp_model.m_num_outputs);
+  EXPECT_EQ(mlp_model.m_num_hidden_layers, des_mlp_model.m_num_hidden_layers);
+  EXPECT_EQ(mlp_model.m_num_layers_neurons.size(), des_mlp_model.m_num_layers_neurons.size());
+  for (int i = 0; i < mlp_model.m_num_layers_neurons.size(); i++) {
+    EXPECT_EQ(mlp_model.m_num_layers_neurons[i], des_mlp_model.m_num_layers_neurons[i]);
+  }
+  EXPECT_EQ(mlp_model.m_layers.size(), des_mlp_model.m_layers.size());
+  for (int i = 0; i < mlp_model.m_layers.size(); i++) {
+    EXPECT_EQ(mlp_model.m_layers[i].m_num_neurons, des_mlp_model.m_layers[i].m_num_neurons);
+    EXPECT_EQ(mlp_model.m_layers[i].m_num_inputs_per_neuron, des_mlp_model.m_layers[i].m_num_inputs_per_neuron);
+    EXPECT_TRUE(mlp_model.m_layers[i].m_activation_func_str == des_mlp_model.m_layers[i].m_activation_func_str);
+    EXPECT_EQ(mlp_model.m_layers[i].m_neurons.size(), des_mlp_model.m_layers[i].m_neurons.size());
+    for (int j = 0; j < mlp_model.m_layers[i].m_neurons.size(); j++) {
+      EXPECT_EQ(mlp_model.m_layers[i].m_neurons[j].m_num_inputs, des_mlp_model.m_layers[i].m_neurons[j].m_num_inputs);
+      EXPECT_EQ(mlp_model.m_layers[i].m_neurons[j].m_fit_bias, des_mlp_model.m_layers[i].m_neurons[j].m_fit_bias);
+      // compare bias term
+      mpz_t des_n, des_value;
+      mpz_init(des_n);
+      mpz_init(des_value);
+      mlp_model.m_layers[i].m_neurons[j].m_bias[0].getter_n(des_n);
+      mlp_model.m_layers[i].m_neurons[j].m_bias[0].getter_value(des_value);
+      int n_cmp = mpz_cmp(v_n, des_n);
+      int value_cmp = mpz_cmp(v_value, des_value);
+      EXPECT_EQ(0, n_cmp);
+      EXPECT_EQ(0, value_cmp);
+      EXPECT_EQ(v_exponent, mlp_model.m_layers[i].m_neurons[j].m_bias[0].getter_exponent());
+      EXPECT_EQ(v_type, mlp_model.m_layers[i].m_neurons[j].m_bias[0].getter_type());
+      mpz_clear(des_n);
+      mpz_clear(des_value);
+      // compare weights
+      for (int k = 0; k < 3; k++) {
+        mpz_t deserialized_n, deserialized_value;
+        mpz_init(deserialized_n);
+        mpz_init(deserialized_value);
+        mlp_model.m_layers[i].m_neurons[j].m_weights[k].getter_n(deserialized_n);
+        mlp_model.m_layers[i].m_neurons[j].m_weights[k].getter_value(deserialized_value);
+        n_cmp = mpz_cmp(v_n, deserialized_n);
+        value_cmp = mpz_cmp(v_value, deserialized_value);
+        EXPECT_EQ(0, n_cmp);
+        EXPECT_EQ(0, value_cmp);
+        EXPECT_EQ(v_exponent, mlp_model.m_layers[i].m_neurons[j].m_weights[k].getter_exponent());
+        EXPECT_EQ(v_type, mlp_model.m_layers[i].m_neurons[j].m_weights[k].getter_type());
+        mpz_clear(deserialized_n);
+        mpz_clear(deserialized_value);
+      }
+    }
+  }
+
   mpz_clear(v_n);
   mpz_clear(v_value);
 }

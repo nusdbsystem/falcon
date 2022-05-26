@@ -38,6 +38,19 @@ class Layer {
         bool with_bias, const std::string& activation_func_str);
 
   /**
+   * copy constructor
+   * @param layer
+   */
+  Layer(const Layer &layer);
+
+  /**
+   * assignment constructor
+   * @param layer
+   * @return
+   */
+  Layer &operator=(const Layer &layer);
+
+  /**
    * default destructor
    */
   ~Layer();

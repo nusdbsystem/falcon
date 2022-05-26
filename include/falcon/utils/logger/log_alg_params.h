@@ -11,6 +11,7 @@
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_builder.h>
 #include <falcon/algorithm/vertical/tree/gbdt_builder.h>
+#include <falcon/algorithm/vertical/nn/mlp_builder.h>
 
 /**
  * print the linear regression algorithm parameters
@@ -36,5 +37,10 @@ void log_random_forest_params(const RandomForestParams& random_forest_params);
  * print the gradient boosting decision tree algorithm parameters
  */
 void log_gbdt_params(const GbdtParams& gbdt_params);
+
+/**
+ * print the mlp algorithm parameters
+ */
+void log_mlp_params(const MlpParams& mlp_params);
 
 #endif //FALCON_INCLUDE_FALCON_UTILS_LOGGER_LOG_ALG_PARAMS_H_

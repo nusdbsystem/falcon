@@ -14,6 +14,8 @@
 #include <falcon/algorithm/vertical/linear_model/logistic_regression_ps.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
 #include <falcon/algorithm/vertical/tree/tree_ps.h>
+#include <falcon/algorithm/vertical/nn/mlp_builder.h>
+#include <falcon/utils/pb_converter/nn_converter.h>
 
 // initializes the LinearRegressionBuilder instance
 // and run .train() .eval() methods, then save model
@@ -625,4 +627,80 @@ void train_gbdt(Party party, const std::string& params_str,
 
   log_info("Trained model and report saved");
   google::FlushLogFiles(google::INFO);
+}
+
+void train_mlp(
+    Party* party,
+    const std::string& params_str,
+    const std::string& model_save_file,
+    const std::string& model_report_file,
+    int is_distributed_train, Worker* worker) {
+  log_info("Run train_mlp");
+  log_info("is_distributed_train = " + std::to_string(is_distributed_train));
+
+  MlpParams params;
+  deserialize_mlp_params(params, params_str);
+  log_mlp_params(params);
+
+  // split train test data for party and populate the vectors
+  std::vector<std::vector<double>> training_data, testing_data;
+  std::vector<double> training_labels, testing_labels;
+
+  // if not distributed train, then the party split the data
+  // otherwise, the party/worker receive the data and phe keys from ps
+  if (is_distributed_train == 0) {
+    double split_percentage = SPLIT_TRAIN_TEST_RATIO;
+    split_dataset(party, params.fit_bias, training_data, testing_data,
+                  training_labels, testing_labels, split_percentage);
+  } else {
+    // here should receive the train/test data/labels from ps
+    std::string recv_training_data_str, recv_testing_data_str;
+    std::string recv_training_labels_str, recv_testing_labels_str;
+    worker->recv_long_message_from_ps(recv_training_data_str);
+    worker->recv_long_message_from_ps(recv_testing_data_str);
+    deserialize_double_matrix(training_data, recv_training_data_str);
+    deserialize_double_matrix(testing_data, recv_testing_data_str);
+    if (party->party_type == falcon::ACTIVE_PARTY) {
+      worker->recv_long_message_from_ps(recv_training_labels_str);
+      worker->recv_long_message_from_ps(recv_testing_labels_str);
+      deserialize_double_array(training_labels, recv_training_labels_str);
+      deserialize_double_array(testing_labels, recv_testing_labels_str);
+    }
+    // also, receive the phe keys from ps
+    // and set these to the party
+    std::string recv_phe_keys_str;
+    log_info("begin to receive phe keys from ps ");
+    worker->recv_long_message_from_ps(recv_phe_keys_str);
+    log_info("received phe keys from ps: " + recv_phe_keys_str);
+    party->load_phe_key_string(recv_phe_keys_str);
+    // set the weight size and party feature num
+    party->setter_feature_num((int) training_data[0].size());
+  }
+
+  // weight size is different if fit_bias is true on active party
+  int weight_size = party->getter_feature_num();
+  double training_accuracy = 0.0, testing_accuracy = 0.0;
+  MlpBuilder mlp_builder(params, training_data,
+                         testing_data,training_labels,testing_labels,
+                         training_accuracy, testing_accuracy);
+
+  if (is_distributed_train == 0) {
+    mlp_builder.train(*party);
+    mlp_builder.eval(*party, falcon::TRAIN, model_report_file);
+    mlp_builder.eval(*party, falcon::TEST, model_report_file);
+//    // save model and report
+//    auto* model_weights = new EncodedNumber[weight_size];
+    std::string pb_mlp_model_string;
+    serialize_mlp_model(mlp_builder.mlp_model, pb_mlp_model_string);
+    save_pb_model_string(pb_mlp_model_string, model_save_file);
+    // save_training_report(log_reg_model.getter_training_accuracy(),
+    //    log_reg_model.getter_testing_accuracy(),
+    //    model_report_file);
+//    delete[] model_weights;
+  } else {
+    mlp_builder.distributed_train(*party, *worker);
+    // in is_distributed_train, parameter server will save the model.
+    mlp_builder.distributed_eval(*party, *worker, falcon::TRAIN);
+    mlp_builder.distributed_eval(*party, *worker, falcon::TEST);
+  }
 }

@@ -127,4 +127,37 @@ void train_random_forest(Party party, const std::string& params_str,
 void train_gbdt(Party party, const std::string& params_str,
                 const std::string& model_save_file, const std::string& model_report_file);
 
+/**
+ * train an mlp model
+ *
+ * @param party: initialized party object
+ * @param params_str: LinearRegressionParams serialized string
+ * @param model_save_file: saved model file
+ * @param model_report_file: saved report file
+ * @param is_distributed_train: 1: use distributed train
+ * @param worker: worker instance, used when is_distributed_train=1
+ */
+void train_mlp(
+    Party* party,
+    const std::string& params_str,
+    const std::string& model_save_file,
+    const std::string& model_report_file,
+    int is_distributed_train=0, Worker* worker=nullptr);
+
+/**
+ * run a master to help to train mlp
+ *
+ * @param party: init
+ * @param params_str: LogisticRegressionParams serialized string
+ * @param worker_address_str: worker's address 'ip+port'
+ * @param model_save_file: the path for saving the trained model
+ * @param model_report_file: the path for saving the training report
+ */
+void launch_mlp_parameter_server(
+    Party* party,
+    const std::string& params_pb_str,
+    const std::string& ps_network_config_pb_str,
+    const std::string& model_save_file,
+    const std::string& model_report_file);
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_VFL_ENTRY_H_

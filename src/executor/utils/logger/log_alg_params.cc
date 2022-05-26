@@ -85,3 +85,28 @@ void log_gbdt_params(const GbdtParams& gbdt_params) {
   log_info("gbdt_params.dt_param.min_impurity_split = " + std::to_string(gbdt_params.dt_param.min_impurity_split));
   log_info("gbdt_params.dt_param.dp_budget = " + std::to_string(gbdt_params.dt_param.dp_budget));
 }
+
+void log_mlp_params(const MlpParams& mlp_params) {
+  log_info("mlp_params.batch_size = " + std::to_string(mlp_params.batch_size));
+  log_info("mlp_params.max_iteration = " + std::to_string(mlp_params.max_iteration));
+  log_info("mlp_params.converge_threshold = " + std::to_string(mlp_params.converge_threshold));
+  log_info("mlp_params.with_regularization = " + std::to_string(mlp_params.with_regularization));
+  log_info("mlp_params.alpha = " + std::to_string(mlp_params.alpha));
+  log_info("mlp_params.learning_rate = " + std::to_string(mlp_params.learning_rate));
+  log_info("mlp_params.decay = " + std::to_string(mlp_params.decay));
+  log_info("mlp_params.penalty = " + mlp_params.penalty);
+  log_info("mlp_params.optimizer = " + mlp_params.optimizer);
+  log_info("mlp_params.metric = " + mlp_params.metric);
+  log_info("mlp_params.dp_budget = " + std::to_string(mlp_params.dp_budget));
+  log_info("mlp_params.fit_bias = " + std::to_string(mlp_params.fit_bias));
+  log_info("mlp_params.num_layers_neurons: ");
+  for (int i = 0; i < mlp_params.num_layers_neurons.size(); i++) {
+    log_info("mlp_params.num_layers_neurons[" + std::to_string(i)
+      + "] = " + std::to_string(mlp_params.num_layers_neurons[i]));
+  }
+  log_info("mlp_params.layers_activation_funcs: ");
+  for (int i = 0; i < mlp_params.layers_activation_funcs.size(); i++) {
+    log_info("mlp_params.layers_activation_funcs[" + std::to_string(i)
+                 + "] = " + mlp_params.layers_activation_funcs[i]);
+  }
+}

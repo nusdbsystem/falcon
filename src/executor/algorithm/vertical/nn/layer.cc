@@ -20,6 +20,20 @@ Layer::Layer(int num_neurons, int num_inputs_per_neuron,
   }
 }
 
+Layer::Layer(const Layer &layer) {
+  m_num_neurons = layer.m_num_neurons;
+  m_num_inputs_per_neuron = layer.m_num_inputs_per_neuron;
+  m_activation_func_str = layer.m_activation_func_str;
+  m_neurons = layer.m_neurons;
+}
+
+Layer &Layer::operator=(const Layer &layer) {
+  m_num_neurons = layer.m_num_neurons;
+  m_num_inputs_per_neuron = layer.m_num_inputs_per_neuron;
+  m_activation_func_str = layer.m_activation_func_str;
+  m_neurons = layer.m_neurons;
+}
+
 Layer::~Layer() {
   m_num_neurons = 0;
   m_num_inputs_per_neuron = 0;
