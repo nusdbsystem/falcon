@@ -66,6 +66,23 @@ MlpBuilder::~MlpBuilder() {
   layers_activation_funcs.clear();
 }
 
+void MlpBuilder::init_encrypted_weights(const Party &party, int precision) {
+
+}
+
+void MlpBuilder::backward_computation(const Party &party,
+                                      const std::vector<std::vector<double>> &batch_samples,
+                                      EncodedNumber *predicted_labels,
+                                      const std::vector<int> &batch_indexes,
+                                      int precision,
+                                      EncodedNumber *deltas) {
+
+}
+
+void MlpBuilder::update_encrypted_weights(Party &party, EncodedNumber *deltas) {
+
+}
+
 void MlpBuilder::train(Party party) {
 
 }

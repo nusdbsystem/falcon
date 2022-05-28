@@ -898,7 +898,7 @@ void LinearRegressionBuilder::train(Party party) {
     for (int i = 0; i < cur_sample_size; i++) {
       encoded_batch_samples[i] = new EncodedNumber[linear_reg_model.weight_size];
     }
-    linear_reg_model.encode_samples(party, batch_samples, encoded_batch_samples, plaintext_samples_precision);
+    encode_samples(party, batch_samples, encoded_batch_samples, plaintext_samples_precision);
     log_info("-------- Iteration " + std::to_string(iter) + ", encode training data success --------");
 
     // compute predicted label
@@ -1039,7 +1039,7 @@ void LinearRegressionBuilder::lime_train(Party party,
     for (int i = 0; i < cur_sample_size; i++) {
       encoded_batch_samples[i] = new EncodedNumber[linear_reg_model.weight_size];
     }
-    linear_reg_model.encode_samples(party, batch_samples, encoded_batch_samples, plaintext_samples_precision);
+    encode_samples(party, batch_samples, encoded_batch_samples, plaintext_samples_precision);
     log_info("-------- Iteration " + std::to_string(iter) + ", encode training data success --------");
 
     // compute predicted label
@@ -1174,7 +1174,7 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
     for (int i = 0; i < cur_sample_size; i++) {
       encoded_mini_batch_samples[i] = new EncodedNumber[linear_reg_model.weight_size];
     }
-    linear_reg_model.encode_samples(party, mini_batch_samples, encoded_mini_batch_samples, plaintext_samples_precision);
+    encode_samples(party, mini_batch_samples, encoded_mini_batch_samples, plaintext_samples_precision);
 
     log_info("-------- "
              "Worker Iteration "
@@ -1327,7 +1327,7 @@ void LinearRegressionBuilder::distributed_lime_train(
     for (int i = 0; i < cur_sample_size; i++) {
       encoded_mini_batch_samples[i] = new EncodedNumber[linear_reg_model.weight_size];
     }
-    linear_reg_model.encode_samples(party, mini_batch_samples, encoded_mini_batch_samples, plaintext_samples_precision);
+    encode_samples(party, mini_batch_samples, encoded_mini_batch_samples, plaintext_samples_precision);
 
     log_info("-------- "
              "Worker Iteration "
@@ -1505,7 +1505,7 @@ double LinearRegressionBuilder::loss_computation(const Party& party,
   for (int i = 0; i < cur_sample_size; i++) {
     encoded_batch_samples[i] = new EncodedNumber[linear_reg_model.weight_size];
   }
-  linear_reg_model.encode_samples(party, batch_samples, encoded_batch_samples);
+  encode_samples(party, batch_samples, encoded_batch_samples);
 
   linear_reg_model.compute_batch_phe_aggregation(party,
                                                  cur_sample_size,

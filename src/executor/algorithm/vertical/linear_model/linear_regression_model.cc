@@ -7,6 +7,7 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/utils/logger/logger.h>
+#include <falcon/algorithm/model_builder_helper.h>
 
 #include <cmath>
 #include <glog/logging.h>

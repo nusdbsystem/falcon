@@ -39,3 +39,14 @@ Layer::~Layer() {
   m_num_inputs_per_neuron = 0;
   m_neurons.clear();
 }
+
+void Layer::init_encrypted_weights(const Party &party, int precision) {
+
+}
+
+void Layer::update_encrypted_weights(const Party &party,
+                                     const std::vector<double> &deriv_error,
+                                     double m_learning_rate,
+                                     std::vector<double> *deltas) {
+
+}

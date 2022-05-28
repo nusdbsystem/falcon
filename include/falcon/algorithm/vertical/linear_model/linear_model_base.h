@@ -56,20 +56,6 @@ class LinearModel {
       EncodedNumber *encrypted_batch_aggregation) const;
 
   /**
-   * encode data samples,
-   *
-   * @param party: initialized party object
-   * @param used_samples: used data_samples
-   * @param encoded_samples: result value
-   * @param precision: the precision of the encoded samples
-   */
-  void encode_samples(
-      const Party &party,
-      const std::vector<std::vector<double>>& used_samples,
-      EncodedNumber** encoded_samples,
-      int precision = PHE_FIXED_POINT_PRECISION) const;
-
-  /**
    * sync up the weight size vector
    *
    * @param party: initialized party object

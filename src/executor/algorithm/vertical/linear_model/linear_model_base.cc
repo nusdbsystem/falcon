@@ -118,27 +118,6 @@ void LinearModel::compute_batch_phe_aggregation(const Party &party,
   delete[] local_batch_phe_aggregation;
 }
 
-void LinearModel::encode_samples(const Party &party,
-                                 const std::vector<std::vector<double>> &used_samples,
-                                 EncodedNumber **encoded_samples,
-                                 int precision) const {
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  party.getter_phe_pub_key(phe_pub_key);
-
-  // retrieve batch samples and encode (notice to use cur_batch_size
-  // instead of default batch size to avoid unexpected batch)
-  int cur_sample_size = (int) used_samples.size();
-
-  for (int i = 0; i < cur_sample_size; i++) {
-    for (int j = 0; j < weight_size; j++) {
-      encoded_samples[i][j].set_double(phe_pub_key->n[0],
-          used_samples[i][j], precision);
-    }
-  }
-
-  djcs_t_free_public_key(phe_pub_key);
-}
-
 void LinearModel::sync_up_weight_sizes(const Party &party) {
   std::vector<int> sync_arr = sync_up_int_arr(party, weight_size);
   party_weight_sizes = sync_arr;

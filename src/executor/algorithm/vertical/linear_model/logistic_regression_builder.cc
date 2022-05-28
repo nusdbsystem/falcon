@@ -16,6 +16,7 @@
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/operator/conversion/op_conv.h>
 #include <falcon/party/info_exchange.h>
+#include <falcon/algorithm/model_builder_helper.h>
 
 #include <ctime>
 #include <random>
@@ -390,7 +391,7 @@ void LogisticRegressionBuilder::train(Party party) {
     for (int i = 0; i < cur_sample_size; i++) {
       encoded_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
     }
-    log_reg_model.encode_samples(party, batch_samples, encoded_batch_samples);
+    encode_samples(party, batch_samples, encoded_batch_samples);
 
     log_info("-------- Iteration " + std::to_string(iter) + ", encode training data success --------");
 
@@ -582,7 +583,7 @@ void LogisticRegressionBuilder::distributed_train(
     for (int i = 0; i < cur_sample_size; i++) {
       encoded_mini_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
     }
-    log_reg_model.encode_samples(party, mini_batch_samples, encoded_mini_batch_samples);
+    encode_samples(party, mini_batch_samples, encoded_mini_batch_samples);
 
     log_info("-------- "
              "Worker Iteration "
@@ -884,7 +885,7 @@ void LogisticRegressionBuilder::loss_computation(Party party, falcon::DatasetTyp
   for (int i = 0; i < cur_sample_size; i++) {
     encoded_batch_samples[i] = new EncodedNumber[log_reg_model.weight_size];
   }
-  log_reg_model.encode_samples( party, batch_samples, encoded_batch_samples);
+  encode_samples( party, batch_samples, encoded_batch_samples);
 
   log_reg_model.compute_batch_phe_aggregation(party, cur_sample_size,
       encoded_batch_samples, plaintext_precision, encrypted_aggregation);

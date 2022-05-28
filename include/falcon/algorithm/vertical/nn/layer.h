@@ -54,6 +54,27 @@ class Layer {
    * default destructor
    */
   ~Layer();
+
+  /**
+   * initialize encrypted local weights
+   *
+   * @param party: initialized party object
+   * @param precision: precision for big integer representation EncodedNumber
+   */
+  void init_encrypted_weights(const Party& party, int precision);
+
+  /**
+   * update the layer encrypted weights
+   *
+   * @param party: initialized party object
+   * @param deriv_error: the derived error from the previous layer
+   * @param m_learning_rate: the learning rate
+   * @param deltas: the deltas returned
+   */
+  void update_encrypted_weights(const Party& party,
+                                const std::vector<double>& deriv_error,
+                                double m_learning_rate,
+                                std::vector<double> *deltas);
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_MLP_LAYER_H_

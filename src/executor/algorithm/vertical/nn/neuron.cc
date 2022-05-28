@@ -44,3 +44,14 @@ Neuron::~Neuron() {
   delete [] m_bias;
   delete [] m_weights;
 }
+
+void Neuron::init_encrypted_weights(const Party &party, int precision) {
+
+}
+
+void Neuron::update_encrypted_weights(const Party &party,
+                                      const std::vector<double> &deriv_error,
+                                      double m_learning_rate,
+                                      std::vector<double> *deltas) {
+
+}

@@ -107,6 +107,42 @@ class MlpBuilder : public ModelBuilder {
   ~MlpBuilder();
 
   /**
+   * initialize encrypted local weights
+   *
+   * @param party: initialized party object
+   * @param precision: precision for big integer representation EncodedNumber
+   */
+  void init_encrypted_weights(const Party& party,
+                              int precision = PHE_FIXED_POINT_PRECISION);
+
+  /**
+   * compute the backward computation process
+   *
+   * @param party: initialized party object
+   * @param batch_samples: the batch samples
+   * @param predicted_labels: the predicted labels
+   * @param batch_indexes: the selected batch indexes
+   * @param precision: the precision for the batch samples
+   * @param deltas: the predicted loss at the last layer
+   */
+  void backward_computation(
+      const Party& party,
+      const std::vector<std::vector<double>>& batch_samples,
+      EncodedNumber* predicted_labels,
+      const std::vector<int>& batch_indexes,
+      int precision,
+      EncodedNumber* deltas);
+
+  /**
+   * layer-by-layer update weights
+   *
+   * @param party: initialized party object
+   * @param deltas: the predicted loss at the last layer
+   */
+  void update_encrypted_weights(Party& party,
+                                EncodedNumber* deltas);
+
+  /**
    * train an mlp model
    *
    * @param party: initialized party object

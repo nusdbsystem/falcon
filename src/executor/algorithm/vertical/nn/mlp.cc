@@ -50,3 +50,36 @@ MlpModel::~MlpModel() {
   m_num_layers_neurons.clear();
   m_layers.clear();
 }
+
+void MlpModel::predict(const Party &party,
+                       const std::vector<std::vector<double>> &predicted_samples,
+                       EncodedNumber *predicted_labels) const {
+
+}
+
+void MlpModel::predict_proba(const Party &party,
+                             const std::vector<std::vector<double>> &predicted_samples,
+                             EncodedNumber **predicted_labels) const {
+
+}
+
+void MlpModel::forward_computation(const Party &party,
+                                   int cur_batch_size,
+                                   EncodedNumber **encoded_batch_samples,
+                                   EncodedNumber **predicted_labels) const {
+
+}
+
+void spdz_mlp_computation(int party_num,
+                          int party_id,
+                          std::vector<int> mpc_port_bases,
+                          const std::string& mpc_player_path,
+                          std::vector<std::string> party_host_names,
+                          int public_value_size,
+                          const std::vector<int>& public_values,
+                          int private_value_size,
+                          const std::vector<double>& private_values,
+                          falcon::SpdzMlpCompType mlp_comp_type,
+                          std::promise<std::vector<double>> *res) {
+
+}

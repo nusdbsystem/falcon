@@ -95,4 +95,18 @@ void compute_encrypted_residual(const Party& party,
                                 EncodedNumber* predicted_labels,
                                 EncodedNumber* encrypted_batch_losses);
 
+/**
+ * encode data samples,
+ *
+ * @param party: initialized party object
+ * @param used_samples: used data_samples
+ * @param encoded_samples: result value
+ * @param precision: the precision of the encoded samples
+ */
+void encode_samples(
+    const Party &party,
+    const std::vector<std::vector<double>>& used_samples,
+    EncodedNumber** encoded_samples,
+    int precision = PHE_FIXED_POINT_PRECISION);
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BUILDER_HELPER_H_

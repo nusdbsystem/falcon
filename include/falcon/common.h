@@ -70,6 +70,11 @@ namespace falcon {
     PEARSON // compute the pearson coefficient
   };
 
+  /** for MLP */
+  enum SpdzMlpCompType {
+    ACTIVATION
+  };
+
   // for inference service
   # define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
 

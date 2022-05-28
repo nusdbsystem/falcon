@@ -9,6 +9,7 @@
 #include <falcon/utils/logger/logger.h>
 #include <falcon/operator/conversion/op_conv.h>
 #include <falcon/party/info_exchange.h>
+#include <falcon/algorithm/model_builder_helper.h>
 
 #include <cmath>
 #include <glog/logging.h>
