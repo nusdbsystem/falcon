@@ -160,6 +160,9 @@ int main(int argc, char *argv[]) {
           case falcon::GBDT:
             train_gbdt(party, algorithm_params, model_save_file, model_report_file);
             break;
+          case falcon::MLP:
+            train_mlp(&party, algorithm_params_pb_str, model_save_file, model_report_file);
+            break;
           case falcon::LIME_SAMPLING:
             lime_sampling(party, algorithm_params, data_output_file);
             break;
@@ -236,6 +239,13 @@ int main(int argc, char *argv[]) {
           case falcon::GBDT:
             log_error("Type distributed falcon::GBDT not implemented");
             exit(1);
+          case falcon::MLP:
+            launch_mlp_parameter_server(&party,
+                                        algorithm_params_pb_str,
+                                        ps_network_config_pb_str,
+                                        model_save_file,
+                                        model_report_file);
+            break;
           case falcon::LIME_COMP_PRED:
             lime_comp_pred(party,
                            algorithm_params,
@@ -349,6 +359,18 @@ int main(int argc, char *argv[]) {
             case falcon::GBDT:
               log_error("Type distributed falcon::GBDT not implemented");
               exit(1);
+            case falcon::MLP: {
+              // worker is created to communicate with parameter server
+              auto worker = new Worker(ps_network_config_pb_str, worker_id);
+              train_mlp(&party,
+                        algorithm_params_pb_str,
+                        model_save_file,
+                        model_report_file,
+                        is_distributed,
+                        worker);
+              delete worker;
+              break;
+            }
             case falcon::LIME_COMP_PRED: {
               party.init_phe_keys(use_existing_key, key_file);
               lime_comp_pred(party,

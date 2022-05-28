@@ -16,6 +16,7 @@
 #include <falcon/algorithm/vertical/tree/tree_ps.h>
 #include <falcon/algorithm/vertical/nn/mlp_builder.h>
 #include <falcon/utils/pb_converter/nn_converter.h>
+#include <falcon/algorithm/vertical/nn/mlp_ps.h>
 
 // initializes the LinearRegressionBuilder instance
 // and run .train() .eval() methods, then save model
@@ -703,4 +704,13 @@ void train_mlp(
     mlp_builder.distributed_eval(*party, *worker, falcon::TRAIN);
     mlp_builder.distributed_eval(*party, *worker, falcon::TEST);
   }
+}
+
+void launch_mlp_parameter_server(
+    Party* party,
+    const std::string& params_pb_str,
+    const std::string& ps_network_config_pb_str,
+    const std::string& model_save_file,
+    const std::string& model_report_file) {
+
 }

@@ -96,6 +96,7 @@ namespace falcon {
     DT,
     RF,
     GBDT,
+    MLP,
     LIME_SAMPLING,
     LIME_COMP_PRED,
     LIME_COMP_WEIGHT,
