@@ -10,4 +10,6 @@
 
 falcon::AlgorithmName parse_algorithm_name(const std::string& name);
 
+falcon::SpdzMlpActivationFunc parse_mlp_act_func(const std::string& name);
+
 #endif //FALCON_INCLUDE_FALCON_UTILS_PARSER_H_

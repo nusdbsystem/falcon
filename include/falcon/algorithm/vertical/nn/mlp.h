@@ -57,6 +57,14 @@ class MlpModel {
   ~MlpModel();
 
   /**
+   * init the encrypted weights of the model
+   *
+   * @param party: initialized party object
+   * @param precision: precision for big integer representation EncodedNumber
+   */
+  void init_encrypted_weights(const Party& party, int precision = PHE_FIXED_POINT_PRECISION);
+
+  /**
    * give the mlp model, predict the labels on samples
    *
    * @param party: initialized party object
@@ -84,12 +92,14 @@ class MlpModel {
    *
    * @param party: initialized party object
    * @param cur_batch_size: the number of samples of the current batch
+   * @param local_weight_sizes: the local weights of parties
    * @param encoded_batch_samples: the encoded batch samples
    * @param predicted_labels: the predicted probabilities of the encoded samples
    */
   void forward_computation(
       const Party& party,
       int cur_batch_size,
+      const std::vector<int>& local_weight_sizes,
       EncodedNumber** encoded_batch_samples,
       EncodedNumber** predicted_labels) const;
 };
@@ -100,7 +110,6 @@ class MlpModel {
     * @param party_num: the number of parties
     * @param party_id: the party's id
     * @param mpc_tree_port_base: the port base to connect to mpc program
-    * @param mpc_player_path: the mpc player path
     * @param party_host_names: the ip addresses of parties
     * @param public_value_size: the number of public values
     * @param public_values: the public values to be sent
@@ -112,7 +121,6 @@ class MlpModel {
 void spdz_mlp_computation(int party_num,
                           int party_id,
                           std::vector<int> mpc_port_bases,
-                          const std::string& mpc_player_path,
                           std::vector<std::string> party_host_names,
                           int public_value_size,
                           const std::vector<int>& public_values,

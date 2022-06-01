@@ -651,7 +651,8 @@ void train_mlp(
   // otherwise, the party/worker receive the data and phe keys from ps
   if (is_distributed_train == 0) {
     double split_percentage = SPLIT_TRAIN_TEST_RATIO;
-    split_dataset(party, params.fit_bias, training_data, testing_data,
+    // for mlp model, do not insert a bias term into the dataset
+    split_dataset(party, false, training_data, testing_data,
                   training_labels, testing_labels, split_percentage);
   } else {
     // here should receive the train/test data/labels from ps
@@ -681,8 +682,8 @@ void train_mlp(
   // weight size is different if fit_bias is true on active party
   int weight_size = party->getter_feature_num();
   double training_accuracy = 0.0, testing_accuracy = 0.0;
-  MlpBuilder mlp_builder(params, training_data,
-                         testing_data,training_labels,testing_labels,
+  MlpBuilder mlp_builder(params, training_data,testing_data,
+                         training_labels,testing_labels,
                          training_accuracy, testing_accuracy);
 
   if (is_distributed_train == 0) {
@@ -712,5 +713,55 @@ void launch_mlp_parameter_server(
     const std::string& ps_network_config_pb_str,
     const std::string& model_save_file,
     const std::string& model_report_file) {
+  log_info("PS Init MLP model");
+  MlpParams params;
+  deserialize_mlp_params(params, params_pb_str);
+  log_mlp_params(params);
 
+  double training_accuracy = 0.0, testing_accuracy = 0.0;
+  std::vector<std::vector<double>> training_data, testing_data;
+  std::vector<double> training_labels, testing_labels;
+
+  // ps split the train and test data, after splitting, the ps on all parties
+  // have the train and test data, later ps will broadcast the split info to workers
+  double split_percentage = SPLIT_TRAIN_TEST_RATIO;
+  // in distributed train, fit bias should be handled here
+  split_dataset(party, params.fit_bias, training_data, testing_data,
+                training_labels, testing_labels, split_percentage);
+  // weight size is different if fit_bias is true on active party
+  int weight_size = party->getter_feature_num();
+
+  // init log_reg_model instance
+  auto mlp_builder = new MlpBuilder(params,
+                                    training_data,testing_data,
+                                    training_labels,testing_labels,
+                                    training_accuracy, testing_accuracy);
+
+  log_info("Init MLP model");
+  log_info("[launch_mlp_parameter_server]: test party's content.");
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party->getter_phe_pub_key(phe_pub_key);
+  log_info("[launch_mlp_parameter_server]: okay.");
+
+  auto ps = new MlpParameterServer(*mlp_builder, *party, ps_network_config_pb_str);
+  djcs_t_free_public_key(phe_pub_key);
+
+  // here need to send the train/test data/labels to workers
+  // also, need to send the phe keys to workers
+  // accordingly, workers have to receive and deserialize these
+  ps->broadcast_train_test_data(training_data, testing_data, training_labels, testing_labels);
+  ps->broadcast_phe_keys();
+
+  // start to train the task in a distributed way
+  ps->distributed_train();
+
+  // evaluate the model on the training and testing datasets
+  ps->distributed_eval(falcon::TRAIN, model_report_file);
+  ps->distributed_eval(falcon::TEST, model_report_file);
+
+  // save the trained model
+  ps->save_model(model_save_file);
+
+  delete mlp_builder;
+  delete ps;
 }

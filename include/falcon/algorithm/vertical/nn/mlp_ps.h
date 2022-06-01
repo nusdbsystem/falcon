@@ -12,16 +12,31 @@
 #include <falcon/utils/pb_converter/lr_converter.h>
 #include <falcon/model/model_io.h>
 #include <falcon/common.h>
+#include <falcon/algorithm/vertical/nn/mlp_builder.h>
 
 class MlpParameterServer : public ParameterServer {
  public:
   // party
   Party party;
+  // mlp model builder
+  MlpBuilder mlp_builder;
+
  public:
   /**
    * default constructor
    */
   MlpParameterServer() = default;
+
+  /**
+   * constructor
+   *
+   * @param m_mlp_builder: the mlp model builder
+   * @param m_party: the participating party
+   * @param ps_network_config_pb_str: the network config between ps and workers
+   */
+  MlpParameterServer(const MlpBuilder& m_mlp_builder,
+                     const Party& m_party,
+                     const std::string& ps_network_config_pb_str);
 
   /**
    * constructor
@@ -62,16 +77,6 @@ class MlpParameterServer : public ParameterServer {
    */
   void broadcast_phe_keys();
 
-  /**
-   * distributed prediction, partition data, collect result, deserialize
-   *
-   * @param cur_test_data_indexes: vector of index
-   * @param predicted_labels: return value, array of labels
-   */
-  void distributed_predict(
-      const std::vector<int>& cur_test_data_indexes,
-      EncodedNumber* predicted_labels) override;
-
  public:
   /**
    * send encrypted weights to workers
@@ -104,6 +109,37 @@ class MlpParameterServer : public ParameterServer {
       int weight_size,
       int weight_phe_precision,
       EncodedNumber* updated_weights) const;
+
+  /**
+   * distributed training process, partition data, collect result, update weights
+   */
+  void distributed_train() override;
+
+  /**
+   * distributed prediction, partition data, collect result, deserialize
+   *
+   * @param cur_test_data_indexes: vector of index
+   * @param predicted_labels: return value, array of labels
+   */
+  void distributed_predict(
+      const std::vector<int>& cur_test_data_indexes,
+      EncodedNumber* predicted_labels) override;
+
+  /**
+   * distributed evaluation, partition data, collect result, compute evaluation matrix
+   *
+   * @param eval_type: train data or test data
+   * @param report_save_path: the path to save evaluation matrix
+   */
+  void distributed_eval(falcon::DatasetType eval_type,
+                        const std::string& report_save_path) override;
+
+  /**
+   * save the trained model
+   *
+   * @param model_save_file: vector of index
+   */
+  void save_model(const std::string& model_save_file) override;
 };
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_NN_MLP_PS_H_

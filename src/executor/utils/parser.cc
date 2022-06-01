@@ -19,3 +19,12 @@ falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
   if ("lime_interpret" == name) output = falcon::LIME_INTERPRET;
   return output;
 }
+
+falcon::SpdzMlpActivationFunc parse_mlp_act_func(const std::string& name) {
+  falcon::SpdzMlpActivationFunc func = falcon::SIGMOID;
+  if ("sigmoid" == name) func = falcon::SIGMOID;
+  if ("relu" == name) func = falcon::RELU;
+  if ("softmax" == name) func = falcon::SOFTMAX;
+  if ("linear" == name) func = falcon::LINEAR;
+  return func;
+}

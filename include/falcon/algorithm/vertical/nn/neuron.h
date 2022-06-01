@@ -60,6 +60,49 @@ class Neuron {
   void init_encrypted_weights(const Party& party, int precision);
 
   /**
+    * compute phe aggregation for a batch of samples
+    *
+    * @param party: initialized party object
+    * @param cur_batch_size: the batch size of the current iteration
+    * @param local_weight_sizes: the number of local weights of parties
+    * @param encoded_batch_samples: the encoded batch samples
+    * @param precision: the precision of the ciphertexts
+    * @param batch_aggregation: returned phe aggregation for the batch
+    */
+  void compute_batch_phe_aggregation(
+      const Party &party,
+      int cur_batch_size,
+      const std::vector<int>& local_weight_sizes,
+      EncodedNumber** encoded_batch_samples,
+      int precision,
+      EncodedNumber *encrypted_batch_aggregation) const;
+
+  /**
+   * compute the phe aggregation for a batch of secret shares
+   *
+   * @param party: initialized party object
+   * @param cur_batch_size: the batch size of the current iteration
+   * @param prev_neuron_size: the number of neurons in previous layer
+   * @param encoded_batch_shares: the encoded secret shares
+   * @param precision: the precision of the ciphertexts
+   * @param batch_aggregation: returned phe aggregation for the batch
+   */
+  void compute_batch_phe_aggregation_with_shares(
+      const Party& party,
+      int cur_batch_size,
+      int prev_neuron_size,
+      EncodedNumber** encoded_batch_shares,
+      int precision,
+      EncodedNumber* encrypted_batch_aggregation) const;
+
+  void sum_batch_local_aggregations(
+      const Party& party,
+      EncodedNumber* batch_local_aggregation,
+      int precision,
+      int cur_batch_size,
+      EncodedNumber* encrypted_batch_aggregation) const;
+
+  /**
    * update the layer encrypted weights
    *
    * @param party: initialized party object

@@ -64,6 +64,38 @@ class Layer {
   void init_encrypted_weights(const Party& party, int precision);
 
   /**
+   * compute the aggregation of the first hidden layer
+   *
+   * @param party: initialized party object
+   * @param cur_batch_size: the number of samples of the current batch
+   * @param local_weight_sizes: the local weight size of each party
+   * @param encoded_batch_samples: the encoded batch samples
+   * @param output_size: the size of the resulted encrypted aggregation res
+   * @param res: encrypted aggregation result
+   */
+  void comp_1st_layer_agg_output(const Party& party,
+                                 int cur_batch_size,
+                                 const std::vector<int>& local_weight_sizes,
+                                 EncodedNumber **encoded_batch_samples,
+                                 int output_size,
+                                 EncodedNumber **res) const;
+
+  /**
+   * compute the aggregation of the other hidden layers
+   *
+   * @param party: initialized party object
+   * @param cur_batch_size: the number of samples of the current batch
+   * @param prev_layer_outputs_shares: the output shares of the previous layer
+   * @param output_size: the size of the resulted encrypted aggregation res
+   * @param res: encrypted aggregation result
+   */
+  void comp_other_layer_agg_output(const Party& party,
+                                   int cur_batch_size,
+                                   const std::vector<std::vector<double>>& prev_layer_outputs_shares,
+                                   int output_size,
+                                   EncodedNumber **res) const;
+
+  /**
    * update the layer encrypted weights
    *
    * @param party: initialized party object

@@ -3,6 +3,8 @@
 //
 
 #include <falcon/algorithm/vertical/nn/layer.h>
+#include <falcon/utils/logger/logger.h>
+#include <falcon/algorithm/model_builder_helper.h>
 
 Layer::Layer() {
   m_num_neurons = 0;
@@ -41,7 +43,111 @@ Layer::~Layer() {
 }
 
 void Layer::init_encrypted_weights(const Party &party, int precision) {
+  int neuron_size = (int) m_neurons.size();
+  for (int i = 0; i < neuron_size; i++) {
+    m_neurons[i].init_encrypted_weights(party, precision);
+  }
+}
 
+void Layer::comp_1st_layer_agg_output(const Party &party,
+                                      int cur_batch_size,
+                                      const std::vector<int>& local_weight_sizes,
+                                      EncodedNumber **encoded_batch_samples,
+                                      int output_size,
+                                      EncodedNumber **res) const {
+  log_info("[comp_1st_layer_agg_output] compute the encrypted aggregation for the first hidden layer");
+  int neuron_size = (int) m_neurons.size();
+  if (neuron_size != output_size) {
+    log_error("[comp_1st_layer_agg_output] neuron size does not match");
+    exit(EXIT_FAILURE);
+  }
+  int precision = std::abs(encoded_batch_samples[0][0].getter_exponent())
+      + std::abs(m_neurons[0].m_weights[0].getter_exponent());
+
+  // transform matrix helper
+  auto **res_helper = new EncodedNumber*[neuron_size];
+  for (int i = 0; i < neuron_size; i++) {
+    res_helper[i] = new EncodedNumber[cur_batch_size];
+  }
+
+  for (int i = 0; i < neuron_size; i++) {
+    m_neurons[i].compute_batch_phe_aggregation(
+        party, cur_batch_size,
+        local_weight_sizes, encoded_batch_samples,
+        precision, res_helper[i]);
+  }
+
+  // convert res_helper into res
+  for (int i = 0; i < cur_batch_size; i++) {
+    for (int j = 0; j < neuron_size; j++) {
+      res[i][j] = res_helper[j][i];
+    }
+  }
+
+  // free memory
+  for (int i = 0; i < neuron_size; i++) {
+    delete [] res_helper[i];
+  }
+  delete [] res_helper;
+}
+
+void Layer::comp_other_layer_agg_output(const Party &party,
+                                        int cur_batch_size,
+                                        const std::vector<std::vector<double>> &prev_layer_outputs_shares,
+                                        int output_size,
+                                        EncodedNumber **res) const {
+  // execution method:
+  // 1. since the inputs are secret shares, let each party compute a partial aggregation,
+  // 2. each party send the partial result to active party for fully aggregation,
+  // 3. the active party add the bias term, and broadcast the encrypted outputs
+  log_info("[comp_other_layer_agg_output] compute the encrypted aggregation for the other hidden layer");
+  int prev_neuron_size = (int) prev_layer_outputs_shares.size();
+  int prev_batch_size = (int) prev_layer_outputs_shares[0].size();
+  if ((prev_neuron_size != m_num_inputs_per_neuron) ||
+      (prev_batch_size != cur_batch_size) || (output_size != m_num_neurons)) {
+    log_error("[comp_other_layer_agg_output] size does not match");
+    exit(EXIT_FAILURE);
+  }
+
+  // local aggregation
+  auto** encoded_prev_outputs_shares = new EncodedNumber*[prev_batch_size];
+  for (int i = 0; i < prev_batch_size; i++) {
+    encoded_prev_outputs_shares[i] = new EncodedNumber[prev_neuron_size];
+  }
+  encode_samples(party, prev_layer_outputs_shares, encoded_prev_outputs_shares);
+
+  int precision = std::abs(encoded_prev_outputs_shares[0][0].getter_exponent())
+      + std::abs(m_neurons[0].m_weights[0].getter_exponent());
+
+  // transform matrix helper
+  auto **res_helper = new EncodedNumber*[m_num_neurons];
+  for (int i = 0; i < m_num_neurons; i++) {
+    res_helper[i] = new EncodedNumber[cur_batch_size];
+  }
+
+  for (int i = 0; i < m_num_neurons; i++) {
+    m_neurons[i].compute_batch_phe_aggregation_with_shares(
+        party, cur_batch_size, prev_neuron_size,
+        encoded_prev_outputs_shares, precision, res_helper[i]);
+  }
+
+  // convert res_helper into res
+  for (int i = 0; i < cur_batch_size; i++) {
+    for (int j = 0; j < m_num_neurons; j++) {
+      res[i][j] = res_helper[j][i];
+    }
+  }
+
+  // free memory
+  for (int i = 0; i < m_num_neurons; i++) {
+    delete [] res_helper[i];
+  }
+  delete [] res_helper;
+
+  for (int i = 0; i < prev_batch_size; i++) {
+    delete [] encoded_prev_outputs_shares[i];
+  }
+  delete [] encoded_prev_outputs_shares;
 }
 
 void Layer::update_encrypted_weights(const Party &party,

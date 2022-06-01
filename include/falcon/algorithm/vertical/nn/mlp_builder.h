@@ -128,7 +128,7 @@ class MlpBuilder : public ModelBuilder {
   void backward_computation(
       const Party& party,
       const std::vector<std::vector<double>>& batch_samples,
-      EncodedNumber* predicted_labels,
+      EncodedNumber** predicted_labels,
       const std::vector<int>& batch_indexes,
       int precision,
       EncodedNumber* deltas);

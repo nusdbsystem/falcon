@@ -42,6 +42,22 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
                               int req_party_id, int phe_precision);
 
 /**
+ * convert a ciphertext matrix to 2-dimensional secret shares
+ *
+ * @param party: the participating party
+ * @param src_ciphers_mat: ciphertext matrix to be decrypted
+ * @param secret_shares_mat: decrypted and decoded secret shares matrix
+ * @param row_size: row size of the matrix
+ * @param column_size: column size of the matrix
+ * @param req_party_id: party that initiate decryption
+ * @param phe_precision: fixed point precision when encoding
+ */
+void ciphers_mat_to_secret_shares_mat(const Party& party, EncodedNumber** src_ciphers_mat,
+                                      std::vector<std::vector<double>>& secret_shares_mat,
+                                      int row_size, int column_size,
+                                      int req_party_id, int phe_precision);
+
+/**
  * convert secret shares back to ciphertext vector
  *
  * @param party: the participating party

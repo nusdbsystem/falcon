@@ -74,6 +74,12 @@ namespace falcon {
   enum SpdzMlpCompType {
     ACTIVATION
   };
+  enum SpdzMlpActivationFunc {
+    SIGMOID,
+    RELU,
+    SOFTMAX,
+    LINEAR
+  };
 
   // for inference service
   # define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"

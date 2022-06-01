@@ -174,6 +174,20 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
   djcs_t_free_public_key(phe_pub_key);
 }
 
+void ciphers_mat_to_secret_shares_mat(const Party& party, EncodedNumber** src_ciphers_mat,
+                                      std::vector<std::vector<double>>& secret_shares_mat,
+                                      int row_size, int column_size,
+                                      int req_party_id, int phe_precision) {
+  // convert the ciphertext vector by vector
+  for (int i = 0; i < row_size; i++) {
+    std::vector<double> secret_shares_vec;
+    ciphers_to_secret_shares(party, src_ciphers_mat[i],
+                             secret_shares_vec, column_size,
+                             req_party_id, phe_precision);
+    secret_shares_mat.push_back(secret_shares_vec);
+  }
+}
+
 void secret_shares_to_ciphers(const Party& party, EncodedNumber* dest_ciphers,
                               std::vector<double> secret_shares,
                               int size, int req_party_id, int phe_precision) {

@@ -23,6 +23,15 @@
 MlpParameterServer::MlpParameterServer(
     const MlpParameterServer &obj) : party(obj.party) {}
 
+MlpParameterServer::MlpParameterServer(const MlpBuilder &m_mlp_builder,
+                                       const Party &m_party,
+                                       const std::string &ps_network_config_pb_str) :
+                                       ParameterServer(ps_network_config_pb_str),
+                                       party(m_party),
+                                       mlp_builder(m_mlp_builder) {
+  log_info("[MlpParameterServer]: constructor");
+}
+
 MlpParameterServer::MlpParameterServer(
     const Party &m_party, const std::string &ps_network_config_pb_str) :
     ParameterServer(ps_network_config_pb_str), party(m_party) {
@@ -116,14 +125,30 @@ std::vector<string> MlpParameterServer::wait_worker_complete() {
   return encoded_messages;
 }
 
+void MlpParameterServer::distributed_train() {
+
+}
+
 void MlpParameterServer::distributed_predict(const std::vector<int> &cur_test_data_indexes,
                                              EncodedNumber *predicted_labels) {
 
 }
+
+void MlpParameterServer::distributed_eval(falcon::DatasetType eval_type, const std::string &report_save_path) {
+
+}
+
+
 
 void MlpParameterServer::update_encrypted_weights(const std::vector<string> &encoded_messages,
                                                   int weight_size,
                                                   int weight_phe_precision,
                                                   EncodedNumber *updated_weights) const {
 
+}
+
+void MlpParameterServer::save_model(const std::string &model_save_file) {
+  std::string  pb_mlp_model_str;
+  serialize_mlp_model(this->mlp_builder.mlp_model, pb_mlp_model_str);
+  save_pb_model_string(pb_mlp_model_str, model_save_file);
 }
