@@ -72,7 +72,8 @@ namespace falcon {
 
   /** for MLP */
   enum SpdzMlpCompType {
-    ACTIVATION
+    ACTIVATION,
+    ACTIVATION_FAST
   };
   enum SpdzMlpActivationFunc {
     SIGMOID,

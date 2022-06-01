@@ -92,7 +92,7 @@ void MlpBuilder::backward_computation(const Party &party,
                                       const std::vector<int> &batch_indexes,
                                       int precision,
                                       EncodedNumber *deltas) {
-
+  log_info("[backward_computation] start backward computation");
 }
 
 void MlpBuilder::update_encrypted_weights(Party &party, EncodedNumber *deltas) {
@@ -221,12 +221,16 @@ void MlpBuilder::train(Party party) {
     }
     int encrypted_batch_agg_precision = encrypted_weights_precision + plaintext_samples_precision;
     // 4 * fixed precision
+    std::vector<std::vector<std::vector<double>>> layer_activation_shares;
+    std::vector<std::vector<std::vector<double>>> layer_deriv_activation_shares;
     mlp_model.forward_computation(
         party,
         cur_sample_size,
         sync_arr,
         encoded_batch_samples,
-        predicted_labels);
+        predicted_labels,
+        layer_activation_shares,
+        layer_deriv_activation_shares);
 
     log_info("-------- Iteration " + std::to_string(iter) + ", forward computation success --------");
     log_info("The precision of predicted_labels is: " + std::to_string(abs(predicted_labels[0][0].getter_exponent())));

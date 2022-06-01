@@ -95,8 +95,29 @@ class MlpModel {
    * @param local_weight_sizes: the local weights of parties
    * @param encoded_batch_samples: the encoded batch samples
    * @param predicted_labels: the predicted probabilities of the encoded samples
+   * @param layer_activation_shares: return the activation shares of each layer
+   * @param layer_deriv_activation_shares: return the derivative activation shares of each layer
    */
   void forward_computation(
+      const Party& party,
+      int cur_batch_size,
+      const std::vector<int>& local_weight_sizes,
+      EncodedNumber** encoded_batch_samples,
+      EncodedNumber** predicted_labels,
+      std::vector<std::vector<std::vector<double>>>& layer_activation_shares,
+      std::vector<std::vector<std::vector<double>>>& layer_deriv_activation_shares) const;
+
+  /**
+   * forward calculation of the network, output predicted labels
+   * which consists of the prediction probability of each sample
+   *
+   * @param party: initialized party object
+   * @param cur_batch_size: the number of samples of the current batch
+   * @param local_weight_sizes: the local weights of parties
+   * @param encoded_batch_samples: the encoded batch samples
+   * @param predicted_labels: the predicted probabilities of the encoded samples
+   */
+  void forward_computation_fast(
       const Party& party,
       int cur_batch_size,
       const std::vector<int>& local_weight_sizes,
