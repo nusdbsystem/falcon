@@ -81,7 +81,7 @@ TEST(PHE, ThresholdPaillierScheme) {
   double b1 = 5.55;
   double b2 = -0.58;
   EncodedNumber number_b1, number_b2;
-  number_b1.set_double(pk->n[0], b1, 16);
+  number_b1.set_double(pk->n[0], b1, 192);
   number_b2.set_double(pk->n[0], b2, 16);
 
   EncodedNumber encrypted_number_b1;
@@ -99,6 +99,44 @@ TEST(PHE, ThresholdPaillierScheme) {
   double decrypted_decoded_product;
   decrypted_product.decode(decrypted_decoded_product);
   EXPECT_NEAR(b1 * b2, decrypted_decoded_product, 1e-3);
+
+  ////////////////////////////////////////////////////
+  /// Test homomorphic multiplication exponent test //
+  ////////////////////////////////////////////////////
+  double b11 = 5.55;
+  double b22 = 0.99;
+  EncodedNumber number_b11, number_b22;
+  number_b11.set_double(pk->n[0], b11, 16);
+  number_b22.set_double(pk->n[0], b22, 16);
+
+  EncodedNumber encrypted_number_b11;
+  djcs_t_aux_encrypt(pk, hr, encrypted_number_b11, number_b11);
+
+  EncodedNumber encrypted_product2, decrypted_product2;
+  djcs_t_aux_ep_mul(pk, encrypted_product2, encrypted_number_b11, number_b22);
+//  std::cout << "encrypted_product2.precision = " << std::abs(encrypted_product2.getter_exponent()) << std::endl;
+
+  for (int i = 0; i < 61; i++) {
+    // multiply encrypted_product2 by 1.0 ten times
+//    std::cout << "i = " << i << std::endl;
+    djcs_t_aux_ep_mul(pk, encrypted_product2, encrypted_product2, number_b22);
+//    std::cout << "encrypted_product2.precision = " << std::abs(encrypted_product2.getter_exponent()) << std::endl;
+  }
+
+  auto* partially_product_decryption2 = new EncodedNumber[client_num];
+  for (int i = 0; i < client_num; i++) {
+    djcs_t_aux_partial_decrypt(pk, au[i], partially_product_decryption2[i], encrypted_product2);
+  }
+  djcs_t_aux_share_combine(pk, decrypted_product2, partially_product_decryption2, client_num);
+
+  double true_mul_res = b11;
+  for (int i = 0; i < 62; i++) {
+    true_mul_res = true_mul_res * b22;
+  }
+
+  double decrypted_decoded_product2;
+  decrypted_product2.decode(decrypted_decoded_product2);
+  EXPECT_NEAR(true_mul_res, decrypted_decoded_product2, 1e-1);
 
   //////////////////////////////////////
   /// Test homomorphic inner product ///
@@ -488,6 +526,7 @@ TEST(PHE, ThresholdPaillierScheme) {
   delete [] partially_decryption;
   delete [] partially_sum_decryption;
   delete [] partially_product_decryption;
+  delete [] partially_product_decryption2;
   delete [] partially_inner_prod_decryption;
   delete [] partially_agg_decryption;
   delete [] number_c1;

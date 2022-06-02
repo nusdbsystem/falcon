@@ -75,6 +75,7 @@ namespace falcon {
     ACTIVATION,
     ACTIVATION_FAST
   };
+
   enum SpdzMlpActivationFunc {
     SIGMOID,
     RELU,

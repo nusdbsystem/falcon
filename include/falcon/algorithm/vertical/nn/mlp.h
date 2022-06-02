@@ -10,6 +10,8 @@
 #include <falcon/algorithm/vertical/nn/neuron.h>
 #include <falcon/algorithm/vertical/nn/layer.h>
 
+typedef std::vector<std::vector<std::vector<double>>> TripleDVec;
+
 // the mlp model
 class MlpModel {
  public:
@@ -104,8 +106,8 @@ class MlpModel {
       const std::vector<int>& local_weight_sizes,
       EncodedNumber** encoded_batch_samples,
       EncodedNumber** predicted_labels,
-      std::vector<std::vector<std::vector<double>>>& layer_activation_shares,
-      std::vector<std::vector<std::vector<double>>>& layer_deriv_activation_shares) const;
+      TripleDVec& layer_activation_shares,
+      TripleDVec& layer_deriv_activation_shares) const;
 
   /**
    * forward calculation of the network, output predicted labels

@@ -86,12 +86,15 @@ void MlpBuilder::init_encrypted_weights(const Party &party, int precision) {
   }
 }
 
-void MlpBuilder::backward_computation(const Party &party,
-                                      const std::vector<std::vector<double>> &batch_samples,
-                                      EncodedNumber **predicted_labels,
-                                      const std::vector<int> &batch_indexes,
-                                      int precision,
-                                      EncodedNumber *deltas) {
+void MlpBuilder::backward_computation(
+    const Party &party,
+    const std::vector<std::vector<double>> &batch_samples,
+    EncodedNumber **predicted_labels,
+    const std::vector<int> &batch_indexes,
+    int precision,
+    TripleDVec& layer_activation_shares,
+    TripleDVec& layer_deriv_activation_shares,
+    EncodedNumber *deltas) {
   log_info("[backward_computation] start backward computation");
 }
 
@@ -221,8 +224,8 @@ void MlpBuilder::train(Party party) {
     }
     int encrypted_batch_agg_precision = encrypted_weights_precision + plaintext_samples_precision;
     // 4 * fixed precision
-    std::vector<std::vector<std::vector<double>>> layer_activation_shares;
-    std::vector<std::vector<std::vector<double>>> layer_deriv_activation_shares;
+    TripleDVec layer_activation_shares;
+    TripleDVec layer_deriv_activation_shares;
     mlp_model.forward_computation(
         party,
         cur_sample_size,
@@ -233,8 +236,8 @@ void MlpBuilder::train(Party party) {
         layer_deriv_activation_shares);
 
     log_info("-------- Iteration " + std::to_string(iter) + ", forward computation success --------");
-    log_info("The precision of predicted_labels is: " + std::to_string(abs(predicted_labels[0][0].getter_exponent())));
-
+    log_info("The precision of predicted_labels is: "
+      + std::to_string(abs(predicted_labels[0][0].getter_exponent())));
 
     // step 2.5: update encrypted local weights
     std::vector<double> truncated_weights_shares;
@@ -249,6 +252,8 @@ void MlpBuilder::train(Party party) {
         predicted_labels,
         batch_indexes,
         encrypted_batch_agg_precision,
+        layer_activation_shares,
+        layer_deriv_activation_shares,
         deltas);
     log_info("deltas precision is: " + std::to_string(std::abs(deltas[0].getter_exponent())));
 

@@ -148,8 +148,8 @@ void MlpModel::forward_computation(const Party &party,
                                    const std::vector<int>& local_weight_sizes,
                                    EncodedNumber **encoded_batch_samples,
                                    EncodedNumber **predicted_labels,
-                                   std::vector<std::vector<std::vector<double>>>& layer_activation_shares,
-                                   std::vector<std::vector<std::vector<double>>>& layer_deriv_activation_shares) const {
+                                   TripleDVec& layer_activation_shares,
+                                   TripleDVec& layer_deriv_activation_shares) const {
   // we compute the forward computation layer-by-layer
   // for the first hidden layer, the input is the encoded_batch_samples distributed among parties
   // for the other layers, the input is the secret shares after spdz activation function

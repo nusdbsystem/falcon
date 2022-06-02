@@ -123,6 +123,8 @@ class MlpBuilder : public ModelBuilder {
    * @param predicted_labels: the predicted labels
    * @param batch_indexes: the selected batch indexes
    * @param precision: the precision for the batch samples
+   * @param layer_activation_shares: layers' activation shares of batch samples
+   * @param layer_deriv_activation_shares: layers' derivative activation shares of batch samples
    * @param deltas: the predicted loss at the last layer
    */
   void backward_computation(
@@ -131,6 +133,8 @@ class MlpBuilder : public ModelBuilder {
       EncodedNumber** predicted_labels,
       const std::vector<int>& batch_indexes,
       int precision,
+      TripleDVec& layer_activation_shares,
+      TripleDVec& layer_deriv_activation_shares,
       EncodedNumber* deltas);
 
   /**
