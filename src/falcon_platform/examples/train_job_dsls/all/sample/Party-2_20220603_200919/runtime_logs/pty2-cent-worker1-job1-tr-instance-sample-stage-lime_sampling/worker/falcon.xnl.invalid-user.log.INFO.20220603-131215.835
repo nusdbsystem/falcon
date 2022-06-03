@@ -1,0 +1,62 @@
+Log file created at: 2022/06/03 13:12:15
+Running on machine: xnl
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0603 13:12:15.443333   835 main.cc:98] Init log file.
+I0603 13:12:15.443881   835 logger.cc:11] -------- parse parameters correct --------
+I0603 13:12:15.443943   835 logger.cc:11] party-id: 2
+I0603 13:12:15.443965   835 logger.cc:11] party-num: 3
+I0603 13:12:15.443990   835 logger.cc:11] fl-setting: 1
+I0603 13:12:15.444026   835 logger.cc:11] existing-key: 1
+I0603 13:12:15.444054   835 logger.cc:11] network-file: CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCfOrAfSrAfWrARILCgn4qwH5qwH6qwESCwoJ/asB/qsB/6sBGgsKCeT3AuT3AuT3Ag==
+I0603 13:12:15.444075   835 logger.cc:11] log-file: /opt/falcon/src/falcon_platform/falcon_logs/Party-2_20220603_200919/runtime_logs/pty2-cent-worker1-job1-tr-instance-sample-stage-lime_sampling/worker
+I0603 13:12:15.444100   835 logger.cc:11] data-input-file: /dataPath/client.txt
+I0603 13:12:15.444116   835 logger.cc:11] data-output-file: /dataOutputPath
+I0603 13:12:15.444144   835 logger.cc:11] key-file: /dataPath/phe_keys
+I0603 13:12:15.444165   835 logger.cc:11] algorithm-name: lime_sampling
+I0603 13:12:15.444188   835 logger.cc:11] model-save-file: /modelPath/saved_model.pb
+I0603 13:12:15.444205   835 logger.cc:11] model-report-file: /modelPath/report.txt
+I0603 13:12:15.444228   835 logger.cc:11] is-inference: 0
+I0603 13:12:15.444243   835 logger.cc:11] inference-endpoint: 0
+I0603 13:12:15.444267   835 logger.cc:11] is-distributed: 0
+I0603 13:12:15.444283   835 logger.cc:11] distributed-train-network-file: 0
+I0603 13:12:15.444309   835 logger.cc:11] worker-id: 0
+I0603 13:12:15.444329   835 logger.cc:11] distributed-role: 2
+I0603 13:12:15.463819   835 logger.cc:11] local_data is reading dataset from: /dataPath/client.txt
+I0603 13:12:15.463959   835 logger.cc:11] sample_num = 4521
+I0603 13:12:15.463979   835 logger.cc:11] feature_num = 5
+I0603 13:12:15.463990   835 logger.cc:11] Parse algorithm name and run the program
+I0603 13:12:15.464270   835 logger.cc:11] mpc_port_array_size = 3
+I0603 13:12:15.464308   835 logger.cc:11] size of ip address = 3
+I0603 13:12:15.464327   835 logger.cc:11] ips[0] = 127.0.0.1
+I0603 13:12:15.464362   835 logger.cc:11] port_array[0][0] = 22003
+I0603 13:12:15.464398   835 logger.cc:11] port_array[0][1] = 22004
+I0603 13:12:15.464409   835 logger.cc:11] port_array[0][2] = 22005
+I0603 13:12:15.464422   835 logger.cc:11] ips[1] = 127.0.0.1
+I0603 13:12:15.464432   835 logger.cc:11] port_array[1][0] = 22008
+I0603 13:12:15.464444   835 logger.cc:11] port_array[1][1] = 22009
+I0603 13:12:15.464454   835 logger.cc:11] port_array[1][2] = 22010
+I0603 13:12:15.464469   835 logger.cc:11] ips[2] = 127.0.0.1
+I0603 13:12:15.464481   835 logger.cc:11] port_array[2][0] = 22013
+I0603 13:12:15.464494   835 logger.cc:11] port_array[2][1] = 22014
+I0603 13:12:15.464504   835 logger.cc:11] port_array[2][2] = 22015
+I0603 13:12:15.464520   835 logger.cc:11] executor_mpc_ports[0] = 48100
+I0603 13:12:15.464534   835 logger.cc:11] executor_mpc_ports[1] = 48100
+I0603 13:12:15.464547   835 logger.cc:11] executor_mpc_ports[2] = 48100
+I0603 13:12:15.464563   835 logger.cc:11] Establish network communications with other parties
+I0603 13:12:16.467525   835 logger.cc:11] Init threshold partially homomorphic encryption keys
+I0603 13:12:16.469950   835 logger.cc:11] m_use_existing_key = 1
+I0603 13:12:16.472206   835 logger.cc:11] Execute training logic
+I0603 13:12:16.477938   835 logger.cc:11] Begin to compute the lime required samples
+I0603 13:12:16.477993   835 logger.cc:11] Split local data and labels into training and testing dataset.
+I0603 13:12:16.478029   835 logger.cc:11] Split percentage for train and test datasets = 0.800000
+I0603 13:12:16.478070   835 logger.cc:11] Training_data_size = 3616
+I0603 13:12:16.480664   835 logger.cc:11] original weight_size = 5
+I0603 13:12:16.480723   835 logger.cc:11] print the first training data before train
+I0603 13:12:16.480743   835 logger.cc:11] vec[0] = 0.176483
+I0603 13:12:16.480788   835 logger.cc:11] vec[1] = 0.545496
+I0603 13:12:16.480803   835 logger.cc:11] vec[2] = 0.000500
+I0603 13:12:16.480824   835 logger.cc:11] vec[3] = 1.000000
+I0603 13:12:16.480857   835 logger.cc:11] vec[4] = 1.000000
+I0603 13:12:16.484249   835 logger.cc:11] [lime_comp_pred] Finish generating random samples
+I0603 13:12:16.489117   835 logger.cc:11] -------- Finish algorithm --------
+I0603 13:12:16.489149   835 logger.cc:11] Time taken by main func: 1044698 microseconds

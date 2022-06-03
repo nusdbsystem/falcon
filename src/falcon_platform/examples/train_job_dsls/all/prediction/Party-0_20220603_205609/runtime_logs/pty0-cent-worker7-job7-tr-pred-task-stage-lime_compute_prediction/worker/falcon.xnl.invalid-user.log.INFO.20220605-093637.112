@@ -1,0 +1,49 @@
+Log file created at: 2022/06/05 09:36:37
+Running on machine: xnl
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0605 09:36:37.137708   112 main.cc:98] Init log file.
+I0605 09:36:37.138005   112 logger.cc:11] -------- parse parameters correct --------
+I0605 09:36:37.138095   112 logger.cc:11] party-id: 0
+I0605 09:36:37.138151   112 logger.cc:11] party-num: 3
+I0605 09:36:37.138165   112 logger.cc:11] fl-setting: 1
+I0605 09:36:37.138195   112 logger.cc:11] existing-key: 1
+I0605 09:36:37.138232   112 logger.cc:11] network-file: CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCdOsAdSsAdWsARILCgnYrAHZrAHarAESCwoJ3awB3qwB36wBGgsKCaSEA6SEA6SEAw==
+I0605 09:36:37.138247   112 logger.cc:11] log-file: /opt/falcon/src/falcon_platform/falcon_logs/Party-0_20220603_205609/runtime_logs/pty0-cent-worker7-job7-tr-pred-task-stage-lime_compute_prediction/worker
+I0605 09:36:37.138267   112 logger.cc:11] data-input-file: /dataPath/client.txt
+I0605 09:36:37.138283   112 logger.cc:11] data-output-file: /dataOutputPath
+I0605 09:36:37.138324   112 logger.cc:11] key-file: /dataPath/phe_keys
+I0605 09:36:37.138337   112 logger.cc:11] algorithm-name: lime_compute_prediction
+I0605 09:36:37.138360   112 logger.cc:11] model-save-file: /modelPath/saved_model.pb
+I0605 09:36:37.138375   112 logger.cc:11] model-report-file: /modelPath/report.txt
+I0605 09:36:37.138393   112 logger.cc:11] is-inference: 0
+I0605 09:36:37.138409   112 logger.cc:11] inference-endpoint: 0
+I0605 09:36:37.138432   112 logger.cc:11] is-distributed: 0
+I0605 09:36:37.138466   112 logger.cc:11] distributed-train-network-file: 0
+I0605 09:36:37.138509   112 logger.cc:11] worker-id: 0
+I0605 09:36:37.138522   112 logger.cc:11] distributed-role: 2
+I0605 09:36:37.156111   112 logger.cc:11] local_data is reading dataset from: /dataPath/client.txt
+I0605 09:36:37.156131   112 logger.cc:11] sample_num = 4521
+I0605 09:36:37.156603   112 logger.cc:11] Active party last column is label, so feature_num - 1
+I0605 09:36:37.156630   112 logger.cc:11] feature_num = 6
+I0605 09:36:37.156661   112 logger.cc:11] Parse algorithm name and run the program
+I0605 09:36:37.156824   112 logger.cc:11] mpc_port_array_size = 3
+I0605 09:36:37.156873   112 logger.cc:11] size of ip address = 3
+I0605 09:36:37.156901   112 logger.cc:11] ips[0] = 127.0.0.1
+I0605 09:36:37.156944   112 logger.cc:11] port_array[0][0] = 22099
+I0605 09:36:37.156975   112 logger.cc:11] port_array[0][1] = 22100
+I0605 09:36:37.157006   112 logger.cc:11] port_array[0][2] = 22101
+I0605 09:36:37.157032   112 logger.cc:11] ips[1] = 127.0.0.1
+I0605 09:36:37.157076   112 logger.cc:11] port_array[1][0] = 22104
+I0605 09:36:37.157085   112 logger.cc:11] port_array[1][1] = 22105
+I0605 09:36:37.157097   112 logger.cc:11] port_array[1][2] = 22106
+I0605 09:36:37.157105   112 logger.cc:11] ips[2] = 127.0.0.1
+I0605 09:36:37.157119   112 logger.cc:11] port_array[2][0] = 22109
+I0605 09:36:37.157128   112 logger.cc:11] port_array[2][1] = 22110
+I0605 09:36:37.157140   112 logger.cc:11] port_array[2][2] = 22111
+I0605 09:36:37.157151   112 logger.cc:11] executor_mpc_ports[0] = 49700
+I0605 09:36:37.157166   112 logger.cc:11] executor_mpc_ports[1] = 49700
+I0605 09:36:37.157176   112 logger.cc:11] executor_mpc_ports[2] = 49700
+I0605 09:36:37.157217   112 logger.cc:11] Establish network communications with other parties
+I0605 09:36:37.656702   112 logger.cc:11] Init threshold partially homomorphic encryption keys
+I0605 09:36:37.659232   112 logger.cc:11] m_use_existing_key = 1
+I0605 09:36:37.659471   112 logger.cc:11] Execute training logic

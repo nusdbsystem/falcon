@@ -1,0 +1,344 @@
+2022/06/03 20:12:16 job-manager.go:209: [JobManager]: Assign port 22017 to master, run task=lime_weight_task_stage
+2022/06/03 20:12:16 job-manager.go:210: [JobManager] begin ManageJobLifeCycle, masterAddr=127.0.0.1:22017, stageName=lime_weight_task_stage, groupNum=%!s(int=1), tasksParallelism=map[%!d(common.FalconTask=lime_weight_task):3]
+2022/06/03 20:12:16 job-manager.go:211: [JobManager] call master.RunMaster with dslOjb
+2022/06/03 20:12:16 job-manager.go:230: [JobManager] master call partyserver 127.0.0.1:30005 to spawn workers 
+2022/06/03 20:12:16 job-manager.go:230: [JobManager] master call partyserver 127.0.0.1:30006 to spawn workers 
+2022/06/03 20:12:16 job-manager.go:230: [JobManager] master call partyserver 127.0.0.1:30007 to spawn workers 
+2022/06/03 20:12:16 master.go:190: [Master.extractResourceInfo] -----debug-----trainWorkerPreGroup: 2
+2022/06/03 20:12:16 master.go:290: [Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID = 0  group_id =  0 distPsIp:  127.0.0.1 distPsPorts:  [22031 22032] distWorkerIps:  [127.0.0.1 127.0.0.1] distWorkerPorts:  [22044 22056] distributedNetworkCfg:  Cg8KCTEyNy4wLjAuMRCcrAEKDwoJMTI3LjAuMC4xEKisARIPCgkxMjcuMC4wLjEQj6wBEg8KCTEyNy4wLjAuMRCQrAE=
+2022/06/03 20:12:16 master.go:190: [Master.extractResourceInfo] -----debug-----trainWorkerPreGroup: 2
+2022/06/03 20:12:16 master.go:290: [Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID = 1  group_id =  0 distPsIp:  127.0.0.1 distPsPorts:  [22069 22070] distWorkerIps:  [127.0.0.1 127.0.0.1] distWorkerPorts:  [22081 22093] distributedNetworkCfg:  Cg8KCTEyNy4wLjAuMRDBrAEKDwoJMTI3LjAuMC4xEM2sARIPCgkxMjcuMC4wLjEQtawBEg8KCTEyNy4wLjAuMRC2rAE=
+2022/06/03 20:12:16 master.go:190: [Master.extractResourceInfo] -----debug-----trainWorkerPreGroup: 2
+2022/06/03 20:12:16 master.go:290: [Master.extractResourceInfo], result of getDistributedNetworkCfg when partyID = 2  group_id =  0 distPsIp:  127.0.0.1 distPsPorts:  [22105 22106] distWorkerIps:  [127.0.0.1 127.0.0.1] distWorkerPorts:  [22119 22130] distributedNetworkCfg:  Cg8KCTEyNy4wLjAuMRDnrAEKDwoJMTI3LjAuMC4xEPKsARIPCgkxMjcuMC4wLjEQ2awBEg8KCTEyNy4wLjAuMRDarAE=
+2022/06/03 20:12:16 master.go:332: [Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is  map[0:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCYSsAYWsAYasARILCgmurAGvrAGwrAESCwoJ0awB0qwB06wBGgsKCdCGA9CGA9CGAw== 1:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCZasAZesAZisARILCgm8rAG9rAG+rAESCwoJ3qwB36wB4KwBGgsKCbSHA7SHA7SHAw== 2:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCaKsAaOsAaSsARILCgnFrAHGrAHHrAESCwoJ66wB7KwB7awBGgsKCZiIA5iIA5iIAw==]
+2022/06/03 20:12:16 master.go:336: [Master.extractResourceInfo] -----checking configurations-----
+2022/06/03 20:12:16 master.go:337: [Master.extractResourceInfo] master.RequiredResource is :
+2022/06/03 20:12:16 master.go:339: [Master.extractResourceInfo] workerNum: 9
+2022/06/03 20:12:16 master.go:342: [Master.extractResourceInfo] party 0 PartyID: 0
+2022/06/03 20:12:16 master.go:343: [Master.extractResourceInfo] party 0 ResourceNum: 3
+2022/06/03 20:12:16 master.go:344: [Master.extractResourceInfo] party 0 ResourceNumPreGroup: 3
+2022/06/03 20:12:16 master.go:347: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.WorkerId: 0
+2022/06/03 20:12:16 master.go:348: [Master.extractResourceInfo] party 0, workerID 0, groupID 0
+2022/06/03 20:12:16 master.go:349: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/06/03 20:12:16 master.go:350: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.WorkerPort: 22019
+2022/06/03 20:12:16 master.go:351: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22020 22021 22022]
+2022/06/03 20:12:16 master.go:352: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.MpcMpcPort: 22030
+2022/06/03 20:12:16 master.go:353: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.MpcExecutorPort: 50000
+2022/06/03 20:12:16 master.go:354: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.ExecutorPSPort: 0
+2022/06/03 20:12:16 master.go:355: [Master.extractResourceInfo] party 0, workerID 0, groupID 0, ResourceSVCs.DistributedRole: dist-ps
+2022/06/03 20:12:16 master.go:347: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.WorkerId: 1
+2022/06/03 20:12:16 master.go:348: [Master.extractResourceInfo] party 0, workerID 1, groupID 0
+2022/06/03 20:12:16 master.go:349: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/06/03 20:12:16 master.go:350: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.WorkerPort: 22033
+2022/06/03 20:12:16 master.go:351: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22038 22039 22040]
+2022/06/03 20:12:16 master.go:352: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.MpcMpcPort: 22042
+2022/06/03 20:12:16 master.go:353: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.MpcExecutorPort: 50100
+2022/06/03 20:12:16 master.go:354: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.ExecutorPSPort: 22044
+2022/06/03 20:12:16 master.go:355: [Master.extractResourceInfo] party 0, workerID 1, groupID 0, ResourceSVCs.DistributedRole: dist-worker
+2022/06/03 20:12:16 master.go:347: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.WorkerId: 2
+2022/06/03 20:12:16 master.go:348: [Master.extractResourceInfo] party 0, workerID 2, groupID 0
+2022/06/03 20:12:16 master.go:349: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/06/03 20:12:16 master.go:350: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.WorkerPort: 22049
+2022/06/03 20:12:16 master.go:351: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22050 22051 22052]
+2022/06/03 20:12:16 master.go:352: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.MpcMpcPort: 22054
+2022/06/03 20:12:16 master.go:353: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.MpcExecutorPort: 50200
+2022/06/03 20:12:16 master.go:354: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.ExecutorPSPort: 22056
+2022/06/03 20:12:16 master.go:355: [Master.extractResourceInfo] party 0, workerID 2, groupID 0, ResourceSVCs.DistributedRole: dist-worker
+2022/06/03 20:12:16 master.go:342: [Master.extractResourceInfo] party 1 PartyID: 1
+2022/06/03 20:12:16 master.go:343: [Master.extractResourceInfo] party 1 ResourceNum: 3
+2022/06/03 20:12:16 master.go:344: [Master.extractResourceInfo] party 1 ResourceNumPreGroup: 3
+2022/06/03 20:12:16 master.go:347: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.WorkerId: 1
+2022/06/03 20:12:16 master.go:348: [Master.extractResourceInfo] party 1, workerID 1, groupID 0
+2022/06/03 20:12:16 master.go:349: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/06/03 20:12:16 master.go:350: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.WorkerPort: 22072
+2022/06/03 20:12:16 master.go:351: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22076 22077 22078]
+2022/06/03 20:12:16 master.go:352: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.MpcMpcPort: 22080
+2022/06/03 20:12:16 master.go:353: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.MpcExecutorPort: 50100
+2022/06/03 20:12:16 master.go:354: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.ExecutorPSPort: 22081
+2022/06/03 20:12:16 master.go:355: [Master.extractResourceInfo] party 1, workerID 1, groupID 0, ResourceSVCs.DistributedRole: dist-worker
+2022/06/03 20:12:16 master.go:347: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.WorkerId: 2
+2022/06/03 20:12:16 master.go:348: [Master.extractResourceInfo] party 1, workerID 2, groupID 0
+2022/06/03 20:12:16 master.go:349: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/06/03 20:12:16 master.go:350: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.WorkerPort: 22083
+2022/06/03 20:12:16 master.go:351: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22085 22086 22087]
+2022/06/03 20:12:16 master.go:352: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.MpcMpcPort: 22091
+2022/06/03 20:12:16 master.go:353: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.MpcExecutorPort: 50200
+2022/06/03 20:12:16 master.go:354: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.ExecutorPSPort: 22093
+2022/06/03 20:12:16 master.go:355: [Master.extractResourceInfo] party 1, workerID 2, groupID 0, ResourceSVCs.DistributedRole: dist-worker
+2022/06/03 20:12:16 master.go:347: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.WorkerId: 0
+2022/06/03 20:12:16 master.go:348: [Master.extractResourceInfo] party 1, workerID 0, groupID 0
+2022/06/03 20:12:16 master.go:349: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/06/03 20:12:16 master.go:350: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.WorkerPort: 22058
+2022/06/03 20:12:16 master.go:351: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22062 22063 22064]
+2022/06/03 20:12:16 master.go:352: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.MpcMpcPort: 22066
+2022/06/03 20:12:16 master.go:353: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.MpcExecutorPort: 50000
+2022/06/03 20:12:16 master.go:354: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.ExecutorPSPort: 0
+2022/06/03 20:12:16 master.go:355: [Master.extractResourceInfo] party 1, workerID 0, groupID 0, ResourceSVCs.DistributedRole: dist-ps
+2022/06/03 20:12:16 master.go:342: [Master.extractResourceInfo] party 2 PartyID: 2
+2022/06/03 20:12:16 master.go:343: [Master.extractResourceInfo] party 2 ResourceNum: 3
+2022/06/03 20:12:16 master.go:344: [Master.extractResourceInfo] party 2 ResourceNumPreGroup: 3
+2022/06/03 20:12:16 master.go:347: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.WorkerId: 1
+2022/06/03 20:12:16 master.go:348: [Master.extractResourceInfo] party 2, workerID 1, groupID 0
+2022/06/03 20:12:16 master.go:349: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/06/03 20:12:16 master.go:350: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.WorkerPort: 22109
+2022/06/03 20:12:16 master.go:351: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22110 22111 22112]
+2022/06/03 20:12:16 master.go:352: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.MpcMpcPort: 22117
+2022/06/03 20:12:16 master.go:353: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.MpcExecutorPort: 50100
+2022/06/03 20:12:16 master.go:354: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.ExecutorPSPort: 22119
+2022/06/03 20:12:16 master.go:355: [Master.extractResourceInfo] party 2, workerID 1, groupID 0, ResourceSVCs.DistributedRole: dist-worker
+2022/06/03 20:12:16 master.go:347: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.WorkerId: 2
+2022/06/03 20:12:16 master.go:348: [Master.extractResourceInfo] party 2, workerID 2, groupID 0
+2022/06/03 20:12:16 master.go:349: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/06/03 20:12:16 master.go:350: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.WorkerPort: 22121
+2022/06/03 20:12:16 master.go:351: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22123 22124 22125]
+2022/06/03 20:12:16 master.go:352: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.MpcMpcPort: 22126
+2022/06/03 20:12:16 master.go:353: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.MpcExecutorPort: 50200
+2022/06/03 20:12:16 master.go:354: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.ExecutorPSPort: 22130
+2022/06/03 20:12:16 master.go:355: [Master.extractResourceInfo] party 2, workerID 2, groupID 0, ResourceSVCs.DistributedRole: dist-worker
+2022/06/03 20:12:16 master.go:347: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.WorkerId: 0
+2022/06/03 20:12:16 master.go:348: [Master.extractResourceInfo] party 2, workerID 0, groupID 0
+2022/06/03 20:12:16 master.go:349: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.ResourceIP: 127.0.0.1
+2022/06/03 20:12:16 master.go:350: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.WorkerPort: 22096
+2022/06/03 20:12:16 master.go:351: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.ExecutorExecutorPort: [22097 22098 22099]
+2022/06/03 20:12:16 master.go:352: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.MpcMpcPort: 22103
+2022/06/03 20:12:16 master.go:353: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.MpcExecutorPort: 50000
+2022/06/03 20:12:16 master.go:354: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.ExecutorPSPort: 0
+2022/06/03 20:12:16 master.go:355: [Master.extractResourceInfo] party 2, workerID 0, groupID 0, ResourceSVCs.DistributedRole: dist-ps
+2022/06/03 20:12:16 master.go:359: [Master.extractResourceInfo] requiredWorkers is  map[0:map[0:false 1:false 2:false] 1:map[0:false 1:false 2:false] 2:map[0:false 1:false 2:false]]
+2022/06/03 20:12:16 master.go:360: [Master.extractResourceInfo] executorPairIps is  map[0:[127.0.0.1 127.0.0.1 127.0.0.1] 1:[127.0.0.1 127.0.0.1 127.0.0.1] 2:[127.0.0.1 127.0.0.1 127.0.0.1]]
+2022/06/03 20:12:16 master.go:361: [Master.extractResourceInfo] executorPairsPorts is  map[0:[[22020 22021 22022] [22062 22063 22064] [22097 22098 22099]] 1:[[22038 22039 22040] [22076 22077 22078] [22110 22111 22112]] 2:[[22050 22051 22052] [22085 22086 22087] [22123 22124 22125]]]
+2022/06/03 20:12:16 master.go:362: [Master.extractResourceInfo] mpcPairsPorts is  map[0:[22030 22066 22103] 1:[22042 22080 22117] 2:[22054 22091 22126]]
+2022/06/03 20:12:16 master.go:363: [Master.extractResourceInfo] mpcExecutorPorts workerID:[partyPort...] is  map[0:[50000 50000 50000] 1:[50100 50100 50100] 2:[50200 50200 50200]]
+2022/06/03 20:12:16 master.go:364: [Master.extractResourceInfo] distPsIp is  map[0:map[0:127.0.0.1] 1:map[0:127.0.0.1] 2:map[0:127.0.0.1]]
+2022/06/03 20:12:16 master.go:365: [Master.extractResourceInfo] distWorkerIps is  map[0:map[0:[127.0.0.1 127.0.0.1]] 1:map[0:[127.0.0.1 127.0.0.1]] 2:map[0:[127.0.0.1 127.0.0.1]]]
+2022/06/03 20:12:16 master.go:368: [Master.extractResourceInfo] mpcPairNetworkCfg workerID:partyMpcMpcAddrs is is  map[0:127.0.0.1:22030
+127.0.0.1:22066
+127.0.0.1:22103 1:127.0.0.1:22042
+127.0.0.1:22080
+127.0.0.1:22117 2:127.0.0.1:22054
+127.0.0.1:22091
+127.0.0.1:22126]
+2022/06/03 20:12:16 master.go:369: [Master.extractResourceInfo] executorPairNetworkCfg workerID:b64_Str is  map[0:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCYSsAYWsAYasARILCgmurAGvrAGwrAESCwoJ0awB0qwB06wBGgsKCdCGA9CGA9CGAw== 1:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCZasAZesAZisARILCgm8rAG9rAG+rAESCwoJ3qwB36wB4KwBGgsKCbSHA7SHA7SHAw== 2:CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCaKsAaOsAaSsARILCgnFrAHGrAHHrAESCwoJ66wB7KwB7awBGgsKCZiIA5iIA5iIAw==]
+2022/06/03 20:12:16 master.go:370: [Master.extractResourceInfo] mpcExecutorNetworkCfg workerID:[partyMpcExecutorPort...] is  map[0:[50000 50000 50000] 1:[50100 50100 50100] 2:[50200 50200 50200]]
+2022/06/03 20:12:16 master.go:371: [Master.extractResourceInfo] distributedNetworkCfg partyID:b64_Str is  map[0:map[0:Cg8KCTEyNy4wLjAuMRCcrAEKDwoJMTI3LjAuMC4xEKisARIPCgkxMjcuMC4wLjEQj6wBEg8KCTEyNy4wLjAuMRCQrAE=] 1:map[0:Cg8KCTEyNy4wLjAuMRDBrAEKDwoJMTI3LjAuMC4xEM2sARIPCgkxMjcuMC4wLjEQtawBEg8KCTEyNy4wLjAuMRC2rAE=] 2:map[0:Cg8KCTEyNy4wLjAuMRDnrAEKDwoJMTI3LjAuMC4xEPKsARIPCgkxMjcuMC4wLjEQ2awBEg8KCTEyNy4wLjAuMRDarAE=]]
+2022/06/03 20:12:16 master.go:373: [Master.extractResourceInfo] -----done with checking configurations-----
+2022/06/03 20:12:16 job-manager.go:255: [JobManager] master received all partyServer's reply
+2022/06/03 20:12:16 job-manager.go:258: [JobManager] master wait here until stage finish
+2022/06/03 20:12:16 master.go:120: [Master.forwardRegistrations]: start forwardRegistrations... 
+2022/06/03 20:20:11 master.go:105: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22083",
+	"PartyID": 1,
+	"WorkerID": 2,
+	"GroupID": 0
+}
+2022/06/03 20:20:25 master.go:105: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22019",
+	"PartyID": 0,
+	"WorkerID": 0,
+	"GroupID": 0
+}
+2022/06/03 20:20:36 master.go:105: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22109",
+	"PartyID": 2,
+	"WorkerID": 1,
+	"GroupID": 0
+}
+2022/06/03 20:20:36 master.go:105: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22033",
+	"PartyID": 0,
+	"WorkerID": 1,
+	"GroupID": 0
+}
+2022/06/03 20:20:40 master.go:105: [master.RegisterWorker] one Worker registered! args: {
+	"Addr": "127.0.0.1:22049",
+	"PartyID": 0,
+	"WorkerID": 2,
+	"GroupID": 0
+}
+2022/06/03 20:21:29 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:21:33 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:21:37 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:21:41 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:21:45 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:21:51 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:21:55 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:21:59 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:22:03 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:22:07 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:22:13 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:22:17 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:22:21 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:22:25 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:22:29 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:22:35 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:22:39 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:22:43 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:22:47 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:22:51 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:22:57 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:23:01 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:23:05 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:23:09 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:23:13 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:23:19 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:23:23 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:23:27 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:23:31 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:23:35 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:23:41 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:23:45 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:23:49 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:23:53 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:23:57 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:24:03 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:24:07 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:24:11 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:24:15 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:24:19 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:24:25 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:24:29 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:24:33 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:24:37 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:24:41 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:24:47 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:24:51 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:24:55 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:24:59 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:25:03 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:25:09 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:25:13 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:25:17 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:25:21 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:25:25 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:25:31 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:25:35 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:25:39 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:25:43 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:25:47 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:25:53 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:25:57 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:26:01 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:26:05 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:26:09 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:26:15 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:26:19 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:26:23 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:26:27 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:26:31 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:26:37 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:26:41 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:26:45 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:26:49 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:26:53 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:26:59 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:27:03 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:27:07 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:27:11 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:27:15 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:27:21 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:27:25 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:27:29 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:27:33 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:27:37 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:27:43 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:27:47 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:27:51 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:27:55 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:27:59 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:28:05 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:28:09 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:28:13 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:28:17 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:28:21 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:28:27 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:28:31 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:28:35 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:28:39 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:28:43 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:28:49 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:28:53 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:28:57 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:29:01 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:29:05 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:29:11 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:29:15 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:29:19 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:29:23 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:29:27 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:29:33 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:29:37 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:29:41 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:29:45 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:29:49 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:29:55 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:29:59 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:30:03 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:30:07 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:30:11 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:30:17 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:30:21 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:30:25 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:30:29 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:30:33 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:30:39 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:30:43 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:30:47 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:30:51 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:30:55 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:31:01 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:31:05 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:31:09 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:31:13 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:31:17 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:31:23 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:31:27 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:31:31 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:31:35 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:31:39 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:31:45 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:31:49 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:31:53 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:31:57 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:32:01 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:32:07 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:32:11 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:32:15 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:32:19 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:32:23 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:32:29 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:32:33 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:32:37 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:32:41 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:32:45 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:32:51 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:32:55 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:32:59 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:33:03 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:33:07 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:33:13 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:33:17 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:33:21 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:33:25 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:33:29 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:33:35 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:33:39 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:33:43 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:33:47 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:33:51 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:33:57 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:34:01 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:34:05 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:34:09 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:34:13 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:34:19 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:34:23 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:34:27 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:34:31 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:34:35 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:34:41 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:34:45 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error
+2022/06/03 20:34:49 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22109 send heartbeat error
+2022/06/03 20:34:53 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22033 send heartbeat error
+2022/06/03 20:34:57 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22049 send heartbeat error
+2022/06/03 20:35:03 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22083 send heartbeat error
+2022/06/03 20:35:07 master_heartbeat.go:59: [Master.Heartbeat] RPC 127.0.0.1:22019 send heartbeat error

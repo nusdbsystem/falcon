@@ -1,0 +1,45 @@
+Log file created at: 2022/06/03 14:22:28
+Running on machine: xnl
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I0603 14:22:28.281651   831 main.cc:98] Init log file.
+I0603 14:22:28.281966   831 logger.cc:11] -------- parse parameters correct --------
+I0603 14:22:28.282047   831 logger.cc:11] party-id: 1
+I0603 14:22:28.282127   831 logger.cc:11] party-num: 3
+I0603 14:22:28.282205   831 logger.cc:11] fl-setting: 1
+I0603 14:22:28.282279   831 logger.cc:11] existing-key: 1
+I0603 14:22:28.282308   831 logger.cc:11] network-file: CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCYOsAYSsAYWsARILCgmIrAGJrAGKrAESCwoJjawBjqwBj6wBGgsKCbCAA7CAA7CAAw==
+I0603 14:22:28.282325   831 logger.cc:11] log-file: /opt/falcon/src/falcon_platform/falcon_logs/Party-1_20220603_205617/runtime_logs/pty1-cent-worker2-job2-tr-pred-task-stage-lime_compute_prediction/worker
+I0603 14:22:28.282346   831 logger.cc:11] data-input-file: /dataPath/client.txt
+I0603 14:22:28.282362   831 logger.cc:11] data-output-file: /dataOutputPath
+I0603 14:22:28.282382   831 logger.cc:11] key-file: /dataPath/phe_keys
+I0603 14:22:28.282414   831 logger.cc:11] algorithm-name: lime_compute_prediction
+I0603 14:22:28.282452   831 logger.cc:11] model-save-file: /modelPath/saved_model.pb
+I0603 14:22:28.282466   831 logger.cc:11] model-report-file: /modelPath/report.txt
+I0603 14:22:28.282485   831 logger.cc:11] is-inference: 0
+I0603 14:22:28.282497   831 logger.cc:11] inference-endpoint: 0
+I0603 14:22:28.282519   831 logger.cc:11] is-distributed: 0
+I0603 14:22:28.282536   831 logger.cc:11] distributed-train-network-file: 0
+I0603 14:22:28.282574   831 logger.cc:11] worker-id: 0
+I0603 14:22:28.282588   831 logger.cc:11] distributed-role: 2
+I0603 14:22:28.298300   831 logger.cc:11] local_data is reading dataset from: /dataPath/client.txt
+I0603 14:22:28.298331   831 logger.cc:11] sample_num = 4521
+I0603 14:22:28.298348   831 logger.cc:11] feature_num = 5
+I0603 14:22:28.298360   831 logger.cc:11] Parse algorithm name and run the program
+I0603 14:22:28.298596   831 logger.cc:11] mpc_port_array_size = 3
+I0603 14:22:28.298612   831 logger.cc:11] size of ip address = 3
+I0603 14:22:28.298645   831 logger.cc:11] ips[0] = 127.0.0.1
+I0603 14:22:28.298679   831 logger.cc:11] port_array[0][0] = 22019
+I0603 14:22:28.298696   831 logger.cc:11] port_array[0][1] = 22020
+I0603 14:22:28.298705   831 logger.cc:11] port_array[0][2] = 22021
+I0603 14:22:28.298717   831 logger.cc:11] ips[1] = 127.0.0.1
+I0603 14:22:28.298727   831 logger.cc:11] port_array[1][0] = 22024
+I0603 14:22:28.298739   831 logger.cc:11] port_array[1][1] = 22025
+I0603 14:22:28.298750   831 logger.cc:11] port_array[1][2] = 22026
+I0603 14:22:28.298763   831 logger.cc:11] ips[2] = 127.0.0.1
+I0603 14:22:28.298774   831 logger.cc:11] port_array[2][0] = 22029
+I0603 14:22:28.298787   831 logger.cc:11] port_array[2][1] = 22030
+I0603 14:22:28.298799   831 logger.cc:11] port_array[2][2] = 22031
+I0603 14:22:28.298813   831 logger.cc:11] executor_mpc_ports[0] = 49200
+I0603 14:22:28.298827   831 logger.cc:11] executor_mpc_ports[1] = 49200
+I0603 14:22:28.298840   831 logger.cc:11] executor_mpc_ports[2] = 49200
+I0603 14:22:28.298854   831 logger.cc:11] Establish network communications with other parties

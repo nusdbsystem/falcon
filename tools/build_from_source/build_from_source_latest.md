@@ -215,17 +215,12 @@ export PATH=/root/.local/bin:$PATH
 ## 13. Replace protoc version
 
 ```bash
-cp ~/.local/bin/protoc /usr/bin/ && \
-    cd /opt/falcon/src/executor/include/proto && \
-    SRC_DIR=v0/ && \
-    DST_DIR=../message && \
-    protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/*.proto
+cp ~/.local/bin/protoc /usr/bin/
 ```
 
 ## 14. Generate proto
 ```bash
- cp ~/.local/bin/protoc /usr/bin/ && \
-    cd /opt/falcon/src/executor/include/proto && \
+cd /opt/falcon/src/executor/include/proto && \
     SRC_DIR=v0/ && \
     DST_DIR=../message && \
     protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/*.proto
@@ -235,6 +230,7 @@ cp ~/.local/bin/protoc /usr/bin/ && \
 ## 15. build 
 ```bash
 cd /opt/falcon
+rm -rf build
 export PATH="$PATH:$HOME/.local/bin" && \
     mkdir build && \
     cmake -Bbuild -H. && \
