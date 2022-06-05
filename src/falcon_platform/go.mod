@@ -21,6 +21,7 @@ require (
 	gorm.io/driver/mysql v1.0.3
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.21.10
+	gotest.tools v2.2.0+incompatible
 	k8s.io/apimachinery v0.20.6
 	k8s.io/client-go v0.20.6
 )

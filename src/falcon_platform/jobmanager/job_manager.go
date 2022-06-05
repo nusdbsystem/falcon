@@ -166,7 +166,7 @@ func manageTaskLifeCycle(job common.TrainJob, workerType string, taskName common
 	masterAddr := common.CoordIP + ":" + fmt.Sprintf("%d", masterPort)
 
 	// update distributed information
-	if assignedWorker == 1 {
+	if assignedWorker <= 2 {
 		// if assignedWorker = 1 disable distributed
 		job.DistributedTask.Enable = 0
 	} else {

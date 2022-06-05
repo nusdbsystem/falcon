@@ -43,7 +43,7 @@ func RunWorker(masterAddr, workerType,
 		" workerNum = ", workerNum, "TaskClassIDName=", TaskClassIDName)
 
 	// centralized way
-	if workerNum == 1 {
+	if workerNum <= 2 {
 		logger.Log.Println("[PartyServer]: PartyServer setup one worker for centralized training")
 
 		// in centralized way, to avoid schedule worker to fixed server every time, use jobId
@@ -84,7 +84,7 @@ func RunWorker(masterAddr, workerType,
 	}
 
 	// in distributed way, currently, only support using docker, others could be added later
-	if workerNum > 1 {
+	if workerNum > 2 {
 
 		// ps is always at workerID = 0
 		var workerId common.WorkerIdType = 0
