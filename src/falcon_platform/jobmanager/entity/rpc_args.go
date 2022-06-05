@@ -5,7 +5,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"falcon_platform/common"
-	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/logger"
 	"fmt"
 	"strconv"
@@ -56,7 +55,7 @@ type RetrieveModelReportReply struct {
 
 type TaskContext struct {
 	TaskName     common.FalconTask
-	FLNetworkCfg *comms_pattern.JobNetworkConfig
+	FLNetworkCfg string // encoded JobNetworkConfig
 	Job          *common.TrainJob
 	Wk           *WorkerInfo
 	MpcAlgName   string
@@ -69,11 +68,6 @@ func MarshalStatus(trainStatuses *DoTaskReply) string {
 		logger.Log.Fatalln(e)
 	}
 	return string(jb)
-}
-
-func ArgTypeRegister() {
-	gob.Register([]interface{}{})
-	gob.Register(map[string]interface{}{})
 }
 
 func EncodeWorkerInfo(args *WorkerInfo) string {
@@ -99,6 +93,19 @@ func DecodeWorkerInfo(encodedStr string) *WorkerInfo {
 	args.PartyID = common.PartyIdType(tmpPartyID)
 	args.WorkerID = common.WorkerIdType(tmpWorkerID)
 	return args
+}
+
+func ArgTypeRegister() {
+	gob.Register([]interface{}{})
+	gob.Register(map[string]interface{}{})
+	gob.Register(common.PreProcessTask{})
+	gob.Register(common.ModelTrainTask{})
+	gob.Register(common.LimeInsSampleTask{})
+	gob.Register(common.LimePredTask{})
+	gob.Register(common.LimeWeightTask{})
+	gob.Register(common.LimeFeatureTask{})
+	gob.Register(common.LimeInterpretTask{})
+
 }
 
 func SerializeTask(args *TaskContext) []byte {

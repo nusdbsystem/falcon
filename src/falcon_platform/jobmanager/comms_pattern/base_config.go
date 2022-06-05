@@ -7,7 +7,7 @@ import (
 
 // PartyNetworkConfig of each party
 type PartyNetworkConfig interface {
-	Constructor(partyNum int, workerId common.WorkerIdType, taskClassIDName string, role int, workerNum int) PartyNetworkConfig
+	Constructor(partyNum int, workerId common.WorkerIdType, taskClassIDName string, role int, workerNum int) []byte
 }
 
 // JobNetworkConfig for each job
@@ -19,4 +19,7 @@ type JobNetworkConfig interface {
 
 	//GetRequiredWorkers each job has a required workers, labelled with partyID-workerID.
 	GetRequiredWorkers() map[common.PartyIdType]map[common.WorkerIdType]bool
+
+	// SerializeNetworkCfg serialize this instance
+	SerializeNetworkCfg() string
 }

@@ -1,7 +1,9 @@
 package comms_pattern
 
 import (
+	"bytes"
 	b64 "encoding/base64"
+	"encoding/gob"
 	"falcon_platform/common"
 	v0 "falcon_platform/common/proto/v0"
 	"falcon_platform/logger"
@@ -43,7 +45,7 @@ type FLNetworkCfgPerParty struct {
 }
 
 func (this *FLNetworkCfgPerParty) Constructor(partyNum int, workerId common.WorkerIdType, taskClassIDName string,
-	role int, workerNum int) PartyNetworkConfig {
+	role int, workerNum int) []byte {
 
 	newCfg := new(FLNetworkCfgPerParty)
 
@@ -55,7 +57,7 @@ func (this *FLNetworkCfgPerParty) Constructor(partyNum int, workerId common.Work
 		newCfg.PsExecutorPorts = []common.PortType{}
 		//resourceSVC.PsPsPorts = []common.PortType{}
 		newCfg.DistributedRole = common.CentralizedWorker
-		return newCfg
+		return EncodeFLNetworkCfgPerParty(newCfg)
 	}
 
 	if role == common.DistributedParameterServer {
@@ -65,7 +67,7 @@ func (this *FLNetworkCfgPerParty) Constructor(partyNum int, workerId common.Work
 		newCfg.ExecutorPSPort = 0
 		newCfg.PsExecutorPorts = resourcemanager.GetFreePort(workerNum - 1)
 		newCfg.DistributedRole = common.DistributedParameterServer
-		return newCfg
+		return EncodeFLNetworkCfgPerParty(newCfg)
 	}
 
 	if role == common.DistributedWorker {
@@ -75,7 +77,7 @@ func (this *FLNetworkCfgPerParty) Constructor(partyNum int, workerId common.Work
 		newCfg.ExecutorPSPort = resourcemanager.GetOneFreePort()
 		newCfg.PsExecutorPorts = []common.PortType{}
 		newCfg.DistributedRole = common.DistributedWorker
-		return newCfg
+		return EncodeFLNetworkCfgPerParty(newCfg)
 	}
 	panic("Generatt FLNetworkCfgPerParty fail, role not match any ")
 }
@@ -153,7 +155,7 @@ func (this *FLNetworkCfg) Constructor(encodeStr [][]byte, PartyNums uint, masLog
 			for workerID, ResourceSVC := range PartyRunWorkerReply.ResourceSVCs {
 				if orderedWorkId == int(workerID) {
 
-					flConfig := ResourceSVC.JobNetCfg.(*FLNetworkCfgPerParty)
+					flConfig := DecodeFLNetworkCfgPerParty(ResourceSVC.JobNetCfg)
 
 					// store role of each worker
 					if _, ok := this.WorkerRole[partyID][workerID]; !ok {
@@ -271,15 +273,15 @@ func (this *FLNetworkCfg) Constructor(encodeStr [][]byte, PartyNums uint, masLog
 		masLogger.Printf("[Master.extractResourceInfo] party %d ResourceNum: %d", i, requiredResource[i].ResourceNum)
 
 		for workerID, svc := range requiredResource[i].ResourceSVCs {
-			flConfig := svc.JobNetCfg.(*FLNetworkCfgPerParty)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.WorkerId: %d", i, workerID, svc, svc.WorkerId)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d", i, workerID, svc)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ResourceIP: %s", i, workerID, svc, svc.ResourceIP)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.WorkerPort: %d", i, workerID, svc, svc.WorkerPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorExecutorPort: %d", i, workerID, svc, flConfig.ExecutorExecutorPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcMpcPort: %d", i, workerID, svc, flConfig.MpcMpcPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcExecutorPort: %d", i, workerID, svc, flConfig.MpcExecutorPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorPSPort: %d", i, workerID, svc, flConfig.ExecutorPSPort)
+			flConfig := DecodeFLNetworkCfgPerParty(svc.JobNetCfg)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.WorkerId: %d\n", i, workerID, svc, svc.WorkerId)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d\n", i, workerID, svc)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ResourceIP: %s\n", i, workerID, svc, svc.ResourceIP)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.WorkerPort: %d\n", i, workerID, svc, svc.WorkerPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorExecutorPort: %d\n", i, workerID, svc, flConfig.ExecutorExecutorPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcMpcPort: %d\n", i, workerID, svc, flConfig.MpcMpcPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcExecutorPort: %d\n", i, workerID, svc, flConfig.MpcExecutorPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorPSPort: %d\n", i, workerID, svc, flConfig.ExecutorPSPort)
 			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.DistributedRole: %s\n", i, workerID, svc, common.DistributedRoleToName(flConfig.DistributedRole))
 		}
 	}
@@ -313,6 +315,17 @@ func (this *FLNetworkCfg) GetPartyIdToIndex() map[common.PartyIdType]int {
 
 func (this *FLNetworkCfg) GetRequiredWorkers() map[common.PartyIdType]map[common.WorkerIdType]bool {
 	return this.RequiredWorkers
+}
+
+func (this *FLNetworkCfg) SerializeNetworkCfg() string {
+	argTypeRegister()
+	var buff bytes.Buffer
+	var encoder = gob.NewEncoder(&buff)
+	if err := encoder.Encode(&this); err != nil {
+		panic(err)
+	}
+	converted := buff.Bytes()
+	return string(converted)
 }
 
 // generate network config for executor-parameter server communication
@@ -460,4 +473,18 @@ func retrieveNetworkConfig(a string) {
 	logger.Log.Println("[retrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays", cfg.ExecutorExecutorPortArrays)
 	logger.Log.Println("[retrieveNetworkConfig]: cfg.ExecutorMpcPortArray", cfg.ExecutorMpcPortArray)
 
+}
+
+func argTypeRegister() {
+	gob.Register([]interface{}{})
+	gob.Register(map[string]interface{}{})
+}
+
+func DeserializeFLNetworkCfg(by []byte) (*FLNetworkCfg, error) {
+	argTypeRegister()
+	reader := bytes.NewReader(by)
+	var decoder = gob.NewDecoder(reader)
+	var d FLNetworkCfg
+	err := decoder.Decode(&d)
+	return &d, err
 }

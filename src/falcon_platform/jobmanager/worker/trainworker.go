@@ -122,7 +122,7 @@ func (wk *TrainWorker) runTask(task tasks.Task, taskArg *entity.TaskContext) {
 	if common.IsDebug != common.DebugOn {
 		wk.Tm.CreateResources(resourcemanager.InitSubProcessManager(), cmd)
 	} else {
-		time.Sleep(10 * time.Minute)
+		time.Sleep(10 * time.Second)
 	}
 }
 
@@ -130,7 +130,7 @@ func (wk *TrainWorker) RunMpc(args string, rep *entity.DoTaskReply) error {
 
 	taskArg, err := entity.DeserializeTask([]byte(args))
 	if err != nil {
-		panic("Parser doTask args fails")
+		panic(err)
 	}
 	var taskName common.FalconTask = taskArg.TaskName
 	if taskName != common.MpcTaskKey {

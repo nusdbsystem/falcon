@@ -46,7 +46,12 @@ type LimeFeatureTask struct {
 func (this *LimeFeatureTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 
 	wk := taskInfo.Wk
-	fLConfig := (*taskInfo.FLNetworkCfg).(*comms_pattern.FLNetworkCfg)
+
+	fLConfig, err := comms_pattern.DeserializeFLNetworkCfg([]byte(taskInfo.FLNetworkCfg))
+	if err != nil {
+		panic("Decode task error")
+	}
+
 	job := taskInfo.Job
 
 	this.printParams(job.Tasks.LimeFeature.AlgorithmName, job)

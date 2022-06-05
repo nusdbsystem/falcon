@@ -191,7 +191,7 @@ func manageTaskLifeCycle(job common.TrainJob, workerType string, taskName common
 	}
 
 	// partyServer reply to jobManager-master after deploying resources.
-	var requiredResource [][]byte
+	var requiredResource = make([][]byte, len(job.PartyAddrList))
 	// default use only 1 worker in centralized way.
 	// in distributed training/inference, each party will launch multiple workers, and default use only 1 ps
 	// master will call party server's endpoint to launch worker, to train or predict

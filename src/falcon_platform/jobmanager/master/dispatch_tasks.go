@@ -22,7 +22,7 @@ func (master *Master) dispatchMpcTask(wg *sync.WaitGroup, mpcAlgorithmName strin
 
 			generalTask := &entity.TaskContext{TaskName: common.MpcTaskKey,
 				Wk:           wk,
-				FLNetworkCfg: &master.JobNetCfg,
+				FLNetworkCfg: master.JobNetCfg.SerializeNetworkCfg(),
 				Job:          job,
 				MpcAlgName:   mpcAlgorithmName,
 			}
@@ -46,7 +46,7 @@ func (master *Master) dispatchTask(wg *sync.WaitGroup, taskName common.FalconTas
 			// master send this to each worker, and worker will use it to generate command line.
 			generalTask := &entity.TaskContext{TaskName: taskName,
 				Wk:           wk,
-				FLNetworkCfg: &master.JobNetCfg,
+				FLNetworkCfg: master.JobNetCfg.SerializeNetworkCfg(),
 				Job:          job}
 
 			args := string(entity.SerializeTask(generalTask))

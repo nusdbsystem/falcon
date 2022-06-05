@@ -105,7 +105,7 @@ func (rm *ResourceManager) DeleteResources() {
 	logger.Log.Printf("[ResourceManager]: DeleteResources done")
 }
 
-// once release, ResourceManager can not delete it by calling rm.clearResource()
+// ReleaseResources once release  can not delete it by calling rm.clearResource()
 func (rm *ResourceManager) ReleaseResources() {
 	logger.Log.Printf("[ResourceManager]: Release Resources, can not delete resources")
 	rm.releaseResource()

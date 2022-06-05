@@ -49,7 +49,10 @@ func (this *LimeInterpretTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cm
 	wk := taskInfo.Wk
 	job := taskInfo.Job
 
-	fLConfig := (*taskInfo.FLNetworkCfg).(*comms_pattern.FLNetworkCfg)
+	fLConfig, err := comms_pattern.DeserializeFLNetworkCfg([]byte(taskInfo.FLNetworkCfg))
+	if err != nil {
+		panic("Decode task error")
+	}
 
 	this.printParams(job.Tasks.LimeInterpret.AlgorithmName, job)
 

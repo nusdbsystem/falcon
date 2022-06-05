@@ -47,7 +47,10 @@ type LimeSampleTask struct {
 func (this *LimeSampleTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 
 	wk := taskInfo.Wk
-	fLConfig := (*taskInfo.FLNetworkCfg).(*comms_pattern.FLNetworkCfg)
+	fLConfig, err := comms_pattern.DeserializeFLNetworkCfg([]byte(taskInfo.FLNetworkCfg))
+	if err != nil {
+		panic("Decode task error")
+	}
 	job := taskInfo.Job
 
 	this.printParams(job.Tasks.LimeInsSample.AlgorithmName, job)

@@ -31,7 +31,7 @@ type ResourceSVC struct {
 	// Each worker's port, listen master's requests
 	WorkerPort common.PortType
 	// network config pattern for a specific job.
-	JobNetCfg PartyNetworkConfig
+	JobNetCfg []byte
 }
 
 func (rs *ResourceSVC) ToAddr(port common.PortType) (address string) {
@@ -43,9 +43,7 @@ type RunWorkerReply struct {
 }
 
 func EncodePartyRunWorkerReply(args *PartyRunWorkerReply) []byte {
-
 	var buff bytes.Buffer
-
 	var encoder = gob.NewEncoder(&buff)
 
 	if err := encoder.Encode(args); err != nil {
@@ -59,6 +57,28 @@ func DecodePartyRunWorkerReply(by []byte) *PartyRunWorkerReply {
 	reader := bytes.NewReader(by)
 	var decoder = gob.NewDecoder(reader)
 	var d PartyRunWorkerReply
+	err := decoder.Decode(&d)
+	if err != nil {
+		panic(err)
+	}
+	return &d
+}
+
+func EncodeFLNetworkCfgPerParty(args *FLNetworkCfgPerParty) []byte {
+	var buff bytes.Buffer
+	var encoder = gob.NewEncoder(&buff)
+
+	if err := encoder.Encode(args); err != nil {
+		panic(err)
+	}
+	converted := buff.Bytes()
+	return converted
+}
+
+func DecodeFLNetworkCfgPerParty(by []byte) *FLNetworkCfgPerParty {
+	reader := bytes.NewReader(by)
+	var decoder = gob.NewDecoder(reader)
+	var d FLNetworkCfgPerParty
 	err := decoder.Decode(&d)
 	if err != nil {
 		panic(err)

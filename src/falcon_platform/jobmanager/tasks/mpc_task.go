@@ -44,7 +44,10 @@ type MpcTask struct {
 func (this *MpcTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 
 	wk := taskInfo.Wk
-	fLConfig := (*taskInfo.FLNetworkCfg).(*comms_pattern.FLNetworkCfg)
+	fLConfig, err := comms_pattern.DeserializeFLNetworkCfg([]byte(taskInfo.FLNetworkCfg))
+	if err != nil {
+		panic("Decode task error")
+	}
 	//job := taskInfo.Job
 
 	partyId := strconv.Itoa(int(wk.PartyID))
