@@ -61,11 +61,16 @@ class MlpBuilder : public ModelBuilder {
   // decay rate for learning rate, following lr = lr0 / (1 + decay*t),
   // t is #iteration
   double decay{};
-  // penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
+  // penalty method, default l2, currently only support 'l2'
   std::string penalty;
   // optimization method, default 'sgd', currently support 'sgd'
   std::string optimizer;
-  // evaluation metric for training and testing, 'mse'
+  // evaluation metric for training and testing, note that
+  // the loss metric and activation function of the output layer
+  // need to be matched:
+  // (1) sigmoid and binary cross entropy;
+  // (2) softmax and categorical cross entropy;
+  // (3) identity with squared loss.
   std::string metric;
   // differential privacy (DP) budget, 0 denotes not use DP
   double dp_budget{};
@@ -123,9 +128,8 @@ class MlpBuilder : public ModelBuilder {
    * @param predicted_labels: the predicted labels
    * @param batch_indexes: the selected batch indexes
    * @param precision: the precision for the batch samples
-   * @param layer_activation_shares: layers' activation shares of batch samples
-   * @param layer_deriv_activation_shares: layers' derivative activation shares of batch samples
-   * @param deltas: the predicted loss at the last layer
+   * @param activation_shares: layers' activation shares of batch samples
+   * @param deriv_activation_shares: layers' derivative activation shares of batch samples
    */
   void backward_computation(
       const Party& party,
@@ -133,18 +137,73 @@ class MlpBuilder : public ModelBuilder {
       EncodedNumber** predicted_labels,
       const std::vector<int>& batch_indexes,
       int precision,
-      TripleDVec& layer_activation_shares,
-      TripleDVec& layer_deriv_activation_shares,
-      EncodedNumber* deltas);
+      const TripleDVec& activation_shares,
+      const TripleDVec& deriv_activation_shares);
+
+  /**
+   * compute the delta of the last layer (i.e., output layer)
+   *
+   * @param party: initialized party object
+   * @param predicted_labels: the predicted labels
+   * @param deltas: the deviations
+   * @param last_layer_activation_shares: the last layer activation shares
+   */
+  void compute_last_layer_delta(
+      const Party& party,
+      EncodedNumber** predicted_labels,
+      std::vector<EncodedNumber**>& deltas,
+      const std::vector<std::vector<double>>& last_layer_activation_shares);
+
+  /**
+   * compute the gradients of a layer
+   *
+   * @param party: initialized party object
+   * @param layer_idx: the index of the layer
+   * @param sample_size: number of samples in a batch
+   * @param activation_shares: the activation shares
+   * @param deriv_activation_shares: the derivative activation shares
+   * @param deltas: the deviations
+   * @param weight_grads: the weight gradients of the layers
+   * @param bias_grads: the bias gradients of the layers
+   */
+  void compute_loss_grad(
+      const Party& party,
+      int layer_idx,
+      int sample_size,
+      const TripleDVec& activation_shares,
+      const TripleDVec& deriv_activation_shares,
+      std::vector<EncodedNumber**>& deltas,
+      std::vector<EncodedNumber**>& weight_grads,
+      std::vector<EncodedNumber*>& bias_grads);
+
+  /**
+   * update the delta of a layer
+   *
+   * @param party: initialized party object
+   * @param layer_idx: the index of the layer
+   * @param sample_size: number of samples in a batch
+   * @param activation_shares: the activation shares
+   * @param deriv_activation_shares: the derivative activation shares
+   * @param deltas: the deviations
+   */
+  void update_layer_delta(
+      const Party& party,
+      int layer_idx,
+      int sample_size,
+      const TripleDVec& activation_shares,
+      const TripleDVec& deriv_activation_shares,
+      std::vector<EncodedNumber**>& deltas);
 
   /**
    * layer-by-layer update weights
    *
    * @param party: initialized party object
-   * @param deltas: the predicted loss at the last layer
+   * @param weight_grads: the gradients of weights each neuron of each layer
+   * @param bias_grads: the gradients of intercept in each neuron of each layer
    */
-  void update_encrypted_weights(Party& party,
-                                EncodedNumber* deltas);
+  void update_encrypted_weights(const Party& party,
+                                const std::vector<EncodedNumber**>& weight_grads,
+                                const std::vector<EncodedNumber*>& bias_grads);
 
   /**
    * train an mlp model

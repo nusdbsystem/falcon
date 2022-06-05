@@ -47,11 +47,10 @@ Neuron::~Neuron() {
   delete [] m_weights;
 }
 
-void Neuron::init_encrypted_weights(const Party &party, int precision) {
+void Neuron::init_encrypted_weights(const Party &party, double limit, int precision) {
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
-  double limit = sqrt(2.0 / (double) m_num_inputs);
   std::mt19937 mt(RANDOM_SEED);
   std::uniform_real_distribution<double> dist(-limit, limit);
   std::vector<double> plain_rand_weights;

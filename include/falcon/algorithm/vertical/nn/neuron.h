@@ -55,9 +55,10 @@ class Neuron {
    * initialize encrypted local weights
    *
    * @param party: initialized party object
+   * @param limit: assist to generate random weights
    * @param precision: precision for big integer representation EncodedNumber
    */
-  void init_encrypted_weights(const Party& party, int precision);
+  void init_encrypted_weights(const Party& party, double limit, int precision);
 
   /**
     * compute phe aggregation for a batch of samples

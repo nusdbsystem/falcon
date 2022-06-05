@@ -92,13 +92,94 @@ void MlpBuilder::backward_computation(
     EncodedNumber **predicted_labels,
     const std::vector<int> &batch_indexes,
     int precision,
-    TripleDVec& layer_activation_shares,
-    TripleDVec& layer_deriv_activation_shares,
-    EncodedNumber *deltas) {
+    const TripleDVec& activation_shares,
+    const TripleDVec& deriv_activation_shares) {
   log_info("[backward_computation] start backward computation");
+  int cur_batch_size = (int) batch_samples.size();
+  int n_layers = (int) mlp_model.m_layers.size();
+  int n_activation_layers = (int) activation_shares.size();
+  int last_layer_idx = n_layers - 1;
+
+  // define the deltas, weight_grads, and bias_grads ciphertexts
+  // deltas: (layer, sample_id, neuron)
+  // weight_grads: (layer, neuron, coef)
+  // bias_grads: (layer, neuron)
+  std::vector<EncodedNumber**> deltas, weight_grads;
+  std::vector<EncodedNumber*> bias_grads;
+
+  // 1. compute the last layer's delta, dim = (n_samples, n_outputs)
+  // if the activation function of the output layer matches the loss function
+  // the deltas of the last layer is [activation_output - y] for each sample in the batch
+  // note that the dimension of and the output layer shares and y is (n_samples, n_outputs)
+  compute_last_layer_delta(party, predicted_labels, deltas,
+                           activation_shares[last_layer_idx]);
+  // 2. compute the grads and intercepts of the last layer
+  compute_loss_grad(party,
+                    last_layer_idx,
+                    cur_batch_size,
+                    activation_shares,
+                    deriv_activation_shares,
+                    deltas,
+                    weight_grads,
+                    bias_grads);
+
+  // 3. back-propagate until reach the first hidden layer
+  for (int l_idx = last_layer_idx; l_idx > 0; l_idx--) {
+    // while the rest of the hidden layers needs to multiply the derivative of activation shares
+    // 3.1 update delta for (l - 1) layer
+    update_layer_delta(party, l_idx,
+                       cur_batch_size,
+                       activation_shares,
+                       deriv_activation_shares,
+                       deltas);
+    // 3.2 compute the coef grads and intercept grads
+    compute_loss_grad(party, l_idx,
+                      cur_batch_size,
+                      activation_shares,
+                      deriv_activation_shares,
+                      deltas,
+                      weight_grads,
+                      bias_grads);
+  }
+
+  // 4. update the weights of each neuron in each layer
+  update_encrypted_weights(party, weight_grads, bias_grads);
 }
 
-void MlpBuilder::update_encrypted_weights(Party &party, EncodedNumber *deltas) {
+void MlpBuilder::compute_last_layer_delta(
+    const Party &party,
+    EncodedNumber **predicted_labels,
+    std::vector<EncodedNumber **> &deltas,
+    const std::vector<std::vector<double>> &last_layer_activation_shares) {
+
+}
+
+void MlpBuilder::compute_loss_grad(
+    const Party &party,
+    int layer_idx,
+    int sample_size,
+    const TripleDVec &activation_shares,
+    const TripleDVec &deriv_activation_shares,
+    std::vector<EncodedNumber **> &deltas,
+    std::vector<EncodedNumber **> &weight_grads,
+    std::vector<EncodedNumber *> &bias_grads) {
+
+}
+
+void MlpBuilder::update_layer_delta(
+    const Party &party,
+    int layer_idx,
+    int sample_size,
+    const TripleDVec &activation_shares,
+    const TripleDVec &deriv_activation_shares,
+    std::vector<EncodedNumber **> &deltas) {
+
+}
+
+void MlpBuilder::update_encrypted_weights(
+    const Party &party,
+    const std::vector<EncodedNumber**>& weight_grads,
+    const std::vector<EncodedNumber*>& bias_grads) {
 
 }
 
@@ -163,7 +244,6 @@ void MlpBuilder::train(Party party) {
   /// 3. if there is regularization term, need to further think about the precision
 
   log_info("************* Training Start *************");
-  log_info("[train]: mpc_port_array_size after: " + std::to_string(party.executor_mpc_ports.size()));
 
   const clock_t training_start_time = clock();
 
@@ -172,22 +252,21 @@ void MlpBuilder::train(Party party) {
     exit(EXIT_FAILURE);
   }
 
-  // step 1: init encrypted weights
-  // (here use precision for consistence in the following)
-  std::vector<int> sync_arr = sync_up_int_arr(party, party.getter_feature_num());
-  int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
-  int plaintext_samples_precision = PHE_FIXED_POINT_PRECISION;
-  init_encrypted_weights(party, encrypted_weights_precision);
-  log_info("Init encrypted local weights success");
+  // step 1: init encrypted weights (here use precision for consistence in the following)
+  int n_features = party.getter_feature_num();
+  std::vector<int> sync_arr = sync_up_int_arr(party, n_features);
+  int encry_weights_prec = PHE_FIXED_POINT_PRECISION;
+  int plain_samples_prec = PHE_FIXED_POINT_PRECISION;
+  init_encrypted_weights(party, encry_weights_prec);
+  log_info("[train] init encrypted MLP weights success");
 
   // record training data ids in data_indexes for iteratively batch selection
   std::vector<int> train_data_indexes;
   for (int i = 0; i < training_data.size(); i++) {
     train_data_indexes.push_back(i);
   }
-  std::vector<std::vector<int>> batch_iter_indexes = precompute_iter_batch_idx(batch_size,
-                                                                               max_iteration,
-                                                                               train_data_indexes);
+  std::vector<std::vector<int>> batch_iter_indexes = precompute_iter_batch_idx(
+      batch_size, max_iteration,train_data_indexes);
 
   // required by spdz connector and mpc computation
   bigint::init_thread();
@@ -199,33 +278,34 @@ void MlpBuilder::train(Party party) {
 
     // select batch_index
     std::vector< int> batch_indexes = sync_batch_idx(party, batch_size, batch_iter_indexes[iter]);
-    log_info("-------- Iteration " + std::to_string(iter) + ", select_batch_idx success --------");
+    log_info("-------- Iteration " + std::to_string(iter)
+      + ", select_batch_idx success --------");
     // get training data with selected batch_index
     std::vector<std::vector<double> > batch_samples;
     for (int index : batch_indexes) {
       batch_samples.push_back(training_data[index]);
     }
-    log_info("batch_samples[0][0] = " + std::to_string(batch_samples[0][0]));
+    log_info("[train] batch_samples[0][0] = " + std::to_string(batch_samples[0][0]));
 
     // encode the training data
     int cur_sample_size = (int) batch_samples.size();
     auto** encoded_batch_samples = new EncodedNumber*[cur_sample_size];
     for (int i = 0; i < cur_sample_size; i++) {
-      encoded_batch_samples[i] = new EncodedNumber[party.getter_feature_num()];
+      encoded_batch_samples[i] = new EncodedNumber[n_features];
     }
     encode_samples(party, batch_samples, encoded_batch_samples);
+    log_info("-------- Iteration " + std::to_string(iter)
+      + ", encode training data success --------");
 
-    log_info("-------- Iteration " + std::to_string(iter) + ", encode training data success --------");
-
-    // compute predicted label
+    // forward computation for the predicted labels
     auto **predicted_labels = new EncodedNumber*[batch_indexes.size()];
     for (int i = 0; i < batch_indexes.size(); i++) {
       predicted_labels[i] = new EncodedNumber[mlp_model.m_num_outputs];
     }
-    int encrypted_batch_agg_precision = encrypted_weights_precision + plaintext_samples_precision;
-    // 4 * fixed precision
-    TripleDVec layer_activation_shares;
-    TripleDVec layer_deriv_activation_shares;
+    // the activation shares and derivative activation shares after forward computation
+    TripleDVec layer_activation_shares, layer_deriv_activation_shares;
+    int encry_agg_precision = encry_weights_prec + plain_samples_prec;
+    log_info("[train] encry_agg_precision is: " + std::to_string(encry_agg_precision));
     mlp_model.forward_computation(
         party,
         cur_sample_size,
@@ -234,36 +314,28 @@ void MlpBuilder::train(Party party) {
         predicted_labels,
         layer_activation_shares,
         layer_deriv_activation_shares);
-
-    log_info("-------- Iteration " + std::to_string(iter) + ", forward computation success --------");
-    log_info("The precision of predicted_labels is: "
+    log_info("-------- Iteration " + std::to_string(iter)
+      + ", forward computation success --------");
+    log_info("[train] predicted_labels' precision is: "
       + std::to_string(abs(predicted_labels[0][0].getter_exponent())));
 
-    // step 2.5: update encrypted local weights
-    std::vector<double> truncated_weights_shares;
-    auto* deltas = new EncodedNumber[mlp_model.m_num_outputs];
-//    // need to make sure that update_precision * 2 = encrypted_weights_precision
-//    int update_precision = encrypted_weights_precision / 2;
-    log_info("encrypted_batch_agg_precision is: " + std::to_string(encrypted_batch_agg_precision));
-
+    // step 2.5: backward propagation and update weights
     backward_computation(
         party,
         batch_samples,
         predicted_labels,
         batch_indexes,
-        encrypted_batch_agg_precision,
+        encry_agg_precision,
         layer_activation_shares,
-        layer_deriv_activation_shares,
-        deltas);
-    log_info("deltas precision is: " + std::to_string(std::abs(deltas[0].getter_exponent())));
-
-    log_info("-------- Iteration " + std::to_string(iter) + ", backward computation success --------");
+        layer_deriv_activation_shares);
+    log_info("-------- Iteration " + std::to_string(iter)
+      + ", backward computation success --------");
 
     const clock_t iter_finish_time = clock();
     double iter_consumed_time =
         double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
     log_info("-------- The " + std::to_string(iter) + "-th "
-                                                      "iteration consumed time = " + std::to_string(iter_consumed_time));
+      "iteration consumed time = " + std::to_string(iter_consumed_time));
 
     for (int i = 0; i < cur_sample_size; i++) {
       delete [] encoded_batch_samples[i];
@@ -271,7 +343,6 @@ void MlpBuilder::train(Party party) {
     }
     delete [] encoded_batch_samples;
     delete [] predicted_labels;
-    delete [] deltas;
   }
 
   const clock_t training_finish_time = clock();

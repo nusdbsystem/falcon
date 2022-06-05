@@ -110,6 +110,22 @@ class MlpModel {
       TripleDVec& layer_deriv_activation_shares) const;
 
   /**
+   * parse the resulted shares received from spdz program in forward_computation
+   *
+   * @param res: the received values from spdz
+   * @param dim1_size: the size of first dimension
+   * @param dim2_size: the size of second dimension
+   * @param act_outputs_shares: the activation secret shares
+   * @param deriv_act_outputs_shares: the derivative activation secret shares
+   */
+  void parse_spdz_act_comp_res(
+      const std::vector<double>& res,
+      int dim1_size,
+      int dim2_size,
+      std::vector<std::vector<double>>& act_outputs_shares,
+      std::vector<std::vector<double>>& deriv_act_outputs_shares) const;
+
+  /**
    * forward calculation of the network, output predicted labels
    * which consists of the prediction probability of each sample
    *

@@ -148,178 +148,122 @@ void MlpModel::forward_computation(const Party &party,
                                    const std::vector<int>& local_weight_sizes,
                                    EncodedNumber **encoded_batch_samples,
                                    EncodedNumber **predicted_labels,
-                                   TripleDVec& layer_activation_shares,
-                                   TripleDVec& layer_deriv_activation_shares) const {
+                                   TripleDVec& activation_shares,
+                                   TripleDVec& deriv_activation_shares) const {
   // we compute the forward computation layer-by-layer
   // for the first hidden layer, the input is the encoded_batch_samples distributed among parties
   // for the other layers, the input is the secret shares after spdz activation function
   int layer_size = (int) m_layers.size();
   // the output activation shares and derivative activation shares of each layer
   // format: (layer, idx_in_batch, neuron_idx)
-  for (int l = 0; l < layer_size; l++) {
-    log_info("[forward_computation]: compute layer " + std::to_string(l));
-    // the first hidden layer
-    if (l == 0) {
-      // compute the encrypted aggregation for each neuron in layer 0
-      int layer0_num_neurons = m_layers[0].m_num_neurons;
-      auto** layer0_enc_outputs = new EncodedNumber*[cur_batch_size];
-      for (int i = 0; i < cur_batch_size; i++) {
-        layer0_enc_outputs[i] = new EncodedNumber[layer0_num_neurons];
-      }
-
-      m_layers[l].comp_1st_layer_agg_output(party, cur_batch_size,
-                                            local_weight_sizes,
-                                            encoded_batch_samples,
-                                            layer0_num_neurons,
-                                            layer0_enc_outputs);
-
-      // next, convert to secret shares and call spdz to compute activation and deriv_activation
-      int cipher_precision = std::abs(layer0_enc_outputs[0][0].getter_exponent());
-      std::vector<std::vector<double>> layer0_enc_outputs_shares;
-      ciphers_mat_to_secret_shares_mat(party, layer0_enc_outputs,
-                                       layer0_enc_outputs_shares,
-                                       cur_batch_size,
-                                       layer0_num_neurons,
-                                       ACTIVE_PARTY_ID,
-                                       cipher_precision);
-
-      log_info("Converted 1st layer encrypted output into secret shares.");
-      std::vector<double> flatten_layer0_enc_outputs_shares = flatten_2d_vector(layer0_enc_outputs_shares);
-      std::vector<int> public_values;
-      public_values.push_back(falcon::ACTIVATION);
-      public_values.push_back(layer0_num_neurons);
-      public_values.push_back(cur_batch_size);
-      falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l].m_activation_func_str);
-      public_values.push_back(func);
-
-      falcon::SpdzMlpCompType comp_type = falcon::ACTIVATION;
-      std::promise<std::vector<double>> promise_values;
-      std::future<std::vector<double>> future_values = promise_values.get_future();
-      std::thread spdz_pruning_check_thread(spdz_mlp_computation,
-                                            party.party_num,
-                                            party.party_id,
-                                            party.executor_mpc_ports,
-                                            party.host_names,
-                                            public_values.size(),
-                                            public_values,
-                                            flatten_layer0_enc_outputs_shares.size(),
-                                            flatten_layer0_enc_outputs_shares,
-                                            comp_type,
-                                            &promise_values);
-      // the result values are as follows (assume public in this version):
-      // best_split_index (global), best_left_impurity, and best_right_impurity
-      std::vector<double> res = future_values.get();
-      spdz_pruning_check_thread.join();
-      log_info("[forward_computation]: communicate with spdz program finished");
-
-      std::vector<double> res_act, res_deriv_act;
-      for (int i = 0; i < flatten_layer0_enc_outputs_shares.size(); i++) {
-        res_act.push_back(res[i]);
-        res_deriv_act.push_back(res[i + flatten_layer0_enc_outputs_shares.size()]);
-      }
-
-      // the returned res vector is the 1d vector of secret shares of the
-      // activation function and derivative of activation function for future usage
-      std::vector<std::vector<double>> layer0_act_outputs_shares = expend_1d_vector(
-          res_act, cur_batch_size, layer0_num_neurons);
-      std::vector<std::vector<double>> layer0_deriv_act_outputs_shares = expend_1d_vector(
-          res_deriv_act, cur_batch_size, layer0_num_neurons);
-      layer_activation_shares.push_back(layer0_act_outputs_shares);
-      layer_deriv_activation_shares.push_back(layer0_deriv_act_outputs_shares);
-
-      for (int i = 0; i < cur_batch_size; i++) {
-        delete [] layer0_enc_outputs[i];
-      }
-      delete [] layer0_enc_outputs;
+  for (int l_idx = 0; l_idx < layer_size; l_idx++) {
+    log_info("[forward_computation]: compute layer " + std::to_string(l_idx));
+    int cur_layer_num_neurons = m_layers[l_idx].m_num_neurons;
+    auto** cur_layer_enc_outputs = new EncodedNumber*[cur_batch_size];
+    for (int i = 0; i < cur_batch_size; i++) {
+      cur_layer_enc_outputs[i] = new EncodedNumber[cur_layer_num_neurons];
     }
-
-    if (l != 0) {
+    // the first hidden layer
+    if (l_idx == 0) {
+      // compute the encrypted aggregation for each neuron in the first hidden layer
+      m_layers[l_idx].comp_1st_layer_agg_output(
+          party, cur_batch_size,
+          local_weight_sizes,
+          encoded_batch_samples,
+          cur_layer_num_neurons,
+          cur_layer_enc_outputs);
+    } else {
       // for other layers, the layer inputs are secret shares, so use another way to aggregate
       // compute the encrypted aggregation for each neuron in layer 0
-      int layer_l_num_neurons = m_layers[l].m_num_neurons;
-      auto** layer_l_enc_outputs = new EncodedNumber*[cur_batch_size];
-      for (int i = 0; i < cur_batch_size; i++) {
-        layer_l_enc_outputs[i] = new EncodedNumber[layer_l_num_neurons];
-      }
-
       // compute the aggregation of current layer
-      m_layers[l].comp_other_layer_agg_output(party, cur_batch_size,
-                                              layer_activation_shares[l-1],
-                                              m_layers[l].m_num_neurons,
-                                              layer_l_enc_outputs);
-
-
-      // next, convert to secret shares and call spdz to compute activation and deriv_activation
-      int cipher_precision = std::abs(layer_l_enc_outputs[0][0].getter_exponent());
-      std::vector<std::vector<double>> layer0_enc_outputs_shares;
-      ciphers_mat_to_secret_shares_mat(party, layer_l_enc_outputs,
-                                       layer0_enc_outputs_shares,
-                                       cur_batch_size,
-                                       layer_l_num_neurons,
-                                       ACTIVE_PARTY_ID,
-                                       cipher_precision);
-
-      log_info("Converted 1st layer encrypted output into secret shares.");
-      std::vector<double> flatten_layer0_enc_outputs_shares = flatten_2d_vector(layer0_enc_outputs_shares);
-      std::vector<int> public_values;
-      public_values.push_back(falcon::ACTIVATION);
-      public_values.push_back(layer_l_num_neurons);
-      public_values.push_back(cur_batch_size);
-      falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l].m_activation_func_str);
-      public_values.push_back(func);
-
-      falcon::SpdzMlpCompType comp_type = falcon::ACTIVATION;
-      std::promise<std::vector<double>> promise_values;
-      std::future<std::vector<double>> future_values = promise_values.get_future();
-      std::thread spdz_pruning_check_thread(spdz_mlp_computation,
-                                            party.party_num,
-                                            party.party_id,
-                                            party.executor_mpc_ports,
-                                            party.host_names,
-                                            public_values.size(),
-                                            public_values,
-                                            flatten_layer0_enc_outputs_shares.size(),
-                                            flatten_layer0_enc_outputs_shares,
-                                            comp_type,
-                                            &promise_values);
-      // the result values are as follows (assume public in this version):
-      // best_split_index (global), best_left_impurity, and best_right_impurity
-      std::vector<double> res = future_values.get();
-      spdz_pruning_check_thread.join();
-      log_info("[forward_computation]: communicate with spdz program finished");
-
-      std::vector<double> res_act, res_deriv_act;
-      for (int i = 0; i < flatten_layer0_enc_outputs_shares.size(); i++) {
-        res_act.push_back(res[i]);
-        res_deriv_act.push_back(res[i + flatten_layer0_enc_outputs_shares.size()]);
-      }
-
-      // the returned res vector is the 1d vector of secret shares of the
-      // activation function and derivative of activation function for future usage
-      std::vector<std::vector<double>> layer0_act_outputs_shares = expend_1d_vector(
-          res_act, cur_batch_size, layer_l_num_neurons);
-      std::vector<std::vector<double>> layer0_deriv_act_outputs_shares = expend_1d_vector(
-          res_deriv_act, cur_batch_size, layer_l_num_neurons);
-      layer_activation_shares.push_back(layer0_act_outputs_shares);
-      layer_deriv_activation_shares.push_back(layer0_deriv_act_outputs_shares);
-
-      for (int i = 0; i < cur_batch_size; i++) {
-        delete [] layer_l_enc_outputs[i];
-      }
-      delete [] layer_l_enc_outputs;
+      m_layers[l_idx].comp_other_layer_agg_output(
+          party, cur_batch_size,
+          activation_shares[l_idx - 1],
+          cur_layer_num_neurons,
+          cur_layer_enc_outputs);
     }
 
-    // convert the last layer output into ciphers and assign to predicted_labels
-    std::vector<std::vector<double>> batch_prediction_shares = layer_activation_shares[layer_size-1];
+    // next, convert to secret shares and call spdz to compute activation and deriv_activation
+    int cipher_precision = std::abs(cur_layer_enc_outputs[0][0].getter_exponent());
+    std::vector<std::vector<double>> cur_layer_enc_outputs_shares;
+    ciphers_mat_to_secret_shares_mat(
+        party, cur_layer_enc_outputs,
+        cur_layer_enc_outputs_shares,
+        cur_batch_size,
+        cur_layer_num_neurons,
+        ACTIVE_PARTY_ID,
+        cipher_precision);
+    log_info("[forward_computation] converted 1st hidden layer "
+             "encrypted output into secret shares.");
+    std::vector<double> flatten_layer_enc_outputs_shares =
+        flatten_2d_vector(cur_layer_enc_outputs_shares);
+    std::vector<int> public_values;
+    public_values.push_back(falcon::ACTIVATION);
+    public_values.push_back(cur_layer_num_neurons);
+    public_values.push_back(cur_batch_size);
+    falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l_idx].m_activation_func_str);
+    public_values.push_back(func);
+
+    falcon::SpdzMlpCompType comp_type = falcon::ACTIVATION;
+    std::promise<std::vector<double>> promise_values;
+    std::future<std::vector<double>> future_values = promise_values.get_future();
+    std::thread spdz_pruning_check_thread(spdz_mlp_computation,
+                                          party.party_num,
+                                          party.party_id,
+                                          party.executor_mpc_ports,
+                                          party.host_names,
+                                          public_values.size(),
+                                          public_values,
+                                          flatten_layer_enc_outputs_shares.size(),
+                                          flatten_layer_enc_outputs_shares,
+                                          comp_type,
+                                          &promise_values);
+    // the result values are as follows (assume to be private, i.e., secret shares):
+    std::vector<double> res = future_values.get();
+    spdz_pruning_check_thread.join();
+    log_info("[forward_computation]: communicate with spdz finished");
+
+    std::vector<std::vector<double>> layer_act_outputs_shares, layer_deriv_act_outputs_shares;
+    parse_spdz_act_comp_res(res, cur_batch_size, cur_layer_num_neurons,
+                            layer_act_outputs_shares, layer_deriv_act_outputs_shares);
+    activation_shares.push_back(layer_act_outputs_shares);
+    deriv_activation_shares.push_back(layer_deriv_act_outputs_shares);
+
     for (int i = 0; i < cur_batch_size; i++) {
-      secret_shares_to_ciphers(party, predicted_labels[i],
-                               batch_prediction_shares[i],
-                               m_num_layers_neurons[layer_size-1],
-                               ACTIVE_PARTY_ID,
-                               PHE_FIXED_POINT_PRECISION);
+      delete [] cur_layer_enc_outputs[i];
     }
-    log_info("[forward_computation] finished.");
+    delete [] cur_layer_enc_outputs;
   }
+  // convert the last layer output into ciphers and assign to predicted_labels
+  std::vector<std::vector<double>> batch_prediction_shares = activation_shares[layer_size-1];
+  for (int i = 0; i < cur_batch_size; i++) {
+    secret_shares_to_ciphers(party, predicted_labels[i],
+                             batch_prediction_shares[i],
+                             m_num_layers_neurons[layer_size-1],
+                             ACTIVE_PARTY_ID,
+                             PHE_FIXED_POINT_PRECISION);
+  }
+  log_info("[forward_computation] finished.");
+}
+
+void MlpModel::parse_spdz_act_comp_res(const std::vector<double> &res,
+                                       int dim1_size,
+                                       int dim2_size,
+                                       std::vector<std::vector<double>> &act_outputs_shares,
+                                       std::vector<std::vector<double>> &deriv_act_outputs_shares) const {
+  log_info("[parse_spdz_act_comp_res] parse the received shares from spdz in forward computation");
+  int flatten_size = dim1_size * dim2_size;
+  std::vector<double> res_act, res_deriv_act;
+  for (int i = 0; i < flatten_size; i++) {
+    res_act.push_back(res[i]);
+    res_deriv_act.push_back(res[i + flatten_size]);
+  }
+  // the returned res vector is the 1d vector of secret shares of the
+  // activation function and derivative of activation function for future usage
+  std::vector<std::vector<double>> layer0_act_outputs_shares = expend_1d_vector(
+      res_act, dim1_size, dim2_size);
+  std::vector<std::vector<double>> layer0_deriv_act_outputs_shares = expend_1d_vector(
+      res_deriv_act, dim1_size, dim2_size);
 }
 
 void MlpModel::forward_computation_fast(const Party &party,
@@ -333,153 +277,96 @@ void MlpModel::forward_computation_fast(const Party &party,
   int layer_size = (int) m_layers.size();
   // the output activation shares and derivative activation shares of each layer
   // format: (layer, idx_in_batch, neuron_idx)
-  std::vector<std::vector<std::vector<double>>> layer_activation_shares;
-  for (int l = 0; l < layer_size; l++) {
-    log_info("[forward_computation_fast]: compute layer " + std::to_string(l));
-    // the first hidden layer
-    if (l == 0) {
-      // compute the encrypted aggregation for each neuron in layer 0
-      int layer0_num_neurons = m_layers[0].m_num_neurons;
-      auto** layer0_enc_outputs = new EncodedNumber*[cur_batch_size];
-      for (int i = 0; i < cur_batch_size; i++) {
-        layer0_enc_outputs[i] = new EncodedNumber[layer0_num_neurons];
-      }
-
-      m_layers[l].comp_1st_layer_agg_output(party, cur_batch_size,
-                                            local_weight_sizes,
-                                            encoded_batch_samples,
-                                            layer0_num_neurons,
-                                            layer0_enc_outputs);
-
-      // next, convert to secret shares and call spdz to compute activation and deriv_activation
-      int cipher_precision = std::abs(layer0_enc_outputs[0][0].getter_exponent());
-      std::vector<std::vector<double>> layer0_enc_outputs_shares;
-      ciphers_mat_to_secret_shares_mat(party, layer0_enc_outputs,
-                                       layer0_enc_outputs_shares,
-                                       cur_batch_size,
-                                       layer0_num_neurons,
-                                       ACTIVE_PARTY_ID,
-                                       cipher_precision);
-
-      log_info("Converted 1st layer encrypted output into secret shares.");
-      std::vector<double> flatten_layer0_enc_outputs_shares = flatten_2d_vector(layer0_enc_outputs_shares);
-      std::vector<int> public_values;
-      public_values.push_back(falcon::ACTIVATION_FAST);
-      public_values.push_back(layer0_num_neurons);
-      public_values.push_back(cur_batch_size);
-      falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l].m_activation_func_str);
-      public_values.push_back(func);
-
-      falcon::SpdzMlpCompType comp_type = falcon::ACTIVATION_FAST;
-      std::promise<std::vector<double>> promise_values;
-      std::future<std::vector<double>> future_values = promise_values.get_future();
-      std::thread spdz_pruning_check_thread(spdz_mlp_computation,
-                                            party.party_num,
-                                            party.party_id,
-                                            party.executor_mpc_ports,
-                                            party.host_names,
-                                            public_values.size(),
-                                            public_values,
-                                            flatten_layer0_enc_outputs_shares.size(),
-                                            flatten_layer0_enc_outputs_shares,
-                                            comp_type,
-                                            &promise_values);
-      // the result values are as follows (assume public in this version):
-      // best_split_index (global), best_left_impurity, and best_right_impurity
-      std::vector<double> res = future_values.get();
-      spdz_pruning_check_thread.join();
-      log_info("[forward_computation_fast]: communicate with spdz program finished");
-
-      // the returned res vector is the 1d vector of secret shares of the
-      // activation function and derivative of activation function for future usage
-      std::vector<std::vector<double>> layer0_act_outputs_shares = expend_1d_vector(
-          res, cur_batch_size, layer0_num_neurons);
-      layer_activation_shares.push_back(layer0_act_outputs_shares);
-
-      for (int i = 0; i < cur_batch_size; i++) {
-        delete [] layer0_enc_outputs[i];
-      }
-      delete [] layer0_enc_outputs;
+  TripleDVec activation_shares;
+  for (int l_idx = 0; l_idx < layer_size; l_idx++) {
+    log_info("[forward_computation_fast]: compute layer " + std::to_string(l_idx));
+    int cur_layer_num_neurons = m_layers[l_idx].m_num_neurons;
+    auto** cur_layer_enc_outputs = new EncodedNumber*[cur_batch_size];
+    for (int i = 0; i < cur_batch_size; i++) {
+      cur_layer_enc_outputs[i] = new EncodedNumber[cur_layer_num_neurons];
     }
-
-    if (l != 0) {
+    // the first hidden layer
+    if (l_idx == 0) {
+      // compute the encrypted aggregation for each neuron in the first hidden layer
+      m_layers[l_idx].comp_1st_layer_agg_output(
+          party, cur_batch_size,
+          local_weight_sizes,
+          encoded_batch_samples,
+          cur_layer_num_neurons,
+          cur_layer_enc_outputs);
+    } else {
       // for other layers, the layer inputs are secret shares, so use another way to aggregate
       // compute the encrypted aggregation for each neuron in layer 0
-      int layer_l_num_neurons = m_layers[l].m_num_neurons;
-      auto** layer_l_enc_outputs = new EncodedNumber*[cur_batch_size];
-      for (int i = 0; i < cur_batch_size; i++) {
-        layer_l_enc_outputs[i] = new EncodedNumber[layer_l_num_neurons];
-      }
-
       // compute the aggregation of current layer
-      m_layers[l].comp_other_layer_agg_output(party, cur_batch_size,
-                                              layer_activation_shares[l-1],
-                                              m_layers[l].m_num_neurons,
-                                              layer_l_enc_outputs);
-
-
-      // next, convert to secret shares and call spdz to compute activation and deriv_activation
-      int cipher_precision = std::abs(layer_l_enc_outputs[0][0].getter_exponent());
-      std::vector<std::vector<double>> layer0_enc_outputs_shares;
-      ciphers_mat_to_secret_shares_mat(party, layer_l_enc_outputs,
-                                       layer0_enc_outputs_shares,
-                                       cur_batch_size,
-                                       layer_l_num_neurons,
-                                       ACTIVE_PARTY_ID,
-                                       cipher_precision);
-
-      log_info("Converted 1st layer encrypted output into secret shares.");
-      std::vector<double> flatten_layer0_enc_outputs_shares = flatten_2d_vector(layer0_enc_outputs_shares);
-      std::vector<int> public_values;
-      public_values.push_back(falcon::ACTIVATION_FAST);
-      public_values.push_back(layer_l_num_neurons);
-      public_values.push_back(cur_batch_size);
-      falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l].m_activation_func_str);
-      public_values.push_back(func);
-
-      falcon::SpdzMlpCompType comp_type = falcon::ACTIVATION_FAST;
-      std::promise<std::vector<double>> promise_values;
-      std::future<std::vector<double>> future_values = promise_values.get_future();
-      std::thread spdz_pruning_check_thread(spdz_mlp_computation,
-                                            party.party_num,
-                                            party.party_id,
-                                            party.executor_mpc_ports,
-                                            party.host_names,
-                                            public_values.size(),
-                                            public_values,
-                                            flatten_layer0_enc_outputs_shares.size(),
-                                            flatten_layer0_enc_outputs_shares,
-                                            comp_type,
-                                            &promise_values);
-      // the result values are as follows (assume public in this version):
-      // best_split_index (global), best_left_impurity, and best_right_impurity
-      std::vector<double> res = future_values.get();
-      spdz_pruning_check_thread.join();
-      log_info("[forward_computation_fast]: communicate with spdz program finished");
-
-      // the returned res vector is the 1d vector of secret shares of the
-      // activation function and derivative of activation function for future usage
-      std::vector<std::vector<double>> layer0_act_outputs_shares = expend_1d_vector(
-          res, cur_batch_size, layer_l_num_neurons);
-      layer_activation_shares.push_back(layer0_act_outputs_shares);
-
-      for (int i = 0; i < cur_batch_size; i++) {
-        delete [] layer_l_enc_outputs[i];
-      }
-      delete [] layer_l_enc_outputs;
+      m_layers[l_idx].comp_other_layer_agg_output(
+          party, cur_batch_size,
+          activation_shares[l_idx - 1],
+          cur_layer_num_neurons,
+          cur_layer_enc_outputs);
     }
 
-    // convert the last layer output into ciphers and assign to predicted_labels
-    std::vector<std::vector<double>> batch_prediction_shares = layer_activation_shares[layer_size-1];
+    // next, convert to secret shares and call spdz to compute activation and deriv_activation
+    int cipher_precision = std::abs(cur_layer_enc_outputs[0][0].getter_exponent());
+    std::vector<std::vector<double>> cur_layer_enc_outputs_shares;
+    ciphers_mat_to_secret_shares_mat(
+        party, cur_layer_enc_outputs,
+        cur_layer_enc_outputs_shares,
+        cur_batch_size,
+        cur_layer_num_neurons,
+        ACTIVE_PARTY_ID,
+        cipher_precision);
+    log_info("[forward_computation] converted 1st hidden layer "
+             "encrypted output into secret shares.");
+    std::vector<double> flatten_layer_enc_outputs_shares =
+        flatten_2d_vector(cur_layer_enc_outputs_shares);
+    std::vector<int> public_values;
+    public_values.push_back(falcon::ACTIVATION_FAST);
+    public_values.push_back(cur_layer_num_neurons);
+    public_values.push_back(cur_batch_size);
+    falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l_idx].m_activation_func_str);
+    public_values.push_back(func);
+
+    falcon::SpdzMlpCompType comp_type = falcon::ACTIVATION_FAST;
+    std::promise<std::vector<double>> promise_values;
+    std::future<std::vector<double>> future_values = promise_values.get_future();
+    std::thread spdz_pruning_check_thread(spdz_mlp_computation,
+                                          party.party_num,
+                                          party.party_id,
+                                          party.executor_mpc_ports,
+                                          party.host_names,
+                                          public_values.size(),
+                                          public_values,
+                                          flatten_layer_enc_outputs_shares.size(),
+                                          flatten_layer_enc_outputs_shares,
+                                          comp_type,
+                                          &promise_values);
+    // the result values are as follows (assume to be private, i.e., secret shares):
+    std::vector<double> res = future_values.get();
+    spdz_pruning_check_thread.join();
+    log_info("[forward_computation]: communicate with spdz finished");
+
+    // the returned res vector is the 1d vector of secret shares of the
+    // activation function and derivative of activation function for future usage
+    std::vector<std::vector<double>> layer_act_outputs_shares = expend_1d_vector(
+        res, cur_batch_size, cur_layer_num_neurons);
+    activation_shares.push_back(layer_act_outputs_shares);
+
     for (int i = 0; i < cur_batch_size; i++) {
-      secret_shares_to_ciphers(party, predicted_labels[i],
-                               batch_prediction_shares[i],
-                               m_num_layers_neurons[layer_size-1],
-                               ACTIVE_PARTY_ID,
-                               PHE_FIXED_POINT_PRECISION);
+      delete [] cur_layer_enc_outputs[i];
     }
-    log_info("[forward_computation_fast] finished.");
+    delete [] cur_layer_enc_outputs;
   }
+
+  // convert the last layer output into ciphers and assign to predicted_labels
+  std::vector<std::vector<double>> batch_prediction_shares = activation_shares[layer_size-1];
+  for (int i = 0; i < cur_batch_size; i++) {
+    secret_shares_to_ciphers(party, predicted_labels[i],
+                             batch_prediction_shares[i],
+                             m_num_layers_neurons[layer_size-1],
+                             ACTIVE_PARTY_ID,
+                             PHE_FIXED_POINT_PRECISION);
+  }
+  log_info("[forward_computation_fast] finished.");
 }
 
 void spdz_mlp_computation(int party_num,

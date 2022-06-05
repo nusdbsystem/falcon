@@ -19,6 +19,8 @@ class Layer {
   // the neurons vector
   std::vector<Neuron> m_neurons;
   // the activation function string: sigmoid, linear, etc.
+  // the activation function of the output layer needs to match
+  // the loss function defined in the mlp builder
   std::string m_activation_func_str;
 
  public:

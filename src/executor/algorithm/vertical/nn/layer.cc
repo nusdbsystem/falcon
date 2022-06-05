@@ -43,9 +43,18 @@ Layer::~Layer() {
 }
 
 void Layer::init_encrypted_weights(const Party &party, int precision) {
+  // according to sklearn init coef function, here
+  // set factor=6.0 if the activation function is not 'logistic' or 'sigmoid'
+  // otherwise set factor=2.0
+  double factor = 6.0;
+  if (m_activation_func_str == "sigmoid") {
+    factor = 2.0;
+  }
+  // according to sklearn, limit = sqrt(factor / (num_inputs + num_outputs))
+  double limit = sqrt(factor / (m_num_inputs_per_neuron + m_num_neurons));
   int neuron_size = (int) m_neurons.size();
   for (int i = 0; i < neuron_size; i++) {
-    m_neurons[i].init_encrypted_weights(party, precision);
+    m_neurons[i].init_encrypted_weights(party, limit, precision);
   }
 }
 
