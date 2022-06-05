@@ -169,6 +169,15 @@ func TestTaskPredict(t *testing.T) {
 		FLNetworkCfg: JobNetCfgIns.SerializeNetworkCfg(),
 		Job:          &job}
 
+	// test serialize and DeserializeTask
+	args := string(entity.SerializeTask(taskInfo))
+	fmt.Println(args)
+	argTask, err := entity.DeserializeTask([]byte(args))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(argTask)
+
 	mpcCmdStr := mpc.GetCommand(mpcTaskInfo).String()
 	expectedStr1 := "/opt/falcon/third_party/MP-SPDZ/semi-party.x -F -N 3 -p 0 -I -ip /opt/falcon/third_party/MP-SPDZ/mpc-network-0 logistic_regression"
 	assert.Equal(t, mpcCmdStr, expectedStr1, "Prediction MPC command is not correct ")
