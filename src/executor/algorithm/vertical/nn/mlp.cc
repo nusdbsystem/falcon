@@ -250,7 +250,7 @@ void MlpModel::parse_spdz_act_comp_res(const std::vector<double> &res,
                                        int dim1_size,
                                        int dim2_size,
                                        std::vector<std::vector<double>> &act_outputs_shares,
-                                       std::vector<std::vector<double>> &deriv_act_outputs_shares) const {
+                                       std::vector<std::vector<double>> &deriv_act_outputs_shares) {
   log_info("[parse_spdz_act_comp_res] parse the received shares from spdz in forward computation");
   int flatten_size = dim1_size * dim2_size;
   std::vector<double> res_act, res_deriv_act;

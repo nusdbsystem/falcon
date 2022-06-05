@@ -162,6 +162,30 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
   mpz_clear(mult);
 }
 
+void djcs_t_aux_increase_prec(djcs_t_public_key* pk,
+                              EncodedNumber & res,
+                              int target_precision,
+                              const EncodedNumber& cipher) {
+  if (cipher.getter_type() != Ciphertext) {
+    log_error("The input type does not match ciphertext.");
+    exit(EXIT_FAILURE);
+  }
+  int cur_precision = std::abs(cipher.getter_exponent());
+  if (target_precision < cur_precision) {
+    log_error("The target precision is less than current precision, cannot increase.");
+    exit(EXIT_FAILURE);
+  } else if (target_precision == cur_precision) {
+    log_info("The precision is correct, no need to increase.");
+    return;
+  } else {
+    // init an encoded number plaintext of 1.0 with diff precision and multiply
+    int diff = target_precision - cur_precision;
+    EncodedNumber assist_plain;
+    assist_plain.set_double(pk->n[0], 1.0, diff);
+    djcs_t_aux_ep_mul(pk, res, cipher, assist_plain);
+  }
+}
+
 void djcs_t_aux_double_vec_encryption(djcs_t_public_key* pk,
                                       hcs_random* hr,
                                       EncodedNumber* res,
@@ -296,6 +320,17 @@ void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
   }
 }
 
+void djcs_t_aux_increase_prec_vec(djcs_t_public_key* pk,
+                                  EncodedNumber* res,
+                                  int target_precision,
+                                  EncodedNumber* ciphers,
+                                  int size) {
+  check_size(size);
+  for (int i = 0; i < size; i++) {
+    djcs_t_aux_increase_prec(pk, res[i], target_precision, ciphers[i]);
+  }
+}
+
 void djcs_t_aux_double_mat_encryption(djcs_t_public_key* pk,
                                       hcs_random* hr,
                                       EncodedNumber** res,
@@ -377,6 +412,21 @@ void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
       }
       djcs_t_aux_inner_product(pk, hr, res[i][j], cipher_vec_j, plain_mat[i], cipher_row_size);
       delete [] cipher_vec_j;
+    }
+  }
+}
+
+void djcs_t_aux_increase_prec_mat(djcs_t_public_key* pk,
+                                  EncodedNumber** res,
+                                  int target_precision,
+                                  EncodedNumber** cipher_mat,
+                                  int row_size,
+                                  int column_size) {
+  check_size(row_size);
+  check_size(column_size);
+  for (int i = 0; i < row_size; i++) {
+    for (int j = 0; j < column_size; j++) {
+      djcs_t_aux_increase_prec(pk, res[i][j], target_precision, cipher_mat[i][j]);
     }
   }
 }

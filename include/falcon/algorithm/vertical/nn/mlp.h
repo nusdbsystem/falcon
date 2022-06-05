@@ -118,12 +118,12 @@ class MlpModel {
    * @param act_outputs_shares: the activation secret shares
    * @param deriv_act_outputs_shares: the derivative activation secret shares
    */
-  void parse_spdz_act_comp_res(
+  static void parse_spdz_act_comp_res(
       const std::vector<double>& res,
       int dim1_size,
       int dim2_size,
       std::vector<std::vector<double>>& act_outputs_shares,
-      std::vector<std::vector<double>>& deriv_act_outputs_shares) const;
+      std::vector<std::vector<double>>& deriv_act_outputs_shares) ;
 
   /**
    * forward calculation of the network, output predicted labels

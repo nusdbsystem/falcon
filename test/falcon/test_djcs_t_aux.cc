@@ -100,6 +100,26 @@ TEST(PHE, ThresholdPaillierScheme) {
   decrypted_product.decode(decrypted_decoded_product);
   EXPECT_NEAR(b1 * b2, decrypted_decoded_product, 1e-3);
 
+  //////////////////////////////////////////////
+  /// Test increase precision of a ciphertext //
+  /////////////////////////////////////////////
+  double inc = 6.66;
+  EncodedNumber number_inc, encry_inc, new_encry_inc, new_decry_inc;
+  number_inc.set_double(pk->n[0], inc, 32);
+  djcs_t_aux_encrypt(pk, hr, encry_inc, number_inc);
+  int target_precision = 96;
+  djcs_t_aux_increase_prec(pk, new_encry_inc, target_precision, encry_inc);
+  int new_precision = std::abs(new_encry_inc.getter_exponent());
+  EXPECT_EQ(new_precision, target_precision);
+  auto* partially_inc_decryption = new EncodedNumber[client_num];
+  for (int i = 0; i < client_num; i++) {
+    djcs_t_aux_partial_decrypt(pk, au[i], partially_inc_decryption[i], new_encry_inc);
+  }
+  djcs_t_aux_share_combine(pk, new_decry_inc, partially_inc_decryption, client_num);
+  double decry_dec_inc;
+  new_decry_inc.decode(decry_dec_inc);
+  EXPECT_NEAR(inc, decry_dec_inc, 1e-3);
+
   ////////////////////////////////////////////////////
   /// Test homomorphic multiplication exponent test //
   ////////////////////////////////////////////////////
@@ -317,6 +337,35 @@ TEST(PHE, ThresholdPaillierScheme) {
     delete [] partially_ele_wise_ep_mul;
   }
 
+  ////////////////////////////////////////////////
+  /// Test encrypted vector increase precision ///
+  ////////////////////////////////////////////////
+
+  double inc_vec[5] = {1.11, 2.22, 3.33, 5.55, 6.66};
+  auto* number_inc_vec = new EncodedNumber[5];
+  auto* encry_inc_vec = new EncodedNumber[5];
+  auto* new_encry_inc_vec = new EncodedNumber[5];
+  auto* new_decry_inc_vec = new EncodedNumber[5];
+  for (int i = 0; i < 5; i++) {
+    number_inc_vec[i].set_double(pk->n[0], inc_vec[i], 16);
+    djcs_t_aux_encrypt(pk, hr, encry_inc_vec[i], number_inc_vec[i]);
+  }
+  int target_precision_1 = 96;
+  djcs_t_aux_increase_prec_vec(pk, new_encry_inc_vec, target_precision_1, encry_inc_vec, 5);
+  int new_precision_1 = std::abs(new_encry_inc_vec[0].getter_exponent());
+  EXPECT_EQ(new_precision_1, target_precision_1);
+  for (int k = 0; k < 5; k++) {
+    auto* partially_inc_decryption_1 = new EncodedNumber[client_num];
+    for (int i = 0; i < client_num; i++) {
+      djcs_t_aux_partial_decrypt(pk, au[i], partially_inc_decryption_1[i], new_encry_inc_vec[k]);
+    }
+    djcs_t_aux_share_combine(pk, new_decry_inc_vec[k], partially_inc_decryption_1, client_num);
+    double decry_dec_inc_1;
+    new_decry_inc_vec[k].decode(decry_dec_inc_1);
+    EXPECT_NEAR(inc_vec[k], decry_dec_inc_1, 1e-3);
+    delete [] partially_inc_decryption_1;
+  }
+
   ////////////////////////////////////////////
   /// Test homomorphic matrix ele-wise add ///
   ////////////////////////////////////////////
@@ -522,10 +571,47 @@ TEST(PHE, ThresholdPaillierScheme) {
     }
   }
 
+  /////////////////////////////////////////////////
+  /// Test encrypted matrix increase encryption ///
+  /////////////////////////////////////////////////
+  std::vector<std::vector<double>> r_inc;
+  std::vector<double> r1_inc{0.9, 0.8, -0.7, 0.6, 0.5};
+  std::vector<double> r2_inc{0.1, 0.2, -0.3, 0.4, 0.5};
+  std::vector<double> r3_inc{0.8, 0.6, -0.7, 0.6, 0.3};
+  r_inc.push_back(r1_inc);
+  r_inc.push_back(r2_inc);
+  r_inc.push_back(r3_inc);
+  auto* number_mat_r_inc = new EncodedNumber*[3];
+  auto* decrypted_number_mat_r_inc = new EncodedNumber*[3];
+  for (int i = 0; i < 3; i++) {
+    number_mat_r_inc[i] = new EncodedNumber[5];
+    decrypted_number_mat_r_inc[i] = new EncodedNumber[5];
+  }
+  djcs_t_aux_double_mat_encryption(pk, hr, number_mat_r_inc, 3, 5, r_inc, PHE_FIXED_POINT_PRECISION);
+  int target_precision_2 = 108;
+  djcs_t_aux_increase_prec_mat(pk, number_mat_r_inc,
+                               target_precision_2, number_mat_r_inc, 3, 5);
+  for (int j = 0; j < 3; j++) {
+    for (int k = 0; k < 5; k++) {
+      auto* partially_decrypt_jk = new EncodedNumber[client_num];
+      for (int i = 0; i < client_num; i++) {
+        djcs_t_aux_partial_decrypt(pk, au[i], partially_decrypt_jk[i], number_mat_r_inc[j][k]);
+      }
+      djcs_t_aux_share_combine(pk, decrypted_number_mat_r_inc[j][k], partially_decrypt_jk, client_num);
+
+      double decoded_number_rjk;
+      decrypted_number_mat_r_inc[j][k].decode(decoded_number_rjk);
+      EXPECT_NEAR(r_inc[j][k], decoded_number_rjk, 1e-3);
+      delete [] partially_decrypt_jk;
+    }
+  }
+
+
   // free memory
   delete [] partially_decryption;
   delete [] partially_sum_decryption;
   delete [] partially_product_decryption;
+  delete [] partially_inc_decryption;
   delete [] partially_product_decryption2;
   delete [] partially_inner_prod_decryption;
   delete [] partially_agg_decryption;
@@ -543,6 +629,10 @@ TEST(PHE, ThresholdPaillierScheme) {
   delete [] dec_res_ele_wise_add_vec;
   delete [] res_ele_wise_ep_vec;
   delete [] dec_res_ele_wise_ep_vec;
+  delete [] number_inc_vec;
+  delete [] encry_inc_vec;
+  delete [] new_encry_inc_vec;
+  delete [] new_decry_inc_vec;
   delete [] encrypted_number_d1;
   delete [] encrypted_mat_result;
   delete [] decrypted_mat_result;
@@ -579,9 +669,13 @@ TEST(PHE, ThresholdPaillierScheme) {
   for (int i = 0; i < 3; i++) {
     delete [] number_mat_r[i];
     delete [] decrypted_number_mat_r[i];
+    delete [] number_mat_r_inc[i];
+    delete [] decrypted_number_mat_r_inc[i];
   }
   delete [] number_mat_r;
   delete [] decrypted_number_mat_r;
+  delete [] number_mat_r_inc;
+  delete [] decrypted_number_mat_r_inc;
 
   hcs_free_random(hr);
   djcs_t_free_public_key(pk);

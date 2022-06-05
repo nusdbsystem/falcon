@@ -82,6 +82,19 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
     const EncodedNumber& cipher,
     const EncodedNumber& plain);
 
+/**
+ * this function increases the precision of a ciphertext,
+ * for computing homomorphic addition when the precision does not match
+ *
+ * @param pk: public key
+ * @param res: multiplication ciphertext
+ * @param target_precision: the precision to be reached
+ * @param cipher: ciphertext EncodedNumber
+ */
+void djcs_t_aux_increase_prec(djcs_t_public_key* pk,
+                              EncodedNumber & res,
+                              int target_precision,
+                              const EncodedNumber& cipher);
 
 /***********************************************************/
 /***************** vector related operations ***************/
@@ -184,6 +197,22 @@ void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
     EncodedNumber* plains,
     int size);
 
+/**
+ * this function increases the precision of a ciphertext vector,
+ * for computing homomorphic addition when the precision does not match
+ *
+ * @param pk: public key
+ * @param res: resulted ciphertext vector
+ * @param target_precision: the precision to be reached
+ * @param ciphers: the ciphertext vector
+ * @param size: the size of the ciphertext vector
+ */
+void djcs_t_aux_increase_prec_vec(djcs_t_public_key* pk,
+                                  EncodedNumber* res,
+                                  int target_precision,
+                                  EncodedNumber* ciphers,
+                                  int size);
+
 /***********************************************************/
 /***************** matrix related operations ***************/
 /***********************************************************/
@@ -268,6 +297,24 @@ void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
     int cipher_column_size,
     int plain_row_size,
     int plain_column_size);
+
+/**
+ * this function increases the precision of a ciphertext matrix,
+ * for computing homomorphic addition when the precision does not match
+ *
+ * @param pk: public key
+ * @param res: resulted ciphertext vector
+ * @param target_precision: the precision to be reached
+ * @param cipher_mat: the ciphertext matrix
+ * @param row_size: the number of rows in the matrix
+ * @param column_size: the number of columns in the matrix
+ */
+void djcs_t_aux_increase_prec_mat(djcs_t_public_key* pk,
+                                  EncodedNumber** res,
+                                  int target_precision,
+                                  EncodedNumber** cipher_mat,
+                                  int row_size,
+                                  int column_size);
 
 /**
  * copy a djcs_t public key from src to dest
