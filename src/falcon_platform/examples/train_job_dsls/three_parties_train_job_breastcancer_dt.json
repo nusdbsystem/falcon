@@ -66,8 +66,8 @@
         }
       },
       "output_configs": {
-        "trained_model": "202203111156.pb",
-        "evaluation_report": "202203111156_dt_breast_cancer_report.txt"
+        "trained_model": "vfl_decision_tree.pb",
+        "evaluation_report": "vfl_decision_tree.txt"
       }
     }
   }

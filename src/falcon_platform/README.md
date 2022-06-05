@@ -124,7 +124,7 @@ The console outputs are captured in `src/falcon_platform/falcon_logs/` folder:
    # UCI tele-marketing bank dataset
    python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_banktele.json
    # UCI breast cancer dataset
-   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_breastcancer.json
+   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_breastcancer_lr.json
    ```
 
 3. kill job:

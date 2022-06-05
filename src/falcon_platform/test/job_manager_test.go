@@ -123,7 +123,7 @@ func TestTaskPredict(t *testing.T) {
 
 	logger.Log, logger.LogFile = logger.GetLogger("./TestSubProc")
 
-	dsl := "/Users/kevin/project_golang/src/github.com/falcon/src/falcon_platform/examples/test_template/three_parties_lime_job_breastcancer_lr2.json"
+	dsl := "/Users/kevin/project_golang/src/github.com/falcon/src/falcon_platform/examples/full_template/three_parties_lime_job_breastcancer_lr_predict.json"
 	workerPortList := []common.PortType{22114, 22119, 22124}
 	ExecutorExecutorPortList := [][]common.PortType{{22115, 22116, 22117}, {22120, 22121, 22122}, {22125, 22126, 22127}}
 	MpcMpcPortList := []common.PortType{22118, 22123, 22128}
