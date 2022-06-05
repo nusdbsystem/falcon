@@ -58,7 +58,7 @@ func (this *LimeWeightTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 	distRole := fLConfig.WorkerRole[wk.PartyID][wk.WorkerID]
 
 	partyType := common.ConvertPartyType2Int(job.PartyInfoList[wk.PartyIndex].PartyType)
-	flSetting := common.ConvertPartyType2Int(job.JobFlType)
+	flSetting := common.ConvertJobFlType2Int(job.JobFlType)
 
 	// 3. generate many files store etc
 	modelInputFile := common.TaskDataPath + "/" + job.Tasks.LimeWeight.InputConfigs.DataInput.Data

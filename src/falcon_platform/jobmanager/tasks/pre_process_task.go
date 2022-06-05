@@ -54,7 +54,7 @@ func (this *PreProcessTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 	logger.Log.Println("[TrainWorker]: begin tasks pre-processing")
 
 	partyType := common.ConvertPartyType2Int(job.PartyInfoList[wk.PartyIndex].PartyType)
-	flSetting := common.ConvertPartyType2Int(job.JobFlType)
+	flSetting := common.ConvertJobFlType2Int(job.JobFlType)
 
 	// 3. generate many files store etc
 	dataInputFile := common.TaskDataPath + "/" + job.Tasks.PreProcessing.InputConfigs.DataInput.Data

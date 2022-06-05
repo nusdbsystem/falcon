@@ -15,11 +15,11 @@ import (
 // init register all existing tasks.
 func init() {
 	allTasks = GetAllTasks()
-	allTasks[common.MpcTaskKey] = new(MpcTaskArgs)
+	allTasks[common.MpcTaskKey] = new(MpcTask)
 }
 
-// MpcTaskArgs used to run the Mpc tasks
-type MpcTaskArgs struct {
+// MpcTask used to run the Mpc tasks
+type MpcTask struct {
 	TaskAbstract
 }
 
@@ -41,14 +41,14 @@ type MpcTaskArgs struct {
 //	-14000 端口用于和所有executor通信，默认是14000，
 //	if there is -ip, no need host ip?
 // * @return
-func (this *MpcTaskArgs) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
+func (this *MpcTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 
 	wk := taskInfo.Wk
 	fLConfig := (*taskInfo.FLNetworkCfg).(*comms_pattern.FLNetworkCfg)
 	//job := taskInfo.Job
 
 	partyId := strconv.Itoa(int(wk.PartyID))
-	partyNum := strconv.Itoa(int(wk.PartyID))
+	partyNum := strconv.Itoa(int(taskInfo.Job.PartyNums))
 	mpcPairNetworkCfg := fLConfig.MpcPairNetworkCfg[wk.WorkerID]
 	mpcExecutorNetworkCfg := fLConfig.MpcExecutorNetworkCfg[wk.WorkerID][wk.PartyIndex]
 	algName := taskInfo.MpcAlgName
@@ -117,6 +117,6 @@ func (this *MpcTaskArgs) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 	return cmd
 }
 
-func (this *MpcTaskArgs) GetRpcCallMethodName() string {
+func (this *MpcTask) GetRpcCallMethodName() string {
 	return "RunMpc"
 }
