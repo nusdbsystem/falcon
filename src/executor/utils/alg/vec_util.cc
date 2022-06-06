@@ -39,3 +39,22 @@ std::vector<std::vector<double>> expend_1d_vector(const std::vector<double>& vec
 
   return ret_mat;
 }
+
+std::vector<std::vector<double>> trans_mat(const std::vector<std::vector<double>>& mat) {
+  if (mat.empty()) {
+    log_error("The 2d vector to be transposed is empty.");
+    exit(EXIT_FAILURE);
+  }
+  int row_size = (int) mat.size();
+  int column_size = (int) mat[0].size();
+  std::vector<std::vector<double>> trans_mat;
+  for (int j = 0; j < column_size; j++) {
+    std::vector<double> vec;
+    vec.reserve(row_size);
+    for (int i = 0; i < row_size; i++) {
+      vec.push_back(mat[i][j]);
+    }
+    trans_mat.push_back(vec);
+  }
+  return trans_mat;
+}

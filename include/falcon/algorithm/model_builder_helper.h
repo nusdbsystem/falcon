@@ -109,4 +109,20 @@ void encode_samples(
     EncodedNumber** encoded_samples,
     int precision = PHE_FIXED_POINT_PRECISION);
 
+/**
+ * get the two-dimensional encrypted true labels
+ *
+ * @param party: initialized party object
+ * @param output_layer_size: the number of neurons of the last layer (decide regression or classification)
+ * @param plain_batch_labels: the plaintext batch labels
+ * @param batch_true_labels: the encrypted batch true labels
+ * @param precision: the precision of the returned batch_true_labels
+ */
+void get_encrypted_2d_true_labels(
+    const Party& party,
+    int output_layer_size,
+    const std::vector<double>& plain_batch_labels,
+    EncodedNumber** batch_true_labels,
+    int precision);
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BUILDER_HELPER_H_

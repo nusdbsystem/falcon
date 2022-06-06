@@ -110,9 +110,10 @@ void MlpBuilder::backward_computation(
   // 1. compute the last layer's delta, dim = (n_samples, n_outputs)
   // if the activation function of the output layer matches the loss function
   // the deltas of the last layer is [activation_output - y] for each sample in the batch
+  // [ref] https://github.com/scikit-learn/scikit-learn/issues/7122
   // note that the dimension of and the output layer shares and y is (n_samples, n_outputs)
-  compute_last_layer_delta(party, predicted_labels, deltas,
-                           activation_shares[last_layer_idx]);
+  compute_last_layer_delta(party, predicted_labels, deltas, batch_indexes);
+
   // 2. compute the grads and intercepts of the last layer
   compute_loss_grad(party,
                     last_layer_idx,
@@ -150,7 +151,64 @@ void MlpBuilder::compute_last_layer_delta(
     const Party &party,
     EncodedNumber **predicted_labels,
     std::vector<EncodedNumber **> &deltas,
-    const std::vector<std::vector<double>> &last_layer_activation_shares) {
+    const std::vector<int> &batch_indexes) {
+  log_info("[compute_last_layer_delta] computing the last layer delta");
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  int prec = (int) std::abs(predicted_labels[0][0].getter_exponent());
+  int cur_sample_size = (int) batch_indexes.size();
+  int output_layer_size = mlp_model.m_num_outputs;
+  auto** delta = new EncodedNumber*[cur_sample_size];
+  for (int i = 0; i < cur_sample_size; i++) {
+    delta[i] = new EncodedNumber[output_layer_size];
+  }
+  // active party retrieve the batch true labels
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::vector<double> plain_batch_labels;
+    for (int i = 0; i < cur_sample_size; i++) {
+      plain_batch_labels.push_back(training_labels[batch_indexes[i]]);
+    }
+    auto** batch_true_labels = new EncodedNumber*[cur_sample_size];
+    for (int i = 0; i < cur_sample_size; i++) {
+      batch_true_labels[i] = new EncodedNumber[output_layer_size];
+    }
+    get_encrypted_2d_true_labels(party, output_layer_size,
+                                 plain_batch_labels, batch_true_labels, prec);
+    int neg_one = -1;
+    EncodedNumber enc_neg_one;
+    enc_neg_one.set_integer(phe_pub_key->n[0], neg_one);
+    for (int i = 0; i < cur_sample_size; i++) {
+      for (int j = 0; j < output_layer_size; j++) {
+        // compute [0 - y_t]
+        djcs_t_aux_ep_mul(phe_pub_key,
+                          batch_true_labels[i][j],
+                          batch_true_labels[i][j],
+                          enc_neg_one);
+        // compute phe addition [pred - y_t] and assign to delta
+        djcs_t_aux_ee_add(phe_pub_key, delta[i][j],
+                          predicted_labels[i][j],
+                          batch_true_labels[i][j]);
+      }
+    }
+
+    // free memory
+    for (int i = 0; i < cur_sample_size; i++) {
+      delete [] batch_true_labels[i];
+    }
+    delete [] batch_true_labels;
+  }
+  broadcast_encoded_number_matrix(party, delta,
+                                  cur_sample_size, output_layer_size, ACTIVE_PARTY_ID);
+  deltas.push_back(delta);
+
+  // free memory
+  for (int i = 0; i < cur_sample_size; i++) {
+    delete [] delta[i];
+  }
+  delete [] delta;
+  djcs_t_free_public_key(phe_pub_key);
 
 }
 
@@ -163,7 +221,21 @@ void MlpBuilder::compute_loss_grad(
     std::vector<EncodedNumber **> &deltas,
     std::vector<EncodedNumber **> &weight_grads,
     std::vector<EncodedNumber *> &bias_grads) {
+  // [ref] sklearn:
+  //    coef_grads[layer] = safe_sparse_dot(activations[layer].T, deltas[layer])
+  //    coef_grads[layer] += self.alpha * self.coefs_[layer]
+  //    coef_grads[layer] /= n_samples
+  //    intercept_grads[layer] = np.mean(deltas[layer], 0)
+  // the description steps are as follows:
+  //    1. compute the gradient using activation shares and delta of the layer
+  //    2. add the gradient of the l2 regularization term
+  //    3. divide the number of samples to get the average gradient
+  //    4. compute the gradient for the bias term
+  std::vector<std::vector<double>> layer_act_shares = activation_shares[layer_idx];
+  auto delta = deltas[layer_idx];
 
+
+  delete [] delta;
 }
 
 void MlpBuilder::update_layer_delta(
@@ -173,7 +245,9 @@ void MlpBuilder::update_layer_delta(
     const TripleDVec &activation_shares,
     const TripleDVec &deriv_activation_shares,
     std::vector<EncodedNumber **> &deltas) {
-
+  // [ref] sklearn:
+  //    deltas[i - 1] = safe_sparse_dot(deltas[i], self.coefs_[i].T)
+  //    inplace_derivative(activations[i], deltas[i - 1])
 }
 
 void MlpBuilder::update_encrypted_weights(

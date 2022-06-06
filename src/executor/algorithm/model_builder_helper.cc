@@ -187,14 +187,14 @@ void compute_encrypted_residual(const Party& party,
   // and sent it to other parties
   if (party.party_type == falcon::ACTIVE_PARTY) {
     int neg_one = -1;
-    EncodedNumber EncodedNegOne;
-    EncodedNegOne.set_integer(phe_pub_key->n[0], neg_one);
+    EncodedNumber enc_neg_one;
+    enc_neg_one.set_integer(phe_pub_key->n[0], neg_one);
     for (int i = 0; i < cur_batch_size; i++) {
       // compute [0-y_t]
       djcs_t_aux_ep_mul(phe_pub_key,
                         batch_true_labels[i],
                         batch_true_labels[i],
-                        EncodedNegOne);
+                        enc_neg_one);
       // compute phe addition [f_t - y_t]
       djcs_t_aux_ee_add(phe_pub_key, encrypted_batch_losses[i],
                         predicted_labels[i],
@@ -227,5 +227,37 @@ void encode_samples(const Party &party,
     }
   }
 
+  djcs_t_free_public_key(phe_pub_key);
+}
+
+void get_encrypted_2d_true_labels(
+    const Party& party,
+    int output_layer_size,
+    const std::vector<double>& plain_batch_labels,
+    EncodedNumber** batch_true_labels,
+    int precision) {
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  // note that the output_layer_size implicitly specifies regression or classification
+  int cur_sample_size = (int) plain_batch_labels.size();
+  for (int i = 0; i < cur_sample_size; i++) {
+    if (output_layer_size == 1) {
+      // regression
+      batch_true_labels[i][0].set_double(phe_pub_key->n[0], plain_batch_labels[i], precision);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random, batch_true_labels[i][0], batch_true_labels[i][0]);
+    } else {
+      // classification, the label is actually the index that to set 1.0
+      int true_label_idx = (int) plain_batch_labels[i];
+      for (int j = 0; j < output_layer_size; j++) {
+        if (j == true_label_idx) {
+          batch_true_labels[i][j].set_double(phe_pub_key->n[0], 1.0, precision);
+        } else {
+          batch_true_labels[i][j].set_double(phe_pub_key->n[0], 0.0, precision);
+        }
+        djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
+                           batch_true_labels[i][j], batch_true_labels[i][j]);
+      }
+    }
+  }
   djcs_t_free_public_key(phe_pub_key);
 }

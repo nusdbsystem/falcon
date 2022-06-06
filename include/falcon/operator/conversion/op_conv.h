@@ -97,4 +97,28 @@ void ciphers_multi(const Party& party, EncodedNumber* res,
                    EncodedNumber* ciphers1, EncodedNumber* ciphers2,
                    int size, int req_party_id);
 
+/**
+   * This function compute the cipher and secret shares multiplication
+   * each party holds a secret share matrix and the same ciphers
+   *
+   * @param party: initialized party object
+   * @param shares: secret shares that held by parties
+   * @param ciphers: the common ciphers for multiplication
+   * @param n_shares_row: the number of rows in shares
+   * @param n_shares_col: the number columns in shares
+   * @param n_ciphers_row: the number of rows in ciphers
+   * @param n_ciphers_col: the number of columns in ciphers
+   * @param ret: the returned result, dim = (n_shares_col, n_ciphers_col)
+   * @param ret_prec: the precision of the returned result
+   */
+void cipher_shares_mat_mul(const Party& party,
+                           const std::vector<std::vector<double>>& shares,
+                           EncodedNumber** ciphers,
+                           int n_shares_row,
+                           int n_shares_col,
+                           int n_ciphers_row,
+                           int n_ciphers_col,
+                           EncodedNumber** ret,
+                           int& ret_prec);
+
 #endif //FALCON_INCLUDE_FALCON_OPERATOR_CONVERSION_OP_CONV_H_

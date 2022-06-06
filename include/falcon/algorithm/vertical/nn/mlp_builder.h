@@ -146,13 +146,13 @@ class MlpBuilder : public ModelBuilder {
    * @param party: initialized party object
    * @param predicted_labels: the predicted labels
    * @param deltas: the deviations
-   * @param last_layer_activation_shares: the last layer activation shares
+   * @param batch_indexes: the last layer activation shares
    */
   void compute_last_layer_delta(
       const Party& party,
       EncodedNumber** predicted_labels,
       std::vector<EncodedNumber**>& deltas,
-      const std::vector<std::vector<double>>& last_layer_activation_shares);
+      const std::vector<int> &batch_indexes);
 
   /**
    * compute the gradients of a layer
