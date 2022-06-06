@@ -159,6 +159,7 @@ RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN git config --global http.sslVerify false
 
 # Clone Falcon and init submodules
+RUN echo "update the falcon repository"
 WORKDIR /opt
 RUN git clone git@github.com:lemonviv/falcon.git && \
     cd falcon && \
@@ -176,11 +177,14 @@ RUN cd third_party/libhcs && \
 # Install third_party MP-SPDZ library
 WORKDIR /opt/falcon
 RUN cd third_party/MP-SPDZ && \
+    mv CONFIG.mine.prod CONFIG.mine && \
     mv Math/Setup.h.prod Math/Setup.h && \
     make mpir && \
     bash fast-make.sh && \
     Scripts/setup-clients.sh 3 && \
     ./compile.py Programs/Source/logistic_regression.mpc && \
+    ./compile.py Programs/Source/linear_regression.mpc && \
+    ./compile.py Programs/Source/lime.mpc && \
     ./compile.py Programs/Source/vfl_decision_tree.mpc && \
     ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
 
@@ -202,8 +206,8 @@ RUN cd /opt/falcon/src/executor/include/proto && \
 
 # build the falcon executor
 WORKDIR /opt/falcon
-RUN git pull && \
-    export PATH="$PATH:$HOME/.local/bin" && \
+RUN git pull
+RUN export PATH="$PATH:$HOME/.local/bin" && \
     mkdir build && \
     cmake -Bbuild -H. && \
     cd build/ && \
@@ -219,8 +223,6 @@ COPY --from=build /usr/local /usr/local
 COPY --from=build /usr/bin /usr/bin
 COPY --from=build /usr/lib /usr/lib
 COPY --from=build /root/.ssh /root/.ssh
-
-COPY cmd.sh /opt/falcon/
 
 RUN apt-get update && apt-get upgrade -y && \
         apt-get install -y --no-install-recommends \
@@ -252,7 +254,19 @@ RUN bash make_platform.sh
 WORKDIR /opt/falcon/third_party/MP-SPDZ
 RUN c_rehash Player-Data/
 
+# need to copy the experiment folder in the docker folder before copy
+# ADD experiments/ /opt/falcon/
+
 # Define working directory.
 WORKDIR /opt/falcon
+RUN echo "re-build third-party mp-spdz"
 COPY cmd_clean_code.sh /opt/falcon/
+
+# make third party MP-SPDZ
+RUN cd third_party/MP-SPDZ && \
+    bash fast-make.sh
+
+# Define working directory.
+WORKDIR /opt/falcon
+RUN git pull origin clean_code && bash make.sh
 CMD ["bash", "cmd_clean_code.sh"]
