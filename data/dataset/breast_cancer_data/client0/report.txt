@@ -1,0 +1,38 @@
+The training accuracy of this model is: 0.920879
+The testing accuracy of this model is: 0.929825
+******** Evaluation Report on training dataset ********
+Confusion Matrix (Class 1 is Positive Class)
+               Pred
+               Class1    Class0
+True Class1    282        1
+     Class0    45        127
+=== Classification Report ===
+False negative (FN) = 1
+False positive (FP) = 45
+True positive (TP) = 282
+True negative (TN) = 127
+regular_accuracy = 0.89890109890109893
+balanced_accuracy = 0.86741926205933106
+sensitivity = 0.99646643109540634
+specificity = 0.73837209302325579
+precision (PPV) = 0.86238532110091748
+NPV = 0.9921875
+F1 score = 0.92459016393442628
+******** Evaluation Report on testing dataset ********
+Confusion Matrix (Class 1 is Positive Class)
+               Pred
+               Class1    Class0
+True Class1    73        1
+     Class0    7        33
+=== Classification Report ===
+False negative (FN) = 1
+False positive (FP) = 7
+True positive (TP) = 73
+True negative (TN) = 33
+regular_accuracy = 0.92982456140350878
+balanced_accuracy = 0.90574324324324329
+sensitivity = 0.98648648648648651
+specificity = 0.82499999999999996
+precision (PPV) = 0.91249999999999998
+NPV = 0.97058823529411764
+F1 score = 0.94805194805194803
