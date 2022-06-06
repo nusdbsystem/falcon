@@ -160,7 +160,7 @@ RUN git config --global http.sslVerify false
 
 # Clone Falcon and init submodules
 WORKDIR /opt
-RUN git clone git@github.com:NLGithubWP/falcon.git && \
+RUN git clone git@github.com:lemonviv/falcon.git && \
     cd falcon && \
     git checkout clean_code && \
     cd third_party/ && \

@@ -39,7 +39,7 @@
   ],
   "distributed_task": {
     "enable": 0,
-    "worker_number": 2
+    "worker_number": 1
   },
   "tasks": {
     "model_training": {
@@ -52,7 +52,7 @@
         },
         "algorithm_config": {
           "batch_size": 8,
-          "max_iteration": 10,
+          "max_iteration": 200,
           "convergence_threshold": 0.0001,
           "with_regularization": false,
           "alpha": 0.1,

@@ -37,6 +37,10 @@
       }
     }
   ],
+  "distributed_task": {
+    "enable": 0,
+    "worker_number": 1
+  },
   "tasks": {
     "model_training": {
       "mpc_algorithm_name": "vfl_decision_tree",

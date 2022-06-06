@@ -102,7 +102,7 @@ func (wk *TrainWorker) DoTask(args string, rep *entity.DoTaskReply) error {
 
 	// if the task is registered,
 	if task, ok := tasks.GetAllTasks()[taskName]; ok {
-		wk.runTask(task, taskArg)
+		wk.runTask(task, taskArg, wk.Tm)
 		update()
 		return nil
 	} else {
@@ -115,12 +115,12 @@ func (wk *TrainWorker) DoTask(args string, rep *entity.DoTaskReply) error {
 }
 
 // runTask execute a given tasks .
-func (wk *TrainWorker) runTask(task tasks.Task, taskArg *entity.TaskContext) {
+func (wk *TrainWorker) runTask(task tasks.Task, taskArg *entity.TaskContext, tm *resourcemanager.ResourceManager) {
 
 	cmd := task.GetCommand(taskArg)
 	// by default, worker will launch executor resource by sub process
 	if common.IsDebug != common.DebugOn {
-		wk.Tm.CreateResources(resourcemanager.InitSubProcessManager(), cmd)
+		tm.CreateResources(resourcemanager.InitSubProcessManager(), cmd)
 	} else {
 		time.Sleep(10 * time.Second)
 	}
@@ -167,7 +167,7 @@ func (wk *TrainWorker) RunMpc(args string, rep *entity.DoTaskReply) error {
 	logger.Log.Println("[TrainWorker]: spawn thread for mpc")
 	go func() {
 		defer logger.HandleErrors()
-		wk.runTask(task, taskArg)
+		wk.runTask(task, taskArg, wk.MpcTm)
 	}()
 	// wait 4 seconds until starting ./semi-party.x return tasks-running or tasks-failed
 	time.Sleep(time.Second * 5)

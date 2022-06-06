@@ -123,7 +123,7 @@ func TestTaskPredict(t *testing.T) {
 
 	logger.Log, logger.LogFile = logger.GetLogger("./TestSubProc")
 
-	dsl := "/Users/kevin/project_golang/src/github.com/falcon/src/falcon_platform/examples/full_template/three_parties_lime_job_breastcancer_lr_predict.json"
+	dsl := "/Users/kevin/project_golang/src/github.com/falcon/src/falcon_platform/examples/full_template/inference_dsl/three_parties_lime_job_breastcancer_lr_predict.json"
 	workerPortList := []common.PortType{22114, 22119, 22124}
 	ExecutorExecutorPortList := [][]common.PortType{{22115, 22116, 22117}, {22120, 22121, 22122}, {22125, 22126, 22127}}
 	MpcMpcPortList := []common.PortType{22118, 22123, 22128}
@@ -181,6 +181,10 @@ func TestTaskPredict(t *testing.T) {
 	mpcCmdStr := mpc.GetCommand(mpcTaskInfo).String()
 	expectedStr1 := "/opt/falcon/third_party/MP-SPDZ/semi-party.x -F -N 3 -p 0 -I -ip /opt/falcon/third_party/MP-SPDZ/mpc-network-0 logistic_regression"
 	assert.Equal(t, mpcCmdStr, expectedStr1, "Prediction MPC command is not correct ")
+
+	// test executing
+	MpcTm := resourcemanager.InitResourceManager()
+	MpcTm.CreateResources(resourcemanager.InitSubProcessManager(), mpc.GetCommand(mpcTaskInfo))
 
 	lptCmdStr := lpt.GetCommand(taskInfo).String()
 	expectedStr2 := "/opt/falcon/build/src/executor/falcon --party-id 0 --party-num 3 --party-type 0 --fl-setting 1 --network-file CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCeOsAeSsAeWsARILCgnorAHprAHqrAESCwoJ7awB7qwB76wBGgsKCYiFA4iFA4iFAw== --log-file /opt/falcon/src/falcon_platform/falcon_logs/Party-0_20220603_205609/runtime_logs/pty0-cent-worker8-job8-tr-pred-task-stage-lime_compute_prediction/centralized_worker --data-input-file /dataPath/client.txt --data-output-file /dataOutputPath --existing-key 1 --key-file /dataPath/phe_keys --algorithm-name lime_compute_prediction --algorithm-params ChNsb2dpc3RpY19yZWdyZXNzaW9uEhcvbG9nX3JlZy9zYXZlZF9tb2RlbC5wYhoZL2xvZ19yZWcvc2FtcGxlZF9kYXRhLnR4dCIOY2xhc3NpZmljYXRpb24oAjIYL2xvZ19yZWcvcHJlZGljdGlvbnMudHh0 --model-save-file /modelPath/saved_model.pb --model-report-file /modelPath/report.txt --is-inference 0 --inference-endpoint 0 --is-distributed 0 --distributed-train-network-file 0 --worker-id 0 --distributed-role 2"
