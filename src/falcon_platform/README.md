@@ -41,17 +41,11 @@ Update configurations in
 - `src/falcon_platform/config_coord.properties` for Coordinator server configs
 - `src/falcon_platform/config_partyserver.properties` for Party server configs
 
-Supply your configurations in those `.properties` files such as
-- `JOB_DATABASE`
-- `LOG_PATH`
-- `COORD_SERVER_IP`
-- `PARTY_SERVER_IP`
-- ...
-
-## Platform setup Debug (development for debugging, capture console's outputs in terminal)
-
+Supply your configurations in those `.properties` files
+## Platform setup Debug
 
 **Simply call the `debug_coord.sh` script**:
+
 ```bash
 # launch the coordinator 
 bash scripts/debug_coord.sh
@@ -64,7 +58,7 @@ bash scripts/debug_coord.sh
 bash scripts/debug_partyserver.sh --partyID 1 
 ```
 
-## Platform setup DEV (development without k8)
+## Platform setup DEV ( without k8)
 
 
 **Simply call the `dev_start_all.sh` script**:
@@ -78,14 +72,8 @@ To terminate the platform, call:
 bash scripts/dev_terminate_all.sh --partyCount <PARTY_COUNT>
 ```
 
-The console outputs are captured in `src/falcon_platform/falcon_logs/` folder:
-- `Coord_TIMESTAMP/Coord-console.log`
-- `Party-0_TIMESTAMP/Party-0-console.log`
-- `Party-1_TIMESTAMP/Party-1-console.log`
-- `Party-2_TIMESTAMP/Party-2-console.log`
 
-
-## Platform setup PROD (production with k8)
+## Platform setup PROD ( with k8)
 
 0. docker image is upload, if u wanna build yourself, try with:
 
@@ -110,6 +98,18 @@ The console outputs are captured in `src/falcon_platform/falcon_logs/` folder:
     ```bash
     bash scripts/start_partyserver.sh
     ```
+
+## UnitTest
+
+To test all existing features, after building a cluster. 
+
+1. Put all ready-to-be-tested DSL in a folder
+2. Update the folder name in execute_dsls.sh
+3. Go to the `falcon/src/falcon_platform` folder and run the following
+
+```bash
+bash scripts/execute_dsls.sh
+```
 
 ## Interact with the platform (submit jobs, monitor jobs etc)
 
@@ -162,31 +162,5 @@ curl -i http://127.0.0.1:30004/api/submit-train-job \
     platform setup log is at `$LOG_PATH/logs/` ,
     db is at     `falcon_logs/coord/falcon.db` 
     
+
 The folder architecture is:
-```bash
-    falcon_logs/
-    ├── coord
-    │   ├── falcon.db
-    │   └── runtime_logs
-    │       └── coord2020-12-27T14:47:31.logs
-    ├── party1
-    │   ├── data_input
-    │   ├── data_output
-    │   ├── logs
-    │   │   └── runtime_logs
-    │   │       └── partyserver2020-12-27T14:47:50.logs
-    │   └── trained_models
-    ├── party2
-    │   ├── data_input
-    │   ├── data_output
-    │   ├── logs
-    │   │   └── runtime_logs
-    │   │       └── partyserver2020-12-27T14:47:45.logs
-    │   └── trained_models
-    └── party3
-        ├── data_input
-        ├── data_output
-        ├── logs
-        └── trained_models
-    ...
-```
