@@ -124,7 +124,7 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 
 func (sp *ParallelismSchedulePolicy) updateSingleStageParallelism(stageName common.FalconTask, workerNum int) {
 
-	if stageName == common.TrainJobFileKey {
+	if stageName == common.ModelTrainTaskKey {
 		sp.ModelTrainParallelism = workerNum
 	}
 

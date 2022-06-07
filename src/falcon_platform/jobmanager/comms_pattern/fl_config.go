@@ -79,7 +79,7 @@ func (this *FLNetworkCfgPerParty) Constructor(partyNum int, workerId common.Work
 		newCfg.DistributedRole = common.DistributedWorker
 		return EncodeFLNetworkCfgPerParty(newCfg)
 	}
-	panic("Generatt FLNetworkCfgPerParty fail, role not match any ")
+	panic("Generate FLNetworkCfgPerParty fail, role not match any ")
 }
 
 // FLNetworkCfg aggregate from all party, and generate this summarty.
@@ -274,15 +274,15 @@ func (this *FLNetworkCfg) Constructor(encodeStr [][]byte, PartyNums uint, masLog
 
 		for workerID, svc := range requiredResource[i].ResourceSVCs {
 			flConfig := DecodeFLNetworkCfgPerParty(svc.JobNetCfg)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.WorkerId: %d\n", i, workerID, svc, svc.WorkerId)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d\n", i, workerID, svc)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ResourceIP: %s\n", i, workerID, svc, svc.ResourceIP)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.WorkerPort: %d\n", i, workerID, svc, svc.WorkerPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorExecutorPort: %d\n", i, workerID, svc, flConfig.ExecutorExecutorPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcMpcPort: %d\n", i, workerID, svc, flConfig.MpcMpcPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.MpcExecutorPort: %d\n", i, workerID, svc, flConfig.MpcExecutorPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.ExecutorPSPort: %d\n", i, workerID, svc, flConfig.ExecutorPSPort)
-			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, %d, ResourceSVCs.DistributedRole: %s\n", i, workerID, svc, common.DistributedRoleToName(flConfig.DistributedRole))
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.WorkerId: %d\n", i, workerID, svc.WorkerId)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d  .\n", i, workerID)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.ResourceIP: %s\n", i, workerID, svc.ResourceIP)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.WorkerPort: %d\n", i, workerID, svc.WorkerPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.ExecutorExecutorPort: %d\n", i, workerID, flConfig.ExecutorExecutorPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.MpcMpcPort: %d\n", i, workerID, flConfig.MpcMpcPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.MpcExecutorPort: %d\n", i, workerID, flConfig.MpcExecutorPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.ExecutorPSPort: %d\n", i, workerID, flConfig.ExecutorPSPort)
+			masLogger.Printf("[Master.extractResourceInfo] party %d, workerID %d, ResourceSVCs.DistributedRole: %s\n", i, workerID, common.DistributedRoleToName(flConfig.DistributedRole))
 		}
 	}
 

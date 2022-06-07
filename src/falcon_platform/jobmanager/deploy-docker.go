@@ -29,7 +29,8 @@ func deployJobManagerDocker(job *common.TrainJob, workerType string) {
 func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string,
 	resourceSVC *fl_comms_pattern.ResourceSVC, nodeLabel string, stage string) {
 
-	stageName := strings.Join(strings.Split(stage, "_")[1:], "-")
+	rawStageName := strings.Split(stage, "_")[0]
+	//stageName := strings.Join(strings.Split(stage, "_")[1:], "-")
 
 	workerAddr := resourceSVC.ToAddr(resourceSVC.WorkerPort)
 
@@ -38,16 +39,11 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 	var localTaskRuntimeLogs string
 	if workerType == common.TrainWorker {
 		//nsec := time.Now().UnixNano() // number of nanoseconds since January 1, 1970 UTC
-		serviceName = fmt.Sprintf("job%s-pty%d-wk%d-%s", jobId, common.PartyID, resourceSVC.WorkerId, stageName)
+		serviceName = fmt.Sprintf("job%s-pty%d-wk%d-%s", jobId, common.PartyID, resourceSVC.WorkerId, rawStageName)
 		localTaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
 		logger.Log.Println("[JobManager]: Current in docker, TrainWorker, svcName", serviceName)
 
 	} else if workerType == common.InferenceWorker {
-		serviceName =
-			"party" + fmt.Sprintf("%d-", common.PartyID) +
-				fmt.Sprintf("%d", resourceSVC.WorkerId) +
-				"-job" + jobId +
-				"-predict-" + stageName
 		localTaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
 		logger.Log.Println("[JobManager]: Current in docker, InferenceWorker, svcName", serviceName)
 	}

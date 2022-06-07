@@ -54,7 +54,7 @@ func (this *ModelTrainTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 
 	this.printParams(job.Tasks.ModelTraining.AlgorithmName, job)
 
-	logger.Log.Println("[TrainWorker]: begin tasks model training")
+	logger.Log.Printf("[TrainWorker]: begin tasks model training, dslRole %s\n", fLConfig.WorkerRole)
 
 	distRole := fLConfig.WorkerRole[wk.PartyID][wk.WorkerID]
 

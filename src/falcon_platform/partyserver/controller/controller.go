@@ -7,6 +7,7 @@ import (
 	"falcon_platform/logger"
 	"falcon_platform/resourcemanager"
 	"strconv"
+	"strings"
 )
 
 /**
@@ -42,6 +43,8 @@ func RunWorker(masterAddr, workerType,
 		"[PartyServer]: PartyServer setup workers,  = ",
 		" workerNum = ", workerNum, "TaskClassIDName=", TaskClassIDName)
 
+	rawStageName := strings.Split(TaskClassIDName, "_")[0]
+
 	// centralized way
 	if workerNum <= 2 {
 		logger.Log.Println("[PartyServer]: PartyServer setup one worker for centralized training")
@@ -72,7 +75,7 @@ func RunWorker(masterAddr, workerType,
 		} else if common.Deployment == common.Docker {
 			nodeLabel := common.PartyServerClusterLabels[nodeID]
 			jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-				dataOutput, resourceSVC, nodeLabel, TaskClassIDName)
+				dataOutput, resourceSVC, nodeLabel, rawStageName+"-centralized")
 
 		} else if common.Deployment == common.K8S {
 			jobmanager.DeployWorkerK8s(masterAddr, workerType, jobId, dataPath, modelPath,
@@ -103,7 +106,7 @@ func RunWorker(masterAddr, workerType,
 		resourceSVC.ResourceIP = nodeIP
 		resourceSVC.WorkerPort = resourcemanager.GetOneFreePort()
 
-		resourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, TaskClassIDName, common.DistributedParameterServer, workerNum)
+		resourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, rawStageName+"-dist-ps", common.DistributedParameterServer, workerNum)
 
 		reply.ResourceSVCs[workerId] = resourceSVC
 		if common.Deployment == common.Docker {
@@ -129,33 +132,33 @@ func RunWorker(masterAddr, workerType,
 			logger.Log.Printf("[PartyServer]: PartyServer setup one worker %d as train worker "+
 				"to conduct distributed training\n", workerId)
 
-			nodeID := schedule(workerId)
-			nodeIP := common.PartyServerClusterIPs[nodeID]
+			wkNodeID := schedule(workerId)
+			wkNodeIP := common.PartyServerClusterIPs[wkNodeID]
 
 			// init resourceSVC information
-			resourceSVC := new(comms_pattern.ResourceSVC)
-			resourceSVC.WorkerId = workerId
-			resourceSVC.ResourceIP = nodeIP
-			resourceSVC.WorkerPort = resourcemanager.GetOneFreePort()
+			wkResourceSVC := new(comms_pattern.ResourceSVC)
+			wkResourceSVC.WorkerId = workerId
+			wkResourceSVC.ResourceIP = wkNodeIP
+			wkResourceSVC.WorkerPort = resourcemanager.GetOneFreePort()
 
-			resourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, TaskClassIDName, common.DistributedWorker, workerNum)
+			wkResourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, rawStageName+"-dist-worker", common.DistributedWorker, workerNum)
 
-			reply.ResourceSVCs[workerId] = resourceSVC
+			reply.ResourceSVCs[workerId] = wkResourceSVC
 
 			logger.Log.Printf("[PartyServer]: PartyServer setup one worker as train worker with workerID=%d to "+
 				"conduct distributed training\n", workerId)
 
 			if common.Deployment == common.Docker {
-				nodeLabel := common.PartyServerClusterLabels[nodeID]
+				nodeLabel := common.PartyServerClusterLabels[wkNodeID]
 				jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-					dataOutput, resourceSVC, nodeLabel, TaskClassIDName)
+					dataOutput, wkResourceSVC, nodeLabel, TaskClassIDName)
 
 			} else {
 
 				if common.IsDebug == common.DebugOn {
-					resourceSVC.ResourceIP = common.PartyServerIP
+					wkResourceSVC.ResourceIP = common.PartyServerIP
 					jobmanager.DeployWorkerThread(masterAddr, workerType, jobId, dataPath, modelPath,
-						dataOutput, resourceSVC)
+						dataOutput, wkResourceSVC)
 
 				} else {
 					logger.Log.Printf("[PartyServer]: Deployment %s not supported in distributed training\n",
