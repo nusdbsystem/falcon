@@ -43,12 +43,12 @@ type LimePredictTask struct {
 //	("distributed-train-network-file", po::value<string>(&distributed_network_file), "ps network file");
 //	("worker-id", po::value<int>(&worker_id), "worker id");
 //	("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0");
-func (this *LimePredictTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
+func (this *LimePredictTask) GetCommand(taskInfo *entity.TaskContext) (*exec.Cmd, error) {
 
 	wk := taskInfo.Wk
 	fLConfig, err := comms_pattern.DeserializeFLNetworkCfg([]byte(taskInfo.FLNetworkCfg))
 	if err != nil {
-		panic("Decode task error")
+		return nil, err
 	}
 	job := taskInfo.Job
 
@@ -95,7 +95,8 @@ func (this *LimePredictTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd 
 	// create log folder for this tasks
 	ee := os.MkdirAll(usedLogFile, os.ModePerm)
 	if ee != nil {
-		logger.Log.Fatalln("[PartyServer]: Creating distributed worker folder error", ee)
+		logger.Log.Println("[PartyServer]: Creating distributed worker folder error", ee)
+		return nil, ee
 	}
 
 	cmd := exec.Command(
@@ -125,6 +126,6 @@ func (this *LimePredictTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd 
 	logger.Log.Printf("---------------------------------------------------------------------------------\n")
 	logger.Log.Printf("[TrainWorker]: cmd is \"%s\"\n", cmd.String())
 	logger.Log.Printf("---------------------------------------------------------------------------------\n")
-	return cmd
+	return cmd, nil
 
 }

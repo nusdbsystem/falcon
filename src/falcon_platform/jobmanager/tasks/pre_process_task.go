@@ -43,12 +43,12 @@ type PreProcessTask struct {
 //		("distributed-train-network-file", po::value<string>(&distributed_network_file), "ps network file");
 //		("worker-id", po::value<int>(&worker_id), "worker id");
 //		("distributed-role", po::value<int>(&distributed_role), "distributed role, worker:1, parameter server:0");
-func (this *PreProcessTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
+func (this *PreProcessTask) GetCommand(taskInfo *entity.TaskContext) (*exec.Cmd, error) {
 
 	wk := taskInfo.Wk
 	fLConfig, err := comms_pattern.DeserializeFLNetworkCfg([]byte(taskInfo.FLNetworkCfg))
 	if err != nil {
-		panic("Decode task error")
+		return nil, err
 	}
 	job := taskInfo.Job
 
@@ -65,7 +65,11 @@ func (this *PreProcessTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 	logFile := common.TaskRuntimeLogs + "-" + job.Tasks.PreProcessing.AlgorithmName
 	KeyFile := common.TaskDataPath + "/" + job.Tasks.PreProcessing.InputConfigs.DataInput.Key
 
-	_ = os.MkdirAll(logFile, os.ModePerm)
+	err = os.MkdirAll(logFile, os.ModePerm)
+	if err != nil {
+		logger.Log.Println("[PartyServer]: Creating logFile error", logFile)
+		//return nil, err
+	}
 
 	// 3. generate command line
 	// this is not defined yet, since there is no such tasks right now
@@ -95,5 +99,5 @@ func (this *PreProcessTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 	// 4. execute cmd
 	logger.Log.Println("[TrainWorker]: tasks pre processing start")
 
-	return cmd
+	return cmd, nil
 }

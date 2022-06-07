@@ -41,12 +41,12 @@ type MpcTask struct {
 //	-14000 端口用于和所有executor通信，默认是14000，
 //	if there is -ip, no need host ip?
 // * @return
-func (this *MpcTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
+func (this *MpcTask) GetCommand(taskInfo *entity.TaskContext) (*exec.Cmd, error) {
 
 	wk := taskInfo.Wk
 	fLConfig, err := comms_pattern.DeserializeFLNetworkCfg([]byte(taskInfo.FLNetworkCfg))
 	if err != nil {
-		panic("Decode task error")
+		return nil, err
 	}
 	//job := taskInfo.Job
 
@@ -73,12 +73,12 @@ func (this *MpcTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 	tmpFile, err := os.Create(mpcExecutorPairNetworkCfgPath)
 	if err != nil {
 		logger.Log.Printf("[TrainWorker]: create file error, %s \n", mpcExecutorPairNetworkCfgPath)
-		//panic(err)
+		//return nil, err
 	}
 	_, err = tmpFile.WriteString(mpcPairNetworkCfg)
 	if err != nil {
 		logger.Log.Printf("[TrainWorker]: write file error, %s \n", mpcExecutorPairNetworkCfgPath)
-		//panic(err)
+		//return nil, err
 	}
 	_ = tmpFile.Close()
 
@@ -90,12 +90,12 @@ func (this *MpcTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 	tmpFile, err = os.Create(mpcExecutorPortFile)
 	if err != nil {
 		logger.Log.Printf("[TrainWorker]: create file error, %s \n", mpcExecutorPortFile)
-		//panic(err)
+		//return nil, err
 	}
 	_, err = tmpFile.WriteString(mpcExecutorNetworkCfg)
 	if err != nil {
 		logger.Log.Printf("[TrainWorker]: write file error, %s \n", mpcExecutorPortFile)
-		//panic(err)
+		//return nil, err
 	}
 	_ = tmpFile.Close()
 
@@ -117,7 +117,7 @@ func (this *MpcTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd {
 	logger.Log.Printf("[TrainWorker]: cmd is \"%s\"\n", cmd.String())
 	logger.Log.Printf("---------------------------------------------------------------------------------\n")
 
-	return cmd
+	return cmd, nil
 }
 
 func (this *MpcTask) GetRpcCallMethodName() string {

@@ -99,11 +99,11 @@ def submit_train_job_json():
 def submit_train_job_file(url, path):
     url = "http://"+url+"/api/submit-train-job"
     with open(path, 'rb') as f:
-        print("requesting to ", url)
+        # print("requesting to ", url)
         res = requests.post(url, files={'train-job-file': f})
-        print(res.status_code)
+        # print(res.status_code)
         try:
-            pprint(json.loads(res.text))
+            print(json.loads(res.text)["job_id"])
         except:
             print(res.content)
 
@@ -121,11 +121,11 @@ def stop_train_job(url, jobId):
 
 def query_train_job_status(url, jobId):
     url = "http://"+url+"/api/query-train-job-status/"+jobId
-    print("requesting to ", url)
+    # print("requesting to ", url)
     res = requests.get(url)
-    print(res.status_code)
+    # print(res.status_code)
     try:
-        pprint(json.loads(res.text))
+        print(json.loads(res.text)["status"])
     except:
         print(res.content)
 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     parser.add_argument('-job', '--job', required=False, type=str, help="job path")
 
     args = parser.parse_args()
-    print(args.url, args.path, args.path)
+    # print(args.url, args.path, args.path)
 
     if args.method == "submit":
         submit_train_job_file(args.url, args.path)

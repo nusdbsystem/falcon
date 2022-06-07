@@ -184,7 +184,7 @@ func (fl *TaskAbstract) printParams(algName string, job *common.TrainJob) {
 type Task interface {
 
 	// GetCommand init tasks envs (log dir etc,) and return cmd
-	GetCommand(taskInfo *entity.TaskContext) *exec.Cmd
+	GetCommand(taskInfo *entity.TaskContext) (*exec.Cmd, error)
 
 	GetRpcCallMethodName() string
 }

@@ -117,12 +117,18 @@ func (wk *TrainWorker) DoTask(args string, rep *entity.DoTaskReply) error {
 // runTask execute a given tasks .
 func (wk *TrainWorker) runTask(task tasks.Task, taskArg *entity.TaskContext, tm *resourcemanager.ResourceManager) {
 
-	cmd := task.GetCommand(taskArg)
-	// by default, worker will launch executor resource by sub process
-	if common.IsDebug != common.DebugOn {
-		tm.CreateResources(resourcemanager.InitSubProcessManager(), cmd)
+	cmd, err := task.GetCommand(taskArg)
+
+	// if create cmd fail, no need to execute
+	if err != nil {
+		tm.TaskStatus = common.TaskFailed
 	} else {
-		time.Sleep(10 * time.Second)
+		// by default, worker will launch executor resource by sub process
+		if common.IsDebug != common.DebugOn {
+			tm.CreateResources(resourcemanager.InitSubProcessManager(), cmd)
+		} else {
+			time.Sleep(10 * time.Second)
+		}
 	}
 }
 
