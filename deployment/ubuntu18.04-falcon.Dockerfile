@@ -260,14 +260,14 @@ RUN c_rehash Player-Data/
 # Define working directory.
 WORKDIR /opt/falcon
 RUN echo "re-build third-party mp-spdz"
-COPY cmd_clean_code.sh /opt/falcon/
+COPY docker_cmd.sh /opt/falcon/
 
 # make third party MP-SPDZ
-RUN cd third_party/MP-SPDZ && \
-    bash fast-make.sh
+# RUN cd third_party/MP-SPDZ && \
+#     bash fast-make.sh
 
 # Define working directory.
 WORKDIR /opt/falcon
-RUN git pull origin clean_code
-RUN bash make.sh
-CMD ["bash", "cmd_clean_code.sh"]
+# RUN git pull origin clean_code
+# RUN bash make.sh
+CMD ["bash", "docker_cmd.sh"]
