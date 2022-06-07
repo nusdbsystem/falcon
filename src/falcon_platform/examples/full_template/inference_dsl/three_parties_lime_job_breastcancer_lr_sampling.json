@@ -54,7 +54,7 @@
         "algorithm_config": {
           "explain_instance_idx": 0,
           "sample_around_instance": true,
-          "num_total_samples": 1000,
+          "num_total_samples": 10,
           "sampling_method": "gaussian",
           "generated_sample_file": "/log_reg/sampled_data.txt"
         }

@@ -52,16 +52,16 @@
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "selected_data_file": "/log_reg/selected_feature_data.txt",
+          "selected_data_file": "/log_reg/selected_feature_data0.txt",
           "selected_predictions_file": "/log_reg/predictions.txt",
           "sample_weights_file": "/log_reg/sample_weights.txt",
-          "num_samples": 1000,
+          "num_samples": 10,
           "class_num": 2,
           "class_id": 0,
           "interpret_model_name": "linear_regression",
           "interpret_model_param": {
             "batch_size": 8,
-            "max_iteration": 100,
+            "max_iteration": 4,
             "convergence_threshold": 0.0001,
             "with_regularization": false,
             "alpha": 0.1,

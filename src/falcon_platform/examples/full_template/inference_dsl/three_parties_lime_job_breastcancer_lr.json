@@ -157,7 +157,7 @@
           "interpret_model_name": "linear_regression",
           "interpret_model_param": {
             "batch_size": 8,
-            "max_iteration": 100,
+            "max_iteration": 5,
             "convergence_threshold": 0.0001,
             "with_regularization": false,
             "alpha": 0.1,
