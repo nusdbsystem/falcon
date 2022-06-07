@@ -158,7 +158,7 @@ func (this *FLNetworkCfg) Constructor(encodeStr [][]byte, PartyNums uint, masLog
 					flConfig := DecodeFLNetworkCfgPerParty(ResourceSVC.JobNetCfg)
 
 					// store role of each worker
-					if _, ok := this.WorkerRole[partyID][workerID]; !ok {
+					if _, ok := this.WorkerRole[partyID]; !ok {
 						this.WorkerRole[partyID] = make(map[common.WorkerIdType]uint)
 					}
 					this.WorkerRole[partyID][workerID] = flConfig.DistributedRole
