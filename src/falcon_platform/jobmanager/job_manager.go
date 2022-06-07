@@ -31,17 +31,146 @@ func initSvcName() string {
 // It should schedule whole tasks as DAG
 func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 
-	// default to be failure
-	var jobStatus string = common.JobSuccessful
-	status := true
+	var jobStatus string
+	if job.DistributedTask.WorkerNumber >= 3+2*int(job.ClassNum) {
+		jobStatus = parallellySchedule(job, workerType)
+	} else {
+		jobStatus = sequenceSchedule(job, workerType)
+	}
 
-	// update status after finish executing.
-	defer func() {
-		// call coordinator to update status
-		client.JobUpdateResInfo(common.CoordAddr, "", jobStatus, "", job.JobId)
-		client.JobUpdateStatus(common.CoordAddr, jobStatus, job.JobId)
-		client.ModelUpdate(common.CoordAddr, 1, job.JobId)
-	}()
+	// call coordinator to update status
+	client.JobUpdateResInfo(common.CoordAddr, "", jobStatus, "", job.JobId)
+	client.JobUpdateStatus(common.CoordAddr, jobStatus, job.JobId)
+	client.ModelUpdate(common.CoordAddr, 1, job.JobId)
+}
+
+func sequenceSchedule(job *common.TrainJob, workerType string) (jobStatus string) {
+	status := true
+	jobStatus = common.JobSuccessful
+
+	// 1. init DAG scheduler
+	dagScheduler := DAGscheduler.NewDagScheduler(job)
+	if dagScheduler.ParallelismPolicy.IsValid == false {
+		logger.Log.Printf("[JobManager]: Cannot find a valid schedule policy according to current worker_num=%d, deadline=10k(default), class_number=%d\n", job.DistributedTask.WorkerNumber, job.ClassNum)
+		jobStatus = common.JobFailed
+		return
+	}
+	dagScheduler.SplitTaskIntoStage(job)
+
+	if stage, ok := dagScheduler.DagTasks[common.PreProcTaskKey]; ok {
+		// 1. generate master address
+		status = manageTaskLifeCycle(*job, workerType, stage.Name, 1, 0)
+
+		logger.Log.Printf("[JobManager]: stage PreProcStage status = %d\n", status)
+		if !status {
+			jobStatus = common.JobFailed
+			return
+		} else {
+			jobStatus = common.JobSuccessful
+		}
+	}
+
+	if stage, ok := dagScheduler.DagTasks[common.ModelTrainTaskKey]; ok {
+		// 1. generate master address
+		status = manageTaskLifeCycle(*job, workerType, stage.Name, stage.AssignedWorker, 0)
+
+		logger.Log.Printf("[JobManager]: stage ModelTrainStage status = %d\n", status)
+		if !status {
+			jobStatus = common.JobFailed
+			return
+		} else {
+			jobStatus = common.JobSuccessful
+		}
+	}
+
+	if stage, ok := dagScheduler.DagTasks[common.LimeInstanceSampleTask]; ok {
+		// 1. generate master address
+		status = manageTaskLifeCycle(*job, workerType, stage.Name, 1, 0)
+		logger.Log.Printf("[JobManager]: stage LimeInstanceSampleStage status = %d\n", status)
+		if !status {
+			jobStatus = common.JobFailed
+			return
+		} else {
+			jobStatus = common.JobSuccessful
+		}
+	}
+
+	if stage, ok := dagScheduler.DagTasks[common.LimePredTaskKey]; ok {
+		status = manageTaskLifeCycle(*job, workerType, stage.Name, 1, 0)
+		logger.Log.Printf("[JobManager]: stage LimePredStage status = %d\n", status)
+		if !status {
+			jobStatus = common.JobFailed
+			return
+		} else {
+			jobStatus = common.JobSuccessful
+		}
+	}
+
+	if stage, ok := dagScheduler.DagTasks[common.LimeWeightTaskKey]; ok {
+		status = manageTaskLifeCycle(*job, workerType, stage.Name, 1, 0)
+		logger.Log.Printf("[JobManager]: stage LimePredStage status = %d\n", status)
+		if !status {
+			jobStatus = common.JobFailed
+			return
+		} else {
+			jobStatus = common.JobSuccessful
+		}
+	}
+
+	var classNum int
+	if job.Tasks.LimeFeature.AlgorithmName != "" {
+		classNum = int(job.Tasks.LimeFeature.ClassNum)
+	} else if job.Tasks.LimeInterpret.AlgorithmName != "" {
+		classNum = int(job.Tasks.LimeInterpret.ClassNum)
+	}
+
+	for classId := 0; classId < classNum; classId++ {
+		// assign one parallelism to this class
+
+		logger.Log.Printf("[JobManager]: One thread start for class %d", classId)
+
+		var selectFeatureFile = ""
+		var status45 bool = true
+		// feature selection
+		if stage, ok := dagScheduler.DagTasks[common.LimeFeatureTaskKey]; ok {
+			job.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
+				common.GenerateLimeFeatSelParams(job.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, int32(classId))
+			status45 = manageTaskLifeCycle(*job, workerType, stage.Name, 1, classId)
+			if !status {
+				jobStatus = common.JobFailed
+				return
+			} else {
+				jobStatus = common.JobSuccessful
+			}
+		}
+
+		// model training, if there is this task, and previous stage is correct.
+		if stage, ok := dagScheduler.DagTasks[common.LimeInterpretTaskKey]; ok && status45 {
+			// generate SerializedAlgorithmConfig
+			job.Tasks.LimeInterpret.InputConfigs.SerializedAlgorithmConfig, _ =
+				common.GenerateLimeInterpretParams(job.Tasks.LimeInterpret.InputConfigs.AlgorithmConfig,
+					int32(classId), selectFeatureFile, job.Tasks.LimeInterpret.MpcAlgorithmName)
+
+			status45 = manageTaskLifeCycle(*job, workerType, stage.Name, 1, classId)
+			if !status {
+				jobStatus = common.JobFailed
+				return
+			} else {
+				jobStatus = common.JobSuccessful
+			}
+		}
+
+		// after finishing the tasks, append the groupIdParam back to availableGroupIds
+		logger.Log.Printf("[JobManager]: one thread done for class %d", classId)
+	}
+
+	return
+}
+
+func parallellySchedule(job *common.TrainJob, workerType string) (jobStatus string) {
+
+	status := true
+	jobStatus = common.JobSuccessful
 
 	// 1. init DAG scheduler
 	dagScheduler := DAGscheduler.NewDagScheduler(job)
@@ -140,9 +269,6 @@ func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 		var classParallelismLock sync.Mutex
 
 		classParallelism := dagScheduler.ParallelismPolicy.LimeClassParallelism
-		if classParallelism == 0 {
-			classParallelism = 1
-		}
 
 		var status45list []string
 
@@ -225,8 +351,7 @@ func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 			}
 		}
 	}
-
-	// after updating jobStatus, record at db
+	return
 }
 
 // job: train or inference

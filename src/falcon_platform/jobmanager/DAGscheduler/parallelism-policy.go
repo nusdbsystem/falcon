@@ -56,7 +56,17 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 		return true
 	} else {
 
-		if job.DistributedTask.Average == 1 {
+		if job.DistributedTask.WorkerNumber == 1 {
+			sp.LimeOriModelPredictionParallelism = 1
+			sp.LimeInstanceWeightParallelism = 1
+			sp.LimeFeatureSelectionParallelism = 1
+			sp.LimeVFLModelTrainParallelism = 1
+			sp.LimeClassParallelism = 1
+
+			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
+			return true
+
+		} else if job.DistributedTask.Average == 1 {
 			averageWorker := (job.DistributedTask.WorkerNumber - 1) / int(1+1+job.ClassNum*(1+1))
 
 			if averageWorker == 2 {
@@ -67,8 +77,8 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 			sp.LimeInstanceWeightParallelism = averageWorker
 			sp.LimeFeatureSelectionParallelism = averageWorker
 			sp.LimeVFLModelTrainParallelism = averageWorker
-
 			sp.LimeClassParallelism = int(job.ClassNum)
+
 			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 			return true
 
@@ -113,6 +123,11 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 }
 
 func (sp *ParallelismSchedulePolicy) updateSingleStageParallelism(stageName common.FalconTask, workerNum int) {
+
+	if stageName == common.TrainJobFileKey {
+		sp.ModelTrainParallelism = workerNum
+	}
+
 	if stageName == common.LimePredTaskKey {
 		sp.LimeOriModelPredictionParallelism = workerNum
 	}

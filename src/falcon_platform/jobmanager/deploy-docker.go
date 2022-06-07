@@ -37,13 +37,9 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 	var serviceName string
 	var localTaskRuntimeLogs string
 	if workerType == common.TrainWorker {
-		serviceName =
-			"pty" + fmt.Sprintf("%d-", common.PartyID) +
-				fmt.Sprintf("%d", resourceSVC.WorkerId) +
-				"-job" + jobId +
-				"-tr-" + stageName
+		//nsec := time.Now().UnixNano() // number of nanoseconds since January 1, 1970 UTC
+		serviceName = fmt.Sprintf("job%s-pty%d-wk%d-%s", jobId, common.PartyID, resourceSVC.WorkerId, stageName)
 		localTaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
-
 		logger.Log.Println("[JobManager]: Current in docker, TrainWorker, svcName", serviceName)
 
 	} else if workerType == common.InferenceWorker {
