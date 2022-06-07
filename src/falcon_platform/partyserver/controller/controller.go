@@ -43,7 +43,7 @@ func RunWorker(masterAddr, workerType,
 		"[PartyServer]: PartyServer setup workers,  = ",
 		" workerNum = ", workerNum, "TaskClassIDName=", TaskClassIDName)
 
-	rawStageName := strings.Split(TaskClassIDName, "_")[0]
+	rawStageName := strings.Join(strings.Split(TaskClassIDName, "_"), "-")
 
 	// centralized way
 	if workerNum <= 2 {
@@ -75,7 +75,7 @@ func RunWorker(masterAddr, workerType,
 		} else if common.Deployment == common.Docker {
 			nodeLabel := common.PartyServerClusterLabels[nodeID]
 			jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-				dataOutput, resourceSVC, nodeLabel, rawStageName+"-centralized")
+				dataOutput, resourceSVC, nodeLabel, rawStageName+"-cent")
 
 		} else if common.Deployment == common.K8S {
 			jobmanager.DeployWorkerK8s(masterAddr, workerType, jobId, dataPath, modelPath,
@@ -141,7 +141,7 @@ func RunWorker(masterAddr, workerType,
 			wkResourceSVC.ResourceIP = wkNodeIP
 			wkResourceSVC.WorkerPort = resourcemanager.GetOneFreePort()
 
-			wkResourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, rawStageName+"-dist-worker", common.DistributedWorker, workerNum)
+			wkResourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, rawStageName+"-dist-wk", common.DistributedWorker, workerNum)
 
 			reply.ResourceSVCs[workerId] = wkResourceSVC
 

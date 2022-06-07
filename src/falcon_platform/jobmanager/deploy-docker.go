@@ -7,7 +7,6 @@ import (
 	"falcon_platform/resourcemanager"
 	"fmt"
 	"os/exec"
-	"strings"
 )
 
 // DeployMasterDocker run master in a docker
@@ -29,7 +28,6 @@ func deployJobManagerDocker(job *common.TrainJob, workerType string) {
 func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath, dataOutput string,
 	resourceSVC *fl_comms_pattern.ResourceSVC, nodeLabel string, stage string) {
 
-	rawStageName := strings.Split(stage, "_")[0]
 	//stageName := strings.Join(strings.Split(stage, "_")[1:], "-")
 
 	workerAddr := resourceSVC.ToAddr(resourceSVC.WorkerPort)
@@ -39,7 +37,7 @@ func DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPat
 	var localTaskRuntimeLogs string
 	if workerType == common.TrainWorker {
 		//nsec := time.Now().UnixNano() // number of nanoseconds since January 1, 1970 UTC
-		serviceName = fmt.Sprintf("job%s-pty%d-wk%d-%s", jobId, common.PartyID, resourceSVC.WorkerId, rawStageName)
+		serviceName = fmt.Sprintf("job%s-pty%d-wk%d-%s", jobId, common.PartyID, resourceSVC.WorkerId, stage)
 		localTaskRuntimeLogs = common.LogPath + "/" + common.RuntimeLogs + "/" + serviceName
 		logger.Log.Println("[JobManager]: Current in docker, TrainWorker, svcName", serviceName)
 
