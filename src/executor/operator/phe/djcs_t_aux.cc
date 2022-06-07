@@ -128,6 +128,27 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
   mpz_clear(sum);
 }
 
+void djcs_t_aux_ee_add_ext(djcs_t_public_key* pk,
+                           EncodedNumber & res,
+                           EncodedNumber cipher1,
+                           EncodedNumber cipher2) {
+  if (cipher1.getter_type() != Ciphertext || cipher2.getter_type() != Ciphertext){
+    log_error("The two inputs need be ciphertexts for homomorphic addition.");
+    exit(EXIT_FAILURE);
+  }
+  int prec1 = std::abs(cipher1.getter_exponent());
+  int prec2 = std::abs(cipher2.getter_exponent());
+  if (prec1 < prec2) {
+    // increase cipher1's precision
+    djcs_t_aux_increase_prec(pk, cipher1, prec2, cipher1);
+  }
+  if (prec1 > prec2) {
+    // increase cipher2's precision
+    djcs_t_aux_increase_prec(pk, cipher2, prec1, cipher2);
+  }
+  djcs_t_aux_ee_add(pk, res, cipher1, cipher2);
+}
+
 void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
     EncodedNumber & res,
     const EncodedNumber& cipher,
@@ -165,7 +186,7 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
 void djcs_t_aux_increase_prec(djcs_t_public_key* pk,
                               EncodedNumber & res,
                               int target_precision,
-                              const EncodedNumber& cipher) {
+                              EncodedNumber cipher) {
   if (cipher.getter_type() != Ciphertext) {
     log_error("The input type does not match ciphertext.");
     exit(EXIT_FAILURE);
@@ -247,6 +268,28 @@ void djcs_t_aux_vec_ele_wise_ee_add(
     res[i] = ciphers1[i];
     djcs_t_aux_ee_add(pk, res[i], res[i], ciphers2[i]);
   }
+}
+
+void djcs_t_aux_vec_ele_wise_ee_add_ext(
+    djcs_t_public_key* pk,
+    EncodedNumber* res,
+    EncodedNumber* ciphers1,
+    EncodedNumber* ciphers2,
+    int size) {
+  check_size(size);
+  check_encoded_public_key(ciphers1[0], ciphers2[0]);
+  int prec1 = std::abs(ciphers1[0].getter_exponent());
+  int prec2 = std::abs(ciphers2[0].getter_exponent());
+  if (prec1 < prec2) {
+    // increase ciphers1's precision
+    djcs_t_aux_increase_prec_vec(pk, ciphers1, prec2, ciphers1, size);
+  }
+  if (prec1 > prec2) {
+    // increase ciphers2's precision
+    djcs_t_aux_increase_prec_vec(pk, ciphers2, prec1, ciphers2, size);
+  }
+
+  djcs_t_aux_vec_ele_wise_ee_add(pk, res, ciphers1, ciphers2, size);
 }
 
 void djcs_t_aux_inner_product(djcs_t_public_key* pk,
@@ -368,6 +411,31 @@ void djcs_t_aux_matrix_ele_wise_ee_add(
   for (int i = 0; i < row_size; i++) {
     djcs_t_aux_vec_ele_wise_ee_add(pk, res[i], cipher_mat1[i], cipher_mat2[i], column_size);
   }
+}
+
+void djcs_t_aux_matrix_ele_wise_ee_add_ext(
+    djcs_t_public_key* pk,
+    EncodedNumber** res,
+    EncodedNumber** cipher_mat1,
+    EncodedNumber** cipher_mat2,
+    int row_size,
+    int column_size) {
+  check_size(row_size);
+  check_size(column_size);
+  check_encoded_public_key(cipher_mat1[0][0], cipher_mat2[0][0]);
+
+  int prec1 = std::abs(cipher_mat1[0][0].getter_exponent());
+  int prec2 = std::abs(cipher_mat2[0][0].getter_exponent());
+  if (prec1 < prec2) {
+    // increase cipher_mat1's precision
+    djcs_t_aux_increase_prec_mat(pk, cipher_mat1, prec2, cipher_mat1, row_size, column_size);
+  }
+  if (prec1 > prec2) {
+    // increase cipher_mat2's precision
+    djcs_t_aux_increase_prec_mat(pk, cipher_mat2, prec1, cipher_mat2, row_size, column_size);
+  }
+
+  djcs_t_aux_matrix_ele_wise_ee_add(pk, res, cipher_mat1, cipher_mat2, row_size, column_size);
 }
 
 void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key* pk,

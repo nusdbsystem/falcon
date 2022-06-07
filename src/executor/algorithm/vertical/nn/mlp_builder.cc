@@ -19,6 +19,7 @@
 #include <falcon/party/info_exchange.h>
 #include <falcon/algorithm/vertical/nn/mlp_builder.h>
 #include <falcon/utils/pb_converter/nn_converter.h>
+#include <falcon/utils/alg/vec_util.h>
 
 #include <ctime>
 #include <random>
@@ -209,7 +210,6 @@ void MlpBuilder::compute_last_layer_delta(
   }
   delete [] delta;
   djcs_t_free_public_key(phe_pub_key);
-
 }
 
 void MlpBuilder::compute_loss_grad(
@@ -232,10 +232,94 @@ void MlpBuilder::compute_loss_grad(
   //    3. divide the number of samples to get the average gradient
   //    4. compute the gradient for the bias term
   std::vector<std::vector<double>> layer_act_shares = activation_shares[layer_idx];
+  std::vector<std::vector<double>> layer_act_shares_trans = trans_mat(layer_act_shares);
+  int shares_row_size = (int) layer_act_shares_trans.size();
+  int shares_column_size = (int) layer_act_shares_trans[0].size();
+  // can first divide n_samples (aka. sample_size)
+  for (int i = 0; i < shares_row_size; i++) {
+    for (int j = 0; j < shares_column_size; j++) {
+      layer_act_shares_trans[i][j] /= sample_size;
+    }
+  }
+  int ciphers_row_size = sample_size;
+  int ciphers_column_size = mlp_model.m_layers[layer_idx].m_num_neurons;
   auto delta = deltas[layer_idx];
+  auto** layer_weight_grad = new EncodedNumber*[shares_row_size];
+  for (int i = 0; i < shares_row_size; i++) {
+    layer_weight_grad[i] = new EncodedNumber[ciphers_column_size];
+  }
+  cipher_shares_mat_mul(party,
+                        layer_act_shares_trans,
+                        delta,
+                        shares_row_size,
+                        shares_column_size,
+                        ciphers_row_size,
+                        ciphers_column_size,
+                        layer_weight_grad);
+  int layer_weight_grad_prec = std::abs(layer_weight_grad[0][0].getter_exponent());
+  if (with_regularization) {
+    // only support l2 regularization currently
+    auto** reg_grad = new EncodedNumber*[shares_row_size];
+    for (int i = 0; i < shares_row_size; i++) {
+      reg_grad[i] = new EncodedNumber[ciphers_column_size];
+    }
+    compute_reg_grad(party, layer_idx, sample_size,
+                     shares_row_size, ciphers_column_size, reg_grad);
 
+    for (int i = 0; i < shares_row_size; i++) {
+      delete [] reg_grad[i];
+    }
+    delete [] reg_grad;
+  }
 
+  auto* layer_bias_grad = new EncodedNumber[ciphers_column_size];
+
+  weight_grads.push_back(layer_weight_grad);
+  bias_grads.push_back(layer_bias_grad);
+
+  // free memory
+  for (int i = 0; i < shares_row_size; i++) {
+    delete [] layer_weight_grad[i];
+  }
+  delete [] layer_weight_grad;
+  delete [] layer_bias_grad;
   delete [] delta;
+}
+
+void MlpBuilder::compute_reg_grad(const Party &party,
+                                  int layer_idx,
+                                  int sample_size,
+                                  int row_size,
+                                  int column_size,
+                                  EncodedNumber **reg_grad) {
+  int cur_neuron_size = (int) mlp_model.m_layers[layer_idx].m_num_neurons;
+  int prev_neuron_size = (int) mlp_model.m_layers[layer_idx-1].m_num_neurons;
+  if (prev_neuron_size != row_size || cur_neuron_size != column_size) {
+    log_error("[compute_reg_grad] dimension does not match");
+    exit(EXIT_FAILURE);
+  }
+  if (penalty != "l2") {
+    log_error("[compute_reg_grad] currently only support l2 regularization");
+    exit(EXIT_FAILURE);
+  }
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  double constant = alpha / ((double) sample_size);
+  EncodedNumber encoded_constant;
+  encoded_constant.set_double(phe_pub_key->n[0], constant, PHE_FIXED_POINT_PRECISION);
+  // copy neuron weights of the current layer, note that here is transposed
+  // and multiply constant homomorphic
+  for (int i = 0; i < row_size; i++) {
+    for (int j = 0; j < column_size; j++) {
+      reg_grad[i][j] = mlp_model.m_layers[layer_idx].m_neurons[j].m_weights[i];
+      djcs_t_aux_ep_mul(phe_pub_key, reg_grad[i][j], reg_grad[i][j], encoded_constant);
+    }
+  }
+
+  djcs_t_free_public_key(phe_pub_key);
 }
 
 void MlpBuilder::update_layer_delta(

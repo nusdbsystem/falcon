@@ -69,6 +69,20 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
     const EncodedNumber& cipher2);
 
 /**
+ * homomorphic addition of two ciphers and return an EncodedNumber
+ * if the exponents are not identical, increase one cipher's exponent to match
+ *
+ * @param pk: public key
+ * @param res: summation ciphertext
+ * @param cipher1: first ciphertext EncodedNumber
+ * @param cipher2: second ciphertext EncodedNumber
+ */
+void djcs_t_aux_ee_add_ext(djcs_t_public_key* pk,
+                           EncodedNumber & res,
+                           EncodedNumber cipher1,
+                           EncodedNumber cipher2);
+
+/**
  * homomorphic multiplication of a cipher and a plain
  * return an EncodedNumber
  *
@@ -94,7 +108,7 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
 void djcs_t_aux_increase_prec(djcs_t_public_key* pk,
                               EncodedNumber & res,
                               int target_precision,
-                              const EncodedNumber& cipher);
+                              EncodedNumber cipher);
 
 /***********************************************************/
 /***************** vector related operations ***************/
@@ -157,6 +171,23 @@ void djcs_t_aux_vec_aggregate(djcs_t_public_key* pk,
  * @param size: the size of the two cipher vectors
  */
 void djcs_t_aux_vec_ele_wise_ee_add(
+    djcs_t_public_key* pk,
+    EncodedNumber* res,
+    EncodedNumber* ciphers1,
+    EncodedNumber* ciphers2,
+    int size);
+
+/**
+ * element-wise homomorphic ciphertext add
+ * if the exponents are not identical, increase one cipher vector's exponent to match
+ *
+ * @param pk: public key
+ * @param res: the resulted cipher vector
+ * @param ciphers1: the cipher vector 1
+ * @param ciphers2: the cipher vector 2
+ * @param size: the size of the two cipher vectors
+ */
+void djcs_t_aux_vec_ele_wise_ee_add_ext(
     djcs_t_public_key* pk,
     EncodedNumber* res,
     EncodedNumber* ciphers1,
@@ -247,6 +278,25 @@ void djcs_t_aux_double_mat_encryption(djcs_t_public_key* pk,
  * @param column_size: the number of columns in the matrix
  */
 void djcs_t_aux_matrix_ele_wise_ee_add(
+    djcs_t_public_key* pk,
+    EncodedNumber** res,
+    EncodedNumber** cipher_mat1,
+    EncodedNumber** cipher_mat2,
+    int row_size,
+    int column_size);
+
+/**
+ * element-wise homomorphic addition of two cipher matrices
+ * if the exponents are not identical, increase one cipher matrix's exponent to match
+ *
+ * @param pk: public key
+ * @param res: resulted cipher matrix
+ * @param cipher_mat1: the first cipher matrix
+ * @param cipher_mat2: the second cipher matrix
+ * @param row_size: the number of rows in the matrix
+ * @param column_size: the number of columns in the matrix
+ */
+void djcs_t_aux_matrix_ele_wise_ee_add_ext(
     djcs_t_public_key* pk,
     EncodedNumber** res,
     EncodedNumber** cipher_mat1,

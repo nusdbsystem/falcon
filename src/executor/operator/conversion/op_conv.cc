@@ -350,8 +350,7 @@ void cipher_shares_mat_mul(const Party& party,
                            int n_shares_col,
                            int n_ciphers_row,
                            int n_ciphers_col,
-                           EncodedNumber** ret,
-                           int& ret_prec) {
+                           EncodedNumber** ret) {
   // retrieve phe pub key and auth server
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
@@ -419,8 +418,6 @@ void cipher_shares_mat_mul(const Party& party,
     party.send_long_message(ACTIVE_PARTY_ID, local_mul_res_str);
   }
   broadcast_encoded_number_matrix(party, ret, n_shares_row, n_ciphers_col, ACTIVE_PARTY_ID);
-
-  ret_prec = std::abs(ret[0][0].getter_exponent());
 
   for (int i = 0; i < n_shares_row; i++) {
     delete [] encoded_shares[i];

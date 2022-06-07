@@ -177,6 +177,24 @@ class MlpBuilder : public ModelBuilder {
       std::vector<EncodedNumber*>& bias_grads);
 
   /**
+   * given a layer index, compute the regularization gradients
+   *
+   * @param party: initialized party object
+   * @param layer_idx: the index of the layer
+   * @param sample_size: number of samples in a batch
+   * @param row_size: number of rows in the reg_grad, should be equal to previous layer #neurons
+   * @param column_size: number of columns in the reg_grad, should be equal to current layer #neurons
+   * @param reg_grad: the returned gradients
+   */
+  void compute_reg_grad(
+      const Party& party,
+      int layer_idx,
+      int sample_size,
+      int row_size,
+      int column_size,
+      EncodedNumber** reg_grad);
+
+  /**
    * update the delta of a layer
    *
    * @param party: initialized party object

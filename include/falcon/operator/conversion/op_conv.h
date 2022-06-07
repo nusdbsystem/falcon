@@ -109,7 +109,6 @@ void ciphers_multi(const Party& party, EncodedNumber* res,
    * @param n_ciphers_row: the number of rows in ciphers
    * @param n_ciphers_col: the number of columns in ciphers
    * @param ret: the returned result, dim = (n_shares_col, n_ciphers_col)
-   * @param ret_prec: the precision of the returned result
    */
 void cipher_shares_mat_mul(const Party& party,
                            const std::vector<std::vector<double>>& shares,
@@ -118,7 +117,6 @@ void cipher_shares_mat_mul(const Party& party,
                            int n_shares_col,
                            int n_ciphers_row,
                            int n_ciphers_col,
-                           EncodedNumber** ret,
-                           int& ret_prec);
+                           EncodedNumber** ret);
 
 #endif //FALCON_INCLUDE_FALCON_OPERATOR_CONVERSION_OP_CONV_H_
