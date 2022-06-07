@@ -59,7 +59,7 @@
           "class_num": 2,
           "class_id": 0,
           "feature_selection": "linear_regression",
-          "num_explained_features": 5,
+          "num_explained_features": 10,
           "selected_features_file": "/log_reg/selected_feature_data.txt"
         }
       },

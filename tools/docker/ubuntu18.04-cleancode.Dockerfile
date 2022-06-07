@@ -268,5 +268,6 @@ RUN cd third_party/MP-SPDZ && \
 
 # Define working directory.
 WORKDIR /opt/falcon
-RUN git pull origin clean_code && bash make.sh
+RUN git pull origin clean_code
+RUN bash make.sh
 CMD ["bash", "cmd_clean_code.sh"]
