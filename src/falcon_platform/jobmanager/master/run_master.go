@@ -66,12 +66,12 @@ func RunMaster(masterAddr string, job *common.TrainJob, workerType string, taskN
 	if workerType == common.TrainWorker {
 		updateStatus = func(jsonString string) {
 			// call coordinator to update status
-			client.JobUpdateResInfo(common.CoordAddr, "", jsonString, "", job.JobId)
-			master.jobStatusLock.Lock()
-			jobStatus := master.jobStatus
-			master.jobStatusLock.Unlock()
-			client.JobUpdateStatus(common.CoordAddr, jobStatus, job.JobId)
-			client.ModelUpdate(common.CoordAddr, 1, job.JobId)
+			//client.JobUpdateResInfo(common.CoordAddr, "", jsonString, "", job.JobId)
+			//master.jobStatusLock.Lock()
+			//jobStatus := master.jobStatus
+			//master.jobStatusLock.Unlock()
+			//client.JobUpdateStatus(common.CoordAddr, jobStatus, job.JobId)
+			//client.ModelUpdate(common.CoordAddr, 1, job.JobId)
 		}
 	} else if workerType == common.InferenceWorker {
 		updateStatus = func(jsonString string) {

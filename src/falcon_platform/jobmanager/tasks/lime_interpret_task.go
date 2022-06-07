@@ -13,7 +13,7 @@ import (
 // init register all existing tasks.
 func init() {
 	allTasks = GetAllTasks()
-	allTasks[common.LimeFeatureTaskKey] = new(LimeInterpretTask)
+	allTasks[common.LimeInterpretTaskKey] = new(LimeInterpretTask)
 }
 
 type LimeInterpretTask struct {

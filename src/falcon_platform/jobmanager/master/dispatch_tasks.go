@@ -28,7 +28,7 @@ func (master *Master) dispatchMpcTask(wg *sync.WaitGroup, mpcAlgorithmName strin
 			}
 
 			args := string(entity.SerializeTask(generalTask))
-			master.Logger.Printf("[Master.Dispatch]: Worker dispatch mpc task %s %d\n", args)
+			//master.Logger.Printf("[Master.Dispatch]: Worker dispatch mpc task %s %d\n", args)
 			master.dispatching(wk.Addr, args, task.GetRpcCallMethodName(), wg)
 		}(worker)
 	}
@@ -51,7 +51,7 @@ func (master *Master) dispatchTask(wg *sync.WaitGroup, taskName common.FalconTas
 				Job:          job}
 
 			args := string(entity.SerializeTask(generalTask))
-			master.Logger.Printf("[Master.Dispatch]: Worker dispatch task %s %d\n", args)
+			//master.Logger.Printf("[Master.Dispatch]: Worker dispatch task %s %d\n", args)
 			master.dispatching(wk.Addr, args, task.GetRpcCallMethodName(), wg)
 		}(worker)
 	}
