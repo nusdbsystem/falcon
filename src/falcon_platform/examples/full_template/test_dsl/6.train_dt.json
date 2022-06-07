@@ -39,7 +39,7 @@
   ],
   "distributed_task": {
     "enable": 0,
-    "worker_number": 2
+    "worker_number": 1
   },
   "tasks": {
     "model_training": {
