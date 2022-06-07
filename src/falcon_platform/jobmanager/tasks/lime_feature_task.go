@@ -56,7 +56,7 @@ func (this *LimeFeatureTask) GetCommand(taskInfo *entity.TaskContext) *exec.Cmd 
 
 	this.printParams(job.Tasks.LimeFeature.AlgorithmName, job)
 
-	logger.Log.Println("[TrainWorker]: begin tasks RunLimeFeature")
+	logger.Log.Printf("[TrainWorker]: begin tasks RunLimeFeature with taskInfo = %s\n", taskInfo)
 
 	distRole := fLConfig.WorkerRole[wk.PartyID][wk.WorkerID]
 

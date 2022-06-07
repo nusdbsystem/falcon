@@ -111,21 +111,21 @@ type LimeWeightTask struct {
 }
 
 type LimeFeatureTask struct {
-	ClassNum         int32
 	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
 	OutputConfigs    ModelOutput `json:"output_configs"`
 	IsDist           bool
+	ClassNum         int32
 }
 
 type LimeInterpretTask struct {
-	ClassNum         int32
 	MpcAlgorithmName string      `json:"mpc_algorithm_name"`
 	AlgorithmName    string      `json:"algorithm_name"`
 	InputConfigs     InputConfig `json:"input_configs"`
 	OutputConfigs    ModelOutput `json:"output_configs"`
 	IsDist           bool
+	ClassNum         int32
 }
 
 type ModelOutput struct {
