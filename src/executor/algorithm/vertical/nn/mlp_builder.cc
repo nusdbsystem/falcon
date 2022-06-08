@@ -128,20 +128,26 @@ void MlpBuilder::backward_computation(
   // 3. back-propagate until reach the first hidden layer
   for (int l_idx = last_layer_idx; l_idx > 0; l_idx--) {
     // while the rest of the hidden layers needs to multiply the derivative of activation shares
-    // 3.1 update delta for (l - 1) layer
-    update_layer_delta(party, l_idx,
-                       cur_batch_size,
-                       activation_shares,
-                       deriv_activation_shares,
-                       deltas);
-    // 3.2 compute the coef grads and intercept grads
-    compute_loss_grad(party, l_idx,
-                      cur_batch_size,
-                      activation_shares,
-                      deriv_activation_shares,
-                      deltas,
-                      weight_grads,
-                      bias_grads);
+    if (l_idx != 1) {
+      // 3.1 update delta for (l - 1) layer
+      update_layer_delta(party, l_idx - 1,
+                         cur_batch_size,
+                         activation_shares,
+                         deriv_activation_shares,
+                         deltas);
+      // 3.2 compute the coef grads and intercept grads
+      compute_loss_grad(party, l_idx - 1,
+                        cur_batch_size,
+                        activation_shares,
+                        deriv_activation_shares,
+                        deltas,
+                        weight_grads,
+                        bias_grads);
+    } else {
+      // it is the first hidden layer, need different process
+      // (note that for the first hidden layer, the gradient computation should be different
+      // because the inputs are the original plaintext samples on each party)
+    }
   }
 
   // 4. update the weights of each neuron in each layer
@@ -231,6 +237,11 @@ void MlpBuilder::compute_loss_grad(
   //    2. add the gradient of the l2 regularization term
   //    3. divide the number of samples to get the average gradient
   //    4. compute the gradient for the bias term
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
   std::vector<std::vector<double>> layer_act_shares = activation_shares[layer_idx];
   std::vector<std::vector<double>> layer_act_shares_trans = trans_mat(layer_act_shares);
   int shares_row_size = (int) layer_act_shares_trans.size();
@@ -243,37 +254,70 @@ void MlpBuilder::compute_loss_grad(
   }
   int ciphers_row_size = sample_size;
   int ciphers_column_size = mlp_model.m_layers[layer_idx].m_num_neurons;
-  auto delta = deltas[layer_idx];
+  auto layer_delta = deltas[layer_idx];
   auto** layer_weight_grad = new EncodedNumber*[shares_row_size];
   for (int i = 0; i < shares_row_size; i++) {
     layer_weight_grad[i] = new EncodedNumber[ciphers_column_size];
   }
   cipher_shares_mat_mul(party,
                         layer_act_shares_trans,
-                        delta,
+                        layer_delta,
                         shares_row_size,
                         shares_column_size,
                         ciphers_row_size,
                         ciphers_column_size,
                         layer_weight_grad);
-  int layer_weight_grad_prec = std::abs(layer_weight_grad[0][0].getter_exponent());
   if (with_regularization) {
     // only support l2 regularization currently
-    auto** reg_grad = new EncodedNumber*[shares_row_size];
-    for (int i = 0; i < shares_row_size; i++) {
-      reg_grad[i] = new EncodedNumber[ciphers_column_size];
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      auto **reg_grad = new EncodedNumber *[shares_row_size];
+      for (int i = 0; i < shares_row_size; i++) {
+        reg_grad[i] = new EncodedNumber[ciphers_column_size];
+      }
+      compute_reg_grad(party, layer_idx, sample_size,
+                       shares_row_size, ciphers_column_size, reg_grad);
+      // aggregate the reg_grad and weight_grad
+      djcs_t_aux_matrix_ele_wise_ee_add_ext(phe_pub_key,
+                                            layer_weight_grad,
+                                            layer_weight_grad,
+                                            reg_grad,
+                                            shares_row_size,
+                                            ciphers_column_size);
+      for (int i = 0; i < shares_row_size; i++) {
+        delete[] reg_grad[i];
+      }
+      delete[] reg_grad;
     }
-    compute_reg_grad(party, layer_idx, sample_size,
-                     shares_row_size, ciphers_column_size, reg_grad);
-
-    for (int i = 0; i < shares_row_size; i++) {
-      delete [] reg_grad[i];
-    }
-    delete [] reg_grad;
+    broadcast_encoded_number_matrix(party, layer_weight_grad,
+                                    shares_row_size, ciphers_column_size, ACTIVE_PARTY_ID);
   }
 
+  // compute the bias gradients for each neuron, which is to compute the
+  // mean of the layer_delta over sample_size
   auto* layer_bias_grad = new EncodedNumber[ciphers_column_size];
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    int layer_delta_prec = std::abs(layer_delta[0][0].getter_exponent());
+    for (int i = 0; i < ciphers_column_size; i++) {
+      layer_bias_grad[i].set_double(phe_pub_key->n[0], 0.0, layer_delta_prec);
+    }
+    // aggregate the delta for each neuron in the layer
+    for (int i = 0; i < ciphers_column_size; i++) {
+      for (int j = 0; j < ciphers_row_size; j++) {
+        djcs_t_aux_ee_add(phe_pub_key, layer_bias_grad[i],
+                          layer_bias_grad[i], layer_delta[j][i]);
+      }
+    }
+    // divide sample size to get the gradient
+    double constant = 1.0 / (double) sample_size;
+    EncodedNumber encoded_constant;
+    encoded_constant.set_double(phe_pub_key->n[0], constant, PHE_FIXED_POINT_PRECISION);
+    for (int i = 0; i < ciphers_column_size; i++) {
+      djcs_t_aux_ep_mul(phe_pub_key, layer_bias_grad[i], layer_bias_grad[i], encoded_constant);
+    }
+  }
+  broadcast_encoded_number_array(party, layer_bias_grad, ciphers_column_size, ACTIVE_PARTY_ID);
 
+  // append to the overall grads vectors
   weight_grads.push_back(layer_weight_grad);
   bias_grads.push_back(layer_bias_grad);
 
@@ -283,7 +327,8 @@ void MlpBuilder::compute_loss_grad(
   }
   delete [] layer_weight_grad;
   delete [] layer_bias_grad;
-  delete [] delta;
+  delete [] layer_delta;
+  djcs_t_free_public_key(phe_pub_key);
 }
 
 void MlpBuilder::compute_reg_grad(const Party &party,
@@ -332,12 +377,22 @@ void MlpBuilder::update_layer_delta(
   // [ref] sklearn:
   //    deltas[i - 1] = safe_sparse_dot(deltas[i], self.coefs_[i].T)
   //    inplace_derivative(activations[i], deltas[i - 1])
+  // note that the delta and weights for current layer are all ciphertext,
+  // need to convert delta into secret shares, and conduct ciphers and shares multiplication
+
+  // deltas[i] dim = (sample_size, n_neurons[i]), coefs[i] dim = (n_neurons[i], n_neurons[i-1])
+  auto delta = deltas[layer_idx];
+
+
+
+  delete delta;
 }
 
 void MlpBuilder::update_encrypted_weights(
     const Party &party,
     const std::vector<EncodedNumber**>& weight_grads,
     const std::vector<EncodedNumber*>& bias_grads) {
+  log_info("[update_encrypted_weights] start to update encrypted weights");
 
 }
 
