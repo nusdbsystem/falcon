@@ -7,7 +7,6 @@
 
 #include <falcon/common.h>
 #include <falcon/party/party.h>
-#include <falcon/algorithm/vertical/nn/neuron.h>
 #include <falcon/algorithm/vertical/nn/layer.h>
 
 typedef std::vector<std::vector<std::vector<double>>> TripleDVec;
@@ -22,7 +21,7 @@ class MlpModel {
   // the number of hidden_layers
   int m_num_hidden_layers;
   // the number of neurons in each layer
-  std::vector<int> m_num_layers_neurons;
+  std::vector<int> m_layers_num_outputs;
   // the vector of layers
   std::vector<Layer> m_layers;
 
@@ -35,10 +34,10 @@ class MlpModel {
   /**
    * constructor
    * @param with_bias: whether has the bias term
-   * @param num_layers_neurons: the vector of layers neuron numbers
+   * @param layers_num_outputs: the vector of layers neuron numbers
    * @param layers_activation_funcs: the vector of layers activation functions
    */
-  MlpModel(bool with_bias, const std::vector<int>& num_layers_neurons, const std::vector<std::string>& layers_activation_funcs);
+  MlpModel(bool with_bias, const std::vector<int>& layers_num_outputs, const std::vector<std::string>& layers_activation_funcs);
 
   /**
    * copy constructor

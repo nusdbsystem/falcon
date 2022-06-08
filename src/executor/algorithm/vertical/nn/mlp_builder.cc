@@ -253,7 +253,7 @@ void MlpBuilder::compute_loss_grad(
     }
   }
   int ciphers_row_size = sample_size;
-  int ciphers_column_size = mlp_model.m_layers[layer_idx].m_num_neurons;
+  int ciphers_column_size = mlp_model.m_layers[layer_idx].m_num_outputs;
   auto layer_delta = deltas[layer_idx];
   auto** layer_weight_grad = new EncodedNumber*[shares_row_size];
   for (int i = 0; i < shares_row_size; i++) {
@@ -337,8 +337,8 @@ void MlpBuilder::compute_reg_grad(const Party &party,
                                   int row_size,
                                   int column_size,
                                   EncodedNumber **reg_grad) {
-  int cur_neuron_size = (int) mlp_model.m_layers[layer_idx].m_num_neurons;
-  int prev_neuron_size = (int) mlp_model.m_layers[layer_idx-1].m_num_neurons;
+  int cur_neuron_size = (int) mlp_model.m_layers[layer_idx].m_num_outputs;
+  int prev_neuron_size = (int) mlp_model.m_layers[layer_idx-1].m_num_outputs;
   if (prev_neuron_size != row_size || cur_neuron_size != column_size) {
     log_error("[compute_reg_grad] dimension does not match");
     exit(EXIT_FAILURE);
@@ -359,7 +359,7 @@ void MlpBuilder::compute_reg_grad(const Party &party,
   // and multiply constant homomorphic
   for (int i = 0; i < row_size; i++) {
     for (int j = 0; j < column_size; j++) {
-      reg_grad[i][j] = mlp_model.m_layers[layer_idx].m_neurons[j].m_weights[i];
+      reg_grad[i][j] = mlp_model.m_layers[layer_idx].m_weight_mat[i][j];
       djcs_t_aux_ep_mul(phe_pub_key, reg_grad[i][j], reg_grad[i][j], encoded_constant);
     }
   }

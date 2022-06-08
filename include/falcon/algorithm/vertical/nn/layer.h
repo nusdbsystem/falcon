@@ -7,21 +7,25 @@
 
 #include <falcon/common.h>
 #include <falcon/party/party.h>
-#include <falcon/algorithm/vertical/nn/neuron.h>
 
 // layer of an MLP model
 class Layer {
  public:
-  // the number of neurons of this layer
-  int m_num_neurons;
-  // the number of inputs for each neuron
-  int m_num_inputs_per_neuron;
-  // the neurons vector
-  std::vector<Neuron> m_neurons;
+  // the number of inputs for each neuron in this layer
+  // in fact, it is the number of neurons (number of outputs) of the previous layer
+  int m_num_inputs;
+  // the number of outputs for this layer
+  int m_num_outputs;
+  // whether the neurons of this layer have bias (default true)
+  bool m_fit_bias;
   // the activation function string: sigmoid, linear, etc.
   // the activation function of the output layer needs to match
   // the loss function defined in the mlp builder
   std::string m_activation_func_str;
+  // the weight matrix, encrypted values during training, dimension = (m_num_inputs, m_num_outputs)
+  EncodedNumber** m_weight_mat{};
+  // the bias vector, encrypted values during training, dimension = m_num_outputs
+  EncodedNumber* m_bias{};
 
  public:
   /**
@@ -31,12 +35,12 @@ class Layer {
 
   /**
    * constructor
-   * @param num_neurons: the number of neurons in this layer
-   * @param num_inputs_per_neuron: the number of inputs for each neuron
+   * @param num_inputs: the number of inputs for each neuron in this layer
+   * @param num_outputs: the number of outputs for this layer
    * @param with_bias: whether has bias term
    * @param activation_func_str: the activation function
    */
-  Layer(int num_neurons, int num_inputs_per_neuron,
+  Layer(int num_inputs, int num_outputs,
         bool with_bias, const std::string& activation_func_str);
 
   /**
