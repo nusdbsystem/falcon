@@ -92,6 +92,7 @@ void MlpBuilder::backward_computation(
     const std::vector<std::vector<double>> &batch_samples,
     EncodedNumber **predicted_labels,
     const std::vector<int> &batch_indexes,
+    const std::vector<int>& local_weight_sizes,
     int precision,
     const TripleDVec& activation_shares,
     const TripleDVec& deriv_activation_shares) {
@@ -119,6 +120,8 @@ void MlpBuilder::backward_computation(
   compute_loss_grad(party,
                     last_layer_idx,
                     cur_batch_size,
+                    local_weight_sizes,
+                    batch_samples,
                     activation_shares,
                     deriv_activation_shares,
                     deltas,
@@ -128,16 +131,19 @@ void MlpBuilder::backward_computation(
   // 3. back-propagate until reach the first hidden layer
   for (int l_idx = last_layer_idx; l_idx > 0; l_idx--) {
     // while the rest of the hidden layers needs to multiply the derivative of activation shares
+    // 3.1 update delta for (l - 1) layer
+    update_layer_delta(party, l_idx - 1,
+                       cur_batch_size,
+                       activation_shares,
+                       deriv_activation_shares,
+                       deltas);
     if (l_idx != 1) {
-      // 3.1 update delta for (l - 1) layer
-      update_layer_delta(party, l_idx - 1,
-                         cur_batch_size,
-                         activation_shares,
-                         deriv_activation_shares,
-                         deltas);
       // 3.2 compute the coef grads and intercept grads
-      compute_loss_grad(party, l_idx - 1,
+      compute_loss_grad(party,
+                        l_idx - 1,
                         cur_batch_size,
+                        local_weight_sizes,
+                        batch_samples,
                         activation_shares,
                         deriv_activation_shares,
                         deltas,
@@ -147,6 +153,12 @@ void MlpBuilder::backward_computation(
       // it is the first hidden layer, need different process
       // (note that for the first hidden layer, the gradient computation should be different
       // because the inputs are the original plaintext samples on each party)
+      compute_loss_grad_1st_layer(party, l_idx - 1,
+                                  cur_batch_size,
+                                  batch_samples,
+                                  deltas,
+                                  weight_grads,
+                                  bias_grads);
     }
   }
 
@@ -222,6 +234,8 @@ void MlpBuilder::compute_loss_grad(
     const Party &party,
     int layer_idx,
     int sample_size,
+    const std::vector<int>& local_weight_sizes,
+    const std::vector<std::vector<double>>& batch_samples,
     const TripleDVec &activation_shares,
     const TripleDVec &deriv_activation_shares,
     std::vector<EncodedNumber **> &deltas,
@@ -259,14 +273,99 @@ void MlpBuilder::compute_loss_grad(
   for (int i = 0; i < shares_row_size; i++) {
     layer_weight_grad[i] = new EncodedNumber[ciphers_column_size];
   }
-  cipher_shares_mat_mul(party,
-                        layer_act_shares_trans,
-                        layer_delta,
-                        shares_row_size,
-                        shares_column_size,
-                        ciphers_row_size,
-                        ciphers_column_size,
-                        layer_weight_grad);
+
+  // if it is not the first hidden layer, use the cipher shares matrix multiplication
+  // else, each party computes the gradients for the corresponding block
+  if (layer_idx != 0) {
+    cipher_shares_mat_mul(party,
+                          layer_act_shares_trans,
+                          layer_delta,
+                          shares_row_size,
+                          shares_column_size,
+                          ciphers_row_size,
+                          ciphers_column_size,
+                          layer_weight_grad);
+  } else {
+    // note that each party's batch samples dimension = (n_samples, n_features)
+    // while the delta dimension = (n_samples, num_outputs)
+    // so we need to transpose the batch samples, and the result will be (n_features, num_outputs)
+    // importantly, \sum_{i=1}^{m} (n_features_i) = num_inputs of this layer
+    int local_n_features = (int) batch_samples[0].size();
+    int layer_output_size = mlp_model.m_layers[layer_idx].m_num_outputs;
+    std::vector<std::vector<double>> trans_batch_samples = trans_mat(batch_samples);
+    // now the dimension = (n_features, n_samples)
+    auto** local_agg_mat = new EncodedNumber*[local_n_features];
+    auto** encoded_trans_batch_samples = new EncodedNumber*[local_n_features];
+    for (int i = 0; i < local_n_features; i++) {
+      local_agg_mat[i] = new EncodedNumber[layer_output_size];
+      encoded_trans_batch_samples[i] = new EncodedNumber[sample_size];
+    }
+    encode_samples(party, trans_batch_samples, encoded_trans_batch_samples);
+    djcs_t_aux_mat_mat_ep_mult(phe_pub_key,
+                               party.phe_random,
+                               local_agg_mat,
+                               deltas[layer_idx],
+                               encoded_trans_batch_samples,
+                               sample_size,
+                               layer_output_size,
+                               local_n_features,
+                               sample_size);
+
+    // the active party aggregate the result and broadcast
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      // copy self local_aggregation
+      for (int i = 0; i < local_n_features; i++) {
+        for (int j = 0; j < layer_output_size; j++) {
+          layer_weight_grad[i][j] = local_agg_mat[i][j];
+        }
+      }
+      // receive and aggregate
+      for (int id = 0; id < party.party_num; id++) {
+        if (id != party.party_id) {
+          // find the index in the layer_weight_grad
+          int start_idx = 0;
+          for (int x = 0; x < party.party_id; x++) {
+            start_idx += local_weight_sizes[x];
+          }
+          // init the matrix to receive from party id
+          int party_id_weight_size = local_weight_sizes[id];
+          auto** recv_local_agg_mat = new EncodedNumber*[party_id_weight_size];
+          for (int i = 0; i < party_id_weight_size; i++) {
+            recv_local_agg_mat[i] = new EncodedNumber[layer_output_size];
+          }
+          // reuse the local_mat_mul_res object to restore the received encoded matrix
+          std::string recv_id_mat_str;
+          deserialize_encoded_number_matrix(recv_local_agg_mat, party_id_weight_size,
+                                            layer_output_size, recv_id_mat_str);
+          // assign to the corresponding place in layer_weight_grad
+          for (int i = 0; i < party_id_weight_size; i++) {
+            for (int j = 0; j < layer_output_size; j++) {
+              layer_weight_grad[start_idx+i][j] = recv_local_agg_mat[i][j];
+            }
+          }
+          for (int i = 0; i < local_weight_sizes[id]; i++) {
+            delete [] recv_local_agg_mat[i];
+          }
+          delete [] recv_local_agg_mat;
+        }
+      }
+    } else {
+      std::string local_aggregation_mat_str;
+      serialize_encoded_number_matrix(local_agg_mat, sample_size,
+                                      layer_output_size, local_aggregation_mat_str);
+      party.send_long_message(ACTIVE_PARTY_ID, local_aggregation_mat_str);
+    }
+    broadcast_encoded_number_matrix(party, layer_weight_grad,
+                                    sample_size, layer_output_size, ACTIVE_PARTY_ID);
+
+    for (int i = 0; i < local_n_features; i++) {
+      delete [] local_agg_mat[i];
+      delete [] encoded_trans_batch_samples[i];
+    }
+    delete [] local_agg_mat;
+    delete [] encoded_trans_batch_samples;
+  }
+
   if (with_regularization) {
     // only support l2 regularization currently
     if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -331,6 +430,17 @@ void MlpBuilder::compute_loss_grad(
   djcs_t_free_public_key(phe_pub_key);
 }
 
+void MlpBuilder::compute_loss_grad_1st_layer(const Party &party,
+                                             int layer_idx,
+                                             int sample_size,
+                                             const std::vector<std::vector<double>>& batch_samples,
+                                             std::vector<EncodedNumber **> &deltas,
+                                             std::vector<EncodedNumber **> &weight_grads,
+                                             std::vector<EncodedNumber *> &bias_grads) {
+  log_info("[compute_loss_grad_1st_layer] start to compute the grad for the 1st layer");
+
+}
+
 void MlpBuilder::compute_reg_grad(const Party &party,
                                   int layer_idx,
                                   int sample_size,
@@ -375,16 +485,72 @@ void MlpBuilder::update_layer_delta(
     const TripleDVec &deriv_activation_shares,
     std::vector<EncodedNumber **> &deltas) {
   // [ref] sklearn:
-  //    deltas[i - 1] = safe_sparse_dot(deltas[i], self.coefs_[i].T)
-  //    inplace_derivative(activations[i], deltas[i - 1])
+  //    deltas[i-1] = safe_sparse_dot(deltas[i], self.coefs_[i].T)
+  //    inplace_derivative(activations[i], deltas[i-1])
   // note that the delta and weights for current layer are all ciphertext,
   // need to convert delta into secret shares, and conduct ciphers and shares multiplication
 
-  // deltas[i] dim = (sample_size, n_neurons[i]), coefs[i] dim = (n_neurons[i], n_neurons[i-1])
+  // deltas[i] dim = (sample_size, m_num_outputs[i]),
+  // coefs[i] dim = (m_num_outputs[i-1], m_num_outputs[i])
+  // first deltas[i-1] dim = (sample_size, m_num_outputs[i-1])
+  // element-wise multiplication * activation[i-1] * deriv_activation[i-1]
   auto delta = deltas[layer_idx];
+  // convert delta into secret shares
+  int layer_weight_mat_row_size = mlp_model.m_layers[layer_idx].m_num_inputs;
+  int layer_weight_mat_col_size = mlp_model.m_layers[layer_idx].m_num_outputs;
+  std::vector<std::vector<double>> delta_shares;
+  ciphers_mat_to_secret_shares_mat(party, delta,
+                                   delta_shares,
+                                   sample_size,
+                                   layer_weight_mat_col_size,
+                                   ACTIVE_PARTY_ID,
+                                   std::abs(delta[0][0].getter_exponent()));
+  // transpose layer layer_idx's m_weight_mat
+  auto **layer_weight_mat_trans = new EncodedNumber*[layer_weight_mat_col_size];
+  for (int i = 0; i < layer_weight_mat_col_size; i++){
+    layer_weight_mat_trans[i] = new EncodedNumber[layer_weight_mat_row_size];
+  }
+  transpose_encoded_mat(mlp_model.m_layers[layer_idx].m_weight_mat,
+                        layer_weight_mat_row_size,
+                        layer_weight_mat_col_size,
+                        layer_weight_mat_trans);
+  // init delta_prev and compute
+  auto** delta_prev = new EncodedNumber*[sample_size];
+  for (int i = 0; i < sample_size; i++) {
+    delta_prev[i] = new EncodedNumber[layer_weight_mat_row_size];
+  }
+  cipher_shares_mat_mul(party,
+                        delta_shares,
+                        layer_weight_mat_trans,
+                        sample_size,
+                        layer_weight_mat_col_size,
+                        layer_weight_mat_col_size,
+                        layer_weight_mat_row_size,
+                        delta_prev);
+  // element-wise delta_prev multiplication with activation shares and deriv activation shares
+  // but note that the shares are distributed on parties, it seems that previously direct
+  // return the activation * derivative-activation can reduce the computation here.
+  std::vector<std::vector<double>> layer_deriv_shares = deriv_activation_shares[layer_idx-1];
+  cipher_shares_mat_mul(party,
+                        layer_deriv_shares,
+                        delta_prev,
+                        (int) layer_deriv_shares.size(),
+                        (int) layer_deriv_shares[0].size(),
+                        sample_size,
+                        layer_weight_mat_row_size,
+                        delta_prev);
 
+  // assign the delta_prev
+  deltas[layer_idx-1] = delta_prev;
 
-
+  for (int i = 0; i < layer_weight_mat_col_size; i++) {
+    delete [] layer_weight_mat_trans[i];
+  }
+  delete [] layer_weight_mat_trans;
+  for (int i = 0; i < sample_size; i++) {
+    delete [] delta_prev[i];
+  }
+  delete [] delta_prev;
   delete delta;
 }
 
@@ -393,7 +559,29 @@ void MlpBuilder::update_encrypted_weights(
     const std::vector<EncodedNumber**>& weight_grads,
     const std::vector<EncodedNumber*>& bias_grads) {
   log_info("[update_encrypted_weights] start to update encrypted weights");
-
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  int layer_size = (int) mlp_model.m_layers.size();
+  // update the encrypted weights and bias for each layer
+  for (int i = 0; i < layer_size; i++) {
+    // update weight mat
+    djcs_t_aux_matrix_ele_wise_ee_add_ext(phe_pub_key,
+                                          mlp_model.m_layers[i].m_weight_mat,
+                                          mlp_model.m_layers[i].m_weight_mat,
+                                          weight_grads[i],
+                                          mlp_model.m_layers[i].m_num_inputs,
+                                          mlp_model.m_layers[i].m_num_outputs);
+    // update bias
+    for (int k = 0; k < mlp_model.m_layers[i].m_num_outputs; k++) {
+      djcs_t_aux_vec_ele_wise_ee_add_ext(phe_pub_key,
+                                         mlp_model.m_layers[i].m_bias,
+                                         mlp_model.m_layers[i].m_bias,
+                                         bias_grads[i],
+                                         mlp_model.m_layers[i].m_num_outputs);
+    }
+  }
+  djcs_t_free_public_key(phe_pub_key);
 }
 
 void MlpBuilder::train(Party party) {
@@ -538,6 +726,7 @@ void MlpBuilder::train(Party party) {
         batch_samples,
         predicted_labels,
         batch_indexes,
+        sync_arr,
         encry_agg_precision,
         layer_activation_shares,
         layer_deriv_activation_shares);

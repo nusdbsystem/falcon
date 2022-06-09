@@ -130,6 +130,7 @@ void MlpModel::predict_proba(const Party &party,
   for (int i = 0; i < pred_size; i++) {
     encoded_batch_samples[i] = new EncodedNumber[weight_size];
   }
+  encode_samples(party, predicted_samples, encoded_batch_samples);
 
   forward_computation_fast(party, pred_size, local_weight_sizes,
                            encoded_batch_samples, predicted_labels);

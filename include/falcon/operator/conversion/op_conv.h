@@ -119,4 +119,17 @@ void cipher_shares_mat_mul(const Party& party,
                            int n_ciphers_col,
                            EncodedNumber** ret);
 
+/**
+ * transpose an encoded matrix
+ *
+ * @param source_mat: the source encoded matrix
+ * @param n_source_row: the number of rows in source matrix
+ * @param n_source_col: the number of columns in source matrix
+ * @param ret_mat: the returned encoded matrix
+ */
+void transpose_encoded_mat(EncodedNumber** source_mat,
+                           int n_source_row,
+                           int n_source_col,
+                           EncodedNumber** ret_mat);
+
 #endif //FALCON_INCLUDE_FALCON_OPERATOR_CONVERSION_OP_CONV_H_

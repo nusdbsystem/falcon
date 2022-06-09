@@ -427,3 +427,18 @@ void cipher_shares_mat_mul(const Party& party,
   delete [] local_mul_res;
   djcs_t_free_public_key(phe_pub_key);
 }
+
+void transpose_encoded_mat(EncodedNumber** source_mat,
+                           int n_source_row,
+                           int n_source_col,
+                           EncodedNumber** ret_mat) {
+  if ((n_source_row == 0) || (n_source_col == 0)) {
+    log_error("[transpose_encoded_mat] matrix is empty");
+    exit(EXIT_FAILURE);
+  }
+  for (int i = 0; i < n_source_row; i++) {
+    for (int j = 0; j < n_source_col; j++) {
+      ret_mat[j][i] = source_mat[i][j];
+    }
+  }
+}

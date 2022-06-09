@@ -127,6 +127,7 @@ class MlpBuilder : public ModelBuilder {
    * @param batch_samples: the batch samples
    * @param predicted_labels: the predicted labels
    * @param batch_indexes: the selected batch indexes
+   * @param local_weight_sizes: the local weight sizes of parties
    * @param precision: the precision for the batch samples
    * @param activation_shares: layers' activation shares of batch samples
    * @param deriv_activation_shares: layers' derivative activation shares of batch samples
@@ -136,6 +137,7 @@ class MlpBuilder : public ModelBuilder {
       const std::vector<std::vector<double>>& batch_samples,
       EncodedNumber** predicted_labels,
       const std::vector<int>& batch_indexes,
+      const std::vector<int>& local_weight_sizes,
       int precision,
       const TripleDVec& activation_shares,
       const TripleDVec& deriv_activation_shares);
@@ -160,6 +162,7 @@ class MlpBuilder : public ModelBuilder {
    * @param party: initialized party object
    * @param layer_idx: the index of the layer
    * @param sample_size: number of samples in a batch
+   * @param local_weight_sizes: the local weight sizes of parties
    * @param activation_shares: the activation shares
    * @param deriv_activation_shares: the derivative activation shares
    * @param deltas: the deviations
@@ -170,8 +173,31 @@ class MlpBuilder : public ModelBuilder {
       const Party& party,
       int layer_idx,
       int sample_size,
+      const std::vector<int>& local_weight_sizes,
+      const std::vector<std::vector<double>>& batch_samples,
       const TripleDVec& activation_shares,
       const TripleDVec& deriv_activation_shares,
+      std::vector<EncodedNumber**>& deltas,
+      std::vector<EncodedNumber**>& weight_grads,
+      std::vector<EncodedNumber*>& bias_grads);
+
+  /**
+ * compute the gradients of the first layer, where the activation
+ * shares are the original batch samples distributed on parties
+ *
+ * @param party: initialized party object
+ * @param layer_idx: the index of the layer
+ * @param sample_size: number of samples in a batch
+ * @param batch_samples: the batch samples on each party
+ * @param deltas: the deviations
+ * @param weight_grads: the weight gradients of the layers
+ * @param bias_grads: the bias gradients of the layers
+ */
+  void compute_loss_grad_1st_layer(
+      const Party& party,
+      int layer_idx,
+      int sample_size,
+      const std::vector<std::vector<double>>& batch_samples,
       std::vector<EncodedNumber**>& deltas,
       std::vector<EncodedNumber**>& weight_grads,
       std::vector<EncodedNumber*>& bias_grads);
