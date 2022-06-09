@@ -809,6 +809,94 @@ void MlpBuilder::distributed_train(const Party &party, const Worker &worker) {
 
 void MlpBuilder::eval(Party party, falcon::DatasetType eval_type,
                       const std::string &report_save_path) {
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  log_info("************* Evaluation on " + dataset_str + " Start *************");
+  const clock_t testing_start_time = clock();
+  // the testing workflow is as follows:
+  //     step 1: init test data
+  //     step 2: the parties call the model.predict function to compute predicted labels
+  //     step 3: active party aggregates and call collaborative decryption
+  //     step 4: active party computes mse metrics
+
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  // step 1: init test data
+  int dataset_size =
+      (eval_type == falcon::TRAIN) ? (int) training_data.size() : (int) testing_data.size();
+  std::vector<std::vector<double>> cur_test_dataset =
+      (eval_type == falcon::TRAIN) ? training_data : testing_data;
+  std::vector<double> cur_test_dataset_labels =
+      (eval_type == falcon::TRAIN) ? training_labels : testing_labels;
+
+  log_info("dataset_size = " + std::to_string(dataset_size));
+
+  // step 2: every party do the prediction, since all examples are required to
+  // computed, there is no need communications of data index between different parties
+  auto* predicted_labels = new EncodedNumber[dataset_size];
+  mlp_model.predict(party, cur_test_dataset, predicted_labels);
+
+  // step 3: active party aggregates and call collaborative decryption
+  auto* decrypted_labels = new EncodedNumber[dataset_size];
+  collaborative_decrypt(party, predicted_labels,
+                        decrypted_labels,
+                        dataset_size,
+                        ACTIVE_PARTY_ID);
+
+  // step 4: active party computes the metrics
+  // calculate accuracy by the active party
+  std::vector<double> predictions;
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // decode decrypted predicted labels
+    for (int i = 0; i < dataset_size; i++) {
+      double x;
+      decrypted_labels[i].decode(x);
+      predictions.push_back(x);
+    }
+
+    // compute accuracy
+    if (mlp_model.m_num_outputs > 1) {
+      int correct_num = 0;
+      for (int i = 0; i < dataset_size; i++) {
+         if (predictions[i] == cur_test_dataset_labels[i]) {
+            correct_num += 1;
+          }
+      }
+      if (eval_type == falcon::TRAIN) {
+        training_accuracy = (double) correct_num / dataset_size;
+        log_info("[GbdtBuilder.eval] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", training accuracy = " + std::to_string(training_accuracy));
+      }
+      if (eval_type == falcon::TEST) {
+        testing_accuracy = (double) correct_num / dataset_size;
+        log_info("[GbdtBuilder.eval] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", testing accuracy = " + std::to_string(testing_accuracy));
+      }
+    } else {
+      if (eval_type == falcon::TRAIN) {
+        training_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
+        log_info("[GbdtBuilder.eval] Training accuracy = " + std::to_string(training_accuracy));
+      }
+      if (eval_type == falcon::TEST) {
+        testing_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
+        log_info("[GbdtBuilder.eval] Testing accuracy = " + std::to_string(testing_accuracy));
+      }
+    }
+  }
+
+  // free memory
+  djcs_t_free_public_key(phe_pub_key);
+  delete [] predicted_labels;
+  delete [] decrypted_labels;
+
+  const clock_t testing_finish_time = clock();
+  double testing_consumed_time =
+      double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
+  log_info("Evaluation time = " + std::to_string(testing_consumed_time));
+  log_info("************* Evaluation on " + dataset_str + " Finished *************");
 
 }
 
