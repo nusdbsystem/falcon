@@ -182,27 +182,6 @@ class MlpBuilder : public ModelBuilder {
       std::vector<EncodedNumber*>& bias_grads);
 
   /**
- * compute the gradients of the first layer, where the activation
- * shares are the original batch samples distributed on parties
- *
- * @param party: initialized party object
- * @param layer_idx: the index of the layer
- * @param sample_size: number of samples in a batch
- * @param batch_samples: the batch samples on each party
- * @param deltas: the deviations
- * @param weight_grads: the weight gradients of the layers
- * @param bias_grads: the bias gradients of the layers
- */
-  void compute_loss_grad_1st_layer(
-      const Party& party,
-      int layer_idx,
-      int sample_size,
-      const std::vector<std::vector<double>>& batch_samples,
-      std::vector<EncodedNumber**>& deltas,
-      std::vector<EncodedNumber**>& weight_grads,
-      std::vector<EncodedNumber*>& bias_grads);
-
-  /**
    * given a layer index, compute the regularization gradients
    *
    * @param party: initialized party object
@@ -248,6 +227,14 @@ class MlpBuilder : public ModelBuilder {
   void update_encrypted_weights(const Party& party,
                                 const std::vector<EncodedNumber**>& weight_grads,
                                 const std::vector<EncodedNumber*>& bias_grads);
+
+  /**
+   * post-processing the weights to make sure that all the layers have the
+   * sample precision for the encrypted weights and bias
+   *
+   * @param party: initialized party object
+   */
+  void post_proc_model_weights(const Party& party);
 
   /**
    * train an mlp model

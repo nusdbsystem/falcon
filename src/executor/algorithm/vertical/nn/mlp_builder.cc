@@ -137,29 +137,17 @@ void MlpBuilder::backward_computation(
                        activation_shares,
                        deriv_activation_shares,
                        deltas);
-    if (l_idx != 1) {
-      // 3.2 compute the coef grads and intercept grads
-      compute_loss_grad(party,
-                        l_idx - 1,
-                        cur_batch_size,
-                        local_weight_sizes,
-                        batch_samples,
-                        activation_shares,
-                        deriv_activation_shares,
-                        deltas,
-                        weight_grads,
-                        bias_grads);
-    } else {
-      // it is the first hidden layer, need different process
-      // (note that for the first hidden layer, the gradient computation should be different
-      // because the inputs are the original plaintext samples on each party)
-      compute_loss_grad_1st_layer(party, l_idx - 1,
-                                  cur_batch_size,
-                                  batch_samples,
-                                  deltas,
-                                  weight_grads,
-                                  bias_grads);
-    }
+    // 3.2 compute the coef grads and intercept grads
+    compute_loss_grad(party,
+                      l_idx - 1,
+                      cur_batch_size,
+                      local_weight_sizes,
+                      batch_samples,
+                      activation_shares,
+                      deriv_activation_shares,
+                      deltas,
+                      weight_grads,
+                      bias_grads);
   }
 
   // 4. update the weights of each neuron in each layer
@@ -430,17 +418,6 @@ void MlpBuilder::compute_loss_grad(
   djcs_t_free_public_key(phe_pub_key);
 }
 
-void MlpBuilder::compute_loss_grad_1st_layer(const Party &party,
-                                             int layer_idx,
-                                             int sample_size,
-                                             const std::vector<std::vector<double>>& batch_samples,
-                                             std::vector<EncodedNumber **> &deltas,
-                                             std::vector<EncodedNumber **> &weight_grads,
-                                             std::vector<EncodedNumber *> &bias_grads) {
-  log_info("[compute_loss_grad_1st_layer] start to compute the grad for the 1st layer");
-
-}
-
 void MlpBuilder::compute_reg_grad(const Party &party,
                                   int layer_idx,
                                   int sample_size,
@@ -579,6 +556,78 @@ void MlpBuilder::update_encrypted_weights(
                                          mlp_model.m_layers[i].m_bias,
                                          bias_grads[i],
                                          mlp_model.m_layers[i].m_num_outputs);
+    }
+  }
+
+  // post-processing the weights to make sure that all the layers have the
+  // sample precision for the encrypted weights and bias
+  post_proc_model_weights(party);
+
+  djcs_t_free_public_key(phe_pub_key);
+}
+
+void MlpBuilder::post_proc_model_weights(const Party& party) {
+  // first, find the maximum precision of each layer (assuming that each layer has the same precision
+  // second, check if the maximum precision is over a threshold, if so, truncate each layer's weights to default
+  // third, else, increase the precision to maximum precision
+  log_info("[post_proc_model_weights]");
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+  // step 1
+  int max_prec = 0;
+  for (int i = 0; i < mlp_model.m_layers.size(); i++) {
+    int layer_weight_prec = std::abs(mlp_model.m_layers[i].m_weight_mat[0][0].getter_exponent());
+    int layer_bias_prec = std::abs(mlp_model.m_layers[i].m_bias[0].getter_exponent());
+    int layer_max_prec = (layer_weight_prec >= layer_bias_prec) ? layer_weight_prec : layer_bias_prec;
+    if (layer_max_prec > max_prec) {
+      max_prec = layer_max_prec;
+    }
+  }
+  // step 2
+  log_info("[post_proc_model_weights] max_prec = " + std::to_string(max_prec));
+  if (max_prec > PHE_MAXIMUM_PRECISION) {
+    // truncate for each layer
+    for (int i = 0; i < mlp_model.m_layers.size(); i++) {
+      // truncate weight mat
+      for (int j = 0; j < mlp_model.m_layers[i].m_num_inputs; j++) {
+        truncate_ciphers_precision(party,
+                                   mlp_model.m_layers[i].m_weight_mat[j],
+                                   mlp_model.m_layers[i].m_num_outputs,
+                                   ACTIVE_PARTY_ID,
+                                   PHE_FIXED_POINT_PRECISION);
+      }
+      // truncate bias
+      truncate_ciphers_precision(party,
+                                 mlp_model.m_layers[i].m_bias,
+                                 mlp_model.m_layers[i].m_num_outputs,
+                                 ACTIVE_PARTY_ID,
+                                 PHE_FIXED_POINT_PRECISION);
+    }
+  } else {
+    // increase precision for each layer
+    for (int i = 0; i < mlp_model.m_layers.size(); i++) {
+      // increase weight mat and bias vector
+      if (party.party_type == falcon::ACTIVE_PARTY) {
+        djcs_t_aux_increase_prec_mat(phe_pub_key,
+                                     mlp_model.m_layers[i].m_weight_mat,
+                                     max_prec,
+                                     mlp_model.m_layers[i].m_weight_mat,
+                                     mlp_model.m_layers[i].m_num_inputs,
+                                     mlp_model.m_layers[i].m_num_outputs);
+        djcs_t_aux_increase_prec_vec(phe_pub_key,
+                                     mlp_model.m_layers[i].m_bias,
+                                     max_prec,
+                                     mlp_model.m_layers[i].m_bias,
+                                     mlp_model.m_layers[i].m_num_outputs);
+      }
+      broadcast_encoded_number_matrix(party, mlp_model.m_layers[i].m_weight_mat,
+                                      mlp_model.m_layers[i].m_num_inputs,
+                                      mlp_model.m_layers[i].m_num_outputs,
+                                      ACTIVE_PARTY_ID);
+      broadcast_encoded_number_array(party, mlp_model.m_layers[i].m_bias,
+                                     mlp_model.m_layers[i].m_num_outputs,
+                                     ACTIVE_PARTY_ID);
     }
   }
   djcs_t_free_public_key(phe_pub_key);
