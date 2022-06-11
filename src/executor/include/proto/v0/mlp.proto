@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package com.nus.dbsytem.falcon.v0;
+option go_package = "/v0";
 
 import public "common.proto";
 
