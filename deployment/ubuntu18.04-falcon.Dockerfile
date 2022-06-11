@@ -208,7 +208,7 @@ RUN cd /opt/falcon/src/executor/include/proto && \
 # build the falcon executor
 WORKDIR /opt/falcon
 RUN git branch
-RUN git pull
+RUN git pull origin mlp && git log
 RUN export PATH="$PATH:$HOME/.local/bin" && \
     mkdir build && \
     cmake -Bbuild -H. && \

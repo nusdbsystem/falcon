@@ -44,7 +44,7 @@
   "tasks": {
     "model_training": {
       "mpc_algorithm_name": "mlp",
-      "algorithm_name": "mlp",
+      "algorithm_name": "mlp_alg",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
@@ -52,24 +52,24 @@
         },
         "algorithm_config": {
           "batch_size": 8,
-          "max_iteration": 200,
+          "max_iteration": 10,
           "converge_threshold": 0.0001,
-          "with_regularization": false,
+          "with_regularization": true,
           "alpha": 0.1,
           "learning_rate": 0.1,
           "decay": 0.1,
           "penalty": "l1",
           "optimizer": "sgd",
-          "metric": "ovr",
-          "dp_budget": "acc",
+          "metric": "acc",
+          "dp_budget": "0.1",
           "fit_bias": true,
-          "num_layers_neurons": [5,2,10],
-          "layers_activation_funcs": ["relu", "relu", "relu"]
+          "num_layers_neurons": [32, 32, 2],
+          "layers_activation_funcs": ["logistic", "logistic", "logistic"]
         }
       },
       "output_configs": {
-        "trained_model": "saved_model.pb",
-        "evaluation_report": "report.txt"
+        "trained_model": "20220611-MLP-model.pb",
+        "evaluation_report": "20220611-MLP-report.txt"
       }
     }
   }
