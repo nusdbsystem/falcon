@@ -198,8 +198,8 @@ void MlpModel::forward_computation(const Party &party,
         flatten_2d_vector(cur_layer_enc_outputs_shares);
     std::vector<int> public_values;
     public_values.push_back(falcon::ACTIVATION);
-    public_values.push_back(cur_layer_num_outputs);
     public_values.push_back(cur_batch_size);
+    public_values.push_back(cur_layer_num_outputs);
     falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l_idx].m_activation_func_str);
     public_values.push_back(func);
 
@@ -321,8 +321,8 @@ void MlpModel::forward_computation_fast(const Party &party,
         flatten_2d_vector(cur_layer_enc_outputs_shares);
     std::vector<int> public_values;
     public_values.push_back(falcon::ACTIVATION_FAST);
-    public_values.push_back(cur_layer_num_outputs);
     public_values.push_back(cur_batch_size);
+    public_values.push_back(cur_layer_num_outputs);
     falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l_idx].m_activation_func_str);
     public_values.push_back(func);
 
@@ -456,15 +456,21 @@ void spdz_mlp_computation(int party_num,
   // receive result from spdz parties according to the computation type
   switch (mlp_comp_type) {
     case falcon::ACTIVATION: {
-      log_info("[spdz_mlp_computation] SPDZ mlp computation pruning check returned");
+      log_info("[spdz_mlp_computation] SPDZ mlp computation activation returned");
       // suppose the activation and derivatives of activation shares are returned
       std::vector<double> return_values = receive_result(mpc_sockets, party_num, 2 * private_value_size);
       res->set_value(return_values);
       break;
     }
+    case falcon::ACTIVATION_FAST: {
+      log_info("[spdz_mlp_computation] SPDZ mlp computation activation fast returned");
+      // suppose the activation shares are returned
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+      res->set_value(return_values);
+    }
     default:
       log_info("[spdz_mlp_computation] SPDZ mlp computation type is not found.");
-      exit(1);
+      exit(EXIT_FAILURE);
   }
 
   for (int i = 0; i < party_num; i++) {

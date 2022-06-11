@@ -78,10 +78,10 @@ namespace falcon {
   };
 
   enum SpdzMlpActivationFunc {
-    SIGMOID,
+    LOGISTIC,
     RELU,
-    SOFTMAX,
-    LINEAR
+    IDENTITY,
+    SOFTMAX
   };
 
   // for inference service

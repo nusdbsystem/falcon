@@ -21,10 +21,10 @@ falcon::AlgorithmName parse_algorithm_name(const std::string& name) {
 }
 
 falcon::SpdzMlpActivationFunc parse_mlp_act_func(const std::string& name) {
-  falcon::SpdzMlpActivationFunc func = falcon::SIGMOID;
-  if ("sigmoid" == name) func = falcon::SIGMOID;
+  falcon::SpdzMlpActivationFunc func = falcon::LOGISTIC;
+  if ("sigmoid" == name) func = falcon::LOGISTIC;
   if ("relu" == name) func = falcon::RELU;
+  if ("identity" == name) func = falcon::IDENTITY;
   if ("softmax" == name) func = falcon::SOFTMAX;
-  if ("linear" == name) func = falcon::LINEAR;
   return func;
 }
