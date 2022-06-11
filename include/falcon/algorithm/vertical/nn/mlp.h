@@ -8,6 +8,11 @@
 #include <falcon/common.h>
 #include <falcon/party/party.h>
 #include <falcon/algorithm/vertical/nn/layer.h>
+#include <thread>
+#include <future>
+#include <numeric>
+#include <iostream>
+#include <chrono>
 
 typedef std::vector<std::vector<std::vector<double>>> TripleDVec;
 

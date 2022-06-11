@@ -159,11 +159,11 @@ RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN git config --global http.sslVerify false
 
 # Clone Falcon and init submodules
-RUN echo "update the falcon repository"
+RUN echo "update repo for building new image"
 WORKDIR /opt
 RUN git clone git@github.com:lemonviv/falcon.git && \
     cd falcon && \
-    git checkout clean_code && \
+    git checkout mlp && \
     cd third_party/ && \
     git submodule update --init --recursive
 
@@ -186,6 +186,7 @@ RUN cd third_party/MP-SPDZ && \
     ./compile.py Programs/Source/linear_regression.mpc && \
     ./compile.py Programs/Source/lime.mpc && \
     ./compile.py Programs/Source/vfl_decision_tree.mpc && \
+    ./compile.py Programs/Source/mlp.mpc && \
     ln -s /opt/falcon/third_party/MP-SPDZ/local/lib/libmpir* /usr/local/lib/
 
 # Install served library
@@ -206,6 +207,7 @@ RUN cd /opt/falcon/src/executor/include/proto && \
 
 # build the falcon executor
 WORKDIR /opt/falcon
+RUN git branch
 RUN git pull
 RUN export PATH="$PATH:$HOME/.local/bin" && \
     mkdir build && \
