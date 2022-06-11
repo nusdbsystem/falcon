@@ -11,3 +11,6 @@ for example:
 ```bash
 protoc -I=./falcon/src/executor/include/proto/v0/ --go_out=./falcon/src/falcon_platform/common/proto ./falcon/src/executor/include/proto/v0/alg_params.proto
 ```
+
+Make sure the `protoc-gen-go` file is in your PATH variable.
+https://www.cnblogs.com/codeBang/p/13324122.html
