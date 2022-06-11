@@ -804,7 +804,138 @@ void MlpBuilder::train(Party party) {
 }
 
 void MlpBuilder::distributed_train(const Party &party, const Worker &worker) {
+  log_info("************* Distributed Training Start *************");
+  const clock_t training_start_time = clock();
 
+  if (optimizer != "sgd") {
+    log_error("The " + optimizer + " optimizer does not supported");
+    exit(EXIT_FAILURE);
+  }
+
+
+  // step 1: init encrypted weights (here use precision for consistence in the following)
+  int n_features = party.getter_feature_num();
+  std::vector<int> sync_arr = sync_up_int_arr(party, n_features);
+  int encry_weights_prec = PHE_FIXED_POINT_PRECISION;
+  int plain_samples_prec = PHE_FIXED_POINT_PRECISION;
+  log_info("[train] init encrypted MLP weights success");
+
+  // required by spdz connector and mpc computation
+  bigint::init_thread();
+
+  // step 2: iteratively computation
+  for (int iter = 0; iter < max_iteration; iter++) {
+    log_info("-------- Iteration " + std::to_string(iter) + " --------");
+    const clock_t iter_start_time = clock();
+    // step 2.1 receive mlp weights from master, and assign to current mlp_model
+    std::string mlp_model_str;
+    worker.recv_long_message_from_ps(mlp_model_str);
+    log_info("-------- Worker Iteration " + std::to_string(iter) + ", "
+             "worker.receive weight success --------");
+    deserialize_mlp_model(mlp_model, mlp_model_str);
+
+    // step 2.2 receive sample id from master for batch computation
+    std::string mini_batch_indexes_str;
+    worker.recv_long_message_from_ps(mini_batch_indexes_str);
+    std::vector<int> mini_batch_indexes;
+    deserialize_int_array(mini_batch_indexes, mini_batch_indexes_str);
+
+    log_info("-------- "
+             "Worker Iteration "
+                 + std::to_string(iter)
+                 + ", worker.receive sample id success, batch size "
+                 + std::to_string(mini_batch_indexes.size()) + " --------");
+
+    log_info("-------- "
+             "Worker Iteration "
+                 + std::to_string(iter)
+                 + ", worker.consensus on batch ids"
+                 + " --------");
+    log_info("print mini_batch_indexes");
+    print_vector(mini_batch_indexes);
+
+    // get training data with selected batch_index
+    std::vector<std::vector<double> > mini_batch_samples;
+    for (int index : mini_batch_indexes) {
+      mini_batch_samples.push_back(training_data[index]);
+    }
+
+    // encode the training data
+    int cur_sample_size = (int) mini_batch_samples.size();
+    auto** encoded_batch_samples = new EncodedNumber*[cur_sample_size];
+    for (int i = 0; i < cur_sample_size; i++) {
+      encoded_batch_samples[i] = new EncodedNumber[n_features];
+    }
+    encode_samples(party, mini_batch_samples, encoded_batch_samples);
+    log_info("-------- Iteration " + std::to_string(iter)
+                 + ", encode training data success --------");
+
+    // forward computation for the predicted labels
+    auto **predicted_labels = new EncodedNumber*[mini_batch_indexes.size()];
+    for (int i = 0; i < mini_batch_indexes.size(); i++) {
+      predicted_labels[i] = new EncodedNumber[mlp_model.m_num_outputs];
+    }
+
+    // the activation shares and derivative activation shares after forward computation
+    TripleDVec layer_activation_shares, layer_deriv_activation_shares;
+    int encry_agg_precision = encry_weights_prec + plain_samples_prec;
+    log_info("[train] encry_agg_precision is: " + std::to_string(encry_agg_precision));
+    mlp_model.forward_computation(
+        party,
+        cur_sample_size,
+        sync_arr,
+        encoded_batch_samples,
+        predicted_labels,
+        layer_activation_shares,
+        layer_deriv_activation_shares);
+    log_info("-------- Iteration " + std::to_string(iter)
+                 + ", forward computation success --------");
+    log_info("[train] predicted_labels' precision is: "
+                 + std::to_string(abs(predicted_labels[0][0].getter_exponent())));
+
+    // step 2.3: backward propagation and update weights
+    backward_computation(
+        party,
+        mini_batch_samples,
+        predicted_labels,
+        mini_batch_indexes,
+        sync_arr,
+        encry_agg_precision,
+        layer_activation_shares,
+        layer_deriv_activation_shares);
+    log_info("-------- Iteration " + std::to_string(iter)
+                 + ", backward computation success --------");
+
+    // step 2.4: send encrypted model to ps, ps will aggregate mlp_model
+    std::string encrypted_mlp_model_str;
+    serialize_mlp_model(mlp_model, encrypted_mlp_model_str);
+    worker.send_long_message_to_ps(encrypted_mlp_model_str);
+
+    log_info("-------- "
+             "Worker Iteration "
+                 + std::to_string(iter)
+                 + ", send gradients to ps success"
+                 + " --------");
+
+    const clock_t iter_finish_time = clock();
+    double iter_consumed_time =
+        double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+    log_info("-------- The " + std::to_string(iter) + "-th "
+                                                      "iteration consumed time = " + std::to_string(iter_consumed_time));
+
+    for (int i = 0; i < cur_sample_size; i++) {
+      delete [] encoded_batch_samples[i];
+      delete [] predicted_labels[i];
+    }
+    delete [] encoded_batch_samples;
+    delete [] predicted_labels;
+  }
+
+  const clock_t training_finish_time = clock();
+  double training_consumed_time =
+      double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  log_info("Distributed Training time = " + std::to_string(training_consumed_time));
+  log_info("************* Distributed Training Finished *************");
 }
 
 void MlpBuilder::eval(Party party, falcon::DatasetType eval_type,
@@ -865,24 +996,24 @@ void MlpBuilder::eval(Party party, falcon::DatasetType eval_type,
       }
       if (eval_type == falcon::TRAIN) {
         training_accuracy = (double) correct_num / dataset_size;
-        log_info("[GbdtBuilder.eval] Dataset size = " + std::to_string(dataset_size)
+        log_info("[mlp_builder.eval] Dataset size = " + std::to_string(dataset_size)
                      + ", correct predicted num = " + std::to_string(correct_num)
                      + ", training accuracy = " + std::to_string(training_accuracy));
       }
       if (eval_type == falcon::TEST) {
         testing_accuracy = (double) correct_num / dataset_size;
-        log_info("[GbdtBuilder.eval] Dataset size = " + std::to_string(dataset_size)
+        log_info("[mlp_builder.eval] Dataset size = " + std::to_string(dataset_size)
                      + ", correct predicted num = " + std::to_string(correct_num)
                      + ", testing accuracy = " + std::to_string(testing_accuracy));
       }
     } else {
       if (eval_type == falcon::TRAIN) {
         training_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
-        log_info("[GbdtBuilder.eval] Training accuracy = " + std::to_string(training_accuracy));
+        log_info("[mlp_builder.eval] Training accuracy = " + std::to_string(training_accuracy));
       }
       if (eval_type == falcon::TEST) {
         testing_accuracy = mean_squared_error(predictions, cur_test_dataset_labels);
-        log_info("[GbdtBuilder.eval] Testing accuracy = " + std::to_string(testing_accuracy));
+        log_info("[mlp_builder.eval] Testing accuracy = " + std::to_string(testing_accuracy));
       }
     }
   }
@@ -902,5 +1033,52 @@ void MlpBuilder::eval(Party party, falcon::DatasetType eval_type,
 
 void MlpBuilder::distributed_eval(const Party &party, const Worker &worker,
                                   falcon::DatasetType eval_type) {
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  log_info("************* Evaluation on " + dataset_str + " Start *************");
 
+  // step 1: retrieve current test data
+  std::vector<std::vector<double> > cur_test_dataset =
+      (eval_type == falcon::TRAIN) ? this->training_data : this->testing_data;
+
+  log_info("current dataset size = " + std::to_string(cur_test_dataset.size()));
+
+  // 2. each worker receive mini_batch_indexes_str from ps
+  std::vector<int> mini_batch_indexes;
+  std::string mini_batch_indexes_str;
+  worker.recv_long_message_from_ps(mini_batch_indexes_str);
+  deserialize_int_array(mini_batch_indexes, mini_batch_indexes_str);
+
+  log_info("current mini batch size = " + std::to_string(mini_batch_indexes.size()));
+
+  std::vector<std::vector<double>> cur_used_samples;
+  for (const auto index: mini_batch_indexes){
+    cur_used_samples.push_back(cur_test_dataset[index]);
+  }
+
+  // 3: compute prediction result
+  int cur_used_samples_size = (int) cur_used_samples.size();
+  auto* predicted_labels = new EncodedNumber[cur_used_samples_size];
+  mlp_model.predict(party, cur_used_samples, predicted_labels);
+
+  log_info("predict on mini batch samples finished");
+
+  // step 3: active party aggregates and call collaborative decryption
+  auto* decrypted_labels = new EncodedNumber[cur_used_samples_size];
+  collaborative_decrypt(party, predicted_labels,
+                        decrypted_labels,
+                        cur_used_samples_size,
+                        ACTIVE_PARTY_ID);
+
+  // 5: ACTIVE_PARTY send to ps
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::string decrypted_predict_label_str;
+    serialize_encoded_number_array(decrypted_labels, cur_used_samples_size, decrypted_predict_label_str);
+    worker.send_long_message_to_ps(decrypted_predict_label_str);
+  }
+
+  log_info("decrypt the predicted labels finished");
+
+  // 6: free resources
+  delete [] predicted_labels;
+  delete [] decrypted_labels;
 }

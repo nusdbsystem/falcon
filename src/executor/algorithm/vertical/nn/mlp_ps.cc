@@ -11,6 +11,9 @@
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/logger/log_alg_params.h>
 #include <falcon/algorithm/model_builder_helper.h>
+#include <falcon/party/info_exchange.h>
+#include <falcon/utils/pb_converter/nn_converter.h>
+#include <falcon/utils/math/math_ops.h>
 #include <iostream>
 #include <thread>
 #include <utility>
@@ -126,25 +129,194 @@ std::vector<string> MlpParameterServer::wait_worker_complete() {
 }
 
 void MlpParameterServer::distributed_train() {
+  // step 1: init encrypted weights (here use precision for consistence in the following)
+  int n_features = party.getter_feature_num();
+  std::vector<int> sync_arr = sync_up_int_arr(party, n_features);
+  int encry_weights_prec = PHE_FIXED_POINT_PRECISION;
+  int plain_samples_prec = PHE_FIXED_POINT_PRECISION;
+  mlp_builder.mlp_model.init_encrypted_weights(party, encry_weights_prec);
+  log_info("[train] init encrypted MLP weights success");
 
+  // record training data ids in data_indexes for iteratively batch selection
+  std::vector<int> train_data_indexes;
+  for (int i = 0; i < this->mlp_builder.getter_training_data().size(); i++) {
+    train_data_indexes.push_back(i);
+  }
+  std::vector<std::vector<int>> batch_iter_indexes = precompute_iter_batch_idx(
+      this->mlp_builder.batch_size, this->mlp_builder.max_iteration, train_data_indexes);
+
+  log_info("current channel size = " + std::to_string(this->worker_channels.size()));
+  for (int iter = 0; iter < this->mlp_builder.max_iteration; iter++) {
+    log_info("--------PS Iteration " + std::to_string(iter) + " --------");
+    // step 2: broadcast weight
+    this->broadcast_encrypted_weights(this->mlp_builder.mlp_model);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps broadcast_encrypted_weights successful --------");
+    // step 3: randomly select a batch of samples from training data
+    // active ps select batch idx and broadcast to passive ps
+    std::vector<int> batch_indexes = sync_batch_idx(this->party,
+                                                    this->mlp_builder.batch_size,
+                                                    batch_iter_indexes[iter]);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps select_batch_idx successful --------");
+    // step 4: partition sample ids, since the partition method is deterministic
+    // all ps can do this step in its own cluster and broadcast to its own workers
+    this->partition_examples(batch_indexes);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps partition_examples successful --------");
+    // step 5: wait worker finish execution
+    auto encoded_message = this->wait_worker_complete();
+    log_info("LRParameterServer received all loss * X_{ij} from falcon_worker");
+    log_info("--------PS Iteration " + std::to_string(iter) + ", LRParameterServer received all loss * X_{ij} from falcon_worker successful --------");
+    // step 6: receive loss, and update weight
+    int weight_phe_precision = abs(this->mlp_builder.mlp_model.m_layers[0].m_bias[0].getter_exponent());
+    this->update_encrypted_weights(encoded_message,
+                                   weight_phe_precision,
+                                   this->mlp_builder.mlp_model);
+    log_info("--------PS Iteration " + std::to_string(iter) + ", ps update_encrypted_weights successful --------");
+  }
 }
 
 void MlpParameterServer::distributed_predict(const std::vector<int> &cur_test_data_indexes,
                                              EncodedNumber *predicted_labels) {
-
+  log_info("current channel size = " + std::to_string(this->worker_channels.size()));
+  // step 1: partition sample ids, every ps partition in the same way
+  std::vector<int> message_sizes = this->partition_examples(cur_test_data_indexes);
+  log_info("cur_test_data_indexes.size = " + std::to_string(cur_test_data_indexes.size()));
+  for (int i = 0; i < message_sizes.size(); i++) {
+    log_info("message_sizes[" + std::to_string(i) + "] = " + std::to_string(message_sizes[i]));
+  }
+  // step 2: if active party, wait worker finish execution
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    std::vector< string > encoded_messages = this->wait_worker_complete();
+    int cur_index = 0;
+    // deserialize encrypted predicted labels
+    for (int i = 0; i < encoded_messages.size(); i++){
+      auto partial_predicted_labels = new EncodedNumber[message_sizes[i]];
+      deserialize_encoded_number_array(
+          partial_predicted_labels,
+          message_sizes[i],
+          encoded_messages[i]);
+      for (int k = 0; k < message_sizes[i]; k++){
+        predicted_labels[cur_index] = partial_predicted_labels[k];
+        cur_index += 1;
+      }
+      delete[] partial_predicted_labels;
+    }
+  }
 }
 
 void MlpParameterServer::distributed_eval(falcon::DatasetType eval_type, const std::string &report_save_path) {
+  std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
+  log_info("************* Evaluation on " + dataset_str + " Start *************");
 
+  // step 1: init test data
+  int dataset_size =
+      (eval_type == falcon::TRAIN) ?
+      (int) this->mlp_builder.getter_training_data().size() :
+      (int) this->mlp_builder.getter_testing_data().size();
+
+  std::vector<std::vector<double>> cur_test_dataset =
+      (eval_type == falcon::TRAIN) ? this->mlp_builder.getter_training_data()
+      : this->mlp_builder.getter_testing_data();
+  std::vector<double> cur_test_dataset_labels =
+      (eval_type == falcon::TRAIN) ? this->mlp_builder.getter_training_labels()
+      : this->mlp_builder.getter_testing_labels();
+
+  std::vector<int> cur_test_data_indexes;
+  cur_test_data_indexes.reserve(dataset_size);
+  for (int i = 0; i < dataset_size; i++) {
+    cur_test_data_indexes.push_back(i);
+  }
+
+  // step 2: do the prediction
+  auto* decrypted_labels = new EncodedNumber[dataset_size];
+  distributed_predict(cur_test_data_indexes, decrypted_labels);
+
+  // step 3: compute and save matrix
+  // step 4: active party computes the metrics
+  // calculate accuracy by the active party
+  std::vector<double> predictions;
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // decode decrypted predicted labels
+    for (int i = 0; i < dataset_size; i++) {
+      double x;
+      decrypted_labels[i].decode(x);
+      predictions.push_back(x);
+    }
+
+    // compute accuracy
+    if (this->mlp_builder.mlp_model.m_num_outputs > 1) {
+      int correct_num = 0;
+      for (int i = 0; i < dataset_size; i++) {
+        if (predictions[i] == cur_test_dataset_labels[i]) {
+          correct_num += 1;
+        }
+      }
+      if (eval_type == falcon::TRAIN) {
+        this->mlp_builder.setter_training_accuracy((double) correct_num / dataset_size);
+        log_info("[mlp_builder.eval] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", training accuracy = " + std::to_string(this->mlp_builder.getter_training_accuracy()));
+      }
+      if (eval_type == falcon::TEST) {
+        this->mlp_builder.setter_testing_accuracy((double) correct_num / dataset_size);
+        log_info("[mlp_builder.eval] Dataset size = " + std::to_string(dataset_size)
+                     + ", correct predicted num = " + std::to_string(correct_num)
+                     + ", testing accuracy = " + std::to_string(this->mlp_builder.getter_testing_accuracy()));
+      }
+    } else {
+      if (eval_type == falcon::TRAIN) {
+        this->mlp_builder.setter_training_accuracy(mean_squared_error(predictions, cur_test_dataset_labels));
+        log_info("[mlp_builder.eval] Training accuracy = " + std::to_string(this->mlp_builder.getter_training_accuracy()));
+      }
+      if (eval_type == falcon::TEST) {
+        this->mlp_builder.setter_testing_accuracy(mean_squared_error(predictions, cur_test_dataset_labels));
+        log_info("[mlp_builder.eval] Testing accuracy = " + std::to_string(this->mlp_builder.getter_testing_accuracy()));
+      }
+    }
+  }
+
+  delete [] decrypted_labels;
 }
 
-
-
 void MlpParameterServer::update_encrypted_weights(const std::vector<string> &encoded_messages,
-                                                  int weight_size,
                                                   int weight_phe_precision,
-                                                  EncodedNumber *updated_weights) const {
+                                                  MlpModel& agg_mlp_model) {
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
 
+  agg_mlp_model = this->mlp_builder.mlp_model;
+  int idx = 0;
+  // deserialize encrypted message, and add to encrypted
+  for (const std::string& message: encoded_messages){
+    MlpModel dec_mlp_model(this->mlp_builder.fit_bias,
+    this->mlp_builder.num_layers_neurons,
+    this->mlp_builder.layers_activation_funcs);
+    deserialize_mlp_model(dec_mlp_model, message);
+    if (idx == 0) {
+      agg_mlp_model = dec_mlp_model;
+    } else {
+      // aggregate the dec_mlp_model into agg_mlp_model
+      for (int i = 0; i < agg_mlp_model.m_layers.size(); i++) {
+        // aggregate layer's m_weight_mat
+        djcs_t_aux_matrix_ele_wise_ee_add(
+            phe_pub_key,
+            agg_mlp_model.m_layers[i].m_weight_mat,
+            agg_mlp_model.m_layers[i].m_weight_mat,
+            dec_mlp_model.m_layers[i].m_weight_mat,
+            agg_mlp_model.m_layers[i].m_num_inputs,
+            agg_mlp_model.m_layers[i].m_num_outputs);
+        // aggregate layer's m_bias
+        djcs_t_aux_vec_ele_wise_ee_add(
+            phe_pub_key,
+            agg_mlp_model.m_layers[i].m_bias,
+            agg_mlp_model.m_layers[i].m_bias,
+            dec_mlp_model.m_layers[i].m_bias,
+            agg_mlp_model.m_layers[i].m_num_outputs);
+      }
+    }
+    idx += 1;
+  }
+
+  djcs_t_free_public_key(phe_pub_key);
 }
 
 void MlpParameterServer::save_model(const std::string &model_save_file) {
