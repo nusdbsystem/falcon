@@ -40,7 +40,7 @@ void handle_eptr(std::exception_ptr eptr);
 
 int main(int argc, char *argv[]) {
   google::InitGoogleLogging(argv[0]);
-
+  std::cout << "------------- Entered executor -------------" << std::endl;
   // basic arguments
   int party_id, party_num, party_type, fl_setting, use_existing_key;
   std::string network_file, log_file, data_input_file, data_output_file, key_file, model_save_file, model_report_file;

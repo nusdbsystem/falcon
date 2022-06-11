@@ -19,12 +19,17 @@ MlpModel::MlpModel() {
 
 MlpModel::MlpModel(bool with_bias, const std::vector<int>& num_layers_neurons, const std::vector<std::string>& layers_activation_funcs) {
   assert(num_layers_neurons.size() >= 2);
-  assert(layers_activation_funcs.size() + 1 == num_layers_neurons.size());
+  assert((layers_activation_funcs.size() + 1) == num_layers_neurons.size());
   m_layers_num_outputs = num_layers_neurons;
   m_num_inputs = m_layers_num_outputs[0];
   m_num_outputs = m_layers_num_outputs[m_layers_num_outputs.size() - 1];
   m_num_hidden_layers = (int) m_layers_num_outputs.size() - 2;
+  log_info("[MlpModel] m_num_hidden_layers = " + std::to_string(m_num_hidden_layers));
+  log_info("[MlpModel] m_num_outputs = " + std::to_string(m_num_outputs));
   for (int i = 0; i < m_layers_num_outputs.size() - 1; i++) {
+    log_info("[MlpModel] layer " + std::to_string(i) + ": ");
+    log_info("[MlpModel] m_num_inputs = " + std::to_string(m_layers_num_outputs[i]));
+    log_info("[MlpModel] m_num_outputs = " + std::to_string(m_layers_num_outputs[i+1]));
     m_layers.emplace_back(Layer(m_layers_num_outputs[i],
                                 m_layers_num_outputs[i+1],
                                 with_bias,
@@ -59,6 +64,7 @@ MlpModel::~MlpModel() {
 void MlpModel::init_encrypted_weights(const Party &party, int precision) {
   log_info("Init the encrypted weights of the MLP model");
   int layer_size = (int) m_layers.size();
+  log_info("[MlpModel::init_encrypted_weights] layer_size = " + std::to_string(layer_size));
   for (int i = 0; i < layer_size; i++) {
     log_info("Init the encrypted weights of layer + " + std::to_string(i));
     m_layers[i].init_encrypted_weights(party, precision);

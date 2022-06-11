@@ -83,7 +83,15 @@ void MlpBuilder::init_encrypted_weights(const Party &party, int precision) {
   } else {
     // receive model_weights_str from active party and deserialize
     party.recv_long_message(ACTIVE_PARTY_ID, model_weights_str);
-    deserialize_mlp_model(mlp_model, model_weights_str);
+    // here need to define another recv_mlp_model for deserialization because
+    // the mlp_model in the mlp_builder has already allocated the memory while
+    // in the nn_converter, there is another memory allocation, which will lead
+    // to a deserialization problem without explicit notification.
+    // CANNOT directly deserialize: deserialize_mlp_model(recv_mlp_model, model_weights_str);
+    MlpModel recv_mlp_model;
+    deserialize_mlp_model(recv_mlp_model, model_weights_str);
+    mlp_model = recv_mlp_model;
+    log_info("[MlpBuilder::init_encrypted_weights] passive party receive and deserialize the mlp model");
   }
 }
 

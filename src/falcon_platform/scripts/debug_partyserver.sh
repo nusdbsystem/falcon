@@ -51,8 +51,8 @@ mkdir -p "$USED_LOG_PATH"
 # decide which deployment the partyServer will use to spawn worker
 export ENV="subprocess"
 #export ENV="docker"
-export IS_DEBUG="debug-on"
-#export IS_DEBUG="debug-off"
+#export IS_DEBUG="debug-on"
+export IS_DEBUG="debug-off"
 export SERVICE_NAME="partyserver"
 export COORD_SERVER_IP=$COORD_SERVER_IP
 export COORD_SERVER_PORT=$COORD_SERVER_PORT

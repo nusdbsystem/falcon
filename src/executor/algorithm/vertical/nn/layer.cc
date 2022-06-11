@@ -54,26 +54,23 @@ Layer::Layer(const Layer &layer) {
 }
 
 Layer &Layer::operator=(const Layer &layer) {
-  if (&layer != this) {
-    m_num_inputs = layer.m_num_inputs;
-    m_num_outputs = layer.m_num_outputs;
-    m_fit_bias = layer.m_fit_bias;
-    m_activation_func_str = layer.m_activation_func_str;
-    m_weight_mat = new EncodedNumber*[m_num_inputs];
-    for (int i = 0; i < m_num_inputs; i++) {
-      m_weight_mat[i] = new EncodedNumber[m_num_outputs];
-    }
-    m_bias = new EncodedNumber[m_num_outputs];
-    for (int i = 0; i < m_num_inputs; i++) {
-      for (int j = 0; j < m_num_outputs; j++) {
-        m_weight_mat[i][j] = layer.m_weight_mat[i][j];
-      }
-    }
+  m_num_inputs = layer.m_num_inputs;
+  m_num_outputs = layer.m_num_outputs;
+  m_fit_bias = layer.m_fit_bias;
+  m_activation_func_str = layer.m_activation_func_str;
+  m_weight_mat = new EncodedNumber*[m_num_inputs];
+  for (int i = 0; i < m_num_inputs; i++) {
+    m_weight_mat[i] = new EncodedNumber[m_num_outputs];
+  }
+  m_bias = new EncodedNumber[m_num_outputs];
+  for (int i = 0; i < m_num_inputs; i++) {
     for (int j = 0; j < m_num_outputs; j++) {
-      m_bias[j] = layer.m_bias[j];
+      m_weight_mat[i][j] = layer.m_weight_mat[i][j];
     }
   }
-  return *this;
+  for (int j = 0; j < m_num_outputs; j++) {
+    m_bias[j] = layer.m_bias[j];
+  }
 }
 
 Layer::~Layer() {
@@ -120,6 +117,8 @@ void Layer::init_encrypted_weights(const Party &party, int precision) {
   }
 
   // assign plain_rand_weight_mat and plain_rand_bias_vec to m_weight_mat and m_bias
+  log_info("[Layer::init_encrypted_weights] m_num_inputs = " + std::to_string(m_num_inputs));
+  log_info("[Layer::init_encrypted_weights] m_num_outputs = " + std::to_string(m_num_outputs));
   for (int i = 0; i < m_num_inputs; i++) {
     for (int j = 0; j < m_num_outputs; j++) {
       EncodedNumber t;
@@ -165,7 +164,14 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
   // whose dim = (cur_batch_size, m_num_outputs).
 
   // extract local weights according to local_weight_sizes
+  log_info("[comp_1st_layer_agg_output] extract local weights");
   int local_n_features = local_weight_sizes[party.party_id];
+  log_info("[comp_1st_layer_agg_output] local_n_features = " + std::to_string(local_n_features));
+  log_info("[comp_1st_layer_agg_output] m_num_outputs = " + std::to_string(m_num_outputs));
+  for (int i = 0; i < local_weight_sizes.size(); i++) {
+    log_info("[comp_1st_layer_agg_output] local_weight_sizes["
+      + std::to_string(i) + "] = " + std::to_string(local_weight_sizes[i]));
+  }
   int start_idx = 0;
   for (int i = 0; i < party.party_id; i++) {
     start_idx += local_weight_sizes[i];
@@ -181,6 +187,7 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
     }
   }
   // each party compute matrix multiplication between encoded_batch_samples and local_weight_mat
+  log_info("[comp_1st_layer_agg_output] compute local aggregation");
   auto** local_mat_mul_res = new EncodedNumber*[cur_batch_size];
   for (int i = 0; i < cur_batch_size; i++) {
     local_mat_mul_res[i] = new EncodedNumber[m_num_outputs];
@@ -196,6 +203,7 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
 
   // the active party aggregate the result and broadcast
   if (party.party_type == falcon::ACTIVE_PARTY) {
+    log_info("[comp_1st_layer_agg_output] the active party aggregate");
     // copy self local_mat_mul_res
     for (int i = 0; i < cur_batch_size; i++) {
       for (int j = 0; j < m_num_outputs; j++) {

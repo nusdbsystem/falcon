@@ -63,7 +63,7 @@
           "metric": "acc",
           "dp_budget": 0.1,
           "fit_bias": true,
-          "num_layers_neurons": [32, 32, 2],
+          "num_layers_neurons": [30, 64, 64, 2],
           "layers_activation_funcs": ["logistic", "logistic", "logistic"]
         }
       },
