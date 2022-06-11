@@ -44,7 +44,7 @@
   "tasks": {
     "model_training": {
       "mpc_algorithm_name": "mlp",
-      "algorithm_name": "mlp_alg",
+      "algorithm_name": "mlp",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
@@ -61,7 +61,7 @@
           "penalty": "l1",
           "optimizer": "sgd",
           "metric": "acc",
-          "dp_budget": "0.1",
+          "dp_budget": 0.1,
           "fit_bias": true,
           "num_layers_neurons": [32, 32, 2],
           "layers_activation_funcs": ["logistic", "logistic", "logistic"]

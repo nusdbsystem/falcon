@@ -533,7 +533,7 @@ func GenerateMLParams(cfg map[string]interface{}) string {
 
 	res := MlpParams{}
 
-	if err := json.Unmarshal(jb, &res); err != nil {
+	if errUnm := json.Unmarshal(jb, &res); errUnm != nil {
 		// do error check
 		panic("GenerateMLParams error in doing Unmarshal")
 	}
