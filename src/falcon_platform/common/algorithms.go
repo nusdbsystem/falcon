@@ -1,6 +1,6 @@
 package common
 
-// algorithm configurations
+// algorithm configurations, json to golang instance
 
 type LogisticRegression struct {
 	// batch size in each iteration
@@ -282,4 +282,84 @@ type LimeInterpretDT struct {
 	InterpretModelParam DecisionTree `json:"interpret_model_param"`
 	// explanation report
 	ExplanationReport string `json:"explanation_report"`
+}
+
+type FixedPointEncodedNumber struct {
+	// maximum value
+	N string
+	// encoded value
+	Value string
+	// fixed point precision
+	Exponent int32
+	// value type
+	Type int32
+}
+
+type EncodedNumberArray struct {
+	EncodedNumber []*FixedPointEncodedNumber
+}
+
+type EncodedNumberMatrix struct {
+	EncodedArray []*EncodedNumberArray
+}
+
+type Layer struct {
+	// the number of inputs for each neuron in this layer
+	// in fact, it is the number of neurons (number of outputs) of the previous layer
+	NumInputs int32
+	// the number of outputs for this layer
+	NumOutputs int32
+	// whether the neurons of this layer have bias (default true)
+	FitBias bool
+	// the activation function string
+	ActivationFuncStr string
+	// the weight matrix, encrypted values during training, dimension = (m_num_inputs, m_num_outputs)
+	WeightMat *EncodedNumberMatrix
+	// the bias vector, encrypted values during training, dimension = m_num_outputs
+	BiasVec *EncodedNumberArray
+}
+
+type MlpModel struct {
+	// the number of inputs (input layer size)
+	NumInputs int32
+	// the number of outputs (output layer size)
+	NumOutputs int32
+	// the number of hidden_layers
+	NumHiddenLayers int32
+	// the number of neurons in each layer
+	NumLayersNeurons []int32
+	// the vector of layers
+	Layers []*Layer
+}
+
+type MlpParams struct {
+	// size of mini-batch in each iteration
+	BatchSize int32 `json:"batch_size"`
+	// maximum number of iterations for training
+	MaxIteration int32 `json:"max_iteration"`
+	// tolerance of convergence
+	ConvergeThreshold float64 `json:"converge_threshold"`
+	// whether use regularization or not
+	WithRegularization bool `json:"with_regularization"`
+	// regularization parameter
+	Alpha float64 `json:"alpha"`
+	// learning rate for parameter updating
+	LearningRate float64 `json:"learning_rate"`
+	// decay rate for learning rate, following lr = lr0 / (1 + decay*t),
+	// t is #iteration
+	Decay float64 `json:"decay"`
+	// penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
+	Penalty string `json:"penalty"`
+	// optimization method, default 'sgd', currently support 'sgd'
+	Optimizer string `json:"optimizer"`
+	// evaluation metric for training and testing, 'mse'
+	Metric string `json:"metric"`
+	// differential privacy (DP) budget, 0 denotes not use DP
+	DpBudget float64 `json:"dp_budget"`
+	// whether to fit the bias term
+	FitBias bool `json:"fit_bias"`
+	// the number of neurons in each layer
+	NumLayersNeurons []int32 `json:"num_layers_neurons"`
+	// the vector of layers activation functions
+	LayersActivationFuncs []string `json:"layers_activation_funcs"`
 }

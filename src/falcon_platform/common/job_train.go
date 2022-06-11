@@ -197,6 +197,11 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 
 			jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig, jobInfo.ClassNum =
 				GenerateGBDTParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+		} else if jobInfo.Tasks.ModelTraining.AlgorithmName == MLPAlgName {
+			logger.Log.Println("ParseTrainJob: ModelTraining AlgorithmName match <-->", jobInfo.Tasks.ModelTraining.AlgorithmName)
+			jobInfo.Tasks.ModelTraining.InputConfigs.SerializedAlgorithmConfig =
+				GenerateMLParams(jobInfo.Tasks.ModelTraining.InputConfigs.AlgorithmConfig)
+
 		} else {
 			return errors.New("algorithm name can not be detected")
 		}
@@ -517,6 +522,45 @@ func GenerateGBDTParams(cfg map[string]interface{}) (string, uint) {
 	}
 
 	return b64.StdEncoding.EncodeToString(out), uint(res.ClassNum)
+}
+
+func GenerateMLParams(cfg map[string]interface{}) string {
+
+	jb, err := json.Marshal(cfg)
+	if err != nil {
+		panic("GenerateMLParams error in doing Marshal")
+	}
+
+	res := MlpParams{}
+
+	if err := json.Unmarshal(jb, &res); err != nil {
+		// do error check
+		panic("GenerateMLParams error in doing Unmarshal")
+	}
+
+	dtp := v0.MlpParams{
+		BatchSize:             res.BatchSize,
+		MaxIteration:          res.MaxIteration,
+		ConvergeThreshold:     res.ConvergeThreshold,
+		WithRegularization:    res.WithRegularization,
+		Alpha:                 res.Alpha,
+		LearningRate:          res.LearningRate,
+		Decay:                 res.Decay,
+		Penalty:               res.Penalty,
+		Optimizer:             res.Optimizer,
+		Metric:                res.Metric,
+		DpBudget:              res.DpBudget,
+		FitBias:               res.FitBias,
+		NumLayersNeurons:      res.NumLayersNeurons,
+		LayersActivationFuncs: res.LayersActivationFuncs,
+	}
+
+	out, err := proto.Marshal(&dtp)
+	if err != nil {
+		log.Fatalln("Failed to encode GenerateMLParams:", err)
+	}
+
+	return b64.StdEncoding.EncodeToString(out)
 }
 
 func GenerateLimeSamplingParams(cfg map[string]interface{}) string {

@@ -164,6 +164,7 @@ const (
 	RandomForestAlgName     = "random_forest"
 	LinearRegressionAlgName = "linear_regression"
 	GBDTAlgName             = "gbdt"
+	MLPAlgName              = "mlp_alg"
 
 	LimeSamplingAlgName       = "lime_sampling"
 	LimeCompPredictionAlgName = "lime_compute_prediction"
