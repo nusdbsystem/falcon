@@ -349,6 +349,28 @@ void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
     int plain_column_size);
 
 /**
+ * the element-wise matrix-matrix multiplication, need to ensure that
+ * cipher_row_size = plain_row_size && cipher_column_size = plain_column_size
+ *
+ * @param pk: public key
+ * @param res: the resulted matrix of matrix multiplication
+ * @param cipher_mat: the ciphertext matrix
+ * @param plain_mat: the plaintext matrix
+ * @param cipher_row_size: the number of rows of ciphertext matrix
+ * @param cipher_column_size: the number of columns of ciphertext matrix
+ * @param plain_row_size: the number of rows of plaintext matrix
+ * @param plain_column_size: the number of columns of plaintext matrix
+ */
+void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key* pk,
+                                EncodedNumber** res,
+                                EncodedNumber** cipher_mat,
+                                EncodedNumber** plain_mat,
+                                int cipher_row_size,
+                                int cipher_column_size,
+                                int plain_row_size,
+                                int plain_column_size);
+
+/**
  * this function increases the precision of a ciphertext matrix,
  * for computing homomorphic addition when the precision does not match
  *

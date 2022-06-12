@@ -58,7 +58,7 @@
           "alpha": 0.1,
           "learning_rate": 0.1,
           "decay": 0.1,
-          "penalty": "l1",
+          "penalty": "l2",
           "optimizer": "sgd",
           "metric": "acc",
           "dp_budget": 0.1,

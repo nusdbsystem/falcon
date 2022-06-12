@@ -484,6 +484,23 @@ void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
   }
 }
 
+void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key* pk,
+                                         EncodedNumber** res,
+                                         EncodedNumber** cipher_mat,
+                                         EncodedNumber** plain_mat,
+                                         int cipher_row_size,
+                                         int cipher_column_size,
+                                         int plain_row_size,
+                                         int plain_column_size) {
+  if ((plain_row_size != cipher_row_size) || (plain_column_size != cipher_column_size)) {
+    log_error("The two matrix dimension do not match for element-wise multiplication");
+    exit(EXIT_FAILURE);
+  }
+  for (int i = 0; i < plain_row_size; i++) {
+    djcs_t_aux_vec_ele_wise_ep_mul(pk, res[i], cipher_mat[i], plain_mat[i], plain_column_size);
+  }
+}
+
 void djcs_t_aux_increase_prec_mat(djcs_t_public_key* pk,
                                   EncodedNumber** res,
                                   int target_precision,

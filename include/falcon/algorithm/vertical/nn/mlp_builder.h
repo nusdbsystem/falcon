@@ -146,14 +146,16 @@ class MlpBuilder : public ModelBuilder {
    * compute the delta of the last layer (i.e., output layer)
    *
    * @param party: initialized party object
+   * @param layer_idx: the layer_idx
    * @param predicted_labels: the predicted labels
    * @param deltas: the deviations
    * @param batch_indexes: the last layer activation shares
    */
   void compute_last_layer_delta(
       const Party& party,
+      int layer_idx,
       EncodedNumber** predicted_labels,
-      std::vector<EncodedNumber**>& deltas,
+      EncodedNumber*** deltas,
       const std::vector<int> &batch_indexes);
 
   /**
@@ -177,9 +179,9 @@ class MlpBuilder : public ModelBuilder {
       const std::vector<std::vector<double>>& batch_samples,
       const TripleDVec& activation_shares,
       const TripleDVec& deriv_activation_shares,
-      std::vector<EncodedNumber**>& deltas,
-      std::vector<EncodedNumber**>& weight_grads,
-      std::vector<EncodedNumber*>& bias_grads);
+      EncodedNumber*** deltas,
+      EncodedNumber*** weight_grads,
+      EncodedNumber** bias_grads);
 
   /**
    * given a layer index, compute the regularization gradients
@@ -215,7 +217,27 @@ class MlpBuilder : public ModelBuilder {
       int sample_size,
       const TripleDVec& activation_shares,
       const TripleDVec& deriv_activation_shares,
-      std::vector<EncodedNumber**>& deltas);
+      EncodedNumber*** deltas);
+
+  /**
+   * update the delta given activation shares and derivative shares
+   *
+   * @param party: initialized party object
+   * @param activation_shares: the activation shares
+   * @param deriv_activation_shares: the derivative activation shares
+   * @param delta: the delta to be updated
+   * @param delta_row_size: the number of rows in delta (i.e., cur_batch_size)
+   * @param delta_col_size: the number of cols in delta
+   * @param phe_precision: the precision to encode shares
+   */
+  void inplace_derivatives(
+      const Party& party,
+      const std::vector<std::vector<double>>& act_shares,
+      const std::vector<std::vector<double>>& deriv_shares,
+      EncodedNumber** delta,
+      int delta_row_size,
+      int delta_col_size,
+      int phe_precision = PHE_FIXED_POINT_PRECISION);
 
   /**
    * layer-by-layer update weights
@@ -225,8 +247,8 @@ class MlpBuilder : public ModelBuilder {
    * @param bias_grads: the gradients of intercept in each neuron of each layer
    */
   void update_encrypted_weights(const Party& party,
-                                const std::vector<EncodedNumber**>& weight_grads,
-                                const std::vector<EncodedNumber*>& bias_grads);
+                                EncodedNumber*** weight_grads,
+                                EncodedNumber** bias_grads);
 
   /**
    * post-processing the weights to make sure that all the layers have the
