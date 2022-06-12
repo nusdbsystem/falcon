@@ -760,6 +760,7 @@ void MlpBuilder::train(Party party) {
     for (int i = 0; i < batch_indexes.size(); i++) {
       predicted_labels[i] = new EncodedNumber[mlp_model.m_num_outputs];
     }
+    log_info("[train] mlp_model.m_num_outputs = " + std::to_string(mlp_model.m_num_outputs));
     // the activation shares and derivative activation shares after forward computation
     TripleDVec layer_activation_shares, layer_deriv_activation_shares;
     int encry_agg_precision = encry_weights_prec + plain_samples_prec;

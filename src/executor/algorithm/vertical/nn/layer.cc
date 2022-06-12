@@ -176,6 +176,7 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
   for (int i = 0; i < party.party_id; i++) {
     start_idx += local_weight_sizes[i];
   }
+  log_info("[comp_1st_layer_agg_output] start_idx = " + std::to_string(start_idx));
   // each party init a block of weight matrix whose dim = (local_weight_size, m_num_outputs)
   auto** local_weight_mat = new EncodedNumber*[local_n_features];
   for (int i = 0; i < local_n_features; i++) {
@@ -214,7 +215,9 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
     for (int id = 0; id < party.party_num; id++) {
       if (id != party.party_id) {
         // reuse the local_mat_mul_res object to restore the received encoded matrix
+        log_info("[comp_1st_layer_agg_output] receive encoded matrix from party " + std::to_string(id));
         std::string recv_id_mat_str;
+        party.recv_long_message(id, recv_id_mat_str);
         deserialize_encoded_number_matrix(local_mat_mul_res, cur_batch_size,
                                           m_num_outputs, recv_id_mat_str);
         // homomorphic addition between local_mat_mul_res and res
@@ -227,6 +230,8 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
     if (m_fit_bias) {
       int prec_res = std::abs(res[0][0].getter_exponent());
       int prec_bias = std::abs(m_bias[0].getter_exponent());
+      log_info("[comp_1st_layer_agg_output] prec_res = " + std::to_string(prec_res));
+      log_info("[comp_1st_layer_agg_output] prec_bias = " + std::to_string(prec_bias));
       auto* m_bias_inc = new EncodedNumber[m_num_outputs];
       djcs_t_aux_increase_prec_vec(phe_pub_key, m_bias_inc, prec_res, m_bias, m_num_outputs);
       for (int i = 0; i < cur_batch_size; i++) {
@@ -237,13 +242,19 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
       delete [] m_bias_inc;
     }
   } else {
+    log_info("[comp_1st_layer_agg_output] send local_mat_mul_res to active party");
+    log_info("[comp_1st_layer_agg_output] cur_batch_size = " + std::to_string(cur_batch_size));
+    log_info("[comp_1st_layer_agg_output] m_num_outputs = " + std::to_string(m_num_outputs));
     std::string local_mat_str;
     serialize_encoded_number_matrix(local_mat_mul_res, cur_batch_size,
                                     m_num_outputs, local_mat_str);
     party.send_long_message(ACTIVE_PARTY_ID, local_mat_str);
   }
-  broadcast_encoded_number_matrix(party, res,
-                                  cur_batch_size, m_num_outputs, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_matrix(
+      party, res,
+      cur_batch_size,
+      m_num_outputs,
+      ACTIVE_PARTY_ID);
 
   // free memory
   for (int i = 0; i < local_n_features; i++) {
@@ -251,7 +262,7 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
   }
   delete [] local_weight_mat;
   for (int i = 0; i < cur_batch_size; i++) {
-    delete local_mat_mul_res[i];
+    delete [] local_mat_mul_res[i];
   }
   delete [] local_mat_mul_res;
   djcs_t_free_public_key(phe_pub_key);
@@ -285,9 +296,14 @@ void Layer::comp_other_layer_agg_output(const Party &party,
   for (int i = 0; i < cur_batch_size; i++) {
     local_ciphers_shares_mul_res[i] = new EncodedNumber[m_num_outputs];
   }
+  log_info("[comp_other_layer_agg_output] prev_batch_size = " + std::to_string(prev_batch_size));
+  log_info("[comp_other_layer_agg_output] prev_output_size = " + std::to_string(prev_output_size));
+  log_info("[comp_other_layer_agg_output] m_num_inputs = " + std::to_string(m_num_inputs));
+  log_info("[comp_other_layer_agg_output] m_num_outputs = " + std::to_string(m_num_outputs));
   cipher_shares_mat_mul(party, prev_layer_outputs_shares,
                         m_weight_mat, prev_batch_size, prev_output_size,
                         m_num_inputs, m_num_outputs, local_ciphers_shares_mul_res);
+  log_info("[comp_other_layer_agg_output] party local ciphers shares computation finished");
 
   // active party aggregate the results
   if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -302,6 +318,7 @@ void Layer::comp_other_layer_agg_output(const Party &party,
       if (id != party.party_id) {
         // reuse the local_mat_mul_res object to restore the received encoded matrix
         std::string recv_id_mat_str;
+        party.recv_long_message(id, recv_id_mat_str);
         deserialize_encoded_number_matrix(local_ciphers_shares_mul_res,
                                           cur_batch_size, m_num_outputs, recv_id_mat_str);
         // homomorphic addition between local_mat_mul_res and res

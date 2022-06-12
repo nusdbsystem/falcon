@@ -164,6 +164,7 @@ void MlpModel::forward_computation(const Party &party,
   for (int l_idx = 0; l_idx < layer_size; l_idx++) {
     log_info("[forward_computation]: compute layer " + std::to_string(l_idx));
     int cur_layer_num_outputs = m_layers[l_idx].m_num_outputs;
+    log_info("[forward_computation]: cur_layer_num_outputs = " + std::to_string(cur_layer_num_outputs));
     auto** cur_layer_enc_outputs = new EncodedNumber*[cur_batch_size];
     for (int i = 0; i < cur_batch_size; i++) {
       cur_layer_enc_outputs[i] = new EncodedNumber[cur_layer_num_outputs];
@@ -181,6 +182,7 @@ void MlpModel::forward_computation(const Party &party,
       // for other layers, the layer inputs are secret shares, so use another way to aggregate
       // compute the encrypted aggregation for each neuron in layer 0
       // compute the aggregation of current layer
+      log_info("[forward_computation] activation_shares.size = " + std::to_string(activation_shares.size()));
       m_layers[l_idx].comp_other_layer_agg_output(
           party, cur_batch_size,
           activation_shares[l_idx - 1],
@@ -203,7 +205,6 @@ void MlpModel::forward_computation(const Party &party,
     std::vector<double> flatten_layer_enc_outputs_shares =
         flatten_2d_vector(cur_layer_enc_outputs_shares);
     std::vector<int> public_values;
-    public_values.push_back(falcon::ACTIVATION);
     public_values.push_back(cur_batch_size);
     public_values.push_back(cur_layer_num_outputs);
     falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l_idx].m_activation_func_str);
@@ -227,10 +228,15 @@ void MlpModel::forward_computation(const Party &party,
     std::vector<double> spdz_res = future_values.get();
     spdz_pruning_check_thread.join();
     log_info("[forward_computation]: communicate with spdz finished");
-
+    log_info("[forward_computation]: spdz_res.size() = " + std::to_string(spdz_res.size()));
     std::vector<std::vector<double>> layer_act_outputs_shares, layer_deriv_act_outputs_shares;
     parse_spdz_act_comp_res(spdz_res, cur_batch_size, cur_layer_num_outputs,
                             layer_act_outputs_shares, layer_deriv_act_outputs_shares);
+    log_info("[forward_computation] layer_act_outputs_shares.row_size = " + std::to_string(layer_act_outputs_shares.size()));
+    log_info("[forward_computation] layer_act_outputs_shares.col_size = " + std::to_string(layer_act_outputs_shares[0].size()));
+    log_info("[forward_computation] layer_deriv_act_outputs_shares.row_size = " + std::to_string(layer_deriv_act_outputs_shares.size()));
+    log_info("[forward_computation] layer_deriv_act_outputs_shares.col_size = " + std::to_string(layer_deriv_act_outputs_shares[0].size()));
+
     activation_shares.push_back(layer_act_outputs_shares);
     deriv_activation_shares.push_back(layer_deriv_act_outputs_shares);
 
@@ -241,10 +247,15 @@ void MlpModel::forward_computation(const Party &party,
   }
   // convert the last layer output into ciphers and assign to predicted_labels
   std::vector<std::vector<double>> batch_prediction_shares = activation_shares[layer_size-1];
+  log_info("[forward_computation] layer_size - 1 = " + std::to_string(layer_size-1));
+  log_info("[forward_computation] batch_prediction_shares.size = " + std::to_string(batch_prediction_shares.size()));
+  log_info("[forward_computation] batch_prediction_shares[0].size = " + std::to_string(batch_prediction_shares[0].size()));
+  log_info("[forward_computation] m_layers_num_outputs[layer_size-1] = " + std::to_string(m_layers_num_outputs[layer_size-1]));
+
   for (int i = 0; i < cur_batch_size; i++) {
     secret_shares_to_ciphers(party, predicted_labels[i],
                              batch_prediction_shares[i],
-                             m_layers_num_outputs[layer_size-1],
+                             m_num_outputs,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
   }
@@ -265,10 +276,8 @@ void MlpModel::parse_spdz_act_comp_res(const std::vector<double> &res,
   }
   // the returned res vector is the 1d vector of secret shares of the
   // activation function and derivative of activation function for future usage
-  std::vector<std::vector<double>> layer0_act_outputs_shares = expend_1d_vector(
-      res_act, dim1_size, dim2_size);
-  std::vector<std::vector<double>> layer0_deriv_act_outputs_shares = expend_1d_vector(
-      res_deriv_act, dim1_size, dim2_size);
+  act_outputs_shares = expend_1d_vector(res_act, dim1_size, dim2_size);
+  deriv_act_outputs_shares = expend_1d_vector(res_deriv_act, dim1_size, dim2_size);
 }
 
 void MlpModel::forward_computation_fast(const Party &party,
@@ -326,7 +335,6 @@ void MlpModel::forward_computation_fast(const Party &party,
     std::vector<double> flatten_layer_enc_outputs_shares =
         flatten_2d_vector(cur_layer_enc_outputs_shares);
     std::vector<int> public_values;
-    public_values.push_back(falcon::ACTIVATION_FAST);
     public_values.push_back(cur_batch_size);
     public_values.push_back(cur_layer_num_outputs);
     falcon::SpdzMlpActivationFunc func = parse_mlp_act_func(m_layers[l_idx].m_activation_func_str);

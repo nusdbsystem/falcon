@@ -30,9 +30,8 @@ std::vector<std::vector<double>> expend_1d_vector(const std::vector<double>& vec
   std::vector<std::vector<double>> ret_mat;
   for (int i = 0; i < row_size; i++) {
     std::vector<double> row_vec;
-    row_vec.reserve(column_size);
     for (int j = 0; j < column_size; j++) {
-      row_vec.push_back(vec[i * row_size + j]);
+      row_vec.push_back(vec[i * column_size + j]);
     }
     ret_mat.push_back(row_vec);
   }

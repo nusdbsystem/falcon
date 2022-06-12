@@ -371,6 +371,11 @@ void cipher_shares_mat_mul(const Party& party,
   for (int i = 0; i < n_shares_row; i++) {
     encoded_shares[i] = new EncodedNumber[n_shares_col];
   }
+  for (int i = 0; i < n_shares_row; i++) {
+    for (int j = 0; j < n_shares_col; j++) {
+      encoded_shares[i][j].set_double(phe_pub_key->n[0], shares[i][j], PHE_FIXED_POINT_PRECISION);
+    }
+  }
   auto** local_mul_res = new EncodedNumber*[n_shares_row];
   for (int i = 0; i < n_shares_row; i++) {
     local_mul_res[i] = new EncodedNumber[n_ciphers_col];
