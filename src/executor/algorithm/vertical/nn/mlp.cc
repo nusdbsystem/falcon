@@ -12,14 +12,18 @@
 #include <falcon/utils/math/math_ops.h>
 
 MlpModel::MlpModel() {
+  m_is_classification = true;
   m_num_inputs = 0;
   m_num_outputs = 0;
   m_num_hidden_layers = 0;
 }
 
-MlpModel::MlpModel(bool with_bias, const std::vector<int>& num_layers_neurons, const std::vector<std::string>& layers_activation_funcs) {
+MlpModel::MlpModel(bool is_classification, bool with_bias,
+                   const std::vector<int>& num_layers_neurons,
+                   const std::vector<std::string>& layers_activation_funcs) {
   assert(num_layers_neurons.size() >= 2);
   assert((layers_activation_funcs.size() + 1) == num_layers_neurons.size());
+  m_is_classification = is_classification;
   m_layers_num_outputs = num_layers_neurons;
   m_num_inputs = m_layers_num_outputs[0];
   m_num_outputs = m_layers_num_outputs[m_layers_num_outputs.size() - 1];
@@ -38,6 +42,7 @@ MlpModel::MlpModel(bool with_bias, const std::vector<int>& num_layers_neurons, c
 }
 
 MlpModel::MlpModel(const MlpModel &mlp_model) {
+  m_is_classification = mlp_model.m_is_classification;
   m_num_inputs = mlp_model.m_num_inputs;
   m_num_outputs = mlp_model.m_num_outputs;
   m_num_hidden_layers = mlp_model.m_num_hidden_layers;
@@ -46,6 +51,7 @@ MlpModel::MlpModel(const MlpModel &mlp_model) {
 }
 
 MlpModel &MlpModel::operator=(const MlpModel &mlp_model) {
+  m_is_classification = mlp_model.m_is_classification;
   m_num_inputs = mlp_model.m_num_inputs;
   m_num_outputs = mlp_model.m_num_outputs;
   m_num_hidden_layers = mlp_model.m_num_hidden_layers;
@@ -57,8 +63,6 @@ MlpModel::~MlpModel() {
   m_num_inputs = 0;
   m_num_outputs = 0;
   m_num_hidden_layers = 0;
-//  m_num_layers_neurons.clear();
-//  m_layers.clear();
 }
 
 void MlpModel::init_encrypted_weights(const Party &party, int precision) {

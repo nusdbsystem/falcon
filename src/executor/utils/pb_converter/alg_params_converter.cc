@@ -219,6 +219,7 @@ void deserialize_gbdt_params(GbdtParams& gbdt_params, const std::string& input_m
 
 void serialize_mlp_params(const MlpParams& mlp_params, std::string& output_message) {
   com::nus::dbsytem::falcon::v0::MlpParams pb_mlp_params;
+  pb_mlp_params.set_is_classification(mlp_params.is_classification);
   pb_mlp_params.set_batch_size(mlp_params.batch_size);
   pb_mlp_params.set_max_iteration(mlp_params.max_iteration);
   pb_mlp_params.set_converge_threshold(mlp_params.converge_threshold);
@@ -231,10 +232,10 @@ void serialize_mlp_params(const MlpParams& mlp_params, std::string& output_messa
   pb_mlp_params.set_metric(mlp_params.metric);
   pb_mlp_params.set_dp_budget(mlp_params.dp_budget);
   pb_mlp_params.set_fit_bias(mlp_params.fit_bias);
-  int layer_size = (int) mlp_params.num_layers_neurons.size();
+  int layer_size = (int) mlp_params.num_layers_outputs.size();
   int hidden_layer_size = (int) mlp_params.layers_activation_funcs.size();
   for (int i = 0; i < layer_size; i++) {
-    pb_mlp_params.add_num_layers_neurons(mlp_params.num_layers_neurons[i]);
+    pb_mlp_params.add_num_layers_outputs(mlp_params.num_layers_outputs[i]);
   }
   for (int i = 0; i < hidden_layer_size; i++) {
     pb_mlp_params.add_layers_activation_funcs(mlp_params.layers_activation_funcs[i]);
@@ -249,6 +250,7 @@ void deserialize_mlp_params(MlpParams& mlp_params, const std::string& input_mess
     log_error("Deserialize mlp params message failed.");
     exit(EXIT_FAILURE);
   }
+  mlp_params.is_classification = pb_mlp_params.is_classification();
   mlp_params.batch_size = pb_mlp_params.batch_size();
   mlp_params.max_iteration = pb_mlp_params.max_iteration();
   mlp_params.converge_threshold = pb_mlp_params.converge_threshold();
@@ -261,10 +263,10 @@ void deserialize_mlp_params(MlpParams& mlp_params, const std::string& input_mess
   mlp_params.metric = pb_mlp_params.metric();
   mlp_params.dp_budget = pb_mlp_params.dp_budget();
   mlp_params.fit_bias = pb_mlp_params.fit_bias();
-  int layer_size = pb_mlp_params.num_layers_neurons_size();
+  int layer_size = pb_mlp_params.num_layers_outputs_size();
   int hidden_layer_size = pb_mlp_params.layers_activation_funcs_size();
   for (int i = 0; i < layer_size; i++) {
-    mlp_params.num_layers_neurons.push_back(pb_mlp_params.num_layers_neurons(i));
+    mlp_params.num_layers_outputs.push_back(pb_mlp_params.num_layers_outputs(i));
   }
   for (int i = 0; i < hidden_layer_size; i++) {
     mlp_params.layers_activation_funcs.push_back(pb_mlp_params.layers_activation_funcs(i));

@@ -46,6 +46,7 @@ MlpBuilder::MlpBuilder(const MlpParams &mlp_params,
                                       std::move(m_testing_labels),
                                       m_training_accuracy,
                                       m_testing_accuracy) {
+  is_classification = mlp_params.is_classification;
   batch_size = mlp_params.batch_size;
   max_iteration = mlp_params.max_iteration;
   converge_threshold = mlp_params.converge_threshold;
@@ -58,13 +59,13 @@ MlpBuilder::MlpBuilder(const MlpParams &mlp_params,
   metric = mlp_params.metric;
   dp_budget = mlp_params.dp_budget;
   fit_bias = mlp_params.fit_bias;
-  num_layers_neurons = mlp_params.num_layers_neurons;
+  num_layers_outputs = mlp_params.num_layers_outputs;
   layers_activation_funcs = mlp_params.layers_activation_funcs;
-  mlp_model = MlpModel(fit_bias, num_layers_neurons, layers_activation_funcs);
+  mlp_model = MlpModel(is_classification, fit_bias, num_layers_outputs, layers_activation_funcs);
 }
 
 MlpBuilder::~MlpBuilder() {
-  num_layers_neurons.clear();
+  num_layers_outputs.clear();
   layers_activation_funcs.clear();
 }
 

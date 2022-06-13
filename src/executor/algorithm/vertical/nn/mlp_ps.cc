@@ -287,9 +287,10 @@ void MlpParameterServer::update_encrypted_weights(const std::vector<string> &enc
   int idx = 0;
   // deserialize encrypted message, and add to encrypted
   for (const std::string& message: encoded_messages){
-    MlpModel dec_mlp_model(this->mlp_builder.fit_bias,
-    this->mlp_builder.num_layers_neurons,
-    this->mlp_builder.layers_activation_funcs);
+    MlpModel dec_mlp_model(this->mlp_builder.is_classification,
+                           this->mlp_builder.fit_bias,
+                           this->mlp_builder.num_layers_outputs,
+                           this->mlp_builder.layers_activation_funcs);
     deserialize_mlp_model(dec_mlp_model, message);
     if (idx == 0) {
       agg_mlp_model = dec_mlp_model;

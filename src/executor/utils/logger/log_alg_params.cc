@@ -100,9 +100,9 @@ void log_mlp_params(const MlpParams& mlp_params) {
   log_info("mlp_params.dp_budget = " + std::to_string(mlp_params.dp_budget));
   log_info("mlp_params.fit_bias = " + std::to_string(mlp_params.fit_bias));
   log_info("mlp_params.num_layers_neurons: ");
-  for (int i = 0; i < mlp_params.num_layers_neurons.size(); i++) {
+  for (int i = 0; i < mlp_params.num_layers_outputs.size(); i++) {
     log_info("mlp_params.num_layers_neurons[" + std::to_string(i)
-      + "] = " + std::to_string(mlp_params.num_layers_neurons[i]));
+      + "] = " + std::to_string(mlp_params.num_layers_outputs[i]));
   }
   log_info("mlp_params.layers_activation_funcs: ");
   for (int i = 0; i < mlp_params.layers_activation_funcs.size(); i++) {

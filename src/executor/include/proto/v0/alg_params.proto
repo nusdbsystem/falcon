@@ -118,33 +118,35 @@ message GbdtParams {
 
 // This message denotes the multi-layer perceptron builder parameters
 message MlpParams {
+    // whether classification or regression
+    bool is_classification = 1;
     // size of mini-batch in each iteration
-    int32 batch_size = 1;
+    int32 batch_size = 2;
     // maximum number of iterations for training
-    int32 max_iteration = 2;
+    int32 max_iteration = 3;
     // tolerance of convergence
-    double converge_threshold = 3;
+    double converge_threshold = 4;
     // whether use regularization or not
-    bool with_regularization = 4;
+    bool with_regularization = 5;
     // regularization parameter
-    double alpha = 5;
+    double alpha = 6;
     // learning rate for parameter updating
-    double learning_rate = 6;
+    double learning_rate = 7;
     // decay rate for learning rate, following lr = lr0 / (1 + decay*t),
     // t is #iteration
-    double decay = 7;
+    double decay = 8;
     // penalty method used, 'l1' or 'l2', default l2, currently support 'l2'
-    string penalty = 8;
+    string penalty = 9;
     // optimization method, default 'sgd', currently support 'sgd'
-    string optimizer = 9;
+    string optimizer = 10;
     // evaluation metric for training and testing, 'mse'
-    string metric = 10;
+    string metric = 11;
     // differential privacy (DP) budget, 0 denotes not use DP
-    double dp_budget = 11;
+    double dp_budget = 12;
     // whether to fit the bias term
-    bool fit_bias = 12;
+    bool fit_bias = 13;
     // the number of neurons in each layer
-    repeated int32 num_layers_neurons = 13;
+    repeated int32 num_layers_outputs = 14;
     // the vector of layers activation functions
-    repeated string layers_activation_funcs = 14;
+    repeated string layers_activation_funcs = 15;
 }

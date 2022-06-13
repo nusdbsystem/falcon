@@ -13,6 +13,8 @@
 #include <falcon/algorithm/vertical/nn/mlp.h>
 
 struct MlpParams {
+  // whether classification or regression
+  bool is_classification;
   // size of mini-batch in each iteration
   int batch_size;
   // maximum number of iterations for training
@@ -39,13 +41,15 @@ struct MlpParams {
   // whether to fit the bias term
   bool fit_bias;
   // the number of neurons in each layer
-  std::vector<int> num_layers_neurons;
+  std::vector<int> num_layers_outputs;
   // the vector of layers activation functions
   std::vector<std::string> layers_activation_funcs;
 };
 
 class MlpBuilder : public ModelBuilder {
  public:
+  // whether classification or regression
+  bool is_classification;
   // size of mini-batch in each iteration
   int batch_size{};
   // maximum number of iterations for training
@@ -77,7 +81,7 @@ class MlpBuilder : public ModelBuilder {
   // whether to fit the bias term
   bool fit_bias{};
   // the number of neurons in each layer
-  std::vector<int> num_layers_neurons;
+  std::vector<int> num_layers_outputs;
   // the vector of layers activation functions
   std::vector<std::string> layers_activation_funcs;
 

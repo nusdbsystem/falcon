@@ -13,6 +13,7 @@
 
 void serialize_mlp_model(const MlpModel& mlp_model, std::string& output_str) {
   com::nus::dbsytem::falcon::v0::MlpModel pb_mlp_model;
+  pb_mlp_model.set_is_classification(mlp_model.m_is_classification);
   pb_mlp_model.set_num_inputs(mlp_model.m_num_inputs);
   pb_mlp_model.set_num_outputs(mlp_model.m_num_outputs);
   pb_mlp_model.set_num_hidden_layers(mlp_model.m_num_hidden_layers);
@@ -102,6 +103,7 @@ void deserialize_mlp_model(MlpModel& mlp_model, const std::string& input_str) {
     log_error("Deserialize mlp model message failed.");
     exit(EXIT_FAILURE);
   }
+  mlp_model.m_is_classification = deserialized_mlp_model.is_classification();
   mlp_model.m_num_inputs = deserialized_mlp_model.num_inputs();
   mlp_model.m_num_outputs = deserialized_mlp_model.num_outputs();
   mlp_model.m_num_hidden_layers = deserialized_mlp_model.num_hidden_layers();

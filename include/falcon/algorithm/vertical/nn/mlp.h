@@ -19,6 +19,8 @@ typedef std::vector<std::vector<std::vector<double>>> TripleDVec;
 // the mlp model
 class MlpModel {
  public:
+  // whether classification or regression
+  bool m_is_classification;
   // the number of inputs (input layer size)
   int m_num_inputs;
   // the number of outputs (output layer size)
@@ -42,7 +44,9 @@ class MlpModel {
    * @param layers_num_outputs: the vector of layers neuron numbers
    * @param layers_activation_funcs: the vector of layers activation functions
    */
-  MlpModel(bool with_bias, const std::vector<int>& layers_num_outputs, const std::vector<std::string>& layers_activation_funcs);
+  MlpModel(bool is_classification, bool with_bias,
+           const std::vector<int>& layers_num_outputs,
+           const std::vector<std::string>& layers_activation_funcs);
 
   /**
    * copy constructor

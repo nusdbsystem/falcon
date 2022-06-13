@@ -556,6 +556,7 @@ TEST(PB_Converter, GbdtParams) {
 
 TEST(PB_Converter, MlpParams) {
   MlpParams mlp_params;
+  mlp_params.is_classification = true;
   mlp_params.batch_size = 32;
   mlp_params.max_iteration = 100;
   mlp_params.converge_threshold = 1e-3;
@@ -568,10 +569,10 @@ TEST(PB_Converter, MlpParams) {
   mlp_params.metric = "acc";
   mlp_params.dp_budget = 0;
   mlp_params.fit_bias = true;
-  mlp_params.num_layers_neurons.push_back(20);
-  mlp_params.num_layers_neurons.push_back(100);
-  mlp_params.num_layers_neurons.push_back(100);
-  mlp_params.num_layers_neurons.push_back(2);
+  mlp_params.num_layers_outputs.push_back(20);
+  mlp_params.num_layers_outputs.push_back(100);
+  mlp_params.num_layers_outputs.push_back(100);
+  mlp_params.num_layers_outputs.push_back(2);
   mlp_params.layers_activation_funcs.emplace_back("sigmoid");
   mlp_params.layers_activation_funcs.emplace_back("sigmoid");
   mlp_params.layers_activation_funcs.emplace_back("linear");
@@ -580,6 +581,7 @@ TEST(PB_Converter, MlpParams) {
 
   MlpParams deserialized_mlp_params;
   deserialize_mlp_params(deserialized_mlp_params, output_message);
+  EXPECT_EQ(mlp_params.is_classification, deserialized_mlp_params.is_classification);
   EXPECT_EQ(mlp_params.batch_size, deserialized_mlp_params.batch_size);
   EXPECT_EQ(mlp_params.max_iteration, deserialized_mlp_params.max_iteration);
   EXPECT_EQ(mlp_params.converge_threshold, deserialized_mlp_params.converge_threshold);
@@ -592,10 +594,10 @@ TEST(PB_Converter, MlpParams) {
   EXPECT_TRUE(mlp_params.penalty == deserialized_mlp_params.penalty);
   EXPECT_TRUE(mlp_params.optimizer == deserialized_mlp_params.optimizer);
   EXPECT_TRUE(mlp_params.metric == deserialized_mlp_params.metric);
-  int layer_size = (int) mlp_params.num_layers_neurons.size();
+  int layer_size = (int) mlp_params.num_layers_outputs.size();
   int hidden_layer_size = (int) mlp_params.layers_activation_funcs.size();
   for (int i = 0; i < layer_size; i++) {
-    EXPECT_EQ(mlp_params.num_layers_neurons[i], deserialized_mlp_params.num_layers_neurons[i]);
+    EXPECT_EQ(mlp_params.num_layers_outputs[i], deserialized_mlp_params.num_layers_outputs[i]);
   }
   for (int i = 0; i < hidden_layer_size; i++) {
     EXPECT_TRUE(mlp_params.layers_activation_funcs[i] == deserialized_mlp_params.layers_activation_funcs[i]);
@@ -1277,7 +1279,7 @@ TEST(PB_Converter, MlpModel) {
   std::vector<std::string> activation_func_str;
   activation_func_str.emplace_back("sigmoid");
   activation_func_str.emplace_back("sigmoid");
-  MlpModel mlp_model(true, num_layers_neurons, activation_func_str);
+  MlpModel mlp_model(true, true, num_layers_neurons, activation_func_str);
 //  mlp_model.m_num_inputs = 3;
 //  mlp_model.m_num_outputs = 2;
 //  mlp_model.m_num_hidden_layers = 2;
@@ -1315,6 +1317,7 @@ TEST(PB_Converter, MlpModel) {
   MlpModel des_mlp_model;
   deserialize_mlp_model(des_mlp_model, pb_str);
 
+  EXPECT_EQ(mlp_model.m_is_classification, des_mlp_model.m_is_classification);
   EXPECT_EQ(mlp_model.m_num_inputs, des_mlp_model.m_num_inputs);
   EXPECT_EQ(mlp_model.m_num_outputs, des_mlp_model.m_num_outputs);
   EXPECT_EQ(mlp_model.m_num_hidden_layers, des_mlp_model.m_num_hidden_layers);
