@@ -206,7 +206,8 @@ int main(int argc, char *argv[]) {
         } else{
           log_info("Passive Party doesn't run parameter server in distributed inference");
         }
-      } else{
+      }
+      else{
         log_info("Execute distributed training logic");
         // if parameter server, init the party itself network channels and phe keys
         party.init_network_channels(network_config_pb_str);
@@ -350,9 +351,17 @@ int main(int argc, char *argv[]) {
               delete worker;
               break;
             }
-            case falcon::DT:
-              log_error("Type falcon::DT not implemented");
-              exit(1);
+            case falcon::DT: {
+              auto worker = new Worker(ps_network_config_pb_str, worker_id);
+              train_decision_tree(&party,
+                                  algorithm_params_pb_str,
+                                  model_save_file,
+                                  model_report_file,
+                                  is_distributed,
+                                  worker);
+              delete worker;
+              break;
+            }
             case falcon::RF:
               log_error("Type distributed falcon::RF not implemented");
               exit(1);
