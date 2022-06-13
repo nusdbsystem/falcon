@@ -21,7 +21,6 @@ MlpModel::MlpModel() {
 MlpModel::MlpModel(bool is_classification, bool with_bias,
                    const std::vector<int>& num_layers_neurons,
                    const std::vector<std::string>& layers_activation_funcs) {
-  assert(num_layers_neurons.size() >= 2);
   assert((layers_activation_funcs.size() + 1) == num_layers_neurons.size());
   m_is_classification = is_classification;
   m_layers_num_outputs = num_layers_neurons;
@@ -84,6 +83,10 @@ void MlpModel::predict(const Party &party,
 
   int pred_size = (int) predicted_samples.size();
   int label_size = m_num_outputs;
+  if (m_is_classification && (m_num_outputs == 1)) {
+    // binary classification
+    label_size = 2;
+  }
   auto **predicted_labels_proba = new EncodedNumber*[pred_size];
   for (int i = 0; i < pred_size; i++) {
     predicted_labels_proba[i] = new EncodedNumber[label_size];
@@ -92,11 +95,34 @@ void MlpModel::predict(const Party &party,
   // computation method that returns only the final label
   predict_proba(party, predicted_samples, predicted_labels_proba);
 
-  if (label_size == 1) {
-    // directly copy
+  if (!m_is_classification) {
+    // directly copy for regression model
     for (int i = 0; i < pred_size; i++) {
       predicted_labels[i] = predicted_labels_proba[i][0];
     }
+  } else if (m_is_classification && (m_num_outputs == 1)) {
+    // binary classification, check if predicted label pos >= 0.5,
+    // which is the first dimension of predicted_labels_proba
+    // decrypt predicted_labels_proba, find the argmax label, and encrypt
+    auto* encrypted_labels_pos = new EncodedNumber[pred_size];
+    for (int i = 0; i < pred_size; i++) {
+      encrypted_labels_pos[i] = predicted_labels_proba[i][0];
+    }
+    auto *decrypted_labels_pos = new EncodedNumber[pred_size];
+    collaborative_decrypt(party, encrypted_labels_pos,
+                          decrypted_labels_pos, pred_size, ACTIVE_PARTY_ID);
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      for (int i = 0; i < pred_size; i++) {
+        double x;
+        decrypted_labels_pos[i].decode(x);
+        double label = (x >= LOGREG_THRES) ? 1.0 : 0.0;
+        predicted_labels[i].set_double(phe_pub_key->n[0], label);
+        djcs_t_aux_encrypt(phe_pub_key, party.phe_random, predicted_labels[i], predicted_labels[i]);
+      }
+    }
+    broadcast_encoded_number_array(party, predicted_labels, pred_size, ACTIVE_PARTY_ID);
+    delete [] encrypted_labels_pos;
+    delete [] decrypted_labels_pos;
   } else {
     // decrypt predicted_labels_proba, find the argmax label, and encrypt
     for (int i = 0; i < pred_size; i++) {
@@ -145,10 +171,35 @@ void MlpModel::predict_proba(const Party &party,
   forward_computation_fast(party, pred_size, local_weight_sizes,
                            encoded_batch_samples, predicted_labels);
 
+  // binary classification, the predicted labels only give the positive probability
+  // as the m_num_outputs == 1
+  double positive_one = 1.0;
+  int negative_one = -1;
+  int prediction_precision = std::abs(predicted_labels[0][0].getter_exponent());
+  auto* predicted_labels_neg = new EncodedNumber[pred_size];
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    EncodedNumber pos_one_double, neg_one_int;
+    pos_one_double.set_double(phe_pub_key->n[0], positive_one, prediction_precision);
+    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, pos_one_double, pos_one_double);
+    neg_one_int.set_integer(phe_pub_key->n[0], negative_one);
+    for (int i = 0; i < pred_size; i++) {
+      EncodedNumber label_neg;
+      djcs_t_aux_ep_mul(phe_pub_key, label_neg, predicted_labels[i][0], neg_one_int);
+      djcs_t_aux_ee_add(phe_pub_key, label_neg, label_neg, pos_one_double);
+      predicted_labels_neg[i] = label_neg;
+    }
+  }
+  broadcast_encoded_number_array(party, predicted_labels_neg, pred_size, ACTIVE_PARTY_ID);
+  // assign the negative probability to the
+  for (int i = 0; i < pred_size; i++) {
+    predicted_labels[i][1] = predicted_labels_neg[i];
+  }
+
   for (int i = 0; i < pred_size; i++) {
     delete [] encoded_batch_samples[i];
   }
   delete [] encoded_batch_samples;
+  delete [] predicted_labels_neg;
   djcs_t_free_public_key(phe_pub_key);
 }
 
