@@ -52,7 +52,7 @@
         },
         "algorithm_config": {
           "batch_size": 8,
-          "max_iteration": 10,
+          "max_iteration": 100,
           "converge_threshold": 0.0001,
           "with_regularization": true,
           "alpha": 0.1,
@@ -63,8 +63,8 @@
           "metric": "acc",
           "dp_budget": 0.1,
           "fit_bias": true,
-          "num_layers_neurons": [30, 32, 16, 2],
-          "layers_activation_funcs": ["logistic", "logistic", "logistic"]
+          "num_layers_neurons": [30, 16, 2],
+          "layers_activation_funcs": ["logistic", "logistic"]
         }
       },
       "output_configs": {

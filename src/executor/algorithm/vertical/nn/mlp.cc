@@ -79,7 +79,7 @@ void MlpModel::predict(const Party &party,
   party.getter_phe_pub_key(phe_pub_key);
 
   int pred_size = (int) predicted_samples.size();
-  int label_size = m_layers_num_outputs[m_layers_num_outputs.size() - 1];
+  int label_size = m_num_outputs;
   auto **predicted_labels_proba = new EncodedNumber*[pred_size];
   for (int i = 0; i < pred_size; i++) {
     predicted_labels_proba[i] = new EncodedNumber[label_size];
@@ -330,7 +330,7 @@ void MlpModel::forward_computation_fast(const Party &party,
         cur_layer_num_outputs,
         ACTIVE_PARTY_ID,
         cipher_precision);
-    log_info("[forward_computation] converted 1st hidden layer "
+    log_info("[forward_computation_fast] converted 1st hidden layer "
              "encrypted output into secret shares.");
     std::vector<double> flatten_layer_enc_outputs_shares =
         flatten_2d_vector(cur_layer_enc_outputs_shares);
@@ -376,11 +376,49 @@ void MlpModel::forward_computation_fast(const Party &party,
   for (int i = 0; i < cur_batch_size; i++) {
     secret_shares_to_ciphers(party, predicted_labels[i],
                              batch_prediction_shares[i],
-                             m_layers_num_outputs[layer_size-1],
+                             m_num_outputs,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
   }
   log_info("[forward_computation_fast] finished.");
+}
+
+void MlpModel::display_model(const Party &party) {
+  log_info("[MlpModel::display_model]");
+  int n_layers = (int) m_layers.size();
+  for (int l = 0; l < n_layers; l++) {
+    log_info("[MlpModel::display_model] display layer " + std::to_string(l));
+    int n_inputs_l = m_layers[l].m_num_inputs;
+    int n_outputs_l = m_layers[l].m_num_outputs;
+    // display m_weight_mat
+    for (int i = 0; i < n_inputs_l; i++) {
+      // decrypt layer l's m_weight_mat[i]
+      log_info("[MlpModel::display_model] m_weight_mat[" + std::to_string(i) + "]'s weights are: ");
+      auto* dec_weight_mat_i = new EncodedNumber[n_outputs_l];
+      collaborative_decrypt(party, m_layers[l].m_weight_mat[i],
+                            dec_weight_mat_i, n_outputs_l, ACTIVE_PARTY_ID);
+      if (party.party_type == falcon::ACTIVE_PARTY) {
+        for (int j = 0; j < n_outputs_l; j++) {
+          double w;
+          dec_weight_mat_i[j].decode(w);
+          log_info("[MlpModel::display_model] m_weight_mat["
+            + std::to_string(i) + "][" + std::to_string(j) + "] = " + std::to_string(w));
+        }
+      }
+      delete [] dec_weight_mat_i;
+    }
+    // display m_bias
+    auto* dec_bias_vec = new EncodedNumber[n_outputs_l];
+    collaborative_decrypt(party, m_layers[l].m_bias, dec_bias_vec, n_outputs_l, ACTIVE_PARTY_ID);
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      for (int j = 0; j < n_outputs_l; j++) {
+        double b;
+        dec_bias_vec[j].decode(b);
+        log_info("[MlpModel::display_model] m_bias[" + std::to_string(j) + "] = " + std::to_string(b));
+      }
+    }
+    delete [] dec_bias_vec;
+  }
 }
 
 void spdz_mlp_computation(int party_num,
@@ -481,6 +519,7 @@ void spdz_mlp_computation(int party_num,
       // suppose the activation shares are returned
       std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
       res->set_value(return_values);
+      break;
     }
     default:
       log_info("[spdz_mlp_computation] SPDZ mlp computation type is not found.");

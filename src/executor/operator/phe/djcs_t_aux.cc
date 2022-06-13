@@ -196,7 +196,7 @@ void djcs_t_aux_increase_prec(djcs_t_public_key* pk,
     log_error("The target precision is less than current precision, cannot increase.");
     exit(EXIT_FAILURE);
   } else if (target_precision == cur_precision) {
-    log_info("The precision is correct, no need to increase.");
+//    log_info("The precision is correct, no need to increase.");
     return;
   } else {
     // init an encoded number plaintext of 1.0 with diff precision and multiply

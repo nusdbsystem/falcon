@@ -145,6 +145,13 @@ class MlpModel {
       const std::vector<int>& local_weight_sizes,
       EncodedNumber** encoded_batch_samples,
       EncodedNumber** predicted_labels) const;
+
+  /**
+   * display the mlp model
+   *
+   * @param party: initialized party object
+   */
+  void display_model(const Party& party);
 };
 
 /**

@@ -330,7 +330,7 @@ void MlpBuilder::compute_loss_grad(
     // can first divide n_samples (aka. sample_size)
     for (int i = 0; i < shares_row_size; i++) {
       for (int j = 0; j < shares_column_size; j++) {
-        layer_act_shares_trans[i][j] /= sample_size;
+        layer_act_shares_trans[i][j] = (0 - learning_rate / sample_size) * layer_act_shares_trans[i][j];
       }
     }
 
@@ -351,6 +351,12 @@ void MlpBuilder::compute_loss_grad(
     int local_n_features = (int) batch_samples[0].size();
     int layer_output_size = mlp_model.m_layers[layer_idx].m_num_outputs;
     std::vector<std::vector<double>> trans_batch_samples = trans_mat(batch_samples);
+    // multiply coefficient constant
+    for (int i = 0; i < local_n_features; i++) {
+      for (int j = 0; j < sample_size; j++) {
+        trans_batch_samples[i][j] = (0 - learning_rate / sample_size) * trans_batch_samples[i][j];
+      }
+    }
     // now the dimension = (n_features, n_samples)
     auto** local_agg_mat = new EncodedNumber*[local_n_features];
     auto** encoded_trans_batch_samples = new EncodedNumber*[local_n_features];
@@ -478,7 +484,7 @@ void MlpBuilder::compute_loss_grad(
       }
     }
     // divide sample size to get the gradient
-    double constant = 1.0 / (double) sample_size;
+    double constant = (0 - learning_rate / (double) sample_size);
     EncodedNumber encoded_constant;
     encoded_constant.set_double(phe_pub_key->n[0], constant, PHE_FIXED_POINT_PRECISION);
     for (int i = 0; i < ciphers_column_size; i++) {
@@ -541,7 +547,8 @@ void MlpBuilder::compute_reg_grad(const Party &party,
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
-  double constant = alpha / ((double) sample_size);
+  // the regularization term is { - learning_rate * alpha * [w] / sample_size}
+  double constant = 0 - (learning_rate * alpha / ((double) sample_size));
   EncodedNumber encoded_constant;
   encoded_constant.set_double(phe_pub_key->n[0], constant, PHE_FIXED_POINT_PRECISION);
   // copy neuron weights of the current layer, note that here is transposed
@@ -607,7 +614,6 @@ void MlpBuilder::update_layer_delta(
   for (int i = 0; i < layer_weight_mat_col_size; i++){
     layer_weight_mat_trans[i] = new EncodedNumber[layer_weight_mat_row_size];
   }
-  log_info("[MlpBuilder::update_layer_delta] debug step 1");
   transpose_encoded_mat(mlp_model.m_layers[layer_idx].m_weight_mat,
                         layer_weight_mat_row_size,
                         layer_weight_mat_col_size,
@@ -617,7 +623,6 @@ void MlpBuilder::update_layer_delta(
   for (int i = 0; i < sample_size; i++) {
     delta_prev[i] = new EncodedNumber[layer_weight_mat_row_size];
   }
-  log_info("[MlpBuilder::update_layer_delta] debug step 2");
   cipher_shares_mat_mul(party,
                         delta_shares,
                         layer_weight_mat_trans,
@@ -626,7 +631,6 @@ void MlpBuilder::update_layer_delta(
                         layer_weight_mat_col_size,
                         layer_weight_mat_row_size,
                         delta_prev);
-  log_info("[MlpBuilder::update_layer_delta] debug step 3");
   // element-wise delta_prev multiplication with activation shares and deriv activation shares
   // but note that the shares are distributed on parties, it seems that previously direct
   // return the activation * derivative-activation can reduce the computation here.
@@ -639,17 +643,12 @@ void MlpBuilder::update_layer_delta(
                       sample_size,
                       layer_weight_mat_row_size);
 
-  log_info("[MlpBuilder::update_layer_delta] debug step 4");
-
   // assign the delta_prev
   for (int i = 0; i < sample_size; i++) {
     for (int j = 0; j < layer_weight_mat_row_size; j++) {
       deltas[layer_idx - 1][i][j] = delta_prev[i][j];
     }
   }
-//  deltas[layer_idx - 1] = delta_prev;
-
-  log_info("[MlpBuilder::update_layer_delta] debug step 5");
 
   for (int i = 0; i < layer_weight_mat_col_size; i++) {
     delete [] layer_weight_mat_trans[i];
@@ -1010,6 +1009,9 @@ void MlpBuilder::train(Party party) {
     delete [] encoded_batch_samples;
     delete [] predicted_labels;
   }
+
+  log_info("[train] display model weights for debug");
+  mlp_model.display_model(party);
 
   const clock_t training_finish_time = clock();
   double training_consumed_time =
