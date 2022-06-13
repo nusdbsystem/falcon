@@ -148,11 +148,11 @@ void split_dataset(Party* party,
     log_info("fit_bias = TRUE, will insert x1=1 to features");
     // insert x1=1 to front of the features
     double x1 = BIAS_VALUE;
-    for (int i = 0; i < training_data.size(); i++) {
-      training_data[i].insert(training_data[i].begin(), x1);
+    for (auto & i : training_data) {
+      i.insert(i.begin(), x1);
     }
-    for (int i = 0; i < testing_data.size(); i++) {
-      testing_data[i].insert(testing_data[i].begin(), x1);
+    for (auto & i : testing_data) {
+      i.insert(i.begin(), x1);
     }
     // update the new feature_num for the active party
     // also update the weight_size value +1

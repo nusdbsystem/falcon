@@ -67,13 +67,13 @@ void Node::print_node() {
   log_info("[Node.print_node]: node split_threshold = " + std::to_string(split_threshold));
   log_info("[Node.print_node]: node node_sample_num = " + std::to_string(node_sample_num));
 
-  // assume that the impurity and label are plaintext
-  double decoded_impurity, decoded_label;
-  impurity.decode(decoded_impurity);
-  log_info("[Node.print_node]: node impurity: " + std::to_string(decoded_impurity));
-  if (node_type == falcon::LEAF) {
-    log_info("[Node.print_node] node label type: " + std::to_string(label.getter_type()));
-    label.decode(decoded_label);
-    log_info("[Node.print_node]: node label: " + std::to_string(decoded_label));
-  }
+//  // assume that the impurity and label are plaintext
+//  double decoded_impurity, decoded_label;
+//  impurity.decode(decoded_impurity);
+//  log_info("[Node.print_node]: node impurity: " + std::to_string(decoded_impurity));
+//  if (node_type == falcon::LEAF) {
+//    log_info("[Node.print_node] node label type: " + std::to_string(label.getter_type()));
+//    label.decode(decoded_label);
+//    log_info("[Node.print_node]: node label: " + std::to_string(decoded_label));
+//  }
 }
