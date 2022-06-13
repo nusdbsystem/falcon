@@ -551,7 +551,7 @@ func GenerateMLParams(cfg map[string]interface{}) string {
 		Metric:                res.Metric,
 		DpBudget:              res.DpBudget,
 		FitBias:               res.FitBias,
-		NumLayersNeurons:      res.NumLayersNeurons,
+		NumLayersOutputs:      res.NumLayersOutputs,
 		LayersActivationFuncs: res.LayersActivationFuncs,
 	}
 
