@@ -10,9 +10,7 @@ docker exec -it $container_id bash make.sh
 
 docker container stop $container_id
 
-
-docker commit $container_id falcon-clean:latest
-
+docker commit --change='CMD ["bash", "docker_cmd.sh"]' $container_id falcon-clean
 
 docker container rm $container_id
 
