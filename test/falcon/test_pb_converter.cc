@@ -1363,6 +1363,7 @@ TEST(PB_Converter, MlpModel) {
       mpz_clear(des_value);
     }
   }
+  EXPECT_EQ(mlp_model.m_n_layers, des_mlp_model.m_n_layers);
 
   mpz_clear(v_n);
   mpz_clear(v_value);

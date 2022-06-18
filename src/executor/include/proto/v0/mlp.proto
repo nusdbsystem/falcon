@@ -34,4 +34,6 @@ message MlpModel {
   repeated int32 num_layers_neurons = 5;
   // the vector of layers
   repeated Layer layers = 6;
+  // the number of layers
+  int32 n_layers = 7;
 }

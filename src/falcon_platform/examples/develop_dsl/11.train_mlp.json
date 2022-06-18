@@ -53,7 +53,7 @@
         "algorithm_config": {
           "is_classification": true,
           "batch_size": 8,
-          "max_iteration": 100,
+          "max_iteration": 1,
           "converge_threshold": 0.0001,
           "with_regularization": true,
           "alpha": 0.1,
@@ -64,7 +64,7 @@
           "metric": "acc",
           "dp_budget": 0.1,
           "fit_bias": true,
-          "num_layers_outputs": [30, 16, 2],
+          "num_layers_outputs": [30, 2, 1],
           "layers_activation_funcs": ["logistic", "logistic"]
         }
       },

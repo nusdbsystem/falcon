@@ -255,6 +255,17 @@ class MlpBuilder : public ModelBuilder {
                                 EncodedNumber** bias_grads);
 
   /**
+   * display gradients
+   *
+   * @param party: initialized party object
+   * @param weight_grads: the gradients of weights each neuron of each layer
+   * @param bias_grads: the gradients of intercept in each neuron of each layer
+   */
+  void display_gradients(const Party& party,
+                         EncodedNumber*** weight_grads,
+                         EncodedNumber** bias_grads);
+
+  /**
    * post-processing the weights to make sure that all the layers have the
    * sample precision for the encrypted weights and bias
    *

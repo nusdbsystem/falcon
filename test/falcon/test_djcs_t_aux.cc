@@ -32,9 +32,9 @@ TEST(PHE, ThresholdPaillierScheme) {
   //////////////////////////////////////
   /// Test encryption and decryption ///
   //////////////////////////////////////
-  double original_number = -0.666;
+  double original_number = -0.11428453151;
   EncodedNumber number;
-  number.set_double(pk->n[0], original_number, 16);
+  number.set_double(pk->n[0], original_number, 64);
 
   EncodedNumber encrypted_number, decrypted_number;
   djcs_t_aux_encrypt(pk, hr, encrypted_number, number);
@@ -469,13 +469,13 @@ TEST(PHE, ThresholdPaillierScheme) {
     decrypted_mat_ele_wise_add[i] = new EncodedNumber[5];
   }
 
-  djcs_t_aux_matrix_ele_wise_ee_add(pk, encrypted_mat_ele_wise_add, number_h1, number_h2, 3, 5);
+  djcs_t_aux_matrix_ele_wise_ee_add(pk, number_h1, number_h1, number_h2, 3, 5);
 
   for (int j = 0; j < 3; j++) {
     for (int k = 0; k < 5; k++) {
       auto* partially_decryption_mat_res_jk = new EncodedNumber[client_num];
       for (int i = 0; i < client_num; i++) {
-        djcs_t_aux_partial_decrypt(pk, au[i], partially_decryption_mat_res_jk[i], encrypted_mat_ele_wise_add[j][k]);
+        djcs_t_aux_partial_decrypt(pk, au[i], partially_decryption_mat_res_jk[i], number_h1[j][k]);
       }
       djcs_t_aux_share_combine(pk, decrypted_mat_ele_wise_add[j][k], partially_decryption_mat_res_jk, client_num);
 

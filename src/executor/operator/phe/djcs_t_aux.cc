@@ -263,11 +263,16 @@ void djcs_t_aux_vec_ele_wise_ee_add(
   check_size(size);
   check_ee_add_exponent(ciphers1[0], ciphers2[0]);
   check_encoded_public_key(ciphers1[0], ciphers2[0]);
+  auto* tmp_res = new EncodedNumber[size];
   // element-wise phe addition
   for (int i = 0; i < size; i++) {
-    res[i] = ciphers1[i];
-    djcs_t_aux_ee_add(pk, res[i], res[i], ciphers2[i]);
+//    tmp_res[i] = ciphers1[i];
+    djcs_t_aux_ee_add(pk, tmp_res[i], ciphers1[i], ciphers2[i]);
   }
+  for (int i = 0; i < size; i++) {
+    res[i] = tmp_res[i];
+  }
+  delete [] tmp_res;
 }
 
 void djcs_t_aux_vec_ele_wise_ee_add_ext(

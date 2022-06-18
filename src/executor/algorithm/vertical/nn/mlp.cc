@@ -38,6 +38,8 @@ MlpModel::MlpModel(bool is_classification, bool with_bias,
                                 with_bias,
                                 layers_activation_funcs[i]));
   }
+  m_n_layers = (int) m_layers_num_outputs.size();
+  log_info("[MlpModel] m_n_layers = " + std::to_string(m_n_layers));
 }
 
 MlpModel::MlpModel(const MlpModel &mlp_model) {
@@ -47,6 +49,7 @@ MlpModel::MlpModel(const MlpModel &mlp_model) {
   m_num_hidden_layers = mlp_model.m_num_hidden_layers;
   m_layers_num_outputs = mlp_model.m_layers_num_outputs;
   m_layers = mlp_model.m_layers;
+  m_n_layers = mlp_model.m_n_layers;
 }
 
 MlpModel &MlpModel::operator=(const MlpModel &mlp_model) {
@@ -56,6 +59,7 @@ MlpModel &MlpModel::operator=(const MlpModel &mlp_model) {
   m_num_hidden_layers = mlp_model.m_num_hidden_layers;
   m_layers_num_outputs = mlp_model.m_layers_num_outputs;
   m_layers = mlp_model.m_layers;
+  m_n_layers = mlp_model.m_n_layers;
 }
 
 MlpModel::~MlpModel() {
@@ -94,7 +98,7 @@ void MlpModel::predict(const Party &party,
   // call predict_proba function (another way is to implement a forward
   // computation method that returns only the final label
   predict_proba(party, predicted_samples, predicted_labels_proba);
-
+  log_info("[MlpModel::predict] predict_proba finished");
   if (!m_is_classification) {
     // directly copy for regression model
     for (int i = 0; i < pred_size; i++) {
@@ -170,36 +174,40 @@ void MlpModel::predict_proba(const Party &party,
 
   forward_computation_fast(party, pred_size, local_weight_sizes,
                            encoded_batch_samples, predicted_labels);
+  log_info("[MlpModel::predict_proba] begin to compute after forward computation fast");
 
-  // binary classification, the predicted labels only give the positive probability
-  // as the m_num_outputs == 1
-  double positive_one = 1.0;
-  int negative_one = -1;
-  int prediction_precision = std::abs(predicted_labels[0][0].getter_exponent());
-  auto* predicted_labels_neg = new EncodedNumber[pred_size];
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    EncodedNumber pos_one_double, neg_one_int;
-    pos_one_double.set_double(phe_pub_key->n[0], positive_one, prediction_precision);
-    djcs_t_aux_encrypt(phe_pub_key, party.phe_random, pos_one_double, pos_one_double);
-    neg_one_int.set_integer(phe_pub_key->n[0], negative_one);
-    for (int i = 0; i < pred_size; i++) {
-      EncodedNumber label_neg;
-      djcs_t_aux_ep_mul(phe_pub_key, label_neg, predicted_labels[i][0], neg_one_int);
-      djcs_t_aux_ee_add(phe_pub_key, label_neg, label_neg, pos_one_double);
-      predicted_labels_neg[i] = label_neg;
+  if (m_is_classification && (m_num_outputs == 1)) {
+    // binary classification, the predicted labels only give the positive probability
+    // as the m_num_outputs == 1
+    double positive_one = 1.0;
+    int negative_one = -1;
+    int prediction_precision = std::abs(predicted_labels[0][0].getter_exponent());
+    auto* predicted_labels_neg = new EncodedNumber[pred_size];
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      EncodedNumber pos_one_double, neg_one_int;
+      pos_one_double.set_double(phe_pub_key->n[0], positive_one, prediction_precision);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random, pos_one_double, pos_one_double);
+      neg_one_int.set_integer(phe_pub_key->n[0], negative_one);
+      for (int i = 0; i < pred_size; i++) {
+        EncodedNumber label_neg;
+        djcs_t_aux_ep_mul(phe_pub_key, label_neg, predicted_labels[i][0], neg_one_int);
+        djcs_t_aux_ee_add(phe_pub_key, label_neg, label_neg, pos_one_double);
+        predicted_labels_neg[i] = label_neg;
+      }
     }
+    broadcast_encoded_number_array(party, predicted_labels_neg, pred_size, ACTIVE_PARTY_ID);
+    log_info("[MlpModel::predict_proba] finish broadcasting the predicted_labels_neg");
+    // assign the negative probability to the
+    for (int i = 0; i < pred_size; i++) {
+      predicted_labels[i][1] = predicted_labels_neg[i];
+    }
+    delete [] predicted_labels_neg;
   }
-  broadcast_encoded_number_array(party, predicted_labels_neg, pred_size, ACTIVE_PARTY_ID);
-  // assign the negative probability to the
-  for (int i = 0; i < pred_size; i++) {
-    predicted_labels[i][1] = predicted_labels_neg[i];
-  }
-
+  log_info("[MlpModel::predict_proba] finish predict_proba");
   for (int i = 0; i < pred_size; i++) {
     delete [] encoded_batch_samples[i];
   }
   delete [] encoded_batch_samples;
-  delete [] predicted_labels_neg;
   djcs_t_free_public_key(phe_pub_key);
 }
 
@@ -213,11 +221,16 @@ void MlpModel::forward_computation(const Party &party,
   // we compute the forward computation layer-by-layer
   // for the first hidden layer, the input is the encoded_batch_samples distributed among parties
   // for the other layers, the input is the secret shares after spdz activation function
-  int layer_size = (int) m_layers.size();
+
   // the output activation shares and derivative activation shares of each layer
   // format: (layer, idx_in_batch, neuron_idx)
-  for (int l_idx = 0; l_idx < layer_size; l_idx++) {
-    log_info("[forward_computation]: compute layer " + std::to_string(l_idx));
+  for (int l_idx = 0; l_idx < m_n_layers - 1; l_idx++) {
+    log_info("---------- [forward_computation]: compute layer " + std::to_string(l_idx) + "-----------");
+    log_info("[forward_computation] display m_weight_mat");
+    display_encrypted_matrix(party, m_layers[l_idx].m_num_inputs, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_weight_mat);
+    log_info("[forward_computation] display m_bias");
+    display_encrypted_vector(party, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_bias);
+
     int cur_layer_num_outputs = m_layers[l_idx].m_num_outputs;
     log_info("[forward_computation]: cur_layer_num_outputs = " + std::to_string(cur_layer_num_outputs));
     auto** cur_layer_enc_outputs = new EncodedNumber*[cur_batch_size];
@@ -233,6 +246,9 @@ void MlpModel::forward_computation(const Party &party,
           encoded_batch_samples,
           cur_layer_num_outputs,
           cur_layer_enc_outputs);
+
+//      log_info("[forward_computation] display cur_layer_enc_outputs for debug");
+//      display_encrypted_matrix(party, cur_batch_size, cur_layer_num_outputs, cur_layer_enc_outputs);
     } else {
       // for other layers, the layer inputs are secret shares, so use another way to aggregate
       // compute the encrypted aggregation for each neuron in layer 0
@@ -240,9 +256,12 @@ void MlpModel::forward_computation(const Party &party,
       log_info("[forward_computation] activation_shares.size = " + std::to_string(activation_shares.size()));
       m_layers[l_idx].comp_other_layer_agg_output(
           party, cur_batch_size,
-          activation_shares[l_idx - 1],
+          activation_shares[l_idx],
           cur_layer_num_outputs,
           cur_layer_enc_outputs);
+
+      log_info("[forward_computation] display cur_layer_enc_outputs for debug");
+      display_encrypted_matrix(party, cur_batch_size, cur_layer_num_outputs, cur_layer_enc_outputs);
     }
 
     // next, convert to secret shares and call spdz to compute activation and deriv_activation
@@ -295,17 +314,19 @@ void MlpModel::forward_computation(const Party &party,
     activation_shares.push_back(layer_act_outputs_shares);
     deriv_activation_shares.push_back(layer_deriv_act_outputs_shares);
 
+    log_info("[forward_computation] display activation shares for layer " + std::to_string(l_idx));
+    display_shares_matrix(party, layer_act_outputs_shares);
+
     for (int i = 0; i < cur_batch_size; i++) {
       delete [] cur_layer_enc_outputs[i];
     }
     delete [] cur_layer_enc_outputs;
   }
   // convert the last layer output into ciphers and assign to predicted_labels
-  std::vector<std::vector<double>> batch_prediction_shares = activation_shares[layer_size-1];
-  log_info("[forward_computation] layer_size - 1 = " + std::to_string(layer_size-1));
+  std::vector<std::vector<double>> batch_prediction_shares = activation_shares[activation_shares.size() - 1];
+  log_info("[forward_computation] activation_shares.size() - 1 = " + std::to_string(activation_shares.size() - 1));
   log_info("[forward_computation] batch_prediction_shares.size = " + std::to_string(batch_prediction_shares.size()));
   log_info("[forward_computation] batch_prediction_shares[0].size = " + std::to_string(batch_prediction_shares[0].size()));
-  log_info("[forward_computation] m_layers_num_outputs[layer_size-1] = " + std::to_string(m_layers_num_outputs[layer_size-1]));
 
   for (int i = 0; i < cur_batch_size; i++) {
     secret_shares_to_ciphers(party, predicted_labels[i],
@@ -314,6 +335,10 @@ void MlpModel::forward_computation(const Party &party,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
   }
+
+//  log_info("[forward_computation] display predicted_labels for debug");
+//  display_encrypted_matrix(party, cur_batch_size, m_num_outputs, predicted_labels);
+
   log_info("[forward_computation] finished.");
 }
 
@@ -343,11 +368,12 @@ void MlpModel::forward_computation_fast(const Party &party,
   // we compute the forward computation layer-by-layer
   // for the first hidden layer, the input is the encoded_batch_samples distributed among parties
   // for the other layers, the input is the secret shares after spdz activation function
-  int layer_size = (int) m_layers.size();
   // the output activation shares and derivative activation shares of each layer
   // format: (layer, idx_in_batch, neuron_idx)
   TripleDVec activation_shares;
-  for (int l_idx = 0; l_idx < layer_size; l_idx++) {
+  std::vector<std::vector<double>> dummy;
+  activation_shares.push_back(dummy);
+  for (int l_idx = 0; l_idx < m_n_layers - 1; l_idx++) {
     log_info("[forward_computation_fast]: compute layer " + std::to_string(l_idx));
     int cur_layer_num_outputs = m_layers[l_idx].m_num_outputs;
     // record the layer encrypted output in cur_layer_enc_outputs, dim = (cur_batch_size, cur_layer_num_outputs)
@@ -370,7 +396,7 @@ void MlpModel::forward_computation_fast(const Party &party,
       // compute the aggregation of current layer
       m_layers[l_idx].comp_other_layer_agg_output(
           party, cur_batch_size,
-          activation_shares[l_idx - 1],
+          activation_shares[l_idx],
           cur_layer_num_outputs,
           cur_layer_enc_outputs);
     }
@@ -385,6 +411,10 @@ void MlpModel::forward_computation_fast(const Party &party,
         cur_layer_num_outputs,
         ACTIVE_PARTY_ID,
         cipher_precision);
+
+    log_info("[forward_computation_fast] display input secret shares to spdz");
+    display_shares_matrix(party, cur_layer_enc_outputs_shares);
+
     log_info("[forward_computation_fast] converted 1st hidden layer "
              "encrypted output into secret shares.");
     std::vector<double> flatten_layer_enc_outputs_shares =
@@ -412,7 +442,11 @@ void MlpModel::forward_computation_fast(const Party &party,
     // the result values are as follows (assume to be private, i.e., secret shares):
     std::vector<double> res = future_values.get();
     spdz_pruning_check_thread.join();
-    log_info("[forward_computation]: communicate with spdz finished");
+    log_info("[forward_computation_fast]: communicate with spdz finished");
+
+//    for (int i = 0; i < flatten_layer_enc_outputs_shares.size(); i++) {
+//      log_info("[forward_computation_fast] res[" + std::to_string(i) + "] = " + std::to_string(res[i]));
+//    }
 
     // the returned res vector is the 1d vector of secret shares of the
     // activation function and derivative of activation function for future usage
@@ -427,7 +461,18 @@ void MlpModel::forward_computation_fast(const Party &party,
   }
 
   // convert the last layer output into ciphers and assign to predicted_labels
-  std::vector<std::vector<double>> batch_prediction_shares = activation_shares[layer_size-1];
+  std::vector<std::vector<double>> batch_prediction_shares = activation_shares[activation_shares.size() - 1];
+
+//  for (int i = 0; i < batch_prediction_shares.size(); i++) {
+//    for (int j = 0; j < batch_prediction_shares[0].size(); j++) {
+//      log_info("[forward_computation_fast] batch_prediction_shares[" + std::to_string(i)
+//        + "][" + std::to_string(j) + "] = " + std::to_string(batch_prediction_shares[i][j]));
+//    }
+//  }
+
+  log_info("[forward_computation_fast] display batch_prediction_shares");
+  display_shares_matrix(party, batch_prediction_shares);
+
   for (int i = 0; i < cur_batch_size; i++) {
     secret_shares_to_ciphers(party, predicted_labels[i],
                              batch_prediction_shares[i],
@@ -435,11 +480,15 @@ void MlpModel::forward_computation_fast(const Party &party,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
   }
+
+  log_info("[forward_computation_fast] display predicted_labels for debug");
+  display_encrypted_matrix(party, cur_batch_size, m_num_outputs, predicted_labels);
+
   log_info("[forward_computation_fast] finished.");
 }
 
 void MlpModel::display_model(const Party &party) {
-  log_info("[MlpModel::display_model]");
+  log_info("------------ [MlpModel::display_model] ------------");
   int n_layers = (int) m_layers.size();
   for (int l = 0; l < n_layers; l++) {
     log_info("[MlpModel::display_model] display layer " + std::to_string(l));
@@ -448,7 +497,6 @@ void MlpModel::display_model(const Party &party) {
     // display m_weight_mat
     for (int i = 0; i < n_inputs_l; i++) {
       // decrypt layer l's m_weight_mat[i]
-      log_info("[MlpModel::display_model] m_weight_mat[" + std::to_string(i) + "]'s weights are: ");
       auto* dec_weight_mat_i = new EncodedNumber[n_outputs_l];
       collaborative_decrypt(party, m_layers[l].m_weight_mat[i],
                             dec_weight_mat_i, n_outputs_l, ACTIVE_PARTY_ID);

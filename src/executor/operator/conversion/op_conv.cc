@@ -6,9 +6,16 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/party/info_exchange.h>
+#include <falcon/algorithm/model_builder_helper.h>
+#include <falcon/utils/base64.h>
+#include <omp.h>
 
 void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
                            EncodedNumber* dest_plains, int size, int req_party_id) {
+
+//  log_info("[collaborative_decrypt] size = " + std::to_string(size));
+//  const clock_t co_dec_start_time = clock();
+
   // retrieve phe pub key and auth server
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   djcs_t_auth_server* phe_auth_server = djcs_t_init_auth_server();
@@ -20,8 +27,15 @@ void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
     djcs_t_aux_partial_decrypt(phe_pub_key, phe_auth_server,
                                partial_decryption[i], src_ciphers[i]);
   }
+//  const clock_t local_partial_dec_time = clock();
+//  double local_dec_consumed_time =
+//      double(local_partial_dec_time - co_dec_start_time) / CLOCKS_PER_SEC;
+//  log_info("Collaborative local decryption time = " + std::to_string(local_dec_consumed_time));
 
   if (party.party_id == req_party_id) {
+//
+//    const clock_t agg_dec_shares_start_time = clock();
+
     // create 2D-array m*n to store the decryption shares,
     // m = size, n = party_num, such that each row i represents
     // all the shares for the i-th ciphertext
@@ -62,6 +76,12 @@ void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
       delete[] decryption_shares[i];
     }
     delete[] decryption_shares;
+//
+//    const clock_t agg_dec_shares_end_time = clock();
+//    double active_party_agg_shares_time =
+//        double(agg_dec_shares_end_time - agg_dec_shares_start_time) / CLOCKS_PER_SEC;
+//    log_info("Active party aggregate decryption shares time = " + std::to_string(active_party_agg_shares_time));
+
   } else {
     // send decrypted shares to the req_party_id
     std::string partial_decryption_str;
@@ -69,6 +89,11 @@ void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
                                    partial_decryption_str);
     party.send_long_message(req_party_id, partial_decryption_str);
   }
+
+//  const clock_t co_dec_end_time = clock();
+//  double co_dec_consumed_time =
+//      double(co_dec_end_time - co_dec_start_time) / CLOCKS_PER_SEC;
+//  log_info("Collaborative decryption time = " + std::to_string(co_dec_consumed_time));
 
   delete[] partial_decryption;
   djcs_t_free_public_key(phe_pub_key);
@@ -365,6 +390,7 @@ void cipher_shares_mat_mul(const Party& party,
     log_error("[cipher_shares_mat_mul] matrix multiplication dimensions do not match");
     exit(EXIT_FAILURE);
   }
+
   // note that the shares and ciphers multiplication equals:
   // each party computes the mat_mul(shares, ciphers), and then aggregate the results
   auto** encoded_shares = new EncodedNumber*[n_shares_row];
@@ -373,13 +399,21 @@ void cipher_shares_mat_mul(const Party& party,
   }
   for (int i = 0; i < n_shares_row; i++) {
     for (int j = 0; j < n_shares_col; j++) {
+//      log_info("[cipher_shares_mat_mul] shares["
+//                   + std::to_string(i) + "][" + std::to_string(j) + "] = "
+//                   + std::to_string(shares[i][j]));
       encoded_shares[i][j].set_double(phe_pub_key->n[0], shares[i][j], PHE_FIXED_POINT_PRECISION);
     }
   }
+
   auto** local_mul_res = new EncodedNumber*[n_shares_row];
   for (int i = 0; i < n_shares_row; i++) {
     local_mul_res[i] = new EncodedNumber[n_ciphers_col];
   }
+
+//  log_info("[cipher_shares_mat_mul] debug ciphers matrix inside cipher_shares_mat_mul");
+//  display_encrypted_matrix(party, n_ciphers_row, n_ciphers_col, ciphers);
+
   djcs_t_aux_mat_mat_ep_mult(phe_pub_key,
                              party.phe_random,
                              local_mul_res,
@@ -389,6 +423,12 @@ void cipher_shares_mat_mul(const Party& party,
                              n_ciphers_col,
                              n_shares_row,
                              n_shares_col);
+
+//  broadcast_encoded_number_matrix(party, local_mul_res, n_shares_row, n_ciphers_col, 0);
+//  log_info("[cipher_shares_mat_mul] display local_mul_res for debug ");
+//  display_encrypted_matrix(party, n_shares_row, n_ciphers_col, local_mul_res);
+
+//  log_info("[cipher_shares_mat_mul] local_mul_res.ret = " + std::to_string(std::abs(local_mul_res[0][0].getter_exponent())));
 
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // assign ret = local_mul_res, and receive from passive parties and aggregate
@@ -401,7 +441,14 @@ void cipher_shares_mat_mul(const Party& party,
       if (id != party.party_id) {
         std::string recv_id_local_mul_res_str;
         party.recv_long_message(id, recv_id_local_mul_res_str);
-        deserialize_encoded_number_matrix(local_mul_res,
+//        std::string b64_recv_id_local_mul_res_str = base64_encode(reinterpret_cast<const BYTE *>(
+//            recv_id_local_mul_res_str.c_str()), recv_id_local_mul_res_str.size());
+//        log_info("[cipher_shares_mat_mul] receive recv_id_local_mul_res_str: " + b64_recv_id_local_mul_res_str);
+        auto** recv_local_mul_res = new EncodedNumber*[n_shares_row];
+        for (int i = 0; i < n_shares_row; i++) {
+          recv_local_mul_res[i] = new EncodedNumber[n_ciphers_col];
+        }
+        deserialize_encoded_number_matrix(recv_local_mul_res,
                                           n_shares_row,
                                           n_ciphers_col,
                                           recv_id_local_mul_res_str);
@@ -409,20 +456,29 @@ void cipher_shares_mat_mul(const Party& party,
         djcs_t_aux_matrix_ele_wise_ee_add(phe_pub_key,
                                           ret,
                                           ret,
-                                          local_mul_res,
+                                          recv_local_mul_res,
                                           n_shares_row,
                                           n_ciphers_col);
+
+        for (int i = 0; i < n_shares_row; i++) {
+          delete [] recv_local_mul_res[i];
+        }
+        delete [] recv_local_mul_res;
       }
     }
   } else {
     std::string local_mul_res_str;
-    serialize_encoded_number_matrix(local_mul_res,
-                                    n_shares_row,
-                                    n_ciphers_col,
-                                    local_mul_res_str);
+    serialize_encoded_number_matrix(local_mul_res, n_shares_row, n_ciphers_col,local_mul_res_str);
+//    std::string b64_local_mul_res_str = base64_encode(reinterpret_cast<const BYTE *>(
+//                                                        local_mul_res_str.c_str()),
+//                                                    local_mul_res_str.size());
+//    log_info("[cipher_shares_mat_mul] sent b64_local_mul_res_str: " + b64_local_mul_res_str);
     party.send_long_message(ACTIVE_PARTY_ID, local_mul_res_str);
   }
   broadcast_encoded_number_matrix(party, ret, n_shares_row, n_ciphers_col, ACTIVE_PARTY_ID);
+
+//  log_info("[cipher_shares_mat_mul] debug ret after aggregation");
+//  display_encrypted_matrix(party, n_shares_row, n_ciphers_col, ret);
 
   for (int i = 0; i < n_shares_row; i++) {
     delete [] encoded_shares[i];

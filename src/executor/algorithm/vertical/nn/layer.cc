@@ -93,7 +93,7 @@ void Layer::init_encrypted_weights(const Party &party, int precision) {
   // set factor=6.0 if the activation function is not 'logistic' or 'sigmoid'
   // otherwise set factor=2.0
   double factor = 6.0;
-  if (m_activation_func_str == "sigmoid") {
+  if (m_activation_func_str == "logistic") {
     factor = 2.0;
   }
   // according to sklearn, limit = sqrt(factor / (num_inputs + num_outputs))
@@ -256,6 +256,9 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
       m_num_outputs,
       ACTIVE_PARTY_ID);
 
+//  log_info("[comp_1st_layer_agg_output] display for debug");
+//  display_encrypted_matrix(party, cur_batch_size, m_num_outputs, res);
+
   // free memory
   for (int i = 0; i < local_n_features; i++) {
     delete [] local_weight_mat[i];
@@ -290,11 +293,14 @@ void Layer::comp_other_layer_agg_output(const Party &party,
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
+//  log_info("[comp_other_layer_agg_output] display mlp model m_weight_mat for debug");
+//  display_encrypted_matrix(party, m_num_inputs, m_num_outputs, m_weight_mat);
+
   // local aggregation
   // local shares * ciphers matrix multiplication result dim = (cur_batch_size, m_num_outputs)
-  auto** local_ciphers_shares_mul_res = new EncodedNumber*[cur_batch_size];
+  auto** ciphers_shares_mul_res = new EncodedNumber*[cur_batch_size];
   for (int i = 0; i < cur_batch_size; i++) {
-    local_ciphers_shares_mul_res[i] = new EncodedNumber[m_num_outputs];
+    ciphers_shares_mul_res[i] = new EncodedNumber[m_num_outputs];
   }
   log_info("[comp_other_layer_agg_output] prev_batch_size = " + std::to_string(prev_batch_size));
   log_info("[comp_other_layer_agg_output] prev_output_size = " + std::to_string(prev_output_size));
@@ -302,65 +308,67 @@ void Layer::comp_other_layer_agg_output(const Party &party,
   log_info("[comp_other_layer_agg_output] m_num_outputs = " + std::to_string(m_num_outputs));
   cipher_shares_mat_mul(party, prev_layer_outputs_shares,
                         m_weight_mat, prev_batch_size, prev_output_size,
-                        m_num_inputs, m_num_outputs, local_ciphers_shares_mul_res);
+                        m_num_inputs, m_num_outputs, ciphers_shares_mul_res);
   log_info("[comp_other_layer_agg_output] party local ciphers shares computation finished");
 
-  // active party aggregate the results
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-  // copy self local_mat_mul_res
-    for (int i = 0; i < cur_batch_size; i++) {
-      for (int j = 0; j < m_num_outputs; j++) {
-        res[i][j] = local_ciphers_shares_mul_res[i][j];
-      }
-    }
-    // receive and aggregate
-    for (int id = 0; id < party.party_num; id++) {
-      if (id != party.party_id) {
-        // reuse the local_mat_mul_res object to restore the received encoded matrix
-        std::string recv_id_mat_str;
-        party.recv_long_message(id, recv_id_mat_str);
-        deserialize_encoded_number_matrix(local_ciphers_shares_mul_res,
-                                          cur_batch_size, m_num_outputs, recv_id_mat_str);
-        // homomorphic addition between local_mat_mul_res and res
-        djcs_t_aux_matrix_ele_wise_ee_add(phe_pub_key, res, res,
-                                          local_ciphers_shares_mul_res,
-                                          cur_batch_size, m_num_outputs);
-      }
-    }
-    // if fit_bias, add the bias to each output neuron of each sample
-    if (m_fit_bias) {
-      int prec_res = std::abs(res[0][0].getter_exponent());
+//  log_info("[comp_other_layer_agg_output] display ciphers_shares_mul_res for debug");
+//  display_encrypted_matrix(party, cur_batch_size, m_num_outputs, ciphers_shares_mul_res);
+
+//
+//  // active party aggregate the results
+//  if (party.party_type == falcon::ACTIVE_PARTY) {
+//  // copy self local_mat_mul_res
+//    for (int i = 0; i < cur_batch_size; i++) {
+//      for (int j = 0; j < m_num_outputs; j++) {
+//        res[i][j] = local_ciphers_shares_mul_res[i][j];
+//      }
+//    }
+//    // receive and aggregate
+//    for (int id = 0; id < party.party_num; id++) {
+//      if (id != party.party_id) {
+//        // reuse the local_mat_mul_res object to restore the received encoded matrix
+//        std::string recv_id_mat_str;
+//        party.recv_long_message(id, recv_id_mat_str);
+//        deserialize_encoded_number_matrix(local_ciphers_shares_mul_res,
+//                                          cur_batch_size, m_num_outputs, recv_id_mat_str);
+//        // homomorphic addition between local_mat_mul_res and res
+//        djcs_t_aux_matrix_ele_wise_ee_add(phe_pub_key, res, res,
+//                                          local_ciphers_shares_mul_res,
+//                                          cur_batch_size, m_num_outputs);
+//      }
+//    }
+
+  // if fit_bias, add the bias to each output neuron of each sample
+  if (m_fit_bias) {
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      int prec_res = std::abs(ciphers_shares_mul_res[0][0].getter_exponent());
       int prec_bias = std::abs(m_bias[0].getter_exponent());
+      log_info("[comp_other_layer_agg_output] prec_res = " + std::to_string(prec_res));
+      log_info("[comp_other_layer_agg_output] prec_bias = " + std::to_string(prec_bias));
+
       auto* m_bias_inc = new EncodedNumber[m_num_outputs];
       djcs_t_aux_increase_prec_vec(phe_pub_key, m_bias_inc, prec_res, m_bias, m_num_outputs);
       for (int i = 0; i < cur_batch_size; i++) {
         for (int j = 0; j < m_num_outputs; j++) {
-          djcs_t_aux_ee_add(phe_pub_key, res[i][j], res[i][j], m_bias_inc[j]);
+          djcs_t_aux_ee_add(phe_pub_key, ciphers_shares_mul_res[i][j], ciphers_shares_mul_res[i][j], m_bias_inc[j]);
         }
       }
       delete [] m_bias_inc;
     }
-  } else {
-    std::string local_mat_str;
-    serialize_encoded_number_matrix(local_ciphers_shares_mul_res,
-                                    cur_batch_size, m_num_outputs, local_mat_str);
-    party.send_long_message(ACTIVE_PARTY_ID, local_mat_str);
+    broadcast_encoded_number_matrix(party, ciphers_shares_mul_res,
+                                    cur_batch_size, m_num_outputs, ACTIVE_PARTY_ID);
   }
-  broadcast_encoded_number_matrix(party, res,
-                                  cur_batch_size, m_num_outputs, ACTIVE_PARTY_ID);
 
+  for (int i = 0; i < cur_batch_size; i++) {
+    for (int j = 0; j < m_num_outputs; j++) {
+      res[i][j] = ciphers_shares_mul_res[i][j];
+    }
+  }
 
   // free memory
   for (int i = 0; i < cur_batch_size; i++) {
-    delete [] local_ciphers_shares_mul_res[i];
+    delete [] ciphers_shares_mul_res[i];
   }
-  delete [] local_ciphers_shares_mul_res;
+  delete [] ciphers_shares_mul_res;
   djcs_t_free_public_key(phe_pub_key);
-}
-
-void Layer::update_encrypted_weights(const Party &party,
-                                     const std::vector<double> &deriv_error,
-                                     double m_learning_rate,
-                                     std::vector<double> *deltas) {
-
 }

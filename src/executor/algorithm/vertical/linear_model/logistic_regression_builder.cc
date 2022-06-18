@@ -235,6 +235,8 @@ void LogisticRegressionBuilder::backward_computation(
                              global_weight_size,
                              ACTIVE_PARTY_ID,
                              dest_precision);
+//  log_info("[LogisticRegressionBuilder::backward_computation] decrypt gradients for debug");
+//  display_encrypted_vector(party, global_weight_size, global_encrypted_gradients);
   // find the corresponding encrypted gradients needed
   int start_idx_in_global = 0;
   for (int i = 0; i < party.party_num; i++) {

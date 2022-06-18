@@ -13,6 +13,7 @@
 #include <falcon/model/model_io.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/party/info_exchange.h>
+#include <falcon/operator/conversion/op_conv.h>
 
 #include <ctime>
 #include <random>
@@ -260,4 +261,115 @@ void get_encrypted_2d_true_labels(
     }
   }
   djcs_t_free_public_key(phe_pub_key);
+}
+
+void display_encrypted_matrix(
+    const Party& party,
+    int row_size,
+    int col_size,
+    EncodedNumber** mat) {
+  log_info("------------------ [display_encrypted_matrix] ---------------");
+  // display m_weight_mat
+  for (int i = 0; i < row_size; i++) {
+    // decrypt layer l's m_weight_mat[i]
+    auto* dec_weight_mat_i = new EncodedNumber[col_size];
+    collaborative_decrypt(party, mat[i],
+                          dec_weight_mat_i, col_size, ACTIVE_PARTY_ID);
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      for (int j = 0; j < col_size; j++) {
+        double w;
+        dec_weight_mat_i[j].decode(w);
+        log_info("[display_encrypted_matrix] matrix["
+                     + std::to_string(i) + "][" + std::to_string(j) + "] = " + std::to_string(w));
+      }
+    }
+    delete [] dec_weight_mat_i;
+  }
+}
+
+void display_encrypted_vector(
+    const Party& party,
+    int size,
+    EncodedNumber* vec) {
+  log_info("------------------ [display_encrypted_vector] ---------------");
+  // display m_bias
+  auto* dec_bias_vec = new EncodedNumber[size];
+  collaborative_decrypt(party, vec, dec_bias_vec, size, ACTIVE_PARTY_ID);
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    for (int j = 0; j < size; j++) {
+      double b;
+      dec_bias_vec[j].decode(b);
+      log_info("[display_encrypted_vector] vector[" + std::to_string(j) + "] = " + std::to_string(b));
+    }
+  }
+  delete [] dec_bias_vec;
+}
+
+void display_shares_vector(
+    const Party& party,
+    const std::vector<double>& vec) {
+  log_info("------------------ [display_shares_vector] ---------------");
+  // display secret share vector
+  std::vector<double> agg(vec.size(), 0.0);
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    for (int i = 0; i < vec.size(); i++) {
+      agg[i] = vec[i];
+    }
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        std::string recv_vec_str;
+        std::vector<double> recv_vec;
+        party.recv_long_message(id, recv_vec_str);
+        deserialize_double_array(recv_vec, recv_vec_str);
+        for (int i = 0; i < recv_vec.size(); i++) {
+          agg[i] += recv_vec[i];
+        }
+      }
+    }
+    for (int i = 0; i < agg.size(); i++) {
+      log_info("[display_shares_vector] vector[" + std::to_string(i) + "] = " + std::to_string(agg[i]));
+    }
+  } else {
+    std::string send_vec_str;
+    serialize_double_array(vec, send_vec_str);
+    party.send_long_message(ACTIVE_PARTY_ID, send_vec_str);
+  }
+}
+
+void display_shares_matrix(
+    const Party& party,
+    const std::vector<std::vector<double>>& mat) {
+  log_info("------------------ [display_shares_matrix] ---------------");
+  // display secret share matrix
+  std::vector<std::vector<double>> agg_mat(mat.size(), std::vector<double> (mat[0].size(), 0.0));
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    for (int i = 0; i < mat.size(); i++) {
+      for (int j = 0; j < mat[0].size(); j++) {
+        agg_mat[i][j] = mat[i][j];
+      }
+    }
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        std::string recv_mat_str;
+        std::vector<std::vector<double>> recv_mat;
+        party.recv_long_message(id, recv_mat_str);
+        deserialize_double_matrix(recv_mat, recv_mat_str);
+        for (int i = 0; i < recv_mat.size(); i++) {
+          for (int j = 0; j < recv_mat[0].size(); j++) {
+            agg_mat[i][j] += recv_mat[i][j];
+          }
+        }
+      }
+    }
+    for (int i = 0; i < agg_mat.size(); i++) {
+      for (int j = 0; j < agg_mat[0].size(); j++) {
+        log_info("[display_shares_matrix] matrix["
+                     + std::to_string(i) + "][" + std::to_string(j) + "] = " + std::to_string(agg_mat[i][j]));
+      }
+    }
+  } else {
+    std::string send_mat_str;
+    serialize_double_matrix(mat, send_mat_str);
+    party.send_long_message(ACTIVE_PARTY_ID, send_mat_str);
+  }
 }

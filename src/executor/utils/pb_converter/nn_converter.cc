@@ -91,6 +91,8 @@ void serialize_mlp_model(const MlpModel& mlp_model, std::string& output_str) {
 //  std::cout << "pb_mlp_model.layers(0).weight_mat().encoded_array(0).encoded_number(0).type = "
 //    << pb_mlp_model.layers(0).weight_mat().encoded_array(0).encoded_number(0).type() << std::endl;
 
+  pb_mlp_model.set_n_layers(mlp_model.m_n_layers);
+
   pb_mlp_model.SerializeToString(&output_str);
   pb_mlp_model.Clear();
 }
@@ -165,4 +167,6 @@ void deserialize_mlp_model(MlpModel& mlp_model, const std::string& input_str) {
     }
     mlp_model.m_layers.push_back(m_layer);
   }
+
+  mlp_model.m_n_layers = deserialized_mlp_model.n_layers();
 }

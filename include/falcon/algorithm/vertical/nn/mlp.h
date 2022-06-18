@@ -31,6 +31,8 @@ class MlpModel {
   std::vector<int> m_layers_num_outputs;
   // the vector of layers
   std::vector<Layer> m_layers;
+  // the number of layers in total
+  int m_n_layers;
 
  public:
   /**

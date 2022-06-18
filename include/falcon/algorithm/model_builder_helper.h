@@ -125,4 +125,24 @@ void get_encrypted_2d_true_labels(
     EncodedNumber** batch_true_labels,
     int precision);
 
+
+void display_encrypted_matrix(
+    const Party& party,
+    int row_size,
+    int col_size,
+    EncodedNumber** mat);
+
+void display_encrypted_vector(
+    const Party& party,
+    int size,
+    EncodedNumber* vec);
+
+void display_shares_vector(
+    const Party& party,
+    const std::vector<double>& vec);
+
+void display_shares_matrix(
+    const Party& party,
+    const std::vector<std::vector<double>>& mat);
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BUILDER_HELPER_H_
