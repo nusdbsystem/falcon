@@ -87,6 +87,7 @@ void log_gbdt_params(const GbdtParams& gbdt_params) {
 }
 
 void log_mlp_params(const MlpParams& mlp_params) {
+  log_info("mlp_params.is_classification = " + std::to_string(mlp_params.is_classification));
   log_info("mlp_params.batch_size = " + std::to_string(mlp_params.batch_size));
   log_info("mlp_params.max_iteration = " + std::to_string(mlp_params.max_iteration));
   log_info("mlp_params.converge_threshold = " + std::to_string(mlp_params.converge_threshold));

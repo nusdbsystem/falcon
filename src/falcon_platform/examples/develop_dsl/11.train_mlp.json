@@ -53,7 +53,7 @@
         "algorithm_config": {
           "is_classification": true,
           "batch_size": 8,
-          "max_iteration": 1,
+          "max_iteration": 1000,
           "converge_threshold": 0.0001,
           "with_regularization": true,
           "alpha": 0.1,

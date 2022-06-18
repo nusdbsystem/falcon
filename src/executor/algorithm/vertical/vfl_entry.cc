@@ -686,6 +686,8 @@ void train_mlp(
                          training_labels,testing_labels,
                          training_accuracy, testing_accuracy);
 
+  log_mlp_params(params);
+
   if (is_distributed_train == 0) {
     mlp_builder.train(*party);
     mlp_builder.eval(*party, falcon::TRAIN, model_report_file);

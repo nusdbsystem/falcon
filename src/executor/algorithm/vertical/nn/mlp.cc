@@ -81,6 +81,8 @@ void MlpModel::init_encrypted_weights(const Party &party, int precision) {
 void MlpModel::predict(const Party &party,
                        const std::vector<std::vector<double>> &predicted_samples,
                        EncodedNumber *predicted_labels) const {
+  log_info("[MlpModel::predict] m_is_classification " + std::to_string(m_is_classification));
+
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
@@ -91,6 +93,7 @@ void MlpModel::predict(const Party &party,
     // binary classification
     label_size = 2;
   }
+  log_info("[MlpModel::predict] label_size = " + std::to_string(label_size));
   auto **predicted_labels_proba = new EncodedNumber*[pred_size];
   for (int i = 0; i < pred_size; i++) {
     predicted_labels_proba[i] = new EncodedNumber[label_size];
@@ -99,8 +102,11 @@ void MlpModel::predict(const Party &party,
   // computation method that returns only the final label
   predict_proba(party, predicted_samples, predicted_labels_proba);
   log_info("[MlpModel::predict] predict_proba finished");
+  log_info("[MlpModel::predict] m_is_classification " + std::to_string(m_is_classification));
+  log_info("[MlpModel::predict] m_num_outputs = " + std::to_string(m_num_outputs));
   if (!m_is_classification) {
     // directly copy for regression model
+    log_info("[MlpModel::predict] regression model");
     for (int i = 0; i < pred_size; i++) {
       predicted_labels[i] = predicted_labels_proba[i][0];
     }
@@ -108,13 +114,15 @@ void MlpModel::predict(const Party &party,
     // binary classification, check if predicted label pos >= 0.5,
     // which is the first dimension of predicted_labels_proba
     // decrypt predicted_labels_proba, find the argmax label, and encrypt
+    log_info("[MlpModel::predict] begin to decrypt the labels");
     auto* encrypted_labels_pos = new EncodedNumber[pred_size];
     for (int i = 0; i < pred_size; i++) {
-      encrypted_labels_pos[i] = predicted_labels_proba[i][0];
+      encrypted_labels_pos[i] = predicted_labels_proba[i][1];
     }
     auto *decrypted_labels_pos = new EncodedNumber[pred_size];
     collaborative_decrypt(party, encrypted_labels_pos,
                           decrypted_labels_pos, pred_size, ACTIVE_PARTY_ID);
+    log_info("[MlpModel::predict] re-encrypt the predicted label");
     if (party.party_type == falcon::ACTIVE_PARTY) {
       for (int i = 0; i < pred_size; i++) {
         double x;
@@ -128,6 +136,7 @@ void MlpModel::predict(const Party &party,
     delete [] encrypted_labels_pos;
     delete [] decrypted_labels_pos;
   } else {
+    log_info("[MlpModel::predict] predict on multi-class classification");
     // decrypt predicted_labels_proba, find the argmax label, and encrypt
     for (int i = 0; i < pred_size; i++) {
       auto *decrypted_labels_i = new EncodedNumber[label_size];
@@ -149,6 +158,8 @@ void MlpModel::predict(const Party &party,
     broadcast_encoded_number_array(party, predicted_labels, pred_size, ACTIVE_PARTY_ID);
   }
 
+  log_info("[MlpModel::predict] finished");
+
   for (int i = 0; i < pred_size; i++) {
     delete [] predicted_labels_proba[i];
   }
@@ -159,6 +170,8 @@ void MlpModel::predict(const Party &party,
 void MlpModel::predict_proba(const Party &party,
                              const std::vector<std::vector<double>> &predicted_samples,
                              EncodedNumber **predicted_labels) const {
+  log_info("[MlpModel::predict_proba] m_is_classification " + std::to_string(m_is_classification));
+
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
@@ -172,8 +185,13 @@ void MlpModel::predict_proba(const Party &party,
   }
   encode_samples(party, predicted_samples, encoded_batch_samples);
 
+  auto **forward_predictions = new EncodedNumber*[pred_size];
+  for (int i = 0; i < pred_size; i++) {
+    forward_predictions[i] = new EncodedNumber[m_num_outputs];
+  }
+
   forward_computation_fast(party, pred_size, local_weight_sizes,
-                           encoded_batch_samples, predicted_labels);
+                           encoded_batch_samples, forward_predictions);
   log_info("[MlpModel::predict_proba] begin to compute after forward computation fast");
 
   if (m_is_classification && (m_num_outputs == 1)) {
@@ -181,7 +199,7 @@ void MlpModel::predict_proba(const Party &party,
     // as the m_num_outputs == 1
     double positive_one = 1.0;
     int negative_one = -1;
-    int prediction_precision = std::abs(predicted_labels[0][0].getter_exponent());
+    int prediction_precision = std::abs(forward_predictions[0][0].getter_exponent());
     auto* predicted_labels_neg = new EncodedNumber[pred_size];
     if (party.party_type == falcon::ACTIVE_PARTY) {
       EncodedNumber pos_one_double, neg_one_int;
@@ -190,7 +208,7 @@ void MlpModel::predict_proba(const Party &party,
       neg_one_int.set_integer(phe_pub_key->n[0], negative_one);
       for (int i = 0; i < pred_size; i++) {
         EncodedNumber label_neg;
-        djcs_t_aux_ep_mul(phe_pub_key, label_neg, predicted_labels[i][0], neg_one_int);
+        djcs_t_aux_ep_mul(phe_pub_key, label_neg, forward_predictions[i][0], neg_one_int);
         djcs_t_aux_ee_add(phe_pub_key, label_neg, label_neg, pos_one_double);
         predicted_labels_neg[i] = label_neg;
       }
@@ -199,15 +217,26 @@ void MlpModel::predict_proba(const Party &party,
     log_info("[MlpModel::predict_proba] finish broadcasting the predicted_labels_neg");
     // assign the negative probability to the
     for (int i = 0; i < pred_size; i++) {
-      predicted_labels[i][1] = predicted_labels_neg[i];
+      predicted_labels[i][0] = predicted_labels_neg[i];
+      predicted_labels[i][1] = forward_predictions[i][0];
     }
     delete [] predicted_labels_neg;
+  } else {
+    for (int i = 0; i < pred_size; i++) {
+      for (int j = 0; j < m_num_outputs; j++) {
+        predicted_labels[i][j] = forward_predictions[i][j];
+      }
+    }
   }
+
   log_info("[MlpModel::predict_proba] finish predict_proba");
+
   for (int i = 0; i < pred_size; i++) {
     delete [] encoded_batch_samples[i];
+    delete [] forward_predictions[i];
   }
   delete [] encoded_batch_samples;
+  delete [] forward_predictions;
   djcs_t_free_public_key(phe_pub_key);
 }
 
@@ -470,8 +499,8 @@ void MlpModel::forward_computation_fast(const Party &party,
 //    }
 //  }
 
-  log_info("[forward_computation_fast] display batch_prediction_shares");
-  display_shares_matrix(party, batch_prediction_shares);
+//  log_info("[forward_computation_fast] display batch_prediction_shares");
+//  display_shares_matrix(party, batch_prediction_shares);
 
   for (int i = 0; i < cur_batch_size; i++) {
     secret_shares_to_ciphers(party, predicted_labels[i],

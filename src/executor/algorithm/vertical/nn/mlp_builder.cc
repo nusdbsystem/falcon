@@ -47,6 +47,7 @@ MlpBuilder::MlpBuilder(const MlpParams &mlp_params,
                                       m_training_accuracy,
                                       m_testing_accuracy) {
   is_classification = mlp_params.is_classification;
+  is_classification = true;
   batch_size = mlp_params.batch_size;
   max_iteration = mlp_params.max_iteration;
   converge_threshold = mlp_params.converge_threshold;
@@ -192,8 +193,8 @@ void MlpBuilder::backward_computation(
 //  display_gradients(party, weight_grads, bias_grads);
   update_encrypted_weights(party, weight_grads, bias_grads);
 
-//  log_info("[backward_computation] display model after updating the weights");
-//  mlp_model.display_model(party);
+  log_info("[backward_computation] display model after updating the weights");
+  mlp_model.display_model(party);
 
   // free deltas, weight_grads, bias_grads memory
   for (int l = 0; l < mlp_model.m_n_layers - 1; l++) {
@@ -513,12 +514,6 @@ void MlpBuilder::compute_loss_grad(
   log_info("[compute_loss_grad] display layer_bias_grad");
   display_encrypted_vector(party, ciphers_column_size, layer_bias_grad);
 
-  log_info("[compute_loss_grad] bias gradients compute finished");
-
-  log_info("[MlpBuilder::compute_loss_grad] layer_idx = " + std::to_string(layer_idx));
-  log_info("[MlpBuilder::compute_loss_grad] deltas[layer_idx][0][0].prec = "
-               + std::to_string(std::abs(deltas[layer_idx][0][0].getter_exponent())));
-
   // assign to the weight_grads and bias_grads objects
   for (int i = 0; i < shares_row_size; i++) {
     for (int j = 0; j < ciphers_column_size; j++) {
@@ -568,8 +563,8 @@ void MlpBuilder::compute_reg_grad(const Party &party,
   party.getter_phe_pub_key(phe_pub_key);
 
   // the regularization term is { - learning_rate * alpha * [w] / sample_size}
-//  double constant = 0 - (learning_rate * alpha / ((double) sample_size));
-  double constant = 0 - (learning_rate * alpha);
+  double constant = 0 - (learning_rate * alpha / ((double) sample_size));
+//  double constant = 0 - (learning_rate * alpha);
   EncodedNumber encoded_constant;
   encoded_constant.set_double(phe_pub_key->n[0], constant, PHE_FIXED_POINT_PRECISION);
   // copy neuron weights of the current layer, note that here is transposed
@@ -977,6 +972,8 @@ void MlpBuilder::train(Party party) {
     exit(EXIT_FAILURE);
   }
 
+  log_info("[train] m_is_classification " + std::to_string(mlp_model.m_is_classification));
+
   // step 1: init encrypted weights (here use precision for consistence in the following)
   int n_features = party.getter_feature_num();
   std::vector<int> sync_arr = sync_up_int_arr(party, n_features);
@@ -1219,10 +1216,13 @@ void MlpBuilder::distributed_train(const Party &party, const Worker &worker) {
     delete [] predicted_labels;
   }
 
+  log_info("[train] m_is_classification " + std::to_string(mlp_model.m_is_classification));
+
   const clock_t training_finish_time = clock();
   double training_consumed_time =
       double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
   log_info("Distributed Training time = " + std::to_string(training_consumed_time));
+
   log_info("************* Distributed Training Finished *************");
 }
 
@@ -1257,6 +1257,7 @@ void MlpBuilder::eval(Party party, falcon::DatasetType eval_type,
   mlp_model.predict(party, cur_test_dataset, predicted_labels);
 
   // step 3: active party aggregates and call collaborative decryption
+  log_info("[MlpBuilder::eval] start to decrypt the predicted labels");
   auto* decrypted_labels = new EncodedNumber[dataset_size];
   collaborative_decrypt(party, predicted_labels,
                         decrypted_labels,
@@ -1275,9 +1276,12 @@ void MlpBuilder::eval(Party party, falcon::DatasetType eval_type,
     }
 
     // compute accuracy
-    if (mlp_model.m_num_outputs > 1) {
+    if (is_classification) {
       int correct_num = 0;
       for (int i = 0; i < dataset_size; i++) {
+        log_info("[mlp_builder.eval] predictions[" + std::to_string(i) + "] = "
+          + std::to_string(predictions[i]) + ", cur_test_dataset_labels["
+          + std::to_string(i) + "] = " + std::to_string(cur_test_dataset_labels[i]));
          if (predictions[i] == cur_test_dataset_labels[i]) {
             correct_num += 1;
           }
