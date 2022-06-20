@@ -539,6 +539,7 @@ func GenerateMLParams(cfg map[string]interface{}) string {
 	}
 
 	dtp := v0.MlpParams{
+		IsClassification:      res.IsClassification,
 		BatchSize:             res.BatchSize,
 		MaxIteration:          res.MaxIteration,
 		ConvergeThreshold:     res.ConvergeThreshold,
