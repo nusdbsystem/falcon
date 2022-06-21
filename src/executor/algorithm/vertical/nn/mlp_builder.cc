@@ -192,8 +192,8 @@ void MlpBuilder::backward_computation(
 //  display_gradients(party, weight_grads, bias_grads);
   update_encrypted_weights(party, weight_grads, bias_grads);
 
-  log_info("[backward_computation] display model after updating the weights");
-  mlp_model.display_model(party);
+//  log_info("[backward_computation] display model after updating the weights");
+//  mlp_model.display_model(party);
 
   // free deltas, weight_grads, bias_grads memory
   for (int l = 0; l < mlp_model.m_n_layers - 1; l++) {
@@ -327,8 +327,8 @@ void MlpBuilder::compute_loss_grad(
   log_info("[compute_loss_grad] ciphers_column_size = " + std::to_string(ciphers_column_size));
   log_info("[compute_loss_grad] init memory finished, start to compute ciphers shares matrix multiplication");
 
-  log_info("[compute_loss_grad] display layer_delta 1st");
-  display_encrypted_matrix(party, ciphers_row_size, ciphers_column_size, layer_delta);
+//  log_info("[compute_loss_grad] display layer_delta 1st");
+//  display_encrypted_matrix(party, ciphers_row_size, ciphers_column_size, layer_delta);
 
   // if it is not the first hidden layer, use the cipher shares matrix multiplication
   // else, each party computes the gradients for the corresponding block
@@ -478,8 +478,8 @@ void MlpBuilder::compute_loss_grad(
                                     shares_row_size, ciphers_column_size, ACTIVE_PARTY_ID);
   }
 
-  log_info("[compute_loss_grad] display layer_weight_grad 3d");
-  display_encrypted_matrix(party, shares_row_size, ciphers_column_size, layer_weight_grad);
+//  log_info("[compute_loss_grad] display layer_weight_grad 3d");
+//  display_encrypted_matrix(party, shares_row_size, ciphers_column_size, layer_weight_grad);
 
   log_info("[compute_loss_grad] regularization term gradient finished");
 
@@ -510,8 +510,8 @@ void MlpBuilder::compute_loss_grad(
   }
   broadcast_encoded_number_array(party, layer_bias_grad, ciphers_column_size, ACTIVE_PARTY_ID);
 
-  log_info("[compute_loss_grad] display layer_bias_grad");
-  display_encrypted_vector(party, ciphers_column_size, layer_bias_grad);
+//  log_info("[compute_loss_grad] display layer_bias_grad");
+//  display_encrypted_vector(party, ciphers_column_size, layer_bias_grad);
 
   // assign to the weight_grads and bias_grads objects
   for (int i = 0; i < shares_row_size; i++) {
@@ -1077,8 +1077,8 @@ void MlpBuilder::train(Party party) {
     delete [] predicted_labels;
   }
 
-  log_info("[train] display model weights for debug");
-  mlp_model.display_model(party);
+//  log_info("[train] display model weights for debug");
+//  mlp_model.display_model(party);
 
   const clock_t training_finish_time = clock();
   double training_consumed_time =

@@ -255,10 +255,10 @@ void MlpModel::forward_computation(const Party &party,
   // format: (layer, idx_in_batch, neuron_idx)
   for (int l_idx = 0; l_idx < m_n_layers - 1; l_idx++) {
     log_info("---------- [forward_computation]: compute layer " + std::to_string(l_idx) + "-----------");
-    log_info("[forward_computation] display m_weight_mat");
-    display_encrypted_matrix(party, m_layers[l_idx].m_num_inputs, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_weight_mat);
-    log_info("[forward_computation] display m_bias");
-    display_encrypted_vector(party, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_bias);
+//    log_info("[forward_computation] display m_weight_mat");
+//    display_encrypted_matrix(party, m_layers[l_idx].m_num_inputs, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_weight_mat);
+//    log_info("[forward_computation] display m_bias");
+//    display_encrypted_vector(party, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_bias);
 
     int cur_layer_num_outputs = m_layers[l_idx].m_num_outputs;
     log_info("[forward_computation]: cur_layer_num_outputs = " + std::to_string(cur_layer_num_outputs));
@@ -289,8 +289,8 @@ void MlpModel::forward_computation(const Party &party,
           cur_layer_num_outputs,
           cur_layer_enc_outputs);
 
-      log_info("[forward_computation] display cur_layer_enc_outputs for debug");
-      display_encrypted_matrix(party, cur_batch_size, cur_layer_num_outputs, cur_layer_enc_outputs);
+//      log_info("[forward_computation] display cur_layer_enc_outputs for debug");
+//      display_encrypted_matrix(party, cur_batch_size, cur_layer_num_outputs, cur_layer_enc_outputs);
     }
 
     // next, convert to secret shares and call spdz to compute activation and deriv_activation
@@ -343,8 +343,8 @@ void MlpModel::forward_computation(const Party &party,
     activation_shares.push_back(layer_act_outputs_shares);
     deriv_activation_shares.push_back(layer_deriv_act_outputs_shares);
 
-    log_info("[forward_computation] display activation shares for layer " + std::to_string(l_idx));
-    display_shares_matrix(party, layer_act_outputs_shares);
+//    log_info("[forward_computation] display activation shares for layer " + std::to_string(l_idx));
+//    display_shares_matrix(party, layer_act_outputs_shares);
 
     for (int i = 0; i < cur_batch_size; i++) {
       delete [] cur_layer_enc_outputs[i];
@@ -441,8 +441,8 @@ void MlpModel::forward_computation_fast(const Party &party,
         ACTIVE_PARTY_ID,
         cipher_precision);
 
-    log_info("[forward_computation_fast] display input secret shares to spdz");
-    display_shares_matrix(party, cur_layer_enc_outputs_shares);
+//    log_info("[forward_computation_fast] display input secret shares to spdz");
+//    display_shares_matrix(party, cur_layer_enc_outputs_shares);
 
     log_info("[forward_computation_fast] converted 1st hidden layer "
              "encrypted output into secret shares.");
@@ -510,8 +510,8 @@ void MlpModel::forward_computation_fast(const Party &party,
                              PHE_FIXED_POINT_PRECISION);
   }
 
-  log_info("[forward_computation_fast] display predicted_labels for debug");
-  display_encrypted_matrix(party, cur_batch_size, m_num_outputs, predicted_labels);
+//  log_info("[forward_computation_fast] display predicted_labels for debug");
+//  display_encrypted_matrix(party, cur_batch_size, m_num_outputs, predicted_labels);
 
   log_info("[forward_computation_fast] finished.");
 }
