@@ -47,7 +47,6 @@ MlpBuilder::MlpBuilder(const MlpParams &mlp_params,
                                       m_training_accuracy,
                                       m_testing_accuracy) {
   is_classification = mlp_params.is_classification;
-  is_classification = true;
   batch_size = mlp_params.batch_size;
   max_iteration = mlp_params.max_iteration;
   converge_threshold = mlp_params.converge_threshold;
