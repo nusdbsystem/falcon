@@ -231,73 +231,6 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
     delete [] regularized_gradients;
   }
 
-  log_info("abs(linear_reg_model.local_weight[0].getter_exponent) = " + std::to_string(abs(linear_reg_model.local_weights[0].getter_exponent())));
-  log_info("abs(encrypted_gradients[0].getter_exponent) before truncate = " + std::to_string(abs(encrypted_gradients[0].getter_exponent())));
-
-  // each party need to truncate the gradient precision to make sure it is consistent with [w_j]
-  // let active party aggregate the encrypted gradients and broadcast, and truncate
-  int dest_precision = abs(linear_reg_model.local_weights[0].getter_exponent());
-  int global_weight_size = std::accumulate(linear_reg_model.party_weight_sizes.begin(), linear_reg_model.party_weight_sizes.end(), 0);
-  auto* global_encrypted_gradients = new EncodedNumber[global_weight_size];
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    // first, pack its own encrypted gradients
-    int idx = 0;
-    for (int j = 0; j < linear_reg_model.weight_size; j++) {
-      global_encrypted_gradients[idx] = encrypted_gradients[j];
-      idx += 1;
-    }
-    // second, receive each party's encrypted gradients
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        std::string recv_enc_grad_i_str;
-        party.recv_long_message(i, recv_enc_grad_i_str);
-        auto* recv_enc_grads_i = new EncodedNumber[linear_reg_model.party_weight_sizes[i]];
-        deserialize_encoded_number_array(recv_enc_grads_i, linear_reg_model.party_weight_sizes[i], recv_enc_grad_i_str);
-        for (int j = 0; j < linear_reg_model.party_weight_sizes[i]; j++) {
-          global_encrypted_gradients[idx] = recv_enc_grads_i[j];
-          idx += 1;
-        }
-        delete [] recv_enc_grads_i;
-      }
-    }
-    // third, broadcast this array, such that parties can truncate
-    std::string global_enc_grad_str;
-    serialize_encoded_number_array(global_encrypted_gradients, global_weight_size, global_enc_grad_str);
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        party.send_long_message(i, global_enc_grad_str);
-      }
-    }
-  } else {
-    // first, send encrypted gradients to the active party
-    std::string enc_grad_str;
-    serialize_encoded_number_array(encrypted_gradients, linear_reg_model.weight_size, enc_grad_str);
-    party.send_long_message(ACTIVE_PARTY_ID, enc_grad_str);
-    // second, receive global encrypted gradients array
-    std::string recv_global_enc_grad_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_global_enc_grad_str);
-    deserialize_encoded_number_array(global_encrypted_gradients, global_weight_size, recv_global_enc_grad_str);
-  }
-  truncate_ciphers_precision(party, global_encrypted_gradients,
-                             global_weight_size,
-                             ACTIVE_PARTY_ID,
-                             dest_precision);
-  // find the corresponding encrypted gradients needed
-  int start_idx_in_global = 0;
-  for (int i = 0; i < party.party_num; i++) {
-    if (i < party.party_id) {
-      start_idx_in_global += linear_reg_model.party_weight_sizes[i];
-    } else {
-      break;
-    }
-  }
-  for (int j = 0; j < linear_reg_model.weight_size; j++) {
-    encrypted_gradients[j] = global_encrypted_gradients[start_idx_in_global];
-    start_idx_in_global += 1;
-  }
-
-  log_info("abs(encrypted_gradients[0].getter_exponent) after truncate = " + std::to_string(abs(encrypted_gradients[0].getter_exponent())));
-
   djcs_t_free_public_key(phe_pub_key);
   delete [] encrypted_batch_losses;
   for (int i = 0; i < cur_batch_size; i++) {
@@ -305,7 +238,6 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
   }
   delete [] encoded_batch_samples;
   delete [] common_gradients;
-  delete [] global_encrypted_gradients;
   delete [] batch_true_labels;
 }
 
@@ -429,11 +361,13 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
 //  delete [] batch_weights;
 //  delete [] updated_batch_losses;
 
-  truncate_ciphers_precision(party, encrypted_batch_losses,
-                             cur_batch_size,
-                             ACTIVE_PARTY_ID,
-                             loss_precision);
-  log_info("[lime_backward_computation]: finish truncate ciphers");
+// 20220621 remove truncate encrypted_batch_losses precision as it can be handled
+//  in the update_encrypted_weights function
+//  truncate_ciphers_precision(party, encrypted_batch_losses,
+//                             cur_batch_size,
+//                             ACTIVE_PARTY_ID,
+//                             loss_precision);
+//  log_info("[lime_backward_computation]: finish truncate ciphers");
 
   // after calculate loss, compute [loss_i] * x_{ij}
   auto** encoded_batch_samples = new EncodedNumber*[cur_batch_size];
@@ -531,73 +465,6 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
     delete [] regularized_gradients;
   }
 
-  log_info("abs(linear_reg_model.local_weight[0].getter_exponent) = " + std::to_string(abs(linear_reg_model.local_weights[0].getter_exponent())));
-  log_info("abs(encrypted_gradients[0].getter_exponent) before truncate = " + std::to_string(abs(encrypted_gradients[0].getter_exponent())));
-
-  // each party need to truncate the gradient precision to make sure it is consistent with [w_j]
-  // let active party aggregate the encrypted gradients and broadcast, and truncate
-  int dest_precision = abs(linear_reg_model.local_weights[0].getter_exponent());
-  int global_weight_size = std::accumulate(linear_reg_model.party_weight_sizes.begin(), linear_reg_model.party_weight_sizes.end(), 0);
-  auto* global_encrypted_gradients = new EncodedNumber[global_weight_size];
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    // first, pack its own encrypted gradients
-    int idx = 0;
-    for (int j = 0; j < linear_reg_model.weight_size; j++) {
-      global_encrypted_gradients[idx] = encrypted_gradients[j];
-      idx += 1;
-    }
-    // second, receive each party's encrypted gradients
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        std::string recv_enc_grad_i_str;
-        party.recv_long_message(i, recv_enc_grad_i_str);
-        auto* recv_enc_grads_i = new EncodedNumber[linear_reg_model.party_weight_sizes[i]];
-        deserialize_encoded_number_array(recv_enc_grads_i, linear_reg_model.party_weight_sizes[i], recv_enc_grad_i_str);
-        for (int j = 0; j < linear_reg_model.party_weight_sizes[i]; j++) {
-          global_encrypted_gradients[idx] = recv_enc_grads_i[j];
-          idx += 1;
-        }
-        delete [] recv_enc_grads_i;
-      }
-    }
-    // third, broadcast this array, such that parties can truncate
-    std::string global_enc_grad_str;
-    serialize_encoded_number_array(global_encrypted_gradients, global_weight_size, global_enc_grad_str);
-    for (int i = 0; i < party.party_num; i++) {
-      if (i != party.party_id) {
-        party.send_long_message(i, global_enc_grad_str);
-      }
-    }
-  } else {
-    // first, send encrypted gradients to the active party
-    std::string enc_grad_str;
-    serialize_encoded_number_array(encrypted_gradients, linear_reg_model.weight_size, enc_grad_str);
-    party.send_long_message(ACTIVE_PARTY_ID, enc_grad_str);
-    // second, receive global encrypted gradients array
-    std::string recv_global_enc_grad_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_global_enc_grad_str);
-    deserialize_encoded_number_array(global_encrypted_gradients, global_weight_size, recv_global_enc_grad_str);
-  }
-  truncate_ciphers_precision(party, global_encrypted_gradients,
-                             global_weight_size,
-                             ACTIVE_PARTY_ID,
-                             dest_precision);
-  // find the corresponding encrypted gradients needed
-  int start_idx_in_global = 0;
-  for (int i = 0; i < party.party_num; i++) {
-    if (i < party.party_id) {
-      start_idx_in_global += linear_reg_model.party_weight_sizes[i];
-    } else {
-      break;
-    }
-  }
-  for (int j = 0; j < linear_reg_model.weight_size; j++) {
-    encrypted_gradients[j] = global_encrypted_gradients[start_idx_in_global];
-    start_idx_in_global += 1;
-  }
-
-  log_info("abs(encrypted_gradients[0].getter_exponent) after truncate = " + std::to_string(abs(encrypted_gradients[0].getter_exponent())));
-
   djcs_t_free_public_key(phe_pub_key);
   delete [] encrypted_batch_losses;
   for (int i = 0; i < cur_batch_size; i++) {
@@ -605,7 +472,6 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
   }
   delete [] encoded_batch_samples;
   delete [] common_gradients;
-  delete [] global_encrypted_gradients;
   delete [] batch_true_labels;
   delete [] batch_sample_weights;
 }
@@ -721,7 +587,7 @@ void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, En
   djcs_t_free_public_key(phe_pub_key);
 }
 
-void LinearRegressionBuilder::update_encrypted_weights(Party &party, EncodedNumber *encrypted_gradients) const {
+void LinearRegressionBuilder::update_encrypted_weights(Party &party, EncodedNumber *encrypted_gradients) {
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
   // update the j-th weight in local_weight vector
@@ -730,11 +596,18 @@ void LinearRegressionBuilder::update_encrypted_weights(Party &party, EncodedNumb
 
   log_info("weight size = " + std::to_string(linear_reg_model.weight_size));
   for (int j = 0; j < linear_reg_model.weight_size; j++) {
-    djcs_t_aux_ee_add(phe_pub_key,
-                      linear_reg_model.local_weights[j],
-                      linear_reg_model.local_weights[j],
-                      encrypted_gradients[j]);
+    djcs_t_aux_ee_add_ext(phe_pub_key,
+                          linear_reg_model.local_weights[j],
+                          linear_reg_model.local_weights[j],
+                          encrypted_gradients[j]);
   }
+  log_info("[LinearRegressionBuilder::update_encrypted_weights] weight precision = "
+    + std::to_string(std::abs(linear_reg_model.local_weights[0].getter_exponent())));
+  // check if the precision exceed the max precision and truncate
+  if (std::abs(linear_reg_model.local_weights[0].getter_exponent()) >= PHE_MAXIMUM_PRECISION) {
+    linear_reg_model.truncate_weights_precision(party, PHE_FIXED_POINT_PRECISION);
+  }
+
   djcs_t_free_public_key(phe_pub_key);
 }
 

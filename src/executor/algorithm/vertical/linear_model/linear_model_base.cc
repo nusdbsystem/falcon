@@ -14,6 +14,7 @@
 #include <stack>
 #include <iostream>
 #include <iomanip>
+#include <numeric>
 
 LinearModel::LinearModel() = default;
 
@@ -121,6 +122,72 @@ void LinearModel::compute_batch_phe_aggregation(const Party &party,
 void LinearModel::sync_up_weight_sizes(const Party &party) {
   std::vector<int> sync_arr = sync_up_int_arr(party, weight_size);
   party_weight_sizes = sync_arr;
+}
+
+void LinearModel::truncate_weights_precision(const Party &party, int dest_precision) {
+  // each party need to truncate the weight precision
+  // let active party aggregate the encrypted gradients and broadcast, and truncate
+  log_info("abs(local_weight[0].getter_exponent) = " + std::to_string(abs(local_weights[0].getter_exponent())));
+  int global_weight_size = std::accumulate(party_weight_sizes.begin(), party_weight_sizes.end(), 0);
+  auto* global_encrypted_weights = new EncodedNumber[global_weight_size];
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // first, pack its own encrypted gradients
+    int idx = 0;
+    for (int j = 0; j < weight_size; j++) {
+      global_encrypted_weights[idx] = local_weights[j];
+      idx += 1;
+    }
+    // second, receive each party's encrypted gradients
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        std::string recv_enc_weights_i_str;
+        party.recv_long_message(i, recv_enc_weights_i_str);
+        auto* recv_enc_weights_i = new EncodedNumber[party_weight_sizes[i]];
+        deserialize_encoded_number_array(recv_enc_weights_i, party_weight_sizes[i], recv_enc_weights_i_str);
+        for (int j = 0; j < party_weight_sizes[i]; j++) {
+          global_encrypted_weights[idx] = recv_enc_weights_i[j];
+          idx += 1;
+        }
+        delete [] recv_enc_weights_i;
+      }
+    }
+    // third, broadcast this array, such that parties can truncate
+    std::string global_enc_weights_str;
+    serialize_encoded_number_array(global_encrypted_weights, global_weight_size, global_enc_weights_str);
+    for (int i = 0; i < party.party_num; i++) {
+      if (i != party.party_id) {
+        party.send_long_message(i, global_enc_weights_str);
+      }
+    }
+  } else {
+    // first, send encrypted gradients to the active party
+    std::string enc_weights_str;
+    serialize_encoded_number_array(local_weights, weight_size, enc_weights_str);
+    party.send_long_message(ACTIVE_PARTY_ID, enc_weights_str);
+    // second, receive global encrypted gradients array
+    std::string recv_global_enc_weights_str;
+    party.recv_long_message(ACTIVE_PARTY_ID, recv_global_enc_weights_str);
+    deserialize_encoded_number_array(global_encrypted_weights, global_weight_size, recv_global_enc_weights_str);
+  }
+  truncate_ciphers_precision(party, global_encrypted_weights,
+                             global_weight_size,
+                             ACTIVE_PARTY_ID,
+                             dest_precision);
+  // find the corresponding encrypted gradients needed
+  int start_idx_in_global = 0;
+  for (int i = 0; i < party.party_num; i++) {
+    if (i < party.party_id) {
+      start_idx_in_global += party_weight_sizes[i];
+    } else {
+      break;
+    }
+  }
+  for (int j = 0; j < weight_size; j++) {
+    local_weights[j] = global_encrypted_weights[start_idx_in_global];
+    start_idx_in_global += 1;
+  }
+
+  delete [] global_encrypted_weights;
 }
 
 std::vector<double> LinearModel::display_weights(const Party& party) {

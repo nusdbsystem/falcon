@@ -63,6 +63,14 @@ class LinearModel {
   void sync_up_weight_sizes(const Party& party);
 
   /**
+   * This function truncates the parties' weights precision
+   *
+   * @param party: initialized party object
+   * @param dest_precision: the destination precision
+   */
+  void truncate_weights_precision(const Party& party, int dest_precision);
+
+  /**
    * print weights during training to view changes
    *
    * @param party: initialized party object
