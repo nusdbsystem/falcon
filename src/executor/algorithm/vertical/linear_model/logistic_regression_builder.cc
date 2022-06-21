@@ -198,7 +198,7 @@ void LogisticRegressionBuilder::backward_computation(
 
 void LogisticRegressionBuilder::update_encrypted_weights(
         Party& party,
-        EncodedNumber* encrypted_gradients) const  {
+        EncodedNumber* encrypted_gradients) {
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
@@ -207,10 +207,14 @@ void LogisticRegressionBuilder::update_encrypted_weights(
   // and local weights are the same
   log_info("[update_encrypted_weights] log_reg_model precision is: " + std::to_string(std::abs(log_reg_model.local_weights[0].getter_exponent())));
   for (int j = 0; j < log_reg_model.weight_size; j++) {
-      djcs_t_aux_ee_add(phe_pub_key,
-                        log_reg_model.local_weights[j],
-                        log_reg_model.local_weights[j],
-                        encrypted_gradients[j]);
+      djcs_t_aux_ee_add_ext(phe_pub_key,
+                            log_reg_model.local_weights[j],
+                            log_reg_model.local_weights[j],
+                            encrypted_gradients[j]);
+  }
+  // check if the precision exceed the max precision and truncate
+  if (std::abs(log_reg_model.local_weights[0].getter_exponent()) >= PHE_MAXIMUM_PRECISION) {
+    log_reg_model.truncate_weights_precision(party, PHE_FIXED_POINT_PRECISION);
   }
   djcs_t_free_public_key(phe_pub_key);
 }

@@ -150,7 +150,7 @@ class LogisticRegressionBuilder : public ModelBuilder {
    * @param party: initialized party object
    * @param encrypted_gradients: encrypted gradients
   */
-  void update_encrypted_weights(Party& party, EncodedNumber* encrypted_gradients) const;
+  void update_encrypted_weights(Party& party, EncodedNumber* encrypted_gradients);
 
   /**
    * train a logistic regression model
