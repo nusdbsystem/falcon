@@ -335,7 +335,7 @@ void LogisticRegressionBuilder::train(Party party) {
     // compute predicted label
     auto *predicted_labels = new EncodedNumber[batch_indexes.size()];
     // 4 * fixed precision
-    // weight * xj => encrypted_weights_precision + plaintext_samples_precision
+    // weight * xj => encrypted_weights_precision + plaintext_samples_precision (need to automatically adjust)
     int encrypted_batch_agg_precision = encrypted_weights_precision + plaintext_samples_precision;
     log_reg_model.forward_computation(
         party,

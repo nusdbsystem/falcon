@@ -132,8 +132,8 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
   if (party.party_id == req_party_id) {
     for (int i = 0; i < size; i++) {
       aggregated_shares[i] = encrypted_shares[i];
-      djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i], aggregated_shares[i],
-                        src_ciphers[i]);
+      djcs_t_aux_ee_add_ext(phe_pub_key, aggregated_shares[i], aggregated_shares[i],
+                            src_ciphers[i]);
     }
     // recv message and add to aggregated shares,
     // u1 computes [e] = [x]+[r1]+..+[rm]
@@ -145,8 +145,8 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
         deserialize_encoded_number_array(recv_encrypted_shares, size,
                                          recv_encrypted_shares_str);
         for (int i = 0; i < size; i++) {
-          djcs_t_aux_ee_add(phe_pub_key, aggregated_shares[i],
-                            aggregated_shares[i], recv_encrypted_shares[i]);
+          djcs_t_aux_ee_add_ext(phe_pub_key, aggregated_shares[i],
+                                aggregated_shares[i], recv_encrypted_shares[i]);
         }
         delete[] recv_encrypted_shares;
       }
@@ -246,8 +246,8 @@ void secret_shares_to_ciphers(const Party& party, EncodedNumber* dest_ciphers,
                                          recv_encrypted_shares_str);
         // homomorphic aggregation
         for (int i = 0; i < size; i++) {
-          djcs_t_aux_ee_add(phe_pub_key, dest_ciphers[i], dest_ciphers[i],
-                            recv_encrypted_shares[i]);
+          djcs_t_aux_ee_add_ext(phe_pub_key, dest_ciphers[i], dest_ciphers[i],
+                                recv_encrypted_shares[i]);
         }
         delete[] recv_encrypted_shares;
       }
