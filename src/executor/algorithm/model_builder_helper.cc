@@ -197,9 +197,9 @@ void compute_encrypted_residual(const Party& party,
                         batch_true_labels[i],
                         enc_neg_one);
       // compute phe addition [f_t - y_t]
-      djcs_t_aux_ee_add(phe_pub_key, encrypted_batch_losses[i],
-                        predicted_labels[i],
-                        batch_true_labels[i]);
+      djcs_t_aux_ee_add_ext(phe_pub_key, encrypted_batch_losses[i],
+                            predicted_labels[i],
+                            batch_true_labels[i]);
     }
   }
   broadcast_encoded_number_array(party, encrypted_batch_losses,

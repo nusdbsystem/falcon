@@ -340,7 +340,6 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
 //             "" + std::to_string(i) + "] = " + std::to_string(w));
 //  }
 
-
   ciphers_multi(party, encrypted_batch_losses,
                 encrypted_batch_losses,
                 batch_sample_weights,
