@@ -80,10 +80,12 @@ message LimeFeatSelParams {
     int32 class_id = 6;
     // feature selection method, current options are 'pearson', 'lasso_path',
     string feature_selection = 7;
+    // feature selection model params, should be serialized LinearRegressionParams or null for pearson
+    string feature_selection_param = 8;
     // number of features to be explained in the interpret model
-    int32 num_explained_features = 8;
+    int32 num_explained_features = 9;
     // selected features to be saved
-    string selected_features_file = 9;
+    string selected_features_file = 10;
 }
 
 // This message denotes the LIME interpret model training parameters

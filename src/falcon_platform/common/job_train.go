@@ -253,7 +253,7 @@ func ParseTrainJob(contents string, jobInfo *TrainJob) error {
 			logger.Log.Println("ParseTrainJob: LimeFeature AlgorithmName match <-->", jobInfo.Tasks.LimeFeature.AlgorithmName)
 
 			_, jobInfo.Tasks.LimeFeature.ClassNum, _ =
-				GenerateLimeFeatSelParams(jobInfo.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, 0)
+				GenerateLimeFeatSelParams(jobInfo.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, 0, jobInfo.Tasks.LimeFeature.MpcAlgorithmName)
 			jobInfo.ClassNum = uint(jobInfo.Tasks.LimeFeature.ClassNum)
 
 		} else {
@@ -665,45 +665,101 @@ func GenerateLimeCompWeightsParams(cfg map[string]interface{}) (string, uint) {
 
 }
 
-func GenerateLimeFeatSelParams(cfg map[string]interface{}, classId int32) (string, int32, string) {
+func GenerateLimeFeatSelParams(cfg map[string]interface{}, classId int32, mpcAlgName string) (string, int32, string) {
 
 	jb, err := json.Marshal(cfg)
 	if err != nil {
 		panic("GenerateLimeFeatSelParams error in doing Marshal")
 	}
 
-	res := LimeFeatSel{}
-
-	if err := json.Unmarshal(jb, &res); err != nil {
-		// do error check
-		panic("GenerateLimeFeatSelParams error in doing Unmarshal")
-	}
-
+	var out []byte
+	var classNum int32
 	var selectFeatureFile = ""
-	fileVec := []rune(res.SelectedFeaturesFile)
-	selectFeatureFile = string(fileVec[:len(fileVec)-4]) + fmt.Sprintf("%d", classId) + ".txt"
 
-	log.Println("save features to ", selectFeatureFile)
+	if mpcAlgName == LimeLinearRegressionAlgName {
 
-	dtp := v0.LimeFeatSelParams{
-		SelectedSamplesFile:     res.SelectedSamplesFile,
-		SelectedPredictionsFile: res.SelectedPredictionsFile,
-		SampleWeightsFile:       res.SampleWeightsFile,
-		NumSamples:              res.NumSamples,
-		ClassNum:                res.ClassNum,
-		ClassId:                 classId,
-		FeatureSelection:        res.FeatureSelection,
-		NumExplainedFeatures:    res.NumExplainedFeatures,
-		SelectedFeaturesFile:    selectFeatureFile,
+		res := LimeFeatSelLR{}
+		if err := json.Unmarshal(jb, &res); err != nil {
+			// do error check
+			panic("LimeFeatSelLR error in doing Unmarshal")
+		}
+		fileVec := []rune(res.SelectedFeaturesFile)
+		selectFeatureFile = string(fileVec[:len(fileVec)-4]) + fmt.Sprintf("%d", classId) + ".txt"
+		log.Println("save features to ", selectFeatureFile)
+
+		lr := v0.LinearRegressionParams{
+			BatchSize:                 res.FeatureSelectionParam.BatchSize,
+			MaxIteration:              res.FeatureSelectionParam.MaxIteration,
+			ConvergeThreshold:         res.FeatureSelectionParam.ConvergeThreshold,
+			WithRegularization:        res.FeatureSelectionParam.WithRegularization,
+			Alpha:                     res.FeatureSelectionParam.Alpha,
+			LearningRate:              res.FeatureSelectionParam.LearningRate,
+			Decay:                     res.FeatureSelectionParam.Decay,
+			Penalty:                   res.FeatureSelectionParam.Penalty,
+			Optimizer:                 res.FeatureSelectionParam.Optimizer,
+			Metric:                    res.FeatureSelectionParam.Metric,
+			DifferentialPrivacyBudget: res.FeatureSelectionParam.DifferentialPrivacyBudget,
+			FitBias:                   res.FeatureSelectionParam.FitBias,
+		}
+
+		out1, err := proto.Marshal(&lr)
+		if err != nil {
+			log.Fatalln("Failed to encode GenerateLimeFeatSelParams:", err)
+		}
+
+		dtp := v0.LimeFeatSelParams{
+			SelectedSamplesFile:     res.SelectedSamplesFile,
+			SelectedPredictionsFile: res.SelectedPredictionsFile,
+			SampleWeightsFile:       res.SampleWeightsFile,
+			NumSamples:              res.NumSamples,
+			ClassNum:                res.ClassNum,
+			ClassId:                 classId,
+			FeatureSelection:        res.FeatureSelection,
+			FeatureSelectionParam:   b64.StdEncoding.EncodeToString(out1),
+			NumExplainedFeatures:    res.NumExplainedFeatures,
+			SelectedFeaturesFile:    selectFeatureFile,
+		}
+
+		out, err = proto.Marshal(&dtp)
+		if err != nil {
+			log.Fatalln("Failed to encode GenerateLimeFeatSelParams:", err)
+		}
+		classNum = res.ClassNum
+
+	} else if mpcAlgName == PearsonAlgName {
+		res := LimeFeatSelPearson{}
+		if err := json.Unmarshal(jb, &res); err != nil {
+			// do error check
+			panic("LimeFeatSelPearson error in doing Unmarshal")
+		}
+
+		fileVec := []rune(res.SelectedFeaturesFile)
+		selectFeatureFile = string(fileVec[:len(fileVec)-4]) + fmt.Sprintf("%d", classId) + ".txt"
+		log.Println("save features to ", selectFeatureFile)
+
+		dtp := v0.LimeFeatSelParams{
+			SelectedSamplesFile:     res.SelectedSamplesFile,
+			SelectedPredictionsFile: res.SelectedPredictionsFile,
+			SampleWeightsFile:       res.SampleWeightsFile,
+			NumSamples:              res.NumSamples,
+			ClassNum:                res.ClassNum,
+			ClassId:                 classId,
+			FeatureSelection:        res.FeatureSelection,
+			FeatureSelectionParam:   "",
+			NumExplainedFeatures:    res.NumExplainedFeatures,
+			SelectedFeaturesFile:    selectFeatureFile,
+		}
+		out, err = proto.Marshal(&dtp)
+		if err != nil {
+			log.Fatalln("Failed to encode GenerateLimeFeatSelParams:", err)
+		}
+		classNum = res.ClassNum
+
+	} else {
+		log.Fatalln("cannot recognize feature selection alg name", err)
 	}
 
-	out, err := proto.Marshal(&dtp)
-	if err != nil {
-		log.Fatalln("Failed to encode GenerateLimeFeatSelParams:", err)
-	}
-
-	return b64.StdEncoding.EncodeToString(out), res.ClassNum, selectFeatureFile
-
+	return b64.StdEncoding.EncodeToString(out), classNum, selectFeatureFile
 }
 
 func GenerateLimeInterpretParams(cfg map[string]interface{}, classId int32, selectFeatureFile string, mpcAlgName string) (string, int32) {

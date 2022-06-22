@@ -218,8 +218,8 @@ type LimeCompWeights struct {
 	SelectedPredictionsFile string `json:"selected_predictions_file"`
 }
 
-// LimeFeatSel This message denotes the LIME feature selection parameters
-type LimeFeatSel struct {
+// LimeFeatSelLR This message denotes the LIME feature selection parameters
+type LimeFeatSelLR struct {
 	// selected samples file
 	SelectedSamplesFile string `json:"selected_samples_file"`
 	// selected predictions file
@@ -234,6 +234,32 @@ type LimeFeatSel struct {
 	ClassId int32 `json:"class_id"`
 	// feature selection method, current options are 'pearson', 'lasso_path',
 	FeatureSelection string `json:"feature_selection"`
+	// feature selection model params, should be serialized LinearRegressionParams or null for pearson
+	FeatureSelectionParam LinearRegression `json:"feature_selection_param"`
+	// number of features to be explained in the interpret model
+	NumExplainedFeatures int32 `json:"num_explained_features"`
+	// selected features to be saved
+	SelectedFeaturesFile string `json:"selected_features_file"`
+}
+
+// LimeFeatSelPearson This message denotes the LIME feature selection parameters
+type LimeFeatSelPearson struct {
+	// selected samples file
+	SelectedSamplesFile string `json:"selected_samples_file"`
+	// selected predictions file
+	SelectedPredictionsFile string `json:"selected_predictions_file"`
+	// the sample weights file
+	SampleWeightsFile string `json:"sample_weights_file"`
+	// number of samples generated or selected
+	NumSamples int32 `json:"num_samples"`
+	// number of classes in classification, set to 1 if regression
+	ClassNum int32 `json:"class_num"`
+	// the label id to be explained
+	ClassId int32 `json:"class_id"`
+	// feature selection method, current options are 'pearson', 'lasso_path',
+	FeatureSelection string `json:"feature_selection"`
+	// feature selection model params, should be serialized LinearRegressionParams or null for pearson
+	FeatureSelectionParam string `json:"FeatureSelectionParam"`
 	// number of features to be explained in the interpret model
 	NumExplainedFeatures int32 `json:"num_explained_features"`
 	// selected features to be saved

@@ -159,6 +159,8 @@ const (
 	HorizontalFl = "horizontal"
 	VerticalFl   = "vertical"
 
+	PearsonAlgName = "pearson_correlation"
+
 	LogisticRegressAlgName  = "logistic_regression"
 	DecisionTreeAlgName     = "decision_tree"
 	RandomForestAlgName     = "random_forest"

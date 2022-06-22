@@ -134,7 +134,7 @@ func sequenceSchedule(job *common.TrainJob, workerType string) (jobStatus string
 		// feature selection
 		if stage, ok := dagScheduler.DagTasks[common.LimeFeatureTaskKey]; ok {
 			job.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
-				common.GenerateLimeFeatSelParams(job.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, int32(classId))
+				common.GenerateLimeFeatSelParams(job.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, int32(classId), job.Tasks.LimeFeature.MpcAlgorithmName)
 			status45 = manageTaskLifeCycle(*job, workerType, stage.Name, 1, classId)
 			if !status {
 				jobStatus = common.JobFailed
@@ -288,7 +288,7 @@ func parallellySchedule(job *common.TrainJob, workerType string) (jobStatus stri
 				// feature selection
 				if stage, ok := dagScheduler.DagTasks[common.LimeFeatureTaskKey]; ok {
 					job.Tasks.LimeFeature.InputConfigs.SerializedAlgorithmConfig, _, selectFeatureFile =
-						common.GenerateLimeFeatSelParams(job.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, int32(classIdParam))
+						common.GenerateLimeFeatSelParams(job.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, int32(classIdParam), job.Tasks.LimeFeature.MpcAlgorithmName)
 					status45 = manageTaskLifeCycle(job, workerType, stage.Name, stage.AssignedWorker, classIdParam)
 					if !status45 {
 						*status45Para = append(*status45Para, common.JobFailed)
