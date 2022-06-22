@@ -8,8 +8,10 @@ set -e
 # cd /opt/falcon/src/falcon_platform/
 
 # execute all dsls in this dir.
-search_dir=./examples/develop_dsl
+search_dir=./examples/$1
 coord_ip=127.0.0.1:30004
+
+echo "Executing all dsls under folder $search_dir"
 
 for entry in "$search_dir"/*
 do
