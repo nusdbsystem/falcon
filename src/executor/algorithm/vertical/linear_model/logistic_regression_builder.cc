@@ -102,6 +102,9 @@ void LogisticRegressionBuilder::backward_computation(
   compute_encrypted_residual(party, batch_indexes, batch_true_labels,
                              precision, predicted_labels, encrypted_batch_losses);
 
+  log_info("[backward_computation] the precision of encrypted_batch_losses is: "
+    + std::to_string(std::abs(encrypted_batch_losses[0].getter_exponent())));
+
   // after calculate loss, compute [loss_i]*x_{ij}
   auto encoded_batch_samples = new EncodedNumber*[cur_batch_size];
   for (int i = 0; i < cur_batch_size; i++) {
@@ -116,7 +119,7 @@ void LogisticRegressionBuilder::backward_computation(
   for (int i = 0; i < cur_batch_size; i++) {
     for (int j = 0; j < log_reg_model.weight_size; j++) {
       encoded_batch_samples[i][j].set_double(
-          phe_pub_key->n[0], 0 - lr_batch * batch_samples[i][j], precision);
+          phe_pub_key->n[0], 0 - lr_batch * batch_samples[i][j], PHE_FIXED_POINT_PRECISION);
     }
   }
 
@@ -157,7 +160,7 @@ void LogisticRegressionBuilder::backward_computation(
       EncodedNumber encoded_constant;
       encoded_constant.set_double(phe_pub_key->n[0],
                                   constant,
-                                  common_gradients_precision);
+                                  PHE_FIXED_POINT_PRECISION);
       // first compute the regularized gradients
       auto* regularized_gradients = new EncodedNumber[log_reg_model.weight_size];
       for (int j = 0; j < log_reg_model.weight_size; j++) {

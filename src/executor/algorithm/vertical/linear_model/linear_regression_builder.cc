@@ -99,7 +99,7 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
     for (int i = 0; i < cur_batch_size; i++) {
       batch_true_labels[i].set_double(phe_pub_key->n[0],
                                       training_labels[batch_indexes[i]],
-                                      predicted_label_precision);
+                                      PHE_FIXED_POINT_PRECISION);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
                          batch_true_labels[i], batch_true_labels[i]);
     }
@@ -147,7 +147,7 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
     for (int j = 0; j < linear_reg_model.weight_size; j++) {
       encoded_batch_samples[i][j].set_double(phe_pub_key->n[0],
                                              0 - lr_batch * batch_samples[i][j],
-                                             precision);
+                                             PHE_FIXED_POINT_PRECISION);
     }
   }
   // compute common_gradients, its precision should be
@@ -180,13 +180,14 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
     // if l2 regularization, the other item is { - lr * 2 * \alpha * [w_j] }
     if (penalty == "l2") {
       int common_gradients_precision = abs(common_gradients[0].getter_exponent());
+      log_info("[backward_computation] common_gradients_precision = " + std::to_string(common_gradients_precision));
       int weights_precision = abs(linear_reg_model.local_weights[0].getter_exponent());
       int plaintext_precision = common_gradients_precision - weights_precision;
       double constant = 0 - learning_rate * 2 * alpha;
       EncodedNumber encoded_constant;
       encoded_constant.set_double(phe_pub_key->n[0],
                                   constant,
-                                  plaintext_precision);
+                                  PHE_FIXED_POINT_PRECISION);
       // first compute the last item of the l2 regularization
       // then, add the second item to the common_gradients
       for (int j = 0; j < linear_reg_model.weight_size; j++) {
@@ -194,11 +195,12 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
                           regularized_gradients[j],
                           linear_reg_model.local_weights[j],
                           encoded_constant);
-        djcs_t_aux_ee_add(phe_pub_key,
-                          encrypted_gradients[j],
-                          common_gradients[j],
-                          regularized_gradients[j]);
+        djcs_t_aux_ee_add_ext(phe_pub_key,
+                              encrypted_gradients[j],
+                              common_gradients[j],
+                              regularized_gradients[j]);
       }
+      log_info("[backward_computation] common_gradients_precision = " + std::to_string(common_gradients_precision));
     }
 
     // if l1 regularization, the other item has two forms:
@@ -215,17 +217,17 @@ void LinearRegressionBuilder::backward_computation(const Party &party,
       EncodedNumber encoded_constant;
       encoded_constant.set_double(phe_pub_key->n[0],
                                   constant,
-                                  plaintext_precision);
+                                  PHE_FIXED_POINT_PRECISION);
       // then, add the second item to the common_gradients
       for (int j = 0; j < linear_reg_model.weight_size; j++) {
         djcs_t_aux_ep_mul(phe_pub_key,
                           regularized_gradients[j],
                           regularized_gradients[j],
                           encoded_constant);
-        djcs_t_aux_ee_add(phe_pub_key,
-                          encrypted_gradients[j],
-                          common_gradients[j],
-                          regularized_gradients[j]);
+        djcs_t_aux_ee_add_ext(phe_pub_key,
+                              encrypted_gradients[j],
+                              common_gradients[j],
+                              regularized_gradients[j]);
       }
     }
     delete [] regularized_gradients;
@@ -380,7 +382,7 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
     for (int j = 0; j < linear_reg_model.weight_size; j++) {
       encoded_batch_samples[i][j].set_double(phe_pub_key->n[0],
                                              0 - lr_batch * batch_samples[i][j],
-                                             precision);
+                                             PHE_FIXED_POINT_PRECISION);
     }
   }
   // compute common_gradients, its precision should be
@@ -419,7 +421,7 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
       EncodedNumber encoded_constant;
       encoded_constant.set_double(phe_pub_key->n[0],
                                   constant,
-                                  plaintext_precision);
+                                  PHE_FIXED_POINT_PRECISION);
       // first compute the last item of the l2 regularization
       // then, add the second item to the common_gradients
       for (int j = 0; j < linear_reg_model.weight_size; j++) {
@@ -427,10 +429,10 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
                           regularized_gradients[j],
                           linear_reg_model.local_weights[j],
                           encoded_constant);
-        djcs_t_aux_ee_add(phe_pub_key,
-                          encrypted_gradients[j],
-                          common_gradients[j],
-                          regularized_gradients[j]);
+        djcs_t_aux_ee_add_ext(phe_pub_key,
+                              encrypted_gradients[j],
+                              common_gradients[j],
+                              regularized_gradients[j]);
       }
     }
 
@@ -448,17 +450,17 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
       EncodedNumber encoded_constant;
       encoded_constant.set_double(phe_pub_key->n[0],
                                   constant,
-                                  plaintext_precision);
+                                  PHE_FIXED_POINT_PRECISION);
       // then, add the second item to the common_gradients
       for (int j = 0; j < linear_reg_model.weight_size; j++) {
         djcs_t_aux_ep_mul(phe_pub_key,
                           regularized_gradients[j],
                           regularized_gradients[j],
                           encoded_constant);
-        djcs_t_aux_ee_add(phe_pub_key,
-                          encrypted_gradients[j],
-                          common_gradients[j],
-                          regularized_gradients[j]);
+        djcs_t_aux_ee_add_ext(phe_pub_key,
+                              encrypted_gradients[j],
+                              common_gradients[j],
+                              regularized_gradients[j]);
       }
     }
     delete [] regularized_gradients;
@@ -564,7 +566,7 @@ void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, En
   party.getter_phe_pub_key(phe_pub_key);
   EncodedNumber regularization_hyper_param;
   regularization_hyper_param.set_double(phe_pub_key->n[0],
-                                        alpha, 2 * PHE_FIXED_POINT_PRECISION);
+                                        alpha, PHE_FIXED_POINT_PRECISION);
   for (int j = 0; j < global_weight_size; j++) {
     djcs_t_aux_ep_mul(phe_pub_key, global_regularized_grad[j],
                       global_regularized_grad[j], regularization_hyper_param);

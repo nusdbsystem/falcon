@@ -11,9 +11,9 @@
       "addr": "127.0.0.1:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client0",
-        "data_output": "/opt/falcon/data/dataset/breast_cancer_data/client0",
-        "model_path": "/opt/falcon/data/dataset/breast_cancer_data/client0"
+        "data_input": "/opt/falcon/data/dataset/energy_prediction_data/client0",
+        "data_output": "/opt/falcon/data/dataset/energy_prediction_data/client0",
+        "model_path": "/opt/falcon/data/dataset/energy_prediction_data/client0"
       }
     },
     {
@@ -21,9 +21,9 @@
       "addr": "127.0.0.1:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client1",
-        "data_output": "/opt/falcon/data/dataset/breast_cancer_data/client1",
-        "model_path": "/opt/falcon/data/dataset/breast_cancer_data/client1"
+        "data_input": "/opt/falcon/data/dataset/energy_prediction_data/client1",
+        "data_output": "/opt/falcon/data/dataset/energy_prediction_data/client1",
+        "model_path": "/opt/falcon/data/dataset/energy_prediction_data/client1"
       }
     },
     {
@@ -31,9 +31,9 @@
       "addr": "127.0.0.1:30007",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client2",
-        "data_output": "/opt/falcon/data/dataset/breast_cancer_data/client2",
-        "model_path": "/opt/falcon/data/dataset/breast_cancer_data/client2"
+        "data_input": "/opt/falcon/data/dataset/energy_prediction_data/client2",
+        "data_output": "/opt/falcon/data/dataset/energy_prediction_data/client2",
+        "model_path": "/opt/falcon/data/dataset/energy_prediction_data/client2"
       }
     }
   ],
@@ -43,8 +43,8 @@
   },
   "tasks": {
     "model_training": {
-      "mpc_algorithm_name": "logistic_regression",
-      "algorithm_name": "logistic_regression",
+      "mpc_algorithm_name": "linear_regression",
+      "algorithm_name": "linear_regression",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
@@ -54,14 +54,14 @@
           "batch_size": 8,
           "max_iteration": 200,
           "convergence_threshold": 0.0001,
-          "with_regularization": false,
+          "with_regularization": true,
           "alpha": 0.1,
           "learning_rate": 0.1,
           "decay": 0.1,
           "penalty": "l1",
           "optimizer": "sgd",
           "multi_class": "ovr",
-          "metric": "acc",
+          "metric": "mse",
           "differential_privacy_budget": 0.1,
           "fit_bias": true
         }
