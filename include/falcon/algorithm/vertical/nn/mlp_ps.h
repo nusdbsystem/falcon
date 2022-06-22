@@ -100,12 +100,10 @@ class MlpParameterServer : public ParameterServer {
    * update weight
    *
    * @param encoded_messages: messages received from worker, this is loss in distributed training
-   * @param weight_phe_precision: the precision of the local model
    * @param agg_mlp_model: returned updated mlp_model
    */
   void update_encrypted_weights(
       const std::vector< string >& encoded_messages,
-      int weight_phe_precision,
       MlpModel& agg_mlp_model);
 
   /**

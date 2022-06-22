@@ -1096,7 +1096,6 @@ void MlpBuilder::distributed_train(const Party &party, const Worker &worker) {
     exit(EXIT_FAILURE);
   }
 
-
   // step 1: init encrypted weights (here use precision for consistence in the following)
   int n_features = party.getter_feature_num();
   std::vector<int> sync_arr = sync_up_int_arr(party, n_features);
@@ -1162,8 +1161,12 @@ void MlpBuilder::distributed_train(const Party &party, const Worker &worker) {
 
     // the activation shares and derivative activation shares after forward computation
     TripleDVec layer_activation_shares, layer_deriv_activation_shares;
+    // push original data samples for making the computation consistent
+    layer_activation_shares.push_back(mini_batch_samples);
+    layer_deriv_activation_shares.push_back(mini_batch_samples);
     int encry_agg_precision = encry_weights_prec + plain_samples_prec;
     log_info("[train] encry_agg_precision is: " + std::to_string(encry_agg_precision));
+    log_info("[train] mlp_model.m_n_layers = " + std::to_string(mlp_model.m_n_layers));
     mlp_model.forward_computation(
         party,
         cur_sample_size,

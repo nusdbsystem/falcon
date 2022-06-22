@@ -680,7 +680,6 @@ void train_mlp(
   }
 
   // weight size is different if fit_bias is true on active party
-  int weight_size = party->getter_feature_num();
   double training_accuracy = 0.0, testing_accuracy = 0.0;
   MlpBuilder mlp_builder(params, training_data,testing_data,
                          training_labels,testing_labels,
@@ -728,10 +727,8 @@ void launch_mlp_parameter_server(
   // have the train and test data, later ps will broadcast the split info to workers
   double split_percentage = SPLIT_TRAIN_TEST_RATIO;
   // in distributed train, fit bias should be handled here
-  split_dataset(party, params.fit_bias, training_data, testing_data,
+  split_dataset(party, false, training_data, testing_data,
                 training_labels, testing_labels, split_percentage);
-  // weight size is different if fit_bias is true on active party
-  int weight_size = party->getter_feature_num();
 
   // init log_reg_model instance
   auto mlp_builder = new MlpBuilder(params,

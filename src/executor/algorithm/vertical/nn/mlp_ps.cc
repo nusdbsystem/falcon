@@ -168,7 +168,6 @@ void MlpParameterServer::distributed_train() {
     // step 6: receive loss, and update weight
     int weight_phe_precision = abs(this->mlp_builder.mlp_model.m_layers[0].m_bias[0].getter_exponent());
     this->update_encrypted_weights(encoded_message,
-                                   weight_phe_precision,
                                    this->mlp_builder.mlp_model);
     log_info("--------PS Iteration " + std::to_string(iter) + ", ps update_encrypted_weights successful --------");
   }
@@ -278,7 +277,6 @@ void MlpParameterServer::distributed_eval(falcon::DatasetType eval_type, const s
 }
 
 void MlpParameterServer::update_encrypted_weights(const std::vector<string> &encoded_messages,
-                                                  int weight_phe_precision,
                                                   MlpModel& agg_mlp_model) {
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
@@ -298,7 +296,7 @@ void MlpParameterServer::update_encrypted_weights(const std::vector<string> &enc
       // aggregate the dec_mlp_model into agg_mlp_model
       for (int i = 0; i < agg_mlp_model.m_layers.size(); i++) {
         // aggregate layer's m_weight_mat
-        djcs_t_aux_matrix_ele_wise_ee_add(
+        djcs_t_aux_matrix_ele_wise_ee_add_ext(
             phe_pub_key,
             agg_mlp_model.m_layers[i].m_weight_mat,
             agg_mlp_model.m_layers[i].m_weight_mat,
@@ -306,7 +304,7 @@ void MlpParameterServer::update_encrypted_weights(const std::vector<string> &enc
             agg_mlp_model.m_layers[i].m_num_inputs,
             agg_mlp_model.m_layers[i].m_num_outputs);
         // aggregate layer's m_bias
-        djcs_t_aux_vec_ele_wise_ee_add(
+        djcs_t_aux_vec_ele_wise_ee_add_ext(
             phe_pub_key,
             agg_mlp_model.m_layers[i].m_bias,
             agg_mlp_model.m_layers[i].m_bias,
