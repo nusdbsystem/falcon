@@ -162,11 +162,13 @@ void LinearParameterServer::update_encrypted_weights(
   auto encrypted_aggregated_gradients = new EncodedNumber[weight_size];
   // first, need to initialize and encrypt the gradients
   for (int i = 0; i < weight_size; i++) {
-    encrypted_aggregated_gradients[i].set_double(phe_pub_key->n[0], 0.0, weight_phe_precision);
+    encrypted_aggregated_gradients[i].set_double(phe_pub_key->n[0], 0.0, PHE_FIXED_POINT_PRECISION);
     djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
                        encrypted_aggregated_gradients[i],
                        encrypted_aggregated_gradients[i]);
   }
+
+  log_info("[LinearParameterServer::update_encrypted_weights] decode encrypted messages and add to encrypted gradients");
 
   // deserialize encrypted message, and add to encrypted
   for (const std::string& message: encoded_messages){
@@ -176,13 +178,15 @@ void LinearParameterServer::update_encrypted_weights(
         weight_size,
         message);
     for (auto i = 0; i < weight_size; i++) {
-      djcs_t_aux_ee_add(phe_pub_key,
-                        encrypted_aggregated_gradients[i],
-                        encrypted_aggregated_gradients[i],
-                        tmp[i]);
+      djcs_t_aux_ee_add_ext(phe_pub_key,
+                            encrypted_aggregated_gradients[i],
+                            encrypted_aggregated_gradients[i],
+                            tmp[i]);
     }
     delete [] tmp;
   }
+
+  log_info("[LinearParameterServer::update_encrypted_weights] aggregate to updated_weights");
 
   // on parameter server, does not need to differentiate regularization
   // or not, because the regularized gradients is computed on each party
@@ -194,7 +198,7 @@ void LinearParameterServer::update_encrypted_weights(
     // update the j-th weight in local_weight vector
     // need to make sure that the exponents of inner_product
     // and local weights are the same
-    djcs_t_aux_ee_add(
+    djcs_t_aux_ee_add_ext(
         phe_pub_key,
         updated_weights[j],
         updated_weights[j],

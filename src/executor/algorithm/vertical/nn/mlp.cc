@@ -255,10 +255,10 @@ void MlpModel::forward_computation(const Party &party,
   // format: (layer, idx_in_batch, neuron_idx)
   for (int l_idx = 0; l_idx < m_n_layers - 1; l_idx++) {
     log_info("---------- [forward_computation]: compute layer " + std::to_string(l_idx) + "-----------");
-//    log_info("[forward_computation] display m_weight_mat");
-//    display_encrypted_matrix(party, m_layers[l_idx].m_num_inputs, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_weight_mat);
-//    log_info("[forward_computation] display m_bias");
-//    display_encrypted_vector(party, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_bias);
+    log_info("[forward_computation] display m_weight_mat");
+    display_encrypted_matrix(party, m_layers[l_idx].m_num_inputs, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_weight_mat);
+    log_info("[forward_computation] display m_bias");
+    display_encrypted_vector(party, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_bias);
 
     int cur_layer_num_outputs = m_layers[l_idx].m_num_outputs;
     log_info("[forward_computation]: cur_layer_num_outputs = " + std::to_string(cur_layer_num_outputs));

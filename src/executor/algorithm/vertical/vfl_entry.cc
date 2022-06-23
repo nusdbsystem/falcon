@@ -761,6 +761,8 @@ void launch_mlp_parameter_server(
   // save the trained model
   ps->save_model(model_save_file);
 
+  log_info("[launch_mlp_parameter_server]: begin to destructor");
+
   delete mlp_builder;
   delete ps;
 }

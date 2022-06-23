@@ -134,7 +134,7 @@ void MlpParameterServer::distributed_train() {
   std::vector<int> sync_arr = sync_up_int_arr(party, n_features);
   int encry_weights_prec = PHE_FIXED_POINT_PRECISION;
   int plain_samples_prec = PHE_FIXED_POINT_PRECISION;
-  mlp_builder.mlp_model.init_encrypted_weights(party, encry_weights_prec);
+  mlp_builder.init_encrypted_weights(party, encry_weights_prec);
   log_info("[train] init encrypted MLP weights success");
 
   // record training data ids in data_indexes for iteratively batch selection
@@ -148,6 +148,14 @@ void MlpParameterServer::distributed_train() {
   log_info("current channel size = " + std::to_string(this->worker_channels.size()));
   for (int iter = 0; iter < this->mlp_builder.max_iteration; iter++) {
     log_info("--------PS Iteration " + std::to_string(iter) + " --------");
+    log_info("[distributed_train] display m_weight_mat");
+    display_encrypted_matrix(party,
+                             this->mlp_builder.mlp_model.m_layers[0].m_num_inputs,
+                             this->mlp_builder.mlp_model.m_layers[0].m_num_outputs,
+                             this->mlp_builder.mlp_model.m_layers[0].m_weight_mat);
+    log_info("[distributed_train] display m_bias");
+    display_encrypted_vector(party, this->mlp_builder.mlp_model.m_layers[0].m_num_outputs, this->mlp_builder.mlp_model.m_layers[0].m_bias);
+
     // step 2: broadcast weight
     this->broadcast_encrypted_weights(this->mlp_builder.mlp_model);
     log_info("--------PS Iteration " + std::to_string(iter) + ", ps broadcast_encrypted_weights successful --------");
@@ -167,8 +175,7 @@ void MlpParameterServer::distributed_train() {
     log_info("--------PS Iteration " + std::to_string(iter) + ", LRParameterServer received all loss * X_{ij} from falcon_worker successful --------");
     // step 6: receive loss, and update weight
     int weight_phe_precision = abs(this->mlp_builder.mlp_model.m_layers[0].m_bias[0].getter_exponent());
-    this->update_encrypted_weights(encoded_message,
-                                   this->mlp_builder.mlp_model);
+    this->update_encrypted_weights(encoded_message);
     log_info("--------PS Iteration " + std::to_string(iter) + ", ps update_encrypted_weights successful --------");
   }
 }
@@ -229,7 +236,6 @@ void MlpParameterServer::distributed_eval(falcon::DatasetType eval_type, const s
   auto* decrypted_labels = new EncodedNumber[dataset_size];
   distributed_predict(cur_test_data_indexes, decrypted_labels);
 
-  // step 3: compute and save matrix
   // step 4: active party computes the metrics
   // calculate accuracy by the active party
   std::vector<double> predictions;
@@ -242,9 +248,12 @@ void MlpParameterServer::distributed_eval(falcon::DatasetType eval_type, const s
     }
 
     // compute accuracy
-    if (this->mlp_builder.mlp_model.m_num_outputs > 1) {
+    if (this->mlp_builder.is_classification) {
       int correct_num = 0;
       for (int i = 0; i < dataset_size; i++) {
+        log_info("[mlp_builder.eval] predictions[" + std::to_string(i) + "] = "
+                     + std::to_string(predictions[i]) + ", cur_test_dataset_labels["
+                     + std::to_string(i) + "] = " + std::to_string(cur_test_dataset_labels[i]));
         if (predictions[i] == cur_test_dataset_labels[i]) {
           correct_num += 1;
         }
@@ -276,42 +285,58 @@ void MlpParameterServer::distributed_eval(falcon::DatasetType eval_type, const s
   delete [] decrypted_labels;
 }
 
-void MlpParameterServer::update_encrypted_weights(const std::vector<string> &encoded_messages,
-                                                  MlpModel& agg_mlp_model) {
+void MlpParameterServer::update_encrypted_weights(const std::vector<string> &encoded_messages) {
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
-  agg_mlp_model = this->mlp_builder.mlp_model;
   int idx = 0;
   // deserialize encrypted message, and add to encrypted
   for (const std::string& message: encoded_messages){
-    MlpModel dec_mlp_model(this->mlp_builder.is_classification,
-                           this->mlp_builder.fit_bias,
-                           this->mlp_builder.num_layers_outputs,
-                           this->mlp_builder.layers_activation_funcs);
+    log_info("[MlpParameterServer::update_encrypted_weights] begin to deserialize encoded_message " + std::to_string(idx));
+    MlpModel dec_mlp_model;
     deserialize_mlp_model(dec_mlp_model, message);
+    log_info("[MlpParameterServer::update_encrypted_weights] after deserialization");
     if (idx == 0) {
-      agg_mlp_model = dec_mlp_model;
+      // assign dec_mlp_model to this->mlp_builder.mlp_model
+      for (int i =0; i < this->mlp_builder.mlp_model.m_layers.size(); i++) {
+        log_info("[MlpParameterServer::update_encrypted_weights] enter layer " + std::to_string(i));
+        int num_inputs = this->mlp_builder.mlp_model.m_layers[i].m_num_inputs;
+        int num_outputs = this->mlp_builder.mlp_model.m_layers[i].m_num_outputs;
+        for (int j = 0; j < num_inputs; j++) {
+          for (int k = 0; k < num_outputs; k++) {
+            this->mlp_builder.mlp_model.m_layers[i].m_weight_mat[j][k] = dec_mlp_model.m_layers[i].m_weight_mat[j][k];
+          }
+        }
+        for (int k = 0; k < num_outputs; k++) {
+          this->mlp_builder.mlp_model.m_layers[i].m_bias[k] = dec_mlp_model.m_layers[i].m_bias[k];
+        }
+        log_info("[MlpParameterServer::update_encrypted_weights] exit layer " + std::to_string(i));
+      }
     } else {
       // aggregate the dec_mlp_model into agg_mlp_model
-      for (int i = 0; i < agg_mlp_model.m_layers.size(); i++) {
+      for (int i = 0; i < this->mlp_builder.mlp_model.m_layers.size(); i++) {
+        log_info("[MlpParameterServer::update_encrypted_weights] enter layer " + std::to_string(i));
+
         // aggregate layer's m_weight_mat
         djcs_t_aux_matrix_ele_wise_ee_add_ext(
             phe_pub_key,
-            agg_mlp_model.m_layers[i].m_weight_mat,
-            agg_mlp_model.m_layers[i].m_weight_mat,
+            this->mlp_builder.mlp_model.m_layers[i].m_weight_mat,
+            this->mlp_builder.mlp_model.m_layers[i].m_weight_mat,
             dec_mlp_model.m_layers[i].m_weight_mat,
-            agg_mlp_model.m_layers[i].m_num_inputs,
-            agg_mlp_model.m_layers[i].m_num_outputs);
+            this->mlp_builder.mlp_model.m_layers[i].m_num_inputs,
+            this->mlp_builder.mlp_model.m_layers[i].m_num_outputs);
         // aggregate layer's m_bias
         djcs_t_aux_vec_ele_wise_ee_add_ext(
             phe_pub_key,
-            agg_mlp_model.m_layers[i].m_bias,
-            agg_mlp_model.m_layers[i].m_bias,
+            this->mlp_builder.mlp_model.m_layers[i].m_bias,
+            this->mlp_builder.mlp_model.m_layers[i].m_bias,
             dec_mlp_model.m_layers[i].m_bias,
-            agg_mlp_model.m_layers[i].m_num_outputs);
+            this->mlp_builder.mlp_model.m_layers[i].m_num_outputs);
+
+        log_info("[MlpParameterServer::update_encrypted_weights] exit layer " + std::to_string(i));
       }
     }
+    log_info("[MlpParameterServer::update_encrypted_weights] free the object assigned to encoded_message " + std::to_string(idx));
     idx += 1;
   }
 

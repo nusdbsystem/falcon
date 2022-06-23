@@ -64,6 +64,56 @@ MlpBuilder::MlpBuilder(const MlpParams &mlp_params,
   mlp_model = MlpModel(is_classification, fit_bias, num_layers_outputs, layers_activation_funcs);
 }
 
+MlpBuilder::MlpBuilder(const MlpBuilder &mlp_builder) {
+  training_data = mlp_builder.training_data;
+  testing_data = mlp_builder.testing_data;
+  training_labels = mlp_builder.training_labels;
+  testing_labels = mlp_builder.testing_labels;
+  training_accuracy = mlp_builder.training_accuracy;
+  testing_accuracy = mlp_builder.testing_accuracy;
+  is_classification = mlp_builder.is_classification;
+  batch_size = mlp_builder.batch_size;
+  max_iteration = mlp_builder.max_iteration;
+  converge_threshold = mlp_builder.converge_threshold;
+  with_regularization = mlp_builder.with_regularization;
+  alpha = mlp_builder.alpha;
+  learning_rate = mlp_builder.learning_rate;
+  decay = mlp_builder.decay;
+  penalty = mlp_builder.penalty;
+  optimizer = mlp_builder.optimizer;
+  metric = mlp_builder.metric;
+  dp_budget = mlp_builder.dp_budget;
+  fit_bias = mlp_builder.fit_bias;
+  num_layers_outputs = mlp_builder.num_layers_outputs;
+  layers_activation_funcs = mlp_builder.layers_activation_funcs;
+  mlp_model = mlp_builder.mlp_model;
+}
+
+MlpBuilder &MlpBuilder::operator=(const MlpBuilder &mlp_builder) {
+  training_data = mlp_builder.training_data;
+  testing_data = mlp_builder.testing_data;
+  training_labels = mlp_builder.training_labels;
+  testing_labels = mlp_builder.testing_labels;
+  training_accuracy = mlp_builder.training_accuracy;
+  testing_accuracy = mlp_builder.testing_accuracy;
+  is_classification = mlp_builder.is_classification;
+  batch_size = mlp_builder.batch_size;
+  max_iteration = mlp_builder.max_iteration;
+  converge_threshold = mlp_builder.converge_threshold;
+  with_regularization = mlp_builder.with_regularization;
+  alpha = mlp_builder.alpha;
+  learning_rate = mlp_builder.learning_rate;
+  decay = mlp_builder.decay;
+  penalty = mlp_builder.penalty;
+  optimizer = mlp_builder.optimizer;
+  metric = mlp_builder.metric;
+  dp_budget = mlp_builder.dp_budget;
+  fit_bias = mlp_builder.fit_bias;
+  num_layers_outputs = mlp_builder.num_layers_outputs;
+  layers_activation_funcs = mlp_builder.layers_activation_funcs;
+  mlp_model = mlp_builder.mlp_model;
+}
+
 MlpBuilder::~MlpBuilder() {
   num_layers_outputs.clear();
   layers_activation_funcs.clear();
@@ -91,7 +141,21 @@ void MlpBuilder::init_encrypted_weights(const Party &party, int precision) {
     // CANNOT directly deserialize: deserialize_mlp_model(recv_mlp_model, model_weights_str);
     MlpModel recv_mlp_model;
     deserialize_mlp_model(recv_mlp_model, model_weights_str);
-    mlp_model = recv_mlp_model;
+    // mlp_model = recv_mlp_model; // TODO: directly assign cause memory leak
+    // assign dec_mlp_model to this->mlp_builder.mlp_model
+    for (int i =0; i < mlp_model.m_layers.size(); i++) {
+      log_info("[MlpParameterServer::update_encrypted_weights] enter layer " + std::to_string(i));
+      int num_inputs = mlp_model.m_layers[i].m_num_inputs;
+      int num_outputs = mlp_model.m_layers[i].m_num_outputs;
+      for (int j = 0; j < num_inputs; j++) {
+        for (int k = 0; k < num_outputs; k++) {
+          mlp_model.m_layers[i].m_weight_mat[j][k] = recv_mlp_model.m_layers[i].m_weight_mat[j][k];
+        }
+      }
+      for (int k = 0; k < num_outputs; k++) {
+        mlp_model.m_layers[i].m_bias[k] = recv_mlp_model.m_layers[i].m_bias[k];
+      }
+    }
     log_info("[MlpBuilder::init_encrypted_weights] passive party receive and deserialize the mlp model");
   }
 }
@@ -1115,7 +1179,22 @@ void MlpBuilder::distributed_train(const Party &party, const Worker &worker) {
     worker.recv_long_message_from_ps(mlp_model_str);
     log_info("-------- Worker Iteration " + std::to_string(iter) + ", "
              "worker.receive weight success --------");
-    deserialize_mlp_model(mlp_model, mlp_model_str);
+    // TODO: check why directly deserialize to mlp_model will have bugs
+    MlpModel des_mlp_model;
+    deserialize_mlp_model(des_mlp_model, mlp_model_str);
+    // assign dec_mlp_model to mlp_model
+    for (int i =0; i < mlp_model.m_layers.size(); i++) {
+      int num_inputs = mlp_model.m_layers[i].m_num_inputs;
+      int num_outputs = mlp_model.m_layers[i].m_num_outputs;
+      for (int j = 0; j < num_inputs; j++) {
+        for (int k = 0; k < num_outputs; k++) {
+          mlp_model.m_layers[i].m_weight_mat[j][k] = des_mlp_model.m_layers[i].m_weight_mat[j][k];
+        }
+      }
+      for (int k = 0; k < num_outputs; k++) {
+        mlp_model.m_layers[i].m_bias[k] = des_mlp_model.m_layers[i].m_bias[k];
+      }
+    }
 
     // step 2.2 receive sample id from master for batch computation
     std::string mini_batch_indexes_str;

@@ -98,6 +98,7 @@ void serialize_mlp_model(const MlpModel& mlp_model, std::string& output_str) {
 }
 
 void deserialize_mlp_model(MlpModel& mlp_model, const std::string& input_str) {
+  log_info("[deserialize_mlp_model] enter deserialize_mlp_model");
   com::nus::dbsytem::falcon::v0::MlpModel deserialized_mlp_model;
   google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_str.c_str(), input_str.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
@@ -115,6 +116,7 @@ void deserialize_mlp_model(MlpModel& mlp_model, const std::string& input_str) {
   }
   int m_layers_size = deserialized_mlp_model.layers_size();
   for (int i = 0; i < m_layers_size; i++) {
+    log_info("[deserialize_mlp_model] deserializing layer " + std::to_string(i));
     const com::nus::dbsytem::falcon::v0::Layer& layer = deserialized_mlp_model.layers(i);
     Layer m_layer;
     m_layer.m_num_inputs = layer.num_inputs();
@@ -165,7 +167,9 @@ void deserialize_mlp_model(MlpModel& mlp_model, const std::string& input_str) {
       mpz_clear(s_n);
       mpz_clear(s_value);
     }
+    log_info("[deserialize_mlp_model] begin to push_back layer " + std::to_string(i));
     mlp_model.m_layers.push_back(m_layer);
+    log_info("[deserialize_mlp_model] after push_back layer " + std::to_string(i));
   }
 
   mlp_model.m_n_layers = deserialized_mlp_model.n_layers();

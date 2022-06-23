@@ -11,6 +11,7 @@
 #include <random>
 
 Layer::Layer() {
+//  log_info("[Layer::Layer] default constructor");
   m_num_inputs = 0;
   m_num_outputs = 0;
   m_fit_bias = true;
@@ -18,6 +19,7 @@ Layer::Layer() {
 
 Layer::Layer(int num_inputs, int num_outputs,
              bool with_bias, const std::string &activation_func_str) {
+//  log_info("[Layer::Layer] constructor with parameters");
   m_num_inputs = num_inputs;
   m_num_outputs = num_outputs;
   m_fit_bias = with_bias;
@@ -34,6 +36,7 @@ Layer::Layer(int num_inputs, int num_outputs,
 }
 
 Layer::Layer(const Layer &layer) {
+//  log_info("[Layer::Layer] constructor with copy object");
   m_num_inputs = layer.m_num_inputs;
   m_num_outputs = layer.m_num_outputs;
   m_fit_bias = layer.m_fit_bias;
@@ -54,6 +57,7 @@ Layer::Layer(const Layer &layer) {
 }
 
 Layer &Layer::operator=(const Layer &layer) {
+//  log_info("[Layer::Layer] constructor with assign operator");
   m_num_inputs = layer.m_num_inputs;
   m_num_outputs = layer.m_num_outputs;
   m_fit_bias = layer.m_fit_bias;
@@ -74,6 +78,7 @@ Layer &Layer::operator=(const Layer &layer) {
 }
 
 Layer::~Layer() {
+//  log_info("[Layer::~Layer] destructor");
   for (int i = 0; i < m_num_inputs; i++) {
     delete [] m_weight_mat[i];
   }
@@ -189,6 +194,7 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
   }
   // each party compute matrix multiplication between encoded_batch_samples and local_weight_mat
   log_info("[comp_1st_layer_agg_output] compute local aggregation");
+  log_info("[comp_1st_layer_agg_output] cur_batch_size = " + std::to_string(cur_batch_size));
   auto** local_mat_mul_res = new EncodedNumber*[cur_batch_size];
   for (int i = 0; i < cur_batch_size; i++) {
     local_mat_mul_res[i] = new EncodedNumber[m_num_outputs];
@@ -201,6 +207,7 @@ void Layer::comp_1st_layer_agg_output(const Party &party,
                              m_num_outputs,
                              cur_batch_size,
                              local_n_features);
+  log_info("[comp_1st_layer_agg_output] djcs_t_aux_mat_mat_ep_mult finished");
 
   // the active party aggregate the result and broadcast
   if (party.party_type == falcon::ACTIVE_PARTY) {

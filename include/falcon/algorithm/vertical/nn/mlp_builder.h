@@ -112,6 +112,10 @@ class MlpBuilder : public ModelBuilder {
              double m_training_accuracy = 0.0,
              double m_testing_accuracy = 0.0);
 
+  MlpBuilder(const MlpBuilder& mlp_builder);
+
+  MlpBuilder &operator=(const MlpBuilder &mlp_builder);
+
   /** destructor */
   ~MlpBuilder();
 
