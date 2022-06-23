@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.nus.dbsytem.falcon.v0;
+option go_package = "/v0";
+
+//import public "vo.proto";
+
+// This message denotes the feature selection parameters
+message FeatSelParams {
+    // number of samples generated or selected
+    int32 num_samples = 1;
+    // feature selection method,
+    string feature_selection = 2;
+    // selected features to be saved
+    string selected_features_file = 3;
+}

@@ -90,6 +90,8 @@ struct LimeFeatSelParams {
   int class_id;
   // feature selection method, current options are 'pearson', 'lasso_path',
   string feature_selection;
+  // feature selection model params, should be serialized LinearRegressionParams or null for pearson
+  string feature_selection_param;
   // number of features to be explained in the interpret model
   int num_explained_features;
   // selected features to be saved
@@ -247,6 +249,7 @@ class LimeExplainer {
    * the interpret model
    *
    * @param party: the participating party
+   * @param feature_selection_param: feature selection pararm
    * @param selected_sample_file: the selected sample file to be saved
    * @param selected_prediction_file: the selected prediction file to be saved
    * @param sample_weights_file: the encrypted sample weights file
@@ -263,6 +266,7 @@ class LimeExplainer {
    * @param worker_id: if is_distributed = 1 and distributed_role = 1
    */
   void select_features(Party party,
+                       const std::string& feature_selection_param,
                        const std::string& selected_samples_file,
                        const std::string& selected_predictions_file,
                        const std::string &sample_weights_file,

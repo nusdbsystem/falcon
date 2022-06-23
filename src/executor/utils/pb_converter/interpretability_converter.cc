@@ -126,6 +126,7 @@ void deserialize_lime_feat_sel_params(LimeFeatSelParams& lime_feat_sel_params, c
   lime_feat_sel_params.class_num = pb_lime_feat_sel_params.class_num();
   lime_feat_sel_params.class_id = pb_lime_feat_sel_params.class_id();
   lime_feat_sel_params.feature_selection = pb_lime_feat_sel_params.feature_selection();
+  lime_feat_sel_params.feature_selection_param = pb_lime_feat_sel_params.feature_selection_param();
   lime_feat_sel_params.num_explained_features = pb_lime_feat_sel_params.num_explained_features();
   lime_feat_sel_params.selected_features_file = pb_lime_feat_sel_params.selected_features_file();
 }

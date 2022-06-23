@@ -449,6 +449,7 @@ void LimeExplainer::compute_squared_dist(const Party &party,
 }
 
 void LimeExplainer::select_features(Party party,
+                                    const std::string &feature_selection_param,
                                     const std::string &selected_samples_file,
                                     const std::string &selected_predictions_file,
                                     const std::string &sample_weights_file,
@@ -464,7 +465,7 @@ void LimeExplainer::select_features(Party party,
                                     int distributed_role,
                                     int worker_id) {
   // currently, only support pearson-based feature selection
-  if (feature_selection != "pearson" && feature_selection != "linear_regression") {
+  if (feature_selection != "pearson_correlation" && feature_selection != "linear_regression") {
     log_error("The feature selection method " + feature_selection + " not supported");
     exit(EXIT_FAILURE);
   }
@@ -501,26 +502,28 @@ void LimeExplainer::select_features(Party party,
                                  sample_weights_file);
 
   log_info("[select_features]: feature_selection = " + feature_selection);
+  log_info("[select_features]: feature_selection_param = " + feature_selection_param);
+
   falcon::AlgorithmName algorithm_name = parse_algorithm_name(feature_selection);
   log_info("[explain_one_label]: algorithm_name = " + std::to_string(algorithm_name));
   // deserialize linear regression params
+
+
   LinearRegressionParams linear_reg_params;
-  // TODO: add feature selection parameters
-  // hardcode here for doing experiments
-  linear_reg_params.batch_size = 8;
-  linear_reg_params.max_iteration = 100;
-  linear_reg_params.converge_threshold = 0.0001;
-  linear_reg_params.with_regularization = true;
-  linear_reg_params.alpha = 0.1;
-  linear_reg_params.learning_rate = 0.1;
-  linear_reg_params.decay = 0.1;
-  linear_reg_params.penalty = "l2";
-  linear_reg_params.optimizer = "sgd";
-  linear_reg_params.metric = "mse";
-  linear_reg_params.dp_budget = 0.1;
-  linear_reg_params.fit_bias = true;
-  // std::string linear_reg_param_pb_str = base64_decode_to_pb_string(feature_selection_param);
-  // deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);
+  //  linear_reg_params.batch_size = 8;
+  //  linear_reg_params.max_iteration = 100;
+  //  linear_reg_params.converge_threshold = 0.0001;
+  //  linear_reg_params.with_regularization = true;
+  //  linear_reg_params.alpha = 0.1;
+  //  linear_reg_params.learning_rate = 0.1;
+  //  linear_reg_params.decay = 0.1;
+  //  linear_reg_params.penalty = "l2";
+  //  linear_reg_params.optimizer = "sgd";
+  //  linear_reg_params.metric = "mse";
+  //  linear_reg_params.dp_budget = 0.1;
+  //  linear_reg_params.fit_bias = true;
+  std::string linear_reg_param_pb_str = base64_decode_to_pb_string(feature_selection_param);
+  deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);
   log_linear_regression_params(linear_reg_params);
   std::vector<double> local_model_weights;
   // call linear regression training
@@ -540,6 +543,7 @@ void LimeExplainer::select_features(Party party,
   std::vector<int> selected_feat_idx;
   if (party.party_id == falcon::ACTIVE_PARTY) {
     // aggregate parties' local weights and find top-k
+    // 1.1 add local weight into global model weights list
     std::vector<double> global_model_weights;
     vector<double>::const_iterator first, end;
     if (linear_reg_params.fit_bias) {
@@ -549,8 +553,11 @@ void LimeExplainer::select_features(Party party,
     } else {
       for (int i = 0; i < local_model_weights.size(); i++) {
         global_model_weights.push_back(local_model_weights[i]);
-      }    }
+      }
+    }
+    // 1.2 receive and add other party's weight into global model weights.
     std::vector<int> party_weight_sizes;
+    // record each party's weight size.
     party_weight_sizes.push_back((int) selected_samples[0].size());
     for (int id = 0; id < party.party_num; id++) {
       if (id != party.party_id) {
@@ -568,13 +575,14 @@ void LimeExplainer::select_features(Party party,
 #ifdef SAVE_BASELINE
     selected_feature_idx_file = output_path_prefix + "selected_feature_idx_" + std::to_string(class_id) + ".txt";
 #endif
-    // find top-k weights and match to each party's local index
+    // 1.3 find top-k weights and match to each party's local index
     std::vector<std::vector<int>> party_selected_feat_idx = find_party_feat_idx(
         party_weight_sizes,
         global_model_weights,
         num_explained_features,
         selected_feature_idx_file
-        );
+    );
+    // 1.4 send selected features index to other party.
     selected_feat_idx = party_selected_feat_idx[0];
     for (int id = 0; id < party.party_num; id++) {
       if (id != party.party_id) {
@@ -583,13 +591,15 @@ void LimeExplainer::select_features(Party party,
         party.send_long_message(id, selected_feat_idx_str);
       }
     }
-  } else {
-    // send to active party
+  }
+  // passive perform following
+  else {
+    // 1.send to active party
     std::string local_model_weights_str;
     serialize_double_array(local_model_weights, local_model_weights_str);
     party.send_long_message(ACTIVE_PARTY_ID, local_model_weights_str);
 
-    // recieve selected_feat_idx from active party
+    // receive selected_feat_idx from active party
     std::string recv_selected_idx_str;
     party.recv_long_message(ACTIVE_PARTY_ID, recv_selected_idx_str);
     deserialize_int_array(selected_feat_idx, recv_selected_idx_str);
@@ -1649,7 +1659,7 @@ void lime_feat_sel(Party party, const std::string& params_str,
                    int distributed_role,
                    int worker_id) {
   log_info("Begin to select features");
-  // deserialize the LimeCompWeightsParams
+  // deserialize the LimeFeatureParams
   LimeFeatSelParams feat_sel_params;
   log_info("[lime_feat_sel]: params_str = " + params_str);
   std::string feat_sel_params_str = base64_decode_to_pb_string(params_str);
@@ -1657,6 +1667,7 @@ void lime_feat_sel(Party party, const std::string& params_str,
   log_info("Deserialize the lime feature_selection params");
   log_info("[lime_feat_sel] num_samples = " + std::to_string(feat_sel_params.num_samples));
   log_info("[lime_feat_sel] feature_selection = " + feat_sel_params.feature_selection);
+  log_info("[lime_feat_sel] feature_selection_params = " + feat_sel_params.feature_selection_param);
   // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
   feat_sel_params.selected_samples_file = output_path_prefix + feat_sel_params.selected_samples_file;
   feat_sel_params.selected_predictions_file = output_path_prefix + feat_sel_params.selected_predictions_file;
@@ -1665,6 +1676,7 @@ void lime_feat_sel(Party party, const std::string& params_str,
 
   LimeExplainer lime_explainer;
   lime_explainer.select_features(party,
+                                 feat_sel_params.feature_selection_param,
                                  feat_sel_params.selected_samples_file,
                                  feat_sel_params.selected_predictions_file,
                                  feat_sel_params.sample_weights_file,
