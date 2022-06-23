@@ -100,13 +100,9 @@ func initLogger() {
 func initEnv(svcName string) {
 
 	common.IsDebug = common.GetEnv("IS_DEBUG", "debug-off")
-	common.TestImgName = common.GetEnv(
-		"TEST_IMG_NAME",
-		"redis:5.0.3-alpine3.8")
+	common.TestImgName = common.GetEnv("TEST_IMG_NAME", "redis:5.0.3-alpine3.8")
 
-	common.FalconDockerImgName = common.GetEnv(
-		"FALCON_WORKER_IMAGE",
-		"lemonwyc/falcon:latest")
+	common.FalconDockerImgName = common.GetEnv("FALCON_WORKER_IMAGE", "none")
 
 	switch svcName {
 	case common.CoordinatorRole:

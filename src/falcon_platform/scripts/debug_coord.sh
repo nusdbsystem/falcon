@@ -35,6 +35,8 @@ export COORD_SERVER_PORT=$COORD_SERVER_PORT
 export LOG_PATH=$USED_LOG_PATH
 export JOB_DATABASE=$JOB_DATABASE
 export N_CONSUMER=$N_CONSUMER
+export FALCON_WORKER_IMAGE=$FALCON_WORKER_IMAGE
+
 
 # launch coordinator
 # detect the OS type with uname

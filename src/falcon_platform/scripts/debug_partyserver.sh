@@ -70,6 +70,7 @@ export PARTY_ID=$PARTY_ID
 
 export MPC_EXE_PATH=$MPC_EXE_PATH
 export FL_ENGINE_PATH=$FL_ENGINE_PATH
+export FALCON_WORKER_IMAGE=$FALCON_WORKER_IMAGE
 
 # launch party server X
 # detect the OS type with uname
