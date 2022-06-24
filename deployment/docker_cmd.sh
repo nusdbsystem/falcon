@@ -1,7 +1,7 @@
 # checkout branch for test code
 echo "---------------git checkout branch--------"
 git branch
-git pull origin clean_code
+#git pull origin clean_code
 
 # make executor
 echo "---------------make executor--------"

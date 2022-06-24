@@ -81,7 +81,7 @@ func (jobDB *JobDB) Connect() {
 		db, err = gorm.Open(jobDB.dia, &gorm.Config{})
 		if err != nil {
 			logger.Log.Println(err)
-			logger.Log.Println("JobDB: connecting Db...retry")
+			logger.Log.Println("JobDB: connecting Db at " + string(jobDB.addr) + "...retry")
 			time.Sleep(time.Second * 5)
 			NTimes--
 		} else {

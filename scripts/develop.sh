@@ -1,6 +1,7 @@
 
 
-container_id=$(docker run -i -t -d lemonwyc/falcon:latest /bin/bash)
+
+container_id=$(docker run -i -t -d falcon:latest /bin/bash)
 
 echo $container_id
 
@@ -11,12 +12,7 @@ docker exec -it $container_id bash make.sh
 
 docker container stop $container_id
 
-docker commit --change='CMD ["bash", "docker_cmd.sh"]' $container_id lemonwyc/falcon:latest
+docker commit --change='CMD ["bash", "docker_cmd.sh"]' $container_id falcon:latest
 
 docker container rm $container_id
-
-
-
-
-
 

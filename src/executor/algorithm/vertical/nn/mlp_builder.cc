@@ -1360,9 +1360,9 @@ void MlpBuilder::eval(Party party, falcon::DatasetType eval_type,
     if (is_classification) {
       int correct_num = 0;
       for (int i = 0; i < dataset_size; i++) {
-        log_info("[mlp_builder.eval] predictions[" + std::to_string(i) + "] = "
-          + std::to_string(predictions[i]) + ", cur_test_dataset_labels["
-          + std::to_string(i) + "] = " + std::to_string(cur_test_dataset_labels[i]));
+//        log_info("[mlp_builder.eval] predictions[" + std::to_string(i) + "] = "
+//          + std::to_string(predictions[i]) + ", cur_test_dataset_labels["
+//          + std::to_string(i) + "] = " + std::to_string(cur_test_dataset_labels[i]));
          if (predictions[i] == cur_test_dataset_labels[i]) {
             correct_num += 1;
           }

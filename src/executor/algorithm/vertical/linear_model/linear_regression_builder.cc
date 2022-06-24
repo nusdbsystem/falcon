@@ -1529,17 +1529,17 @@ void LinearRegressionBuilder::eval_predictions_and_save(EncodedNumber *decrypted
   }
   if (eval_type == falcon::TRAIN) {
     reg_metrics.compute_metrics(decoded_predicted_labels, training_labels);
-    for (int i = 0; i < sample_number; i++) {
-      log_info("sample " + std::to_string(i) + "'s predicted label = " +
-        std::to_string(decoded_predicted_labels[i]) + ", ground truth label = " + std::to_string(training_labels[i]));
-    }
+//    for (int i = 0; i < sample_number; i++) {
+//      log_info("sample " + std::to_string(i) + "'s predicted label = " +
+//        std::to_string(decoded_predicted_labels[i]) + ", ground truth label = " + std::to_string(training_labels[i]));
+//    }
   }
   if (eval_type == falcon::TEST) {
     reg_metrics.compute_metrics(decoded_predicted_labels, testing_labels);
-    for (int i = 0; i < sample_number; i++) {
-      log_info("sample " + std::to_string(i) + "'s predicted label = " +
-          std::to_string(decoded_predicted_labels[i]) + ", ground truth label = " + std::to_string(testing_labels[i]));
-    }
+//    for (int i = 0; i < sample_number; i++) {
+//      log_info("sample " + std::to_string(i) + "'s predicted label = " +
+//          std::to_string(decoded_predicted_labels[i]) + ", ground truth label = " + std::to_string(testing_labels[i]));
+//    }
   }
 
   // write the results to report

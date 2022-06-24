@@ -1,0 +1,77 @@
+{
+  "job_name": "credit_card_training",
+  "job_info": "this is the job_info",
+  "job_fl_type": "vertical",
+  "existing_key": 0,
+  "party_nums": 3,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "10.0.0.80:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/credit",
+        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/credit",
+        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/credit"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "10.0.0.86:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/credit",
+        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/credit",
+        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/credit"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "10.0.0.94:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/credit",
+        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/credit",
+        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/credit"
+      }
+    }
+  ],
+  "distributed_task": {
+    "enable": 0,
+    "worker_number": 4
+  },
+  "tasks": {
+    "model_training": {
+      "mpc_algorithm_name": "logistic_regression",
+      "algorithm_name": "logistic_regression",
+      "input_configs": {
+        "data_input": {
+          "data": "client.txt",
+          "key": "phe_keys"
+        },
+        "algorithm_config": {
+          "batch_size": 128,
+          "max_iteration": 188,
+          "is_classification": true,
+          "converge_threshold": 0.0001,
+          "with_regularization": true,
+          "alpha": 0.1,
+          "learning_rate": 0.1,
+          "decay": 0.1,
+          "penalty": "l2",
+          "optimizer": "sgd",
+          "metric": "acc",
+          "dp_budget": 0.1,
+          "fit_bias": true,
+          "num_layers_outputs": [16, 8, 1],
+          "layers_activation_funcs": ["relu", "logistic"]
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    }
+  }
+}

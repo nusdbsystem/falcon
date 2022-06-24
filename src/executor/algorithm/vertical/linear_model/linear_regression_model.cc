@@ -44,9 +44,9 @@ void LinearRegressionModel::predict(const Party &party,
   int ciphertext_precision = 0 - local_weights[0].getter_exponent();
   int plaintext_precision = 0 - encoded_batch_samples[0][0].getter_exponent();
   int encrypted_batch_aggregation_precision = ciphertext_precision + plaintext_precision;
-  log_info("ciphertext_precision = " + std::to_string(ciphertext_precision));
-  log_info("plaintext_precision = " + std::to_string(plaintext_precision));
-  log_info("batch_aggregation_precision = " + std::to_string(encrypted_batch_aggregation_precision));
+//  log_info("ciphertext_precision = " + std::to_string(ciphertext_precision));
+//  log_info("plaintext_precision = " + std::to_string(plaintext_precision));
+//  log_info("batch_aggregation_precision = " + std::to_string(encrypted_batch_aggregation_precision));
 
   forward_computation(party,
                       cur_sample_size,
