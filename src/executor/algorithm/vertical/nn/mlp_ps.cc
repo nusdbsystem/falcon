@@ -151,13 +151,13 @@ void MlpParameterServer::distributed_train() {
   log_info("current channel size = " + std::to_string(this->worker_channels.size()));
   for (int iter = 0; iter < this->mlp_builder.max_iteration; iter++) {
     log_info("--------PS Iteration " + std::to_string(iter) + " --------");
-    log_info("[distributed_train] display m_weight_mat");
-    display_encrypted_matrix(party,
-                             this->mlp_builder.mlp_model.m_layers[0].m_num_inputs,
-                             this->mlp_builder.mlp_model.m_layers[0].m_num_outputs,
-                             this->mlp_builder.mlp_model.m_layers[0].m_weight_mat);
-    log_info("[distributed_train] display m_bias");
-    display_encrypted_vector(party, this->mlp_builder.mlp_model.m_layers[0].m_num_outputs, this->mlp_builder.mlp_model.m_layers[0].m_bias);
+//    log_info("[distributed_train] display m_weight_mat");
+//    display_encrypted_matrix(party,
+//                             this->mlp_builder.mlp_model.m_layers[0].m_num_inputs,
+//                             this->mlp_builder.mlp_model.m_layers[0].m_num_outputs,
+//                             this->mlp_builder.mlp_model.m_layers[0].m_weight_mat);
+//    log_info("[distributed_train] display m_bias");
+//    display_encrypted_vector(party, this->mlp_builder.mlp_model.m_layers[0].m_num_outputs, this->mlp_builder.mlp_model.m_layers[0].m_bias);
 
     // step 2: broadcast weight
     this->broadcast_encrypted_weights(this->mlp_builder.mlp_model);

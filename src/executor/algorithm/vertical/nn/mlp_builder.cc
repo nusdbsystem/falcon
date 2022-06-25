@@ -1069,9 +1069,9 @@ void MlpBuilder::train(Party party) {
     std::vector< int> batch_indexes = sync_batch_idx(party, batch_size, batch_iter_indexes[iter]);
     log_info("-------- Iteration " + std::to_string(iter)
       + ", select_batch_idx success --------");
-    for (int i = 0; i < batch_indexes.size(); i++) {
-      log_info("[train] batch_indexes[" + std::to_string(i) + "] = " + std::to_string(batch_indexes[i]));
-    }
+//    for (int i = 0; i < batch_indexes.size(); i++) {
+//      log_info("[train] batch_indexes[" + std::to_string(i) + "] = " + std::to_string(batch_indexes[i]));
+//    }
     // get training data with selected batch_index
     std::vector<std::vector<double> > batch_samples;
     for (int index : batch_indexes) {

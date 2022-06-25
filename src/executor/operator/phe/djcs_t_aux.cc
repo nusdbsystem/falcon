@@ -477,7 +477,7 @@ void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
   }
   // matrix multiplication
   for (int i = 0; i < plain_row_size; i++) {
-    log_info("[djcs_t_aux_mat_mat_ep_mult] i = " + std::to_string(i));
+//    log_info("[djcs_t_aux_mat_mat_ep_mult] i = " + std::to_string(i));
     for (int j = 0; j < cipher_column_size; j++) {
       // re-arrange the ciphertext vector for calling inner product
       auto* cipher_vec_j = new EncodedNumber[cipher_row_size];
