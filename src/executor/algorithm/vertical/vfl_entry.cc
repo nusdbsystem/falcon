@@ -74,7 +74,7 @@ void train_linear_regression(Party* party, const std::string& params_str,
 
   if (is_distributed_train == 0) {
     linear_reg_builder.train(*party);
-    linear_reg_builder.eval(*party, falcon::TRAIN, model_report_file);
+//    linear_reg_builder.eval(*party, falcon::TRAIN, model_report_file);
     linear_reg_builder.eval(*party, falcon::TEST, model_report_file);
     // save model and report
     auto* model_weights = new EncodedNumber[weight_size];
@@ -88,7 +88,7 @@ void train_linear_regression(Party* party, const std::string& params_str,
   } else {
     linear_reg_builder.distributed_train(*party, *worker);
     // in is_distributed_train, parameter server will save the model.
-    linear_reg_builder.distributed_eval(*party, *worker, falcon::TRAIN);
+//    linear_reg_builder.distributed_eval(*party, *worker, falcon::TRAIN);
     linear_reg_builder.distributed_eval(*party, *worker, falcon::TEST);
   }
 }
@@ -140,7 +140,7 @@ void launch_linear_reg_parameter_server(Party* party,
   log_info("[launch_linear_reg_parameter_server]: distributed train finished.");
 
   // evaluate the model on the training and testing datasets
-  ps->distributed_eval(falcon::TRAIN, model_report_file);
+//  ps->distributed_eval(falcon::TRAIN, model_report_file);
   ps->distributed_eval(falcon::TEST, model_report_file);
 
   // save the trained model
@@ -217,7 +217,7 @@ void train_logistic_regression(Party* party,
 
   if (is_distributed_train == 0){
     log_reg_model_builder.train(*party);
-    log_reg_model_builder.eval(*party, falcon::TRAIN, model_report_file);
+//    log_reg_model_builder.eval(*party, falcon::TRAIN, model_report_file);
     log_reg_model_builder.eval(*party, falcon::TEST, model_report_file);
     // save model and report
     auto* model_weights = new EncodedNumber[weight_size];
@@ -232,7 +232,7 @@ void train_logistic_regression(Party* party,
   } else {
     log_reg_model_builder.distributed_train(*party, *worker);
     // in is_distributed_train, parameter server will save the model.
-    log_reg_model_builder.distributed_eval(*party, *worker, falcon::TRAIN);
+//    log_reg_model_builder.distributed_eval(*party, *worker, falcon::TRAIN);
     log_reg_model_builder.distributed_eval(*party, *worker, falcon::TEST);
   }
 }
@@ -287,7 +287,7 @@ void launch_log_reg_parameter_server(
   ps->distributed_train();
 
   // evaluate the model on the training and testing datasets
-  ps->distributed_eval(falcon::TRAIN, model_report_file);
+//  ps->distributed_eval(falcon::TRAIN, model_report_file);
   ps->distributed_eval(falcon::TEST, model_report_file);
 
   // save the trained model
@@ -689,7 +689,7 @@ void train_mlp(
 
   if (is_distributed_train == 0) {
     mlp_builder.train(*party);
-    mlp_builder.eval(*party, falcon::TRAIN, model_report_file);
+//    mlp_builder.eval(*party, falcon::TRAIN, model_report_file);
     mlp_builder.eval(*party, falcon::TEST, model_report_file);
 //    // save model and report
 //    auto* model_weights = new EncodedNumber[weight_size];
@@ -703,7 +703,7 @@ void train_mlp(
   } else {
     mlp_builder.distributed_train(*party, *worker);
     // in is_distributed_train, parameter server will save the model.
-    mlp_builder.distributed_eval(*party, *worker, falcon::TRAIN);
+//    mlp_builder.distributed_eval(*party, *worker, falcon::TRAIN);
     mlp_builder.distributed_eval(*party, *worker, falcon::TEST);
   }
 }
@@ -755,7 +755,7 @@ void launch_mlp_parameter_server(
   ps->distributed_train();
 
   // evaluate the model on the training and testing datasets
-  ps->distributed_eval(falcon::TRAIN, model_report_file);
+//  ps->distributed_eval(falcon::TRAIN, model_report_file);
   ps->distributed_eval(falcon::TEST, model_report_file);
 
   // save the trained model
