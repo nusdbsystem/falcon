@@ -66,6 +66,9 @@ GbdtBuilder::GbdtBuilder(const GbdtParams& gbdt_params,
 }
 
 void GbdtBuilder::train(Party party) {
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
   // two branches for training gbdt model: regression and classification
   log_info("************ Begin to train the GBDT model ************");
   // required by spdz connector and mpc computation
@@ -76,6 +79,11 @@ void GbdtBuilder::train(Party party) {
     train_classification_task(party);
   }
   log_info("End train the GBDT model");
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("Training time = " + std::to_string(consumed_time));
 }
 
 void GbdtBuilder::distributed_train(const Party &party, const Worker &worker) {}
@@ -505,8 +513,8 @@ void GbdtBuilder::square_encrypted_residual(Party party,
 void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string &report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   log_info("************* Evaluation on " + dataset_str + " Start *************");
-  const clock_t testing_start_time = clock();
-
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
   // init test data
   int dataset_size = (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
   std::vector< std::vector<double> > cur_test_dataset =
@@ -598,9 +606,11 @@ void GbdtBuilder::eval(Party party, falcon::DatasetType eval_type, const string 
   delete [] predicted_labels;
   delete [] decrypted_labels;
 
-  const clock_t testing_finish_time = clock();
-  double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  log_info("Evaluation time = " + std::to_string(testing_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("Evaluation time = " + std::to_string(consumed_time));
   log_info("************* Evaluation on " + dataset_str + " Finished *************");
 }
 

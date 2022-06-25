@@ -714,7 +714,9 @@ void LinearRegressionBuilder::train(Party party) {
   /// 3. when the training finished, decrypt the encrypted weights if necessary
 
   log_info("************* Training Start *************");
-  const clock_t training_start_time = clock();
+
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   if (optimizer != "sgd") {
     log_error("The " + optimizer + " optimizer does not supported");
@@ -747,7 +749,8 @@ void LinearRegressionBuilder::train(Party party) {
   // step 2: iteratively computation
   for (int iter = 0; iter < max_iteration; iter++) {
     log_info("-------- Iteration " + std::to_string(iter) + " --------");
-    const clock_t iter_start_time = clock();
+    struct timespec iter_start;
+    clock_gettime(CLOCK_MONOTONIC, &iter_start);
 
     // select batch_index
     std::vector< int> batch_indexes = sync_batch_idx(party, batch_size, batch_iter_indexes[iter]);
@@ -813,9 +816,10 @@ void LinearRegressionBuilder::train(Party party) {
     }
 #endif
 
-    const clock_t iter_finish_time = clock();
-    double iter_consumed_time =
-        double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+    struct timespec iter_finish;
+    clock_gettime(CLOCK_MONOTONIC, &iter_finish);
+    double iter_consumed_time = (double) (iter_finish.tv_sec - iter_start.tv_sec);
+    iter_consumed_time += (double) (iter_finish.tv_nsec - iter_start.tv_nsec) / 1000000000.0;
     log_info("-------- The " + std::to_string(iter) + "-th "
                                                       "iteration consumed time = " + std::to_string(iter_consumed_time));
     delete [] predicted_labels;
@@ -826,10 +830,13 @@ void LinearRegressionBuilder::train(Party party) {
     delete [] encoded_batch_samples;
   }
 
-  const clock_t training_finish_time = clock();
-  double training_consumed_time =
-      double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("Training time = " + std::to_string(training_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+  log_info("Training time = " + std::to_string(consumed_time));
   log_info("************* Training Finished *************");
 }
 
@@ -855,7 +862,8 @@ void LinearRegressionBuilder::lime_train(Party party,
   /// 3. when the training finished, decrypt the encrypted weights if necessary
 
   log_info("************* Training Start *************");
-  const clock_t training_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   if (optimizer != "sgd") {
     log_error("The " + optimizer + " optimizer does not supported");
@@ -888,7 +896,8 @@ void LinearRegressionBuilder::lime_train(Party party,
   // step 2: iteratively computation
   for (int iter = 0; iter < max_iteration; iter++) {
     log_info("-------- Iteration " + std::to_string(iter) + " --------");
-    const clock_t iter_start_time = clock();
+    struct timespec iter_start;
+    clock_gettime(CLOCK_MONOTONIC, &iter_start);
 
     // select batch_index
     std::vector< int> batch_indexes = sync_batch_idx(party, batch_size, batch_iter_indexes[iter]);
@@ -957,9 +966,10 @@ void LinearRegressionBuilder::lime_train(Party party,
 //    }
 #endif
 
-    const clock_t iter_finish_time = clock();
-    double iter_consumed_time =
-        double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+    struct timespec iter_finish;
+    clock_gettime(CLOCK_MONOTONIC, &iter_finish);
+    double iter_consumed_time = (double) (iter_finish.tv_sec - iter_start.tv_sec);
+    iter_consumed_time += (double) (iter_finish.tv_nsec - iter_start.tv_nsec) / 1000000000.0;
     log_info("-------- The " + std::to_string(iter) + "-th "
                                                       "iteration consumed time = " + std::to_string(iter_consumed_time));
     delete [] predicted_labels;
@@ -970,16 +980,18 @@ void LinearRegressionBuilder::lime_train(Party party,
     delete [] encoded_batch_samples;
   }
 
-  const clock_t training_finish_time = clock();
-  double training_consumed_time =
-      double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("Training time = " + std::to_string(training_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("Training time = " + std::to_string(consumed_time));
   log_info("************* Training Finished *************");
 }
 
 void LinearRegressionBuilder::distributed_train(const Party &party, const Worker &worker) {
   log_info("************* Distributed Training Start *************");
-  const clock_t training_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
   // (here use precision for consistence in the following)
   linear_reg_model.sync_up_weight_sizes(party);
   int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
@@ -994,6 +1006,8 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
   bigint::init_thread();
 
   for (int iter = 0; iter < max_iteration; iter++) {
+    struct timespec iter_start;
+    clock_gettime(CLOCK_MONOTONIC, &iter_start);
     log_info("-------- Worker Iteration " + std::to_string(iter) + " --------");
     // step 1.1: receive weight from master, and assign to current log_reg_model.local_weights
     std::string weight_str;
@@ -1020,8 +1034,6 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
                  + std::to_string(iter)
                  + ", worker.receive sample id success, batch size "
                  + std::to_string(mini_batch_indexes.size()) + " --------");
-
-    const clock_t iter_start_time = clock();
 
     // step 2.1: activate party send batch_indexes to other party, while other party receive them.
     // in distributed training, passive party use the index sent by active party instead of the one sent by ps
@@ -1100,9 +1112,10 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
                  + ", send gradients to ps success"
                  + " --------");
 
-    const clock_t iter_finish_time = clock();
-    double iter_consumed_time =
-        double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+    struct timespec iter_finish;
+    clock_gettime(CLOCK_MONOTONIC, &iter_finish);
+    double iter_consumed_time = (double) (iter_finish.tv_sec - iter_start.tv_sec);
+    iter_consumed_time += (double) (iter_finish.tv_nsec - iter_start.tv_nsec) / 1000000000.0;
 
     log_info("-------- The " + std::to_string(iter) + "-th "
                                                       "iteration consumed time = " + std::to_string(iter_consumed_time));
@@ -1116,10 +1129,12 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
     delete [] encrypted_gradients;
   }
 
-  const clock_t training_finish_time = clock();
-  double training_consumed_time =
-      double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("Distributed Training time = " + std::to_string(training_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("Distributed Training time = " + std::to_string(consumed_time));
   log_info("************* Distributed Training Finished *************");
 
 }
@@ -1132,7 +1147,8 @@ void LinearRegressionBuilder::distributed_lime_train(
     bool use_sample_weights,
     EncodedNumber *encrypted_sample_weights) {
   log_info("************* Distributed LIME Training Start *************");
-  const clock_t training_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
   // (here use precision for consistence in the following)
   linear_reg_model.sync_up_weight_sizes(party);
   int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
@@ -1147,6 +1163,8 @@ void LinearRegressionBuilder::distributed_lime_train(
   bigint::init_thread();
 
   for (int iter = 0; iter < max_iteration; iter++) {
+    struct timespec iter_start;
+    clock_gettime(CLOCK_MONOTONIC, &iter_start);
     log_info("-------- Worker Iteration " + std::to_string(iter) + " --------");
     // step 1.1: receive weight from master, and assign to current log_reg_model.local_weights
     std::string weight_str;
@@ -1173,8 +1191,6 @@ void LinearRegressionBuilder::distributed_lime_train(
                  + std::to_string(iter)
                  + ", worker.receive sample id success, batch size "
                  + std::to_string(mini_batch_indexes.size()) + " --------");
-
-    const clock_t iter_start_time = clock();
 
     // step 2.1: activate party send batch_indexes to other party, while other party receive them.
     // in distributed training, passive party use the index sent by active party instead of the one sent by ps
@@ -1257,9 +1273,10 @@ void LinearRegressionBuilder::distributed_lime_train(
                  + ", send gradients to ps success"
                  + " --------");
 
-    const clock_t iter_finish_time = clock();
-    double iter_consumed_time =
-        double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+    struct timespec iter_finish;
+    clock_gettime(CLOCK_MONOTONIC, &iter_finish);
+    double iter_consumed_time = (double) (iter_finish.tv_sec - iter_start.tv_sec);
+    iter_consumed_time += (double) (iter_finish.tv_nsec - iter_start.tv_nsec) / 1000000000.0;
 
     log_info("-------- The " + std::to_string(iter) + "-th "
                                                       "iteration consumed time = " + std::to_string(iter_consumed_time));
@@ -1273,17 +1290,19 @@ void LinearRegressionBuilder::distributed_lime_train(
     delete [] encrypted_gradients;
   }
 
-  const clock_t training_finish_time = clock();
-  double training_consumed_time =
-      double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("Distributed Training time = " + std::to_string(training_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("Distributed Training time = " + std::to_string(consumed_time));
   log_info("************* Distributed Training Finished *************");
 }
 
 void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, const std::string &report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   log_info("************* Evaluation on " + dataset_str + " Start *************");
-  const clock_t testing_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
   // the testing workflow is as follows:
   //     step 1: init test data
   //     step 2: the parties call the model.predict function to compute predicted labels
@@ -1331,10 +1350,11 @@ void LinearRegressionBuilder::eval(Party party, falcon::DatasetType eval_type, c
   delete [] predicted_labels;
   delete [] decrypted_labels;
 
-  const clock_t testing_finish_time = clock();
-  double testing_consumed_time =
-      double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  log_info("Evaluation time = " + std::to_string(testing_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("Evaluation time = " + std::to_string(consumed_time));
   log_info("************* Evaluation on " + dataset_str + " Finished *************");
 
 }
@@ -1349,7 +1369,8 @@ double LinearRegressionBuilder::loss_computation(const Party& party,
   // if l1 regularization, L = \sum_{i=1}^B (sw_i * (\hat{y}_i - y_i)^2) +
   //     \lambda * \sum_{j=1}^{weight_size} |w_j|
   std::string dataset_str = (dataset_type == falcon::TRAIN ? "training dataset" : "testing dataset");
-  const clock_t testing_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
@@ -1446,10 +1467,11 @@ double LinearRegressionBuilder::loss_computation(const Party& party,
   }
   delete [] encoded_batch_samples;
 
-  const clock_t testing_finish_time = clock();
-  double testing_consumed_time =
-      double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  log_info("Time for loss computation on " + dataset_str + " = " + std::to_string(testing_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("Time for loss computation on " + dataset_str + " = " + std::to_string(consumed_time));
 
 }
 

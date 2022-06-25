@@ -207,7 +207,8 @@ void DecisionTreeBuilder::train(Party party) {
   // labels, only the active party has the info, then it initializes
   // and sends the encrypted label info to other parties.
   log_info("[DecisionTreeBuilder.train] ************* Training Start *************");
-  const clock_t training_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // pre-compute label helper and feature helper
   precompute_label_helper(party.party_type);
@@ -240,9 +241,11 @@ void DecisionTreeBuilder::train(Party party) {
   build_node(party, 0, available_feature_ids, sample_mask_iv, encrypted_labels);
   log_info("[DecisionTreeBuilder.train] tree capacity = " + std::to_string(tree.capacity));
 
-  const clock_t training_finish_time = clock();
-  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("[DecisionTreeBuilder.train] Training time = " + std::to_string(training_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("[DecisionTreeBuilder.train] Training time = " + std::to_string(consumed_time));
   log_info("[DecisionTreeBuilder.train] ************* Training Finished *************");
 
   delete [] sample_mask_iv;
@@ -258,7 +261,8 @@ void DecisionTreeBuilder::train(Party party, EncodedNumber *encrypted_labels) {
   // for the labels, the format should be encrypted (with size class_num * sample_num),
   // and is known to other parties as well (should be sent before calling this train method)
   log_info("[DecisionTreeBuilder.train-with-enc-labels] ************* Training Start *************");
-  const clock_t training_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
   // pre-compute label helper and feature helper
   precompute_label_helper(party.party_type);
   precompute_feature_helpers();
@@ -283,9 +287,11 @@ void DecisionTreeBuilder::train(Party party, EncodedNumber *encrypted_labels) {
   build_node(party, 0, available_feature_ids, sample_mask_iv, encrypted_labels);
 
   log_info("[DecisionTreeBuilder.train-with-enc-labels] tree capacity = " + std::to_string(tree.capacity));
-  const clock_t training_finish_time = clock();
-  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("[DecisionTreeBuilder.train-with-enc-labels] Training time = " + std::to_string(training_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("[DecisionTreeBuilder.train-with-enc-labels] Training time = " + std::to_string(consumed_time));
   log_info("[DecisionTreeBuilder.train-with-enc-labels] ************* Training Finished *************");
 
   delete [] sample_mask_iv;
@@ -359,7 +365,8 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
   // 9. recursively build the next two tree nodes
   log_info("[DecisionTreeBuilder.build_node] ****** Build tree node " + std::to_string(node_index)
                + " (depth = " + std::to_string(tree.nodes[node_index].depth) + ")******");
-  const clock_t node_start_time = clock();
+  struct timespec node_start;
+  clock_gettime(CLOCK_MONOTONIC, &node_start);
   if (node_index >= tree.capacity) {
     log_info("[DecisionTreeBuilder.build_node] Node index exceeds the maximum tree depth");
     exit(EXIT_FAILURE);
@@ -517,9 +524,11 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
   tree.internal_node_num += 1;
   tree.total_node_num += 1;
 
-  const clock_t node_finish_time = clock();
-  double node_consumed_time = double (node_finish_time - node_start_time) / CLOCKS_PER_SEC;
-  log_info("[DecisionTreeBuilder.build_node] Node build time = " + std::to_string(node_consumed_time));
+  struct timespec node_finish;
+  clock_gettime(CLOCK_MONOTONIC, &node_finish);
+  double consumed_time = (double) (node_finish.tv_sec - node_start.tv_sec);
+  consumed_time += (double) (node_finish.tv_nsec - node_start.tv_nsec) / 1000000000.0;
+  log_info("[DecisionTreeBuilder.build_node] Node build time = " + std::to_string(consumed_time));
 
   // step 9: recursively build the next child tree nodes
   build_node(party, left_child_index,available_feature_ids_new,
@@ -1013,7 +1022,8 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
     log_info("[DecisionTreeBuilder.compute_encrypted_statistics] use_sample_weights =  " + std::to_string(use_sample_weights));
   }
 #endif
-  const clock_t start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // retrieve phe pub key
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
@@ -1167,8 +1177,10 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
   delete [] weighted_sample_mask_iv;
   djcs_t_free_public_key(phe_pub_key);
 
-  const clock_t finish_time = clock();
-  double consumed_time = double(finish_time - start_time) / CLOCKS_PER_SEC;
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
   log_info("[DecisionTreeBuilder.compute_encrypted_statistics] Node encrypted statistics computation time = " + std::to_string(consumed_time));
 }
 
@@ -1312,7 +1324,8 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
   // for the labels, the format should be encrypted (with size class_num * sample_num),
   // and is known to other parties as well (should be sent before calling this train method)
   log_info("[DecisionTreeBuilder.lime_train] ************* Training Start *************");
-  const clock_t training_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // pre-compute label helper and feature helper
   precompute_label_helper(party.party_type);
@@ -1372,9 +1385,11 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
              weighted_encrypted_true_labels, use_sample_weights, encrypted_weights);
   log_info("[DecisionTreeBuilder.lime_train] tree capacity = " + std::to_string(tree.capacity));
 
-  const clock_t training_finish_time = clock();
-  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
-  log_info("[DecisionTreeBuilder.lime_train] Training time = " + std::to_string(training_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("[DecisionTreeBuilder.lime_train] Training time = " + std::to_string(consumed_time));
   log_info("[DecisionTreeBuilder.lime_train] ************* Training Finished *************");
 
   delete [] sample_mask_iv;
@@ -1383,7 +1398,8 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
 
 void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &worker) {
   log_info("************* [DT_train_worker.distributed_train]: distributed train Start *************");
-  const clock_t training_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // 1. pre-compute label helper and feature helper based on current features
   // calculate r1 and r2, in form of [[1], [0] ...[1], [0]...]
@@ -1433,7 +1449,8 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
                                                  bool use_sample_weights,
                                                  EncodedNumber *encrypted_sample_weights) {
   log_info("************* [DT_train_worker.distributed_train]: distributed train Start *************");
-  const clock_t training_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // 1. pre-compute label helper and feature helper based on current features
   // calculate r1 and r2, in form of [[1], [0] ...[1], [0]...]
@@ -1527,7 +1544,8 @@ void DecisionTreeBuilder::distributed_build_nodes(const Party &party,
   std::vector<EncodedNumber*> garbage_collection;
 
   while (true) {
-    const clock_t node_start_time = clock();
+    struct timespec node_start;
+    clock_gettime(CLOCK_MONOTONIC, &node_start);
     std::string received_str;
     worker.recv_long_message_from_ps(received_str);
     // only break after receiving ps's stop message
@@ -1794,10 +1812,12 @@ void DecisionTreeBuilder::distributed_build_nodes(const Party &party,
 
     /// step 5: clear and log time used
 
-    const clock_t node_finish_time = clock();
-    double node_consumed_time = double (node_finish_time - node_start_time) / CLOCKS_PER_SEC;
+    struct timespec node_finish;
+    clock_gettime(CLOCK_MONOTONIC, &node_finish);
+    double consumed_time = (double) (node_finish.tv_sec - node_start.tv_sec);
+    consumed_time += (double) (node_finish.tv_nsec - node_start.tv_nsec) / 1000000000.0;
 
-    log_info("[DT_train_worker.distributed_train]: step 5, time used" + to_string(node_consumed_time));
+    log_info("[DT_train_worker.distributed_train]: step 5, time used" + to_string(consumed_time));
 
     iter ++;
   }
@@ -1816,7 +1836,8 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type,
                                const std::string& report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   log_info("[DecisionTreeBuilder.eval] ************* Evaluation on " + dataset_str + " Start *************");
-  const clock_t testing_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // step 1: init test data
   int dataset_size = (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
@@ -1827,16 +1848,19 @@ void DecisionTreeBuilder::eval(Party party, falcon::DatasetType eval_type,
 
   calc_eval_accuracy(party, eval_type, cur_test_dataset, cur_test_dataset_labels);
 
-  const clock_t testing_finish_time = clock();
-  double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  log_info("[DecisionTreeBuilder.eval] Evaluation time = " + std::to_string(testing_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("[DecisionTreeBuilder.eval] Evaluation time = " + std::to_string(consumed_time));
   log_info("[DecisionTreeBuilder.eval] ************* Evaluation on " + dataset_str + " Finished *************");
 }
 
 void DecisionTreeBuilder::distributed_eval(Party &party, const Worker &worker, falcon::DatasetType eval_type) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   log_info("[DT_train_worker.distributed_eval]: ----- Evaluation on " + dataset_str + "Start -----");
-  const clock_t testing_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // step 1: init full dataset, used dataset.
   log_info("[DT_train_worker.distributed_eval]: step 1 init full dataset, used dataset ");
@@ -1888,9 +1912,11 @@ void DecisionTreeBuilder::distributed_eval(Party &party, const Worker &worker, f
     }
   }
 
-  const clock_t testing_finish_time = clock();
-  double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  log_info("[DT_train_worker.distributed_eval]: Evaluation time = " + std::to_string(testing_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("[DT_train_worker.distributed_eval]: Evaluation time = " + std::to_string(consumed_time));
   log_info("[DT_train_worker.distributed_eval] ************* Evaluation on " + dataset_str + " Finished *************");
 }
 

@@ -129,6 +129,9 @@ std::vector<string> MlpParameterServer::wait_worker_complete() {
 }
 
 void MlpParameterServer::distributed_train() {
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
   // step 1: init encrypted weights (here use precision for consistence in the following)
   int n_features = party.getter_feature_num();
   std::vector<int> sync_arr = sync_up_int_arr(party, n_features);
@@ -178,6 +181,13 @@ void MlpParameterServer::distributed_train() {
     this->update_encrypted_weights(encoded_message);
     log_info("--------PS Iteration " + std::to_string(iter) + ", ps update_encrypted_weights successful --------");
   }
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+  log_info("Training time = " + std::to_string(consumed_time));
 }
 
 void MlpParameterServer::distributed_predict(const std::vector<int> &cur_test_data_indexes,
@@ -210,6 +220,9 @@ void MlpParameterServer::distributed_predict(const std::vector<int> &cur_test_da
 }
 
 void MlpParameterServer::distributed_eval(falcon::DatasetType eval_type, const std::string &report_save_path) {
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   log_info("************* Evaluation on " + dataset_str + " Start *************");
 
@@ -281,6 +294,14 @@ void MlpParameterServer::distributed_eval(falcon::DatasetType eval_type, const s
       }
     }
   }
+
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+  log_info("Evaluation time = " + std::to_string(consumed_time));
 
   delete [] decrypted_labels;
 }

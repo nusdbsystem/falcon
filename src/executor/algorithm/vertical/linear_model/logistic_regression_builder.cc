@@ -283,7 +283,8 @@ void LogisticRegressionBuilder::train(Party party) {
   log_info("************* Training Start *************");
   log_info("[train]: mpc_port_array_size after: " + std::to_string(party.executor_mpc_ports.size()));
 
-  const clock_t training_start_time = clock();
+  struct timespec training_start_time;
+  clock_gettime(CLOCK_MONOTONIC, &training_start_time);
 
   if (optimizer != "sgd") {
     log_error("The " + optimizer + " optimizer does not supported");
@@ -313,7 +314,8 @@ void LogisticRegressionBuilder::train(Party party) {
   // step 2: iteratively computation
   for (int iter = 0; iter < max_iteration; iter++) {
     log_info("-------- Iteration " + std::to_string(iter) + " --------");
-    const clock_t iter_start_time = clock();
+    struct timespec iter_start_time;
+    clock_gettime(CLOCK_MONOTONIC, &iter_start_time);
 
     // select batch_index
     std::vector< int> batch_indexes = sync_batch_idx(party, batch_size, batch_iter_indexes[iter]);
@@ -401,9 +403,12 @@ void LogisticRegressionBuilder::train(Party party) {
     update_encrypted_weights(party, encrypted_gradients);
     log_info("-------- Iteration " + std::to_string(iter) + ", update_encrypted_weights computation success --------");
 
-    const clock_t iter_finish_time = clock();
-    double iter_consumed_time =
-        double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+    struct timespec iter_finish_time;
+    clock_gettime(CLOCK_MONOTONIC, &iter_finish_time);
+
+    double iter_consumed_time = (double) (iter_finish_time.tv_sec - iter_start_time.tv_sec);
+    iter_consumed_time += (double) (iter_finish_time.tv_nsec - iter_start_time.tv_nsec) / 1000000000.0;
+
     log_info("-------- The " + std::to_string(iter) + "-th "
                            "iteration consumed time = " + std::to_string(iter_consumed_time));
 
@@ -444,9 +449,12 @@ void LogisticRegressionBuilder::train(Party party) {
     delete [] encoded_batch_samples;
   }
 
-  const clock_t training_finish_time = clock();
-  double training_consumed_time =
-      double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  struct timespec training_finish_time;
+  clock_gettime(CLOCK_MONOTONIC, &training_finish_time);
+
+  double training_consumed_time = (double) (training_finish_time.tv_sec - training_start_time.tv_sec);
+  training_consumed_time += (double) (training_finish_time.tv_nsec - training_start_time.tv_nsec) / 1000000000.0;
+
   log_info("Training time = " + std::to_string(training_consumed_time));
   log_info("************* Training Finished *************");
 }
@@ -455,7 +463,10 @@ void LogisticRegressionBuilder::distributed_train(
     const Party& party,
     const Worker& worker) {
   log_info("************* Distributed Training Start *************");
-  const clock_t training_start_time = clock();
+
+  struct timespec training_start_time;
+  clock_gettime(CLOCK_MONOTONIC, &training_start_time);
+
   // (here use precision for consistence in the following)
   log_reg_model.sync_up_weight_sizes(party);
   int encrypted_weights_precision = PHE_FIXED_POINT_PRECISION;
@@ -470,6 +481,9 @@ void LogisticRegressionBuilder::distributed_train(
   bigint::init_thread();
 
   for (int iter = 0; iter < max_iteration; iter++) {
+    struct timespec iter_start_time;
+    clock_gettime(CLOCK_MONOTONIC, &iter_start_time);
+
     log_info("-------- Worker Iteration " + std::to_string(iter) + " --------");
     // step 1.1: receive weight from master, and assign to current log_reg_model.local_weights
     std::string weight_str;
@@ -496,8 +510,6 @@ void LogisticRegressionBuilder::distributed_train(
              + std::to_string(iter)
              + ", worker.receive sample id success, batch size "
              + std::to_string(mini_batch_indexes.size()) + " --------");
-
-    const clock_t iter_start_time = clock();
 
     // step 2.1: activate party send batch_indexes to other party, while other party receive them.
     // in distributed training, passive party use the index sent by active party instead of the one sent by ps
@@ -576,9 +588,11 @@ void LogisticRegressionBuilder::distributed_train(
              + ", send gradients to ps success"
              + " --------");
 
-    const clock_t iter_finish_time = clock();
-    double iter_consumed_time =
-            double(iter_finish_time - iter_start_time) / CLOCKS_PER_SEC;
+    struct timespec iter_finish_time;
+    clock_gettime(CLOCK_MONOTONIC, &iter_finish_time);
+
+    double iter_consumed_time = (double) (iter_finish_time.tv_sec - iter_start_time.tv_sec);
+    iter_consumed_time += (double) (iter_finish_time.tv_nsec - iter_start_time.tv_nsec) / 1000000000.0;
 
     log_info("-------- The " + std::to_string(iter) + "-th "
                                                       "iteration consumed time = " + std::to_string(iter_consumed_time));
@@ -621,9 +635,12 @@ void LogisticRegressionBuilder::distributed_train(
     delete [] encrypted_gradients;
   }
 
-  const clock_t training_finish_time = clock();
-  double training_consumed_time =
-          double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  struct timespec training_finish_time;
+  clock_gettime(CLOCK_MONOTONIC, &training_finish_time);
+
+  double training_consumed_time = (double) (training_finish_time.tv_sec - training_start_time.tv_sec);
+  training_consumed_time += (double) (training_finish_time.tv_nsec - training_start_time.tv_nsec) / 1000000000.0;
+
   log_info("Distributed Training time = " + std::to_string(training_consumed_time));
   log_info("************* Distributed Training Finished *************");
 }
@@ -633,7 +650,9 @@ void LogisticRegressionBuilder::eval(Party party,
     const std::string& report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   log_info("************* Evaluation on " + dataset_str + " Start *************");
-  const clock_t testing_start_time = clock();
+
+  struct timespec testing_start_time;
+  clock_gettime(CLOCK_MONOTONIC, &testing_start_time);
 
   /// the testing workflow is as follows:
   ///     step 1: init test data
@@ -676,9 +695,12 @@ void LogisticRegressionBuilder::eval(Party party,
   delete [] predicted_labels;
   delete [] decrypted_labels;
 
-  const clock_t testing_finish_time = clock();
-  double testing_consumed_time =
-      double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
+  struct timespec testing_finish_time;
+  clock_gettime(CLOCK_MONOTONIC, &testing_finish_time);
+
+  double testing_consumed_time = (double) (testing_finish_time.tv_sec - testing_start_time.tv_sec);
+  testing_consumed_time += (double) (testing_finish_time.tv_nsec - testing_start_time.tv_nsec) / 1000000000.0;
+
   log_info("Evaluation time = " + std::to_string(testing_consumed_time));
   log_info("************* Evaluation on " + dataset_str + " Finished *************");
 }
@@ -797,7 +819,6 @@ void LogisticRegressionBuilder::eval_matrix_computation_and_save(
 
 void LogisticRegressionBuilder::loss_computation(Party party, falcon::DatasetType dataset_type, double &loss) {
   std::string dataset_str = (dataset_type == falcon::TRAIN ? "training dataset" : "testing dataset");
-  const clock_t testing_start_time = clock();
 
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
@@ -872,10 +893,5 @@ void LogisticRegressionBuilder::loss_computation(Party party, falcon::DatasetTyp
     delete [] encoded_batch_samples[i];
   }
   delete [] encoded_batch_samples;
-
-  const clock_t testing_finish_time = clock();
-  double testing_consumed_time =
-      double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  log_info("Time for loss computation on " + dataset_str + " = " + std::to_string(testing_consumed_time));
 }
 

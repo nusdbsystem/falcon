@@ -164,16 +164,20 @@ void DTParameterServer::broadcast_phe_keys(){
 
 void DTParameterServer::distributed_train(){
   log_info("************* [Ps.distributed_train] Training started *************");
-  const clock_t training_start_time = clock();
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // train the tree model
   build_tree();
   alg_builder.tree.print_tree_model();
 
-  const clock_t training_finish_time = clock();
-  double training_consumed_time = double(training_finish_time - training_start_time) / CLOCKS_PER_SEC;
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
   log_info("[Ps.distributed_train]: tree capacity = " + to_string(alg_builder.tree.capacity));
-  log_info("[Ps.distributed_train]: Training time = " + to_string(training_consumed_time));
+  log_info("[Ps.distributed_train]: Training time = " + to_string(consumed_time));
   log_info("************* [Ps.distributed_train] Training Finished *************");
 }
 
@@ -431,6 +435,8 @@ void DTParameterServer::build_tree(){
 void DTParameterServer::distributed_eval(
     falcon::DatasetType eval_type,
     const std::string& report_save_path) {
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
   // step 1: init test data
   int dataset_size =
       (eval_type == falcon::TRAIN) ?
@@ -452,6 +458,14 @@ void DTParameterServer::distributed_eval(
     log_info("[Ps.distributed_eval]: 5. active party save model");
     save_model(report_save_path);
   }
+
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+  log_info("[Ps.distributed_eval]: Evaluation time = " + to_string(consumed_time));
+
   delete [] decrypted_labels;
 }
 

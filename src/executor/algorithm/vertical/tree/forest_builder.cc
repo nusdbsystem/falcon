@@ -121,6 +121,9 @@ void RandomForestBuilder::shuffle_and_assign_training_data(Party &party,
 
 void RandomForestBuilder::train(Party party) {
   log_info("************ Begin to train the random forest model ************");
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
   init_forest_builder(party);
   log_info("Init " + std::to_string(n_estimator) + " tree builders in the random forest");
   for (int tree_id = 0; tree_id < n_estimator; ++tree_id) {
@@ -129,14 +132,19 @@ void RandomForestBuilder::train(Party party) {
     forest_model.forest_trees.emplace_back(tree_builders[tree_id].tree);
   }
   log_info("End train the random forest");
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("Training time = " + std::to_string(consumed_time));
 }
 
 void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
     const std::string& report_save_path) {
   std::string dataset_str = (eval_type == falcon::TRAIN ? "training dataset" : "testing dataset");
   log_info("************* Evaluation on " + dataset_str + " Start *************");
-  const clock_t testing_start_time = clock();
-
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC, &start);
   // init test data
   int dataset_size = (eval_type == falcon::TRAIN) ? training_data.size() : testing_data.size();
   std::vector< std::vector<double> > cur_test_dataset =
@@ -207,9 +215,11 @@ void RandomForestBuilder::eval(Party party, falcon::DatasetType eval_type,
   delete [] predicted_labels;
   delete [] decrypted_labels;
 
-  const clock_t testing_finish_time = clock();
-  double testing_consumed_time = double(testing_finish_time - testing_start_time) / CLOCKS_PER_SEC;
-  log_info("Evaluation time = " + std::to_string(testing_consumed_time));
+  struct timespec finish;
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  double consumed_time = (double) (finish.tv_sec - start.tv_sec);
+  consumed_time += (double) (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+  log_info("Evaluation time = " + std::to_string(consumed_time));
   log_info("************* Evaluation on " + dataset_str + " Finished *************");
 }
 
