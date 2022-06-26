@@ -6,7 +6,7 @@ SERVER_LIST=servers.txt
 
 while read REMOTE_SERVER
 do
-  ssh -n -f $REMOTE_SERVER "docker load -i falcon.tar"
+  ssh -n -f $REMOTE_SERVER "docker load -i falcon.tar" &
 
 done < $SERVER_LIST
 

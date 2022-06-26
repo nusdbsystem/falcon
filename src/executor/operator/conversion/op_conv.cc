@@ -23,6 +23,8 @@ void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
   party.getter_phe_auth_server(phe_auth_server);
   // partially decrypt the ciphertext vector
   auto * partial_decryption = new EncodedNumber[size];
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < size; i++) {
     djcs_t_aux_partial_decrypt(phe_pub_key, phe_auth_server,
                                partial_decryption[i], src_ciphers[i]);
@@ -66,6 +68,8 @@ void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
     }
 
     // share combine for decryption
+    omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
     for (int i = 0; i < size; i++) {
       djcs_t_aux_share_combine(phe_pub_key, dest_plains[i],
                                decryption_shares[i], party.party_num);
@@ -245,6 +249,8 @@ void secret_shares_to_ciphers(const Party& party, EncodedNumber* dest_ciphers,
         deserialize_encoded_number_array(recv_encrypted_shares, size,
                                          recv_encrypted_shares_str);
         // homomorphic aggregation
+        omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
         for (int i = 0; i < size; i++) {
           djcs_t_aux_ee_add_ext(phe_pub_key, dest_ciphers[i], dest_ciphers[i],
                                 recv_encrypted_shares[i]);
@@ -323,6 +329,8 @@ void ciphers_multi(const Party& party, EncodedNumber *res, EncodedNumber *cipher
   // step 2: aggregate the plaintext and ciphers2 multiplication
   auto* global_aggregation = new EncodedNumber[size];
   auto* local_aggregation = new EncodedNumber[size];
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < size; i++) {
     encoded_ciphers1_shares[i].set_double(phe_pub_key->n[0],
                                           ciphers1_shares[i]);

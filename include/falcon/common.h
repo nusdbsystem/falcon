@@ -115,6 +115,7 @@ namespace falcon {
   enum DatasetType { TRAIN, TEST, VALIDATE };
 
   #define NUM_OMP_THREADS 4
+  #define PARALLELISM_ENABLED true
 }  // namespace falcon
 
 #endif // FALCON_INCLUDE_COMMON_H_

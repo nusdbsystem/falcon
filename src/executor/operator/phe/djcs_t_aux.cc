@@ -10,6 +10,8 @@
 #include <glog/logging.h>
 #include <falcon/utils/logger/logger.h>
 
+#include "omp.h"
+
 void djcs_t_aux_encrypt(djcs_t_public_key* pk,
     hcs_random* hr,
     EncodedNumber & res,
@@ -476,6 +478,8 @@ void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
     exit(EXIT_FAILURE);
   }
   // matrix multiplication
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < plain_row_size; i++) {
 //    log_info("[djcs_t_aux_mat_mat_ep_mult] i = " + std::to_string(i));
     for (int j = 0; j < cipher_column_size; j++) {
@@ -502,6 +506,8 @@ void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key* pk,
     log_error("The two matrix dimension do not match for element-wise multiplication");
     exit(EXIT_FAILURE);
   }
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < plain_row_size; i++) {
     djcs_t_aux_vec_ele_wise_ep_mul(pk, res[i], cipher_mat[i], plain_mat[i], plain_column_size);
   }

@@ -43,8 +43,8 @@
   },
   "tasks": {
     "model_training": {
-      "mpc_algorithm_name": "logistic_regression",
-      "algorithm_name": "logistic_regression",
+      "mpc_algorithm_name": "mlp",
+      "algorithm_name": "mlp",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
@@ -64,7 +64,7 @@
           "metric": "mse",
           "dp_budget": 0.1,
           "fit_bias": true,
-          "num_layers_outputs": [15, 8, 1],
+          "num_layers_outputs": [14, 8, 1],
           "layers_activation_funcs": ["relu", "identity"]
         }
       },

@@ -43,7 +43,7 @@
   },
   "tasks": {
     "model_training": {
-      "mpc_algorithm_name": "logistic_regression",
+      "mpc_algorithm_name": "mlp",
       "algorithm_name": "logistic_regression",
       "input_configs": {
         "data_input": {
