@@ -117,8 +117,6 @@ func (wk *TrainWorker) DoTask(args string, rep *entity.DoTaskReply) error {
 // runTask execute a given tasks .
 func (wk *TrainWorker) runTask(task tasks.Task, taskArg *entity.TaskContext, tm *resourcemanager.ResourceManager) {
 
-	logger.Log.Printf("[TrainWorker]: cfg str =  %s \n", taskArg.FLNetworkCfg)
-
 	cmd, err := task.GetCommand(taskArg)
 
 	// if create cmd fail, no need to execute

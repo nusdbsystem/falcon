@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"encoding/json"
 	"falcon_platform/common"
 	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/jobmanager/entity"
@@ -49,6 +50,9 @@ func (this *MpcTask) GetCommand(taskInfo *entity.TaskContext) (*exec.Cmd, error)
 		return nil, err
 	}
 	//job := taskInfo.Job
+
+	jsonData, _ := json.Marshal(fLConfig)
+	logger.Log.Printf("[GetCommand]: received job network cfg = %s \n", string(jsonData))
 
 	partyId := strconv.Itoa(int(wk.PartyID))
 	partyNum := strconv.Itoa(int(taskInfo.Job.PartyNums))

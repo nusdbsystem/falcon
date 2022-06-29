@@ -38,7 +38,7 @@ func (ds *DagScheduler) SplitTaskIntoStage(job *common.TrainJob) {
 	// stage 2
 	if job.Tasks.ModelTraining.AlgorithmName != "" {
 		taskStage := TaskStage{
-			common.FalconTask("train-" + job.Tasks.ModelTraining.MpcAlgorithmName),
+			common.ModelTrainTaskKey,
 			ds.ParallelismPolicy.ModelTrainParallelism}
 		ds.DagTasks[common.ModelTrainTaskKey] = taskStage
 	}

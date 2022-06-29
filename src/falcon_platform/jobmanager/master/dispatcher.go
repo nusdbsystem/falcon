@@ -51,6 +51,7 @@ func (master *Master) dispatch(job *common.TrainJob, taskName common.FalconTask)
 		master.runtimeStatusMonitor(ctx)
 	}()
 
+	master.Logger.Println("[Scheduler]: get taskName by reflect" + taskName)
 	// the o position should be always the 'MpcAlgorithmName'
 	mpcAlgorithmName := reflect.ValueOf(job.ExecutedTasks[taskName]).Elem().Field(0).String()
 

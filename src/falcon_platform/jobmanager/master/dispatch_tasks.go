@@ -1,6 +1,7 @@
 package master
 
 import (
+	"encoding/json"
 	"falcon_platform/client"
 	"falcon_platform/common"
 	"falcon_platform/jobmanager/entity"
@@ -13,7 +14,8 @@ import (
 // algName: which algorithm name is used in this task
 func (master *Master) dispatchMpcTask(wg *sync.WaitGroup, mpcAlgorithmName string, job *common.TrainJob) {
 
-	master.Logger.Printf("[Master.Dispatch]: serialized job network cfg = %s \n", master.JobNetCfg.SerializeNetworkCfg())
+	jsonData, _ := json.Marshal(master.JobNetCfg)
+	master.Logger.Printf("[Master.Dispatch]: serialized MPC job network cfg = %s \n", string(jsonData))
 
 	master.Lock()
 	for _, worker := range master.workers {
@@ -42,7 +44,8 @@ func (master *Master) dispatchMpcTask(wg *sync.WaitGroup, mpcAlgorithmName strin
 // dispatchTask
 func (master *Master) dispatchTask(wg *sync.WaitGroup, taskName common.FalconTask, job *common.TrainJob) {
 
-	master.Logger.Printf("[Master.Dispatch]: serialized job network cfg = %s \n", master.JobNetCfg.SerializeNetworkCfg())
+	jsonData, _ := json.Marshal(master.JobNetCfg)
+	master.Logger.Printf("[Master.Dispatch]: serialized job network cfg = %s \n", string(jsonData))
 
 	master.Lock()
 	for _, worker := range master.workers {

@@ -56,15 +56,12 @@ func RunPartyServer() {
 		<-quit
 
 		http_logger.Println("HTTP Server is shutting down...")
-
 		logger.Log.Println("RunPartyServer: call client.PartyServerDelete")
-		//client.PartyServerDelete(common.CoordAddr, common.PartyServerIP)
-
 		logger.Log.Println("RunPartyServer: delete all docker containers")
 		// 		dockerSdk := new(resourcemanager.DockerSdkMngr)
 		// 		dockerSdk.DeleteAll()
 
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		server.SetKeepAlivesEnabled(false)
