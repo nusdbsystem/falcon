@@ -377,7 +377,7 @@ func manageTaskLifeCycle(job common.TrainJob, workerType string, taskName common
 
 	masterIns := master.RunMaster(masterAddr, &job, workerType, taskName, taskClassID)
 	masterIns.Logger.Printf("[JobManager]: Assign port %d to master, run tasks=%s\n", masterPort, taskName)
-	masterIns.Logger.Printf("[JobManager] begin ManageJobLifeCycle, masterAddr=%s, taskName=%s, groupNum=%s, \n", masterAddr, taskClassID)
+	masterIns.Logger.Printf("[JobManager] begin ManageJobLifeCycle, masterAddr=%s, taskName=%s \n", masterAddr, taskClassID)
 	masterIns.Logger.Println("[JobManager] call master.RunMaster with job")
 
 	// update job's master addr

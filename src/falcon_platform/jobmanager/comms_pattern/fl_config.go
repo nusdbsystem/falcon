@@ -467,11 +467,21 @@ func retrieveNetworkConfig(a string) {
 
 	cfg := v0.NetworkConfig{}
 
-	_ = proto.Unmarshal(res, &cfg)
+	e := proto.Unmarshal(res, &cfg)
+	if e != nil {
+		logger.Log.Println(e)
+	}
 
-	logger.Log.Println("[retrieveNetworkConfig]: cfg.Ips", cfg.Ips)
-	logger.Log.Println("[retrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays", cfg.ExecutorExecutorPortArrays)
-	logger.Log.Println("[retrieveNetworkConfig]: cfg.ExecutorMpcPortArray", cfg.ExecutorMpcPortArray)
+	str_ips := strings.Join(cfg.Ips, ", ")
+	fmt.Println("[retrieveNetworkConfig]: cfg.Ips = " + str_ips)
+
+	fmt.Println("[retrieveNetworkConfig]: cfg.ExecutorExecutorPortArrays...")
+	for _, ele := range cfg.ExecutorExecutorPortArrays {
+		fmt.Println(ele.Ports)
+	}
+
+	fmt.Println("[retrieveNetworkConfig]: cfg.ExecutorMpcPortArray ... ")
+	fmt.Println(cfg.ExecutorMpcPortArray)
 
 }
 
