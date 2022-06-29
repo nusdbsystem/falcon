@@ -15,3 +15,6 @@ do
     echo
   fi
 done
+
+# show the loading process
+ps aux | grep docker

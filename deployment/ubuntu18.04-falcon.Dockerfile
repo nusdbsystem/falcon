@@ -154,16 +154,29 @@ RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
 RUN chmod 600 /root/.ssh/id_rsa
 
 #Add Github to known hosts
+RUN touch /root/.ssh/config
+RUN echo Host github.com > /root/.ssh/config
+RUN echo  Hostname ssh.github.com >> /root/.ssh/config
+RUN echo  Port 443 >> /root/.ssh/config
+RUN echo  StrictHostKeyChecking no >> /root/.ssh/config
+
 RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN git config --global http.sslVerify false
 
+#RUN touch /root/.ssh/config
+#RUN echo Host github.com > /root/.ssh/config
+#RUN echo  Hostname ssh.github.com >> /root/.ssh/config
+#RUN echo  Port 443 >> /root/.ssh/config
+
+RUN cat /root/.ssh/config
+
 # Clone Falcon and init submodules
 RUN echo "update repo for building new image"
 WORKDIR /opt
-RUN git clone git@github.com:lemonviv/falcon.git && \
+RUN echo yes|git clone git@github.com:lemonviv/falcon.git && \
     cd falcon && \
-    git checkout mlp && \
+    git checkout experiment2022  && \
     cd third_party/ && \
     git submodule update --init --recursive
 
@@ -264,12 +277,11 @@ WORKDIR /opt/falcon
 RUN echo "re-build third-party mp-spdz"
 COPY docker_cmd.sh /opt/falcon/
 
-# make third party MP-SPDZ
-# RUN cd third_party/MP-SPDZ && \
-#     bash fast-make.sh
-
 # Define working directory.
 WORKDIR /opt/falcon
-# RUN git pull origin clean_code
-# RUN bash make.sh
+
+# re-make for update
+RUN git pull origin experiment2022
+RUN bash make.sh
+
 CMD ["bash", "docker_cmd.sh"]

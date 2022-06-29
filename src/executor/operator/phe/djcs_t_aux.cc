@@ -267,6 +267,8 @@ void djcs_t_aux_vec_ele_wise_ee_add(
   check_encoded_public_key(ciphers1[0], ciphers2[0]);
   auto* tmp_res = new EncodedNumber[size];
   // element-wise phe addition
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < size; i++) {
 //    tmp_res[i] = ciphers1[i];
     djcs_t_aux_ee_add(pk, tmp_res[i], ciphers1[i], ciphers2[i]);
@@ -365,6 +367,8 @@ void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
     int size) {
   check_size(size);
   check_encoded_public_key(ciphers[0], plains[0]);
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < size; i++) {
     djcs_t_aux_ep_mul(pk, res[i], ciphers[i], plains[i]);
   }
@@ -376,6 +380,8 @@ void djcs_t_aux_increase_prec_vec(djcs_t_public_key* pk,
                                   EncodedNumber* ciphers,
                                   int size) {
   check_size(size);
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < size; i++) {
     djcs_t_aux_increase_prec(pk, res[i], target_precision, ciphers[i]);
   }
@@ -396,6 +402,8 @@ void djcs_t_aux_double_mat_encryption(djcs_t_public_key* pk,
     log_error("The result size is not equal to mat size");
     exit(EXIT_FAILURE);
   }
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < row_size; i++) {
     for (int j = 0; j < column_size; j++) {
       res[i][j].set_double(pk->n[0], mat[i][j], phe_precision);
@@ -455,6 +463,8 @@ void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key* pk,
   check_size(row_size);
   check_size(column_size);
   check_encoded_public_key(ciphers[0], plains[0][0]);
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < row_size; i++) {
     djcs_t_aux_inner_product(pk, hr, res[i], ciphers, plains[i], column_size);
   }
@@ -506,8 +516,6 @@ void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key* pk,
     log_error("The two matrix dimension do not match for element-wise multiplication");
     exit(EXIT_FAILURE);
   }
-  omp_set_num_threads(NUM_OMP_THREADS);
-#pragma omp parallel for
   for (int i = 0; i < plain_row_size; i++) {
     djcs_t_aux_vec_ele_wise_ep_mul(pk, res[i], cipher_mat[i], plain_mat[i], plain_column_size);
   }
@@ -521,6 +529,8 @@ void djcs_t_aux_increase_prec_mat(djcs_t_public_key* pk,
                                   int column_size) {
   check_size(row_size);
   check_size(column_size);
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < row_size; i++) {
     for (int j = 0; j < column_size; j++) {
       djcs_t_aux_increase_prec(pk, res[i][j], target_precision, cipher_mat[i][j]);

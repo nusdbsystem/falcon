@@ -17,6 +17,7 @@ source $MY_PATH/config_partyserver.properties
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)  # for hh:mm:ss
 echo "PARTY_SERVER_BASEPATH provided: $PARTY_SERVER_BASEPATH"
 USED_LOG_PATH=$PARTY_SERVER_BASEPATH/falcon_logs/Party-${PARTY_ID}_${TIMESTAMP}
+mkdir -p "$USED_LOG_PATH"
 
 # decide which deployment the partyServer will use to spawn worker
 #export ENV="subprocess"

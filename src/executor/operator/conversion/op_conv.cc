@@ -114,6 +114,9 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
   // (the request party will add the summation to the share)
   // ui randomly chooses ri belongs to Zq and encrypts it as [ri]
   auto* encrypted_shares = new EncodedNumber[size];
+  secret_shares = std::vector<double>(size, 0.0);
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int i = 0; i < size; i++) {
     // TODO: check how to replace with spdz random values
     if (phe_precision != 0) {
@@ -121,19 +124,21 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
       encrypted_shares[i].set_double(phe_pub_key->n[0], s, phe_precision);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random, encrypted_shares[i],
                          encrypted_shares[i]);
-      secret_shares.push_back(0 - s);
+      secret_shares[i] = 0 - s;
     } else {
       int s = rand() % MAXIMUM_RAND_VALUE;
       encrypted_shares[i].set_integer(phe_pub_key->n[0], s);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random, encrypted_shares[i],
                          encrypted_shares[i]);
-      secret_shares.push_back(0 - s);
+      secret_shares[i] = 0 - s;
     }
   }
 
   // request party aggregate the shares and invoke collaborative decryption
   auto* aggregated_shares = new EncodedNumber[size];
   if (party.party_id == req_party_id) {
+    omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
     for (int i = 0; i < size; i++) {
       aggregated_shares[i] = encrypted_shares[i];
       djcs_t_aux_ee_add_ext(phe_pub_key, aggregated_shares[i], aggregated_shares[i],
@@ -148,6 +153,8 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
         auto* recv_encrypted_shares = new EncodedNumber[size];
         deserialize_encoded_number_array(recv_encrypted_shares, size,
                                          recv_encrypted_shares_str);
+        omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
         for (int i = 0; i < size; i++) {
           djcs_t_aux_ee_add_ext(phe_pub_key, aggregated_shares[i],
                                 aggregated_shares[i], recv_encrypted_shares[i]);
