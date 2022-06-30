@@ -105,7 +105,7 @@ func testStageInit(stage DAGscheduler.TaskStage, job common.TrainJob, tf *testCf
 		requiredResource[partyIndex] = reply.EncodedStr
 	}
 
-	JobNetCfgIns := comms_pattern.GetJobNetCfg()[job.JobFlType]
+	JobNetCfgIns := comms_pattern.GetJobNetCfgBuilder()[job.JobFlType]
 
 	JobNetCfgIns.Constructor(requiredResource, uint(len(job.PartyAddrList)), logger.Log)
 
@@ -152,7 +152,7 @@ func TestTaskPredict(t *testing.T) {
 	// 3. init stage
 	JobNetCfgIns := testStageInit(stage, job, tf)
 
-	mpc := new(tasks.MpcTask)
+	//mpc := new(tasks.MpcTask)
 
 	// 4. test worker 0
 	serviceName := "pty0-cent-worker8-job8-tr-pred-task-stage"
@@ -180,14 +180,17 @@ func TestTaskPredict(t *testing.T) {
 	}
 	fmt.Println(argTask)
 
-	mpcCmdStr := mpc.GetCommand(mpcTaskInfo).String()
+	mpcCmd, _ := lpt.GetCommand(mpcTaskInfo)
+	mpcCmdStr := mpcCmd.String()
+
 	expectedStr1 := "/opt/falcon/third_party/MP-SPDZ/semi-party.x -F -N 3 -p 0 -I -ip /opt/falcon/third_party/MP-SPDZ/mpc-network-0 logistic_regression"
 
 	// test executing
 	MpcTm := resourcemanager.InitResourceManager()
-	MpcTm.CreateResources(resourcemanager.InitSubProcessManager(), mpc.GetCommand(mpcTaskInfo))
+	MpcTm.CreateResources(resourcemanager.InitSubProcessManager(), mpcCmd)
 
-	lptCmdStr := lpt.GetCommand(taskInfo).String()
+	lptCmd, _ := lpt.GetCommand(taskInfo)
+	lptCmdStr := lptCmd.String()
 
 	assert.Equal(t, mpcCmdStr, expectedStr1, "Prediction MPC command is not correct ")
 	expectedStr2 := "/opt/falcon/build/src/executor/falcon --party-id 0 --party-num 3 --party-type 0 --fl-setting 1 --network-file CgkxMjcuMC4wLjEKCTEyNy4wLjAuMQoJMTI3LjAuMC4xEgsKCeOsAeSsAeWsARILCgnorAHprAHqrAESCwoJ7awB7qwB76wBGgsKCYiFA4iFA4iFAw== --log-file /opt/falcon/src/falcon_platform/falcon_logs/Party-0_20220603_205609/runtime_logs/pty0-cent-worker8-job8-tr-pred-task-stage-lime_compute_prediction/centralized_worker --data-input-file /dataPath/client.txt --data-output-file /dataOutputPath --existing-key 1 --key-file /dataPath/phe_keys --algorithm-name lime_compute_prediction --algorithm-params ChNsb2dpc3RpY19yZWdyZXNzaW9uEhcvbG9nX3JlZy9zYXZlZF9tb2RlbC5wYhoZL2xvZ19yZWcvc2FtcGxlZF9kYXRhLnR4dCIOY2xhc3NpZmljYXRpb24oAjIYL2xvZ19yZWcvcHJlZGljdGlvbnMudHh0 --model-save-file /modelPath/saved_model.pb --model-report-file /modelPath/report.txt --is-inference 0 --inference-endpoint 0 --is-distributed 0 --distributed-train-network-file 0 --worker-id 0 --distributed-role 2"

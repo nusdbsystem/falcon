@@ -8,6 +8,7 @@ import (
 	"falcon_platform/logger"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strings"
 )
@@ -214,7 +215,7 @@ func AddPort(ServerAddr, port string) {
 	}()
 	if err != nil || resp.StatusCode != 200 {
 		//panic(fmt.Sprintf("[Client]: Requesting 'AddPort' Error, %s\n", err))
-		logger.Log.Println("[Client]: Requesting 'AddPort' Error, %s, it probably already exist. \n", err)
+		logger.Log.Printf("[Client]: Requesting 'AddPort' Error, %s, it probably already exist. \n", err)
 	}
 }
 
@@ -260,4 +261,26 @@ func GetFreePort(ServerAddr string, portNum int) []common.PortType {
 	}
 
 	return sli
+}
+
+func GetJobStatus(ServerAddr string, jobID uint) string {
+
+	resp, err := http.Get("http://" + strings.TrimSpace(ServerAddr+"/"+common.QueryTrainJobStatus) +
+		"/" + fmt.Sprintf("%d", jobID))
+	if err != nil {
+		panic(err)
+	}
+	//We Read the response body on the line below.
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	res := new(common.JobStatusReply)
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		panic(fmt.Sprintf("[Client]: Read 'AssignPort'reply' Error, %s\n", err))
+	}
+	//Convert the body to type string
+	return res.Status
 }

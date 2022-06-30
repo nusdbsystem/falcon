@@ -8,7 +8,7 @@
   "party_info": [
     {
       "id": 0,
-      "addr": "10.0.0.80:30005",
+      "addr": "10.0.0.81:30005",
       "party_type": "active",
       "path": {
         "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/credit",

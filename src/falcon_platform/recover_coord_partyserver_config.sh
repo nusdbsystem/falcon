@@ -1,2 +1,0 @@
-mv config_coord.properties.local config_coord.properties
-mv config_partyserver.properties.local config_partyserver.properties

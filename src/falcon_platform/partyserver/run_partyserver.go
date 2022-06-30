@@ -6,6 +6,8 @@ import (
 	"falcon_platform/common"
 	"falcon_platform/logger"
 	"falcon_platform/partyserver/router"
+	"falcon_platform/partyserver/singleton"
+
 	// "falcon_platform/resourcemanager"
 	"log"
 	"net/http"
@@ -18,6 +20,9 @@ import (
 )
 
 func RunPartyServer() {
+
+	// init party server cluster's status
+	singleton.GetServerJobInfo()
 
 	// set up HTTP server routes
 	r := router.NewRouter()

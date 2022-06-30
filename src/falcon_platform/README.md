@@ -119,12 +119,11 @@ bash scripts/execute_dsls.sh
 
    ```bash
    # python3 coordinator_client.py -url <ip url of coordinator>:30004 -method submit -path ./examples/train_job_dsls/job.json
-   # Simple test without datasets.
-   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/debug_two_parties_train_job.json
+   
    # UCI tele-marketing bank dataset
-   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_banktele.json
+   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/full_template/8.train_logistic_reg.json
    # UCI breast cancer dataset
-   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_breastcancer_lr.json
+   python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./examples/full_template/three_parties_train_job_breastcancer_lr.json
    ```
 
 3. kill job:

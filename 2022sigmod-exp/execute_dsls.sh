@@ -34,7 +34,7 @@ do
       exit
     else
       echo "output is $output, sleep two second, and waiting..."
-      sleep 2
+      sleep 20
     fi
   done
 

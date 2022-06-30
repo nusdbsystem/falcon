@@ -18,28 +18,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type JobSubmitReply struct {
-	JobId   uint   `json:"job_id"`
-	JobName string `json:"job_name"`
-	UserId  uint   `json:"user_id"`
-	TaskNum uint   `json:"task_num,uint"`
-	Status  string `json:"status"`
-}
-
-type JobStatusReply struct {
-	JobId  uint   `json:"job_id"`
-	Status string `json:"status"`
-}
-
-type JobIdGet struct {
-	JobId string `json:"job_id"`
-}
-
-type JobModelReportReply struct {
-	JobId                uint   `json:"job_id"`
-	EvaluationReportPath string `json:"evaluation_report_path"`
-}
-
 // receive a job from jsonbody or file, parse it, put in jobQueue
 func SubmitTrainJob(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// declare the job as train job type
@@ -92,7 +70,7 @@ func SubmitTrainJob(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 
 	// 4. return to client
 
-	resIns := JobSubmitReply{
+	resIns := common.JobSubmitReply{
 		JobId,
 		JobName,
 		UserId,
@@ -112,14 +90,14 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 	// read the query parameters with gorilla mux
 	params := mux.Vars(r)
 	jobId, _ := strconv.Atoi(params["jobId"])
-	var jr JobStatusReply
+	var jr common.JobStatusReply
 	status, e := controller.JobStatusQuery(uint(jobId), ctx)
 	if e != nil {
 		exceptions.HandleHttpError(w, r, http.StatusBadRequest, e.Error())
 		return
 	}
 	if status == common.JobFailed || status == common.JobKilled || status == common.JobSuccessful {
-		jr = JobStatusReply{
+		jr = common.JobStatusReply{
 			JobId:  uint(jobId),
 			Status: "Job already stopped with status: " + status,
 		}
@@ -129,7 +107,7 @@ func JobKill(w http.ResponseWriter, r *http.Request, ctx *entity.Context) {
 			exceptions.HandleHttpError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
-		jr = JobStatusReply{
+		jr = common.JobStatusReply{
 			JobId:  uint(jobId),
 			Status: common.JobKilled,
 		}
@@ -196,7 +174,7 @@ func JobStatusQuery(w http.ResponseWriter, r *http.Request, ctx *entity.Context)
 		return
 	}
 
-	jr := JobStatusReply{
+	jr := common.JobStatusReply{
 		JobId:  uint(jobId),
 		Status: status,
 	}

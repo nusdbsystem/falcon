@@ -13,7 +13,7 @@ func TestSerialize(t *testing.T) {
 	job := common.TrainJob{}
 	job.JobFlType = "vertical"
 
-	JobNetCfgIns := comms_pattern.GetJobNetCfg()[job.JobFlType]
+	JobNetCfgIns := comms_pattern.GetJobNetCfgBuilder()[job.JobFlType]
 
 	wk := &entity.WorkerInfo{"worker0Addr", 0, 8, 0}
 

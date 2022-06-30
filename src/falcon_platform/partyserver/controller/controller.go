@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"encoding/json"
 	"falcon_platform/common"
 	"falcon_platform/jobmanager"
 	"falcon_platform/jobmanager/comms_pattern"
 	"falcon_platform/logger"
+	"falcon_platform/partyserver/singleton"
 	"falcon_platform/resourcemanager"
 	"strconv"
 	"strings"
@@ -16,11 +18,38 @@ import (
  * @Param
  * @return
  **/
-func schedule(workerId common.WorkerIdType) (nodeId int) {
+func scheduleRoundRobin(workerId common.WorkerIdType) (nodeId int) {
 	var clusterSize = len(common.PartyServerClusterIPs)
 	nodeId = int(workerId) % clusterSize
 	logger.Log.Printf("[PartyServer]: PartyServer Schedule worker %d to node %d \n", workerId, nodeId)
 	return nodeId
+}
+
+func scheduleResourceBased(jobIdInt int) int {
+
+	bs1, _ := json.Marshal(singleton.GetServerJobInfo())
+	logger.Log.Printf("[PartyServer]: PartyServer before schedule, current label info is %s ", string(bs1))
+
+	defer func() {
+		bs2, _ := json.Marshal(singleton.GetServerJobInfo())
+		logger.Log.Printf("[PartyServer]: PartyServer after schedule, current label info is %s ", string(bs2))
+	}()
+
+	success, label := singleton.ScheduleToIdleServer(jobIdInt)
+	if success == false {
+		logger.Log.Println("[PartyServer]: cannot find a available serve, all server has running job on it. ")
+		panic("cannot find a available server")
+	}
+
+	for nodeId, checkLabel := range common.PartyServerClusterLabels {
+		if checkLabel == label {
+			logger.Log.Printf(
+				"[PartyServer]: PartyServer schedule job = %d to node with label =  %s \n", jobIdInt, label)
+			return nodeId
+		}
+	}
+	logger.Log.Println("[PartyServer]: No matched label found")
+	panic("No matched label found")
 }
 
 // RunWorker party Run workers to do tasks, partyServer can deploy works in 3 ways according to user's setting,
@@ -53,7 +82,7 @@ func RunWorker(masterAddr, workerType,
 		jobIdInt, _ := strconv.Atoi(jobId)
 		workerId := common.WorkerIdType(jobIdInt)
 
-		nodeID := schedule(workerId)
+		nodeID := scheduleResourceBased(jobIdInt)
 		nodeIP := common.PartyServerClusterIPs[nodeID]
 
 		// init resourceSVC information
@@ -98,7 +127,7 @@ func RunWorker(masterAddr, workerType,
 		// 1 worker is for serving parameter server
 		logger.Log.Println("[PartyServer]: PartyServer setup one worker as parameter " +
 			"server to conduct distributed training")
-		nodeID := schedule(workerId)
+		nodeID := scheduleRoundRobin(workerId)
 		nodeIP := common.PartyServerClusterIPs[nodeID]
 		// init resourceSVC information
 		resourceSVC := new(comms_pattern.ResourceSVC)
@@ -132,7 +161,7 @@ func RunWorker(masterAddr, workerType,
 			logger.Log.Printf("[PartyServer]: PartyServer setup one worker %d as train worker "+
 				"to conduct distributed training\n", workerId)
 
-			wkNodeID := schedule(workerId)
+			wkNodeID := scheduleRoundRobin(workerId)
 			wkNodeIP := common.PartyServerClusterIPs[wkNodeID]
 
 			// init resourceSVC information
