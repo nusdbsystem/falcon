@@ -213,7 +213,7 @@ class LimeExplainer {
    * and then compute the exponential kernel weights
    *
    * @param party: the participating party
-   * @param weights: the returned encrypted weights
+   * @param weights: the returned asss weights
    * @param origin_data: the data to be explained
    * @param sampled_data: the sampled data
    * @param distance_metric: the distance metric between data samples, "euclidean"
@@ -223,7 +223,7 @@ class LimeExplainer {
    */
   void compute_dist_weights(
       const Party& party,
-      EncodedNumber* weights,
+      std::vector<double>& sss_weights,
       const std::vector<double>& origin_data,
       const std::vector<std::vector<double>>& sampled_data,
       const std::string& distance_metric,

@@ -180,7 +180,8 @@ void LimeExplainer::compute_sample_weights(
   std::vector<double> origin_data = generated_samples[0];
   int generated_samples_size = (int) generated_samples.size();
   log_info("Read the generated samples finished");
-  auto* encrypted_weights = new EncodedNumber[generated_samples_size];
+  std::vector<double> sss_weights;
+  std::vector<std::vector<double>> write_data;
 
   // not distributed, directly compute and return
   if(is_distributed == 0) {
@@ -188,11 +189,12 @@ void LimeExplainer::compute_sample_weights(
     //      the distance metric, need to call spdz program
     //  3. compute the sample weights based on kernel and kernel_width
     //      also need to call spdz program
-    compute_dist_weights(party, encrypted_weights,generated_samples[0],
+    compute_dist_weights(party, sss_weights,generated_samples[0],
                          generated_samples, distance_metric, kernel, kernel_width);
     log_info("Compute dist and weights finished");
-    //  4. write the encrypted sample weights to the sample_weights_file
-    write_encoded_number_array_to_file(encrypted_weights, generated_samples_size, sample_weights_file);
+    //  4. write the sss sample weights to the sample_weights_file
+    write_data.push_back(sss_weights);
+    write_dataset_to_file(write_data, delimiter, sample_weights_file);
     log_info("Write encrypted sample weights finished");
   }
 
@@ -207,22 +209,22 @@ void LimeExplainer::compute_sample_weights(
     }
     std::vector<int> worker_sample_sizes = ps->partition_examples(sample_indices);
     // receive sample weights
-    std::vector<std::string> encrypted_weights_str_vec = ps->wait_worker_complete();
+    std::vector<std::string> sss_weights_str_vec = ps->wait_worker_complete();
     int index = 0;
     for(int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
       int wk_sample_size = worker_sample_sizes[wk_index];
-      auto* worker_weights = new EncodedNumber[wk_sample_size];
-      deserialize_encoded_number_array(worker_weights, wk_sample_size, encrypted_weights_str_vec[wk_index]);
+      std::vector<double> worker_weights;
+      deserialize_double_array(worker_weights, sss_weights_str_vec[wk_index]);
       for (int i = 0; i < wk_sample_size; i++) {
-        encrypted_weights[index + i] = worker_weights[i];
+        sss_weights.push_back(worker_weights[i]);
       }
       index += wk_sample_size;
-      delete [] worker_weights;
     }
     log_info("Receive from workers and assign the encrypted weights");
 
     // write to file
-    write_encoded_number_array_to_file(encrypted_weights, generated_samples_size, sample_weights_file);
+    write_data.push_back(sss_weights);
+    write_dataset_to_file(write_data, delimiter, sample_weights_file);
     log_info("Write encrypted sample weights finished");
 
     delete ps;
@@ -245,13 +247,13 @@ void LimeExplainer::compute_sample_weights(
     // compute the sample weights
     int wk_sample_size = (int) recv_sample_indices.size();
     auto* worker_encrypted_weights = new EncodedNumber[wk_sample_size];
-    compute_dist_weights(party, worker_encrypted_weights,generated_samples[0],
+    compute_dist_weights(party, sss_weights,generated_samples[0],
                          worker_samples, distance_metric, kernel, kernel_width);
     log_info("Worker " + std::to_string(worker_id) + " compute dist and weights finished");
     // return the weights back to ps
-    std::string worker_encrypted_weights_str;
-    serialize_encoded_number_array(worker_encrypted_weights, wk_sample_size, worker_encrypted_weights_str);
-    worker->send_long_message_to_ps(worker_encrypted_weights_str);
+    std::string worker_sss_weights_str;
+    serialize_double_array(sss_weights, worker_sss_weights_str);
+    worker->send_long_message_to_ps(worker_sss_weights_str);
     delete worker;
     delete [] worker_encrypted_weights;
   }
@@ -260,21 +262,12 @@ void LimeExplainer::compute_sample_weights(
   //  5. decrypt the encrypted weights and save as a plaintext file
   if (is_distributed == 0 || (is_distributed == 1 && distributed_role == falcon::DistPS)) {
     std::string plaintext_weights_file = sample_weights_file + ".plaintext";
-    std::vector<double> plaintext_weights;
-    auto* decrypted_weights = new EncodedNumber[selected_sample_size];
-    party.collaborative_decrypt(encrypted_weights, decrypted_weights, selected_sample_size, ACTIVE_PARTY_ID);
-    for (int i = 0; i < selected_sample_size; i++) {
-      double w;
-      decrypted_weights[i].decode(w);
-      plaintext_weights.push_back(w);
-    }
+    std::vector<double> plaintext_weights = display_shares_vector(party, sss_weights);
     std::vector<std::vector<double>> format_weights;
     format_weights.push_back(plaintext_weights);
     write_dataset_to_file(format_weights, delimiter, plaintext_weights_file);
-    delete [] decrypted_weights;
     }
 #endif
-  delete [] encrypted_weights;
 }
 
 std::vector<int> LimeExplainer::random_select_sample_idx(
@@ -312,7 +305,7 @@ std::vector<int> LimeExplainer::random_select_sample_idx(
 }
 
 void LimeExplainer::compute_dist_weights(const Party &party,
-                                         EncodedNumber* weights,
+                                         std::vector<double>& sss_weights,
                                          const std::vector<double>& origin_data,
                                          const std::vector<std::vector<double>>& sampled_data,
                                          const std::string& distance_metric,
@@ -379,9 +372,7 @@ void LimeExplainer::compute_dist_weights(const Party &party,
   log_info("[compute_dist_weights]: communicate with spdz finished");
   log_info("[compute_dist_weights]: res.size = " + std::to_string(res.size()));
 
-  // 5. convert to cipher and return
-  secret_shares_to_ciphers(party, weights, res, sample_size,
-                           ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+  sss_weights = res;
   log_info("[compute_dist_weights]: shares to ciphers finished");
   delete [] squared_dist;
 }

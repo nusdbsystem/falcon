@@ -137,12 +137,5 @@ void display_encrypted_vector(
     int size,
     EncodedNumber* vec);
 
-void display_shares_vector(
-    const Party& party,
-    const std::vector<double>& vec);
-
-void display_shares_matrix(
-    const Party& party,
-    const std::vector<std::vector<double>>& mat);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BUILDER_HELPER_H_

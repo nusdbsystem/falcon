@@ -132,4 +132,12 @@ void transpose_encoded_mat(EncodedNumber** source_mat,
                            int n_source_col,
                            EncodedNumber** ret_mat);
 
+std::vector<double> display_shares_vector(
+    const Party& party,
+    const std::vector<double>& vec);
+
+std::vector<std::vector<double>> display_shares_matrix(
+    const Party& party,
+    const std::vector<std::vector<double>>& mat);
+
 #endif //FALCON_INCLUDE_FALCON_OPERATOR_CONVERSION_OP_CONV_H_
