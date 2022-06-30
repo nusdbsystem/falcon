@@ -74,7 +74,7 @@ func newMaster(masterAddr string, partyNum uint, jobType string) (ms *Master) {
 	ms.heartbeatTimeout = common.MasterTimeout
 	ms.WorkerNum = 0
 	ms.PartyNums = partyNum
-	ms.JobNetCfg = comms_pattern.GetJobNetCfg()[jobType]
+	ms.JobNetCfg = comms_pattern.GetJobNetCfgBuilder()[jobType].Builder()
 	return
 }
 

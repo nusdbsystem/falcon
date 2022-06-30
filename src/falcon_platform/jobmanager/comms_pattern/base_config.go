@@ -12,6 +12,10 @@ type PartyNetworkConfig interface {
 
 // JobNetworkConfig for each job
 type JobNetworkConfig interface {
+
+	// Builder build and return a new instance
+	Builder() JobNetworkConfig
+
 	Constructor(encodeStr [][]byte, PartyNums uint, masLogger *log.Logger)
 
 	//GetPartyIdToIndex each job has a mapper to map each partyId to internel partyIndex

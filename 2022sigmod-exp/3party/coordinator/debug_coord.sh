@@ -24,6 +24,7 @@ export FALCON_WORKER_IMAGE=$FALCON_WORKER_IMAGE
 export COORD_SERVER_BASEPATH=$USED_LOG_PATH
 
 # launch coordinator detect the OS type with uname
+source 2022sigmod-exp/source_cluster_go_env.sh
 makeOS=''
 unamestr=`uname`
 if [[ "$unamestr" == 'Linux' ]]; then

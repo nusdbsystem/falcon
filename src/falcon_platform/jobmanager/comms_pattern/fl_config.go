@@ -18,7 +18,7 @@ import (
 // init register all network config pattern for each job.
 func init() {
 	GetAllNetworkCfg()["vertical"] = new(FLNetworkCfgPerParty)
-	GetJobNetCfg()["vertical"] = new(FLNetworkCfg)
+	GetJobNetCfgBuilder()["vertical"] = new(FLNetworkCfg)
 }
 
 // FLNetworkCfgPerParty Each worker will has following cfg under FL task
@@ -97,6 +97,11 @@ type FLNetworkCfg struct {
 
 	// map
 	PartyIdToIndex map[common.PartyIdType]int
+}
+
+func (this *FLNetworkCfg) Builder() JobNetworkConfig {
+	ins := new(FLNetworkCfg)
+	return ins
 }
 
 func (this *FLNetworkCfg) Constructor(encodeStr [][]byte, PartyNums uint, masLogger *log.Logger) {

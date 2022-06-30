@@ -40,6 +40,7 @@ export FL_ENGINE_PATH=$FL_ENGINE_PATH
 export FALCON_WORKER_IMAGE=$FALCON_WORKER_IMAGE
 
 # launch party server X # detect the OS type with uname
+source 2022sigmod-exp/source_cluster_go_env.sh
 makeOS=''
 unamestr=`uname`
 if [[ "$unamestr" == 'Linux' ]]; then

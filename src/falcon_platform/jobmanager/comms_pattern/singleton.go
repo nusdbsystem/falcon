@@ -19,7 +19,7 @@ func GetAllNetworkCfg() map[string]PartyNetworkConfig {
 var jobNetCfgOnce sync.Once
 var jobNetCfg map[string]JobNetworkConfig
 
-func GetJobNetCfg() map[string]JobNetworkConfig {
+func GetJobNetCfgBuilder() map[string]JobNetworkConfig {
 	jobNetCfgOnce.Do(func() {
 		jobNetCfg = make(map[string]JobNetworkConfig)
 	})
