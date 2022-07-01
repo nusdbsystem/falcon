@@ -11,9 +11,9 @@
       "addr": "10.0.0.81:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/energy",
-        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/energy",
-        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/energy"
+        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/bank",
+        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/bank",
+        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/bank"
       }
     },
     {
@@ -21,9 +21,9 @@
       "addr": "10.0.0.86:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/energy",
-        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/energy",
-        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/energy"
+        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/bank",
+        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/bank",
+        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/bank"
       }
     },
     {
@@ -31,9 +31,9 @@
       "addr": "10.0.0.94:30007",
       "party_type": "passive",
       "path": {
-        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/energy",
-        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/energy",
-        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/energy"
+        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/bank",
+        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/bank",
+        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/bank"
       }
     }
   ],
@@ -43,8 +43,8 @@
   },
   "tasks": {
     "model_training": {
-      "mpc_algorithm_name": "linear_regression",
-      "algorithm_name": "linear_regression",
+      "mpc_algorithm_name": "logistic_regression",
+      "algorithm_name": "logistic_regression",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
@@ -52,16 +52,16 @@
         },
         "algorithm_config": {
           "batch_size": 128,
-          "max_iteration": 123,
+          "max_iteration": 29,
           "convergence_threshold": 0.0001,
-          "with_regularization": false,
+          "with_regularization": true,
           "alpha": 0.1,
           "learning_rate": 0.1,
           "decay": 0.1,
           "penalty": "l1",
           "optimizer": "sgd",
           "multi_class": "ovr",
-          "metric": "mse",
+          "metric": "acc",
           "differential_privacy_budget": 0.1,
           "fit_bias": true
         }
