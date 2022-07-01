@@ -340,7 +340,7 @@ class LimeExplainer {
    * @param party: the participating party
    * @param train_data: the plaintext train data
    * @param predictions: the encrypted model predictions
-   * @param sample_weights: the encrypted sample weights
+   * @param sss_sample_weights: the encrypted sample weights
    * @param num_samples: the number of samples for training
    * @param interpret_model_name: the model to be trained
    * @param interpret_model_param: the model params to be used for training
@@ -352,9 +352,9 @@ class LimeExplainer {
    */
   std::vector<double> explain_one_label(
       const Party &party,
-      std::vector<std::vector<double>> train_data,
+      const std::vector<std::vector<double>>& train_data,
       EncodedNumber* predictions,
-      EncodedNumber* sample_weights,
+      const std::vector<double> &sss_sample_weights,
       int num_samples,
       const std::string &interpret_model_name,
       const std::string &interpret_model_param,
@@ -371,7 +371,7 @@ class LimeExplainer {
    * @param linear_reg_param_str: linear regression param string
    * @param train_data: the plaintext train data
    * @param predictions: the encrypted model predictions
-   * @param sample_weights: the encrypted sample weights
+   * @param sss_sample_weights: the sss sample weights
    * @param ps_network_str: the parameters of ps network string,
    * @param is_distributed: whether use distributed interpretable model training
    * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
@@ -383,7 +383,7 @@ class LimeExplainer {
       const LinearRegressionParams & linear_reg_params,
       const std::vector<std::vector<double>>& train_data,
       EncodedNumber* predictions,
-      EncodedNumber* sample_weights,
+      const std::vector<double> &sss_sample_weights,
       const std::string& ps_network_str = std::string(),
       int is_distributed = 0,
       int distributed_role = 0,
@@ -409,7 +409,7 @@ class LimeExplainer {
       const DecisionTreeParams & dt_params,
       const std::vector<std::vector<double>>& train_data,
       EncodedNumber* predictions,
-      EncodedNumber* sample_weights,
+      const std::vector<double> &sss_sample_weights,
       const std::string& ps_network_str = std::string(),
       int is_distributed = 0,
       int distributed_role = 0,

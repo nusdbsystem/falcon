@@ -250,7 +250,7 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
                                                         int precision,
                                                         EncodedNumber *ground_truth_labels,
                                                         bool use_sample_weights,
-                                                        EncodedNumber *sample_weights,
+                                                        const std::vector<double> &sss_sample_weights,
                                                         EncodedNumber *encrypted_gradients) {
   // retrieve phe pub key and phe random
   djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
@@ -279,10 +279,10 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
   int predicted_label_precision = std::abs(predicted_labels[0].getter_exponent());
   log_info("[lime_backward_computation]: predicted_label_precision = " + std::to_string(predicted_label_precision));
   auto* batch_true_labels = new EncodedNumber[cur_batch_size];
-  auto* batch_sample_weights = new EncodedNumber[cur_batch_size];
+  std::vector<double> batch_sss_sample_weights(cur_batch_size, 0.0);
   for (int i = 0; i < cur_batch_size; i++) {
     batch_true_labels[i] = ground_truth_labels[batch_indexes[i]];
-    batch_sample_weights[i] = sample_weights[batch_indexes[i]];
+    batch_sss_sample_weights[i] = sss_sample_weights[batch_indexes[i]];
   }
   int batch_true_labels_precision = std::abs(batch_true_labels[0].getter_exponent());
   log_info("[lime_backward_computation]: batch_true_labels_precision = " + std::to_string(batch_true_labels_precision));
@@ -320,9 +320,7 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
   // here compute cipher multiplication, and set the dest precision to loss_i.precision
   // [loss_i] = [loss_i] * [sample_weights_i]
   int loss_precision = std::abs(encrypted_batch_losses[0].getter_exponent());
-  int sample_weight_precision = std::abs(batch_sample_weights[0].getter_exponent());
   log_info("[lime_backward_computation]: loss_precision = " + std::to_string(loss_precision));
-  log_info("[lime_backward_computation]: sample_weight_precision = " + std::to_string(sample_weight_precision));
 
 //  for debug
 //  auto* batch_losses = new EncodedNumber[cur_batch_size];
@@ -342,11 +340,8 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
 //             "" + std::to_string(i) + "] = " + std::to_string(w));
 //  }
 
-  ciphers_multi(party, encrypted_batch_losses,
-                encrypted_batch_losses,
-                batch_sample_weights,
-                cur_batch_size,
-                ACTIVE_PARTY_ID);
+  cipher_shares_ele_wise_vec_mul(party, batch_sss_sample_weights,
+                                 encrypted_batch_losses, cur_batch_size, encrypted_batch_losses);
   log_info("[lime_backward_computation]: finish compute cipher multiplication");
 
 //  // for debug
@@ -474,7 +469,6 @@ void LinearRegressionBuilder::lime_backward_computation(const Party &party,
   delete [] encoded_batch_samples;
   delete [] common_gradients;
   delete [] batch_true_labels;
-  delete [] batch_sample_weights;
 }
 
 void LinearRegressionBuilder::compute_l1_regularized_grad(const Party &party, EncodedNumber *regularized_gradients) {
@@ -844,7 +838,7 @@ void LinearRegressionBuilder::lime_train(Party party,
                                          bool use_encrypted_labels,
                                          EncodedNumber *encrypted_true_labels,
                                          bool use_sample_weights,
-                                         EncodedNumber *encrypted_sample_weights) {
+                                         const std::vector<double> &sss_sample_weights) {
   /// The training stage consists of the following steps
   /// 1. each party init encrypted local weights, "local_weights" = [w1], [w2], ...[wn]
   /// 2. iterative computation (see LogisticRegressionBuilder::train)
@@ -952,7 +946,7 @@ void LinearRegressionBuilder::lime_train(Party party,
         encrypted_batch_aggregation_precision,
         encrypted_true_labels,
         use_sample_weights,
-        encrypted_sample_weights,
+        sss_sample_weights,
         encrypted_gradients);
 
     log_info("-------- Iteration " + std::to_string(iter) + ", backward computation success --------");
@@ -1145,7 +1139,7 @@ void LinearRegressionBuilder::distributed_lime_train(
     bool use_encrypted_labels,
     EncodedNumber *encrypted_true_labels,
     bool use_sample_weights,
-    EncodedNumber *encrypted_sample_weights) {
+    const std::vector<double> &sss_sample_weights) {
   log_info("************* Distributed LIME Training Start *************");
   struct timespec start;
   clock_gettime(CLOCK_MONOTONIC, &start);
@@ -1253,7 +1247,7 @@ void LinearRegressionBuilder::distributed_lime_train(
         encrypted_batch_aggregation_precision,
         encrypted_true_labels,
         use_sample_weights,
-        encrypted_sample_weights,
+        sss_sample_weights,
         encrypted_gradients);
 
     log_info("-------- "
@@ -1289,6 +1283,17 @@ void LinearRegressionBuilder::distributed_lime_train(
     delete [] encoded_mini_batch_samples;
     delete [] encrypted_gradients;
   }
+
+  // step final: receive weight from master, and assign to current log_reg_model.local_weights
+  std::string final_weight_str;
+  worker.recv_long_message_from_ps(final_weight_str);
+  log_info("-------- Worker final worker.receive weight success --------");
+  auto* deserialized_weight = new EncodedNumber[linear_reg_model.weight_size];
+  deserialize_encoded_number_array(deserialized_weight, linear_reg_model.weight_size, final_weight_str);
+  for (int i = 0; i < linear_reg_model.weight_size; i++) {
+    this->linear_reg_model.local_weights[i] = deserialized_weight[i];
+  }
+  delete [] deserialized_weight;
 
   struct timespec finish;
   clock_gettime(CLOCK_MONOTONIC, &finish);

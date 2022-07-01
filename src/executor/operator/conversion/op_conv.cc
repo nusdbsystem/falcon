@@ -519,6 +519,53 @@ void transpose_encoded_mat(EncodedNumber** source_mat,
   }
 }
 
+void cipher_shares_ele_wise_vec_mul(const Party& party,
+                                    const std::vector<double>& shares,
+                                    EncodedNumber* ciphers,
+                                    int size,
+                                    EncodedNumber* ret) {
+  if (size != shares.size()) {
+    log_error("[cipher_shares_ele_wise_vec_mul] size does not match");
+    exit(EXIT_FAILURE);
+  }
+  // retrieve phe pub key and auth server
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  auto* local_agg = new EncodedNumber[size];
+  auto* plain_shares = new EncodedNumber[size];
+  for (int i = 0; i < size; i++) {
+    plain_shares[i].set_double(phe_pub_key->n[0], shares[i]);
+  }
+  djcs_t_aux_vec_ele_wise_ep_mul(phe_pub_key, local_agg, ciphers, plain_shares, size);
+
+  if (party.party_id == falcon::ACTIVE_PARTY) {
+    // copy local agg
+    for (int i = 0; i < size; i++) {
+      ret[i] = local_agg[i];
+    }
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        std::string recv_local_agg_str;
+        party.recv_long_message(id, recv_local_agg_str);
+        auto* recv_local_agg = new EncodedNumber[size];
+        deserialize_encoded_number_array(recv_local_agg, size, recv_local_agg_str);
+        djcs_t_aux_vec_ele_wise_ee_add_ext(phe_pub_key, ret, ret, recv_local_agg, size);
+        delete [] recv_local_agg;
+      }
+    }
+  } else {
+    std::string local_agg_str;
+    serialize_encoded_number_array(local_agg, size, local_agg_str);
+    party.send_long_message(ACTIVE_PARTY_ID, local_agg_str);
+  }
+
+  broadcast_encoded_number_array(party, ret, size, ACTIVE_PARTY_ID);
+
+  delete [] local_agg;
+  delete [] plain_shares;
+  djcs_t_free_public_key(phe_pub_key);
+}
 
 std::vector<double> display_shares_vector(
     const Party& party,

@@ -487,10 +487,9 @@ void LimeExplainer::select_features(Party party,
   log_info("Read the computed predictions finished");
 
   // 3. read the sample weights file (optional at the moment)
-  auto* encrypted_weights = new EncodedNumber[selected_sample_size];
-  read_encoded_number_array_file(encrypted_weights,
-                                 selected_sample_size,
-                                 sample_weights_file);
+  std::vector<double> sss_weights;
+  std::vector<std::vector<double>> read_data = read_dataset(sample_weights_file, delimiter);
+  sss_weights = read_data[0];
 
   log_info("[select_features]: feature_selection = " + feature_selection);
   log_info("[select_features]: feature_selection_param = " + feature_selection_param);
@@ -498,7 +497,6 @@ void LimeExplainer::select_features(Party party,
   falcon::AlgorithmName algorithm_name = parse_algorithm_name(feature_selection);
   log_info("[explain_one_label]: algorithm_name = " + std::to_string(algorithm_name));
   // deserialize linear regression params
-
 
   LinearRegressionParams linear_reg_params;
   //  linear_reg_params.batch_size = 8;
@@ -523,7 +521,7 @@ void LimeExplainer::select_features(Party party,
           linear_reg_params,
           selected_samples,
           selected_pred_class_id,
-          encrypted_weights,
+          sss_weights,
           ps_network_str,
           is_distributed,
           distributed_role,
@@ -644,7 +642,6 @@ void LimeExplainer::select_features(Party party,
     delete [] selected_predictions[i];
   }
   delete [] selected_predictions;
-  delete [] encrypted_weights;
   delete [] selected_pred_class_id;
 }
 
@@ -744,10 +741,9 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
                                   selected_predictions_file);
 
   //  3. read the sample_weights_file to get the encrypted sample weights for each data
-  auto* encrypted_weights = new EncodedNumber[cur_sample_size];
-  read_encoded_number_array_file(encrypted_weights,
-                                 cur_sample_size,
-                                 sample_weights_file);
+  std::vector<double> sss_weights;
+  std::vector<std::vector<double>> read_data = read_dataset(sample_weights_file, delimiter);
+  sss_weights = read_data[0];
 
   //  4. prepare the information for invoking the corresponding training API
   // extract the k-th model predictions
@@ -761,7 +757,7 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
   std::vector<double> explanations = explain_one_label(party,
                                                        selected_data,
                                                        kth_predictions,
-                                                       encrypted_weights,
+                                                       sss_weights,
                                                        cur_sample_size,
                                                        interpret_model_name,
                                                        interpret_model_param,
@@ -804,7 +800,6 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
     delete [] encrypted_predictions[i];
   }
   delete [] encrypted_predictions;
-  delete [] encrypted_weights;
   delete [] kth_predictions;
 
   return explanations;
@@ -812,9 +807,9 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
 
 std::vector<double> LimeExplainer::explain_one_label(
     const Party &party,
-    std::vector<std::vector<double>> train_data,
+    const std::vector<std::vector<double>>& train_data,
     EncodedNumber* predictions,
-    EncodedNumber* sample_weights,
+    const std::vector<double> &sss_sample_weights,
     int num_samples,
     const std::string &interpret_model_name,
     const std::string &interpret_model_param,
@@ -859,7 +854,7 @@ std::vector<double> LimeExplainer::explain_one_label(
           linear_reg_params,
           train_data,
           predictions,
-          sample_weights,
+          sss_sample_weights,
           ps_network_str,
           is_distributed,
           distributed_role,
@@ -890,7 +885,7 @@ std::vector<double> LimeExplainer::explain_one_label(
           dt_params,
           train_data,
           predictions,
-          sample_weights,
+          sss_sample_weights,
           ps_network_str,
           is_distributed,
           distributed_role,
@@ -910,7 +905,7 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
     const LinearRegressionParams &linear_reg_params,
     const std::vector<std::vector<double>>& train_data,
     EncodedNumber *predictions,
-    EncodedNumber *sample_weights,
+    const std::vector<double> &sss_sample_weights,
     const std::string& ps_network_str,
     int is_distributed,
     int distributed_role,
@@ -946,7 +941,7 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
     log_info("Init linear regression builder finished");
     linear_reg_builder.lime_train(party,
                                   true, predictions,
-                                  true, sample_weights);
+                                  true, sss_sample_weights);
     log_info("Train lime linear regression model finished.");
     // decrypt the model weights and return
     local_explanations =
@@ -1002,7 +997,7 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
     log_info("[lime_linear_reg_train worker]: init linear regression model");
     linear_reg_model_builder->distributed_lime_train(party, *worker,
                                                      true, predictions,
-                                                     true, sample_weights);
+                                                     true, sss_sample_weights);
     log_info("[lime_linear_reg_train worker]: distributed train finished.");
     // decrypt the model weights and return
     local_explanations =
@@ -1020,11 +1015,15 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
     const DecisionTreeParams &dt_params,
     const std::vector<std::vector<double>> &train_data,
     EncodedNumber *predictions,
-    EncodedNumber *sample_weights,
+    const std::vector<double> &sss_sample_weights,
     const std::string &ps_network_str,
     int is_distributed,
     int distributed_role,
     int worker_id) {
+  // retrieve phe pub key and phe random
+  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
   std::vector<double> local_explanations;
 
   // train a lime decision tree model
@@ -1046,15 +1045,17 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
                 cur_sample_size,
                 ACTIVE_PARTY_ID);
   int predictions_prec = std::abs(predictions[0].getter_exponent());
-  log_info("[lime_decision_tree_train]: predictions_prec = " + std::to_string(predictions_prec));
-  truncate_ciphers_precision(party, predictions_square,
-                             cur_sample_size,
-                             ACTIVE_PARTY_ID,
-                             predictions_prec);
   int predictions_square_prec = std::abs(predictions_square[0].getter_exponent());
+  log_info("[lime_decision_tree_train]: predictions_prec = " + std::to_string(predictions_prec));
   log_info("[lime_decision_tree_train]: predictions_square_prec = " + std::to_string(predictions_square_prec));
+//  truncate_ciphers_precision(party, predictions_square,
+//                             cur_sample_size,
+//                             ACTIVE_PARTY_ID,
+//                             predictions_prec);
+  auto* assist_predictions = new EncodedNumber[cur_sample_size];
+  djcs_t_aux_increase_prec_vec(phe_pub_key, assist_predictions, predictions_square_prec, predictions, cur_sample_size);
   for (int i = 0; i < cur_sample_size; i++) {
-    encrypted_labels[i] = predictions[i];
+    encrypted_labels[i] = assist_predictions[i];
     encrypted_labels[i + cur_sample_size] = predictions_square[i];
   }
   log_info("[lime_decision_tree_train]: encrypted_label_size = " + std::to_string(label_size));
@@ -1080,7 +1081,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
                                               dummy_test_accuracy);
     log_info("Init decision tree builder finished");
     decision_tree_builder.lime_train(
-        party, true, encrypted_labels, true, sample_weights);
+        party, true, encrypted_labels, true, sss_sample_weights);
     log_info("Train lime decision tree model finished.");
 
 #ifdef SAVE_BASELINE
@@ -1125,7 +1126,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
     // ps splits the data from vertical dimention, and sends the splitted part to workers
     std::string training_data_str;
 
-    int each_worker_features_num = used_train_data[0].size()/ps->worker_channels.size();
+    int each_worker_features_num = ((int) used_train_data[0].size())/ps->worker_channels.size();
 
     falcon_print(std::cout,  "[PS.broadcast_train_test_data]:",
                  "worker num",
@@ -1145,7 +1146,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
       std::vector<std::vector<double>> tmp_training_data(used_train_data.size());
 
       if (wk_index == ps->worker_channels.size()-1){
-        train_data_last_index = used_train_data[0].size();
+        train_data_last_index = (int) used_train_data[0].size();
         worker_feature_index_prefix_train_data += to_string(train_data_prev_index);
       }else{
         train_data_last_index = train_data_prev_index+each_worker_features_num; //4
@@ -1222,13 +1223,15 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
     log_info("[lime_decision_tree_train worker]: init linear regression model");
     tree_model_builder->distributed_lime_train(party, *worker,
                                                true, encrypted_labels,
-                                               true, sample_weights);
+                                               true, sss_sample_weights);
     log_info("[lime_decision_tree_train worker]: distributed train finished.");
     delete tree_model_builder;
     delete worker;
   }
+  djcs_t_free_public_key(phe_pub_key);
   delete [] encrypted_labels;
   delete [] predictions_square;
+  delete [] assist_predictions;
   return local_explanations;
 }
 
@@ -1659,7 +1662,6 @@ void lime_feat_sel(Party party, const std::string& params_str,
   log_info("[lime_feat_sel] num_samples = " + std::to_string(feat_sel_params.num_samples));
   log_info("[lime_feat_sel] feature_selection = " + feat_sel_params.feature_selection);
   log_info("[lime_feat_sel] feature_selection_params = " + feat_sel_params.feature_selection_param);
-  // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
   feat_sel_params.selected_samples_file = output_path_prefix + feat_sel_params.selected_samples_file;
   feat_sel_params.selected_predictions_file = output_path_prefix + feat_sel_params.selected_predictions_file;
   feat_sel_params.sample_weights_file = output_path_prefix + feat_sel_params.sample_weights_file;

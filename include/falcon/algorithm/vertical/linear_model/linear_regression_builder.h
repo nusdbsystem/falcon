@@ -132,7 +132,7 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param precision: precision for the batch samples and shares
    * @param ground_truth_labels: the encrypted ground truth labels
    * @param use_sample_weights: whether use sample weights
-   * @param sample_weights: (encrypted) sample weights
+   * @param sss_sample_weights: (encrypted) sample weights
    */
   void lime_backward_computation(
       const Party& party,
@@ -142,7 +142,7 @@ class LinearRegressionBuilder : public ModelBuilder {
       int precision,
       EncodedNumber *ground_truth_labels,
       bool use_sample_weights,
-      EncodedNumber *sample_weights,
+      const std::vector<double> &sss_sample_weights,
       EncodedNumber* encrypted_gradients);
 
   /**
@@ -180,13 +180,13 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param use_encrypted_labels: whether use encrypted labels during training
    * @param encrypted_true_labels: encrypted labels used
    * @param use_sample_weights: whether use encrypted sample weights
-   * @param encrypted_sample_weights: encrypted sample weights
+   * @param sss_sample_weights: encrypted sample weights
    */
   void lime_train(Party party,
                   bool use_encrypted_labels,
                   EncodedNumber* encrypted_true_labels,
                   bool use_sample_weights,
-                  EncodedNumber* encrypted_sample_weights);
+                  const std::vector<double> &sss_sample_weights);
 
   /**
    * train a logistic regression model
@@ -204,14 +204,14 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param use_encrypted_labels: whether use encrypted labels during training
    * @param encrypted_true_labels: encrypted labels used
    * @param use_sample_weights: whether use encrypted sample weights
-   * @param encrypted_sample_weights: encrypted sample weights
+   * @param sss_sample_weights: encrypted sample weights
    */
   void distributed_lime_train(const Party& party,
                               const Worker& worker,
                               bool use_encrypted_labels,
                               EncodedNumber* encrypted_true_labels,
                               bool use_sample_weights,
-                              EncodedNumber* encrypted_sample_weights);
+                              const std::vector<double> &sss_sample_weights);
 
   /**
    * evaluate a logistic regression model

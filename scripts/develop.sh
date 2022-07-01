@@ -7,6 +7,9 @@ echo $container_id
 
 docker cp src $container_id:/opt/falcon/
 docker cp include $container_id:/opt/falcon/
+# docker cp data $container_id:/opt/falcon/
+# docker cp make.sh $container_id:/opt/falcon/
+# docker cp deployment/docker_cmd.sh $container_id:/opt/falcon/
 
 docker exec -it $container_id bash make.sh
 

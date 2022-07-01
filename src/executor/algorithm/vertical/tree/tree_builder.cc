@@ -343,7 +343,7 @@ void DecisionTreeBuilder::initialize_encrypted_labels(Party party, EncodedNumber
 
 void DecisionTreeBuilder::build_node(Party &party, int node_index,
     std::vector<int> available_feature_ids, EncodedNumber *sample_mask_iv,
-    EncodedNumber *encrypted_labels, bool use_sample_weights, EncodedNumber *encrypted_weights) {
+    EncodedNumber *encrypted_labels, bool use_sample_weights, const std::vector<double> &sss_sample_weights) {
   // 1. check if some pruning conditions are satisfied
   //      1.1 feature set is empty;
   //      1.2 the number of samples are less than a pre-defined threshold
@@ -417,7 +417,7 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
   // step 2: if satisfied, compute label via spdz computation
   if (is_satisfied) {
     compute_leaf_statistics(party, node_index, sample_mask_iv, encrypted_labels,
-                            use_sample_weights, encrypted_weights);
+                            use_sample_weights, sss_sample_weights);
     return;
   }
 
@@ -426,7 +426,7 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
   std::vector<double> res = find_best_split(party, node_index,
                                             available_feature_ids, sample_mask_iv,
                                             encrypted_labels, party_split_nums,
-                                            use_sample_weights, encrypted_weights);
+                                            use_sample_weights, sss_sample_weights);
   int best_split_index = (int) res[0];
   double left_impurity = res[1];
   double right_impurity = res[2];
@@ -532,9 +532,9 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
 
   // step 9: recursively build the next child tree nodes
   build_node(party, left_child_index,available_feature_ids_new,
-      sample_mask_iv_left, encrypted_labels_left, use_sample_weights, encrypted_weights);
+      sample_mask_iv_left, encrypted_labels_left, use_sample_weights, sss_sample_weights);
   build_node(party, right_child_index,available_feature_ids_new,
-      sample_mask_iv_right, encrypted_labels_right, use_sample_weights, encrypted_weights);
+      sample_mask_iv_right, encrypted_labels_right, use_sample_weights, sss_sample_weights);
 
   delete [] sample_mask_iv_left;
   delete [] sample_mask_iv_right;
@@ -627,7 +627,7 @@ bool DecisionTreeBuilder::check_pruning_conditions(Party &party, int node_index,
 
 void DecisionTreeBuilder::compute_leaf_statistics(Party &party, int node_index,
     EncodedNumber *sample_mask_iv, EncodedNumber *encrypted_labels,
-    bool use_sample_weights, EncodedNumber *encrypted_weights) {
+    bool use_sample_weights, const std::vector<double> &sss_sample_weights) {
   log_info("[DecisionTreeBuilder.compute_leaf_statistics] begin to compute leaf values");
   int sample_num = (int) training_data.size();
   // retrieve phe pub key
@@ -739,7 +739,7 @@ std::vector<double> DecisionTreeBuilder::find_best_split(const Party &party,
                                           EncodedNumber *encrypted_labels,
                                           std::vector<int> &party_split_nums,
                                           bool use_sample_weights,
-                                          EncodedNumber *encrypted_weights) {
+                                          const std::vector<double> &sss_sample_weights) {
   // step 3: active party computes some encrypted label
   // information and broadcast to the other clients
   // step 4: every party locally computes necessary encrypted statistics,
@@ -794,7 +794,7 @@ std::vector<double> DecisionTreeBuilder::find_best_split(const Party &party,
                                  sample_mask_iv, encrypted_statistics, encrypted_labels,
                                  encrypted_left_branch_sample_nums,
                                  encrypted_right_branch_sample_nums,
-                                 use_sample_weights, encrypted_weights);
+                                 use_sample_weights, sss_sample_weights);
   }
   log_info("[DecisionTreeBuilder.find_best_split] Finish computing local statistics");
 
@@ -1012,13 +1012,12 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
                                                        EncodedNumber *encrypted_labels,
                                                        EncodedNumber *encrypted_left_sample_nums,
                                                        EncodedNumber *encrypted_right_sample_nums,
-                                                       bool use_sample_weights, EncodedNumber *encrypted_weights) {
+                                                       bool use_sample_weights, const std::vector<double> &sss_sample_weights) {
 #ifdef DEBUG
   if (use_sample_weights) {
     log_info("[DecisionTreeBuilder.compute_encrypted_statistics] Compute encrypted statistics for node " + std::to_string(node_index));
     log_info("[DecisionTreeBuilder.compute_encrypted_statistics] sample_mask_iv precision =  " + std::to_string(std::abs(sample_mask_iv[0].getter_exponent())));
     log_info("[DecisionTreeBuilder.compute_encrypted_statistics] encrypted_labels precision =  " + std::to_string(std::abs(encrypted_labels[0].getter_exponent())));
-    log_info("[DecisionTreeBuilder.compute_encrypted_statistics] encrypted_weights precision =  " + std::to_string(std::abs(encrypted_weights[0].getter_exponent())));
     log_info("[DecisionTreeBuilder.compute_encrypted_statistics] use_sample_weights =  " + std::to_string(use_sample_weights));
   }
 #endif
@@ -1036,8 +1035,8 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
   auto* weighted_sample_mask_iv = new EncodedNumber[sample_num];
   if (use_sample_weights) {
     // if use encrypted weights, need to execute an element-wise cipher multiplication
-    ciphers_multi(party, weighted_sample_mask_iv, sample_mask_iv, encrypted_weights,
-                  sample_num, ACTIVE_PARTY_ID);
+    cipher_shares_ele_wise_vec_mul(party, sss_sample_weights,
+                                   sample_mask_iv, sample_num, weighted_sample_mask_iv);
   } else {
     for (int i = 0; i < sample_num; i++) {
       weighted_sample_mask_iv[i] = sample_mask_iv[i];
@@ -1315,7 +1314,7 @@ void DecisionTreeBuilder::update_mask_iv_and_labels(const Party& party,
 
 void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
                                      EncodedNumber *encrypted_true_labels, bool use_sample_weights,
-                                     EncodedNumber *encrypted_weights) {
+                                     const std::vector<double> &sss_sample_weights) {
   // To avoid each tree node disclose which samples are on available,
   // we use an encrypted mask vector to protect the information
   // while ensure that the training can still be processed.
@@ -1346,15 +1345,14 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
   // check whether use sample_weights, if so, compute cipher multi
   auto* weighted_encrypted_true_labels = new EncodedNumber[label_size];
   if (use_sample_weights) {
-    auto* assist_encrypted_weights = new EncodedNumber[label_size];
+    std::vector<double> assist_sss_sample_weights(label_size, 0.0);
     for (int i = 0; i < sample_num; i++) {
-      assist_encrypted_weights[i] = encrypted_weights[i];
-      assist_encrypted_weights[i+sample_num] = encrypted_weights[i];
+      assist_sss_sample_weights[i] = sss_sample_weights[i];
+      assist_sss_sample_weights[i + sample_num] = sss_sample_weights[i];
     }
-    ciphers_multi(party, weighted_encrypted_true_labels, encrypted_true_labels,
-                  assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
+    cipher_shares_ele_wise_vec_mul(party, assist_sss_sample_weights,
+                                   encrypted_true_labels, label_size, weighted_encrypted_true_labels);
     broadcast_encoded_number_array(party, weighted_encrypted_true_labels, class_num * sample_num, ACTIVE_PARTY_ID);
-    delete [] assist_encrypted_weights;
   } else {
     for (int i = 0; i < label_size; i++) {
       weighted_encrypted_true_labels[i] = encrypted_true_labels[i];
@@ -1375,14 +1373,14 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
   EncodedNumber enc_root_impurity;
   double root_impurity = lime_reg_tree_root_impurity(
       party, enc_root_impurity, use_encrypted_labels, weighted_encrypted_true_labels,
-      sample_num, class_num, use_sample_weights, encrypted_weights);
+      sample_num, class_num, use_sample_weights, sss_sample_weights);
   tree.nodes[0].impurity = enc_root_impurity;
 
   // required by spdz connector and mpc computation
   bigint::init_thread();
   // recursively build the tree
   build_node(party,0,available_feature_ids, sample_mask_iv,
-             weighted_encrypted_true_labels, use_sample_weights, encrypted_weights);
+             weighted_encrypted_true_labels, use_sample_weights, sss_sample_weights);
   log_info("[DecisionTreeBuilder.lime_train] tree capacity = " + std::to_string(tree.capacity));
 
   struct timespec finish;
@@ -1436,7 +1434,7 @@ void DecisionTreeBuilder::distributed_train(const Party &party, const Worker &wo
   // call the distributed build node logic
   distributed_build_nodes(party, worker, sample_num, init_available_feature_ids,
                           init_sample_mask_iv, init_encrypted_labels,
-                          false, nullptr);
+                          false, std::vector<double>());
 
   delete [] init_sample_mask_iv;
   delete [] init_encrypted_labels;
@@ -1447,7 +1445,7 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
                                                  bool use_encrypted_labels,
                                                  EncodedNumber *encrypted_true_labels,
                                                  bool use_sample_weights,
-                                                 EncodedNumber *encrypted_sample_weights) {
+                                                 const std::vector<double> &sss_sample_weights) {
   log_info("************* [DT_train_worker.distributed_train]: distributed train Start *************");
   struct timespec start;
   clock_gettime(CLOCK_MONOTONIC, &start);
@@ -1475,15 +1473,14 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
   // check whether use sample_weights, if so, compute cipher multi
   auto* init_encrypted_labels = new EncodedNumber[label_size];
   if (use_sample_weights) {
-    auto* assist_encrypted_weights = new EncodedNumber[label_size];
+    std::vector<double> assist_sss_sample_weights(label_size, 0.0);
     for (int i = 0; i < sample_num; i++) {
-      assist_encrypted_weights[i] = encrypted_sample_weights[i];
-      assist_encrypted_weights[i+sample_num] = encrypted_sample_weights[i];
+      assist_sss_sample_weights[i] = sss_sample_weights[i];
+      assist_sss_sample_weights[i + sample_num] = sss_sample_weights[i];
     }
-    ciphers_multi(party, init_encrypted_labels, encrypted_true_labels,
-                  assist_encrypted_weights, label_size, ACTIVE_PARTY_ID);
+    cipher_shares_ele_wise_vec_mul(party, assist_sss_sample_weights,
+                                   encrypted_true_labels, label_size, init_encrypted_labels);
     broadcast_encoded_number_array(party, init_encrypted_labels, class_num * sample_num, ACTIVE_PARTY_ID);
-    delete [] assist_encrypted_weights;
   } else {
     for (int i = 0; i < label_size; i++) {
       init_encrypted_labels[i] = encrypted_true_labels[i];
@@ -1503,14 +1500,14 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
   EncodedNumber enc_root_impurity;
   double root_impurity = lime_reg_tree_root_impurity(
       party, enc_root_impurity, use_encrypted_labels, init_encrypted_labels,
-      sample_num, class_num, use_sample_weights, encrypted_sample_weights);
+      sample_num, class_num, use_sample_weights, sss_sample_weights);
   tree.nodes[0].impurity = enc_root_impurity;
   log_info("[DT_train_worker.distributed_train]: step 3, finished init root node info");
 
   // call the distributed build node logic
   distributed_build_nodes(party, worker, sample_num, init_available_feature_ids,
                           init_sample_mask_iv, init_encrypted_labels,
-                          use_sample_weights, encrypted_sample_weights);
+                          use_sample_weights, sss_sample_weights);
 
   delete [] init_sample_mask_iv;
   delete [] init_encrypted_labels;
@@ -1523,7 +1520,7 @@ void DecisionTreeBuilder::distributed_build_nodes(const Party &party,
                                                   EncodedNumber *init_sample_mask_iv,
                                                   EncodedNumber *init_encrypted_labels,
                                                   bool use_sample_weights,
-                                                  EncodedNumber *encrypted_sample_weights) {
+                                                  const std::vector<double> &sss_sample_weights) {
   // init map to main node_index: encrypted_label and encrypted_mask_iv
   map<int, EncodedNumber*> node_index_sample_mask_iv;
   map<int, EncodedNumber*> node_index_encrypted_labels;
@@ -1588,7 +1585,7 @@ void DecisionTreeBuilder::distributed_build_nodes(const Party &party,
     std::vector<double> res = find_best_split(party, node_index,
                                               current_used_available_features_ids, current_used_sample_mask_iv,
                                               current_used_encrypted_labels, party_split_nums,
-                                              use_sample_weights, encrypted_sample_weights);
+                                              use_sample_weights, sss_sample_weights);
 
     res.push_back(worker.worker_id - 1);
     log_info("[DT_train_worker.distributed_train]: step 4.5, Finished computation with spdz");

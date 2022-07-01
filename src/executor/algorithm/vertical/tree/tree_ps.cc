@@ -184,6 +184,7 @@ void DTParameterServer::distributed_train(){
 void DTParameterServer::build_tree(){
   /// 0. init depth and impurity for root node
   alg_builder.tree.nodes[0].depth = 0;
+  // TODO: when doing distributed lime train, here got a problem, need further check, because using dummy labels
   alg_builder.calc_root_impurity(party);
 
 //  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();

@@ -32,12 +32,12 @@ double root_impurity(const std::vector<double>& labels, falcon::TreeType tree_ty
  * @param size
  * @param class_num
  * @param use_sample_weights
- * @param encrypted_weights
+ * @param sss_sample_weights
  * @return
  */
 double lime_reg_tree_root_impurity(Party& party, EncodedNumber& enc_root_impurity,
                                    bool use_encrypted_labels, EncodedNumber* weighted_encrypted_true_labels,
-                                   int size, int class_num, bool use_sample_weights, EncodedNumber* encrypted_weights);
+                                   int size, int class_num, bool use_sample_weights, const std::vector<double> &sss_sample_weights);
 
 
 std::vector<double> rf_pred2prob(int class_num, const std::vector<double>& pred);

@@ -132,6 +132,12 @@ void transpose_encoded_mat(EncodedNumber** source_mat,
                            int n_source_col,
                            EncodedNumber** ret_mat);
 
+void cipher_shares_ele_wise_vec_mul(const Party& party,
+                                    const std::vector<double>& shares,
+                                    EncodedNumber* ciphers,
+                                    int size,
+                                    EncodedNumber* ret);
+
 std::vector<double> display_shares_vector(
     const Party& party,
     const std::vector<double>& vec);

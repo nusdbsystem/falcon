@@ -32,7 +32,8 @@ func initSvcName() string {
 func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 
 	var jobStatus string
-	if job.DistributedTask.WorkerNumber >= 3+2*int(job.ClassNum) {
+// 	if job.DistributedTask.WorkerNumber >= 3+2*int(job.ClassNum) {
+	if job.DistributedTask.WorkerNumber >= 3 {
 		jobStatus = parallellySchedule(job, workerType)
 	} else {
 		jobStatus = sequenceSchedule(job, workerType)

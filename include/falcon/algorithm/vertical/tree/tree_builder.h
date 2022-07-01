@@ -177,7 +177,7 @@ class DecisionTreeBuilder : public ModelBuilder {
    * @param sample_mask_iv: the encrypted mask indicator vector
    * @param encrypted_labels: the encrypted labels of the training data
    * @param use_sample_weights: whether use sample weights (for LIME)
-   * @param encrypted_weights: the encrypted weights (for LIME)
+   * @param sss_sample_weights: the encrypted weights (for LIME)
    */
   void build_node(Party &party,
       int node_index,
@@ -185,7 +185,7 @@ class DecisionTreeBuilder : public ModelBuilder {
       EncodedNumber *sample_mask_iv,
       EncodedNumber * encrypted_labels,
       bool use_sample_weights = false,
-      EncodedNumber *encrypted_weights = nullptr);
+      const std::vector<double> &sss_sample_weights = std::vector<double>());
 
   /**
    * check if this node satisfies the pruning conditions
@@ -213,14 +213,14 @@ class DecisionTreeBuilder : public ModelBuilder {
    * @param sample_mask_iv: the encrypted mask indicator vector
    * @param encrypted_labels: the encrypted labels of the training data
    * @param use_sample_weights: whether use sample weights (for LIME)
-   * @param encrypted_weights: the encrypted weights (for LIME)
+   * @param sss_sample_weights: the encrypted weights (for LIME)
    */
   void compute_leaf_statistics(Party &party,
       int node_index,
       EncodedNumber *sample_mask_iv,
       EncodedNumber *encrypted_labels,
       bool use_sample_weights = false,
-      EncodedNumber *encrypted_weights = nullptr);
+      const std::vector<double> &sss_sample_weights = std::vector<double>());
 
   /**
    * the core logic for finding the best split securely
@@ -232,7 +232,7 @@ class DecisionTreeBuilder : public ModelBuilder {
    * @param encrypted_labels: the encrypted labels of the training data
    * @param party_split_nums: the returned vector of each party's split numbers
    * @param use_sample_weights: whether use sample weights (for LIME)
-   * @param encrypted_weights: the encrypted weights (for LIME)
+   * @param sss_sample_weights: the encrypted weights (for LIME)
    */
   std::vector<double> find_best_split(const Party& party, int node_index,
                                       std::vector<int> available_feature_ids,
@@ -240,7 +240,7 @@ class DecisionTreeBuilder : public ModelBuilder {
                                       EncodedNumber* encrypted_labels,
                                       std::vector<int>& party_split_nums,
                                       bool use_sample_weights = false,
-                                      EncodedNumber *encrypted_weights = nullptr);
+                                      const std::vector<double> &sss_sample_weights = std::vector<double>());
 
   /**
    * encrypt the left and right impurity
@@ -266,7 +266,7 @@ class DecisionTreeBuilder : public ModelBuilder {
    * @param encrypted_left_sample_nums: the encrypted left sample numbers
    * @param encrypted_right_sample_nums: the encrypted right sample numbers
    * @param use_sample_weights: whether use sample weights (for LIME)
-   * @param encrypted_weights: the encrypted weights (for LIME)
+   * @param sss_sample_weights: the encrypted weights (for LIME)
    */
   void compute_encrypted_statistics(const Party &party, int node_index,
                                     std::vector<int> available_feature_ids,
@@ -276,7 +276,7 @@ class DecisionTreeBuilder : public ModelBuilder {
                                     EncodedNumber * encrypted_left_sample_nums,
                                     EncodedNumber * encrypted_right_sample_nums,
                                     bool use_sample_weights = false,
-                                    EncodedNumber *encrypted_weights = nullptr);
+                                    const std::vector<double> &sss_sample_weights = std::vector<double>());
 
   /**
    * find the party id that has the best split
@@ -362,13 +362,13 @@ class DecisionTreeBuilder : public ModelBuilder {
  * @param use_encrypted_labels: whether use encrypted labels during training
  * @param encrypted_true_labels: encrypted labels used
  * @param use_sample_weights: whether use encrypted sample weights
- * @param encrypted_sample_weights: encrypted sample weights
+ * @param sss_sample_weights: encrypted sample weights
  */
   void lime_train(Party party,
                   bool use_encrypted_labels,
                   EncodedNumber* encrypted_true_labels,
                   bool use_sample_weights,
-                  EncodedNumber* encrypted_sample_weights);
+                  const std::vector<double> &sss_sample_weights);
 
   /**
    * build the decision tree model
@@ -384,14 +384,14 @@ class DecisionTreeBuilder : public ModelBuilder {
    * @param use_encrypted_labels: whether use encrypted labels during training
    * @param encrypted_true_labels: encrypted labels used
    * @param use_sample_weights: whether use encrypted sample weights
-   * @param encrypted_sample_weights: encrypted sample weights
+   * @param sss_sample_weights: encrypted sample weights
    */
   void distributed_lime_train(Party party,
                               const Worker& worker,
                               bool use_encrypted_labels,
                               EncodedNumber* encrypted_true_labels,
                               bool use_sample_weights,
-                              EncodedNumber* encrypted_sample_weights);
+                              const std::vector<double> &sss_sample_weights);
 
   /**
    * build the tree nodes for distributed train
@@ -403,7 +403,7 @@ class DecisionTreeBuilder : public ModelBuilder {
    * @param init_sample_mask_iv: init sample mask iv
    * @param init_encrypted_labels: init encrypted labels
    * @param use_sample_weights: whether use sample weights
-   * @param encrypted_sample_weights: the encrypted sample weights if use_sample_weights is true
+   * @param sss_sample_weights: the encrypted sample weights if use_sample_weights is true
    */
   void distributed_build_nodes(const Party& party, const Worker &worker,
                                int sample_num,
@@ -411,8 +411,7 @@ class DecisionTreeBuilder : public ModelBuilder {
                                EncodedNumber* init_sample_mask_iv,
                                EncodedNumber* init_encrypted_labels,
                                bool use_sample_weights,
-                               EncodedNumber* encrypted_sample_weights
-                               );
+                               const std::vector<double> &sss_sample_weights);
 
   /**
    * evaluate the accuracy on the dataset
