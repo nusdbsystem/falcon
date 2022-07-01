@@ -138,6 +138,7 @@ void LogisticRegressionModel::forward_computation(
 
   // step 2.3: communicate with spdz parties and receive results
   // the spdz_logistic_function_computation will do the 1/(1+e^(wx)) operation
+  falcon::SpdzLogRegCompType comp_type = falcon::LOG_FUNC;
   std::promise<std::vector<double>> promise_values;
   std::future<std::vector<double>> future_values =
       promise_values.get_future();
@@ -149,6 +150,7 @@ void LogisticRegressionModel::forward_computation(
                           party.host_names,
                           batch_aggregation_shares,
                           cur_batch_size,
+                          comp_type,
                           &promise_values);
   vector< double> batch_logistic_shares = future_values.get();
   // main thread wait spdz_thread to finish
@@ -195,9 +197,10 @@ void spdz_logistic_function_computation(int party_num,
                                         std::vector<int> mpc_port_bases,
                                         const std::string& mpc_player_path,
                                         std::vector<std::string> party_host_names,
-                                        std::vector<double> batch_aggregation_shares,
-                                        int cur_batch_size,
-                                        std::promise<std::vector<double>> *batch_loss_shares) {
+                                        std::vector<double> private_values,
+                                        int private_value_size,
+                                        falcon::SpdzLogRegCompType comp_type,
+                                        std::promise<std::vector<double>> *res_shares) {
   // Here put the whole setup socket code together, as using a function call
   // would result in a problem when deleting the created sockets
   // setup connections from this party to each spdz party socket
@@ -247,21 +250,26 @@ void spdz_logistic_function_computation(int party_num,
 
   // send data to spdz parties
   if (party_id == ACTIVE_PARTY_ID) {
+    // the active party sends computation id for spdz computation
+    std::vector<int> computation_id;
+    computation_id.push_back(comp_type);
+    log_info("[spdz_logistic_function_computation] comp_type = " + std::to_string(comp_type));
+    send_public_values(computation_id, mpc_sockets, party_num);
     // send the current array size to the mpc parties
     std::vector<int> array_size_vec;
-    array_size_vec.push_back(cur_batch_size);
+    array_size_vec.push_back(private_value_size);
     send_public_values(array_size_vec, mpc_sockets, party_num);
   }
 
   // all the parties send private shares
-  for (int i = 0; i < batch_aggregation_shares.size(); i++) {
+  for (int i = 0; i < private_values.size(); i++) {
     vector<double> x;
-    x.push_back(batch_aggregation_shares[i]);
+    x.push_back(private_values[i]);
     send_private_inputs(x, mpc_sockets, party_num);
   }
   // send_private_inputs(batch_aggregation_shares,mpc_sockets, party_num);
-  std::vector<double> return_values = receive_result(mpc_sockets, party_num, cur_batch_size);
-  batch_loss_shares->set_value(return_values);
+  std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+  res_shares->set_value(return_values);
 
   for (int i = 0; i < party_num; i++) {
     close_client_socket(plain_sockets[i]);

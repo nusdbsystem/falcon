@@ -84,6 +84,11 @@ namespace falcon {
     SOFTMAX
   };
 
+  enum SpdzLogRegCompType {
+    LOG_FUNC,
+    L1_REGULARIZATION
+  };
+
   // for inference service
   # define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
 

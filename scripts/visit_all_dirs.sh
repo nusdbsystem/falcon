@@ -2,7 +2,7 @@
 
 
 echo "-----slave-80 -----"
-ssh slave-80 "cd /users/yunchengwu/projects/falcon && bash scripts/visit_do.sh" &
+#ssh slave-80 "cd /users/yunchengwu/projects/falcon && bash scripts/visit_do.sh" &
 echo " "
 
 echo "-----slave-81 -----"

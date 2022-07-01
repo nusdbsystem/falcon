@@ -108,6 +108,7 @@ void spdz_logistic_function_computation(int party_num,
     std::vector<std::string> party_host_names,
     std::vector<double> batch_aggregation_shares,
     int cur_batch_size,
+    falcon::SpdzLogRegCompType comp_type,
     std::promise<std::vector<double>> *batch_loss_shares);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LOGISTIC_REGRESSION_MODEL_H_

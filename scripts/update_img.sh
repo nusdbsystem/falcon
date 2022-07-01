@@ -3,7 +3,7 @@
 
 
 echo "-----slave-80 -----"
-ssh slave-80 "cd /users/yunchengwu/projects/falcon && bash scripts/develop.sh" &
+#ssh slave-80 "cd /users/yunchengwu/projects/falcon && bash scripts/develop.sh" &
 echo " "
 
 echo "-----slave-81 -----"

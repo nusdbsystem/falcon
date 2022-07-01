@@ -2,7 +2,7 @@
 #!/bin/bash
 
 echo "-----slave-80 -----"
-echo "$(ssh slave-80 "docker images falcon:latest")"
+#echo "$(ssh slave-80 "docker images falcon:latest")"
 echo " "
 
 echo "-----slave-81 -----"

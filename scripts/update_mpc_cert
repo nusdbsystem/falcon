@@ -1,0 +1,13 @@
+
+
+
+
+docker run -i -t falcon:latest /bin/bash
+
+cd third_party/MP-SPDZ
+Scripts/setup-online.sh 3 128 128
+Scripts/setup-clients.sh 3
+
+cd /users/yunchengwu/projects/falcon/deployment
+docker commit --change='CMD ["bash", "docker_cmd.sh"]' ead135b11e85 falcon:latest
+

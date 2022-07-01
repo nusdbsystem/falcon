@@ -144,6 +144,18 @@ class LogisticRegressionBuilder : public ModelBuilder {
       EncodedNumber* encrypted_gradients);
 
   /**
+  * this function computes the regularized gradients of l1
+  * regularization method, basically, it checks whether a weight
+  * is larger than 0 or not, and assign the corresponding sign with
+  * regularization hyper-parameter.
+  *
+  * @param party
+  * @param regularized_gradients
+  */
+  void compute_l1_regularized_grad(const Party& party,
+                                   EncodedNumber* regularized_gradients);
+
+  /**
    * after receiving batch loss shares and truncated weight shares
    * from spdz parties, update the encrypted local weights
    *

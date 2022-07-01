@@ -58,7 +58,7 @@
           "alpha": 0.1,
           "learning_rate": 0.1,
           "decay": 0.1,
-          "penalty": "l2",
+          "penalty": "l1",
           "optimizer": "sgd",
           "multi_class": "ovr",
           "metric": "acc",
