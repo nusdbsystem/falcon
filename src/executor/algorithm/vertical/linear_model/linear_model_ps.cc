@@ -89,6 +89,8 @@ std::vector<int> LinearParameterServer::partition_examples(std::vector<int> batc
       last1  = batch_indexes.end();
     }
     std::vector<int> mini_batch_indexes(first1, last1);
+    log_info("[partition_examples] wk_index = " + std::to_string(wk_index));
+    log_info("[partition_examples] mini_batch_indexes.size() = " + std::to_string(mini_batch_indexes.size()));
     // serialize mini_batch_indexes to str
     std::string mini_batch_indexes_str;
     serialize_int_array(mini_batch_indexes, mini_batch_indexes_str);

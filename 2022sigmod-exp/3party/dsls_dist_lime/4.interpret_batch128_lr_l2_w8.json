@@ -1,0 +1,84 @@
+{
+  "job_name": "synthetic nsample4000 dataset lime explanation",
+  "job_info": "include weight, feature selection, and interpret stages",
+  "job_fl_type": "vertical",
+  "existing_key": 1,
+  "party_nums": 3,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "172.31.18.73:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/synthetic_lime/nFeaturePerParty/partyfeature20"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "172.31.27.127:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nFeaturePerParty/partyfeature20"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "172.31.28.225:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nFeaturePerParty/partyfeature20"
+      }
+    }
+  ],
+  "distributed_task": {
+    "enable": 1,
+    "worker_number": 8
+  },
+  "tasks": {
+    "lime_interpret": {
+      "mpc_algorithm_name": "linear_regression",
+      "algorithm_name": "lime_interpret",
+      "input_configs": {
+        "data_input": {
+          "data": "synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party.csv",
+          "key": "partyfeature20_phe_keys"
+        },
+        "algorithm_config": {
+          "selected_data_file": "/selected_features_synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party0.txt",
+          "selected_predictions_file": "/synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_targets_full.csv.ciphertext",
+          "sample_weights_file": "/synthesis_partyfeature20_sample_weights.txt",
+          "num_samples": 4000,
+          "class_num": 2,
+          "class_id": 0,
+          "interpret_model_name": "linear_regression",
+          "interpret_model_param": {
+            "batch_size": 128,
+            "max_iteration": 32,
+            "convergence_threshold": 0.0001,
+            "with_regularization": true,
+            "alpha": 0.1,
+            "learning_rate": 0.1,
+            "decay": 0.1,
+            "penalty": "l2",
+            "optimizer": "sgd",
+            "metric": "mse",
+            "differential_privacy_budget": 0.1,
+            "fit_bias": true
+          },
+          "explanation_report": "/exp_report_synthesis_partyfeature20_lr_l2_batch_128.txt"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    }
+  }
+}

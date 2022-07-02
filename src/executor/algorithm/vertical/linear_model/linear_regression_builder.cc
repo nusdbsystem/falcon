@@ -1123,6 +1123,17 @@ void LinearRegressionBuilder::distributed_train(const Party &party, const Worker
     delete [] encrypted_gradients;
   }
 
+  // step final: receive weight from master, and assign to current log_reg_model.local_weights
+  std::string final_weight_str;
+  worker.recv_long_message_from_ps(final_weight_str);
+  log_info("-------- Worker final worker.receive weight success --------");
+  auto* deserialized_weight = new EncodedNumber[linear_reg_model.weight_size];
+  deserialize_encoded_number_array(deserialized_weight, linear_reg_model.weight_size, final_weight_str);
+  for (int i = 0; i < linear_reg_model.weight_size; i++) {
+    this->linear_reg_model.local_weights[i] = deserialized_weight[i];
+  }
+  delete [] deserialized_weight;
+
   struct timespec finish;
   clock_gettime(CLOCK_MONOTONIC, &finish);
 
@@ -1491,15 +1502,16 @@ void LinearRegressionBuilder::distributed_eval(
   std::vector<std::vector<double> > cur_test_dataset =
       (eval_type == falcon::TRAIN) ? this->training_data : this->testing_data;
 
-  log_info("current dataset size = " + std::to_string(cur_test_dataset.size()));
+  log_info("[distributed_eval] current dataset size = " + std::to_string(cur_test_dataset.size()));
 
   // 2. each worker receive mini_batch_indexes_str from ps
   std::vector<int> mini_batch_indexes;
+  log_info("[distributed_eval] current mini batch size = " + std::to_string(mini_batch_indexes.size()));
   std::string mini_batch_indexes_str;
   worker.recv_long_message_from_ps(mini_batch_indexes_str);
   deserialize_int_array(mini_batch_indexes, mini_batch_indexes_str);
 
-  log_info("current mini batch size = " + std::to_string(mini_batch_indexes.size()));
+  log_info("[distributed_eval] current mini batch size = " + std::to_string(mini_batch_indexes.size()));
 
   std::vector<std::vector<double>> cur_used_samples;
   for (const auto index: mini_batch_indexes){
@@ -1511,7 +1523,7 @@ void LinearRegressionBuilder::distributed_eval(
   auto* predicted_labels = new EncodedNumber[cur_used_samples_size];
   linear_reg_model.predict(party, cur_used_samples, predicted_labels);
 
-  log_info("predict on mini batch samples finished");
+  log_info("[distributed_eval] predict on mini batch samples finished");
 
   // 4: active party aggregates and call collaborative decryption
   auto* decrypted_labels = new EncodedNumber[cur_used_samples_size];

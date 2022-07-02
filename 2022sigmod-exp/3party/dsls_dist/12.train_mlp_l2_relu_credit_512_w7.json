@@ -8,32 +8,32 @@
   "party_info": [
     {
       "id": 0,
-      "addr": "10.0.0.81:30005",
+      "addr": "172.31.18.73:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/credit",
-        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/credit",
-        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party0/data/credit"
+        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/credit",
+        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/credit",
+        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/credit"
       }
     },
     {
       "id": 1,
-      "addr": "10.0.0.86:30006",
+      "addr": "172.31.27.127:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/credit",
-        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/credit",
-        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party1/data/credit"
+        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/credit",
+        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/credit",
+        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/credit"
       }
     },
     {
       "id": 2,
-      "addr": "10.0.0.94:30007",
+      "addr": "172.31.28.225:30007",
       "party_type": "passive",
       "path": {
-        "data_input": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/credit",
-        "data_output": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/credit",
-        "model_path": "/users/yunchengwu/projects/falcon/2022sigmod-exp/3party/party2/data/credit"
+        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/credit",
+        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/credit",
+        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/credit"
       }
     }
   ],
@@ -64,7 +64,7 @@
           "metric": "acc",
           "dp_budget": 0.1,
           "fit_bias": true,
-          "num_layers_outputs": [16, 8, 1],
+          "num_layers_outputs": [23, 8, 1],
           "layers_activation_funcs": ["relu", "logistic"]
         }
       },
