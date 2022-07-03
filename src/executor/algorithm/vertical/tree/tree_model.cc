@@ -252,7 +252,7 @@ void TreeModel::predict(Party &party,
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
           predicted_labels[i], predicted_labels[i]);
       for (int j = 0; j < binary_vector.size(); j++) {
-        djcs_t_aux_ee_add(phe_pub_key, predicted_labels[i],
+        djcs_t_aux_ee_add_ext(phe_pub_key, predicted_labels[i],
             predicted_labels[i], updated_label_vector[j]);
       }
     }

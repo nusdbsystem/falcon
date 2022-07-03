@@ -384,7 +384,7 @@ void DecisionTreeBuilder::build_node(Party &party, int node_index,
     djcs_t_aux_encrypt(phe_pub_key_tmp, party.phe_random, encrypted_node_num[0], encrypted_node_num[0]);
     int sample_num = (int) training_data.size();
     for (int i = 0; i < sample_num; i++) {
-      djcs_t_aux_ee_add(phe_pub_key_tmp, encrypted_node_num[0], encrypted_node_num[0], sample_mask_iv[i]);
+      djcs_t_aux_ee_add_ext(phe_pub_key_tmp, encrypted_node_num[0], encrypted_node_num[0], sample_mask_iv[i]);
     }
   }
   broadcast_encoded_number_array(party, encrypted_node_num, 1, ACTIVE_PARTY_ID);
@@ -571,7 +571,7 @@ bool DecisionTreeBuilder::check_pruning_conditions(Party &party, int node_index,
     djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
         encrypted_sample_count[0], encrypted_sample_count[0]);
     for (int i = 0; i < sample_num; i++) {
-      djcs_t_aux_ee_add(phe_pub_key, encrypted_sample_count[0],
+      djcs_t_aux_ee_add_ext(phe_pub_key, encrypted_sample_count[0],
           encrypted_sample_count[0], sample_mask_iv[i]);
     }
     encrypted_impurity[0] = tree.nodes[node_index].impurity;
@@ -647,7 +647,7 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party, int node_index,
       for (int c = 0; c < class_num; c++) {
         class_sample_nums[c] = encrypted_labels[c * sample_num + 0];
         for (int j = 1; j < sample_num; j++) {
-          djcs_t_aux_ee_add(phe_pub_key, class_sample_nums[c],
+          djcs_t_aux_ee_add_ext(phe_pub_key, class_sample_nums[c],
               class_sample_nums[c], encrypted_labels[c * sample_num + j]);
         }
       }
@@ -660,14 +660,14 @@ void DecisionTreeBuilder::compute_leaf_statistics(Party &party, int node_index,
       auto *encrypted_sample_num_aux = new EncodedNumber[1];
       label_info[0] = encrypted_labels[0];
       for (int i = 1; i < sample_num; i++) {
-        djcs_t_aux_ee_add(phe_pub_key, label_info[0],
+        djcs_t_aux_ee_add_ext(phe_pub_key, label_info[0],
             label_info[0], encrypted_labels[0 * sample_num + i]);
       }
       encrypted_sample_num_aux[0].set_integer(phe_pub_key->n[0], 0);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
           encrypted_sample_num_aux[0], encrypted_sample_num_aux[0]);
       for (int i = 0; i < sample_num; i++) {
-        djcs_t_aux_ee_add(phe_pub_key, encrypted_sample_num_aux[0],
+        djcs_t_aux_ee_add_ext(phe_pub_key, encrypted_sample_num_aux[0],
             encrypted_sample_num_aux[0], sample_mask_iv[i]);
       }
       ciphers_to_secret_shares(party, label_info, shares1, 1,
@@ -1101,9 +1101,9 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
     for (int sample_idx = 0; sample_idx < sample_num; sample_idx++) {
       int sorted_idx = sorted_indices[sample_idx];
       double sorted_feature_value = feature_helpers[feature_id].origin_feature_values[sorted_idx];
-      djcs_t_aux_ee_add(phe_pub_key, total_sum,total_sum, sorted_sample_iv[sample_idx]);
+      djcs_t_aux_ee_add_ext(phe_pub_key, total_sum,total_sum, sorted_sample_iv[sample_idx]);
       for (int c = 0; c < class_num; c++) {
-        djcs_t_aux_ee_add(phe_pub_key, sums_stats[c],
+        djcs_t_aux_ee_add_ext(phe_pub_key, sums_stats[c],
                           sums_stats[c],encrypted_labels[c * sample_num + sorted_idx]);
       }
       if (split_iterator == split_num) {
@@ -1117,10 +1117,10 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
       if (split_iterator == split_num) {
         continue;
       }
-      djcs_t_aux_ee_add(phe_pub_key, left_sums[split_iterator],
+      djcs_t_aux_ee_add_ext(phe_pub_key, left_sums[split_iterator],
                         left_sums[split_iterator], sorted_sample_iv[sample_idx]);
       for (int c = 0; c < class_num; c++) {
-        djcs_t_aux_ee_add(phe_pub_key,left_stats[split_iterator][c],
+        djcs_t_aux_ee_add_ext(phe_pub_key,left_stats[split_iterator][c],
                           left_stats[split_iterator][c],encrypted_labels[c * sample_num + sorted_idx]);
       }
     }
@@ -1145,14 +1145,14 @@ void DecisionTreeBuilder::compute_encrypted_statistics(const Party &party,
 
     // compute right sample num of the current split by total_sum + (-1) * left_sum_help
     for (int k = 0; k < split_num; k++) {
-      djcs_t_aux_ee_add(phe_pub_key,left_num_help, left_num_help, left_sums[k]);
+      djcs_t_aux_ee_add_ext(phe_pub_key,left_num_help, left_num_help, left_sums[k]);
       encrypted_left_sample_nums[split_index] = left_num_help;
       djcs_t_aux_ep_mul(phe_pub_key,right_num_help, left_num_help, plain_constant_help);
-      djcs_t_aux_ee_add(phe_pub_key,encrypted_right_sample_nums[split_index], total_sum, right_num_help);
+      djcs_t_aux_ee_add_ext(phe_pub_key,encrypted_right_sample_nums[split_index], total_sum, right_num_help);
       for (int c = 0; c < class_num; c++) {
-        djcs_t_aux_ee_add(phe_pub_key,left_stat_help[c], left_stat_help[c], left_stats[k][c]);
+        djcs_t_aux_ee_add_ext(phe_pub_key,left_stat_help[c], left_stat_help[c], left_stats[k][c]);
         djcs_t_aux_ep_mul(phe_pub_key,right_stat_help[c], left_stat_help[c], plain_constant_help);
-        djcs_t_aux_ee_add(phe_pub_key,right_stat_help[c], right_stat_help[c], sums_stats[c]);
+        djcs_t_aux_ee_add_ext(phe_pub_key,right_stat_help[c], right_stat_help[c], sums_stats[c]);
         encrypted_statistics[split_index][2 * c] = left_stat_help[c];
         encrypted_statistics[split_index][2 * c + 1] = right_stat_help[c];
       }
@@ -1359,10 +1359,10 @@ void DecisionTreeBuilder::lime_train(Party party, bool use_encrypted_labels,
     }
   }
 
-  // TODO: make the label precision automatically match
-  // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
-  truncate_ciphers_precision(party, weighted_encrypted_true_labels, label_size,
-                             ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+//  // TODO: make the label precision automatically match
+//  // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
+//  truncate_ciphers_precision(party, weighted_encrypted_true_labels, label_size,
+//                             ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
 
   // init the root node info
   tree.nodes[0].depth = 0;
@@ -1486,10 +1486,10 @@ void DecisionTreeBuilder::distributed_lime_train(Party party,
       init_encrypted_labels[i] = encrypted_true_labels[i];
     }
   }
-  // TODO: make the label precision automatically match
-  // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
-  truncate_ciphers_precision(party, init_encrypted_labels, label_size,
-                             ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+//  // TODO: make the label precision automatically match
+//  // truncate encrypted labels to PHE_FIXED_POINT_PRECISION
+//  truncate_ciphers_precision(party, init_encrypted_labels, label_size,
+//                             ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
 
   // required by spdz connector and mpc computation
   bigint::init_thread();

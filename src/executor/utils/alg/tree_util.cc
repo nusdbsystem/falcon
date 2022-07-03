@@ -89,8 +89,8 @@ double lime_reg_tree_root_impurity(Party& party, EncodedNumber& enc_root_impurit
 
     // compute encrypted sum
     for (int i = 0; i < size; i++) {
-      djcs_t_aux_ee_add(phe_pub_key, enc_label_sum[0], enc_label_sum[0], weighted_encrypted_true_labels[i]);
-      djcs_t_aux_ee_add(phe_pub_key, enc_label_sum[1], enc_label_sum[1], weighted_encrypted_true_labels[i + size]);
+      djcs_t_aux_ee_add_ext(phe_pub_key, enc_label_sum[0], enc_label_sum[0], weighted_encrypted_true_labels[i]);
+      djcs_t_aux_ee_add_ext(phe_pub_key, enc_label_sum[1], enc_label_sum[1], weighted_encrypted_true_labels[i + size]);
     }
   }
   broadcast_encoded_number_array(party, enc_label_sum, 2, ACTIVE_PARTY_ID);
