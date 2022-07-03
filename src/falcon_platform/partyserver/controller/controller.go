@@ -82,7 +82,8 @@ func RunWorker(masterAddr, workerType,
 		jobIdInt, _ := strconv.Atoi(jobId)
 		workerId := common.WorkerIdType(jobIdInt)
 
-		nodeID := scheduleResourceBased(jobIdInt)
+// 		nodeID := scheduleResourceBased(jobIdInt)
+		nodeID := scheduleRoundRobin(common.WorkerIdType(jobIdInt))
 		nodeIP := common.PartyServerClusterIPs[nodeID]
 
 		// init resourceSVC information

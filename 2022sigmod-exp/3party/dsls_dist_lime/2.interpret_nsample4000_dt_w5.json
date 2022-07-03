@@ -63,7 +63,7 @@
             "criterion": "mse",
             "split_strategy": "best",
             "class_num": 2,
-            "max_depth": 4,
+            "max_depth": 3,
             "max_bins": 8,
             "min_samples_split": 5,
             "min_samples_leaf": 5,

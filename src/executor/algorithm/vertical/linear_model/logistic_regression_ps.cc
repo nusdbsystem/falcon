@@ -93,6 +93,11 @@ void LogRegParameterServer::distributed_train(){
                                    weight_phe_precision,
                                    this->alg_builder.log_reg_model.local_weights);
     log_info("--------PS Iteration " + std::to_string(iter) + ", ps update_encrypted_weights successful --------");
+    // check if the precision exceed the max precision and truncate
+    if (std::abs(this->alg_builder.log_reg_model.local_weights[0].getter_exponent()) >= PHE_MAXIMUM_PRECISION) {
+      this->alg_builder.log_reg_model.truncate_weights_precision(party, PHE_FIXED_POINT_PRECISION);
+      log_info("--------PS Iteration " + std::to_string(iter) + ", ps truncate local weights successful --------");
+    }
   }
 
   struct timespec finish;

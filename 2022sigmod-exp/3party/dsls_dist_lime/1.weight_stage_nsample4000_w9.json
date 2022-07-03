@@ -48,7 +48,7 @@
       "input_configs": {
         "data_input": {
           "data": "synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party.csv",
-          "key": "nsample4000_phe_keys"
+          "key": "nclass2_phe_keys"
         },
         "algorithm_config": {
           "explain_instance_idx": 0,
