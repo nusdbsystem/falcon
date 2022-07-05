@@ -69,7 +69,7 @@ func RunWorker(masterAddr, workerType,
 	reply.ResourceSVCs = make(map[common.WorkerIdType]*comms_pattern.ResourceSVC)
 
 	logger.Log.Println(
-		"[PartyServer]: PartyServer setup workers,  = ",
+		"[PartyServer]: PartyServer setup workers = ",
 		" workerNum = ", workerNum, "TaskClassIDName=", TaskClassIDName)
 
 	rawStageName := strings.Join(strings.Split(TaskClassIDName, "_"), "-")
@@ -82,7 +82,7 @@ func RunWorker(masterAddr, workerType,
 		jobIdInt, _ := strconv.Atoi(jobId)
 		workerId := common.WorkerIdType(jobIdInt)
 
-// 		nodeID := scheduleResourceBased(jobIdInt)
+		// 		nodeID := scheduleResourceBased(jobIdInt)
 		nodeID := scheduleRoundRobin(common.WorkerIdType(jobIdInt))
 		nodeIP := common.PartyServerClusterIPs[nodeID]
 
@@ -136,13 +136,13 @@ func RunWorker(masterAddr, workerType,
 		resourceSVC.ResourceIP = nodeIP
 		resourceSVC.WorkerPort = resourcemanager.GetOneFreePort()
 
-		resourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, rawStageName+"-dist-ps", common.DistributedParameterServer, workerNum)
+		resourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, TaskClassIDName, common.DistributedParameterServer, workerNum)
 
 		reply.ResourceSVCs[workerId] = resourceSVC
 		if common.Deployment == common.Docker {
 			nodeLabel := common.PartyServerClusterLabels[nodeID]
 			jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-				dataOutput, resourceSVC, nodeLabel, TaskClassIDName)
+				dataOutput, resourceSVC, nodeLabel, rawStageName+"-dist-ps")
 
 		} else {
 			if common.IsDebug == common.DebugOn {
@@ -171,7 +171,7 @@ func RunWorker(masterAddr, workerType,
 			wkResourceSVC.ResourceIP = wkNodeIP
 			wkResourceSVC.WorkerPort = resourcemanager.GetOneFreePort()
 
-			wkResourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, rawStageName+"-dist-wk", common.DistributedWorker, workerNum)
+			wkResourceSVC.JobNetCfg = jobNetCfg.Constructor(partyNum, workerId, TaskClassIDName, common.DistributedWorker, workerNum)
 
 			reply.ResourceSVCs[workerId] = wkResourceSVC
 
@@ -181,7 +181,7 @@ func RunWorker(masterAddr, workerType,
 			if common.Deployment == common.Docker {
 				nodeLabel := common.PartyServerClusterLabels[wkNodeID]
 				jobmanager.DeployWorkerDockerService(masterAddr, workerType, jobId, dataPath, modelPath,
-					dataOutput, wkResourceSVC, nodeLabel, TaskClassIDName)
+					dataOutput, wkResourceSVC, nodeLabel, rawStageName+"-dist-wk")
 
 			} else {
 

@@ -76,6 +76,8 @@ func GetMpcExecutorPort(workerID int, TaskClassIDName string) common.PortType {
 	TaskName := strings.Split(TaskClassIDName, "-")[0]
 	classID, _ := strconv.Atoi(strings.Split(TaskClassIDName, "-")[1])
 
+	logger.Log.Println("Allocating port with taskName = %s and classID = %d", TaskClassIDName, classID)
+
 	stagePrefix := 1
 	if TaskName == string(common.PreProcTaskKey) {
 		stagePrefix = 2
@@ -104,6 +106,8 @@ func GetMpcExecutorPort(workerID int, TaskClassIDName string) common.PortType {
 	if TaskName == string(common.LimeInterpretTaskKey) {
 		stagePrefix = 8
 	}
+
+	logger.Log.Printf("Allocating port with TaskClassIDName = %s and classID = %d stagePrefix = %d \n", TaskClassIDName, classID, stagePrefix)
 
 	prefix := stagePrefix*1000 + workerID*100 + classID*10
 

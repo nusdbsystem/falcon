@@ -32,7 +32,7 @@ func initSvcName() string {
 func manageJobLifeCycle(job *common.TrainJob, workerType string) {
 
 	var jobStatus string
-// 	if job.DistributedTask.WorkerNumber >= 3+2*int(job.ClassNum) {
+	// 	if job.DistributedTask.WorkerNumber >= 3+2*int(job.ClassNum) {
 	if job.DistributedTask.WorkerNumber >= 3 {
 		jobStatus = parallellySchedule(job, workerType)
 	} else {
@@ -292,6 +292,7 @@ func parallellySchedule(job *common.TrainJob, workerType string) (jobStatus stri
 						common.GenerateLimeFeatSelParams(job.Tasks.LimeFeature.InputConfigs.AlgorithmConfig, int32(classIdParam), job.Tasks.LimeFeature.MpcAlgorithmName)
 					status45 = manageTaskLifeCycle(job, workerType, stage.Name, stage.AssignedWorker, classIdParam)
 					if !status45 {
+						logger.Log.Printf("[JobManager]: feature selection class %d failed, skip model training", classIdParam)
 						*status45Para = append(*status45Para, common.JobFailed)
 						return
 					} else {
@@ -333,6 +334,7 @@ func parallellySchedule(job *common.TrainJob, workerType string) (jobStatus stri
 					classParallelismLock.Unlock()
 					break
 				} else {
+					logger.Log.Println("[JobManager]: wait for previous task finish...")
 					classParallelismLock.Unlock()
 					time.Sleep(1 * time.Second)
 				}
@@ -352,6 +354,7 @@ func parallellySchedule(job *common.TrainJob, workerType string) (jobStatus stri
 			}
 		}
 	}
+	logger.Log.Printf("[JobManager]: parallelism job done ! begin to update status.")
 	return
 }
 
@@ -430,7 +433,7 @@ func manageTaskLifeCycle(job common.TrainJob, workerType string, taskName common
 	// wait this job finish
 	masterIns.WaitJobComplete()
 
-	masterIns.Logger.Println("[JobManager] master finish this stage")
+	masterIns.Logger.Println("[JobManager] master finish this stage" + taskName)
 
 	return masterIns.IsSuccessful()
 }

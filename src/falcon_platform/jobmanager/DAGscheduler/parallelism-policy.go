@@ -53,6 +53,8 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 			sp.updateSingleStageParallelism(k, workerNum)
 			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 		}
+		// for single stage, default to set class parallelism = 1
+		sp.LimeClassParallelism = int(job.ClassNum)
 		return true
 	} else {
 
@@ -61,7 +63,7 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 			sp.LimeInstanceWeightParallelism = 1
 			sp.LimeFeatureSelectionParallelism = 1
 			sp.LimeVFLModelTrainParallelism = 1
-			sp.LimeClassParallelism = 1
+			sp.LimeClassParallelism = int(job.ClassNum)
 
 			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 			return true
