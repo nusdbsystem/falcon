@@ -33,11 +33,15 @@ do
       echo "output is $output, exit. "
       exit
     else
-      echo "output is $output, sleep two second, and waiting..."
+#      echo "output is $output, sleep two second, and waiting..."
       sleep 20
     fi
   done
 
+  sleep 3
+  echo "Now, $jobID finished, rm it's services and begin to execute the next dsl ..... "
+  bash docker_rm_job.sh $jobID
+  sleep 3
 
 done
 
