@@ -57,6 +57,7 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 		sp.LimeClassParallelism = int(job.ClassNum)
 		return true
 	} else {
+		// multiple tasks,
 
 		if job.DistributedTask.WorkerNumber == 1 {
 			sp.LimeOriModelPredictionParallelism = 1
@@ -68,31 +69,25 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
 			return true
 
-		} else if job.DistributedTask.Average == 1 {
-			averageWorker := (job.DistributedTask.WorkerNumber - 1) / int(1+1+job.ClassNum*(1+1))
-
-			if averageWorker == 2 {
-				averageWorker = 1
-			}
-
-			sp.LimeOriModelPredictionParallelism = averageWorker
-			sp.LimeInstanceWeightParallelism = averageWorker
-			sp.LimeFeatureSelectionParallelism = averageWorker
-			sp.LimeVFLModelTrainParallelism = averageWorker
-			sp.LimeClassParallelism = int(job.ClassNum)
-
-			logger.Log.Println("[JobManager]: schedule result = ", sp.toString())
-			return true
-
 		} else {
-
-			// if many stage. run scheduler
-			cmd := exec.Command(
-				"python3",
-				"autoscale/KttScheduler.py",
-				"-w", fmt.Sprintf("%d", workerNum),
-				"-d", "100000",
-				"-c", fmt.Sprintf("%d", job.ClassNum))
+			var cmd *exec.Cmd
+			if job.DistributedTask.Average == 1 {
+				cmd = exec.Command(
+					"python3",
+					"autoscale/KttScheduler.py",
+					"-w", fmt.Sprintf("%d", workerNum),
+					"-d", "100000",
+					"-c", fmt.Sprintf("%d", job.ClassNum),
+					"-a", "1")
+			} else {
+				cmd = exec.Command(
+					"python3",
+					"autoscale/KttScheduler.py",
+					"-w", fmt.Sprintf("%d", workerNum),
+					"-d", "100000",
+					"-c", fmt.Sprintf("%d", job.ClassNum),
+					"-a", "0")
+			}
 
 			out, err := cmd.Output()
 			if err != nil {
@@ -120,6 +115,7 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 			} else {
 				panic("KttScheduler.py return un-recognized result")
 			}
+
 		}
 	}
 }

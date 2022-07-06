@@ -1,0 +1,68 @@
+{
+  "job_name": "credit_card_training",
+  "job_info": "this is the job_info",
+  "job_fl_type": "vertical",
+  "existing_key": 1,
+  "party_nums": 3,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "172.31.18.73:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/synthetic_lime/nFeaturePerParty/partyfeature20"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "172.31.27.127:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nFeaturePerParty/partyfeature20"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "172.31.28.225:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nFeaturePerParty/partyfeature20"
+      }
+    }
+  ],
+  "distributed_task": {
+    "enable": 1,
+    "worker_number": 6
+  },
+  "tasks": {
+    "lime_pred": {
+      "mpc_algorithm_name": "logistic_regression",
+      "algorithm_name": "lime_compute_prediction",
+      "input_configs": {
+        "data_input": {
+          "data": "synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party.csv",
+          "key": "partyfeature20_phe_keys"
+        },
+        "algorithm_config": {
+          "original_model_name": "logistic_regression",
+          "original_model_saved_file": "/synthetic_partyfeature20_rlr.pb",
+          "generated_sample_file": "/synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party.csv",
+          "model_type": "classification",
+          "class_num": 2,
+          "computed_prediction_file": "/dummy_predictions_lr.txt"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    }
+  }
+}
