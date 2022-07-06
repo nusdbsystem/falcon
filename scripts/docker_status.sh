@@ -7,9 +7,9 @@ mails=$(echo $serviceids | tr " " "\n")
 
 for sid in $mails
 do
-
+  echo "$sid"
   STR=$(docker service ps $sid)
-  SUB='Running'
+  SUB='Shutdown'
   if [[ "$STR" == *"$SUB"* ]]; then
     echo "$STR"
     echo

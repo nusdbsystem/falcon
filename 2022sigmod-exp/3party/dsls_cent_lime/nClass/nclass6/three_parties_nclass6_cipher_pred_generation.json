@@ -2,38 +2,38 @@
   "job_name": "synthetic nclass6 dataset convert plain predictions to cipher",
   "job_info": "reuse the lime weight tape with an alternative branch",
   "job_fl_type": "vertical",
-  "existing_key": 0,
+  "existing_key": 1,
   "party_nums": 3,
   "task_num": 1,
   "party_info": [
     {
       "id": 0,
-      "addr": "172.31.18.73:30005",
+      "addr": "127.0.0.1:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/synthetic_lime/nClass/nclass6",
-        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/synthetic_lime/nClass/nclass6",
-        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party0/data/synthetic_lime/nClass/nclass6"
+        "data_input": "/opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_lime/nClass/nclass6",
+        "data_output": "/opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_lime/nClass/nclass6",
+        "model_path": "/opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_lime/nClass/nclass6"
       }
     },
     {
       "id": 1,
-      "addr": "172.31.27.127:30006",
+      "addr": "127.0.0.1:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nClass/nclass6",
-        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nClass/nclass6",
-        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nClass/nclass6"
+        "data_input": "/opt/falcon/2022sigmod-exp/3party/party1/data/synthetic_lime/nClass/nclass6",
+        "data_output": "/opt/falcon/2022sigmod-exp/3party/party1/data/synthetic_lime/nClass/nclass6",
+        "model_path": "/opt/falcon/2022sigmod-exp/3party/party1/data/synthetic_lime/nClass/nclass6"
       }
     },
     {
       "id": 2,
-      "addr": "172.31.28.225:30007",
+      "addr": "127.0.0.1:30007",
       "party_type": "passive",
       "path": {
-        "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nClass/nclass6",
-        "data_output": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nClass/nclass6",
-        "model_path": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nClass/nclass6"
+        "data_input": "/opt/falcon/2022sigmod-exp/3party/party2/data/synthetic_lime/nClass/nclass6",
+        "data_output": "/opt/falcon/2022sigmod-exp/3party/party2/data/synthetic_lime/nClass/nclass6",
+        "model_path": "/opt/falcon/2022sigmod-exp/3party/party2/data/synthetic_lime/nClass/nclass6"
       }
     }
   ],

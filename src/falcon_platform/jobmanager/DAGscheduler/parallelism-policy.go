@@ -1,9 +1,11 @@
 package DAGscheduler
 
 import (
+	"bytes"
 	"falcon_platform/common"
 	"falcon_platform/logger"
 	"fmt"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -70,6 +72,9 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 			return true
 
 		} else {
+			pathstr, _ := os.Getwd()
+			logger.Log.Println("[JobManager]: current path = " + pathstr)
+
 			var cmd *exec.Cmd
 			if job.DistributedTask.Average == 1 {
 				cmd = exec.Command(
@@ -89,11 +94,19 @@ func (sp *ParallelismSchedulePolicy) generateNewPolicy(job *common.TrainJob) boo
 					"-a", "0")
 			}
 
-			out, err := cmd.Output()
+			logger.Log.Println("[JobManager]: cmd = " + cmd.String())
+
+			var out bytes.Buffer
+			var stderr bytes.Buffer
+			cmd.Stdout = &out
+			cmd.Stderr = &stderr
+			err := cmd.Run()
 			if err != nil {
+				fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+				logger.Log.Println("[JobManager]: KttScheduler err = ", err)
 				panic(err.Error())
 			}
-			result := strings.Split(strings.TrimSpace(string(out)), "\n")
+			result := strings.Split(strings.TrimSpace(out.String()), "\n")
 			logger.Log.Println("[JobManager]: KttScheduler return with:", result)
 			label := result[0]
 			if strings.Contains(label, "OK") {

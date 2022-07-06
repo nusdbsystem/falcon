@@ -42,32 +42,25 @@
     "worker_number": 1
   },
   "tasks": {
-    "model_training": {
-      "mpc_algorithm_name": "linear_regression",
-      "algorithm_name": "linear_regression",
+    "lime_pred": {
+      "mpc_algorithm_name": "logistic_regression",
+      "algorithm_name": "lime_compute_prediction",
       "input_configs": {
         "data_input": {
-          "data": "client.txt",
+          "data": "synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party.csv",
           "key": "partyfeature20_phe_keys"
         },
         "algorithm_config": {
-          "batch_size": 128,
-          "max_iteration": 2,
-          "convergence_threshold": 0.0001,
-          "with_regularization": true,
-          "alpha": 0.1,
-          "learning_rate": 0.1,
-          "decay": 0.1,
-          "penalty": "l2",
-          "optimizer": "sgd",
-          "multi_class": "ovr",
-          "metric": "mse",
-          "differential_privacy_budget": 0.1,
-          "fit_bias": true
+          "original_model_name": "logistic_regression",
+          "original_model_saved_file": "/synthetic_partyfeature20_rlr.pb",
+          "generated_sample_file": "/synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party.csv",
+          "model_type": "classification",
+          "class_num": 2,
+          "computed_prediction_file": "/dummy_predictions_lr.txt"
         }
       },
       "output_configs": {
-        "trained_model": "synthetic_partyfeature20_rlr.pb",
+        "trained_model": "saved_model.pb",
         "evaluation_report": "report.txt"
       }
     }

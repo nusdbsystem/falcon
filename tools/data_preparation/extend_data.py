@@ -4,7 +4,7 @@ import argparse
 import random
 import numpy as np
 
-# usage:  python3 extend_data.py --input_file /opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_train/nFeaturePerParty/partyfeature50/client.txt --output_file /opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_train/nFeaturePerParty/partyfeature50/client_new.txt --expect_num 10000
+# usage:  python3 extend_data.py --input_file /opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_train/nFeaturePerParty/partyfeature50/client.txt --output_file /opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_train/nFeaturePerParty/partyfeature50/xx.txt --expect_num 10000
 
 def get_args():
     parser = argparse.ArgumentParser(description='append binary class label to the file and extend to specific number of rows')

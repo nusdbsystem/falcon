@@ -2,7 +2,7 @@
   "job_name": "credit_card_training",
   "job_info": "this is the job_info",
   "job_fl_type": "vertical",
-  "existing_key": 0,
+  "existing_key": 1,
   "party_nums": 3,
   "task_num": 1,
   "party_info": [
@@ -11,9 +11,9 @@
       "addr": "127.0.0.1:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/opt/falcon/2022sigmod-exp/3party/party0/data/bike",
-        "data_output": "/opt/falcon/2022sigmod-exp/3party/party0/data/bike",
-        "model_path": "/opt/falcon/2022sigmod-exp/3party/party0/data/bike"
+        "data_input": "/opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "data_output": "/opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "model_path": "/opt/falcon/2022sigmod-exp/3party/party0/data/synthetic_lime/nFeaturePerParty/partyfeature20"
       }
     },
     {
@@ -21,9 +21,9 @@
       "addr": "127.0.0.1:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/2022sigmod-exp/3party/party1/data/bike",
-        "data_output": "/opt/falcon/2022sigmod-exp/3party/party1/data/bike",
-        "model_path": "/opt/falcon/2022sigmod-exp/3party/party1/data/bike"
+        "data_input": "/opt/falcon/2022sigmod-exp/3party/party1/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "data_output": "/opt/falcon/2022sigmod-exp/3party/party1/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "model_path": "/opt/falcon/2022sigmod-exp/3party/party1/data/synthetic_lime/nFeaturePerParty/partyfeature20"
       }
     },
     {
@@ -31,15 +31,15 @@
       "addr": "127.0.0.1:30007",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/2022sigmod-exp/3party/party2/data/bike",
-        "data_output": "/opt/falcon/2022sigmod-exp/3party/party2/data/bike",
-        "model_path": "/opt/falcon/2022sigmod-exp/3party/party2/data/bike"
+        "data_input": "/opt/falcon/2022sigmod-exp/3party/party2/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "data_output": "/opt/falcon/2022sigmod-exp/3party/party2/data/synthetic_lime/nFeaturePerParty/partyfeature20",
+        "model_path": "/opt/falcon/2022sigmod-exp/3party/party2/data/synthetic_lime/nFeaturePerParty/partyfeature20"
       }
     }
   ],
   "distributed_task": {
-    "enable": 1,
-    "worker_number": 3
+    "enable": 0,
+    "worker_number": 1
   },
   "tasks": {
     "model_training": {
@@ -48,7 +48,7 @@
       "input_configs": {
         "data_input": {
           "data": "client.txt",
-          "key": "phe_keys"
+          "key": "partyfeature20_phe_keys"
         },
         "algorithm_config": {
           "batch_size": 128,
@@ -67,7 +67,7 @@
         }
       },
       "output_configs": {
-        "trained_model": "saved_model.pb",
+        "trained_model": "synthetic_partyfeature20_rlr.pb",
         "evaluation_report": "report.txt"
       }
     }

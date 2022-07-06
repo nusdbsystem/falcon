@@ -4,7 +4,7 @@ ubuntu@ec2-34-224-78-199.compute-1.amazonaws.com
 ubuntu@ec2-3-87-245-116.compute-1.amazonaws.com
 ubuntu@ec2-34-224-102-45.compute-1.amazonaws.com
 ubuntu@ec2-3-94-163-69.compute-1.amazonaws.com
-ubuntu@ec2-54-227-102-114.compute-1.amazonaws.com
+ubuntu@ec2-52-201-253-53.compute-1.amazonaws.com
 ubuntu@ec2-54-227-102-114.compute-1.amazonaws.com
 ubuntu@ec2-34-230-88-196.compute-1.amazonaws.com
 ubuntu@ec2-34-229-151-146.compute-1.amazonaws.com

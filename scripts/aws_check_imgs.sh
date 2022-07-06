@@ -26,7 +26,7 @@ echo "$(ssh -i "/home/wuyuncheng/sigmod23-aws/aws-ec2-ssh-falcon.pem" ubuntu@ec2
 echo " "
 
 echo "----- p0w2 -----"
-echo "$(ssh -i "/home/wuyuncheng/sigmod23-aws/aws-ec2-ssh-falcon.pem" ubuntu@ec2-54-227-102-114.compute-1.amazonaws.com "docker images lemonwyc/falcon:latest")"
+echo "$(ssh -i "/home/wuyuncheng/sigmod23-aws/aws-ec2-ssh-falcon.pem" ubuntu@ec2-52-201-253-53.compute-1.amazonaws.com "docker images lemonwyc/falcon:latest")"
 echo " "
 
 echo "----- p1w2 -----"

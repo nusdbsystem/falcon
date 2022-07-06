@@ -6,6 +6,8 @@
 #include <falcon/utils/base64.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <iterator>
+#include <falcon/utils/logger/logger.h>
+
 
 std::vector<std::vector<double> > read_dataset(const std::string& data_file,
                                                char delimiter) {
@@ -146,6 +148,8 @@ void write_encoded_number_matrix_to_file(
     exit(EXIT_FAILURE);
   }
 
+  log_info("[write_encoded_number_matrix_to_file] row_num = " + std::to_string(row_num));
+
   for (int i = 0; i < row_num; i++) {
     std::string line;
     // serialize encoded array to string and write
@@ -154,6 +158,7 @@ void write_encoded_number_matrix_to_file(
     std::string b64_line = base64_encode(reinterpret_cast<const BYTE *>(line.c_str()),
                                          line.size());
     b64_line += "\n";
+    log_info("[write_encoded_number_matrix_to_file] write line " + std::to_string(i));
     encoded_matrix_outfile << b64_line;
   }
   encoded_matrix_outfile.close();

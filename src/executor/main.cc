@@ -16,6 +16,7 @@
 #include <falcon/algorithm/vertical/tree/gbdt_builder.h>
 #include "falcon/inference/server/inference_server.h"
 #include <falcon/inference/interpretability/lime/lime.h>
+#include <falcon/algorithm/vertical/preprocessing/pre_feature_selection.h>
 #include "falcon/distributed/worker.h"
 #include "falcon/algorithm/vertical/linear_model/logistic_regression_ps.h"
 #include <falcon/algorithm/vertical/linear_model/linear_regression_ps.h>
@@ -129,6 +130,7 @@ int main(int argc, char *argv[]) {
       // for non-distributed train or inference, init the network and keys directly
       party.init_network_channels(network_config_pb_str);
       party.init_phe_keys(use_existing_key, key_file);
+      // centralized inference
       if (is_inference) {
         log_info("Execute inference logic");
         // invoke creating endpoint for inference requests
@@ -142,9 +144,14 @@ int main(int argc, char *argv[]) {
         } else {
           run_passive_server(model_save_file, party, parsed_algorithm_name);
         }
-      } else {
+      }
+      // centralized training
+      else {
         log_info("Execute training logic");
         switch(parsed_algorithm_name) {
+          case falcon::FeatureSelection:
+            pre_feat_sel(party, algorithm_params, data_output_file);
+            break;
           case falcon::LOG_REG:
             train_logistic_regression(&party, algorithm_params_pb_str, model_save_file, model_report_file);
             break;

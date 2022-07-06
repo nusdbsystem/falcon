@@ -114,6 +114,7 @@ namespace falcon {
     LIME_SAMPLING,
     LIME_COMP_PRED,
     LIME_COMP_WEIGHT,
+    FeatureSelection,
     LIME_FEAT_SEL,
     LIME_INTERPRET
   };

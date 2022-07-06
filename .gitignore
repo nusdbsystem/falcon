@@ -141,3 +141,10 @@ src/falcon_platform/examples/train_job_dsls/sigmod_experiments/
 
 # ignore trained pb file
 *.pb
+
+2022sigmod-exp/3party/party0/data/synthetic_lime/
+2022sigmod-exp/3party/party1/data/synthetic_lime/
+2022sigmod-exp/3party/party2/data/synthetic_lime/
+2022sigmod-exp/3party/party0/data/synthetic_train/
+2022sigmod-exp/3party/party1/data/synthetic_train/
+2022sigmod-exp/3party/party2/data/synthetic_train/

@@ -259,9 +259,11 @@ EncodedNumberType EncodedNumber::getter_type() const {
 long long fixed_pointed_integer_representation(double value, int precision) {
   auto ex = (long long) pow(PHE_FIXED_POINT_BASE, precision);
   std::stringstream ss;
+  // keep precision decimal places.
   ss << std::fixed << std::setprecision(precision) << value;
   std::string s = ss.str();
 //  auto r = (long long) (::atof(s.c_str()) * ex);
+  // convert back to float and upgrade with 2**precision
   auto r = (long long) (std::stold(s) * ex);
   return r;
 }

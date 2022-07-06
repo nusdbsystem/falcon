@@ -1,8 +1,0 @@
-******** Evaluation Report on testing dataset ********
-=== Regression Report ===
-MSE Loss = 8.24126
-RMSE Loss = 2.87076
-MSLE Loss = -nan
-RMSLE Loss = -nan
-MAE Loss = 2.82242
-MAXE Loss = 4.31489
