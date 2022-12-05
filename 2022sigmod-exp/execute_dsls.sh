@@ -5,7 +5,7 @@
 set -e
 
 # go to falcon_platform dir
-# cd /opt/falcon/src/falcon_platform/
+# cd /opt/falcon/2022sigmod-exp
 # ./3party/DSLs
 
 # execute all dsls in this dir.
