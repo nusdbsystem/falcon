@@ -1,12 +1,12 @@
 # checkout branch for test code
 echo "---------------git checkout branch--------"
 git branch
-# git pull origin experiment2022
+git pull origin add_pearson
 # git log -4
 
 # make executor
 echo "---------------make executor--------"
-# bash make.sh
+bash make.sh
 
 # make platform
 echo "---------------make platform--------"
