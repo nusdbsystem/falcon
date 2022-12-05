@@ -19,6 +19,10 @@
 #include <thread>
 #include <future>
 
+/* feature selection */
+const std::string PEARSON_FEATURE_SELECTION = "pearson_correlation";
+const std::string LR_FEATURE_SELECTION = "linear_regression";
+
 struct LimeSamplingParams {
   // the instance index for explain
   int explain_instance_idx;

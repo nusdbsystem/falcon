@@ -22,11 +22,7 @@
 #include <falcon/utils/base64.h>
 #include <falcon/operator/conversion/op_conv.h>
 #include <falcon/party/info_exchange.h>
-
 #include <glog/logging.h>
-#include "omp.h"
-
-#include <utility>
 #include <falcon/model/model_io.h>
 #include <falcon/utils/pb_converter/lr_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
@@ -456,10 +452,11 @@ void LimeExplainer::select_features(Party party,
                                     int distributed_role,
                                     int worker_id) {
   // currently, only support pearson-based feature selection
-  if (feature_selection != "pearson_correlation" && feature_selection != "linear_regression") {
+  if (feature_selection != PEARSON_FEATURE_SELECTION && feature_selection != LR_FEATURE_SELECTION) {
     log_error("The feature selection method " + feature_selection + " not supported");
     exit(EXIT_FAILURE);
   }
+
   // do the following steps to selected feature
   // 1. read the selected sample file
   char delimiter = ',';
@@ -498,34 +495,36 @@ void LimeExplainer::select_features(Party party,
   log_info("[explain_one_label]: algorithm_name = " + std::to_string(algorithm_name));
   // deserialize linear regression params
 
-  LinearRegressionParams linear_reg_params;
-  //  linear_reg_params.batch_size = 8;
-  //  linear_reg_params.max_iteration = 100;
-  //  linear_reg_params.converge_threshold = 0.0001;
-  //  linear_reg_params.with_regularization = true;
-  //  linear_reg_params.alpha = 0.1;
-  //  linear_reg_params.learning_rate = 0.1;
-  //  linear_reg_params.decay = 0.1;
-  //  linear_reg_params.penalty = "l2";
-  //  linear_reg_params.optimizer = "sgd";
-  //  linear_reg_params.metric = "mse";
-  //  linear_reg_params.dp_budget = 0.1;
-  //  linear_reg_params.fit_bias = true;
-  std::string linear_reg_param_pb_str = base64_decode_to_pb_string(feature_selection_param);
-  deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);
-  log_linear_regression_params(linear_reg_params);
   std::vector<double> local_model_weights;
-  // call linear regression training
-  local_model_weights = lime_linear_reg_train(
-          party,
-          linear_reg_params,
-          selected_samples,
-          selected_pred_class_id,
-          sss_weights,
-          ps_network_str,
-          is_distributed,
-          distributed_role,
-          worker_id);
+  bool is_linear_reg_params_fit_bias = false;
+  if (feature_selection == PEARSON_FEATURE_SELECTION){
+
+    // pearson doesn't require parameters
+
+
+
+  }else if (feature_selection == LR_FEATURE_SELECTION) {
+    LinearRegressionParams linear_reg_params;
+    std::string linear_reg_param_pb_str = base64_decode_to_pb_string(feature_selection_param);
+    deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);
+    log_linear_regression_params(linear_reg_params);
+    // call linear regression training
+    is_linear_reg_params_fit_bias = linear_reg_params.fit_bias;
+    local_model_weights = lime_linear_reg_train(
+        party,
+        linear_reg_params,
+        selected_samples,
+        selected_pred_class_id,
+        sss_weights,
+        ps_network_str,
+        is_distributed,
+        distributed_role,
+        worker_id);
+
+  }else{
+    log_error("The feature selection method " + feature_selection + " not supported");
+    exit(EXIT_FAILURE);
+  }
 
   // parties exchange local_model_weights and find top-k feature indexes
   // TODO: need to use mpc program to do the comparison (here approximate it)
@@ -535,7 +534,8 @@ void LimeExplainer::select_features(Party party,
     // 1.1 add local weight into global model weights list
     std::vector<double> global_model_weights;
     vector<double>::const_iterator first, end;
-    if (linear_reg_params.fit_bias) {
+    // only used when linear_reg_params.fit_bias = true
+    if (is_linear_reg_params_fit_bias) {
       for (int i = 1; i < local_model_weights.size(); i++) {
         global_model_weights.push_back(local_model_weights[i]);
       }

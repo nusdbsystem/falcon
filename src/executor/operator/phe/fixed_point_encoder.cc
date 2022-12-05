@@ -3,12 +3,9 @@
 //
 
 #include "falcon/operator/phe/fixed_point_encoder.h"
-
 #include <iomanip>
-#include <sstream>
 #include <cmath>
 #include <iostream>
-
 #include <falcon/utils/logger/logger.h>
 
 EncodedNumber::EncodedNumber()
