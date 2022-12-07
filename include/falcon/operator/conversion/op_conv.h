@@ -58,7 +58,8 @@ void ciphers_mat_to_secret_shares_mat(const Party& party, EncodedNumber** src_ci
                                       int req_party_id, int phe_precision);
 
 /**
- * convert secret shares back to ciphertext vector
+ * Convert secret shares back to ciphertext vector,
+ * After Converting, all parties will have the ciphertext
  *
  * @param party: the participating party
  * @param dest_ciphers: ciphertext vector to be recovered

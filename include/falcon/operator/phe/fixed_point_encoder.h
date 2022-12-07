@@ -164,7 +164,9 @@ class EncodedNumber {
 };
 
 /**
- * represent a double with fixed pointed integer
+ * convert a double value to a fixed pointed integer,
+ * e,g. 1.111  -> 1.11 * 2**2 when precision is 2
+ *
  * @param value
  * @param precision : exponent with precision
  * @return

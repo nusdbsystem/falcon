@@ -305,7 +305,7 @@ void djcs_t_aux_matrix_ele_wise_ee_add_ext(
     int column_size);
 
 /**
- * homomorphic matrix multiplication of a cipher vector
+ * MatMul: homomorphic matrix multiplication of a cipher vector
  * and a plain matrix, the result is a cipher vector
  *
  * @param pk: public key

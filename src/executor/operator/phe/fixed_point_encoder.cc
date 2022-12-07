@@ -260,7 +260,7 @@ long long fixed_pointed_integer_representation(double value, int precision) {
   ss << std::fixed << std::setprecision(precision) << value;
   std::string s = ss.str();
 //  auto r = (long long) (::atof(s.c_str()) * ex);
-  // convert back to float and upgrade with 2**precision
+  // convert string back to long double and upgrade with ex**precision, ex is 2 by default
   auto r = (long long) (std::stold(s) * ex);
   return r;
 }

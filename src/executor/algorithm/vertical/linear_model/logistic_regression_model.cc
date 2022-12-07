@@ -81,11 +81,13 @@ void LogisticRegressionModel::predict_proba(
   }
   // compute the positive prediction, note that the predicted_labels_pos is known to all parties
   auto* predicted_labels_pos = new EncodedNumber[cur_sample_size];
+  // predict
   predict(party, predicted_samples, predicted_labels_pos);
   int prediction_precision = std::abs(predicted_labels_pos[0].getter_exponent());
   int negative_one = -1;
   double positive_one = 1.0;
   auto* predicted_labels_neg = new EncodedNumber[cur_sample_size];
+  // todo: why other party can calculate predicted_labels_neg also, why active compute while others receive?
   if (party.party_type == falcon::ACTIVE_PARTY) {
     EncodedNumber pos_one_double, neg_one_int;
     pos_one_double.set_double(phe_pub_key->n[0], positive_one, prediction_precision);
@@ -93,11 +95,14 @@ void LogisticRegressionModel::predict_proba(
     neg_one_int.set_integer(phe_pub_key->n[0], negative_one);
     for (int i = 0; i < cur_sample_size; i++) {
       EncodedNumber label_neg;
+      // [label_neg] = [predicted_labels_pos] * -1
       djcs_t_aux_ep_mul(phe_pub_key, label_neg, predicted_labels_pos[i], neg_one_int);
+      // [label_neg] = [1] + [label_net] = [1] + [-predicted_labels_pos]
       djcs_t_aux_ee_add(phe_pub_key, label_neg, label_neg, pos_one_double);
       predicted_labels_neg[i] = label_neg;
     }
   }
+  // activate party send to all passive parties,
   broadcast_encoded_number_array(party, predicted_labels_neg, cur_sample_size, ACTIVE_PARTY_ID);
   for (int i = 0; i < cur_sample_size; i++) {
     predicted_labels[i][0] = predicted_labels_neg[i];

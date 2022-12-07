@@ -153,7 +153,11 @@ set(SOURCE_FILES
         algorithm/vertical/nn/layer.cc algorithm/vertical/nn/mlp.cc
         ../../include/falcon/algorithm/vertical/nn/mlp_builder.h algorithm/vertical/nn/mlp_builder.cc
         ../../include/falcon/utils/pb_converter/nn_converter.h utils/pb_converter/nn_converter.cc
-        ../../include/falcon/algorithm/vertical/nn/mlp_ps.h algorithm/vertical/nn/mlp_ps.cc ../../include/falcon/utils/alg/vec_util.h utils/alg/vec_util.cc)
+        ../../include/falcon/algorithm/vertical/nn/mlp_ps.h algorithm/vertical/nn/mlp_ps.cc
+        ../../include/falcon/utils/alg/vec_util.h utils/alg/vec_util.cc
+        ../../include/falcon/algorithm/vertical/preprocessing/weighted_pearson.h
+        algorithm/vertical/preprocessing/weighted_pearson.cpp
+        )
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")
