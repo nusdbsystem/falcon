@@ -173,6 +173,7 @@ void LimeExplainer::compute_sample_weights(
   char delimiter = ',';
   std::vector<std::vector<double>> generated_samples =
       read_dataset(generated_sample_file, delimiter);
+  // the first row is the origin data to be predicted
   std::vector<double> origin_data = generated_samples[0];
   int generated_samples_size = (int) generated_samples.size();
   log_info("Read the generated samples finished");
@@ -499,8 +500,16 @@ void LimeExplainer::select_features(Party party,
   bool is_linear_reg_params_fit_bias = false;
   if (feature_selection == PEARSON_FEATURE_SELECTION){
     // pearson doesn't require parameters
-
-
+    WeightedPearson wpcc;
+    wpcc.get_feature_importance(party,
+                                class_id,
+                                selected_samples,
+                                selected_pred_class_id,
+                                sss_weights,
+                                ps_network_str,
+                                is_distributed,
+                                distributed_role,
+                                worker_id);
 
 
   }else if (feature_selection == LR_FEATURE_SELECTION) {
@@ -1630,9 +1639,11 @@ void lime_comp_weight(Party party, const std::string& params_str,
       party,
       comp_weights_params.generated_sample_file,
       comp_weights_params.computed_prediction_file,
+
       comp_weights_params.is_precompute,
       comp_weights_params.num_samples,
       comp_weights_params.class_num,
+
       comp_weights_params.distance_metric,
       comp_weights_params.kernel,
       comp_weights_params.kernel_width,

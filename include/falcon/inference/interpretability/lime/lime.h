@@ -12,6 +12,7 @@
 #include <falcon/operator/phe/fixed_point_encoder.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
 #include <falcon/algorithm/vertical/tree/tree_builder.h>
+#include <falcon/algorithm/vertical/preprocessing/weighted_pearson.h>
 #include "scaler.h"
 #include <string>
 #include <vector>
