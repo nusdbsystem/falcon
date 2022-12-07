@@ -61,4 +61,28 @@ class WeightedPearson {
 
 };
 
+
+void spdz_lime_divide(int party_num,
+                      int party_id,
+                      std::vector<int> mpc_port_bases,
+                      std::vector<std::string> party_host_names,
+                      int public_value_size,
+                      const std::vector<int>& public_values,
+                      int private_value_size,
+                      const std::vector<double>& private_values,
+                      falcon::SpdzLimeCompType lime_comp_type,
+                      std::promise<std::vector<double>> *res);
+
+void spdz_lime_WPCC(int party_num,
+                    int party_id,
+                    std::vector<int> mpc_port_bases,
+                    std::vector<std::string> party_host_names,
+                    int public_value_size,
+                    const std::vector<int>& public_values,
+                    int private_value_size,
+                    const std::vector<double>& private_values,
+                    falcon::SpdzLimeCompType lime_comp_type,
+                    std::promise<std::vector<double>> *res);
+
+
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_PREPROCESSING_WEIGHTED_PEARSON_H_
