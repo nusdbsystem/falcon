@@ -500,8 +500,7 @@ void LimeExplainer::select_features(Party party,
   bool is_linear_reg_params_fit_bias = false;
   if (feature_selection == PEARSON_FEATURE_SELECTION){
     // pearson doesn't require parameters
-    WeightedPearson wpcc;
-    wpcc.get_feature_importance(party,
+    wpcc_feature_selection(party,
                                 class_id,
                                 selected_samples,
                                 selected_pred_class_id,
