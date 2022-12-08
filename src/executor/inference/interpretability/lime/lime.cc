@@ -1048,7 +1048,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   int label_size = REGRESSION_TREE_CLASS_NUM * cur_sample_size;
   auto* encrypted_labels = new EncodedNumber[label_size];
   auto* predictions_square = new EncodedNumber[cur_sample_size];
-  ciphers_multi(party, predictions_square,
+  ciphers_ele_wise_multi(party, predictions_square,
                 predictions,
                 predictions,
                 cur_sample_size,
