@@ -17,7 +17,7 @@
  * Negative: encoded number is negative, should minus n before decoding
  * Overflow: encoded number is overflowed
  */
-enum EncodedNumberState {Invalid, Positive, Negative, Overflow};
+enum EncodedNumberState { Invalid, Positive, Negative, Overflow };
 
 /**
  * describe the type of the EncodedNumber, three types
@@ -25,7 +25,7 @@ enum EncodedNumberState {Invalid, Positive, Negative, Overflow};
  * Plaintext: the original value or revealed secret shared value
  * Ciphertext: the encrypted value by threshold Damgard Jurik cryptosystem
  */
-enum EncodedNumberType {Plaintext, Ciphertext};
+enum EncodedNumberType { Plaintext, Ciphertext };
 
 // fixed pointed integer representation
 class EncodedNumber {
@@ -98,13 +98,13 @@ class EncodedNumber {
    * @deprecated
    * @param v
    */
-  void decode(long & v);
+  void decode(long &v);
 
   /**
    * decode to double value
    * @param v
    */
-  void decode(double & v);
+  void decode(double &v);
 
   /**
    * when exponent is large, decode with truncation
@@ -114,7 +114,7 @@ class EncodedNumber {
    * @param v
    * @param truncated_exponent
    */
-  void decode_with_truncation(double & v, int truncated_exponent);
+  void decode_with_truncation(double &v, int truncated_exponent);
 
   /**
    * check encoded number
@@ -160,7 +160,7 @@ class EncodedNumber {
   int getter_exponent() const;
 
   /** get EncodedNumber type */
-  EncodedNumberType  getter_type() const;
+  EncodedNumberType getter_type() const;
 };
 
 /**
@@ -180,7 +180,7 @@ long long fixed_pointed_integer_representation(double value, int precision);
  * @param res
  * @param exponent
  */
-void fixed_pointed_encode(long value, mpz_t res, int & exponent);
+void fixed_pointed_encode(long value, mpz_t res, int &exponent);
 
 /**
  * encode a double with mpz_t
@@ -190,14 +190,14 @@ void fixed_pointed_encode(long value, mpz_t res, int & exponent);
  * @param res
  * @param exponent
  */
-void fixed_pointed_encode(double value, int precision, mpz_t res, int & exponent);
+void fixed_pointed_encode(double value, int precision, mpz_t res, int &exponent);
 
 /**
  * decode a mpz_t to a long value when exponent is 0
  * @param value
  * @param res
  */
-void fixed_pointed_decode(long & value, mpz_t res);
+void fixed_pointed_decode(long &value, mpz_t res);
 
 /**
  * decode a mpz_t to a double value when exponent is not 0
@@ -205,7 +205,7 @@ void fixed_pointed_decode(long & value, mpz_t res);
  * @param res
  * @param exponent
  */
-void fixed_pointed_decode(double & value, mpz_t res, int exponent);
+void fixed_pointed_decode(double &value, mpz_t res, int exponent);
 
 /**
  * decode a mpz_t to a double value when exponent is not 0 with precision truncation
@@ -215,7 +215,19 @@ void fixed_pointed_decode(double & value, mpz_t res, int exponent);
  * @param exponent
  * @param truncated_exponent : truncate the res to desired precision to avoid overflow
  */
-void fixed_pointed_decode_truncated(double & value, mpz_t res, int exponent, int truncated_exponent);
+void fixed_pointed_decode_truncated(double &value, mpz_t res, int exponent, int truncated_exponent);
 
+
+/**
+ * Convert a two dimension vector into two-d encoded number array
+ * @param two_d_vec input two dimension array to be converted
+ * @param pn: public key of a party
+ * @param exponent: precision in converting a value into encode number
+ * @return two dimension encoded number with each value encoding using pn and exponent
+ */
+void metrics_to_encoded_num(EncodedNumber** result,
+                           const std::vector<std::vector<double>>& two_d_vec,
+                           mpz_t pn,
+                           int exponent);
 
 #endif //FALCON_SRC_EXECUTOR_OPERATOR_PHE_FIXED_POINT_ENCODER_H_

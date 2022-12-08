@@ -375,3 +375,25 @@ void fixed_pointed_decode_truncated(double & value, mpz_t res, int exponent, int
     mpz_clear(new_value);
   }
 }
+
+void metrics_to_encoded_num(EncodedNumber** result, const std::vector<std::vector<double>>& two_d_vec, mpz_t pn, int exponent){
+
+  // the result is created outside using
+  //  auto **encoded_shares = new EncodedNumber *[n_shares_row];
+  //  for (int i = 0; i < n_shares_row; i++) {
+  //      encoded_shares[i] = new EncodedNumber[n_shares_col];
+  //  }
+
+  if (two_d_vec.empty()){
+    log_error("[vector_to_encoded_num] convert to two-d encoded number failed due ot 0 len of shares");
+    exit(EXIT_FAILURE);
+  }
+  int row_size = two_d_vec.size();
+  int column_size = two_d_vec[0].size();
+  for (int i = 0; i < row_size; i++) {
+    for (int j = 0; j < column_size; j++) {
+      result[i][j].set_double(pn, two_d_vec[i][j], exponent);
+    }
+  }
+
+}
