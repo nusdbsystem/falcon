@@ -4,25 +4,23 @@
 
 #include <falcon/operator/conversion/op_conv.h>
 #include <falcon/utils/pb_converter/common_converter.h>
-#include <falcon/utils/logger/logger.h>
 #include <falcon/party/info_exchange.h>
-#include <falcon/algorithm/model_builder_helper.h>
 #include <falcon/utils/base64.h>
 #include <omp.h>
 
-void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
-                           EncodedNumber* dest_plains, int size, int req_party_id) {
+void collaborative_decrypt(const Party &party, EncodedNumber *src_ciphers,
+                           EncodedNumber *dest_plains, int size, int req_party_id) {
 
 //  log_info("[collaborative_decrypt] size = " + std::to_string(size));
 //  const clock_t co_dec_start_time = clock();
 
   // retrieve phe pub key and auth server
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  djcs_t_auth_server* phe_auth_server = djcs_t_init_auth_server();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
+  djcs_t_auth_server *phe_auth_server = djcs_t_init_auth_server();
   party.getter_phe_pub_key(phe_pub_key);
   party.getter_phe_auth_server(phe_auth_server);
   // partially decrypt the ciphertext vector
-  auto * partial_decryption = new EncodedNumber[size];
+  auto *partial_decryption = new EncodedNumber[size];
   omp_set_num_threads(NUM_OMP_THREADS);
 #pragma omp parallel for
   for (int i = 0; i < size; i++) {
@@ -41,7 +39,7 @@ void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
     // create 2D-array m*n to store the decryption shares,
     // m = size, n = party_num, such that each row i represents
     // all the shares for the i-th ciphertext
-    auto** decryption_shares = new EncodedNumber*[size];
+    auto **decryption_shares = new EncodedNumber *[size];
     for (int i = 0; i < size; i++) {
       decryption_shares[i] = new EncodedNumber[party.party_num];
     }
@@ -56,7 +54,7 @@ void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
       } else {
         std::string recv_partial_decryption_str;
         party.recv_long_message(id, recv_partial_decryption_str);
-        auto* recv_partial_decryption = new EncodedNumber[size];
+        auto *recv_partial_decryption = new EncodedNumber[size];
         deserialize_encoded_number_array(recv_partial_decryption, size,
                                          recv_partial_decryption_str);
         // copy other party's decrypted shares
@@ -104,16 +102,16 @@ void collaborative_decrypt(const Party& party, EncodedNumber* src_ciphers,
   djcs_t_free_auth_server(phe_auth_server);
 }
 
-void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
-                              std::vector<double>& secret_shares,
+void ciphers_to_secret_shares(const Party &party, EncodedNumber *src_ciphers,
+                              std::vector<double> &secret_shares,
                               int size, int req_party_id, int phe_precision) {
   // retrieve phe pub key and auth server
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
   // each party generates a random vector with size values
   // (the request party will add the summation to the share)
   // ui randomly chooses ri belongs to Zq and encrypts it as [ri]
-  auto* encrypted_shares = new EncodedNumber[size];
+  auto *encrypted_shares = new EncodedNumber[size];
   secret_shares = std::vector<double>(size, 0.0);
   omp_set_num_threads(NUM_OMP_THREADS);
 #pragma omp parallel for
@@ -135,7 +133,7 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
   }
 
   // request party aggregate the shares and invoke collaborative decryption
-  auto* aggregated_shares = new EncodedNumber[size];
+  auto *aggregated_shares = new EncodedNumber[size];
   if (party.party_id == req_party_id) {
     omp_set_num_threads(NUM_OMP_THREADS);
 #pragma omp parallel for
@@ -150,7 +148,7 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
       if (id != party.party_id) {
         std::string recv_encrypted_shares_str;
         party.recv_long_message(id, recv_encrypted_shares_str);
-        auto* recv_encrypted_shares = new EncodedNumber[size];
+        auto *recv_encrypted_shares = new EncodedNumber[size];
         deserialize_encoded_number_array(recv_encrypted_shares, size,
                                          recv_encrypted_shares_str);
         omp_set_num_threads(NUM_OMP_THREADS);
@@ -186,7 +184,7 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
                                      recv_aggregated_shares_str);
   }
   // collaborative decrypt the aggregated shares, clients jointly decrypt [e]
-  auto* decrypted_sum = new EncodedNumber[size];
+  auto *decrypted_sum = new EncodedNumber[size];
   collaborative_decrypt(party, aggregated_shares, decrypted_sum, size, req_party_id);
   // if request party, add the decoded results to the secret shares
   // u1 sets [x]1 = e − r1 mod q
@@ -199,7 +197,7 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
       } else {
         long decoded_sum_i;
         decrypted_sum[i].decode(decoded_sum_i);
-        secret_shares[i] += (double)decoded_sum_i;
+        secret_shares[i] += (double) decoded_sum_i;
       }
     }
   }
@@ -210,8 +208,8 @@ void ciphers_to_secret_shares(const Party& party, EncodedNumber* src_ciphers,
   djcs_t_free_public_key(phe_pub_key);
 }
 
-void ciphers_mat_to_secret_shares_mat(const Party& party, EncodedNumber** src_ciphers_mat,
-                                      std::vector<std::vector<double>>& secret_shares_mat,
+void ciphers_mat_to_secret_shares_mat(const Party &party, EncodedNumber **src_ciphers_mat,
+                                      std::vector<std::vector<double>> &secret_shares_mat,
                                       int row_size, int column_size,
                                       int req_party_id, int phe_precision) {
   // convert the ciphertext vector by vector
@@ -224,16 +222,16 @@ void ciphers_mat_to_secret_shares_mat(const Party& party, EncodedNumber** src_ci
   }
 }
 
-void secret_shares_to_ciphers(const Party& party, EncodedNumber* dest_ciphers,
+void secret_shares_to_ciphers(const Party &party, EncodedNumber *dest_ciphers,
                               std::vector<double> secret_shares,
                               int size, int req_party_id, int phe_precision) {
   // retrieve phe pub key and auth server
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
   // encode and encrypt the secret shares
   // and send to req_party, who aggregates
   // and send back to the other parties
-  auto* encrypted_shares = new EncodedNumber[size];
+  auto *encrypted_shares = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {
     encrypted_shares[i].set_double(phe_pub_key->n[0], secret_shares[i],
                                    phe_precision);
@@ -252,7 +250,7 @@ void secret_shares_to_ciphers(const Party& party, EncodedNumber* dest_ciphers,
       if (id != party.party_id) {
         std::string recv_encrypted_shares_str;
         party.recv_long_message(id, recv_encrypted_shares_str);
-        auto* recv_encrypted_shares = new EncodedNumber[size];
+        auto *recv_encrypted_shares = new EncodedNumber[size];
         deserialize_encoded_number_array(recv_encrypted_shares, size,
                                          recv_encrypted_shares_str);
         // homomorphic aggregation
@@ -291,7 +289,11 @@ void secret_shares_to_ciphers(const Party& party, EncodedNumber* dest_ciphers,
   djcs_t_free_public_key(phe_pub_key);
 }
 
-void truncate_ciphers_precision(const Party& party, EncodedNumber *ciphers, int size,
+/***********************************************************/
+/***************** cipher & share operations ***************/
+/***********************************************************/
+
+void truncate_ciphers_precision(const Party &party, EncodedNumber *ciphers, int size,
                                 int req_party_id, int dest_precision) {
   // check if the cipher precision is higher than the dest_precision
   // otherwise, no need to truncate the precision
@@ -308,22 +310,22 @@ void truncate_ciphers_precision(const Party& party, EncodedNumber *ciphers, int 
   // broadcast_encoded_number_array(ciphers, size, req_party_id);
   // step 2. convert the ciphers into secret shares given src_precision
   std::vector<double> ciphers_shares;
-  ciphers_to_secret_shares(party, ciphers,ciphers_shares, size, req_party_id, src_precision);
+  ciphers_to_secret_shares(party, ciphers, ciphers_shares, size, req_party_id, src_precision);
   // step 3. convert the secret shares into ciphers given dest_precision
   auto *dest_ciphers = new EncodedNumber[size];
-  secret_shares_to_ciphers(party, dest_ciphers,ciphers_shares, size, req_party_id, dest_precision);
+  secret_shares_to_ciphers(party, dest_ciphers, ciphers_shares, size, req_party_id, dest_precision);
   // step 4. inplace ciphers by dest_ciphers
   for (int i = 0; i < size; i++) {
     ciphers[i] = dest_ciphers[i];
   }
   log_info("truncate the ciphers precision finished");
-  delete [] dest_ciphers;
+  delete[] dest_ciphers;
 }
 
-void ciphers_multi(const Party& party, EncodedNumber *res, EncodedNumber *ciphers1,
-                          EncodedNumber *ciphers2, int size, int req_party_id) {
+void ciphers_multi(const Party &party, EncodedNumber *res, EncodedNumber *ciphers1,
+                   EncodedNumber *ciphers2, int size, int req_party_id) {
   // retrieve phe pub key and auth server
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
   // step 1: convert ciphers 1 to secret shares
   int cipher1_precision = std::abs(ciphers1[0].getter_exponent());
@@ -331,11 +333,11 @@ void ciphers_multi(const Party& party, EncodedNumber *res, EncodedNumber *cipher
   std::vector<double> ciphers1_shares;
   ciphers_to_secret_shares(party, ciphers1, ciphers1_shares,
                            size, req_party_id, cipher1_precision);
-  auto* encoded_ciphers1_shares = new EncodedNumber[size];
+  auto *encoded_ciphers1_shares = new EncodedNumber[size];
 
   // step 2: aggregate the plaintext and ciphers2 multiplication
-  auto* global_aggregation = new EncodedNumber[size];
-  auto* local_aggregation = new EncodedNumber[size];
+  auto *global_aggregation = new EncodedNumber[size];
+  auto *local_aggregation = new EncodedNumber[size];
   omp_set_num_threads(NUM_OMP_THREADS);
 #pragma omp parallel for
   for (int i = 0; i < size; i++) {
@@ -352,7 +354,7 @@ void ciphers_multi(const Party& party, EncodedNumber *res, EncodedNumber *cipher
     }
     for (int id = 0; id < party.party_num; id++) {
       if (id != party.party_id) {
-        auto* recv_local_aggregation = new EncodedNumber[size];
+        auto *recv_local_aggregation = new EncodedNumber[size];
         std::string recv_local_aggregation_str;
         party.recv_long_message(id, recv_local_aggregation_str);
         deserialize_encoded_number_array(recv_local_aggregation,
@@ -361,7 +363,7 @@ void ciphers_multi(const Party& party, EncodedNumber *res, EncodedNumber *cipher
           djcs_t_aux_ee_add(phe_pub_key, global_aggregation[i],
                             global_aggregation[i], recv_local_aggregation[i]);
         }
-        delete [] recv_local_aggregation;
+        delete[] recv_local_aggregation;
       }
     }
   } else {
@@ -377,22 +379,22 @@ void ciphers_multi(const Party& party, EncodedNumber *res, EncodedNumber *cipher
     res[i] = global_aggregation[i];
   }
 
-  delete [] encoded_ciphers1_shares;
-  delete [] global_aggregation;
-  delete [] local_aggregation;
+  delete[] encoded_ciphers1_shares;
+  delete[] global_aggregation;
+  delete[] local_aggregation;
   djcs_t_free_public_key(phe_pub_key);
 }
 
-void cipher_shares_mat_mul(const Party& party,
-                           const std::vector<std::vector<double>>& shares,
-                           EncodedNumber** ciphers,
+void cipher_shares_mat_mul(const Party &party,
+                           const std::vector<std::vector<double>> &shares,
+                           EncodedNumber **ciphers,
                            int n_shares_row,
                            int n_shares_col,
                            int n_ciphers_row,
                            int n_ciphers_col,
-                           EncodedNumber** ret) {
+                           EncodedNumber **ret) {
   // retrieve phe pub key and auth server
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
   // sanity check
@@ -408,26 +410,26 @@ void cipher_shares_mat_mul(const Party& party,
 
   // note that the shares and ciphers multiplication equals:
   // each party computes the mat_mul(shares, ciphers), and then aggregate the results
-  auto** encoded_shares = new EncodedNumber*[n_shares_row];
+  auto **encoded_shares = new EncodedNumber *[n_shares_row];
   for (int i = 0; i < n_shares_row; i++) {
     encoded_shares[i] = new EncodedNumber[n_shares_col];
   }
   for (int i = 0; i < n_shares_row; i++) {
     for (int j = 0; j < n_shares_col; j++) {
-//      log_info("[cipher_shares_mat_mul] shares["
-//                   + std::to_string(i) + "][" + std::to_string(j) + "] = "
-//                   + std::to_string(shares[i][j]));
+      //      log_info("[cipher_shares_mat_mul] shares["
+      //                   + std::to_string(i) + "][" + std::to_string(j) + "] = "
+      //                   + std::to_string(shares[i][j]));
       encoded_shares[i][j].set_double(phe_pub_key->n[0], shares[i][j], PHE_FIXED_POINT_PRECISION);
     }
   }
 
-  auto** local_mul_res = new EncodedNumber*[n_shares_row];
+  auto **local_mul_res = new EncodedNumber *[n_shares_row];
   for (int i = 0; i < n_shares_row; i++) {
     local_mul_res[i] = new EncodedNumber[n_ciphers_col];
   }
 
-//  log_info("[cipher_shares_mat_mul] debug ciphers matrix inside cipher_shares_mat_mul");
-//  display_encrypted_matrix(party, n_ciphers_row, n_ciphers_col, ciphers);
+  //  log_info("[cipher_shares_mat_mul] debug ciphers matrix inside cipher_shares_mat_mul");
+  //  display_encrypted_matrix(party, n_ciphers_row, n_ciphers_col, ciphers);
 
   djcs_t_aux_mat_mat_ep_mult(phe_pub_key,
                              party.phe_random,
@@ -439,11 +441,11 @@ void cipher_shares_mat_mul(const Party& party,
                              n_shares_row,
                              n_shares_col);
 
-//  broadcast_encoded_number_matrix(party, local_mul_res, n_shares_row, n_ciphers_col, 0);
-//  log_info("[cipher_shares_mat_mul] display local_mul_res for debug ");
-//  display_encrypted_matrix(party, n_shares_row, n_ciphers_col, local_mul_res);
+  //  broadcast_encoded_number_matrix(party, local_mul_res, n_shares_row, n_ciphers_col, 0);
+  //  log_info("[cipher_shares_mat_mul] display local_mul_res for debug ");
+  //  display_encrypted_matrix(party, n_shares_row, n_ciphers_col, local_mul_res);
 
-//  log_info("[cipher_shares_mat_mul] local_mul_res.ret = " + std::to_string(std::abs(local_mul_res[0][0].getter_exponent())));
+  //  log_info("[cipher_shares_mat_mul] local_mul_res.ret = " + std::to_string(std::abs(local_mul_res[0][0].getter_exponent())));
 
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // assign ret = local_mul_res, and receive from passive parties and aggregate
@@ -456,10 +458,10 @@ void cipher_shares_mat_mul(const Party& party,
       if (id != party.party_id) {
         std::string recv_id_local_mul_res_str;
         party.recv_long_message(id, recv_id_local_mul_res_str);
-//        std::string b64_recv_id_local_mul_res_str = base64_encode(reinterpret_cast<const BYTE *>(
-//            recv_id_local_mul_res_str.c_str()), recv_id_local_mul_res_str.size());
-//        log_info("[cipher_shares_mat_mul] receive recv_id_local_mul_res_str: " + b64_recv_id_local_mul_res_str);
-        auto** recv_local_mul_res = new EncodedNumber*[n_shares_row];
+        //        std::string b64_recv_id_local_mul_res_str = base64_encode(reinterpret_cast<const BYTE *>(
+        //            recv_id_local_mul_res_str.c_str()), recv_id_local_mul_res_str.size());
+        //        log_info("[cipher_shares_mat_mul] receive recv_id_local_mul_res_str: " + b64_recv_id_local_mul_res_str);
+        auto **recv_local_mul_res = new EncodedNumber *[n_shares_row];
         for (int i = 0; i < n_shares_row; i++) {
           recv_local_mul_res[i] = new EncodedNumber[n_ciphers_col];
         }
@@ -476,38 +478,38 @@ void cipher_shares_mat_mul(const Party& party,
                                           n_ciphers_col);
 
         for (int i = 0; i < n_shares_row; i++) {
-          delete [] recv_local_mul_res[i];
+          delete[] recv_local_mul_res[i];
         }
-        delete [] recv_local_mul_res;
+        delete[] recv_local_mul_res;
       }
     }
   } else {
     std::string local_mul_res_str;
-    serialize_encoded_number_matrix(local_mul_res, n_shares_row, n_ciphers_col,local_mul_res_str);
-//    std::string b64_local_mul_res_str = base64_encode(reinterpret_cast<const BYTE *>(
-//                                                        local_mul_res_str.c_str()),
-//                                                    local_mul_res_str.size());
-//    log_info("[cipher_shares_mat_mul] sent b64_local_mul_res_str: " + b64_local_mul_res_str);
+    serialize_encoded_number_matrix(local_mul_res, n_shares_row, n_ciphers_col, local_mul_res_str);
+    //    std::string b64_local_mul_res_str = base64_encode(reinterpret_cast<const BYTE *>(
+    //                                                        local_mul_res_str.c_str()),
+    //                                                    local_mul_res_str.size());
+    //    log_info("[cipher_shares_mat_mul] sent b64_local_mul_res_str: " + b64_local_mul_res_str);
     party.send_long_message(ACTIVE_PARTY_ID, local_mul_res_str);
   }
   broadcast_encoded_number_matrix(party, ret, n_shares_row, n_ciphers_col, ACTIVE_PARTY_ID);
 
-//  log_info("[cipher_shares_mat_mul] debug ret after aggregation");
-//  display_encrypted_matrix(party, n_shares_row, n_ciphers_col, ret);
+  //  log_info("[cipher_shares_mat_mul] debug ret after aggregation");
+  //  display_encrypted_matrix(party, n_shares_row, n_ciphers_col, ret);
 
   for (int i = 0; i < n_shares_row; i++) {
-    delete [] encoded_shares[i];
-    delete [] local_mul_res[i];
+    delete[] encoded_shares[i];
+    delete[] local_mul_res[i];
   }
-  delete [] encoded_shares;
-  delete [] local_mul_res;
+  delete[] encoded_shares;
+  delete[] local_mul_res;
   djcs_t_free_public_key(phe_pub_key);
 }
 
-void transpose_encoded_mat(EncodedNumber** source_mat,
+void transpose_encoded_mat(EncodedNumber **source_mat,
                            int n_source_row,
                            int n_source_col,
-                           EncodedNumber** ret_mat) {
+                           EncodedNumber **ret_mat) {
   if ((n_source_row == 0) || (n_source_col == 0)) {
     log_error("[transpose_encoded_mat] matrix is empty");
     exit(EXIT_FAILURE);
@@ -519,21 +521,21 @@ void transpose_encoded_mat(EncodedNumber** source_mat,
   }
 }
 
-void cipher_shares_ele_wise_vec_mul(const Party& party,
-                                    const std::vector<double>& shares,
-                                    EncodedNumber* ciphers,
+void cipher_shares_ele_wise_vec_mul(const Party &party,
+                                    const std::vector<double> &shares,
+                                    EncodedNumber *ciphers,
                                     int size,
-                                    EncodedNumber* ret) {
+                                    EncodedNumber *ret) {
   if (size != shares.size()) {
     log_error("[cipher_shares_ele_wise_vec_mul] size does not match");
     exit(EXIT_FAILURE);
   }
   // retrieve phe pub key and auth server
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
-  auto* local_agg = new EncodedNumber[size];
-  auto* plain_shares = new EncodedNumber[size];
+  auto *local_agg = new EncodedNumber[size];
+  auto *plain_shares = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {
     plain_shares[i].set_double(phe_pub_key->n[0], shares[i]);
   }
@@ -548,10 +550,10 @@ void cipher_shares_ele_wise_vec_mul(const Party& party,
       if (id != party.party_id) {
         std::string recv_local_agg_str;
         party.recv_long_message(id, recv_local_agg_str);
-        auto* recv_local_agg = new EncodedNumber[size];
+        auto *recv_local_agg = new EncodedNumber[size];
         deserialize_encoded_number_array(recv_local_agg, size, recv_local_agg_str);
         djcs_t_aux_vec_ele_wise_ee_add_ext(phe_pub_key, ret, ret, recv_local_agg, size);
-        delete [] recv_local_agg;
+        delete[] recv_local_agg;
       }
     }
   } else {
@@ -562,14 +564,14 @@ void cipher_shares_ele_wise_vec_mul(const Party& party,
 
   broadcast_encoded_number_array(party, ret, size, ACTIVE_PARTY_ID);
 
-  delete [] local_agg;
-  delete [] plain_shares;
+  delete[] local_agg;
+  delete[] plain_shares;
   djcs_t_free_public_key(phe_pub_key);
 }
 
 std::vector<double> display_shares_vector(
-    const Party& party,
-    const std::vector<double>& vec) {
+    const Party &party,
+    const std::vector<double> &vec) {
   log_info("------------------ [display_shares_vector] ---------------");
   // display secret share vector
   std::vector<double> agg(vec.size(), 0.0);
@@ -600,11 +602,11 @@ std::vector<double> display_shares_vector(
 }
 
 std::vector<std::vector<double>> display_shares_matrix(
-    const Party& party,
-    const std::vector<std::vector<double>>& mat) {
+    const Party &party,
+    const std::vector<std::vector<double>> &mat) {
   log_info("------------------ [display_shares_matrix] ---------------");
   // display secret share matrix
-  std::vector<std::vector<double>> agg_mat(mat.size(), std::vector<double> (mat[0].size(), 0.0));
+  std::vector<std::vector<double>> agg_mat(mat.size(), std::vector<double>(mat[0].size(), 0.0));
   if (party.party_type == falcon::ACTIVE_PARTY) {
     for (int i = 0; i < mat.size(); i++) {
       for (int j = 0; j < mat[0].size(); j++) {
@@ -627,7 +629,7 @@ std::vector<std::vector<double>> display_shares_matrix(
     for (int i = 0; i < agg_mat.size(); i++) {
       for (int j = 0; j < agg_mat[0].size(); j++) {
         log_info("[display_shares_matrix] matrix["
-                     + std::to_string(i) + "][" + std::to_string(j) + "] = " + std::to_string(agg_mat[i][j]));
+        + std::to_string(i) + "][" + std::to_string(j) + "] = " + std::to_string(agg_mat[i][j]));
       }
     }
   } else {

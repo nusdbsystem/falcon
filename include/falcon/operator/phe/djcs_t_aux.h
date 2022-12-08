@@ -6,10 +6,8 @@
 #define FALCON_SRC_OPERATOR_PHE_DJCS_T_AUX_H_
 
 #include <vector>
-
 #include "gmp.h"    // gmp is included implicitly
 #include "libhcs.h" // master header includes everything
-
 #include "falcon/operator/phe/fixed_point_encoder.h"
 
 /***********************************************************/
