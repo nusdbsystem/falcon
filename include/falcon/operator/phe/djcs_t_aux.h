@@ -22,10 +22,10 @@
  * @param res: ciphertext EncodedNumber
  * @param plain: plaintext EncodedNumber
  */
-void djcs_t_aux_encrypt(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber & res,
-    const EncodedNumber& plain);
+void djcs_t_aux_encrypt(djcs_t_public_key *pk,
+                        hcs_random *hr,
+                        EncodedNumber &res,
+                        const EncodedNumber &plain);
 
 /**
  * decrypt a ciphertext EncodedNumber
@@ -35,10 +35,10 @@ void djcs_t_aux_encrypt(djcs_t_public_key* pk,
  * @param res: partially decrypted EncodedNumber
  * @param cipher: ciphertext EncodedNumber
  */
-void djcs_t_aux_partial_decrypt(djcs_t_public_key* pk,
-    djcs_t_auth_server* au,
-    EncodedNumber & res,
-    const EncodedNumber& cipher);
+void djcs_t_aux_partial_decrypt(djcs_t_public_key *pk,
+                                djcs_t_auth_server *au,
+                                EncodedNumber &res,
+                                const EncodedNumber &cipher);
 
 /**
  * combine partially decrypted EncodedNumbers
@@ -48,10 +48,10 @@ void djcs_t_aux_partial_decrypt(djcs_t_public_key* pk,
  * @param shares: partially decrypted EncodedNumbers
  * @param size: size of the shares vector
  */
-void djcs_t_aux_share_combine(djcs_t_public_key* pk,
-    EncodedNumber & res,
-    EncodedNumber* shares,
-    int size);
+void djcs_t_aux_share_combine(djcs_t_public_key *pk,
+                              EncodedNumber &res,
+                              EncodedNumber *shares,
+                              int size);
 
 /**
  * homomorphic addition of two ciphers and return an EncodedNumber,
@@ -62,10 +62,25 @@ void djcs_t_aux_share_combine(djcs_t_public_key* pk,
  * @param cipher1: first ciphertext EncodedNumber
  * @param cipher2: second ciphertext EncodedNumber
  */
-void djcs_t_aux_ee_add(djcs_t_public_key* pk,
-                       EncodedNumber & res,
-                       const EncodedNumber& cipher1,
-                       const EncodedNumber& cipher2);
+void djcs_t_aux_ee_add(djcs_t_public_key *pk,
+                       EncodedNumber &res,
+                       const EncodedNumber &cipher1,
+                       const EncodedNumber &cipher2);
+
+/**
+ * homomorphic addition of two ciphers and return an EncodedNumber,
+ * both cipher have same exponent
+ *
+ * @param pk: public key
+ * @param res: summation ciphertext
+ * @param cipher1: first ciphertext EncodedNumber
+ * @param cipher2: second ciphertext EncodedNumber
+ */
+
+void djcs_t_aux_ee_add_a_vector(djcs_t_public_key *pk,
+                                EncodedNumber &res,
+                                int size,
+                                EncodedNumber *cipher_vector);
 
 /**
  * homomorphic addition of two ciphers and return an EncodedNumber
@@ -77,8 +92,8 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
  * @param cipher1: first ciphertext EncodedNumber
  * @param cipher2: second ciphertext EncodedNumber
  */
-void djcs_t_aux_ee_add_ext(djcs_t_public_key* pk,
-                           EncodedNumber & res,
+void djcs_t_aux_ee_add_ext(djcs_t_public_key *pk,
+                           EncodedNumber &res,
                            EncodedNumber cipher1,
                            EncodedNumber cipher2);
 
@@ -91,10 +106,10 @@ void djcs_t_aux_ee_add_ext(djcs_t_public_key* pk,
  * @param cipher: ciphertext EncodedNumber
  * @param plain: plaintext EncodedNumber
  */
-void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
-    EncodedNumber & res,
-    const EncodedNumber& cipher,
-    const EncodedNumber& plain);
+void djcs_t_aux_ep_mul(djcs_t_public_key *pk,
+                       EncodedNumber &res,
+                       const EncodedNumber &cipher,
+                       const EncodedNumber &plain);
 
 /**
  * this function increases the precision of a ciphertext,
@@ -106,8 +121,8 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
  * @param target_precision: the precision to be reached
  * @param cipher: ciphertext EncodedNumber
  */
-void djcs_t_aux_increase_prec(djcs_t_public_key* pk,
-                              EncodedNumber & res,
+void djcs_t_aux_increase_prec(djcs_t_public_key *pk,
+                              EncodedNumber &res,
                               int target_precision,
                               EncodedNumber cipher);
 
@@ -125,12 +140,12 @@ void djcs_t_aux_increase_prec(djcs_t_public_key* pk,
  * @param vec: values to be encrypted
  * @param phe_precision: the precision to be used
  */
-void djcs_t_aux_double_vec_encryption(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber* res,
-    int size,
-    const std::vector<double>& vec,
-    int phe_precision = PHE_FIXED_POINT_PRECISION);
+void djcs_t_aux_double_vec_encryption(djcs_t_public_key *pk,
+                                      hcs_random *hr,
+                                      EncodedNumber *res,
+                                      int size,
+                                      const std::vector<double> &vec,
+                                      int phe_precision = PHE_FIXED_POINT_PRECISION);
 
 /**
  * encrypt a int vector based on pk and phe precision
@@ -142,12 +157,12 @@ void djcs_t_aux_double_vec_encryption(djcs_t_public_key* pk,
  * @param vec: values to be encrypted
  * @param phe_precision: the precision to be used
  */
-void djcs_t_aux_int_vec_encryption(djcs_t_public_key* pk,
-                               hcs_random* hr,
-                               EncodedNumber* res,
-                               int size,
-                               const std::vector<int>& vec,
-                               int phe_precision = PHE_FIXED_POINT_PRECISION);
+void djcs_t_aux_int_vec_encryption(djcs_t_public_key *pk,
+                                   hcs_random *hr,
+                                   EncodedNumber *res,
+                                   int size,
+                                   const std::vector<int> &vec,
+                                   int phe_precision = PHE_FIXED_POINT_PRECISION);
 
 /**
  * homomorphic aggregate a cipher vector and return the result
@@ -157,9 +172,9 @@ void djcs_t_aux_int_vec_encryption(djcs_t_public_key* pk,
  * @param ciphers: a vector of ciphertext EncodedNumber
  * @param size: the size of the ciphers vector
  */
-void djcs_t_aux_vec_aggregate(djcs_t_public_key* pk,
-                              EncodedNumber& res,
-                              EncodedNumber* ciphers,
+void djcs_t_aux_vec_aggregate(djcs_t_public_key *pk,
+                              EncodedNumber &res,
+                              EncodedNumber *ciphers,
                               int size);
 
 /**
@@ -173,10 +188,10 @@ void djcs_t_aux_vec_aggregate(djcs_t_public_key* pk,
  * @param size: the size of the two cipher vectors
  */
 void djcs_t_aux_vec_ele_wise_ee_add(
-    djcs_t_public_key* pk,
-    EncodedNumber* res,
-    EncodedNumber* ciphers1,
-    EncodedNumber* ciphers2,
+    djcs_t_public_key *pk,
+    EncodedNumber *res,
+    EncodedNumber *ciphers1,
+    EncodedNumber *ciphers2,
     int size);
 
 /**
@@ -191,10 +206,10 @@ void djcs_t_aux_vec_ele_wise_ee_add(
  * @param size: the size of the two cipher vectors
  */
 void djcs_t_aux_vec_ele_wise_ee_add_ext(
-    djcs_t_public_key* pk,
-    EncodedNumber* res,
-    EncodedNumber* ciphers1,
-    EncodedNumber* ciphers2,
+    djcs_t_public_key *pk,
+    EncodedNumber *res,
+    EncodedNumber *ciphers1,
+    EncodedNumber *ciphers2,
     int size);
 
 /**
@@ -208,12 +223,12 @@ void djcs_t_aux_vec_ele_wise_ee_add_ext(
  * @param plains: a vector of plaintext EncodedNumber
  * @param size: vector size
  */
-void djcs_t_aux_inner_product(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber& res,
-    EncodedNumber* ciphers,
-    EncodedNumber* plains,
-    int size);
+void djcs_t_aux_inner_product(djcs_t_public_key *pk,
+                              hcs_random *hr,
+                              EncodedNumber &res,
+                              EncodedNumber *ciphers,
+                              EncodedNumber *plains,
+                              int size);
 
 /**
  * element-wise ciphertext plaintext multiplication
@@ -226,11 +241,11 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
  * @param plains: a vector of plaintext EncodedNumber
  * @param size: vector size
  */
-void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
-    EncodedNumber* res,
-    EncodedNumber* ciphers,
-    EncodedNumber* plains,
-    int size);
+void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key *pk,
+                                    EncodedNumber *res,
+                                    EncodedNumber *ciphers,
+                                    EncodedNumber *plains,
+                                    int size);
 
 /**
  * this function increases the precision of each element of a ciphertext vector,
@@ -242,10 +257,10 @@ void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
  * @param ciphers: the ciphertext vector
  * @param size: the size of the ciphertext vector
  */
-void djcs_t_aux_increase_prec_vec(djcs_t_public_key* pk,
-                                  EncodedNumber* res,
+void djcs_t_aux_increase_prec_vec(djcs_t_public_key *pk,
+                                  EncodedNumber *res,
                                   int target_precision,
-                                  EncodedNumber* ciphers,
+                                  EncodedNumber *ciphers,
                                   int size);
 
 /***********************************************************/
@@ -263,13 +278,13 @@ void djcs_t_aux_increase_prec_vec(djcs_t_public_key* pk,
  * @param mat: values to be encrypted
  * @param phe_precision: the precision to be used
  */
-void djcs_t_aux_double_mat_encryption(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber** res,
-    int row_size,
-    int column_size,
-    const std::vector<std::vector<double>>& mat,
-    int phe_precision = PHE_FIXED_POINT_PRECISION);
+void djcs_t_aux_double_mat_encryption(djcs_t_public_key *pk,
+                                      hcs_random *hr,
+                                      EncodedNumber **res,
+                                      int row_size,
+                                      int column_size,
+                                      const std::vector<std::vector<double>> &mat,
+                                      int phe_precision = PHE_FIXED_POINT_PRECISION);
 
 /**
  * element-wise homomorphic addition of two cipher matrices
@@ -282,10 +297,10 @@ void djcs_t_aux_double_mat_encryption(djcs_t_public_key* pk,
  * @param column_size: the number of columns in the matrix
  */
 void djcs_t_aux_matrix_ele_wise_ee_add(
-    djcs_t_public_key* pk,
-    EncodedNumber** res,
-    EncodedNumber** cipher_mat1,
-    EncodedNumber** cipher_mat2,
+    djcs_t_public_key *pk,
+    EncodedNumber **res,
+    EncodedNumber **cipher_mat1,
+    EncodedNumber **cipher_mat2,
     int row_size,
     int column_size);
 
@@ -301,10 +316,10 @@ void djcs_t_aux_matrix_ele_wise_ee_add(
  * @param column_size: the number of columns in the matrix
  */
 void djcs_t_aux_matrix_ele_wise_ee_add_ext(
-    djcs_t_public_key* pk,
-    EncodedNumber** res,
-    EncodedNumber** cipher_mat1,
-    EncodedNumber** cipher_mat2,
+    djcs_t_public_key *pk,
+    EncodedNumber **res,
+    EncodedNumber **cipher_mat1,
+    EncodedNumber **cipher_mat2,
     int row_size,
     int column_size);
 
@@ -320,13 +335,13 @@ void djcs_t_aux_matrix_ele_wise_ee_add_ext(
  * @param row_size: number of plaintext rows
  * @param column_size: number of plaintext columns, equal to cipher size
  */
-void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber* res,
-    EncodedNumber* ciphers,
-    EncodedNumber** plains,
-    int row_size,
-    int column_size);
+void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key *pk,
+                                hcs_random *hr,
+                                EncodedNumber *res,
+                                EncodedNumber *ciphers,
+                                EncodedNumber **plains,
+                                int row_size,
+                                int column_size);
 
 /**
  * the homomorphic multiplication between a plaintext matrix and a ciphertext matrix,
@@ -344,15 +359,15 @@ void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key* pk,
  * @param plain_row_size: the number of rows of plaintext matrix
  * @param plain_column_size: the number of columns of plaintext matrix
  */
-void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber** res,
-    EncodedNumber** cipher_mat,
-    EncodedNumber** plain_mat,
-    int cipher_row_size,
-    int cipher_column_size,
-    int plain_row_size,
-    int plain_column_size);
+void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key *pk,
+                                hcs_random *hr,
+                                EncodedNumber **res,
+                                EncodedNumber **cipher_mat,
+                                EncodedNumber **plain_mat,
+                                int cipher_row_size,
+                                int cipher_column_size,
+                                int plain_row_size,
+                                int plain_column_size);
 
 /**
  * the element-wise matrix-matrix multiplication, need to ensure that
@@ -367,14 +382,14 @@ void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
  * @param plain_row_size: the number of rows of plaintext matrix
  * @param plain_column_size: the number of columns of plaintext matrix
  */
-void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key* pk,
-                                EncodedNumber** res,
-                                EncodedNumber** cipher_mat,
-                                EncodedNumber** plain_mat,
-                                int cipher_row_size,
-                                int cipher_column_size,
-                                int plain_row_size,
-                                int plain_column_size);
+void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key *pk,
+                                         EncodedNumber **res,
+                                         EncodedNumber **cipher_mat,
+                                         EncodedNumber **plain_mat,
+                                         int cipher_row_size,
+                                         int cipher_column_size,
+                                         int plain_row_size,
+                                         int plain_column_size);
 
 /**
  * this function increases the precision of a ciphertext matrix,
@@ -387,10 +402,10 @@ void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key* pk,
  * @param row_size: the number of rows in the matrix
  * @param column_size: the number of columns in the matrix
  */
-void djcs_t_aux_increase_prec_mat(djcs_t_public_key* pk,
-                                  EncodedNumber** res,
+void djcs_t_aux_increase_prec_mat(djcs_t_public_key *pk,
+                                  EncodedNumber **res,
                                   int target_precision,
-                                  EncodedNumber** cipher_mat,
+                                  EncodedNumber **cipher_mat,
                                   int row_size,
                                   int column_size);
 
@@ -400,7 +415,7 @@ void djcs_t_aux_increase_prec_mat(djcs_t_public_key* pk,
  * @param src: src public key object
  * @param dest: dest public key object
  */
-void djcs_t_public_key_copy(djcs_t_public_key* src, djcs_t_public_key* dest);
+void djcs_t_public_key_copy(djcs_t_public_key *src, djcs_t_public_key *dest);
 
 /**
  * copy a djcs_t authenticate server from src to dest
@@ -408,7 +423,7 @@ void djcs_t_public_key_copy(djcs_t_public_key* src, djcs_t_public_key* dest);
  * @param src: src auth server object
  * @param dest: dest auth server object
  */
-void djcs_t_auth_server_copy(djcs_t_auth_server* src, djcs_t_auth_server* dest);
+void djcs_t_auth_server_copy(djcs_t_auth_server *src, djcs_t_auth_server *dest);
 
 /**
  * copy a hcs_random from src to dest
@@ -416,7 +431,7 @@ void djcs_t_auth_server_copy(djcs_t_auth_server* src, djcs_t_auth_server* dest);
  * @param src: src hcs random object
  * @param dest: dest hcs random object
  */
-void djcs_t_hcs_random_copy(hcs_random* src, hcs_random* dest);
+void djcs_t_hcs_random_copy(hcs_random *src, hcs_random *dest);
 
 /**
  * check a vector's size is not zero
@@ -431,7 +446,7 @@ void check_size(int size);
  * @param num1: the first EncodedNumber
  * @param num2: the second EncodedNumber
  */
-void check_encoded_public_key(const EncodedNumber& num1, const EncodedNumber& num2);
+void check_encoded_public_key(const EncodedNumber &num1, const EncodedNumber &num2);
 
 /**
  * check the two ciphertexts have the same exponent
@@ -439,6 +454,6 @@ void check_encoded_public_key(const EncodedNumber& num1, const EncodedNumber& nu
  * @param num1: the first ciphertext
  * @param num2: the second ciphertext
  */
-void check_ee_add_exponent(const EncodedNumber& num1, const EncodedNumber& num2);
+void check_ee_add_exponent(const EncodedNumber &num1, const EncodedNumber &num2);
 
 #endif //FALCON_SRC_OPERATOR_PHE_DJCS_T_AUX_H_

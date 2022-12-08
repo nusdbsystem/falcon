@@ -104,7 +104,7 @@ EncodedNumber PearsonCorrelation::calculate_weighted_mean(
   denominator.set_integer(phe_pub_key->n[0], 0);
 
   // calculate weight[i] * x[i] =>  x
-  ciphers_multi(party, encrypted_samples, encrypted_samples, encrypted_weight, sample_size, party.party_id);
+  ciphers_ele_wise_multi(party, encrypted_samples, encrypted_samples, encrypted_weight, sample_size, party.party_id);
 
   // sum all x
   for ( int i = 0; i < sample_size; i++ ){

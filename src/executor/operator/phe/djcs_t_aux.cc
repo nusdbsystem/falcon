@@ -12,10 +12,10 @@
 
 #include "omp.h"
 
-void djcs_t_aux_encrypt(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber & res,
-    const EncodedNumber& plain) {
+void djcs_t_aux_encrypt(djcs_t_public_key *pk,
+                        hcs_random *hr,
+                        EncodedNumber &res,
+                        const EncodedNumber &plain) {
   if (plain.getter_type() != Plaintext) {
     log_error("The plain should not be encrypted.");
     exit(EXIT_FAILURE);
@@ -40,10 +40,10 @@ void djcs_t_aux_encrypt(djcs_t_public_key* pk,
   mpz_clear(t3);
 }
 
-void djcs_t_aux_partial_decrypt(djcs_t_public_key* pk,
-    djcs_t_auth_server* au,
-    EncodedNumber & res,
-    const EncodedNumber& cipher) {
+void djcs_t_aux_partial_decrypt(djcs_t_public_key *pk,
+                                djcs_t_auth_server *au,
+                                EncodedNumber &res,
+                                const EncodedNumber &cipher) {
   if (cipher.getter_type() != Ciphertext) {
     log_error("The value is not ciphertext and cannot be decrypted.");
     exit(EXIT_FAILURE);
@@ -67,11 +67,11 @@ void djcs_t_aux_partial_decrypt(djcs_t_public_key* pk,
   mpz_clear(t3);
 }
 
-void djcs_t_aux_share_combine(djcs_t_public_key* pk,
-    EncodedNumber & res,
-    EncodedNumber* shares,
-    int size) {
-  auto* shares_value = (mpz_t *) malloc (size * sizeof(mpz_t));
+void djcs_t_aux_share_combine(djcs_t_public_key *pk,
+                              EncodedNumber &res,
+                              EncodedNumber *shares,
+                              int size) {
+  auto *shares_value = (mpz_t *) malloc(size * sizeof(mpz_t));
   for (int i = 0; i < size; i++) {
     mpz_init(shares_value[i]);
     shares[i].getter_value(shares_value[i]);
@@ -95,11 +95,11 @@ void djcs_t_aux_share_combine(djcs_t_public_key* pk,
   mpz_clear(t2);
 }
 
-void djcs_t_aux_ee_add(djcs_t_public_key* pk,
-    EncodedNumber & res,
-    const EncodedNumber& cipher1,
-    const EncodedNumber& cipher2) {
-  if (cipher1.getter_type() != Ciphertext || cipher2.getter_type() != Ciphertext){
+void djcs_t_aux_ee_add(djcs_t_public_key *pk,
+                       EncodedNumber &res,
+                       const EncodedNumber &cipher1,
+                       const EncodedNumber &cipher2) {
+  if (cipher1.getter_type() != Ciphertext || cipher2.getter_type() != Ciphertext) {
     log_error("The two inputs need be ciphertexts for homomorphic addition.");
     exit(EXIT_FAILURE);
   }
@@ -130,11 +130,20 @@ void djcs_t_aux_ee_add(djcs_t_public_key* pk,
   mpz_clear(sum);
 }
 
-void djcs_t_aux_ee_add_ext(djcs_t_public_key* pk,
-                           EncodedNumber & res,
+void djcs_t_aux_ee_add_a_vector(djcs_t_public_key *pk,
+                                EncodedNumber &res,
+                                int size,
+                                EncodedNumber *cipher_vector) {
+  for (int i = 0; i< size; i++){
+    djcs_t_aux_ee_add(pk, res, cipher_vector[i], res);
+  }
+}
+
+void djcs_t_aux_ee_add_ext(djcs_t_public_key *pk,
+                           EncodedNumber &res,
                            EncodedNumber cipher1,
                            EncodedNumber cipher2) {
-  if (cipher1.getter_type() != Ciphertext || cipher2.getter_type() != Ciphertext){
+  if (cipher1.getter_type() != Ciphertext || cipher2.getter_type() != Ciphertext) {
     log_error("The two inputs need be ciphertexts for homomorphic addition.");
     exit(EXIT_FAILURE);
   }
@@ -151,10 +160,10 @@ void djcs_t_aux_ee_add_ext(djcs_t_public_key* pk,
   djcs_t_aux_ee_add(pk, res, cipher1, cipher2);
 }
 
-void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
-    EncodedNumber & res,
-    const EncodedNumber& cipher,
-    const EncodedNumber& plain) {
+void djcs_t_aux_ep_mul(djcs_t_public_key *pk,
+                       EncodedNumber &res,
+                       const EncodedNumber &cipher,
+                       const EncodedNumber &plain) {
   if (cipher.getter_type() != Ciphertext || plain.getter_type() != Plaintext) {
     log_error("The input types do not match ciphertext or plaintext.");
     exit(EXIT_FAILURE);
@@ -185,8 +194,8 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
   mpz_clear(mult);
 }
 
-void djcs_t_aux_increase_prec(djcs_t_public_key* pk,
-                              EncodedNumber & res,
+void djcs_t_aux_increase_prec(djcs_t_public_key *pk,
+                              EncodedNumber &res,
                               int target_precision,
                               EncodedNumber cipher) {
   if (cipher.getter_type() != Ciphertext) {
@@ -209,11 +218,11 @@ void djcs_t_aux_increase_prec(djcs_t_public_key* pk,
   }
 }
 
-void djcs_t_aux_double_vec_encryption(djcs_t_public_key* pk,
-                                      hcs_random* hr,
-                                      EncodedNumber* res,
+void djcs_t_aux_double_vec_encryption(djcs_t_public_key *pk,
+                                      hcs_random *hr,
+                                      EncodedNumber *res,
                                       int size,
-                                      const std::vector<double>& vec,
+                                      const std::vector<double> &vec,
                                       int phe_precision) {
   check_size(size);
   int vec_size = (int) vec.size();
@@ -227,11 +236,11 @@ void djcs_t_aux_double_vec_encryption(djcs_t_public_key* pk,
   }
 }
 
-void djcs_t_aux_int_vec_encryption(djcs_t_public_key* pk,
-                                   hcs_random* hr,
-                                   EncodedNumber* res,
+void djcs_t_aux_int_vec_encryption(djcs_t_public_key *pk,
+                                   hcs_random *hr,
+                                   EncodedNumber *res,
                                    int size,
-                                   const std::vector<int>& vec,
+                                   const std::vector<int> &vec,
                                    int phe_precision) {
   check_size(size);
   int vec_size = (int) vec.size();
@@ -245,10 +254,10 @@ void djcs_t_aux_int_vec_encryption(djcs_t_public_key* pk,
   }
 }
 
-void djcs_t_aux_vec_aggregate(djcs_t_public_key* pk,
-    EncodedNumber& res,
-    EncodedNumber* ciphers,
-    int size) {
+void djcs_t_aux_vec_aggregate(djcs_t_public_key *pk,
+                              EncodedNumber &res,
+                              EncodedNumber *ciphers,
+                              int size) {
   check_size(size);
   res = ciphers[0];
   for (int i = 1; i < size; i++) {
@@ -257,15 +266,15 @@ void djcs_t_aux_vec_aggregate(djcs_t_public_key* pk,
 }
 
 void djcs_t_aux_vec_ele_wise_ee_add(
-    djcs_t_public_key* pk,
-    EncodedNumber* res,
-    EncodedNumber* ciphers1,
-    EncodedNumber* ciphers2,
+    djcs_t_public_key *pk,
+    EncodedNumber *res,
+    EncodedNumber *ciphers1,
+    EncodedNumber *ciphers2,
     int size) {
   check_size(size);
   check_ee_add_exponent(ciphers1[0], ciphers2[0]);
   check_encoded_public_key(ciphers1[0], ciphers2[0]);
-  auto* tmp_res = new EncodedNumber[size];
+  auto *tmp_res = new EncodedNumber[size];
   // element-wise phe addition
   omp_set_num_threads(NUM_OMP_THREADS);
 #pragma omp parallel for
@@ -276,14 +285,14 @@ void djcs_t_aux_vec_ele_wise_ee_add(
   for (int i = 0; i < size; i++) {
     res[i] = tmp_res[i];
   }
-  delete [] tmp_res;
+  delete[] tmp_res;
 }
 
 void djcs_t_aux_vec_ele_wise_ee_add_ext(
-    djcs_t_public_key* pk,
-    EncodedNumber* res,
-    EncodedNumber* ciphers1,
-    EncodedNumber* ciphers2,
+    djcs_t_public_key *pk,
+    EncodedNumber *res,
+    EncodedNumber *ciphers1,
+    EncodedNumber *ciphers2,
     int size) {
   check_size(size);
   check_encoded_public_key(ciphers1[0], ciphers2[0]);
@@ -301,12 +310,12 @@ void djcs_t_aux_vec_ele_wise_ee_add_ext(
   djcs_t_aux_vec_ele_wise_ee_add(pk, res, ciphers1, ciphers2, size);
 }
 
-void djcs_t_aux_inner_product(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber& res,
-    EncodedNumber* ciphers,
-    EncodedNumber* plains,
-    int size) {
+void djcs_t_aux_inner_product(djcs_t_public_key *pk,
+                              hcs_random *hr,
+                              EncodedNumber &res,
+                              EncodedNumber *ciphers,
+                              EncodedNumber *plains,
+                              int size) {
   check_size(size);
   check_encoded_public_key(ciphers[0], plains[0]);
 
@@ -319,8 +328,8 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
   res.setter_exponent(ciphers[0].getter_exponent() + plains[0].getter_exponent());
   res.setter_type(Ciphertext);
 
-  auto *mpz_ciphers = (mpz_t *) malloc (size * sizeof(mpz_t));
-  auto *mpz_plains = (mpz_t *) malloc (size * sizeof(mpz_t));
+  auto *mpz_ciphers = (mpz_t *) malloc(size * sizeof(mpz_t));
+  auto *mpz_plains = (mpz_t *) malloc(size * sizeof(mpz_t));
   for (int i = 0; i < size; i++) {
     mpz_init(mpz_ciphers[i]);
     mpz_init(mpz_plains[i]);
@@ -360,11 +369,11 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
   free(mpz_plains);
 }
 
-void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
-    EncodedNumber* res,
-    EncodedNumber* ciphers,
-    EncodedNumber* plains,
-    int size) {
+void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key *pk,
+                                    EncodedNumber *res,
+                                    EncodedNumber *ciphers,
+                                    EncodedNumber *plains,
+                                    int size) {
   check_size(size);
   check_encoded_public_key(ciphers[0], plains[0]);
   omp_set_num_threads(NUM_OMP_THREADS);
@@ -374,10 +383,10 @@ void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
   }
 }
 
-void djcs_t_aux_increase_prec_vec(djcs_t_public_key* pk,
-                                  EncodedNumber* res,
+void djcs_t_aux_increase_prec_vec(djcs_t_public_key *pk,
+                                  EncodedNumber *res,
                                   int target_precision,
-                                  EncodedNumber* ciphers,
+                                  EncodedNumber *ciphers,
                                   int size) {
   check_size(size);
   omp_set_num_threads(NUM_OMP_THREADS);
@@ -387,12 +396,12 @@ void djcs_t_aux_increase_prec_vec(djcs_t_public_key* pk,
   }
 }
 
-void djcs_t_aux_double_mat_encryption(djcs_t_public_key* pk,
-                                      hcs_random* hr,
-                                      EncodedNumber** res,
+void djcs_t_aux_double_mat_encryption(djcs_t_public_key *pk,
+                                      hcs_random *hr,
+                                      EncodedNumber **res,
                                       int row_size,
                                       int column_size,
-                                      const std::vector<std::vector<double>>& mat,
+                                      const std::vector<std::vector<double>> &mat,
                                       int phe_precision) {
   check_size(row_size);
   check_size(column_size);
@@ -413,10 +422,10 @@ void djcs_t_aux_double_mat_encryption(djcs_t_public_key* pk,
 }
 
 void djcs_t_aux_matrix_ele_wise_ee_add(
-    djcs_t_public_key* pk,
-    EncodedNumber** res,
-    EncodedNumber** cipher_mat1,
-    EncodedNumber** cipher_mat2,
+    djcs_t_public_key *pk,
+    EncodedNumber **res,
+    EncodedNumber **cipher_mat1,
+    EncodedNumber **cipher_mat2,
     int row_size,
     int column_size) {
   check_size(row_size);
@@ -429,10 +438,10 @@ void djcs_t_aux_matrix_ele_wise_ee_add(
 }
 
 void djcs_t_aux_matrix_ele_wise_ee_add_ext(
-    djcs_t_public_key* pk,
-    EncodedNumber** res,
-    EncodedNumber** cipher_mat1,
-    EncodedNumber** cipher_mat2,
+    djcs_t_public_key *pk,
+    EncodedNumber **res,
+    EncodedNumber **cipher_mat1,
+    EncodedNumber **cipher_mat2,
     int row_size,
     int column_size) {
   check_size(row_size);
@@ -453,13 +462,13 @@ void djcs_t_aux_matrix_ele_wise_ee_add_ext(
   djcs_t_aux_matrix_ele_wise_ee_add(pk, res, cipher_mat1, cipher_mat2, row_size, column_size);
 }
 
-void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber* res,
-    EncodedNumber* ciphers,
-    EncodedNumber** plains,
-    int row_size,
-    int column_size) {
+void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key *pk,
+                                hcs_random *hr,
+                                EncodedNumber *res,
+                                EncodedNumber *ciphers,
+                                EncodedNumber **plains,
+                                int row_size,
+                                int column_size) {
   check_size(row_size);
   check_size(column_size);
   check_encoded_public_key(ciphers[0], plains[0][0]);
@@ -470,15 +479,15 @@ void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key* pk,
   }
 }
 
-void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
-    hcs_random* hr,
-    EncodedNumber** res,
-    EncodedNumber** cipher_mat,
-    EncodedNumber** plain_mat,
-    int cipher_row_size,
-    int cipher_column_size,
-    int plain_row_size,
-    int plain_column_size) {
+void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key *pk,
+                                hcs_random *hr,
+                                EncodedNumber **res,
+                                EncodedNumber **cipher_mat,
+                                EncodedNumber **plain_mat,
+                                int cipher_row_size,
+                                int cipher_column_size,
+                                int plain_row_size,
+                                int plain_column_size) {
   check_size(cipher_row_size);
   check_size(cipher_column_size);
   check_size(plain_row_size);
@@ -494,20 +503,20 @@ void djcs_t_aux_mat_mat_ep_mult(djcs_t_public_key* pk,
 //    log_info("[djcs_t_aux_mat_mat_ep_mult] i = " + std::to_string(i));
     for (int j = 0; j < cipher_column_size; j++) {
       // re-arrange the ciphertext vector for calling inner product
-      auto* cipher_vec_j = new EncodedNumber[cipher_row_size];
+      auto *cipher_vec_j = new EncodedNumber[cipher_row_size];
       for (int k = 0; k < cipher_row_size; k++) {
         cipher_vec_j[k] = cipher_mat[k][j];
       }
       djcs_t_aux_inner_product(pk, hr, res[i][j], cipher_vec_j, plain_mat[i], cipher_row_size);
-      delete [] cipher_vec_j;
+      delete[] cipher_vec_j;
     }
   }
 }
 
-void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key* pk,
-                                         EncodedNumber** res,
-                                         EncodedNumber** cipher_mat,
-                                         EncodedNumber** plain_mat,
+void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key *pk,
+                                         EncodedNumber **res,
+                                         EncodedNumber **cipher_mat,
+                                         EncodedNumber **plain_mat,
                                          int cipher_row_size,
                                          int cipher_column_size,
                                          int plain_row_size,
@@ -521,10 +530,10 @@ void djcs_t_aux_ele_wise_mat_mat_ep_mult(djcs_t_public_key* pk,
   }
 }
 
-void djcs_t_aux_increase_prec_mat(djcs_t_public_key* pk,
-                                  EncodedNumber** res,
+void djcs_t_aux_increase_prec_mat(djcs_t_public_key *pk,
+                                  EncodedNumber **res,
                                   int target_precision,
-                                  EncodedNumber** cipher_mat,
+                                  EncodedNumber **cipher_mat,
                                   int row_size,
                                   int column_size) {
   check_size(row_size);
@@ -538,24 +547,24 @@ void djcs_t_aux_increase_prec_mat(djcs_t_public_key* pk,
   }
 }
 
-void djcs_t_public_key_copy(djcs_t_public_key* src, djcs_t_public_key* dest) {
+void djcs_t_public_key_copy(djcs_t_public_key *src, djcs_t_public_key *dest) {
   dest->s = src->s;
   dest->l = src->l;
   dest->w = src->w;
   mpz_set(dest->g, src->g);
   mpz_set(dest->delta, src->delta);
-  dest->n = (mpz_t *) malloc(sizeof(mpz_t) * (src->s+1));
+  dest->n = (mpz_t *) malloc(sizeof(mpz_t) * (src->s + 1));
   for (int i = 0; i < dest->s + 1; i++) {
     mpz_init_set(dest->n[i], src->n[i]);
   }
 }
 
-void djcs_t_auth_server_copy(djcs_t_auth_server* src, djcs_t_auth_server* dest) {
+void djcs_t_auth_server_copy(djcs_t_auth_server *src, djcs_t_auth_server *dest) {
   dest->i = src->i;
   mpz_set(dest->si, src->si);
 }
 
-void djcs_t_hcs_random_copy(hcs_random* src, hcs_random* dest) {
+void djcs_t_hcs_random_copy(hcs_random *src, hcs_random *dest) {
   // TODO: probably this function causes memory leak, need further examination
   gmp_randinit_set(dest->rstate, src->rstate);
 }
@@ -567,7 +576,7 @@ void check_size(int size) {
   }
 }
 
-void check_encoded_public_key(const EncodedNumber& num1, const EncodedNumber& num2) {
+void check_encoded_public_key(const EncodedNumber &num1, const EncodedNumber &num2) {
   mpz_t t1, t2;
   mpz_init(t1);
   mpz_init(t2);
@@ -581,7 +590,7 @@ void check_encoded_public_key(const EncodedNumber& num1, const EncodedNumber& nu
   mpz_clear(t2);
 }
 
-void check_ee_add_exponent(const EncodedNumber& num1, const EncodedNumber& num2) {
+void check_ee_add_exponent(const EncodedNumber &num1, const EncodedNumber &num2) {
   int num1_exponent = num1.getter_exponent();
   int num2_exponent = num2.getter_exponent();
   if (num1_exponent != num2_exponent) {
