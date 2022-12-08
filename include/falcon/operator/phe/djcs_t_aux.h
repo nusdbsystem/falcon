@@ -56,7 +56,8 @@ void djcs_t_aux_share_combine(djcs_t_public_key* pk,
     int size);
 
 /**
- * homomorphic addition of two ciphers and return an EncodedNumber
+ * homomorphic addition of two ciphers and return an EncodedNumber,
+ * both cipher have same exponent
  *
  * @param pk: public key
  * @param res: summation ciphertext
@@ -64,13 +65,14 @@ void djcs_t_aux_share_combine(djcs_t_public_key* pk,
  * @param cipher2: second ciphertext EncodedNumber
  */
 void djcs_t_aux_ee_add(djcs_t_public_key* pk,
-    EncodedNumber & res,
-    const EncodedNumber& cipher1,
-    const EncodedNumber& cipher2);
+                       EncodedNumber & res,
+                       const EncodedNumber& cipher1,
+                       const EncodedNumber& cipher2);
 
 /**
  * homomorphic addition of two ciphers and return an EncodedNumber
- * if the exponents are not identical, increase one cipher's exponent to match
+ * both cipher have un-identical exponents,
+ * increase one cipher's exponent to match
  *
  * @param pk: public key
  * @param res: summation ciphertext
@@ -98,6 +100,7 @@ void djcs_t_aux_ep_mul(djcs_t_public_key* pk,
 
 /**
  * this function increases the precision of a ciphertext,
+ * target_precision should be greater tha precision(exponent) of cipher
  * for computing homomorphic addition when the precision does not match
  *
  * @param pk: public key
@@ -163,6 +166,7 @@ void djcs_t_aux_vec_aggregate(djcs_t_public_key* pk,
 
 /**
  * element-wise homomorphic ciphertext add
+ * both cipher have same exponent
  *
  * @param pk: public key
  * @param res: the resulted cipher vector
@@ -179,7 +183,8 @@ void djcs_t_aux_vec_ele_wise_ee_add(
 
 /**
  * element-wise homomorphic ciphertext add
- * if the exponents are not identical, increase one cipher vector's exponent to match
+ * both cipher have un-identical exponents,
+ * increase low-exponent cipher vector's exponent to match
  *
  * @param pk: public key
  * @param res: the resulted cipher vector
@@ -195,8 +200,8 @@ void djcs_t_aux_vec_ele_wise_ee_add_ext(
     int size);
 
 /**
- * homomorphic inner product of a cipher vector and a plain vector
- * return an EncodedNumber
+ * homomorphic inner product of a cipher vector and a plain vector, return an EncodedNumber
+ * e,g. {a1, a2, a3 } * {[b1], [b2], [b3]} = [a1b1+a2b3+a3b3]
  *
  * @param pk: public key
  * @param hr: random variable
@@ -214,6 +219,7 @@ void djcs_t_aux_inner_product(djcs_t_public_key* pk,
 
 /**
  * element-wise ciphertext plaintext multiplication
+ * e,g. { a1, a2, a3 } * { [b1], [b2], [b3] } = { [a1b1], [a2b3], [a3b3] }
  *
  * @param pk: public key
  * @param hr: random variable
@@ -229,7 +235,7 @@ void djcs_t_aux_vec_ele_wise_ep_mul(djcs_t_public_key* pk,
     int size);
 
 /**
- * this function increases the precision of a ciphertext vector,
+ * this function increases the precision of each element of a ciphertext vector,
  * for computing homomorphic addition when the precision does not match
  *
  * @param pk: public key
@@ -305,16 +311,16 @@ void djcs_t_aux_matrix_ele_wise_ee_add_ext(
     int column_size);
 
 /**
- * MatMul: homomorphic matrix multiplication of a cipher vector
- * and a plain matrix, the result is a cipher vector
- *
+ * MatMul: homomorphic multiplication between a cipher vector and a plain matrix,
+ * the result is a cipher vector
+ * size of cipher == column size of plain
  * @param pk: public key
  * @param hr: random variable
- * @param res: multiplication results with row_size
- * @param ciphers: cipher vector
- * @param plains: plain matrix
+ * @param res: multiplication results with row_size [ae1+be2, ce1+de2]
+ * @param ciphers: cipher vector, eg: [e1, e2]
+ * @param plains: plain matrix, eg: [[a, b], [c, d]]
  * @param row_size: number of plaintext rows
- * @param column_size: number of columns, equal to cipher size
+ * @param column_size: number of plaintext columns, equal to cipher size
  */
 void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key* pk,
     hcs_random* hr,
@@ -325,8 +331,10 @@ void djcs_t_aux_vec_mat_ep_mult(djcs_t_public_key* pk,
     int column_size);
 
 /**
- * the homomorphic multiplication between a plaintext matrix
- * and a ciphertext matrix, need to ensure plain_column_size = cipher_row_size
+ * the homomorphic multiplication between a plaintext matrix and a ciphertext matrix,
+ * the result is a cipher matrix
+ * need to ensure plain_column_size = cipher_row_size
+ * e,g. plainText (M*N) * cipherText (N*K) = Res (M*K)
  *
  * @param pk: public key
  * @param hr: random variable
