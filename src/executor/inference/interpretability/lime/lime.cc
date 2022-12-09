@@ -29,7 +29,7 @@
 #include <random>
 
 std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Party &party,
-                                                                        StandardScaler* scaler,
+                                                                        StandardScaler *scaler,
                                                                         bool sample_around_instance,
                                                                         const std::vector<double> &data_row,
                                                                         int sample_instance_num,
@@ -60,16 +60,16 @@ std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Pa
   for (int i = 0; i < sample_instance_num; i++) {
     for (int j = 0; j < feature_num; j++) {
       if (sample_around_instance) {
-        sampled_data[i+1][j] = (sampled_data[i+1][j] * (scaler->scale[j]) + data_row[j]);
+        sampled_data[i + 1][j] = (sampled_data[i + 1][j] * (scaler->scale[j]) + data_row[j]);
       } else {
-        sampled_data[i+1][j] = (sampled_data[i+1][j] * (scaler->scale[j]) + scaler->mean[j]);
+        sampled_data[i + 1][j] = (sampled_data[i + 1][j] * (scaler->scale[j]) + scaler->mean[j]);
       }
       // truncate the sampled data to fall into [0, 1] range
-      if (sampled_data[i+1][j] <= 0) {
-        sampled_data[i+1][j] = SMOOTHER;
+      if (sampled_data[i + 1][j] <= 0) {
+        sampled_data[i + 1][j] = SMOOTHER;
       }
-      if (sampled_data[i+1][j] > 1.0) {
-        sampled_data[i+1][j] = 1.0;
+      if (sampled_data[i + 1][j] > 1.0) {
+        sampled_data[i + 1][j] = 1.0;
       }
     }
   }
@@ -77,8 +77,8 @@ std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Pa
 }
 
 void LimeExplainer::load_predict_origin_model(const Party &party,
-                                              const std::string& origin_model_name,
-                                              const std::string& origin_model_saved_file,
+                                              const std::string &origin_model_name,
+                                              const std::string &origin_model_saved_file,
                                               std::vector<std::vector<double>> generated_samples,
                                               std::string model_type,
                                               int class_num,
@@ -87,8 +87,7 @@ void LimeExplainer::load_predict_origin_model(const Party &party,
   log_info("[load_predict_origin_model] num_total_samples = " + std::to_string(num_total_samples));
   falcon::AlgorithmName model_name = parse_algorithm_name(origin_model_name);
   switch (model_name) {
-    case falcon::LOG_REG:
-    {
+    case falcon::LOG_REG: {
       LogisticRegressionModel saved_log_reg_model;
       std::string saved_model_string;
       load_pb_model_string(saved_model_string, origin_model_saved_file);
@@ -98,8 +97,7 @@ void LimeExplainer::load_predict_origin_model(const Party &party,
                                         predictions);
       break;
     }
-    case falcon::RF:
-    {
+    case falcon::RF: {
       if (class_num == 1) {
         log_error("Random forest model on regression interpretation not integrated yet.");
         exit(EXIT_FAILURE);
@@ -108,12 +106,14 @@ void LimeExplainer::load_predict_origin_model(const Party &party,
         std::string saved_model_string;
         load_pb_model_string(saved_model_string, origin_model_saved_file);
         deserialize_random_forest_model(saved_forest_model, saved_model_string);
-        saved_forest_model.predict_proba(const_cast<Party &>(party), generated_samples, (int) generated_samples.size(), predictions);
+        saved_forest_model.predict_proba(const_cast<Party &>(party),
+                                         generated_samples,
+                                         (int) generated_samples.size(),
+                                         predictions);
       }
       break;
     }
-    case falcon::GBDT:
-    {
+    case falcon::GBDT: {
       if (class_num != 1) {
         log_error("GBDT model on multiple class interpretation not integrated yet.");
         exit(EXIT_FAILURE);
@@ -124,13 +124,16 @@ void LimeExplainer::load_predict_origin_model(const Party &party,
         deserialize_gbdt_model(saved_gbdt_model, saved_model_string);
         if (class_num == 1) {
           // regression, only need one dimensional predictions
-          auto* predictions_assit = new EncodedNumber[generated_samples.size()];
-          saved_gbdt_model.predict(const_cast<Party &>(party), generated_samples, (int) generated_samples.size(), predictions_assit);
+          auto *predictions_assit = new EncodedNumber[generated_samples.size()];
+          saved_gbdt_model.predict(const_cast<Party &>(party),
+                                   generated_samples,
+                                   (int) generated_samples.size(),
+                                   predictions_assit);
           // copy 1d predictions to 2d predictions
           for (int i = 0; i < (int) generated_samples.size(); i++) {
             predictions[i][0] = predictions_assit[i];
           }
-          delete [] predictions_assit;
+          delete[] predictions_assit;
         } else {
           // TODO: not implement yet
           log_error("[LimeExplainer.load_predict_origin_model] lime for gbdt classification not support");
@@ -139,8 +142,7 @@ void LimeExplainer::load_predict_origin_model(const Party &party,
       }
       break;
     }
-    default:
-      break;
+    default:break;
   }
 }
 
@@ -157,7 +159,7 @@ void LimeExplainer::compute_sample_weights(
     const std::string &sample_weights_file,
     const std::string &selected_sample_file,
     const std::string &selected_prediction_file,
-    const std::string& ps_network_str,
+    const std::string &ps_network_str,
     int is_distributed,
     int distributed_role,
     int worker_id) {
@@ -181,12 +183,12 @@ void LimeExplainer::compute_sample_weights(
   std::vector<std::vector<double>> write_data;
 
   // not distributed, directly compute and return
-  if(is_distributed == 0) {
+  if (is_distributed == 0) {
     //  2. compute the distance between the first row and the rest given
     //      the distance metric, need to call spdz program
     //  3. compute the sample weights based on kernel and kernel_width
     //      also need to call spdz program
-    compute_dist_weights(party, sss_weights,generated_samples[0],
+    compute_dist_weights(party, sss_weights, generated_samples[0],
                          generated_samples, distance_metric, kernel, kernel_width);
     log_info("Compute dist and weights finished");
     //  4. write the sss sample weights to the sample_weights_file
@@ -208,7 +210,7 @@ void LimeExplainer::compute_sample_weights(
     // receive sample weights
     std::vector<std::string> sss_weights_str_vec = ps->wait_worker_complete();
     int index = 0;
-    for(int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
+    for (int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
       int wk_sample_size = worker_sample_sizes[wk_index];
       std::vector<double> worker_weights;
       deserialize_double_array(worker_weights, sss_weights_str_vec[wk_index]);
@@ -243,8 +245,8 @@ void LimeExplainer::compute_sample_weights(
     }
     // compute the sample weights
     int wk_sample_size = (int) recv_sample_indices.size();
-    auto* worker_encrypted_weights = new EncodedNumber[wk_sample_size];
-    compute_dist_weights(party, sss_weights,generated_samples[0],
+    auto *worker_encrypted_weights = new EncodedNumber[wk_sample_size];
+    compute_dist_weights(party, sss_weights, generated_samples[0],
                          worker_samples, distance_metric, kernel, kernel_width);
     log_info("Worker " + std::to_string(worker_id) + " compute dist and weights finished");
     // return the weights back to ps
@@ -252,7 +254,7 @@ void LimeExplainer::compute_sample_weights(
     serialize_double_array(sss_weights, worker_sss_weights_str);
     worker->send_long_message_to_ps(worker_sss_weights_str);
     delete worker;
-    delete [] worker_encrypted_weights;
+    delete[] worker_encrypted_weights;
   }
 
 #ifdef SAVE_BASELINE
@@ -268,7 +270,7 @@ void LimeExplainer::compute_sample_weights(
 }
 
 std::vector<int> LimeExplainer::random_select_sample_idx(
-    const Party& party,
+    const Party &party,
     int generated_samples_size,
     int num_samples) {
   // active party random select samples and predictions
@@ -302,11 +304,11 @@ std::vector<int> LimeExplainer::random_select_sample_idx(
 }
 
 void LimeExplainer::compute_dist_weights(const Party &party,
-                                         std::vector<double>& sss_weights,
-                                         const std::vector<double>& origin_data,
-                                         const std::vector<std::vector<double>>& sampled_data,
-                                         const std::string& distance_metric,
-                                         const std::string& kernel,
+                                         std::vector<double> &sss_weights,
+                                         const std::vector<double> &origin_data,
+                                         const std::vector<std::vector<double>> &sampled_data,
+                                         const std::string &distance_metric,
+                                         const std::string &kernel,
                                          double kernel_width) {
   // check distance metric and kernel method
   if (distance_metric != "euclidean") {
@@ -330,15 +332,15 @@ void LimeExplainer::compute_dist_weights(const Party &party,
   //  2. parties aggregate and convert to secret shares
   log_info("[compute_dist_weights]: begin to compute square dist.");
   int sample_size = (int) sampled_data.size();
-  auto* squared_dist = new EncodedNumber[sample_size];
+  auto *squared_dist = new EncodedNumber[sample_size];
   compute_squared_dist(party, origin_data, sampled_data, squared_dist);
   log_info("[compute_dist_weights]: finish to compute square dist.");
   std::vector<double> squared_dist_shares;
   ciphers_to_secret_shares(party, squared_dist,
-      squared_dist_shares,
-      sample_size,
-      ACTIVE_PARTY_ID,
-      PHE_FIXED_POINT_PRECISION);
+                           squared_dist_shares,
+                           sample_size,
+                           ACTIVE_PARTY_ID,
+                           PHE_FIXED_POINT_PRECISION);
   log_info("[compute_dist_weights]: compute encrypted distance finished");
 
   //  3. parties compute kernel width (replace the input one by default now -- let spdz compute)
@@ -371,7 +373,7 @@ void LimeExplainer::compute_dist_weights(const Party &party,
 
   sss_weights = res;
   log_info("[compute_dist_weights]: shares to ciphers finished");
-  delete [] squared_dist;
+  delete[] squared_dist;
 }
 
 void LimeExplainer::compute_squared_dist(const Party &party,
@@ -386,10 +388,10 @@ void LimeExplainer::compute_squared_dist(const Party &party,
     local_squared_sum.push_back(ss);
   }
 
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
-  auto* local_squared_dist = new EncodedNumber[sample_size];
+  auto *local_squared_dist = new EncodedNumber[sample_size];
   for (int i = 0; i < sample_size; i++) {
     local_squared_dist[i].set_double(phe_pub_key->n[0],
                                      local_squared_sum[i],
@@ -409,7 +411,7 @@ void LimeExplainer::compute_squared_dist(const Party &party,
       if (id != party.party_id) {
         std::string recv_local_squared_dist_str;
         party.recv_long_message(id, recv_local_squared_dist_str);
-        auto* recv_local_squared_dist = new EncodedNumber[sample_size];
+        auto *recv_local_squared_dist = new EncodedNumber[sample_size];
         deserialize_encoded_number_array(recv_local_squared_dist,
                                          sample_size,
                                          recv_local_squared_dist_str);
@@ -420,7 +422,7 @@ void LimeExplainer::compute_squared_dist(const Party &party,
                             squared_dist[i],
                             recv_local_squared_dist[i]);
         }
-        delete [] recv_local_squared_dist;
+        delete[] recv_local_squared_dist;
       }
     }
   } else {
@@ -432,7 +434,7 @@ void LimeExplainer::compute_squared_dist(const Party &party,
   // broadcast squared_dist array
   broadcast_encoded_number_array(party, squared_dist, sample_size, ACTIVE_PARTY_ID);
 
-  delete [] local_squared_dist;
+  delete[] local_squared_dist;
   djcs_t_free_public_key(phe_pub_key);
 }
 
@@ -441,14 +443,14 @@ void LimeExplainer::select_features(Party party,
                                     const std::string &selected_samples_file,
                                     const std::string &selected_predictions_file,
                                     const std::string &sample_weights_file,
-                                    const std::string& output_path_prefix,
+                                    const std::string &output_path_prefix,
                                     int num_samples,
                                     int class_num,
                                     int class_id,
                                     const std::string &feature_selection,
                                     int num_explained_features,
                                     const std::string &selected_features_file,
-                                    const std::string& ps_network_str,
+                                    const std::string &ps_network_str,
                                     int is_distributed,
                                     int distributed_role,
                                     int worker_id) {
@@ -469,7 +471,7 @@ void LimeExplainer::select_features(Party party,
 
   // 2. read the computed_prediction file (note that
   //     we assume all parties have the same prediction file now)
-  auto** selected_predictions = new EncodedNumber*[selected_sample_size];
+  auto **selected_predictions = new EncodedNumber *[selected_sample_size];
   for (int i = 0; i < selected_sample_size; i++) {
     selected_predictions[i] = new EncodedNumber[class_num];
   }
@@ -478,7 +480,7 @@ void LimeExplainer::select_features(Party party,
                                   class_num,
                                   selected_predictions_file);
   // extract the class_id computed predictions
-  auto* selected_pred_class_id = new EncodedNumber[selected_sample_size];
+  auto *selected_pred_class_id = new EncodedNumber[selected_sample_size];
   for (int i = 0; i < selected_sample_size; i++) {
     selected_pred_class_id[i] = selected_predictions[i][class_id];
   }
@@ -498,20 +500,19 @@ void LimeExplainer::select_features(Party party,
 
   std::vector<double> local_model_weights;
   bool is_linear_reg_params_fit_bias = false;
-  if (feature_selection == PEARSON_FEATURE_SELECTION){
+  if (feature_selection == PEARSON_FEATURE_SELECTION) {
     // pearson doesn't require parameters
     wpcc_feature_selection(party,
-                                class_id,
-                                selected_samples,
-                                selected_pred_class_id,
-                                sss_weights,
-                                ps_network_str,
-                                is_distributed,
-                                distributed_role,
-                                worker_id);
+                           class_id,
+                           selected_samples,
+                           selected_pred_class_id,
+                           sss_weights,
+                           ps_network_str,
+                           is_distributed,
+                           distributed_role,
+                           worker_id);
 
-
-  }else if (feature_selection == LR_FEATURE_SELECTION) {
+  } else if (feature_selection == LR_FEATURE_SELECTION) {
     LinearRegressionParams linear_reg_params;
     std::string linear_reg_param_pb_str = base64_decode_to_pb_string(feature_selection_param);
     deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);
@@ -529,7 +530,7 @@ void LimeExplainer::select_features(Party party,
         distributed_role,
         worker_id);
 
-  }else{
+  } else {
     log_error("The feature selection method " + feature_selection + " not supported");
     exit(EXIT_FAILURE);
   }
@@ -589,7 +590,7 @@ void LimeExplainer::select_features(Party party,
       }
     }
   }
-  // passive perform following
+    // passive perform following
   else {
     // 1.send to active party
     std::string local_model_weights_str;
@@ -647,17 +648,17 @@ void LimeExplainer::select_features(Party party,
   write_dataset_to_file(selected_feat_samples, delimiter, selected_features_file);
 
   for (int i = 0; i < selected_sample_size; i++) {
-    delete [] selected_predictions[i];
+    delete[] selected_predictions[i];
   }
-  delete [] selected_predictions;
-  delete [] selected_pred_class_id;
+  delete[] selected_predictions;
+  delete[] selected_pred_class_id;
 }
 
 std::vector<std::vector<int>> LimeExplainer::find_party_feat_idx(
-    const std::vector<int>& party_weight_sizes,
-    const std::vector<double>& global_model_weights,
+    const std::vector<int> &party_weight_sizes,
+    const std::vector<double> &global_model_weights,
     int num_explained_features,
-    const std::string& selected_feature_idx_file) {
+    const std::string &selected_feature_idx_file) {
   std::vector<int> top_k_indexes = find_top_k_indexes(global_model_weights, num_explained_features);
 
 #ifdef SAVE_BASELINE
@@ -692,8 +693,8 @@ std::vector<std::vector<int>> LimeExplainer::find_party_feat_idx(
   for (int global_idx: top_k_indexes) {
     for (int i = 1; i < party_index_range.size(); i++) {
       if (global_idx < party_index_range[i]) {
-        int local_idx = global_idx - party_index_range[i-1];
-        party_selected_feat_idx[i-1].push_back(local_idx);
+        int local_idx = global_idx - party_index_range[i - 1];
+        party_selected_feat_idx[i - 1].push_back(local_idx);
         break;
       }
     }
@@ -719,7 +720,7 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
                                              const std::string &interpret_model_name,
                                              const std::string &interpret_model_param,
                                              const std::string &explanation_report,
-                                             const std::string& ps_network_str,
+                                             const std::string &ps_network_str,
                                              int is_distributed,
                                              int distributed_role,
                                              int worker_id) {
@@ -739,7 +740,7 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
   int cur_sample_size = (int) selected_data.size();
 
   //  2. read the selected_predictions_file to get the encrypted labels (with probabilities)
-  auto** encrypted_predictions = new EncodedNumber*[cur_sample_size];
+  auto **encrypted_predictions = new EncodedNumber *[cur_sample_size];
   for (int i = 0; i < cur_sample_size; i++) {
     encrypted_predictions[i] = new EncodedNumber[class_num];
   }
@@ -756,7 +757,7 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
   //  4. prepare the information for invoking the corresponding training API
   // extract the k-th model predictions
   std::vector<std::vector<double>> wrap_explanations;
-  auto* kth_predictions = new EncodedNumber[cur_sample_size];
+  auto *kth_predictions = new EncodedNumber[cur_sample_size];
   for (int i = 0; i < cur_sample_size; i++) {
     kth_predictions[i] = encrypted_predictions[i][class_id];
   }
@@ -805,23 +806,23 @@ std::vector<double> LimeExplainer::interpret(const Party &party,
 #endif
 
   for (int i = 0; i < cur_sample_size; i++) {
-    delete [] encrypted_predictions[i];
+    delete[] encrypted_predictions[i];
   }
-  delete [] encrypted_predictions;
-  delete [] kth_predictions;
+  delete[] encrypted_predictions;
+  delete[] kth_predictions;
 
   return explanations;
 }
 
 std::vector<double> LimeExplainer::explain_one_label(
     const Party &party,
-    const std::vector<std::vector<double>>& train_data,
-    EncodedNumber* predictions,
+    const std::vector<std::vector<double>> &train_data,
+    EncodedNumber *predictions,
     const std::vector<double> &sss_sample_weights,
     int num_samples,
     const std::string &interpret_model_name,
     const std::string &interpret_model_param,
-    const std::string& ps_network_str,
+    const std::string &ps_network_str,
     int is_distributed,
     int distributed_role,
     int worker_id) {
@@ -900,8 +901,7 @@ std::vector<double> LimeExplainer::explain_one_label(
           worker_id);
       break;
     }
-    default:
-      log_error("The interpret algorithm " + interpret_model_name + " is not supported.");
+    default:log_error("The interpret algorithm " + interpret_model_name + " is not supported.");
       break;
   }
 
@@ -911,10 +911,10 @@ std::vector<double> LimeExplainer::explain_one_label(
 std::vector<double> LimeExplainer::lime_linear_reg_train(
     Party party,
     const LinearRegressionParams &linear_reg_params,
-    const std::vector<std::vector<double>>& train_data,
+    const std::vector<std::vector<double>> &train_data,
     EncodedNumber *predictions,
     const std::vector<double> &sss_sample_weights,
-    const std::string& ps_network_str,
+    const std::string &ps_network_str,
     int is_distributed,
     int distributed_role,
     int worker_id) {
@@ -961,7 +961,7 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
   if (is_distributed == 1 && distributed_role == falcon::DistPS) {
     log_info("************* Distributed LIME Interpret *************");
     // init linear_reg instance
-    auto linear_reg_model_builder = new LinearRegressionBuilder (
+    auto linear_reg_model_builder = new LinearRegressionBuilder(
         linear_reg_params,
         weight_size,
         used_train_data,
@@ -990,7 +990,7 @@ std::vector<double> LimeExplainer::lime_linear_reg_train(
   if (is_distributed == 1 && distributed_role == falcon::DistWorker) {
     log_info("************* Distributed LIME Interpret *************");
     // init linear_reg instance
-    auto linear_reg_model_builder = new LinearRegressionBuilder (
+    auto linear_reg_model_builder = new LinearRegressionBuilder(
         linear_reg_params,
         weight_size,
         used_train_data,
@@ -1029,7 +1029,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
     int distributed_role,
     int worker_id) {
   // retrieve phe pub key and phe random
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
   std::vector<double> local_explanations;
@@ -1045,13 +1045,13 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   // assign to encrypted_labels before passing to lime_train function
   int cur_sample_size = (int) used_train_data.size();
   int label_size = REGRESSION_TREE_CLASS_NUM * cur_sample_size;
-  auto* encrypted_labels = new EncodedNumber[label_size];
-  auto* predictions_square = new EncodedNumber[cur_sample_size];
+  auto *encrypted_labels = new EncodedNumber[label_size];
+  auto *predictions_square = new EncodedNumber[cur_sample_size];
   ciphers_ele_wise_multi(party, predictions_square,
-                predictions,
-                predictions,
-                cur_sample_size,
-                ACTIVE_PARTY_ID);
+                         predictions,
+                         predictions,
+                         cur_sample_size,
+                         ACTIVE_PARTY_ID);
   int predictions_prec = std::abs(predictions[0].getter_exponent());
   int predictions_square_prec = std::abs(predictions_square[0].getter_exponent());
   log_info("[lime_decision_tree_train]: predictions_prec = " + std::to_string(predictions_prec));
@@ -1060,7 +1060,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
 //                             cur_sample_size,
 //                             ACTIVE_PARTY_ID,
 //                             predictions_prec);
-  auto* assist_predictions = new EncodedNumber[cur_sample_size];
+  auto *assist_predictions = new EncodedNumber[cur_sample_size];
   djcs_t_aux_increase_prec_vec(phe_pub_key, assist_predictions, predictions_square_prec, predictions, cur_sample_size);
   for (int i = 0; i < cur_sample_size; i++) {
     encrypted_labels[i] = assist_predictions[i];
@@ -1114,7 +1114,7 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
   if (is_distributed == 1 && distributed_role == falcon::DistPS) {
     log_info("************* Distributed LIME Interpret *************");
     // init tree builder instance
-    auto tree_model_builder = new DecisionTreeBuilder (
+    auto tree_model_builder = new DecisionTreeBuilder(
         dt_params,
         used_train_data,
         dummy_test_data,
@@ -1134,9 +1134,9 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
     // ps splits the data from vertical dimention, and sends the splitted part to workers
     std::string training_data_str;
 
-    int each_worker_features_num = ((int) used_train_data[0].size())/ps->worker_channels.size();
+    int each_worker_features_num = ((int) used_train_data[0].size()) / ps->worker_channels.size();
 
-    falcon_print(std::cout,  "[PS.broadcast_train_test_data]:",
+    falcon_print(std::cout, "[PS.broadcast_train_test_data]:",
                  "worker num",
                  ps->worker_channels.size(),
                  "data size",
@@ -1153,26 +1153,26 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
       // get the last index of training_data[0].size()
       std::vector<std::vector<double>> tmp_training_data(used_train_data.size());
 
-      if (wk_index == ps->worker_channels.size()-1){
+      if (wk_index == ps->worker_channels.size() - 1) {
         train_data_last_index = (int) used_train_data[0].size();
         worker_feature_index_prefix_train_data += to_string(train_data_prev_index);
-      }else{
-        train_data_last_index = train_data_prev_index+each_worker_features_num; //4
-        worker_feature_index_prefix_train_data += to_string(train_data_prev_index) +" ";
+      } else {
+        train_data_last_index = train_data_prev_index + each_worker_features_num; //4
+        worker_feature_index_prefix_train_data += to_string(train_data_prev_index) + " ";
       }
 
       // assign
-      for(int j = 0; j < used_train_data.size(); j++){
+      for (int j = 0; j < used_train_data.size(); j++) {
         tmp_training_data[j].insert(tmp_training_data[j].begin(),
-                                    used_train_data[j].begin()+train_data_prev_index,
-                                    used_train_data[j].begin()+train_data_last_index);
+                                    used_train_data[j].begin() + train_data_prev_index,
+                                    used_train_data[j].begin() + train_data_last_index);
       }
 
       serialize_double_matrix(tmp_training_data, training_data_str);
       ps->send_long_message_to_worker(wk_index, training_data_str);
 
-      falcon_print(std::cout,  "[PS.broadcast_train_test_data]:",
-                   "assign",train_data_prev_index, "-", train_data_last_index,
+      falcon_print(std::cout, "[PS.broadcast_train_test_data]:",
+                   "assign", train_data_prev_index, "-", train_data_last_index,
                    "to worker", wk_index);
 
       train_data_prev_index = train_data_last_index;
@@ -1210,16 +1210,16 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
     worker->recv_long_message_from_ps(recv_worker_feature_index_prefix_train_data);
 
     // decode worker_feature_index_prefix_train_data
-    std::stringstream iss( recv_worker_feature_index_prefix_train_data );
+    std::stringstream iss(recv_worker_feature_index_prefix_train_data);
     int worker_feature_index_prefix_train_data_num;
     std::vector<int> worker_feature_index_prefix_train_data_vector;
-    while ( iss >> worker_feature_index_prefix_train_data_num )
-      worker_feature_index_prefix_train_data_vector.push_back( worker_feature_index_prefix_train_data_num );
+    while (iss >> worker_feature_index_prefix_train_data_num)
+      worker_feature_index_prefix_train_data_vector.push_back(worker_feature_index_prefix_train_data_num);
 
-    worker->assign_train_feature_prefix(worker_feature_index_prefix_train_data_vector[worker->worker_id-1]);
+    worker->assign_train_feature_prefix(worker_feature_index_prefix_train_data_vector[worker->worker_id - 1]);
 
     // init tree builder instance
-    auto tree_model_builder = new DecisionTreeBuilder (
+    auto tree_model_builder = new DecisionTreeBuilder(
         dt_params,
         training_data,
         dummy_test_data,
@@ -1237,13 +1237,13 @@ std::vector<double> LimeExplainer::lime_decision_tree_train(
     delete worker;
   }
   djcs_t_free_public_key(phe_pub_key);
-  delete [] encrypted_labels;
-  delete [] predictions_square;
-  delete [] assist_predictions;
+  delete[] encrypted_labels;
+  delete[] predictions_square;
+  delete[] assist_predictions;
   return local_explanations;
 }
 
-void lime_sampling(Party party, const std::string& params_str, const std::string& output_path_prefix) {
+void lime_sampling(Party party, const std::string &params_str, const std::string &output_path_prefix) {
   log_info("Begin to compute the lime required samples");
   // 1. deserialize the LimeSamplingParams
   LimeSamplingParams sampling_params;
@@ -1257,9 +1257,9 @@ void lime_sampling(Party party, const std::string& params_str, const std::string
   int num_total_samples = sampling_params.num_total_samples;
   std::vector<std::vector<double>> train_data, test_data;
   std::vector<double> train_labels, test_labels;
-  split_dataset(&party, false,train_data, test_data,
+  split_dataset(&party, false, train_data, test_data,
                 train_labels, test_labels, SPLIT_TRAIN_TEST_RATIO);
-  auto* scaler = new StandardScaler(true, true);
+  auto *scaler = new StandardScaler(true, true);
   scaler->fit(train_data, train_labels);
   std::vector<double> data_row = train_data[sampling_params.explain_instance_idx];
   std::vector<std::vector<double>> generated_samples = lime_explainer.generate_random_samples(
@@ -1281,9 +1281,9 @@ void lime_sampling(Party party, const std::string& params_str, const std::string
   delete scaler;
 }
 
-void lime_comp_pred(Party party, const std::string& params_str,
-                    const std::string& output_path_prefix,
-                    const std::string& ps_network_str,
+void lime_comp_pred(Party party, const std::string &params_str,
+                    const std::string &output_path_prefix,
+                    const std::string &ps_network_str,
                     int is_distributed,
                     int distributed_role,
                     int worker_id) {
@@ -1301,15 +1301,18 @@ void lime_comp_pred(Party party, const std::string& params_str,
 
   std::string comp_pred_params_str = base64_decode_to_pb_string(params_str);
   deserialize_lime_comp_pred_params(comp_prediction_params, comp_pred_params_str);
-  comp_prediction_params.original_model_saved_file = output_path_prefix + comp_prediction_params.original_model_saved_file;
+  comp_prediction_params.original_model_saved_file =
+      output_path_prefix + comp_prediction_params.original_model_saved_file;
   comp_prediction_params.generated_sample_file = output_path_prefix + comp_prediction_params.generated_sample_file;
-  comp_prediction_params.computed_prediction_file = output_path_prefix + comp_prediction_params.computed_prediction_file;
+  comp_prediction_params.computed_prediction_file =
+      output_path_prefix + comp_prediction_params.computed_prediction_file;
   log_info("Deserialize the lime comp_prediction params");
 
   // 2. read generated random samples
   LimeExplainer lime_explainer;
   char delimiter = ',';
-  std::vector<std::vector<double>> generated_samples = read_dataset(comp_prediction_params.generated_sample_file, delimiter);
+  std::vector<std::vector<double>>
+      generated_samples = read_dataset(comp_prediction_params.generated_sample_file, delimiter);
   log_info("[lime_comp_pred] Read generated samples finished");
 
   // 3. load model and compute model predictions
@@ -1317,7 +1320,7 @@ void lime_comp_pred(Party party, const std::string& params_str,
   int cur_sample_size = (int) generated_samples.size();
   log_info("[lime_comp_pred] cur_sample_size = " + std::to_string(cur_sample_size));
   log_info("[lime_comp_pred] class_num = " + std::to_string(class_num));
-  auto** predictions = new EncodedNumber*[cur_sample_size];
+  auto **predictions = new EncodedNumber *[cur_sample_size];
   for (int i = 0; i < cur_sample_size; i++) {
     predictions[i] = new EncodedNumber[class_num];
   }
@@ -1353,9 +1356,9 @@ void lime_comp_pred(Party party, const std::string& params_str,
     // receive sample weights
     std::vector<std::string> encrypted_predictions_str_vec = ps->wait_worker_complete();
     int index = 0;
-    for(int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
+    for (int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
       int wk_sample_size = worker_sample_sizes[wk_index];
-      auto* worker_predictions = new EncodedNumber*[wk_sample_size];
+      auto *worker_predictions = new EncodedNumber *[wk_sample_size];
       for (int i = 0; i < wk_sample_size; i++) {
         worker_predictions[i] = new EncodedNumber[class_num];
       }
@@ -1363,15 +1366,15 @@ void lime_comp_pred(Party party, const std::string& params_str,
                                         class_num, encrypted_predictions_str_vec[wk_index]);
       for (int i = 0; i < wk_sample_size; i++) {
         for (int j = 0; j < class_num; j++) {
-          predictions[index+i][j] = worker_predictions[i][j];
+          predictions[index + i][j] = worker_predictions[i][j];
         }
       }
       index += wk_sample_size;
 
       for (int i = 0; i < wk_sample_size; i++) {
-        delete [] worker_predictions[i];
+        delete[] worker_predictions[i];
       }
-      delete [] worker_predictions;
+      delete[] worker_predictions;
     }
     log_info("Receive from workers and assign the encrypted predictions");
 
@@ -1399,7 +1402,7 @@ void lime_comp_pred(Party party, const std::string& params_str,
     }
     // compute the sample weights
     int wk_sample_size = (int) recv_sample_indices.size();
-    auto* worker_encrypted_predictions = new EncodedNumber*[wk_sample_size];
+    auto *worker_encrypted_predictions = new EncodedNumber *[wk_sample_size];
     for (int i = 0; i < wk_sample_size; i++) {
       worker_encrypted_predictions[i] = new EncodedNumber[class_num];
     }
@@ -1414,14 +1417,17 @@ void lime_comp_pred(Party party, const std::string& params_str,
     log_info("Worker " + std::to_string(worker_id) + " compute predictions finished");
     // return the weights back to ps
     std::string worker_encrypted_predictions_str;
-    serialize_encoded_number_matrix(worker_encrypted_predictions, wk_sample_size, class_num, worker_encrypted_predictions_str);
+    serialize_encoded_number_matrix(worker_encrypted_predictions,
+                                    wk_sample_size,
+                                    class_num,
+                                    worker_encrypted_predictions_str);
     worker->send_long_message_to_ps(worker_encrypted_predictions_str);
 
     delete worker;
     for (int i = 0; i < wk_sample_size; i++) {
-      delete [] worker_encrypted_predictions[i];
+      delete[] worker_encrypted_predictions[i];
     }
-    delete [] worker_encrypted_predictions;
+    delete[] worker_encrypted_predictions;
   }
 
   // if SAVE_BASELINE is enabled, then save the aggregated sample data and plaintext predictions
@@ -1438,13 +1444,12 @@ void lime_comp_pred(Party party, const std::string& params_str,
 
   // free information
   for (int i = 0; i < cur_sample_size; i++) {
-    delete [] predictions[i];
+    delete[] predictions[i];
   }
-  delete [] predictions;
+  delete[] predictions;
 }
 
-
-void lime_conv_pred_plain2cipher(Party party, const std::string& params_str, const std::string& output_path_prefix) {
+void lime_conv_pred_plain2cipher(Party party, const std::string &params_str, const std::string &output_path_prefix) {
   log_info("Begin to convert plaintext predictions to ciphertext");
   // deserialize the LimeCompWeightsParams
   LimeCompWeightsParams comp_weights_params;
@@ -1471,12 +1476,13 @@ void lime_conv_pred_plain2cipher(Party party, const std::string& params_str, con
 
   // read prediction dataset
   char delimiter = ',';
-  std::vector<std::vector<double>> plain_predictions = read_dataset(comp_weights_params.computed_prediction_file, delimiter);
+  std::vector<std::vector<double>>
+      plain_predictions = read_dataset(comp_weights_params.computed_prediction_file, delimiter);
 
   // active party encrypt the plain predictions with 2 * PHE_PRECISION and broadcast
   int row_num = (int) plain_predictions.size();
   int column_num = (int) plain_predictions[0].size();
-  auto** predictions = new EncodedNumber*[row_num];
+  auto **predictions = new EncodedNumber *[row_num];
   for (int i = 0; i < row_num; i++) {
     predictions[i] = new EncodedNumber[column_num];
   }
@@ -1484,7 +1490,7 @@ void lime_conv_pred_plain2cipher(Party party, const std::string& params_str, con
   log_info("[lime_conv_pred_plain2cipher] column_num = " + std::to_string(column_num));
 
   // retrieve phe pub key and phe random
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
   if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -1509,17 +1515,16 @@ void lime_conv_pred_plain2cipher(Party party, const std::string& params_str, con
 
   // free information
   for (int i = 0; i < row_num; i++) {
-    delete [] predictions[i];
+    delete[] predictions[i];
   }
-  delete [] predictions;
+  delete[] predictions;
   djcs_t_free_public_key(phe_pub_key);
 }
 
-
-void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>& generated_samples,
-                             EncodedNumber** predictions, int cur_sample_size, int class_num,
-                             const std::string& generated_sample_file,
-                             const std::string& computed_prediction_file) {
+void save_data_pred4baseline(Party party, const std::vector<std::vector<double>> &generated_samples,
+                             EncodedNumber **predictions, int cur_sample_size, int class_num,
+                             const std::string &generated_sample_file,
+                             const std::string &computed_prediction_file) {
   // first, create two file names
   std::string aggregated_sample_file = generated_sample_file + ".aggregated";
   std::string plaintext_predictions_file = computed_prediction_file + ".plaintext";
@@ -1562,7 +1567,7 @@ void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>
 
   // third, collaboratively decrypt the predictions
   std::vector<std::vector<double>> plaintext_predictions;
-  auto** decrypted_predictions = new EncodedNumber*[cur_sample_size];
+  auto **decrypted_predictions = new EncodedNumber *[cur_sample_size];
   for (int i = 0; i < cur_sample_size; i++) {
     decrypted_predictions[i] = new EncodedNumber[class_num];
   }
@@ -1594,14 +1599,14 @@ void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>
 
   // free memory
   for (int i = 0; i < cur_sample_size; i++) {
-    delete [] decrypted_predictions[i];
+    delete[] decrypted_predictions[i];
   }
-  delete [] decrypted_predictions;
+  delete[] decrypted_predictions;
 }
 
-void lime_comp_weight(Party party, const std::string& params_str,
-                      const std::string& output_path_prefix,
-                      const std::string& ps_network_str,
+void lime_comp_weight(Party party, const std::string &params_str,
+                      const std::string &output_path_prefix,
+                      const std::string &ps_network_str,
                       int is_distributed,
                       int distributed_role,
                       int worker_id) {
@@ -1656,9 +1661,9 @@ void lime_comp_weight(Party party, const std::string& params_str,
   log_info("Finish computing sample weights");
 }
 
-void lime_feat_sel(Party party, const std::string& params_str,
-                   const std::string& output_path_prefix,
-                   const std::string& ps_network_str,
+void lime_feat_sel(Party party, const std::string &params_str,
+                   const std::string &output_path_prefix,
+                   const std::string &ps_network_str,
                    int is_distributed,
                    int distributed_role,
                    int worker_id) {
@@ -1697,9 +1702,9 @@ void lime_feat_sel(Party party, const std::string& params_str,
   log_info("Finish feature selection");
 }
 
-void lime_interpret(Party party, const std::string& params_str,
-                    const std::string& output_path_prefix,
-                    const std::string& ps_network_str,
+void lime_interpret(Party party, const std::string &params_str,
+                    const std::string &output_path_prefix,
+                    const std::string &ps_network_str,
                     int is_distributed,
                     int distributed_role,
                     int worker_id) {
@@ -1731,141 +1736,23 @@ void lime_interpret(Party party, const std::string& params_str,
   // 2. create the LimeExplainer instance and call explain instance
   LimeExplainer lime_explainer;
   std::vector<double> explanation = lime_explainer.interpret(party,
-                           interpret_params.selected_data_file,
-                           interpret_params.selected_predictions_file,
-                           interpret_params.sample_weights_file,
-                           interpret_params.num_samples,
-                           interpret_params.class_num,
-                           interpret_params.class_id,
-                           interpret_params.interpret_model_name,
-                           interpret_params.interpret_model_param,
-                           interpret_params.explanation_report,
-                           ps_network_str,
-                           is_distributed,
-                           distributed_role,
-                           worker_id);
+                                                             interpret_params.selected_data_file,
+                                                             interpret_params.selected_predictions_file,
+                                                             interpret_params.sample_weights_file,
+                                                             interpret_params.num_samples,
+                                                             interpret_params.class_num,
+                                                             interpret_params.class_id,
+                                                             interpret_params.interpret_model_name,
+                                                             interpret_params.interpret_model_param,
+                                                             interpret_params.explanation_report,
+                                                             ps_network_str,
+                                                             is_distributed,
+                                                             distributed_role,
+                                                             worker_id);
 
   // 3. print the explanation
   log_info("The explanation for class" + std::to_string(interpret_params.class_id) + " is: ");
   for (int i = 0; i < explanation.size(); i++) {
     log_info("explanation " + std::to_string(i) + " = " + std::to_string(explanation[i]));
-  }
-}
-
-void spdz_lime_computation(int party_num,
-                           int party_id,
-                           std::vector<int> mpc_port_bases,
-                           std::vector<std::string> party_host_names,
-                           int public_value_size,
-                           const std::vector<int>& public_values,
-                           int private_value_size,
-                           const std::vector<double>& private_values,
-                           falcon::SpdzLimeCompType lime_comp_type,
-                           std::promise<std::vector<double>> *res) {
-  // Here put the whole setup socket code together, as using a function call
-  // would result in a problem when deleting the created sockets
-  // setup connections from this party to each spdz party socket
-  std::vector<ssl_socket*> mpc_sockets(party_num);
-  vector<int> plain_sockets(party_num);
-  // ssl_ctx ctx(mpc_player_path, "C" + to_string(party_id));
-  ssl_ctx ctx("C" + to_string(party_id));
-  // std::cout << "correct init ctx" << std::endl;
-  ssl_service io_service;
-  octetStream specification;
-  std::cout << "begin connect to spdz parties" << std::endl;
-  std::cout << "party_num = " << party_num << std::endl;
-  for (int i = 0; i < party_num; i++)
-  {
-    set_up_client_socket(plain_sockets[i], party_host_names[i].c_str(), mpc_port_bases[i] + i);
-    send(plain_sockets[i], (octet*) &party_id, sizeof(int));
-    mpc_sockets[i] = new ssl_socket(io_service, ctx, plain_sockets[i],
-                                    "P" + to_string(i), "C" + to_string(party_id), true);
-    if (i == 0){
-      // receive gfp prime
-      specification.Receive(mpc_sockets[0]);
-    }
-    LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
-                                                          " sockets = " << mpc_sockets[i] << ", port_num = " << mpc_port_bases[i] + i << ".";
-  }
-  LOG(INFO) << "Finish setup socket connections to spdz engines.";
-  std::cout << "Finish setup socket connections to spdz engines." << std::endl;
-  int type = specification.get<int>();
-  switch (type)
-  {
-    case 'p':
-    {
-      gfp::init_field(specification.get<bigint>());
-      LOG(INFO) << "Using prime " << gfp::pr();
-      break;
-    }
-    default:
-      LOG(ERROR) << "Type " << type << " not implemented";
-      exit(1);
-  }
-  LOG(INFO) << "Finish initializing gfp field.";
-  // std::cout << "Finish initializing gfp field." << std::endl;
-  // std::cout << "batch aggregation size = " << batch_aggregation_shares.size() << std::endl;
-  google::FlushLogFiles(google::INFO);
-
-  // send data to spdz parties
-  std::cout << "party_id = " << party_id << std::endl;
-  LOG(INFO) << "party_id = " << party_id;
-  if (party_id == ACTIVE_PARTY_ID) {
-    // the active party sends computation id for spdz computation
-    std::vector<int> computation_id;
-    computation_id.push_back(lime_comp_type);
-    std::cout << "lime_comp_type = " << lime_comp_type << std::endl;
-    LOG(INFO) << "lime_comp_type = " << lime_comp_type;
-    google::FlushLogFiles(google::INFO);
-    send_public_values(computation_id, mpc_sockets, party_num);
-    // the active party sends public values to spdz parties
-    for (int i = 0; i < public_value_size; i++) {
-      std::vector<int> x;
-      x.push_back(public_values[i]);
-      send_public_values(x, mpc_sockets, party_num);
-    }
-  }
-  // all the parties send private shares
-  std::cout << "private value size = " << private_value_size << std::endl;
-  LOG(INFO) << "private value size = " << private_value_size;
-  for (int i = 0; i < private_value_size; i++) {
-    vector<double> x;
-    x.push_back(private_values[i]);
-    send_private_inputs(x, mpc_sockets, party_num);
-  }
-
-  // receive result from spdz parties according to the computation type
-  switch (lime_comp_type) {
-    case falcon::DIST_WEIGHT: {
-      LOG(INFO) << "SPDZ lime computation dist weights computation";
-      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
-      res->set_value(return_values);
-      break;
-    }
-    case falcon::PEARSON: {
-      LOG(INFO) << "SPDZ lime computation type find best split returned";
-      std::vector<double> return_values;
-      std::vector<double> best_split_index = receive_result(mpc_sockets, party_num, 1);
-      std::vector<double> best_left_impurity = receive_result(mpc_sockets, party_num, 1);
-      std::vector<double> best_right_impurity = receive_result(mpc_sockets, party_num, 1);
-      return_values.push_back(best_split_index[0]);
-      return_values.push_back(best_left_impurity[0]);
-      return_values.push_back(best_right_impurity[0]);
-      res->set_value(return_values);
-      break;
-    }
-    default:
-      LOG(INFO) << "SPDZ lime computation type is not found.";
-      exit(1);
-  }
-
-  for (int i = 0; i < party_num; i++) {
-    close_client_socket(plain_sockets[i]);
-  }
-
-  // free memory and close mpc_sockets
-  for (int i = 0; i < party_num; i++) {
-    delete mpc_sockets[i];
-    mpc_sockets[i] = nullptr;
   }
 }

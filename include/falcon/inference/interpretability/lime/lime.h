@@ -518,32 +518,5 @@ void lime_interpret(Party party, const std::string& params_str,
                     int distributed_role = 0,
                     int worker_id = 0);
 
-/**
- * spdz computation with thread,
- * the spdz_lime_computation will do the sqrt(dist), kernel
- * exponential, and pearson coefficient operation
- *
- * @param party_num
- * @param party_id
- * @param mpc_tree_port_bases
- * @param party_host_names
- * @param public_value_size
- * @param public_values
- * @param private_value_size
- * @param private_values
- * @param tree_comp_type
- * @param res
- */
-void spdz_lime_computation(int party_num,
-                           int party_id,
-                           std::vector<int> mpc_port_bases,
-                           std::vector<std::string> party_host_names,
-                           int public_value_size,
-                           const std::vector<int>& public_values,
-                           int private_value_size,
-                           const std::vector<double>& private_values,
-                           falcon::SpdzLimeCompType lime_comp_type,
-                           std::promise<std::vector<double>> *res);
-
 
 #endif //FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_H_
