@@ -282,6 +282,7 @@ WORKDIR /opt/falcon
 
 # re-make for update
 RUN git checkout add_pearson
+RUN git pull origin add_pearson
+COPY make.sh /opt/falcon/
 RUN bash make.sh
-
 CMD ["bash", "docker_cmd.sh"]

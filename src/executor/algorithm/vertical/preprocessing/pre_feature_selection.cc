@@ -14,15 +14,14 @@
 #include <falcon/common.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 
-
 void FeatSel::select_features(Party party,
-                                    int num_samples,
-                                    const std::string &feature_selection,
-                                    const std::string &selected_features_file,
-                                    const std::string& ps_network_str,
-                                    int is_distributed,
-                                    int distributed_role,
-                                    int worker_id){
+                              int num_samples,
+                              const std::string &feature_selection,
+                              const std::string &selected_features_file,
+                              const std::string &ps_network_str,
+                              int is_distributed,
+                              int distributed_role,
+                              int worker_id) {
 
   // 1. read the selected sample file
   std::vector<std::vector<double> > dataset = party.getter_local_data();
@@ -30,24 +29,24 @@ void FeatSel::select_features(Party party,
   int selected_sample_size = dataset.size();
   log_info("Read the generated samples finished");
 
-  if (feature_selection != "pearson_correlation"){
+  if (feature_selection != "pearson_correlation") {
     log_error("only support pearson_correlation in pre-processing stage");
     exit(EXIT_FAILURE);
   }
 
   // 0. retrieve phe pub key and phe random
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
   // 1. Active party sends local labels to other party, while passive party receive and save locally.
-  auto* selected_sample_true_labels = new EncodedNumber[selected_sample_size];
+  auto *selected_sample_true_labels = new EncodedNumber[selected_sample_size];
 
   // 1.1 encrypt local label
-  if (party.party_type == falcon.ACTIVE_PARTY){
+  if (party.party_type == falcon::ACTIVE_PARTY) {
 
     std::vector<double> labels = party.getter_labels();
 
-    for (int i = 0; i < selected_sample_size; i++){
+    for (int i = 0; i < selected_sample_size; i++) {
       selected_sample_true_labels[i].set_double(
           phe_pub_key->n[0],
           labels[i],
@@ -61,15 +60,15 @@ void FeatSel::select_features(Party party,
     // serialize encrypted label and send out
     std::string enc_label_str;
     serialize_encoded_number_array(selected_sample_true_labels, selected_sample_size, enc_label_str);
-    for (int j = 0; j < party.party_num; j++){
-      if (j != party.party_id){
+    for (int j = 0; j < party.party_num; j++) {
+      if (j != party.party_id) {
         party.send_long_message(j, enc_label_str);
       }
     }
   }
 
   // passive party receive labels.
-  if (party.party_type == falcon.PASSIVE_PARTY){
+  if (party.party_type == falcon::PASSIVE_PARTY) {
     std::string recv_enc_label_str;
     party.recv_long_message(ACTIVE_PARTY_ID, recv_enc_label_str);
     deserialize_encoded_number_array(selected_sample_true_labels, selected_sample_size, recv_enc_label_str);
@@ -77,21 +76,21 @@ void FeatSel::select_features(Party party,
 
   // 2. each party calculate the score
   PearsonCorrelation pearson_cor;
-  EncodedNumber* local_score = new EncodedNumber[dataset[0].size()];
+  EncodedNumber *local_score = new EncodedNumber[dataset[0].size()];
 
   // for each feature
-  for ( int fid = 0; fid < dataset[0].size(); fid++ ){
-    std::vector< double > selected_feature_vec;
+  for (int fid = 0; fid < dataset[0].size(); fid++) {
+    std::vector<double> selected_feature_vec;
     // generate the feature vector across all examples.
-    for ( int row = 0; row < dataset.size(); row ++){
+    for (int row = 0; row < dataset.size(); row++) {
       selected_feature_vec.push_back(dataset[row][fid]);
     }
 
     // calculate the score.
     EncodedNumber score = pearson_cor.calculate_score(party,
-                                               selected_feature_vec,
-                                               selected_sample_true_labels,
-                                               selected_feature_vec.size());
+                                                      selected_feature_vec,
+                                                      selected_sample_true_labels,
+                                                      selected_feature_vec.size());
 
     local_score[fid] = score;
   }
@@ -99,9 +98,9 @@ void FeatSel::select_features(Party party,
   // 3. all party send score to active party.
   std::vector<int> selected_feat_idx;
   std::vector<int> party_score_size;
-  if ( party.party_type == falcon.ACTIVE_PARTY){
+  if (party.party_type == falcon::ACTIVE_PARTY) {
     // store score for all features across parties in sequence of partyID.
-    std::vector< EncodedNumber* > global_score;
+    std::vector<EncodedNumber *> global_score;
     // 1.1 add local score into global score list
     party_score_size.push_back(dataset[0].size());
     global_score.push_back(local_score);
@@ -119,7 +118,7 @@ void FeatSel::select_features(Party party,
         // receive score array
         std::string recv_score_str;
         party.recv_long_message(id, recv_score_str);
-        EncodedNumber* recv_score;
+        EncodedNumber *recv_score;
         deserialize_encoded_number_array(recv_score, recv_score_size, recv_score_str);
         global_score.push_back(recv_score);
       }
@@ -140,7 +139,7 @@ void FeatSel::select_features(Party party,
   }
 
   // passive perform following
-  if (party.party_type == falcon.PASSIVE_PARTY){
+  if (party.party_type == falcon::PASSIVE_PARTY) {
 
     // 1.send to active party the size of the score array for deserialize
     party.send_long_message(ACTIVE_PARTY_ID, to_string(dataset[0].size()));
@@ -171,18 +170,17 @@ void FeatSel::select_features(Party party,
 
   write_dataset_to_file(selected_feat_samples, ',', selected_features_file);
 
-  delete [] selected_sample_true_labels;
-  delete []local_score;
+  delete[] selected_sample_true_labels;
+  delete[]local_score;
 
 }
 
-
-void pre_feat_sel(Party party, const std::string& params_str,
-                      const std::string& output_path_prefix,
-                      const std::string& ps_network_str,
-                      int is_distributed,
-                      int distributed_role,
-                      int worker_id){
+void pre_feat_sel(const Party &party, const std::string &params_str,
+                  const std::string &output_path_prefix,
+                  const std::string &ps_network_str,
+                  int is_distributed,
+                  int distributed_role,
+                  int worker_id) {
 
   log_info("Begin to select features");
   // deserialize the Params
@@ -209,22 +207,10 @@ void pre_feat_sel(Party party, const std::string& params_str,
       worker_id);
 }
 
-
 // test
 std::vector<std::vector<int>> find_party_feat_index(
-    std::vector< EncodedNumber* > global_score,
-    int topK){
-
-  // construct result
+    const std::vector<EncodedNumber *> &global_score,
+    int topK) {
   std::vector<std::vector<int>> party_selected_feat_idx;
-
-  for (int i = 0; i < global_score.size(); i++) {
-    std::vector<int> feat_idx;
-    for (int j = 0; j < global_score[i].size(); j++ ){
-      feat_idx.push_back(j);
-    }
-    party_selected_feat_idx.push_back(feat_idx);
-  }
-
   return party_selected_feat_idx;
 }

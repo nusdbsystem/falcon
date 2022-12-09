@@ -4,7 +4,6 @@ rm -rf build
 
 # generate new protoc
 echo "============= begin to generate new protoc ============="
-#cp ~/.local/bin/protoc /usr/bin/ && \bin
 cd /opt/falcon/src/executor/include/proto && \
     SRC_DIR=v0/ && \
     DST_DIR=../message && \

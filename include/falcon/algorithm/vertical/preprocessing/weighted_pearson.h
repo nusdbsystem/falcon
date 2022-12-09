@@ -10,7 +10,18 @@
 #include <falcon/party/party.h>
 #include <falcon/distributed/worker.h>
 #include <falcon/party/info_exchange.h>
-
+#include <thread>
+#include <Networking/ssl_sockets.h>
+#include <future>
+#include <falcon/common.h>
+#include <falcon/operator/mpc/spdz_connector.h>
+#include <falcon/utils/logger/logger.h>
+#include <random>
+#include <thread>
+#include <future>
+#include <Networking/ssl_sockets.h>
+#include <falcon/utils/math/math_ops.h>
+#include <openssl/ssl.h>
 
 /**
  * This function return importance of features with encrypted predictions,
@@ -27,7 +38,7 @@
  * @param worker_id: if is_distributed = 1 and distributed_role = 1
  * @return
  */
-static std::vector<double> wpcc_feature_selection(
+std::vector<double> wpcc_feature_selection(
     Party party,
     int class_id,
     const std::vector<std::vector<double>> &train_data,
@@ -48,7 +59,7 @@ static std::vector<double> wpcc_feature_selection(
  * @param sss_sample_weights: the sss sample weights
  * @return correlation
  */
-static std::vector<double> get_correlation(
+std::vector<double> get_correlation(
     const Party &party,
     int class_id,
     const vector<std::vector<double>> &train_data,

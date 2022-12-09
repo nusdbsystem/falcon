@@ -34,6 +34,8 @@ set(SOURCE_FILES
         utils/pb_converter/tree_converter.cc
         ../../include/falcon/utils/pb_converter/lr_converter.h
         utils/pb_converter/lr_converter.cc
+        ../../include/falcon/utils/pb_converter/preprocessing_converter.h
+        utils/pb_converter/preprocessing_converter.cpp
         utils/metric/classification.cc
         utils/math/math_ops.cc
         ../../include/falcon/utils/base64.h
@@ -157,6 +159,12 @@ set(SOURCE_FILES
         ../../include/falcon/utils/alg/vec_util.h utils/alg/vec_util.cc
         ../../include/falcon/algorithm/vertical/preprocessing/weighted_pearson.h
         algorithm/vertical/preprocessing/weighted_pearson.cpp
+        ../../include/falcon/algorithm/vertical/preprocessing/pre_feature_selection.h
+        algorithm/vertical/preprocessing/pre_feature_selection.cc
+        ../../include/falcon/algorithm/vertical/preprocessing/pearson_correlation.h
+        algorithm/vertical/preprocessing/pearson_correlation.cc
+        include/message/feat_sel.pb.cc
+        include/message/feat_sel.pb.h
         )
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")

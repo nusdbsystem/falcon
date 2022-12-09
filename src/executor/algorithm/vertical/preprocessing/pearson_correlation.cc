@@ -71,9 +71,14 @@ EncodedNumber PearsonCorrelation::calculate_weighted_mean(
   EncodedNumber denominator;
   denominator.set_integer(phe_pub_key->n[0], 0);
 
+
+  auto plain_samples_encoded = new EncodedNumber[plain_samples.size()];
+  for (int i = 0; i< plain_samples.size(); i++){
+    plain_samples_encoded[i].set_double(phe_pub_key->n[0], plain_samples[i]);
+  }
   // compute homomorphic inner product between feature j and weights
   djcs_t_aux_inner_product(phe_pub_key, party.phe_random, numerator,
-                           encrypted_weight, plain_samples,
+                           encrypted_weight, plain_samples_encoded,
                            sample_size);
 
   for ( int i = 0; i < sample_size; i++ ){

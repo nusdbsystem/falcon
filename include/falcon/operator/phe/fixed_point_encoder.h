@@ -8,6 +8,7 @@
 #include "libhcs.h"
 #include "gmp.h"
 #include "falcon/common.h"
+#include <vector>
 
 /**
  * After decryption, there are four states for the decrypted number:
@@ -217,7 +218,6 @@ void fixed_pointed_decode(double &value, mpz_t res, int exponent);
  */
 void fixed_pointed_decode_truncated(double &value, mpz_t res, int exponent, int truncated_exponent);
 
-
 /**
  * Convert a two dimension vector into two-d encoded number array
  * @param two_d_vec input two dimension array to be converted
@@ -225,9 +225,9 @@ void fixed_pointed_decode_truncated(double &value, mpz_t res, int exponent, int 
  * @param exponent: precision in converting a value into encode number
  * @return two dimension encoded number with each value encoding using pn and exponent
  */
-void metrics_to_encoded_num(EncodedNumber** result,
-                           const std::vector<std::vector<double>>& two_d_vec,
-                           mpz_t pn,
-                           int exponent);
+void metrics_to_encoded_num(EncodedNumber **result,
+                            const std::vector<std::vector<double>> &two_d_vec,
+                            mpz_t pn,
+                            int exponent);
 
 #endif //FALCON_SRC_EXECUTOR_OPERATOR_PHE_FIXED_POINT_ENCODER_H_
