@@ -55,26 +55,33 @@ static std::vector<double> get_correlation(
     EncodedNumber *predictions,
     const vector<double> &sss_sample_weights);
 
-void spdz_lime_divide(int party_num,
-                      int party_id,
-                      std::vector<int> mpc_port_bases,
-                      std::vector<std::string> party_host_names,
-                      int public_value_size,
-                      const std::vector<int> &public_values,
-                      int private_value_size,
-                      const std::vector<double> &private_values,
-                      falcon::SpdzLimeCompType lime_comp_type,
-                      std::promise<std::vector<double>> *res);
 
-void spdz_lime_WPCC(int party_num,
-                    int party_id,
-                    std::vector<int> mpc_port_bases,
-                    std::vector<std::string> party_host_names,
-                    int public_value_size,
-                    const std::vector<int> &public_values,
-                    int private_value_size,
-                    const std::vector<double> &private_values,
-                    falcon::SpdzLimeCompType lime_comp_type,
-                    std::promise<std::vector<double>> *res);
+/**
+ * spdz computation with thread,
+ * the spdz_lime_computation will do the sqrt(dist), kernel
+ * exponential, and pearson coefficient operation
+ *
+ * @param party_num: the participating party number
+ * @param party_id: the participating party id
+ * @param mpc_port_bases: the mpc ports
+ * @param party_host_names: the mpc hosts
+ * @param public_value_size: public value size
+ * @param public_values: public value known to all parties
+ * @param private_value_size: private value size
+ * @param private_values: private value only stored at each party, eg, local share
+ * @param lime_comp_type: which function in MPC is executed
+ * @param res: res, in form of share
+ */
+void spdz_lime_computation(int party_num,
+                           int party_id,
+                           std::vector<int> mpc_port_bases,
+                           std::vector<std::string> party_host_names,
+                           int public_value_size,
+                           const std::vector<int>& public_values,
+                           int private_value_size,
+                           const std::vector<double>& private_values,
+                           falcon::SpdzLimeCompType lime_comp_type,
+                           std::promise<std::vector<double>> *res);
+
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_PREPROCESSING_WEIGHTED_PEARSON_H_

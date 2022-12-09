@@ -108,39 +108,41 @@ std::vector<double> get_correlation(const Party &party,
                         two_d_prediction_cipher, 1, num_instance, num_instance, 1,
                         two_d_sss_weight_mul_pred_cipher);
 
+  // each party hold one share
   std::vector<double> two_d_sss_weight_mul_pred_share;
   ciphers_to_secret_shares(party,
                            two_d_sss_weight_mul_pred_cipher[0],
                            two_d_sss_weight_mul_pred_share,
-                           num_instance,
+                           1,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
 
   // 4. active party compute mean y with [mean_y] = SSS2PHE(<two_d_sss_weight_mul_pred_share> / <w_sum>)
-  // and convert it to shares
+  // send to MPC
+  std::vector<double> private_values;
+  private_values.push_back(two_d_sss_weight_mul_pred_share[0]);
+  private_values.push_back(sum_sss_weight_share[0]);
   std::vector<double> mean_y_share;
   std::vector<int> public_values;
-  //    public_values.push_back(sample_size);
-  //    public_values.push_back(total_feature_size);
-  falcon::SpdzLimeCompType comp_type = falcon::PEARSON;
-  std::promise<std::vector<double>> promise_values;
-  std::future<std::vector<double>> future_values = promise_values.get_future();
-  std::thread spdz_dist_weights(spdz_lime_divide,
+  falcon::SpdzLimeCompType comp_type = falcon::PEARSON_Division;
+  std::promise<std::vector<double>> promise_values_mean_y;
+  std::future<std::vector<double>> future_values_mean_y = promise_values_mean_y.get_future();
+  std::thread spdz_dist_weights(spdz_lime_computation,
                                 party.party_num,
                                 party.party_id,
                                 party.executor_mpc_ports,
                                 party.host_names,
-                                public_values.size(),
-                                public_values,
-                                two_d_sss_weight_mul_pred_share.size(),
-                                two_d_sss_weight_mul_pred_share,
+                                0,
+                                public_values, // no public value needed
+                                private_values.size(), // 2
+                                private_values, // <mean_y>, <sum_w>
                                 comp_type,
-                                &promise_values);
-  std::vector<double> res = future_values.get();
+                                &promise_values_mean_y);
+  std::vector<double> mean_y_res = future_values_mean_y.get();
   spdz_dist_weights.join();
-  mean_y_share = res;
+  mean_y_share = mean_y_res;
   log_info("[compute_mean_y]: communicate with spdz finished");
-  log_info("[compute_mean_y]: res.size = " + std::to_string(res.size()));
+  log_info("[compute_mean_y]: res.size = " + std::to_string(mean_y_res.size()));
 
   // convert mean_y share into mean_y cipher
   auto *mean_y_cipher = new EncodedNumber[1];
@@ -263,24 +265,24 @@ std::vector<double> get_correlation(const Party &party,
                              PHE_FIXED_POINT_PRECISION);
 
     // calculate mean of mu
+    std::vector<double> private_values_for_feature;
+    private_values_for_feature.push_back(tmp_shares[0]);
+    private_values_for_feature.push_back(sum_sss_weight_share[0]);
     std::vector<double> mean_f_share;
-    std::vector<int> public_values;
-    //    public_values.push_back(sample_size);
-    //    public_values.push_back(total_feature_size);
-    falcon::SpdzLimeCompType comp_type = falcon::PEARSON;
+    comp_type = falcon::PEARSON_Division;
     std::promise<std::vector<double>> promise_values_mean_f;
     std::future<std::vector<double>> future_values_mean_f = promise_values_mean_f.get_future();
-    std::thread spdz_dist_mean_f(spdz_lime_divide,
-                                  party.party_num,
-                                  party.party_id,
-                                  party.executor_mpc_ports,
-                                  party.host_names,
-                                  public_values.size(),
-                                  public_values,
-                                  tmp_shares.size(),
-                                  tmp_shares,
-                                  comp_type,
-                                  &promise_values_mean_f);
+    std::thread spdz_dist_mean_f(spdz_lime_computation,
+                                 party.party_num,
+                                 party.party_id,
+                                 party.executor_mpc_ports,
+                                 party.host_names,
+                                 0,
+                                 public_values, // no public value needed
+                                 private_values_for_feature.size(),  // 2
+                                 private_values_for_feature, // <mean_F>, <sum_w>
+                                 comp_type,
+                                 &promise_values_mean_f);
     std::vector<double> res_mean_f = future_values_mean_f.get();
     spdz_dist_weights.join();
     mean_f_share = res_mean_f;
@@ -294,28 +296,9 @@ std::vector<double> get_correlation(const Party &party,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
 
-
     // calculate squared mean value f
     std::vector<double> squared_mean_f_share;
-    //    public_values.push_back(sample_size);
-    //    public_values.push_back(total_feature_size);
-    comp_type = falcon::PEARSON;
-    std::promise<std::vector<double>> promise_values_squared;
-    std::future<std::vector<double>> future_values_squared = promise_values_squared.get_future();
-    std::thread spdz_dist_squared(spdz_lime_divide,
-                                  party.party_num,
-                                  party.party_id,
-                                  party.executor_mpc_ports,
-                                  party.host_names,
-                                  public_values.size(),
-                                  public_values,
-                                  mean_f_share.size(),
-                                  mean_f_share,
-                                  comp_type,
-                                  &promise_values_squared);
-    std::vector<double> res_squared = future_values_squared.get();
-    spdz_dist_weights.join();
-    squared_mean_f_share = res;
+    squared_mean_f_share.push_back(mean_f_share[0] * mean_f_share[0]);
 
     // convert squared_mean_f back to cipher
     auto *squared_mean_f_cipher = new EncodedNumber[1];
@@ -358,7 +341,7 @@ std::vector<double> get_correlation(const Party &party,
                           1, num_instance, num_instance, 1,
                           f_vec_min_mean_vec_share);
 
-    // get p share
+    // get p share, 1*1
     std::vector<double> p_shares;
     ciphers_to_secret_shares(party, f_vec_min_mean_vec_share[0],
                              p_shares,
@@ -414,22 +397,24 @@ std::vector<double> get_correlation(const Party &party,
                              PHE_FIXED_POINT_PRECISION);
 
     // for this feature, calculate WPCC share, wpcc = <p> / (<q1> * <q2>)
+    std::vector<double> private_values_wpcc;
+    private_values_wpcc.push_back(p_shares[0]);
+    private_values_wpcc.push_back(q1_shares[0]);
+    private_values_wpcc.push_back(q2_shares[0]);
     std::vector<double> wpcc_shares;
-    //    public_values.push_back(sample_size);
-    //    public_values.push_back(total_feature_size);
-    comp_type = falcon::PEARSON;
+    falcon::SpdzLimeCompType comp_type_wpcc = falcon::PEARSON_Div_with_SquareRoot;
     std::promise<std::vector<double>> promise_values_wpcc;
     std::future<std::vector<double>> future_values_wpcc = promise_values_wpcc.get_future();
-    std::thread spdz_dist_wpcc(spdz_lime_WPCC,
+    std::thread spdz_dist_wpcc(spdz_lime_computation,
                                party.party_num,
                                party.party_id,
                                party.executor_mpc_ports,
                                party.host_names,
-                               public_values.size(),
-                               public_values,
-                               q1_shares.size(),
-                               q1_shares,
-                               comp_type,
+                               0,
+                               public_values, // no public value needed
+                               private_values_wpcc.size(), // 3
+                               private_values_wpcc, // <mean_y>, <sum_w>
+                               comp_type_wpcc,
                                &promise_values_wpcc);
     std::vector<double> res_wpcc = future_values_wpcc.get();
     spdz_dist_weights.join();
@@ -442,29 +427,118 @@ std::vector<double> get_correlation(const Party &party,
   return wpcc_vec;
 }
 
-void spdz_lime_divide(int party_num,
-                      int party_id,
-                      std::vector<int> mpc_port_bases,
-                      std::vector<std::string> party_host_names,
-                      int public_value_size,
-                      const std::vector<int> &public_values,
-                      int private_value_size,
-                      const std::vector<double> &private_values,
-                      falcon::SpdzLimeCompType lime_comp_type,
-                      std::promise<std::vector<double>> *res) {
+void spdz_lime_computation(int party_num,
+                           int party_id,
+                           std::vector<int> mpc_port_bases,
+                           std::vector<std::string> party_host_names,
+                           int public_value_size,
+                           const std::vector<int> &public_values,
+                           int private_value_size,
+                           const std::vector<double> &private_values,
+                           falcon::SpdzLimeCompType lime_comp_type,
+                           std::promise<std::vector<double>> *res) {
+  // Here put the whole setup socket code together, as using a function call
+  // would result in a problem when deleting the created sockets
+  // setup connections from this party to each spdz party socket
+  std::vector<ssl_socket *> mpc_sockets(party_num);
+  vector<int> plain_sockets(party_num);
+  // ssl_ctx ctx(mpc_player_path, "C" + to_string(party_id));
+  ssl_ctx ctx("C" + to_string(party_id));
+  // std::cout << "correct init ctx" << std::endl;
+  ssl_service io_service;
+  octetStream specification;
+  std::cout << "begin connect to spdz parties" << std::endl;
+  std::cout << "party_num = " << party_num << std::endl;
+  for (int i = 0; i < party_num; i++) {
+    set_up_client_socket(plain_sockets[i], party_host_names[i].c_str(), mpc_port_bases[i] + i);
+    send(plain_sockets[i], (octet *) &party_id, sizeof(int));
+    mpc_sockets[i] = new ssl_socket(io_service, ctx, plain_sockets[i],
+                                    "P" + to_string(i), "C" + to_string(party_id), true);
+    if (i == 0) {
+      // receive gfp prime
+      specification.Receive(mpc_sockets[0]);
+    }
+    LOG(INFO) << "Set up socket connections for " << i << "-th spdz party succeed,"
+                                                          " sockets = " << mpc_sockets[i] << ", port_num = "
+              << mpc_port_bases[i] + i << ".";
+  }
+  LOG(INFO) << "Finish setup socket connections to spdz engines.";
+  std::cout << "Finish setup socket connections to spdz engines." << std::endl;
+  int type = specification.get<int>();
+  // todo, 'p' is 112 , but what 112 means?
+  switch (type) {
+    case 'p': {
+      gfp::init_field(specification.get<bigint>());
+      LOG(INFO) << "Using prime " << gfp::pr();
+      break;
+    }
+    default:LOG(ERROR) << "Type " << type << " not implemented";
+      exit(1);
+  }
+  LOG(INFO) << "Finish initializing gfp field.";
+  // std::cout << "Finish initializing gfp field." << std::endl;
+  // std::cout << "batch aggregation size = " << batch_aggregation_shares.size() << std::endl;
+  google::FlushLogFiles(google::INFO);
 
-}
+  // send data to spdz parties
+  std::cout << "party_id = " << party_id << std::endl;
+  LOG(INFO) << "party_id = " << party_id;
+  if (party_id == ACTIVE_PARTY_ID) {
+    // the active party sends computation id for spdz computation
+    std::vector<int> computation_id;
+    computation_id.push_back(lime_comp_type);
+    std::cout << "lime_comp_type = " << lime_comp_type << std::endl;
+    LOG(INFO) << "lime_comp_type = " << lime_comp_type;
+    google::FlushLogFiles(google::INFO);
+    send_public_values(computation_id, mpc_sockets, party_num);
+    // the active party sends public values to spdz parties
+    for (int i = 0; i < public_value_size; i++) {
+      std::vector<int> x;
+      x.push_back(public_values[i]);
+      send_public_values(x, mpc_sockets, party_num);
+    }
+  }
+  // all the parties send private shares
+  std::cout << "private value size = " << private_value_size << std::endl;
+  LOG(INFO) << "private value size = " << private_value_size;
+  for (int i = 0; i < private_value_size; i++) {
+    vector<double> x;
+    x.push_back(private_values[i]);
+    send_private_inputs(x, mpc_sockets, party_num);
+  }
 
-void spdz_lime_WPCC(int party_num,
-                    int party_id,
-                    std::vector<int> mpc_port_bases,
-                    std::vector<std::string> party_host_names,
-                    int public_value_size,
-                    const std::vector<int> &public_values,
-                    int private_value_size,
-                    const std::vector<double> &private_values,
-                    falcon::SpdzLimeCompType lime_comp_type,
-                    std::promise<std::vector<double>> *res) {
+  // receive result from spdz parties according to the computation type
+  switch (lime_comp_type) {
+    case falcon::DIST_WEIGHT: {
+      LOG(INFO) << "SPDZ lime computation dist weights computation";
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+      res->set_value(return_values);
+      break;
+    }
+    case falcon::PEARSON_Division: {
+      LOG(INFO) << "SPDZ calculate mean value <mean_y> / <mean_sum>";
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+      res->set_value(return_values);
+      break;
+    }
+    case falcon::PEARSON_Div_with_SquareRoot: {
+      LOG(INFO) << "SPDZ calculate mean value <p> /( <q1> * <q2>) ";
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+      res->set_value(return_values);
+      break;
+    }
+    default:LOG(INFO) << "SPDZ lime computation type is not found.";
+      exit(1);
+  }
 
+  for (int i = 0; i < party_num; i++) {
+    close_client_socket(plain_sockets[i]);
+  }
+
+  // free memory and close mpc_sockets
+  for (int i = 0; i < party_num; i++) {
+    delete mpc_sockets[i];
+    mpc_sockets[i] = nullptr;
+  }
 }
 
