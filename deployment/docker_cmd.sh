@@ -1,7 +1,7 @@
 # checkout branch for test code
 echo "---------------git checkout branch--------"
 git branch
-git pull origin add_pearson
+git pull origin add_pearson --force
 # git log -4
 
 # make executor

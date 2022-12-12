@@ -280,9 +280,10 @@ COPY docker_cmd.sh /opt/falcon/
 # Define working directory.
 WORKDIR /opt/falcon
 
-# re-make for update
+# ARG CACHEBUST=1 is for re-make for update
+ARG CACHEBUST=1
 RUN git checkout add_pearson
-RUN git pull origin add_pearson
+RUN git pull origin add_pearson --force
 COPY make.sh /opt/falcon/
 RUN bash make.sh
 CMD ["bash", "docker_cmd.sh"]

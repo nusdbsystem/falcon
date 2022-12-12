@@ -188,6 +188,16 @@ std::vector<double> get_correlation(const Party &party,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
     e_share_vec.push_back(es_share[0]);
+
+    for (int i = 0; i < num_instance; i++) {
+      delete[] two_d_mean_y_cipher_neg[i];
+    }
+    delete[] two_d_mean_y_cipher_neg;
+
+    for (int i = 0; i < num_instance; i++) {
+      delete[] sss_weight_mul_y_min_meany_cipher[i];
+    }
+    delete[] sss_weight_mul_y_min_meany_cipher;
   }
 
   // after getting e, calculate q2, y_vec_min_mean_vec in form of 1*1
@@ -420,9 +430,47 @@ std::vector<double> get_correlation(const Party &party,
     spdz_dist_weights.join();
     wpcc_shares = res_wpcc;
     wpcc_vec.push_back(wpcc_shares[0]);
+
+    for (int i = 0; i < num_instance; i++) {
+      delete[] feature_vector_plains[i];
+    }
+    delete[] feature_vector_plains;
+
+    delete[] feature_multiply_w_cipher;
+
+    delete[] two_d_sss_weight_mul_F_cipher;
+
+    delete[] mean_f_cipher;
+    delete[] squared_mean_f_cipher;
+
+    for (int i = 0; i < num_instance; i++) {
+      delete[] q1_cipher[i];
+    }
+    delete[] q1_cipher;
   }
 
   djcs_t_free_public_key(phe_pub_key);
+
+  // clean the code
+  for (int i = 0; i < num_instance; i++) {
+    delete[] two_d_prediction_cipher[i];
+  }
+  delete[] two_d_prediction_cipher;
+
+  delete[] sss_weight_cipher;
+
+  for (int i = 0; i < num_instance; i++) {
+    delete[] two_d_sss_weight_mul_pred_cipher[i];
+  }
+  delete[] two_d_sss_weight_mul_pred_cipher;
+
+  delete[] mean_y_cipher;
+
+  for (int i = 0; i < num_instance; i++) {
+    delete[] y_vec_min_mean_vec[i];
+  }
+  delete[] y_vec_min_mean_vec;
+
 
   return wpcc_vec;
 }

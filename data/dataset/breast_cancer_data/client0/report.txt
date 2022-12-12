@@ -36,3 +36,39 @@ specificity = 0.82499999999999996
 precision (PPV) = 0.91249999999999998
 NPV = 0.97058823529411764
 F1 score = 0.94805194805194803
+******** Evaluation Report on testing dataset ********
+Confusion Matrix (Class 1 is Positive Class)
+               Pred
+               Class1    Class0
+True Class1    74        0
+     Class0    16        24
+=== Classification Report ===
+False negative (FN) = 0
+False positive (FP) = 16
+True positive (TP) = 74
+True negative (TN) = 24
+regular_accuracy = 0.85964912280701755
+balanced_accuracy = 0.80000000000000004
+sensitivity = 1
+specificity = 0.59999999999999998
+precision (PPV) = 0.82222222222222219
+NPV = 1
+F1 score = 0.90243902439024393
+******** Evaluation Report on testing dataset ********
+Confusion Matrix (Class 1 is Positive Class)
+               Pred
+               Class1    Class0
+True Class1    74        0
+     Class0    16        24
+=== Classification Report ===
+False negative (FN) = 0
+False positive (FP) = 16
+True positive (TP) = 74
+True negative (TN) = 24
+regular_accuracy = 0.85964912280701755
+balanced_accuracy = 0.80000000000000004
+sensitivity = 1
+specificity = 0.59999999999999998
+precision (PPV) = 0.82222222222222219
+NPV = 1
+F1 score = 0.90243902439024393
