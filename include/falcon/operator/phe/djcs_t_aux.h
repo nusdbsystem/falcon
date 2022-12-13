@@ -68,16 +68,15 @@ void djcs_t_aux_ee_add(djcs_t_public_key *pk,
                        const EncodedNumber &cipher2);
 
 /**
- * homomorphic addition of two ciphers and return an EncodedNumber,
- * both cipher have same exponent
+ * Add all values in a vector into a single EncodedNumber
  *
  * @param pk: public key
- * @param res: summation ciphertext
- * @param cipher1: first ciphertext EncodedNumber
- * @param cipher2: second ciphertext EncodedNumber
+ * @param res: added ciphertext
+ * @param size: size of the vector
+ * @param cipher_vector: the vector to be aggregated
  */
-
 void djcs_t_aux_ee_add_a_vector(djcs_t_public_key *pk,
+                                hcs_random *hr,
                                 EncodedNumber &res,
                                 int size,
                                 EncodedNumber *cipher_vector);

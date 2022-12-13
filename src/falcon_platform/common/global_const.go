@@ -159,7 +159,7 @@ const (
 	HorizontalFl = "horizontal"
 	VerticalFl   = "vertical"
 
-	PearsonAlgName = "pearson_correlation"
+	PearsonAlgName = "lime"
 
 	LogisticRegressAlgName  = "logistic_regression"
 	DecisionTreeAlgName     = "decision_tree"

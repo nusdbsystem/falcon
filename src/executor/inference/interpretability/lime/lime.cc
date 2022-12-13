@@ -454,8 +454,13 @@ void LimeExplainer::select_features(Party party,
                                     int is_distributed,
                                     int distributed_role,
                                     int worker_id) {
+
+  /* feature selection */
+  std::string PEARSON_FEATURE_SELECTION_NAME = "pearson_correlation";
+  std::string LR_FEATURE_SELECTION_NAME = "linear_regression";
+
   // currently, only support pearson-based feature selection
-  if (feature_selection != PEARSON_FEATURE_SELECTION && feature_selection != LR_FEATURE_SELECTION) {
+  if (feature_selection != PEARSON_FEATURE_SELECTION_NAME && feature_selection != LR_FEATURE_SELECTION_NAME) {
     log_error("The feature selection method " + feature_selection + " not supported");
     exit(EXIT_FAILURE);
   }
@@ -492,15 +497,16 @@ void LimeExplainer::select_features(Party party,
   sss_weights = read_data[0];
 
   log_info("[select_features]: feature_selection = " + feature_selection);
-  log_info("[select_features]: feature_selection_param = " + feature_selection_param);
+  log_info("[select_features]: algorithm_code = " + feature_selection_param);
 
   falcon::AlgorithmName algorithm_name = parse_algorithm_name(feature_selection);
-  log_info("[explain_one_label]: algorithm_name = " + std::to_string(algorithm_name));
+  log_info("[explain_one_label]: algorithm_code = " + std::to_string(algorithm_name));
   // deserialize linear regression params
 
   std::vector<double> local_model_weights;
   bool is_linear_reg_params_fit_bias = false;
-  if (feature_selection == PEARSON_FEATURE_SELECTION) {
+  if (feature_selection == PEARSON_FEATURE_SELECTION_NAME) {
+    log_info("[explain_one_label]: begin run pearson feature selection");
     // pearson doesn't require parameters
     wpcc_feature_selection(party,
                            class_id,
@@ -512,7 +518,7 @@ void LimeExplainer::select_features(Party party,
                            distributed_role,
                            worker_id);
 
-  } else if (feature_selection == LR_FEATURE_SELECTION) {
+  } else if (feature_selection == LR_FEATURE_SELECTION_NAME) {
     LinearRegressionParams linear_reg_params;
     std::string linear_reg_param_pb_str = base64_decode_to_pb_string(feature_selection_param);
     deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);

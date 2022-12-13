@@ -1,6 +1,6 @@
 # Falcon
 Falcon is a federated learning system with privacy protection. It allows
-multiple parties to collaboratively train a machine learning model and 
+multiple parties to collaboratively train a machine learning model and
 serve for new requests.
 
 ## Prerequisites
@@ -10,7 +10,21 @@ serve for new requests.
 
 * install secure multiparty computation library **MP-SPDZ**.
 
-* install web server request handling library **[served](https://github.com/meltwater/served)**. 
+* install web server request handling library **[served](https://github.com/meltwater/served)**.
+
+# Develop guide
+
+Current development follows the current patterns:
+
+1. Edit falcon or `MPC`  locally and `git commit` to corresponding `github`
+2. Review the `dockerfile` in `/falcon/deployment/ubuntu18.04-falcon.Dockerfile`:
+    1. If some`MPC` code is updated, change the docker file line 283-286
+    2. Build locally with `docker build -t falcon-clean:latest -f ./ubuntu18.04-falcon.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg CACHEBUST="$(date +%s)"`
+3. Now the code is updated to the docker container.
+4. Start the platform and submit the job according the following tutorials
+5. If the `MPC` program is stable, then move the line 283-386 before the `ARG CACHEBUST=1` to avoid repeatly compile `MPC`
+
+
 
 ## Quick Setup
 
@@ -32,8 +46,8 @@ bash tools/scripts/build_executor.sh
 ```
 
 * prepare data and json file for training or inference (default dataset
-is under data/dataset/bank_marketing_data/ and default job is under
-src/falcon_platform/train_jobs/three_parties_train_job.json)
+  is under data/dataset/bank_marketing_data/ and default job is under
+  src/falcon_platform/train_jobs/three_parties_train_job.json)
 
 * submit train job to coordinator
 ```shell script
@@ -44,8 +58,8 @@ python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train
 python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_breastcancer.json
 ```
 
-* after training, find the saved model and report under 
-data/dataset/bank_marketing_data/client0/
+* after training, find the saved model and report under
+  data/dataset/bank_marketing_data/client0/
 
 * terminate coordinator and partyserver
 ```shell script

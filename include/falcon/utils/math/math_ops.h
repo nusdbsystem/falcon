@@ -137,8 +137,8 @@ double square_sum(std::vector<double> a, std::vector<double> b);
 /**
  * find top k indexes
  *
- * @param a
- * @param k
+ * @param a vector of a plain test array
+ * @param k find top k from a
  * @return
  */
 std::vector<int> find_top_k_indexes(const std::vector<double>& a, int k);

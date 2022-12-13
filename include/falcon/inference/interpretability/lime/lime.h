@@ -19,10 +19,6 @@
 #include <thread>
 #include <future>
 
-/* feature selection */
-const std::string PEARSON_FEATURE_SELECTION = "pearson_correlation";
-const std::string LR_FEATURE_SELECTION = "linear_regression";
-
 struct LimeSamplingParams {
   // the instance index for explain
   int explain_instance_idx;
@@ -287,12 +283,12 @@ class LimeExplainer {
                        int worker_id = 0);
 
   /**
-   * find the corresponding party's index
+   * Find the the most important K feature's index at each party
    *
-   * @param party_weight_sizes
-   * @param global_model_weights
-   * @param num_explained_features
-   * @param selected_feature_idx_file
+   * @param party_weight_sizes weight size
+   * @param global_model_weights global weight for each feature
+   * @param num_explained_features number of features
+   * @param selected_feature_idx_file this is only for debug
    * @return
    */
   std::vector<std::vector<int>> find_party_feat_idx(

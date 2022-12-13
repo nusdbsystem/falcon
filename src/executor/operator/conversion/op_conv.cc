@@ -416,12 +416,12 @@ void cipher_shares_mat_mul(const Party &party,
 
   // sanity check
   if (n_shares_row != shares.size() || n_shares_col != shares[0].size()) {
-    log_error("[cipher_shares_mat_mul] the shares sizes do not match");
+    log_error("[cipher_shares_mat_mul] the shares sizes do not match the given share row and col size");
     exit(EXIT_FAILURE);
   }
   // check if the column size of shares = the row size of ciphers for matrix multiplication
   if (n_shares_col != n_ciphers_row) {
-    log_error("[cipher_shares_mat_mul] matrix multiplication dimensions do not match");
+    log_error("[cipher_shares_mat_mul] matrix multiplication dimensions do not match the given cipher row and col size");
     exit(EXIT_FAILURE);
   }
 

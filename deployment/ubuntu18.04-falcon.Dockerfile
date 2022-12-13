@@ -257,33 +257,58 @@ RUN apt-get update && apt-get upgrade -y && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/*
 
-# Set environment variables.
+#############################################################
+# adjust the following according to the developing progress
+#############################################################
+WORKDIR /opt/falcon/third_party/MP-SPDZ
+RUN git fetch origin && \
+    git checkout add_pearson && \
+    ./compile.py Programs/Source/lime.mpc
+
+# 1. pull latest code
+WORKDIR /opt/falcon
+RUN git fetch origin && \
+    git checkout add_pearson && \
+    git pull origin add_pearson
+
+# 2. Set environment variables and pre-compile falcon_coordinator
 ENV GOROOT /usr/local/go
 ENV GOPATH /gopath
 ENV PATH $GOROOT/bin:$GOPATH/bin:$PATH
 ENV PATH /root/.local/bin:$PATH
-
 WORKDIR /opt/falcon/src/falcon_platform
 RUN bash make_platform.sh
 
+# ARG CACHEBUST=1 is to force re-execute the following CMDs at each updates.
+ARG CACHEBUST=1
+
+# 1. pull latest code
+WORKDIR /opt/falcon
+RUN git fetch origin && \
+    git pull origin add_pearson
+
+# 2. Set environment variables and pre-compile falcon_coordinator
+# ENV GOROOT /usr/local/go
+# ENV GOPATH /gopath
+# ENV PATH $GOROOT/bin:$GOPATH/bin:$PATH
+# ENV PATH /root/.local/bin:$PATH
+# WORKDIR /opt/falcon/src/falcon_platform
+# RUN bash make_platform.sh
+
+# 3. update mpc data and code
 WORKDIR /opt/falcon/third_party/MP-SPDZ
 RUN c_rehash Player-Data/
 
-# need to copy the experiment folder in the docker folder before copy
-# ADD experiments/ /opt/falcon/
+# # every-time the code (e,g. lime.mpc) have been changed, re-compiled it here.
+# WORKDIR /opt/falcon/third_party/MP-SPDZ
+# RUN git fetch origin && \
+#     git checkout add_pearson && \
+#     ./compile.py Programs/Source/lime.mpc
 
-# Define working directory.
+# 4. pre-compile falcon
 WORKDIR /opt/falcon
-RUN echo "re-build third-party mp-spdz"
-COPY docker_cmd.sh /opt/falcon/
-
-# Define working directory.
-WORKDIR /opt/falcon
-
-# ARG CACHEBUST=1 is for re-make for update
-ARG CACHEBUST=1
-RUN git checkout add_pearson
-RUN git pull origin add_pearson --force
-COPY make.sh /opt/falcon/
 RUN bash make.sh
-CMD ["bash", "docker_cmd.sh"]
+
+# 5. define the entry
+WORKDIR /opt/falcon
+CMD ["bash", "deployment/docker_cmd.sh"]

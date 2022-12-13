@@ -5,9 +5,7 @@
 #include "../../include/message/common.pb.h"
 #include <falcon/utils/pb_converter/common_converter.h>
 
-#include <glog/logging.h>
 #include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/message_lite.h>
 #include <falcon/utils/logger/logger.h>
 
 void serialize_int_array(std::vector<int> vec, std::string& output_message) {

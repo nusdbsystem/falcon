@@ -23,10 +23,10 @@ std::vector<double> wpcc_feature_selection(Party party,
   std::vector<std::vector<double>> used_train_data = train_data;
   int weight_size = (int) used_train_data[0].size();
   party.setter_feature_num(weight_size);
-  log_info("start weighted pearson");
 
   // 3. get the weights for each feature.
   if (is_distributed == 0) {
+    log_info("start centralized weighted pearson");
     local_explanations = get_correlation(party, class_id, train_data, predictions, sss_sample_weights);
   }
 
@@ -38,6 +38,8 @@ std::vector<double> wpcc_feature_selection(Party party,
     auto worker = new Worker(ps_network_str, worker_id);
   }
 
+  log_info("Pearson Feature Selection Done");
+
   return local_explanations;
 }
 
@@ -48,6 +50,10 @@ std::vector<double> get_correlation(const Party &party,
                                     const vector<double> &sss_sample_weights_share) {
   djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
+
+  // get batch_true_labels_precision
+  int batch_true_labels_precision = std::abs(predictions[0].getter_exponent());
+  log_info("[pearson_fl]: batch_true_labels_precision = " + std::to_string(batch_true_labels_precision));
 
   // get number of instance
   int num_instance = train_data.size();
@@ -76,7 +82,7 @@ std::vector<double> get_correlation(const Party &party,
                            num_instance,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
-
+  log_info("[pearson_fl]: 1. jointly convert <w> into ciphertext [w], and saved in active party");
 
   // 3. all parties calculate sum, and convert it to share
   log_info("step 2, getting the sum of weight");
@@ -93,6 +99,8 @@ std::vector<double> get_correlation(const Party &party,
                            num_instance,
                            ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
 
+  log_info("[pearson_fl]: 2. active party convert sum to secret shares, and each party hold one share");
+
   // in form of 1*N
   std::vector<vector<double>> two_d_e_share_vec;
   std::vector<double> q2_shares;
@@ -107,6 +115,8 @@ std::vector<double> get_correlation(const Party &party,
                         two_d_sss_weights_share,
                         two_d_prediction_cipher, 1, num_instance, num_instance, 1,
                         two_d_sss_weight_mul_pred_cipher);
+
+  log_info("[pearson_fl]: 3. active party calculate <w>*[Prediction] and convert it to secret share");
 
   // each party hold one share
   std::vector<double> two_d_sss_weight_mul_pred_share;
@@ -127,31 +137,35 @@ std::vector<double> get_correlation(const Party &party,
   falcon::SpdzLimeCompType comp_type = falcon::PEARSON_Division;
   std::promise<std::vector<double>> promise_values_mean_y;
   std::future<std::vector<double>> future_values_mean_y = promise_values_mean_y.get_future();
-  std::thread spdz_dist_weights(spdz_lime_computation,
-                                party.party_num,
-                                party.party_id,
-                                party.executor_mpc_ports,
-                                party.host_names,
-                                0,
-                                public_values, // no public value needed
-                                private_values.size(), // 2
-                                private_values, // <mean_y>, <sum_w>
-                                comp_type,
-                                &promise_values_mean_y);
+  std::thread spdz_dist_mean_y(spdz_lime_computation,
+                               party.party_num,
+                               party.party_id,
+                               party.executor_mpc_ports,
+                               party.host_names,
+                               0,
+                               public_values, // no public value needed
+                               private_values.size(), // 2
+                               private_values, // <mean_y>, <sum_w>
+                               comp_type,
+                               &promise_values_mean_y);
   std::vector<double> mean_y_res = future_values_mean_y.get();
-  spdz_dist_weights.join();
+  spdz_dist_mean_y.join();
   mean_y_share = mean_y_res;
   log_info("[compute_mean_y]: communicate with spdz finished");
   log_info("[compute_mean_y]: res.size = " + std::to_string(mean_y_res.size()));
+
+  log_info("[pearson_fl]: 4.1 active party compute mean_U = <two_d_sss_weight_mul_pred_share> / <w_sum>)");
 
   // convert mean_y share into mean_y cipher
   auto *mean_y_cipher = new EncodedNumber[1];
   secret_shares_to_ciphers(party,
                            mean_y_cipher,
                            mean_y_share,
-                           num_instance,
+                           1,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
+
+  log_info("[pearson_fl]: 4.2. active party compute [mean_y] = SSS2PHE(mean_U)");
 
   // 5. calculate the (<w> * {[y] - [mean_y]}) ** 2
   std::vector<double> e_share_vec; // N vector
@@ -159,10 +173,16 @@ std::vector<double> get_correlation(const Party &party,
   neg_one_int.set_integer(phe_pub_key->n[0], -1);
   EncodedNumber mean_y_cipher_neg;
   djcs_t_aux_ep_mul(phe_pub_key, mean_y_cipher_neg, mean_y_cipher[0], neg_one_int);
+  log_info("[pearson_fl]: 4.3 convert [mean_u] to [-mean_u]");
+
   for (int index = 0; index < num_instance; index++) {
     // calculate [y_i] - [mean_y_cipher]
     EncodedNumber y_min_mean_y_cipher;
-    djcs_t_aux_ee_add(phe_pub_key, y_min_mean_y_cipher, mean_y_cipher_neg, predictions[index]);
+    djcs_t_aux_ee_add_ext(phe_pub_key, y_min_mean_y_cipher, mean_y_cipher_neg, predictions[index]);
+
+    int y_min_mean_y_cipher_pre = std::abs(y_min_mean_y_cipher.getter_exponent());
+    log_info("[pearson_fl]: 5.2 calculate the [y] - [mean_y], result's precision ="
+                 + std::to_string(y_min_mean_y_cipher_pre));
 
     // convert [y_i] - [mean_y_cipher] into two dim in form of 1*1
     auto **two_d_mean_y_cipher_neg = new EncodedNumber *[1];
@@ -171,13 +191,20 @@ std::vector<double> get_correlation(const Party &party,
 
     // init result 1*1 metris
     auto **sss_weight_mul_y_min_meany_cipher = new EncodedNumber *[1];
-    for (int i = 0; i < 1; i++) {
-      sss_weight_mul_y_min_meany_cipher[i] = new EncodedNumber[1];
-    }
+    sss_weight_mul_y_min_meany_cipher[0] = new EncodedNumber[1];
+
+    // pick one element from two_d_sss_weights_share each time and wrapper it as two-d vector
+    std::vector<std::vector<double>> two_d_sss_weights_share_element;
+    std::vector<double> tmp_vec;
+    tmp_vec.push_back(sss_sample_weights_share[index]);
+    two_d_sss_weights_share_element.push_back(tmp_vec);
+
     cipher_shares_mat_mul(party,
-                          two_d_sss_weights_share,
+                          two_d_sss_weights_share_element,
                           two_d_mean_y_cipher_neg, 1, 1, 1, 1,
                           sss_weight_mul_y_min_meany_cipher);
+
+    log_info("[pearson_fl]: 5.3 convert [y_i] - [mean_y_cipher] into two dim in form of 1*1 ");
 
     // get es share
     std::vector<double> es_share;
@@ -189,22 +216,19 @@ std::vector<double> get_correlation(const Party &party,
                              PHE_FIXED_POINT_PRECISION);
     e_share_vec.push_back(es_share[0]);
 
-    for (int i = 0; i < num_instance; i++) {
-      delete[] two_d_mean_y_cipher_neg[i];
-    }
+    // clear the memory
+    delete[] two_d_mean_y_cipher_neg[0];
     delete[] two_d_mean_y_cipher_neg;
-
-    for (int i = 0; i < num_instance; i++) {
-      delete[] sss_weight_mul_y_min_meany_cipher[i];
-    }
+    delete[] sss_weight_mul_y_min_meany_cipher[0];
     delete[] sss_weight_mul_y_min_meany_cipher;
   }
 
+  log_info("[pearson_fl]: 5. all done ");
+
   // after getting e, calculate q2, y_vec_min_mean_vec in form of 1*1
   auto **y_vec_min_mean_vec = new EncodedNumber *[1];
-  for (int i = 0; i < 1; i++) {
-    y_vec_min_mean_vec[i] = new EncodedNumber[1];
-  }
+  y_vec_min_mean_vec[0] = new EncodedNumber[1];
+
   // calculate [y_i] - [mean_y_cipher] in form of N*1
   auto **y_vec_min_mean_y_cipher = new EncodedNumber *[num_instance];
   for (int i = 0; i < num_instance; i++) {
@@ -213,9 +237,15 @@ std::vector<double> get_correlation(const Party &party,
   // assign value
   for (int i = 0; i < num_instance; i++) {
     EncodedNumber tmp_res;
-    djcs_t_aux_ee_add(phe_pub_key, tmp_res, mean_y_cipher_neg, predictions[i]);
+    djcs_t_aux_ee_add_ext(phe_pub_key, tmp_res, mean_y_cipher_neg, predictions[i]);
     y_vec_min_mean_y_cipher[i][0] = tmp_res;
   }
+
+  int y_min_mean_y_cipher_pre = std::abs(y_vec_min_mean_y_cipher[0][0].getter_exponent());
+  log_info("[pearson_fl]: 6 calculate [y] - [mean_y], result's precision ="
+               + std::to_string(y_min_mean_y_cipher_pre));
+
+  log_info("[pearson_fl]: 6. calculate the (<w> * {[y] - [mean_y]}) ** 2");
 
   // 6. calculate q2
   // make e_share to two dim,
@@ -226,17 +256,18 @@ std::vector<double> get_correlation(const Party &party,
                         1, num_instance, num_instance, 1,
                         y_vec_min_mean_vec);
 
+  log_info("[pearson_fl]: 7.1 calculate q2 done");
+
   // convert q2 into share
   ciphers_to_secret_shares(party, y_vec_min_mean_vec[0],
                            q2_shares,
                            1,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
+  log_info("[pearson_fl]: 7.2 convert q2 cipher to share");
 
-  // activate sync <e> to all other paries.
-  for (auto &ele: two_d_e_share_vec) {
-    broadcast_double_array(party, ele, ACTIVE_PARTY_ID);
-  }
+  log_info(
+      "[pearson_fl]: 8. parties begin to calculate WPCC for features" + std::to_string(party.getter_feature_num()));
 
   // 1. calculate local feature mean
   for (int feature_id = 0; feature_id < party.getter_feature_num(); feature_id++) {
@@ -249,8 +280,8 @@ std::vector<double> get_correlation(const Party &party,
                                                      train_data[sample_id][feature_id],
                                                      PHE_FIXED_POINT_PRECISION);
     }
-    // calculate F*[W]
-    auto *feature_multiply_w_cipher = new EncodedNumber[num_instance];
+    // calculate F*[W], 1*1
+    auto *feature_multiply_w_cipher = new EncodedNumber[1];
     djcs_t_aux_vec_mat_ep_mult(phe_pub_key,
                                party.phe_random,
                                feature_multiply_w_cipher,
@@ -259,20 +290,16 @@ std::vector<double> get_correlation(const Party &party,
                                1,
                                num_instance);
 
-    // sum the F*[W]
-    auto *two_d_sss_weight_mul_F_cipher = new EncodedNumber[1];
-    djcs_t_aux_ee_add_a_vector(phe_pub_key,
-                               two_d_sss_weight_mul_F_cipher[0],
-                               num_instance,
-                               feature_multiply_w_cipher);
+    log_info("[pearson_fl]: 9.1. calculate F*[W]");
 
     // convert it to share for further <tmp> / <sum_w>
     std::vector<double> tmp_shares;
-    ciphers_to_secret_shares(party, two_d_sss_weight_mul_F_cipher,
+    ciphers_to_secret_shares(party, feature_multiply_w_cipher,
                              tmp_shares,
                              1,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
+    log_info("[pearson_fl]: 9.3. convert it to share ");
 
     // calculate mean of mu
     std::vector<double> private_values_for_feature;
@@ -294,8 +321,10 @@ std::vector<double> get_correlation(const Party &party,
                                  comp_type,
                                  &promise_values_mean_f);
     std::vector<double> res_mean_f = future_values_mean_f.get();
-    spdz_dist_weights.join();
+    spdz_dist_mean_f.join();
     mean_f_share = res_mean_f;
+
+    log_info("[pearson_fl]: 9.4. computes <tmp> / <sum_w>");
 
     // convert mu back to cipher
     auto *mean_f_cipher = new EncodedNumber[1];
@@ -305,6 +334,8 @@ std::vector<double> get_correlation(const Party &party,
                              1,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
+
+    log_info("[pearson_fl]: 9.5. convert mu back to cipher");
 
     // calculate squared mean value f
     std::vector<double> squared_mean_f_share;
@@ -318,6 +349,8 @@ std::vector<double> get_correlation(const Party &party,
                              1,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
+
+    log_info("[pearson_fl]: 9.6. convert squared_mean_f back to cipher and convert to cipher");
 
     // calculate numerator in equ 11
     // encrypt the feature vector first
@@ -340,16 +373,18 @@ std::vector<double> get_correlation(const Party &party,
       f_vec_min_mean_f_cipher[index][0] = f_min_mean_f_cipher;
     }
 
+    log_info("[pearson_fl]: 9.7. calculate [f_i] - [mean_f_cipher],");
+
     // calculate <w> * ([F] - [mean_F]), 1*1
     auto **f_vec_min_mean_vec_share = new EncodedNumber *[1];
-    for (int i = 0; i < 1; i++) {
-      f_vec_min_mean_vec_share[i] = new EncodedNumber[1];
-    }
+    f_vec_min_mean_vec_share[0] = new EncodedNumber[1];
     cipher_shares_mat_mul(party,
-                          two_d_e_share_vec,
-                          f_vec_min_mean_f_cipher,
+                          two_d_e_share_vec, // 1*N
+                          f_vec_min_mean_f_cipher, // N*1
                           1, num_instance, num_instance, 1,
                           f_vec_min_mean_vec_share);
+
+    log_info("[pearson_fl]: 9.8. calculate <w> * ([F] - [mean_F]) ");
 
     // get p share, 1*1
     std::vector<double> p_shares;
@@ -358,6 +393,8 @@ std::vector<double> get_correlation(const Party &party,
                              1,
                              ACTIVE_PARTY_ID,
                              PHE_FIXED_POINT_PRECISION);
+
+    log_info("[pearson_fl]: 9.9. convert <w> * ([F] - [mean_F]) to shares ");
 
     // calculate (f-mean_f) ** 2, N*1
     auto **tmp_vec_cipher = new EncodedNumber *[num_instance];
@@ -372,31 +409,39 @@ std::vector<double> get_correlation(const Party &party,
                                               train_data[i][feature_id] * train_data[i][feature_id],
                                               PHE_FIXED_POINT_PRECISION * PHE_FIXED_POINT_PRECISION);
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random, squared_feature_value_cipher, squared_feature_value_cipher);
+      log_info("[pearson_fl]: 9.10. for each instance, calculate [f**2] ");
 
-      // calculate -2f*[mean_f]
+      // calculate -2f*[mean_f]`
       EncodedNumber middle_value;
       EncodedNumber neg_2f;
       double value = -2 * train_data[i][feature_id];
       neg_2f.set_integer(phe_pub_key->n[0], value);
       djcs_t_aux_ep_mul(phe_pub_key, middle_value, mean_f_cipher[0], neg_2f);
 
+      log_info("[pearson_fl]: 9.11. for each instance,  calculate -2f*[mean_f]");
+
       // calculate [f**2] + -2f*[mean_f] + [mean_f**2]
       EncodedNumber tmp_vec_ele;
-      djcs_t_aux_ee_add(phe_pub_key, tmp_vec_ele, squared_feature_value_cipher, middle_value);
-      djcs_t_aux_ee_add(phe_pub_key, tmp_vec_ele, tmp_vec_ele, squared_mean_f_cipher[0]);
+      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele, squared_feature_value_cipher, middle_value);
+      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele, tmp_vec_ele, squared_mean_f_cipher[0]);
+      log_info("[pearson_fl]: 9.12. for each instance, calculate [f**2] + -2f*[mean_f] + [mean_f**2]");
+
       tmp_vec_cipher[i][0] = tmp_vec_ele;
     }
 
+    log_info("[pearson_fl]: 9.13. (f-mean_f) ** 2, ");
+
     // calculate q1 1*1
     auto **q1_cipher = new EncodedNumber *[1];
-    for (int i = 0; i < num_instance; i++) {
-      q1_cipher[i] = new EncodedNumber[1];
-    }
+    q1_cipher[0] = new EncodedNumber[1];
+
     cipher_shares_mat_mul(party,
                           two_d_sss_weights_share, // 1*N
                           tmp_vec_cipher, // N*1
                           1, num_instance, num_instance, 1,
                           q1_cipher);
+
+    log_info("[pearson_fl]: 9.14. calculate q1 ");
 
     // convert cipher to shares
     std::vector<double> q1_shares;
@@ -427,51 +472,53 @@ std::vector<double> get_correlation(const Party &party,
                                comp_type_wpcc,
                                &promise_values_wpcc);
     std::vector<double> res_wpcc = future_values_wpcc.get();
-    spdz_dist_weights.join();
+    spdz_dist_wpcc.join();
     wpcc_shares = res_wpcc;
     wpcc_vec.push_back(wpcc_shares[0]);
 
-    for (int i = 0; i < num_instance; i++) {
-      delete[] feature_vector_plains[i];
-    }
+    log_info("[pearson_fl]: 9.15. calculate WPCC for feature " + std::to_string(feature_id));
+
+    delete[] feature_vector_plains[0];
     delete[] feature_vector_plains;
-
+    for (int i = 0; i< num_instance; i++){
+      delete[] f_vec_min_mean_f_cipher[i];
+    }
+    delete[] f_vec_min_mean_f_cipher;
+    delete[] f_vec_min_mean_vec_share[0];
+    delete[] f_vec_min_mean_vec_share;
     delete[] feature_multiply_w_cipher;
-
-    delete[] two_d_sss_weight_mul_F_cipher;
-
     delete[] mean_f_cipher;
     delete[] squared_mean_f_cipher;
-
-    for (int i = 0; i < num_instance; i++) {
-      delete[] q1_cipher[i];
+    delete[] encrypted_feature;
+    for (int i = 0; i< num_instance; i++){
+      delete[] tmp_vec_cipher[i];
     }
+    delete[] tmp_vec_cipher;
+    delete[] q1_cipher[0];
     delete[] q1_cipher;
   }
 
   djcs_t_free_public_key(phe_pub_key);
+
+  log_info("[pearson_fl]: 9.16. All done, begin to clear the memory");
 
   // clean the code
   for (int i = 0; i < num_instance; i++) {
     delete[] two_d_prediction_cipher[i];
   }
   delete[] two_d_prediction_cipher;
-
+  for (int i = 0; i < num_instance; i++) {
+    delete[] y_vec_min_mean_y_cipher[i];
+  }
+  delete[] y_vec_min_mean_y_cipher;
   delete[] sss_weight_cipher;
-
-  for (int i = 0; i < num_instance; i++) {
-    delete[] two_d_sss_weight_mul_pred_cipher[i];
-  }
+  delete[] two_d_sss_weight_mul_pred_cipher[0];
   delete[] two_d_sss_weight_mul_pred_cipher;
-
   delete[] mean_y_cipher;
-
-  for (int i = 0; i < num_instance; i++) {
-    delete[] y_vec_min_mean_vec[i];
-  }
+  delete[] y_vec_min_mean_vec[0];
   delete[] y_vec_min_mean_vec;
 
-
+  log_info("[pearson_fl]: 9.17. Clear the memory done, return wpcc shares for all features");
   return wpcc_vec;
 }
 
@@ -546,6 +593,9 @@ void spdz_lime_computation(int party_num,
       send_public_values(x, mpc_sockets, party_num);
     }
   }
+  LOG(INFO) << "active party sending all public value to all mpc  = " << lime_comp_type;
+  google::FlushLogFiles(google::INFO);
+
   // all the parties send private shares
   std::cout << "private value size = " << private_value_size << std::endl;
   LOG(INFO) << "private value size = " << private_value_size;
@@ -564,7 +614,7 @@ void spdz_lime_computation(int party_num,
       break;
     }
     case falcon::PEARSON_Division: {
-      LOG(INFO) << "SPDZ calculate mean value <mean_y> / <mean_sum>";
+      LOG(INFO) << "SPDZ calculate mean value <mean_value> / <mean_sum>";
       std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
       res->set_value(return_values);
       break;

@@ -99,8 +99,12 @@ void djcs_t_aux_ee_add(djcs_t_public_key *pk,
                        EncodedNumber &res,
                        const EncodedNumber &cipher1,
                        const EncodedNumber &cipher2) {
-  if (cipher1.getter_type() != Ciphertext || cipher2.getter_type() != Ciphertext) {
-    log_error("The two inputs need be ciphertexts for homomorphic addition.");
+  if (cipher1.getter_type() != Ciphertext) {
+    log_error("The first input need be ciphertexts for homomorphic addition.");
+    exit(EXIT_FAILURE);
+  }
+  if (cipher2.getter_type() != Ciphertext) {
+    log_error("The second input need be ciphertexts for homomorphic addition.");
     exit(EXIT_FAILURE);
   }
 
@@ -131,11 +135,35 @@ void djcs_t_aux_ee_add(djcs_t_public_key *pk,
 }
 
 void djcs_t_aux_ee_add_a_vector(djcs_t_public_key *pk,
+                                hcs_random *hr,
                                 EncodedNumber &res,
                                 int size,
                                 EncodedNumber *cipher_vector) {
-  for (int i = 0; i< size; i++){
-    djcs_t_aux_ee_add(pk, res, cipher_vector[i], res);
+
+  // get the precision of cipher
+  int cipher_vector_precision = std::abs(cipher_vector[0].getter_exponent());
+  log_info("[djcs_t_aux_ee_add_a_vector]: vector's precision ="
+               + std::to_string(cipher_vector_precision));
+
+  if (size == 0){
+    log_error("The input vector is empty");
+    exit(EXIT_FAILURE);
+  }else if (size == 1){
+    res = cipher_vector[0];
+  }else if (size == 2) {
+    djcs_t_aux_ee_add(pk, res, cipher_vector[0], cipher_vector[1]);
+  } else {
+    // init the tmp result
+    EncodedNumber tmp_res;
+    tmp_res.set_double(pk->n[0], 0, cipher_vector_precision);
+    djcs_t_aux_encrypt(pk, hr, tmp_res, tmp_res);
+    // add all values in the vector
+    for (int i = 0; i < size; i++) {
+      log_info("[djcs_t_aux_ee_add_a_vector]: add i-th element, i = " + std::to_string(i));
+      djcs_t_aux_ee_add(pk, tmp_res, cipher_vector[i], tmp_res);
+    }
+    // assign to result
+    res = tmp_res;
   }
 }
 
