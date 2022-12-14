@@ -17,7 +17,7 @@ void djcs_t_aux_encrypt(djcs_t_public_key *pk,
                         EncodedNumber &res,
                         const EncodedNumber &plain) {
   if (plain.getter_type() != Plaintext) {
-    log_error("The plain should not be encrypted.");
+    log_error("The given value is not Plaintext, and should not be encrypted.");
     exit(EXIT_FAILURE);
   }
 

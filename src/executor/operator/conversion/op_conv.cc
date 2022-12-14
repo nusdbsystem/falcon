@@ -78,6 +78,15 @@ void collaborative_decrypt(const Party &party, EncodedNumber *src_ciphers,
       delete[] decryption_shares[i];
     }
     delete[] decryption_shares;
+
+    // serialize dest_plains and broadcast
+    std::string dest_plain_str;
+    serialize_encoded_number_array(dest_plains, size, dest_plain_str);
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        party.send_long_message(id, dest_plain_str);
+      }
+    }
 //
 //    const clock_t agg_dec_shares_end_time = clock();
 //    double active_party_agg_shares_time =
@@ -90,6 +99,11 @@ void collaborative_decrypt(const Party &party, EncodedNumber *src_ciphers,
     serialize_encoded_number_array(partial_decryption, size,
                                    partial_decryption_str);
     party.send_long_message(req_party_id, partial_decryption_str);
+
+    // receive and set dest_plains
+    std::string recv_dest_plain_str;
+    party.recv_long_message(req_party_id, recv_dest_plain_str);
+    deserialize_encoded_number_array(dest_plains, size, recv_dest_plain_str);
   }
 
 //  const clock_t co_dec_end_time = clock();

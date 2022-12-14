@@ -13,7 +13,7 @@
 #include <queue>
 
 inline void check_vectors(std::vector<double> a, std::vector<double> b,
-                     const std::vector<double>& weights) {
+                          const std::vector<double> &weights) {
   if (a.size() != b.size()) {
     LOG(ERROR) << "Mean squared error computation wrong: sizes of the two "
                   "vectors not same";
@@ -24,7 +24,7 @@ inline void check_vectors(std::vector<double> a, std::vector<double> b,
 }
 
 double mean_squared_error(std::vector<double> a, std::vector<double> b,
-                          const std::vector<double>& weights) {
+                          const std::vector<double> &weights) {
   check_vectors(a, b, weights);
   int num = a.size();
   double squared_error = 0.0, mean_squared_error = 0.0;
@@ -37,7 +37,7 @@ double mean_squared_error(std::vector<double> a, std::vector<double> b,
   }
 
   if (!weights.empty()) {
-    double weights_sum = std::accumulate(weights.begin(), weights.end(),0.0);
+    double weights_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
     // mean_squared_error = squared_error / (num * weights_sum); // do not use num here
     mean_squared_error = squared_error / weights_sum;
   } else {
@@ -47,7 +47,7 @@ double mean_squared_error(std::vector<double> a, std::vector<double> b,
 }
 
 double mean_squared_log_error(std::vector<double> a, std::vector<double> b,
-                              const std::vector<double>& weights) {
+                              const std::vector<double> &weights) {
   check_vectors(a, b, weights);
   int num = a.size();
   double squared_log_error = 0.0, mean_squared_log_error = 0.0;
@@ -165,8 +165,8 @@ double logistic_regression_loss(std::vector<double> pred_probs,
     }
     // std::cout << "est_prob = " << std::setprecision(17) << est_prob << "\n";
 
-    loss_i += (double)(labels[i] * log(est_prob));
-    loss_i += (double)((1.0 - labels[i]) * log(1.0 - est_prob));
+    loss_i += (double) (labels[i] * log(est_prob));
+    loss_i += (double) ((1.0 - labels[i]) * log(1.0 - est_prob));
     loss_sum += loss_i;
     // if (i < 5) {
     //   std::cout << "predicted probability = " << std::setprecision(17) <<
@@ -179,7 +179,7 @@ double logistic_regression_loss(std::vector<double> pred_probs,
   return loss;
 }
 
-double mode(const std::vector<double>& inputs) {
+double mode(const std::vector<double> &inputs) {
   // compute the frequency of the values
   std::map<double, int> m;
   for (auto v : inputs) {
@@ -202,7 +202,7 @@ double mode(const std::vector<double>& inputs) {
   return mode_value;
 }
 
-double median(std::vector<double>& inputs) {
+double median(std::vector<double> &inputs) {
   int vec_size = (int) inputs.size();
   double median_value = 0.0;
   int n = vec_size / 2;
@@ -212,7 +212,7 @@ double median(std::vector<double>& inputs) {
     // return the average of the middle two
     median_value = median_value + inputs[n];
     nth_element(inputs.begin(), inputs.begin() + n - 1, inputs.end());
-    median_value = median_value + inputs[n-1];
+    median_value = median_value + inputs[n - 1];
     median_value /= 2;
   } else {
     // return the middle one
@@ -239,14 +239,16 @@ double square_sum(std::vector<double> a, std::vector<double> b) {
   return ss;
 }
 
-std::vector<int> find_top_k_indexes(const std::vector<double>& a, int k) {
+std::vector<int> find_top_k_indexes(const std::vector<double> &a, int k) {
   // from: https://stackoverflow.com/questions/14902876/indices-of-the-k-largest-elements-in-an-unsorted-length-n-array/23486017
   std::vector<int> indexes;
-  std::priority_queue< std::pair<double, int>, std::vector< std::pair<double, int> >, std::greater <std::pair<double, int> > > q;
+  std::priority_queue<std::pair<double, int>,
+                      std::vector<std::pair<double, int> >,
+                      std::greater<std::pair<double, int> > > q;
   for (int i = 0; i < a.size(); ++i) {
-    if(q.size()<k)
+    if (q.size() < k)
       q.push(std::pair<double, int>(a[i], i));
-    else if(q.top().first < a[i]){
+    else if (q.top().first < a[i]) {
       q.pop();
       q.push(std::pair<double, int>(a[i], i));
     }
@@ -263,7 +265,7 @@ std::vector<int> find_top_k_indexes(const std::vector<double>& a, int k) {
   return res;
 }
 
-int global_idx(const std::vector<int>& a, int id, int idx) {
+int global_idx(const std::vector<int> &a, int id, int idx) {
   int count = 0;
   int size = (int) a.size();
   if (id >= size || idx >= a[id]) {

@@ -12,7 +12,6 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/math/math_ops.h>
 #include <Networking/ssl_sockets.h>
-#include <falcon/operator/mpc/spdz_connector.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_ps.h>
 #include <falcon/algorithm/vertical/tree/tree_ps.h>
@@ -503,29 +502,29 @@ void LimeExplainer::select_features(Party party,
   log_info("[explain_one_label]: algorithm_code = " + std::to_string(algorithm_name));
   // deserialize linear regression params
 
-  std::vector<double> local_model_weights;
-  bool is_linear_reg_params_fit_bias = false;
+  // this is the selected feature index for all parties
+  std::vector<int> selected_feat_idx;
   if (feature_selection == PEARSON_FEATURE_SELECTION_NAME) {
     log_info("[explain_one_label]: begin run pearson feature selection");
     // pearson doesn't require parameters
-    wpcc_feature_selection(party,
-                           class_id,
-                           selected_samples,
-                           selected_pred_class_id,
-                           sss_weights,
-                           ps_network_str,
-                           is_distributed,
-                           distributed_role,
-                           worker_id);
-
-  } else if (feature_selection == LR_FEATURE_SELECTION_NAME) {
+    selected_feat_idx = wpcc_feature_selection(party,
+                                               num_explained_features,
+                                                     selected_samples,
+                                                     selected_pred_class_id,
+                                                     sss_weights,
+                                                     ps_network_str,
+                                                     is_distributed,
+                                                     distributed_role,
+                                                     worker_id);
+  }
+  else if (feature_selection == LR_FEATURE_SELECTION_NAME) {
     LinearRegressionParams linear_reg_params;
     std::string linear_reg_param_pb_str = base64_decode_to_pb_string(feature_selection_param);
     deserialize_lir_params(linear_reg_params, linear_reg_param_pb_str);
     log_linear_regression_params(linear_reg_params);
     // call linear regression training
-    is_linear_reg_params_fit_bias = linear_reg_params.fit_bias;
-    local_model_weights = lime_linear_reg_train(
+    bool is_linear_reg_params_fit_bias = linear_reg_params.fit_bias;
+    std::vector<double> local_model_weights = lime_linear_reg_train(
         party,
         linear_reg_params,
         selected_samples,
@@ -536,111 +535,79 @@ void LimeExplainer::select_features(Party party,
         distributed_role,
         worker_id);
 
-  } else {
+    // parties exchange local_model_weights and find top-k feature indexes
+    // TODO: need to use mpc program to do the comparison (here approximate it)
+    if (party.party_id == falcon::ACTIVE_PARTY) {
+      // aggregate parties' local weights and find top-k
+      // 1.1 add local weight into global model weights list
+      std::vector<double> global_model_weights;
+      vector<double>::const_iterator first, end;
+      // only used when linear_reg_params.fit_bias = true
+      if (is_linear_reg_params_fit_bias) {
+        for (int i = 1; i < local_model_weights.size(); i++) {
+          global_model_weights.push_back(local_model_weights[i]);
+        }
+      } else {
+        for (int i = 0; i < local_model_weights.size(); i++) {
+          global_model_weights.push_back(local_model_weights[i]);
+        }
+      }
+      // 1.2 receive and add other party's weight into global model weights.
+      std::vector<int> party_weight_sizes;
+      // record each party's weight size.
+      party_weight_sizes.push_back((int) selected_samples[0].size());
+      for (int id = 0; id < party.party_num; id++) {
+        if (id != party.party_id) {
+          std::string recv_model_weights_str;
+          party.recv_long_message(id, recv_model_weights_str);
+          std::vector<double> recv_model_weights;
+          deserialize_double_array(recv_model_weights, recv_model_weights_str);
+          party_weight_sizes.push_back((int) recv_model_weights.size());
+          for (double d : recv_model_weights) {
+            global_model_weights.push_back(d);
+          }
+        }
+      }
+      std::string selected_feature_idx_file;
+#ifdef SAVE_BASELINE
+      selected_feature_idx_file = output_path_prefix + "selected_feature_idx_" + std::to_string(class_id) + ".txt";
+#endif
+      // 1.3 find top-k weights and match to each party's local index
+      std::vector<std::vector<int>> party_selected_feat_idx = find_party_feat_idx(
+          party_weight_sizes,
+          global_model_weights,
+          num_explained_features,
+          selected_feature_idx_file
+      );
+      // 1.4 send selected features index to other party.
+      selected_feat_idx = party_selected_feat_idx[0];
+      for (int id = 0; id < party.party_num; id++) {
+        if (id != party.party_id) {
+          std::string selected_feat_idx_str;
+          serialize_int_array(party_selected_feat_idx[id], selected_feat_idx_str);
+          party.send_long_message(id, selected_feat_idx_str);
+        }
+      }
+    }
+      // passive perform following
+    else {
+      // 1.send to active party
+      std::string local_model_weights_str;
+      serialize_double_array(local_model_weights, local_model_weights_str);
+      party.send_long_message(ACTIVE_PARTY_ID, local_model_weights_str);
+
+      // receive selected_feat_idx from active party
+      std::string recv_selected_idx_str;
+      party.recv_long_message(ACTIVE_PARTY_ID, recv_selected_idx_str);
+      deserialize_int_array(selected_feat_idx, recv_selected_idx_str);
+    }
+  }
+  else {
     log_error("The feature selection method " + feature_selection + " not supported");
     exit(EXIT_FAILURE);
   }
 
-  // parties exchange local_model_weights and find top-k feature indexes
-  // TODO: need to use mpc program to do the comparison (here approximate it)
-  std::vector<int> selected_feat_idx;
-  if (party.party_id == falcon::ACTIVE_PARTY) {
-    // aggregate parties' local weights and find top-k
-    // 1.1 add local weight into global model weights list
-    std::vector<double> global_model_weights;
-    vector<double>::const_iterator first, end;
-    // only used when linear_reg_params.fit_bias = true
-    if (is_linear_reg_params_fit_bias) {
-      for (int i = 1; i < local_model_weights.size(); i++) {
-        global_model_weights.push_back(local_model_weights[i]);
-      }
-    } else {
-      for (int i = 0; i < local_model_weights.size(); i++) {
-        global_model_weights.push_back(local_model_weights[i]);
-      }
-    }
-    // 1.2 receive and add other party's weight into global model weights.
-    std::vector<int> party_weight_sizes;
-    // record each party's weight size.
-    party_weight_sizes.push_back((int) selected_samples[0].size());
-    for (int id = 0; id < party.party_num; id++) {
-      if (id != party.party_id) {
-        std::string recv_model_weights_str;
-        party.recv_long_message(id, recv_model_weights_str);
-        std::vector<double> recv_model_weights;
-        deserialize_double_array(recv_model_weights, recv_model_weights_str);
-        party_weight_sizes.push_back((int) recv_model_weights.size());
-        for (double d : recv_model_weights) {
-          global_model_weights.push_back(d);
-        }
-      }
-    }
-    std::string selected_feature_idx_file;
-#ifdef SAVE_BASELINE
-    selected_feature_idx_file = output_path_prefix + "selected_feature_idx_" + std::to_string(class_id) + ".txt";
-#endif
-    // 1.3 find top-k weights and match to each party's local index
-    std::vector<std::vector<int>> party_selected_feat_idx = find_party_feat_idx(
-        party_weight_sizes,
-        global_model_weights,
-        num_explained_features,
-        selected_feature_idx_file
-    );
-    // 1.4 send selected features index to other party.
-    selected_feat_idx = party_selected_feat_idx[0];
-    for (int id = 0; id < party.party_num; id++) {
-      if (id != party.party_id) {
-        std::string selected_feat_idx_str;
-        serialize_int_array(party_selected_feat_idx[id], selected_feat_idx_str);
-        party.send_long_message(id, selected_feat_idx_str);
-      }
-    }
-  }
-    // passive perform following
-  else {
-    // 1.send to active party
-    std::string local_model_weights_str;
-    serialize_double_array(local_model_weights, local_model_weights_str);
-    party.send_long_message(ACTIVE_PARTY_ID, local_model_weights_str);
-
-    // receive selected_feat_idx from active party
-    std::string recv_selected_idx_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, recv_selected_idx_str);
-    deserialize_int_array(selected_feat_idx, recv_selected_idx_str);
-  }
-
-//  // 4. connect to spdz program and return selected_feature_idx (which is public)
-//  std::vector<double> selected_pred_shares;
-//  party.ciphers_to_secret_shares(selected_pred_class_id,
-//                                 selected_pred_shares,
-//                                 selected_sample_size,
-//                                 ACTIVE_PARTY_ID,
-//                                 PHE_FIXED_POINT_PRECISION);
-//  std::vector<int> public_values;
-//  public_values.push_back(selected_sample_size);
-//  public_values.push_back(num_explained_features);
-//  falcon::SpdzLimeCompType comp_type = falcon::PEARSON;
-//  std::promise<std::vector<double>> promise_values;
-//  std::future<std::vector<double>> future_values = promise_values.get_future();
-//  std::thread spdz_pearson_comp(spdz_lime_computation,
-//                                party.party_num,
-//                                party.party_id,
-//                                party.executor_mpc_ports,
-//                                party.host_names,
-//                                public_values.size(),
-//                                public_values,
-//                                selected_pred_shares.size(),
-//                                selected_pred_shares,
-//                                comp_type,
-//                                &promise_values);
-//  std::vector<double> res = future_values.get();
-//  spdz_pearson_comp.join();
-//  log_error("[select_features]: communicate with spdz finished");
-
-  // 5. convert the returned res into int vector, and re-organize the selected_features_file
-//  for (int i = 0; i < res.size(); i++) {
-//    selected_feat_idx[i] = (int) res[i];
-//  }
+  // write to file
   log_info("begin to select features and write dataset");
   std::vector<std::vector<double>> selected_feat_samples;
   for (int i = 0; i < selected_sample_size; i++) {

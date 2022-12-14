@@ -191,6 +191,7 @@ void LinearModel::truncate_weights_precision(const Party &party, int dest_precis
 }
 
 std::vector<double> LinearModel::display_weights(const Party& party) {
+
   std::vector<double> local_model_weights;
   log_info("display local weights");
   for (int i = 0; i < party.party_num; i++) {

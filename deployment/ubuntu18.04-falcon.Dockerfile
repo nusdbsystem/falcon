@@ -263,6 +263,8 @@ RUN apt-get update && apt-get upgrade -y && \
 WORKDIR /opt/falcon/third_party/MP-SPDZ
 RUN git fetch origin && \
     git checkout add_pearson && \
+    git checkout add_pearson && \
+    git checkout add_pearson && \
     ./compile.py Programs/Source/lime.mpc
 
 # 1. pull latest code
@@ -296,8 +298,13 @@ RUN git fetch origin && \
 # RUN bash make_platform.sh
 
 # 3. update mpc data and code
+# Client-side handshake with P0 failed. Make sure we have the necessary certificate (Player-Data/P0.pem in the default configuration), and run `c_rehash <directory>` on its location.
+# The certificates should be the same on every host. Also make sure that it's still valid. Certificates generated with `Scripts/setup-ssl.sh` expire after a month.
 WORKDIR /opt/falcon/third_party/MP-SPDZ
-RUN c_rehash Player-Data/
+RUN Scripts/setup-online.sh 3 128 128 && \
+    Scripts/setup-clients.sh 3 && \
+    Scripts/setup-ssl.sh 3 128 128 && \
+    c_rehash Player-Data/
 
 # # every-time the code (e,g. lime.mpc) have been changed, re-compiled it here.
 # WORKDIR /opt/falcon/third_party/MP-SPDZ
