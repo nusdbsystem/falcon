@@ -34,7 +34,7 @@ void collaborative_decrypt(const Party &party,
  * <Privacy Preserving Vertical Federated Learning for Tree-based Models>
  *
  * @param party: the participating party
- * @param src_ciphers: ciphertext vector to be decrypted
+ * @param src_ciphers: ciphertext vector to be decrypted, hold by one party
  * @param secret_shares: decrypted and decoded secret shares
  * @param size: size of the vector
  * @param req_party_id: party that initiate decryption
@@ -147,7 +147,7 @@ void transpose_encoded_mat(EncodedNumber **source_mat,
  *
  * @param party: initialized party object
  * @param shares: secret shares that held by parties
- * @param ciphers: the common ciphers for multiplication
+ * @param ciphers: the common ciphers for multiplication, all party must have this,
  * @param n_shares_row: the number of rows in shares
  * @param n_shares_col: the number columns in shares
  * @param n_ciphers_row: the number of rows in ciphers
@@ -199,4 +199,10 @@ std::vector<std::vector<double>> display_shares_matrix(
     const Party &party,
     const std::vector<std::vector<double>> &mat);
 
+
+void cipher_share_mul(const Party &party,
+                      const double &share,
+                      const EncodedNumber &cipher,
+                      EncodedNumber &ret
+);
 #endif //FALCON_INCLUDE_FALCON_OPERATOR_CONVERSION_OP_CONV_H_

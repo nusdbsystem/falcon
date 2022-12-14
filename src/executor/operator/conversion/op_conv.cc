@@ -643,3 +643,25 @@ std::vector<std::vector<double>> display_shares_matrix(
 
   return agg_mat;
 }
+
+void cipher_share_mul(const Party &party,
+                      const double &share,
+                      const EncodedNumber &cipher,
+                      EncodedNumber &ret
+) {
+  // each party get local key
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  // convert share to encoded number
+  EncodedNumber encoded_cipher;
+  encoded_cipher.set_double(phe_pub_key->n[0], share);
+
+  // calculate squared mean value f
+  djcs_t_aux_ep_mul(phe_pub_key,
+                    ret,
+                    cipher,
+                    encoded_cipher);
+
+  djcs_t_free_public_key(phe_pub_key);
+}
