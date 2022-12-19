@@ -40,7 +40,7 @@ do
 
   sleep 3
   echo "Now, $jobID finished, rm it's services and begin to execute the next dsl ..... "
-  bash docker_rm_job.sh $jobID
+#  bash docker_rm_job.sh $jobID
   sleep 3
 
 done

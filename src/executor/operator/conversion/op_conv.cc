@@ -79,7 +79,7 @@ void collaborative_decrypt(const Party &party, EncodedNumber *src_ciphers,
     }
     delete[] decryption_shares;
 
-    // serialize dest_plains and broadcast
+    // serialize dest_plains and broadcast to all passive parties
     std::string dest_plain_str;
     serialize_encoded_number_array(dest_plains, size, dest_plain_str);
     for (int id = 0; id < party.party_num; id++) {
@@ -100,7 +100,7 @@ void collaborative_decrypt(const Party &party, EncodedNumber *src_ciphers,
                                    partial_decryption_str);
     party.send_long_message(req_party_id, partial_decryption_str);
 
-    // receive and set dest_plains
+    // receive and set dest_plains from active party
     std::string recv_dest_plain_str;
     party.recv_long_message(req_party_id, recv_dest_plain_str);
     deserialize_encoded_number_array(dest_plains, size, recv_dest_plain_str);

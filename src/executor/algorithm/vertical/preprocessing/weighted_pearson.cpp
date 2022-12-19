@@ -69,15 +69,6 @@ std::vector<int> wpcc_feature_selection(Party party,
 //                                             party_feature_id_look_ups,
 //                                             num_explained_features);
 
-    // 3.2 find the top k over all parties.
-//    selected_feat_idx =
-//        jointly_get_top_k_features_plaintext(party,
-//                                   feature_num_array,
-//                                   feature_wpcc_share_vec,
-//                                   party_id_loop_ups,
-//                                   party_feature_id_look_ups,
-//                                   num_explained_features);
-
     sleep(5);
 
     // 3.2 find the top k over all parties.

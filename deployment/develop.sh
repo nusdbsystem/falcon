@@ -1,8 +1,8 @@
 
 
 # push code to repo
-git push origin --force
-git push naili --force
+git push origin
+git push naili
 
 # remove all containers
 bash src/falcon_platform/scripts/docker_service_rm_all_container.sh

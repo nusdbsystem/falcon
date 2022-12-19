@@ -44,7 +44,7 @@
   },
   "tasks": {
     "lime_feature": {
-      "mpc_algorithm_name": "linear_regression",
+      "mpc_algorithm_name": "lime",
       "algorithm_name": "lime_feature_selection",
       "input_configs": {
         "data_input": {

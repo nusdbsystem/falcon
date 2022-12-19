@@ -265,6 +265,11 @@ RUN git fetch origin && \
     git checkout add_pearson && \
     git checkout add_pearson && \
     git checkout add_pearson && \
+    git checkout add_pearson && \
+    git checkout add_pearson && \
+    git checkout add_pearson && \
+    git checkout add_pearson && \
+    git checkout add_pearson && \
     ./compile.py Programs/Source/lime.mpc
 
 # 1. pull latest code
