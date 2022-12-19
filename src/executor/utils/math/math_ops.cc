@@ -3,7 +3,9 @@
 #include <falcon/common.h>
 #include <glog/logging.h>
 #include <google/protobuf/io/coded_stream.h>
-
+#include <iostream>
+#include<vector>
+#include<algorithm>
 #include <cmath>
 #include <iomanip>   // std::setprecision
 #include <iostream>  // std::cout
@@ -277,4 +279,27 @@ int global_idx(const std::vector<int> &a, int id, int idx) {
   }
   count += idx;
   return count;
+}
+
+bool MyComp(std::pair<double, int> a, std::pair<double, int> b) {
+  if (a.first >= b.first) return true;
+  return false;
+}
+
+std::vector<int> index_of_top_k_in_vector(std::vector<double> vMetric, int K) {
+  // vec is the original vector
+  std::vector<std::pair<double, int>> vMetricWithIndex;
+  vMetricWithIndex.reserve(vMetric.size());
+  for (int i = 0; i < vMetric.size(); ++i) vMetricWithIndex.emplace_back(vMetric[i], i);
+  sort(vMetricWithIndex.begin(), vMetricWithIndex.end(), MyComp);
+  std::vector<int> result;
+  for (auto i:vMetricWithIndex) {
+    std::cout << "Element :" << i.first << " | Index:" << i.second << std::endl;
+    result.push_back(i.second);
+  }
+
+  // get the top K
+  std::vector<int> first_k(result.begin(), result.begin() + K);
+
+  return first_k;
 }

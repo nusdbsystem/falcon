@@ -63,24 +63,22 @@ std::vector<int> wpcc_feature_selection(Party party,
     log_info("[wpcc_feature_selection]: 1. Get all features importance done ! Begin to jointly find top K");
 
     // for debug and compare with baseline
-//    selected_feat_idx =
-//        jointly_get_top_k_features_plaintext(party,
-//                                             feature_num_array,
-//                                             feature_wpcc_share_vec,
-//                                             party_id_loop_ups,
-//                                             party_feature_id_look_ups,
-//                                             num_explained_features);
-//
-//    sleep(5);
-//
-//    // 3.2 find the top k over all parties.
-//    selected_feat_idx =
-//        jointly_get_top_k_features(party,
-//                                   feature_num_array,
-//                                   feature_wpcc_share_vec,
-//                                   party_id_loop_ups,
-//                                   party_feature_id_look_ups,
-//                                   num_explained_features);
+    jointly_get_top_k_features_plaintext(party,
+                                         feature_num_array,
+                                         feature_wpcc_share_vec,
+                                         party_id_loop_ups,
+                                         party_feature_id_look_ups,
+                                         num_explained_features);
+    sleep(5);
+
+    // 3.2 find the top k over all parties.
+    selected_feat_idx =
+        jointly_get_top_k_features(party,
+                                   feature_num_array,
+                                   feature_wpcc_share_vec,
+                                   party_id_loop_ups,
+                                   party_feature_id_look_ups,
+                                   num_explained_features);
     log_info("[wpcc_feature_selection]: 2. Return selected feature index !");
   }
 
@@ -591,158 +589,6 @@ void get_local_features_correlations(const Party &party,
   log_info("[pearson_fl]: 11. Clear the memory done, return wpcc shares for all features");
 }
 
-void get_local_features_correlations_plaintext(const Party &party,
-                                               const std::vector<int> &party_feature_nums,
-                                               const vector<std::vector<double>> &train_data,
-                                               EncodedNumber *predictions,
-                                               const vector<double> &sss_sample_weights_share,
-                                               std::vector<double> &wpcc_vec,
-                                               std::vector<int> party_id_loop_ups,
-                                               std::vector<int> party_feature_id_look_ups) {
-  // 1. init, get batch_true_labels_precision
-  int batch_true_labels_precision = std::abs(predictions[0].getter_exponent());
-  log_info("[wpcc_plaintext]: batch_true_labels_precision = " + std::to_string(batch_true_labels_precision));
-
-  // get number of instance
-  // 2. jointly convert <w> into ciphertext [w], and saved in active party
-  int num_instance = train_data.size();
-  log_info("[features_correlations_plaintext]: number of num_instance = " + std::to_string(num_instance));
-
-  auto *sss_weight_cipher = new EncodedNumber[num_instance];
-  secret_shares_to_ciphers(party,
-                           sss_weight_cipher,
-                           sss_sample_weights_share,
-                           num_instance,
-                           ACTIVE_PARTY_ID,
-                           PHE_FIXED_POINT_PRECISION);
-  // 3. convert cipher to plain
-  auto *sss_weight_plain_encoded_num = new EncodedNumber[num_instance];
-  collaborative_decrypt(party,
-                        sss_weight_cipher,
-                        sss_weight_plain_encoded_num,
-                        num_instance,
-                        ACTIVE_PARTY_ID);
-  log_info("[wpcc_plaintext]: convert weight cipher to weight plain");
-
-  // 4. convert plain to double
-  std::vector<double> instance_weight_double;
-  for (int i = 0; i < num_instance; i++) {
-    double weight;
-    sss_weight_plain_encoded_num[i].decode(weight);
-    instance_weight_double.push_back(weight);
-  }
-  log_info("[wpcc_plaintext]: convert weight plain to weight double");
-
-  double sum_weight = 0;
-  for (int i = 0; i < num_instance; i++) {
-    sum_weight += instance_weight_double[i];
-  }
-
-  // 5.  convert cipher to plain and double
-  auto *prediction_plain_encoded_num = new EncodedNumber[num_instance];
-  collaborative_decrypt(party,
-                        predictions,
-                        prediction_plain_encoded_num,
-                        num_instance,
-                        ACTIVE_PARTY_ID);
-  std::vector<double> prediction_plain_double;
-  for (int i = 0; i < num_instance; i++) {
-    double prediction_double;
-    prediction_plain_encoded_num[i].decode(prediction_double);
-    prediction_plain_double.push_back(prediction_double);
-  }
-  log_info("[wpcc_plaintext]: convert prediction cipher to prediction double");
-
-  // all party send local feature to active party
-  if (party.party_type == falcon::ACTIVE_PARTY) {
-    // init the full_train_data with train_data
-    vector<std::vector<double>> full_train_data = train_data;
-    for (int id = 0; id < party.party_num; id++) {
-      if (id != party.party_id) {
-        // receive from other's party
-        std::string receive_local_dataset_str;
-        party.recv_long_message(id, receive_local_dataset_str);
-        vector<std::vector<double>> received_train_data;
-        deserialize_double_matrix(received_train_data, receive_local_dataset_str);
-        // attach the dataset locally
-        for (int sample_id = 0; sample_id < received_train_data.size(); sample_id++) {
-          for (int feature_id = 0; feature_id < received_train_data[sample_id].size(); feature_id++) {
-            double record_feature_double = received_train_data[sample_id][feature_id];
-            full_train_data[sample_id].push_back(record_feature_double);
-          }
-        }
-      }
-    }
-
-    log_info("[wpcc_plaintext]: active party receive all parties' datasets, print the datasets as following");
-    for (auto &each_record : full_train_data) {
-      std::stringstream ss;
-      for (size_t i = 0; i < each_record.size(); i++) {
-        if (i != 0) {
-          ss << ", ";
-        }
-        ss << each_record[i];
-      }
-      log_info("checking training datasets:" + ss.str());
-    }
-
-    int total_feature_num = full_train_data[0].size();
-    // active party have full training data now, calculate WPCC for each feature.
-
-    // 1. calculate mean Y
-    double mean_y = 0;
-    for (int sample_id = 0; sample_id < full_train_data.size(); sample_id++) {
-      mean_y += instance_weight_double[sample_id] * prediction_plain_double[sample_id];
-    }
-
-    mean_y = mean_y / sum_weight;
-    log_info("[wpcc_plaintext]: active party calculate mean Y = " + std::to_string(mean_y));
-
-    std::vector<double> wpcc_plain_double;
-    for (int feature_id = 0; feature_id < total_feature_num; feature_id++) {
-      // get mean_f
-      double mean_f = 0;
-      for (int sample_id = 0; sample_id < full_train_data.size(); sample_id++) {
-        mean_f += instance_weight_double[sample_id] * full_train_data[sample_id][feature_id];
-      }
-      mean_f = mean_f / sum_weight;
-
-      // calculate p, q1, q2
-      double numerator = 0;
-      double denominator_q1 = 0;
-      double denominator_q2 = 0;
-      for (int sample_id = 0; sample_id < full_train_data.size(); sample_id++) {
-        numerator += instance_weight_double[sample_id]
-            * (prediction_plain_double[sample_id] - mean_y)
-            * (full_train_data[sample_id][feature_id] - mean_f);
-        denominator_q1 += instance_weight_double[sample_id]
-            * (full_train_data[sample_id][feature_id] - mean_f)
-            * (full_train_data[sample_id][feature_id] - mean_f);
-        denominator_q2 += instance_weight_double[sample_id]
-            * (prediction_plain_double[sample_id] - mean_y)
-            * (prediction_plain_double[sample_id] - mean_y);
-      }
-      double wpcc = numerator / (sqrt(denominator_q1) * sqrt(denominator_q2));
-      wpcc_plain_double.push_back(wpcc);
-      log_info("[wpcc_plaintext]: DEBUG. feature index = " + std::to_string(feature_id)
-                   + " wpcc = " + std::to_string(wpcc)
-                   + " p = " + std::to_string(numerator)
-                   + " q1 = " + std::to_string(denominator_q1)
-                   + " q2 = " + std::to_string(denominator_q2)
-      );
-    }
-  } else {
-    // 1.send to active party
-    std::string local_dataset_str;
-    serialize_double_matrix(train_data, local_dataset_str);
-    party.send_long_message(ACTIVE_PARTY_ID, local_dataset_str);
-  }
-
-  delete[] sss_weight_cipher;
-  delete[] sss_weight_plain_encoded_num;
-  delete[] prediction_plain_encoded_num;
-}
-
 std::vector<int> jointly_get_top_k_features(const Party &party,
                                             const std::vector<int> &party_feature_nums,
                                             const std::vector<double> &feature_cor_shares,
@@ -788,29 +634,15 @@ std::vector<int> jointly_get_top_k_features(const Party &party,
 
   log_info("[jointly_get_top_k_features] num_explained_features = " + std::to_string(num_explained_features));
 
-  // all parties jointly convert share into cipher
-  auto *feature_index_cipher = new EncodedNumber[num_explained_features];
-  secret_shares_to_ciphers(party,
-                           feature_index_cipher,
-                           feature_index_share,
-                           num_explained_features,
-                           ACTIVE_PARTY_ID,
-                           PHE_FIXED_POINT_PRECISION);
-
-  auto *feature_index_plain = new EncodedNumber[num_explained_features];
-  collaborative_decrypt(party,
-                        feature_index_cipher,
-                        feature_index_plain,
-                        num_explained_features,
-                        ACTIVE_PARTY_ID);
-
+  std::vector<double> feature_global_index_double;
+  secret_shares_to_plain_double(party, feature_global_index_double,
+                                feature_index_share, num_explained_features,
+                                ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   // each party only get the local feature index
   std::vector<int> selected_feat_idx;
   for (int i = 0; i < num_explained_features; i++) {
     // decode the plaintext into int, which is the globally selected feature id
-    double decoded_feature_global_index;
-    feature_index_plain[i].decode(decoded_feature_global_index);
-    int decoded_feature_global_index_int = static_cast<int>(std::round(decoded_feature_global_index));
+    int decoded_feature_global_index_int = static_cast<int>(std::round(feature_global_index_double[i]));
 
     // convert global feature id into local feature id, and record it.
     log_info("[jointly_get_top_k_features] i = " + std::to_string(i) +
@@ -823,54 +655,6 @@ std::vector<int> jointly_get_top_k_features(const Party &party,
       selected_feat_idx.push_back(cur_local_feature_id);
     }
   }
-  delete[] feature_index_cipher;
-  delete[]feature_index_plain;
-  return selected_feat_idx;
-}
-
-std::vector<int> jointly_get_top_k_features_plaintext(const Party &party,
-                                                      const std::vector<int> &party_feature_nums,
-                                                      const std::vector<double> &feature_cor_shares,
-                                                      const std::vector<int> &party_id_loop_ups,
-                                                      const std::vector<int> &party_feature_id_look_ups,
-                                                      int num_explained_features) {
-  int total_feature_num = 0;
-  for (auto &ele: party_feature_nums) {
-    total_feature_num += ele;
-  }
-
-  log_info("[feature_corr_plain]: DEBUG. size of wpcc share = " + std::to_string(feature_cor_shares.size()) +
-      " size of total feature = " + std::to_string(total_feature_num));
-
-
-  // all parties jointly convert share into cipher
-  auto *feature_corr_cipher = new EncodedNumber[total_feature_num];
-  secret_shares_to_ciphers(party,
-                           feature_corr_cipher,
-                           feature_cor_shares,
-                           total_feature_num,
-                           ACTIVE_PARTY_ID,
-                           PHE_FIXED_POINT_PRECISION);
-
-  auto *feature_corr_plain = new EncodedNumber[total_feature_num];
-  collaborative_decrypt(party,
-                        feature_corr_cipher,
-                        feature_corr_plain,
-                        total_feature_num,
-                        ACTIVE_PARTY_ID);
-
-  log_info("[feature_corr_plain]: DEBUG. begin to print feature each time. ");
-  // each party only get the local feature index
-  std::vector<int> selected_feat_idx;
-  for (int i = 0; i < total_feature_num; i++) {
-    // decode the plaintext into int, which is the globally selected feature id
-    double decoded_feature_global_index;
-    feature_corr_plain[i].decode(decoded_feature_global_index);
-    log_info("[feature_corr_plain]: DEBUG. feature index = " + std::to_string(i) + " wpcc = "
-                 + std::to_string(decoded_feature_global_index));
-  }
-  delete[] feature_corr_cipher;
-  delete[] feature_corr_plain;
   return selected_feat_idx;
 }
 
@@ -1080,4 +864,205 @@ void spdz_lime_computation(int party_num,
     mpc_sockets[i] = nullptr;
   }
 }
+
+/***********************************************************/
+/***************** plaintext for verfication ***************/
+/***********************************************************/
+
+void get_local_features_correlations_plaintext(const Party &party,
+                                               const std::vector<int> &party_feature_nums,
+                                               const vector<std::vector<double>> &train_data,
+                                               EncodedNumber *predictions,
+                                               const vector<double> &sss_sample_weights_share,
+                                               std::vector<double> &wpcc_vec,
+                                               std::vector<int> party_id_loop_ups,
+                                               std::vector<int> party_feature_id_look_ups) {
+  // 1. init, get batch_true_labels_precision
+  int batch_true_labels_precision = std::abs(predictions[0].getter_exponent());
+  log_info("[wpcc_plaintext]: batch_true_labels_precision = " + std::to_string(batch_true_labels_precision));
+
+  // get number of instance
+  // 2. jointly convert <w> into ciphertext [w], and saved in active party
+  int num_instance = train_data.size();
+  log_info("[features_correlations_plaintext]: number of num_instance = " + std::to_string(num_instance));
+
+  auto *sss_weight_cipher = new EncodedNumber[num_instance];
+  secret_shares_to_ciphers(party,
+                           sss_weight_cipher,
+                           sss_sample_weights_share,
+                           num_instance,
+                           ACTIVE_PARTY_ID,
+                           PHE_FIXED_POINT_PRECISION);
+  // 3. convert cipher to plain
+  auto *sss_weight_plain_encoded_num = new EncodedNumber[num_instance];
+  collaborative_decrypt(party,
+                        sss_weight_cipher,
+                        sss_weight_plain_encoded_num,
+                        num_instance,
+                        ACTIVE_PARTY_ID);
+  log_info("[wpcc_plaintext]: convert weight cipher to weight plain");
+
+  // 4. convert plain to double
+  std::vector<double> instance_weight_double;
+  for (int i = 0; i < num_instance; i++) {
+    double weight;
+    sss_weight_plain_encoded_num[i].decode(weight);
+    instance_weight_double.push_back(weight);
+  }
+  log_info("[wpcc_plaintext]: convert weight plain to weight double");
+
+  double sum_weight = 0;
+  for (int i = 0; i < num_instance; i++) {
+    sum_weight += instance_weight_double[i];
+  }
+
+  // 5.  convert cipher to plain and double
+  auto *prediction_plain_encoded_num = new EncodedNumber[num_instance];
+  collaborative_decrypt(party,
+                        predictions,
+                        prediction_plain_encoded_num,
+                        num_instance,
+                        ACTIVE_PARTY_ID);
+  std::vector<double> prediction_plain_double;
+  for (int i = 0; i < num_instance; i++) {
+    double prediction_double;
+    prediction_plain_encoded_num[i].decode(prediction_double);
+    prediction_plain_double.push_back(prediction_double);
+  }
+  log_info("[wpcc_plaintext]: convert prediction cipher to prediction double");
+
+  // all party send local feature to active party
+  if (party.party_type == falcon::ACTIVE_PARTY) {
+    // init the full_train_data with train_data
+    vector<std::vector<double>> full_train_data = train_data;
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        // receive from other's party
+        std::string receive_local_dataset_str;
+        party.recv_long_message(id, receive_local_dataset_str);
+        vector<std::vector<double>> received_train_data;
+        deserialize_double_matrix(received_train_data, receive_local_dataset_str);
+        // attach the dataset locally
+        for (int sample_id = 0; sample_id < received_train_data.size(); sample_id++) {
+          for (int feature_id = 0; feature_id < received_train_data[sample_id].size(); feature_id++) {
+            double record_feature_double = received_train_data[sample_id][feature_id];
+            full_train_data[sample_id].push_back(record_feature_double);
+          }
+        }
+      }
+    }
+
+    log_info("[wpcc_plaintext]: active party receive all parties' datasets, print the datasets as following");
+    for (auto &each_record : full_train_data) {
+      std::stringstream ss;
+      for (size_t i = 0; i < each_record.size(); i++) {
+        if (i != 0) {
+          ss << ", ";
+        }
+        ss << each_record[i];
+      }
+      log_info("checking training datasets:" + ss.str());
+    }
+
+    int total_feature_num = full_train_data[0].size();
+    // active party have full training data now, calculate WPCC for each feature.
+
+    // 1. calculate mean Y
+    double mean_y = 0;
+    for (int sample_id = 0; sample_id < full_train_data.size(); sample_id++) {
+      mean_y += instance_weight_double[sample_id] * prediction_plain_double[sample_id];
+    }
+
+    mean_y = mean_y / sum_weight;
+    log_info("[wpcc_plaintext]: active party calculate mean Y = " + std::to_string(mean_y));
+
+    std::vector<double> wpcc_plain_double;
+    for (int feature_id = 0; feature_id < total_feature_num; feature_id++) {
+      // get mean_f
+      double mean_f = 0;
+      for (int sample_id = 0; sample_id < full_train_data.size(); sample_id++) {
+        mean_f += instance_weight_double[sample_id] * full_train_data[sample_id][feature_id];
+      }
+      mean_f = mean_f / sum_weight;
+
+      // calculate p, q1, q2
+      double numerator = 0;
+      double denominator_q1 = 0;
+      double denominator_q2 = 0;
+      for (int sample_id = 0; sample_id < full_train_data.size(); sample_id++) {
+        numerator += instance_weight_double[sample_id]
+            * (prediction_plain_double[sample_id] - mean_y)
+            * (full_train_data[sample_id][feature_id] - mean_f);
+        denominator_q1 += instance_weight_double[sample_id]
+            * (full_train_data[sample_id][feature_id] - mean_f)
+            * (full_train_data[sample_id][feature_id] - mean_f);
+        denominator_q2 += instance_weight_double[sample_id]
+            * (prediction_plain_double[sample_id] - mean_y)
+            * (prediction_plain_double[sample_id] - mean_y);
+      }
+      double wpcc = numerator / (sqrt(denominator_q1) * sqrt(denominator_q2));
+      wpcc_plain_double.push_back(wpcc);
+      log_info("[wpcc_plaintext]: DEBUG. feature index = " + std::to_string(feature_id)
+                   + " wpcc = " + std::to_string(wpcc)
+                   + " p = " + std::to_string(numerator)
+                   + " q1 = " + std::to_string(denominator_q1)
+                   + " q2 = " + std::to_string(denominator_q2)
+      );
+    }
+  } else {
+    // 1.send to active party
+    std::string local_dataset_str;
+    serialize_double_matrix(train_data, local_dataset_str);
+    party.send_long_message(ACTIVE_PARTY_ID, local_dataset_str);
+  }
+
+  delete[] sss_weight_cipher;
+  delete[] sss_weight_plain_encoded_num;
+  delete[] prediction_plain_encoded_num;
+}
+
+std::vector<int> jointly_get_top_k_features_plaintext(const Party &party,
+                                                      const std::vector<int> &party_feature_nums,
+                                                      const std::vector<double> &feature_cor_shares,
+                                                      const std::vector<int> &party_id_loop_ups,
+                                                      const std::vector<int> &party_feature_id_look_ups,
+                                                      int num_explained_features) {
+  int total_feature_num = 0;
+  for (auto &ele: party_feature_nums) {
+    total_feature_num += ele;
+  }
+
+  log_info("[top_k_features_index]: DEBUG. size of wpcc share = " + std::to_string(feature_cor_shares.size()) +
+      " size of total feature = " + std::to_string(total_feature_num));
+
+  std::vector<double> feature_corr_plain_double;
+  secret_shares_to_plain_double(party, feature_corr_plain_double, feature_cor_shares, total_feature_num,
+                                ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+
+  for (int i = 0; i < total_feature_num; i++) {
+    log_info("[top_k_features_index]: DEBUG. feature index = " + std::to_string(i) + " wpcc = "
+                 + std::to_string(feature_corr_plain_double[i]));
+  }
+
+  // convert all to positive
+  for (double &element : feature_corr_plain_double) {
+    if (element <= 0) {
+      element = -element;
+    }
+  }
+
+  std::vector<int> global_indexs = index_of_top_k_in_vector(feature_corr_plain_double, num_explained_features);
+
+  // Print the indices of the largest k elements
+  for (auto g_index: global_indexs) {
+    log_info("[top_k_features_index]: DEBUG. global feature id " + std::to_string(g_index)
+                 + " party id = " + std::to_string(party_id_loop_ups[g_index])
+                 + " party's local feature index = " + std::to_string(party_feature_id_look_ups[g_index])
+    );
+  }
+
+  std::vector<int> selected_feat_idx;
+  return selected_feat_idx;
+}
+
 

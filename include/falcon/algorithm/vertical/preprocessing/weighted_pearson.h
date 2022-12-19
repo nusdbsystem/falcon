@@ -84,24 +84,6 @@ void get_local_features_correlations(
     std::vector<int> &party_feature_id_look_ups);
 
 /**
- * get the correlation plaintext for verification
- *
- * @param party: the participating party
- * @param train_data: the plaintext train data
- * @param predictions: the encrypted model predictions
- * @param sss_sample_weights: the sss sample weights
- * @return correlation
- */
-void get_local_features_correlations_plaintext(const Party &party,
-                                               const std::vector<int> &party_feature_nums,
-                                               const vector<std::vector<double>> &train_data,
-                                               EncodedNumber *predictions,
-                                               const vector<double> &sss_sample_weights_share,
-                                               std::vector<double> &wpcc_vec,
-                                               std::vector<int> party_id_loop_ups,
-                                               std::vector<int> party_feature_id_look_ups);
-
-/**
  * get the top K features from MPC
  *
  * @param party: the participating party
@@ -115,21 +97,6 @@ std::vector<int> jointly_get_top_k_features(const Party &party,
                                             const std::vector<int> &party_id_loop_ups,
                                             const std::vector<int> &party_feature_id_look_ups,
                                             int num_explained_features);
-
-/**
- * get the top K features from MPC
- *
- * @param party: the participating party
- * @param feature_cor_shares: the importance share for each feature
- * @param num_explained_features: the top K features
- * @return correlation
- */
-std::vector<int> jointly_get_top_k_features_plaintext(const Party &party,
-                                                      const std::vector<int> &party_feature_nums,
-                                                      const std::vector<double> &feature_cor_shares,
-                                                      const std::vector<int> &party_id_loop_ups,
-                                                      const std::vector<int> &party_feature_id_look_ups,
-                                                      int num_explained_features);
 
 /**
  * weighted mean
@@ -190,5 +157,38 @@ void spdz_lime_computation(int party_num,
                            const std::vector<double> &private_values,
                            falcon::SpdzLimeCompType lime_comp_type,
                            std::promise<std::vector<double>> *res);
+
+/**
+* get the correlation plaintext for verification
+*
+* @param party: the participating party
+* @param train_data: the plaintext train data
+* @param predictions: the encrypted model predictions
+* @param sss_sample_weights: the sss sample weights
+* @return correlation
+*/
+void get_local_features_correlations_plaintext(const Party &party,
+                                               const std::vector<int> &party_feature_nums,
+                                               const vector<std::vector<double>> &train_data,
+                                               EncodedNumber *predictions,
+                                               const vector<double> &sss_sample_weights_share,
+                                               std::vector<double> &wpcc_vec,
+                                               std::vector<int> party_id_loop_ups,
+                                               std::vector<int> party_feature_id_look_ups);
+
+/**
+ * get the top K features from MPC
+ *
+ * @param party: the participating party
+ * @param feature_cor_shares: the importance share for each feature
+ * @param num_explained_features: the top K features
+ * @return correlation
+ */
+std::vector<int> jointly_get_top_k_features_plaintext(const Party &party,
+                                                      const std::vector<int> &party_feature_nums,
+                                                      const std::vector<double> &feature_cor_shares,
+                                                      const std::vector<int> &party_id_loop_ups,
+                                                      const std::vector<int> &party_feature_id_look_ups,
+                                                      int num_explained_features);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_PREPROCESSING_WEIGHTED_PEARSON_H_
