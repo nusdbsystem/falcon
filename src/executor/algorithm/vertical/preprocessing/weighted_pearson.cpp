@@ -34,6 +34,8 @@ std::vector<int> wpcc_feature_selection(Party party,
   int weight_size = (int) used_train_data[0].size();
   party.setter_feature_num(weight_size);
 
+  log_info("[wpcc_feature_selection]: number of instance = " + std::to_string(used_train_data.size()));
+
   // all parties get this info
   std::vector<int> feature_num_array = sync_global_feature_number(party);
 
@@ -68,17 +70,17 @@ std::vector<int> wpcc_feature_selection(Party party,
 //                                             party_id_loop_ups,
 //                                             party_feature_id_look_ups,
 //                                             num_explained_features);
-
-    sleep(5);
-
-    // 3.2 find the top k over all parties.
-    selected_feat_idx =
-        jointly_get_top_k_features(party,
-                                   feature_num_array,
-                                   feature_wpcc_share_vec,
-                                   party_id_loop_ups,
-                                   party_feature_id_look_ups,
-                                   num_explained_features);
+//
+//    sleep(5);
+//
+//    // 3.2 find the top k over all parties.
+//    selected_feat_idx =
+//        jointly_get_top_k_features(party,
+//                                   feature_num_array,
+//                                   feature_wpcc_share_vec,
+//                                   party_id_loop_ups,
+//                                   party_feature_id_look_ups,
+//                                   num_explained_features);
     log_info("[wpcc_feature_selection]: 2. Return selected feature index !");
   }
 
@@ -174,7 +176,7 @@ void get_local_features_correlations(const Party &party,
     two_d_prediction_cipher[i][0] = predictions[i];
   }
 
-  // 2. jointly convert <w> into ciphertext [w], and saved in active party
+  // 2. jointly convert <w> into ciphertext [w],
   auto *sss_weight_cipher = new EncodedNumber[num_instance];
   secret_shares_to_ciphers(party,
                            sss_weight_cipher,
@@ -185,25 +187,31 @@ void get_local_features_correlations(const Party &party,
   log_info("[pearson_fl]: 1. jointly convert <w> into ciphertext [w], and saved in active party");
 
   // 3. all parties calculate sum, and convert it to share
-  log_info("step 2, getting the sum of weight");
-  EncodedNumber *sum_sss_weight_cipher = &sss_weight_cipher[0];
-  for (int i = 1; i < num_instance; i++) {
-    djcs_t_aux_ee_add(phe_pub_key, *sum_sss_weight_cipher, *sum_sss_weight_cipher, sss_weight_cipher[i]);
+  log_info("step 2, getting the sum of weight, assign exp = " + std::to_string(sss_weight_cipher[0].getter_exponent()));
+
+  int weight_cipher_exp = abs(sss_weight_cipher[0].getter_exponent());
+  EncodedNumber sum_sss_weight_cipher_num;
+  sum_sss_weight_cipher_num.set_double(phe_pub_key->n[0], 0, weight_cipher_exp);
+  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sum_sss_weight_cipher_num, sum_sss_weight_cipher_num);
+
+  for (int i = 0; i < num_instance; i++) {
+    log_info("Debug: exp of the weight number = " + std::to_string(i) + " is "
+                 + std::to_string(sss_weight_cipher[i].getter_exponent()));
+    djcs_t_aux_ee_add(phe_pub_key, sum_sss_weight_cipher_num, sum_sss_weight_cipher_num, sss_weight_cipher[i]);
   }
+  // convert to 1d array
+  auto *sum_sss_weight_cipher = new EncodedNumber[1];
+  sum_sss_weight_cipher[0] = sum_sss_weight_cipher_num;
 
   // 4. active party convert it to secret shares, and each party hold one share
   std::vector<double> sum_sss_weight_share;
   ciphers_to_secret_shares(party,
                            sum_sss_weight_cipher,
                            sum_sss_weight_share,
-                           num_instance,
+                           1,
                            ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
 
   log_info("[pearson_fl]: 2. active party convert sum to secret shares, and each party hold one share");
-
-  // in form of 1*N
-  std::vector<vector<double>> two_d_e_share_vec;
-  std::vector<double> q2_shares;
 
   // 3. active party calculate <w>*[Prediction] and convert it to secret share
   // init result two dimension cipher of 1*1
@@ -216,7 +224,6 @@ void get_local_features_correlations(const Party &party,
 
   log_info("[pearson_fl]: 3. active party calculate <w>*[Prediction] and convert it to secret share");
 
-  // only active party requires to calculate it.
   auto *mean_y_cipher = new EncodedNumber[1];
   WeightedMean(party,
                sum_sss_weight_share[0],
@@ -297,10 +304,9 @@ void get_local_features_correlations(const Party &party,
   log_info("[pearson_fl]: 6 calculate [y] - [mean_y], result's precision ="
                + std::to_string(y_min_mean_y_cipher_pre));
 
-  log_info("[pearson_fl]: 6. calculate the (<w> * {[y] - [mean_y]}) ** 2");
-
   // 6. calculate q2
   // make e_share to two dim,
+  std::vector<vector<double>> two_d_e_share_vec;
   two_d_e_share_vec.push_back(e_share_vec);
   cipher_shares_mat_mul(party,
                         two_d_e_share_vec, // 1*N
@@ -308,21 +314,17 @@ void get_local_features_correlations(const Party &party,
                         1, num_instance, num_instance, 1,
                         y_vec_min_mean_vec);
 
-  log_info("[pearson_fl]: 7.1 calculate q2 done");
-
   // convert q2 into share
+  // in form of 1*N
+  std::vector<double> q2_shares;
   ciphers_to_secret_shares(party, y_vec_min_mean_vec[0],
                            q2_shares,
                            1,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
-  log_info("[pearson_fl]: 7.2 convert q2 cipher to share");
+  log_info("[pearson_fl]: 7. convert q2 cipher and convert it to share done");
 
-  log_info(
-      "[pearson_fl]: 8. parties begin to calculate WPCC for features, num = "
-          + std::to_string(party.getter_feature_num()));
-
-  // party compute in parallel
+  // init result featureNum * 1
   auto **party_local_tmp_wf = new EncodedNumber *[party.getter_feature_num()];
   for (int i = 0; i < party.getter_feature_num(); i++) {
     party_local_tmp_wf[i] = new EncodedNumber[1];
@@ -334,6 +336,7 @@ void get_local_features_correlations(const Party &party,
     local_encrypted_feature[i] = new EncodedNumber[num_instance];
   }
 
+  // party compute in parallel,
   for (int feature_id = 0; feature_id < party.getter_feature_num(); feature_id++) {
     // 1. each party compute F*[W]
     auto **feature_vector_plains = new EncodedNumber *[1];
@@ -370,7 +373,12 @@ void get_local_features_correlations(const Party &party,
     }
 
   }
-  log_info("[pearson_fl]: 8. each party compute F*[W] in parallel");
+  log_info("[pearson_fl]: 8. each party compute F*[W] in parallel done");
+
+  std::vector<double> debug_vec_p;
+  std::vector<double> debug_vec_q1;
+  std::vector<double> debug_vec_q2;
+  std::vector<double> debug_vec_wpcc;
 
   // 1. calculate local feature mean
   for (int party_id = 0; party_id < party.party_num; party_id++) {
@@ -396,8 +404,9 @@ void get_local_features_correlations(const Party &party,
       convert_cipher_to_negative(phe_pub_key, mean_f_cipher[0], mean_f_cipher_neg);
 
       // get (mean_f)**2
-      EncodedNumber squared_mean_f_cipher;
-      cipher_share_mul(party, mean_f_share[0], mean_f_cipher[0], squared_mean_f_cipher);
+      auto *squared_mean_f_cipher = new EncodedNumber[1];
+      ciphers_ele_wise_multi(party, squared_mean_f_cipher, mean_f_cipher, mean_f_cipher, 1, party_id);
+//      cipher_share_mul(party, mean_f_share[0], mean_f_cipher[0], squared_mean_f_cipher);
       log_info("[pearson_fl]: 9. all parties compute mean_f and (mean_f)**2");
 
 
@@ -443,7 +452,7 @@ void get_local_features_correlations(const Party &party,
                                PHE_FIXED_POINT_PRECISION);
       log_info("[pearson_fl]: 9.4. all parties jointly calculate p share <p>");
 
-      // calculate (f-mean_f) ** 2, tmp_vec_cipher: N*1
+      // calculate q1 = (f-mean_f) ** 2, tmp_vec_cipher: N*1
       auto **tmp_vec_cipher = new EncodedNumber *[num_instance];
       for (int i = 0; i < num_instance; i++) {
         tmp_vec_cipher[i] = new EncodedNumber[1];
@@ -461,13 +470,13 @@ void get_local_features_correlations(const Party &party,
           // calculate -2f*[mean_f]`
           EncodedNumber middle_value;
           EncodedNumber neg_2f;
-          neg_2f.set_double(phe_pub_key->n[0], -2 * train_data[i][feature_id]);
+          neg_2f.set_double(phe_pub_key->n[0], -2 * train_data[i][feature_id], abs(mean_f_cipher[0].getter_exponent()));
           djcs_t_aux_ep_mul(phe_pub_key, middle_value, mean_f_cipher[0], neg_2f);
 
           // calculate [f_j]**2 + -2f_j*[mean_F] + [mean_F]**2
           EncodedNumber tmp_vec_ele;
           djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele, squared_feature_value_cipher, middle_value);
-          djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele, tmp_vec_ele, squared_mean_f_cipher);
+          djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele, tmp_vec_ele, squared_mean_f_cipher[0]);
           tmp_vec_cipher[i][0] = tmp_vec_ele;
         }
       }
@@ -497,6 +506,29 @@ void get_local_features_correlations(const Party &party,
 
       // all parties jointly calculate  WPCC share, wpcc = <p> / (<q1> * <q2>) for this features
       double one_wpcc_share = compute_wpcc(party, p_shares[0], q1_shares[0], q2_shares[0]);
+
+      // debug p, q1, q2
+      std::vector<double> p_plain_double;
+      secret_shares_to_plain_double(party, p_plain_double, p_shares, 1,
+                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+      std::vector<double> q1_plain_double;
+      secret_shares_to_plain_double(party, q1_plain_double, q1_shares, 1,
+                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+      std::vector<double> q2_plain_double;
+      secret_shares_to_plain_double(party, q2_plain_double, q2_shares, 1,
+                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+
+      std::vector<double> wpcc_plain_double;
+      std::vector<double> share_vec_wpcc;
+      share_vec_wpcc.push_back(one_wpcc_share);
+      secret_shares_to_plain_double(party, wpcc_plain_double, share_vec_wpcc, 1,
+                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+
+      debug_vec_p.push_back(p_plain_double[0]);
+      debug_vec_q1.push_back(q1_plain_double[0]);
+      debug_vec_q2.push_back(q2_plain_double[0]);
+      debug_vec_wpcc.push_back(wpcc_plain_double[0]);
+
       wpcc_vec.push_back(one_wpcc_share);
       party_id_loop_ups.push_back(party_id);
       party_feature_id_look_ups.push_back(feature_id);
@@ -520,6 +552,15 @@ void get_local_features_correlations(const Party &party,
   }
 
   djcs_t_free_public_key(phe_pub_key);
+
+  for (int feature_indx = 0; feature_indx < debug_vec_p.size(); feature_indx++) {
+    log_info("[wpcc_plaintext]: Debug, system decryption. feature index = " + std::to_string(feature_indx)
+                 + " wpcc = " + std::to_string(debug_vec_wpcc[feature_indx])
+                 + " p = " + std::to_string(debug_vec_p[feature_indx])
+                 + " q1 = " + std::to_string(debug_vec_q1[feature_indx])
+                 + " q2 = " + std::to_string(debug_vec_q2[feature_indx])
+    );
+  }
 
   log_info("[pearson_fl]: 10. All done, begin to clear the memory");
 
@@ -565,6 +606,8 @@ void get_local_features_correlations_plaintext(const Party &party,
   // get number of instance
   // 2. jointly convert <w> into ciphertext [w], and saved in active party
   int num_instance = train_data.size();
+  log_info("[features_correlations_plaintext]: number of num_instance = " + std::to_string(num_instance));
+
   auto *sss_weight_cipher = new EncodedNumber[num_instance];
   secret_shares_to_ciphers(party,
                            sss_weight_cipher,
@@ -631,31 +674,38 @@ void get_local_features_correlations_plaintext(const Party &party,
       }
     }
 
-    log_info("[wpcc_plaintext]: active party receive all parties' datasets");
+    log_info("[wpcc_plaintext]: active party receive all parties' datasets, print the datasets as following");
+    for (auto &each_record : full_train_data) {
+      std::stringstream ss;
+      for (size_t i = 0; i < each_record.size(); i++) {
+        if (i != 0) {
+          ss << ", ";
+        }
+        ss << each_record[i];
+      }
+      log_info("checking training datasets:" + ss.str());
+    }
 
     int total_feature_num = full_train_data[0].size();
     // active party have full training data now, calculate WPCC for each feature.
 
     // 1. calculate mean Y
     double mean_y = 0;
-    for (int feature_id = 0; feature_id < total_feature_num; feature_id++) {
-      for (int sample_id = 0; sample_id < full_train_data.size(); sample_id++) {
-        mean_y += instance_weight_double[sample_id] * prediction_plain_double[sample_id];
-      }
+    for (int sample_id = 0; sample_id < full_train_data.size(); sample_id++) {
+      mean_y += instance_weight_double[sample_id] * prediction_plain_double[sample_id];
     }
+
     mean_y = mean_y / sum_weight;
-    log_info("[wpcc_plaintext]: active party calculate mean Y");
+    log_info("[wpcc_plaintext]: active party calculate mean Y = " + std::to_string(mean_y));
 
     std::vector<double> wpcc_plain_double;
     for (int feature_id = 0; feature_id < total_feature_num; feature_id++) {
       // get mean_f
       double mean_f = 0;
-      double sum_mean_f = 0;
       for (int sample_id = 0; sample_id < full_train_data.size(); sample_id++) {
         mean_f += instance_weight_double[sample_id] * full_train_data[sample_id][feature_id];
-        sum_mean_f += full_train_data[sample_id][feature_id];
       }
-      mean_f = mean_f / sum_mean_f;
+      mean_f = mean_f / sum_weight;
 
       // calculate p, q1, q2
       double numerator = 0;
@@ -665,15 +715,21 @@ void get_local_features_correlations_plaintext(const Party &party,
         numerator += instance_weight_double[sample_id]
             * (prediction_plain_double[sample_id] - mean_y)
             * (full_train_data[sample_id][feature_id] - mean_f);
-        denominator_q1 += (instance_weight_double[sample_id] * full_train_data[sample_id][feature_id] - mean_f)
+        denominator_q1 += instance_weight_double[sample_id]
+            * (full_train_data[sample_id][feature_id] - mean_f)
             * (full_train_data[sample_id][feature_id] - mean_f);
-        denominator_q2 += (instance_weight_double[sample_id] * prediction_plain_double[sample_id] - mean_y)
+        denominator_q2 += instance_weight_double[sample_id]
+            * (prediction_plain_double[sample_id] - mean_y)
             * (prediction_plain_double[sample_id] - mean_y);
       }
-      double wpcc = numerator/( sqrt(denominator_q1) * sqrt(denominator_q2));
+      double wpcc = numerator / (sqrt(denominator_q1) * sqrt(denominator_q2));
       wpcc_plain_double.push_back(wpcc);
-      log_info("[pearson_fl]: DEBUG. feature index = " + std::to_string(feature_id) + " wpcc is = "
-      + std::to_string(wpcc));
+      log_info("[wpcc_plaintext]: DEBUG. feature index = " + std::to_string(feature_id)
+                   + " wpcc = " + std::to_string(wpcc)
+                   + " p = " + std::to_string(numerator)
+                   + " q1 = " + std::to_string(denominator_q1)
+                   + " q2 = " + std::to_string(denominator_q2)
+      );
     }
   } else {
     // 1.send to active party
@@ -685,8 +741,6 @@ void get_local_features_correlations_plaintext(const Party &party,
   delete[] sss_weight_cipher;
   delete[] sss_weight_plain_encoded_num;
   delete[] prediction_plain_encoded_num;
-
-
 }
 
 std::vector<int> jointly_get_top_k_features(const Party &party,
@@ -760,8 +814,9 @@ std::vector<int> jointly_get_top_k_features(const Party &party,
 
     // convert global feature id into local feature id, and record it.
     log_info("[jointly_get_top_k_features] i = " + std::to_string(i) +
-    ", decoded_feature_global_index_int = " + std::to_string(decoded_feature_global_index_int) +
-    ", party_id_loop_ups[" + std::to_string(i) + "] = " + std::to_string(party_id_loop_ups[decoded_feature_global_index_int]));
+        ", decoded_feature_global_index_int = " + std::to_string(decoded_feature_global_index_int) +
+        ", party_id_loop_ups[" + std::to_string(i) + "] = "
+                 + std::to_string(party_id_loop_ups[decoded_feature_global_index_int]));
     int cur_party_id = party_id_loop_ups[decoded_feature_global_index_int];
     if (cur_party_id == party.party_id) {
       int cur_local_feature_id = party_feature_id_look_ups[decoded_feature_global_index_int];
@@ -769,7 +824,7 @@ std::vector<int> jointly_get_top_k_features(const Party &party,
     }
   }
   delete[] feature_index_cipher;
-  delete []feature_index_plain;
+  delete[]feature_index_plain;
   return selected_feat_idx;
 }
 
@@ -784,7 +839,7 @@ std::vector<int> jointly_get_top_k_features_plaintext(const Party &party,
     total_feature_num += ele;
   }
 
-  log_info("[pearson_fl]: DEBUG. size of wpcc share = " + std::to_string(feature_cor_shares.size()) +
+  log_info("[feature_corr_plain]: DEBUG. size of wpcc share = " + std::to_string(feature_cor_shares.size()) +
       " size of total feature = " + std::to_string(total_feature_num));
 
 
@@ -804,17 +859,18 @@ std::vector<int> jointly_get_top_k_features_plaintext(const Party &party,
                         total_feature_num,
                         ACTIVE_PARTY_ID);
 
-  log_info("[pearson_fl]: DEBUG. begin to print feature each time. ");
+  log_info("[feature_corr_plain]: DEBUG. begin to print feature each time. ");
   // each party only get the local feature index
   std::vector<int> selected_feat_idx;
   for (int i = 0; i < total_feature_num; i++) {
     // decode the plaintext into int, which is the globally selected feature id
     double decoded_feature_global_index;
     feature_corr_plain[i].decode(decoded_feature_global_index);
-    log_info("[pearson_fl]: DEBUG. feature index = " + std::to_string(i) + " wpcc is = "
+    log_info("[feature_corr_plain]: DEBUG. feature index = " + std::to_string(i) + " wpcc = "
                  + std::to_string(decoded_feature_global_index));
   }
   delete[] feature_corr_cipher;
+  delete[] feature_corr_plain;
   return selected_feat_idx;
 }
 

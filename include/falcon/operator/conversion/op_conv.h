@@ -83,6 +83,21 @@ void secret_shares_to_ciphers(const Party &party,
                               int req_party_id,
                               int phe_precision);
 
+/**
+ * Convert secret shares back to plaintext vector,
+ * After Converting, all parties will have the ciphertext
+ *
+ * @param party: the participating party
+ * @param dest_plaintext_double: plaintext of vectors
+ * @param secret_shares: secret shares received from spdz parties
+ * @param size: size of the vector
+ * @param req_party_id: party that initiate conversion
+ * @param phe_precision: ciphertext vector precision, need careful design
+ */
+void secret_shares_to_plain_double(const Party &party, vector<double> &dest_plaintext_double,
+                                   std::vector<double> secret_shares,
+                                   int size, int req_party_id, int phe_precision);
+
 /***********************************************************/
 /***************** cipher & share operations ***************/
 /***********************************************************/

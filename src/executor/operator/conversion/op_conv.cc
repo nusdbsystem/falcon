@@ -8,6 +8,8 @@
 #include <falcon/utils/base64.h>
 #include <omp.h>
 
+#include <utility>
+
 void collaborative_decrypt(const Party &party, EncodedNumber *src_ciphers,
                            EncodedNumber *dest_plains, int size, int req_party_id) {
 
@@ -304,6 +306,38 @@ void secret_shares_to_ciphers(const Party &party, EncodedNumber *dest_ciphers,
   delete[] encrypted_shares;
   djcs_t_free_public_key(phe_pub_key);
 }
+
+void secret_shares_to_plain_double(const Party &party, vector<double> &dest_plaintext_double,
+                                   std::vector<double> secret_shares,
+                                   int size, int req_party_id, int phe_precision){
+
+  auto *cipher_array = new EncodedNumber[size];
+  // all parties jointly convert share to cipher.
+  secret_shares_to_ciphers(party,
+                           cipher_array,
+                           std::move(secret_shares),
+                           size,
+                           req_party_id,
+                           phe_precision);
+  // 3. convert cipher to plain
+  auto *plain_encoded_num = new EncodedNumber[size];
+  collaborative_decrypt(party,
+                        cipher_array,
+                        plain_encoded_num,
+                        size,
+                        req_party_id);
+
+  // 4. convert plain to double
+  for (int i = 0; i < size; i++) {
+    double plain_double;
+    plain_encoded_num[i].decode(plain_double);
+    dest_plaintext_double.push_back(plain_double);
+  }
+
+  delete[] cipher_array;
+  delete[] plain_encoded_num;
+}
+
 
 /***********************************************************/
 /***************** cipher & share operations ***************/

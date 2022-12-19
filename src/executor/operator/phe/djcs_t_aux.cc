@@ -145,12 +145,12 @@ void djcs_t_aux_ee_add_a_vector(djcs_t_public_key *pk,
   log_info("[djcs_t_aux_ee_add_a_vector]: vector's precision ="
                + std::to_string(cipher_vector_precision));
 
-  if (size == 0){
+  if (size == 0) {
     log_error("The input vector is empty");
     exit(EXIT_FAILURE);
-  }else if (size == 1){
+  } else if (size == 1) {
     res = cipher_vector[0];
-  }else if (size == 2) {
+  } else if (size == 2) {
     djcs_t_aux_ee_add(pk, res, cipher_vector[0], cipher_vector[1]);
   } else {
     // init the tmp result
@@ -622,7 +622,8 @@ void check_ee_add_exponent(const EncodedNumber &num1, const EncodedNumber &num2)
   int num1_exponent = num1.getter_exponent();
   int num2_exponent = num2.getter_exponent();
   if (num1_exponent != num2_exponent) {
-    log_error("The two EncodedNumbers have different exponents, cannot add.");
+    log_error("The two EncodedNumbers have different exponents, cannot add. First cipher's exp = "
+    + std::to_string(num1_exponent) + " and second cipher's exp = " + std::to_string(num2_exponent));
     exit(EXIT_FAILURE);
   }
 }
