@@ -404,7 +404,6 @@ void get_local_features_correlations(const Party &party,
       // get (mean_f)**2
       auto *squared_mean_f_cipher = new EncodedNumber[1];
       ciphers_ele_wise_multi(party, squared_mean_f_cipher, mean_f_cipher, mean_f_cipher, 1, party_id);
-//      cipher_share_mul(party, mean_f_share[0], mean_f_cipher[0], squared_mean_f_cipher);
       log_info("[pearson_fl]: 9. all parties compute mean_f and (mean_f)**2");
 
 
@@ -534,6 +533,7 @@ void get_local_features_correlations(const Party &party,
 
       delete[] feature_multiply_w_cipher;
       delete[] mean_f_cipher;
+      delete[] squared_mean_f_cipher;
       for (int i = 0; i < num_instance; i++) {
         delete[] f_vec_min_mean_f_cipher[i];
       }
@@ -563,6 +563,7 @@ void get_local_features_correlations(const Party &party,
   log_info("[pearson_fl]: 10. All done, begin to clear the memory");
 
   // clean the code
+  delete[] sum_sss_weight_cipher;
   for (int i = 0; i < num_instance; i++) {
     delete[] two_d_prediction_cipher[i];
   }
@@ -645,10 +646,12 @@ std::vector<int> jointly_get_top_k_features(const Party &party,
     int decoded_feature_global_index_int = static_cast<int>(std::round(feature_global_index_double[i]));
 
     // convert global feature id into local feature id, and record it.
-    log_info("[jointly_get_top_k_features] i = " + std::to_string(i) +
-        ", decoded_feature_global_index_int = " + std::to_string(decoded_feature_global_index_int) +
-        ", party_id_loop_ups[" + std::to_string(i) + "] = "
-                 + std::to_string(party_id_loop_ups[decoded_feature_global_index_int]));
+    log_info("[jointly_get_top_k_features] , feature_global_index_int = "
+                 + std::to_string(decoded_feature_global_index_int)
+                 + " party_id = " + std::to_string(party_id_loop_ups[decoded_feature_global_index_int])
+                 + " party local feature index = "
+                 + std::to_string(party_feature_id_look_ups[decoded_feature_global_index_int]));
+
     int cur_party_id = party_id_loop_ups[decoded_feature_global_index_int];
     if (cur_party_id == party.party_id) {
       int cur_local_feature_id = party_feature_id_look_ups[decoded_feature_global_index_int];

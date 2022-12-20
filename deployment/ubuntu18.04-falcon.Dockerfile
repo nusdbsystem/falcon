@@ -263,13 +263,7 @@ RUN apt-get update && apt-get upgrade -y && \
 WORKDIR /opt/falcon/third_party/MP-SPDZ
 RUN git fetch origin && \
     git checkout add_pearson && \
-    git checkout add_pearson && \
-    git checkout add_pearson && \
-    git checkout add_pearson && \
-    git checkout add_pearson && \
-    git checkout add_pearson && \
-    git checkout add_pearson && \
-    git checkout add_pearson && \
+    git log --oneline -2 && \
     ./compile.py Programs/Source/lime.mpc
 
 # 1. pull latest code
