@@ -41,7 +41,8 @@ void convert_cipher_to_negative(
  * active party gather all parties feature number and broadcast to each party
  *
  * @param party: the participating party
- * @return global feature number over each partyID
+ * @return global feature number over each partyID, eg,. if 1st is N, N is number of
+ *   features of party 0
  */
 std::vector<int> sync_global_feature_number(const Party &party);
 
@@ -210,8 +211,9 @@ void worker_calculate_wpcc_per_feature(const Party &party,
                                        const std::vector<std::vector<double>> &two_d_sss_weights_share,
                                        const std::vector<double> &q2_shares,
                                        std::vector<double> &wpcc_vec,
-                                       std::vector<int> &party_id_loop_ups,
-                                       std::vector<int> &party_feature_id_look_ups);
+                                       const std::vector<int> &global_feature_partition_ids,
+                                       const std::vector<int> &global_partyid_look_up_vec,
+                                       const std::vector<int> &global_party_local_feature_id_look_up_vec);
 
 /**
 * get the correlation plaintext for verification

@@ -15,6 +15,48 @@ WeightedPearsonPS::WeightedPearsonPS(
   djcs_t_free_public_key(phe_pub_key);
 }
 
+std::vector<int> WeightedPearsonPS::partition_examples(std::vector<int> nums){
+
+  int mini_batch_size = int(nums.size()/this->worker_channels.size());
+
+  log_info("[WeightedPearsonPS.partition_examples]: ps worker size = " + std::to_string(this->worker_channels.size()));
+  log_info("[WeightedPearsonPS.partition_examples]: mini_batch_size = " + std::to_string(mini_batch_size));
+  log_info("[WeightedPearsonPS.partition_examples]: nums = " + std::to_string(nums.size()));
+
+  std::vector<int> message_sizes;
+  // deterministic partition given the batch indexes
+  int index = 0;
+  for(int wk_index = 0; wk_index < this->worker_channels.size(); wk_index++){
+    // generate mini-batch for this worker
+    std::vector<int>::const_iterator first1 = nums.begin() + index;
+    std::vector<int>::const_iterator last1  = nums.begin() + index + mini_batch_size;
+
+    if (wk_index == this->worker_channels.size() - 1){
+      last1  = nums.end();
+    }
+    std::vector<int> mini_batch_indexes(first1, last1);
+
+    // serialize mini_batch_indexes to str
+    std::string mini_batch_indexes_str;
+    serialize_int_array(mini_batch_indexes, mini_batch_indexes_str);
+
+    // record size of mini_batch_indexes, used in deserialization process
+    message_sizes.push_back((int) mini_batch_indexes.size());
+
+    log_info("[PS.partition_examples]: ps send batch_size " +
+    std::to_string(mini_batch_indexes.size()) +
+    " to worker " + std::to_string(wk_index+1) +
+    ", first last index are [" + to_string(mini_batch_indexes[0]) +
+    ", " +to_string(mini_batch_indexes.back()) + "]");
+
+    // send to worker
+    this->send_long_message_to_worker(wk_index, mini_batch_indexes_str);
+    // update index
+    index += mini_batch_size;
+  }
+  return message_sizes;
+}
+
 void WeightedPearsonPS::distributed_train() {
 
 }
