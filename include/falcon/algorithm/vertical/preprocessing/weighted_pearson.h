@@ -24,11 +24,25 @@
 #include <falcon/utils/math/math_ops.h>
 #include <openssl/ssl.h>
 
+/**
+ * Convert cipher into negative cipher
+ * @param phe_pub_key: user public key
+ * @param cipher_value: cipher to be converted
+ * @param result: converted result
+ */
 void convert_cipher_to_negative(
     djcs_t_public_key *phe_pub_key,
     const EncodedNumber &cipher_value,
     EncodedNumber &result
 );
+
+/**
+ * active party gather all parties feature number and broadcast to each party
+ *
+ * @param party: the participating party
+ * @return global feature number over each partyID
+ */
+std::vector<int> sync_global_feature_number(const Party &party);
 
 /**
  * This function return importance of features with encrypted predictions,
@@ -55,14 +69,6 @@ std::vector<int> wpcc_feature_selection(
     int is_distributed = 0,
     int distributed_role = 0,
     int worker_id = 0);
-
-/**
- * active party gather all parties feature number and broadcast to each party
- *
- * @param party: the participating party
- * @return global feature number over each partyID
- */
-std::vector<int> sync_global_feature_number(const Party &party);
 
 /**
  * get the correlation

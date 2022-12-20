@@ -607,13 +607,12 @@ void LimeExplainer::select_features(Party party,
     exit(EXIT_FAILURE);
   }
 
-  // write to file
+  // each feature write local selected features to file
   log_info("begin to select features and write dataset");
   std::vector<std::vector<double>> selected_feat_samples;
   for (int i = 0; i < selected_sample_size; i++) {
     std::vector<double> sample;
-    for (int j = 0; j < selected_feat_idx.size(); j++) {
-      int idx = selected_feat_idx[j];
+    for (int idx : selected_feat_idx) {
       sample.push_back(selected_samples[i][idx]);
     }
     selected_feat_samples.push_back(sample);

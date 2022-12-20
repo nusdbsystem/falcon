@@ -16,6 +16,53 @@ void convert_cipher_to_negative(
   neg_one_int.set_integer(phe_pub_key->n[0], -1);
   djcs_t_aux_ep_mul(phe_pub_key, result, cipher_value, neg_one_int);
 }
+std::vector<int> sync_global_feature_number(const Party &party) {
+
+  std::vector<int> feature_num_array;
+
+  // 0. active party gather all parties features.
+  if (party.party_id == falcon::ACTIVE_PARTY) {
+    // receive and deserialize_int_array
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        std::string recv_feature_num_str;
+        party.recv_long_message(id, recv_feature_num_str);
+        std::vector<int> recv_feature_num;
+        deserialize_int_array(recv_feature_num, recv_feature_num_str);
+        // aggregate each parties' feature number
+        feature_num_array.push_back(recv_feature_num[0]);
+      } else {
+        feature_num_array.push_back(party.getter_feature_num());
+      }
+    }
+
+    // serialize and send to other parties
+    std::string total_feature_num_str;
+    serialize_int_array(feature_num_array, total_feature_num_str);
+    for (int id = 0; id < party.party_num; id++) {
+      if (id != party.party_id) {
+        party.send_long_message(id, total_feature_num_str);
+      }
+    }
+    return feature_num_array;
+  }
+    // passive perform following
+  else {
+    // 1.send to active party
+    std::vector<int> local_feature_num;
+    local_feature_num.push_back(party.getter_feature_num());
+    std::string local_feature_num_str;
+    serialize_int_array(local_feature_num, local_feature_num_str);
+    party.send_long_message(ACTIVE_PARTY_ID, local_feature_num_str);
+
+    // receive total_feature_num from the request party
+    std::string received_local_feature_num_str;
+    party.recv_long_message(ACTIVE_PARTY_ID, received_local_feature_num_str);
+
+    deserialize_int_array(feature_num_array, received_local_feature_num_str);
+    return feature_num_array;
+  }
+}
 
 std::vector<int> wpcc_feature_selection(Party party,
                                         int num_explained_features,
@@ -93,54 +140,6 @@ std::vector<int> wpcc_feature_selection(Party party,
   log_info("Pearson Feature Selection Done");
 
   return selected_feat_idx;
-}
-
-std::vector<int> sync_global_feature_number(const Party &party) {
-
-  std::vector<int> feature_num_array;
-
-  // 0. active party gather all parties features.
-  if (party.party_id == falcon::ACTIVE_PARTY) {
-    // receive and deserialize_int_array
-    for (int id = 0; id < party.party_num; id++) {
-      if (id != party.party_id) {
-        std::string recv_feature_num_str;
-        party.recv_long_message(id, recv_feature_num_str);
-        std::vector<int> recv_feature_num;
-        deserialize_int_array(recv_feature_num, recv_feature_num_str);
-        // aggregate each parties' feature number
-        feature_num_array.push_back(recv_feature_num[0]);
-      } else {
-        feature_num_array.push_back(party.getter_feature_num());
-      }
-    }
-
-    // serialize and send to other parties
-    std::string total_feature_num_str;
-    serialize_int_array(feature_num_array, total_feature_num_str);
-    for (int id = 0; id < party.party_num; id++) {
-      if (id != party.party_id) {
-        party.send_long_message(id, total_feature_num_str);
-      }
-    }
-    return feature_num_array;
-  }
-    // passive perform following
-  else {
-    // 1.send to active party
-    std::vector<int> local_feature_num;
-    local_feature_num.push_back(party.getter_feature_num());
-    std::string local_feature_num_str;
-    serialize_int_array(local_feature_num, local_feature_num_str);
-    party.send_long_message(ACTIVE_PARTY_ID, local_feature_num_str);
-
-    // receive total_feature_num from the request party
-    std::string received_local_feature_num_str;
-    party.recv_long_message(ACTIVE_PARTY_ID, received_local_feature_num_str);
-
-    deserialize_int_array(feature_num_array, received_local_feature_num_str);
-    return feature_num_array;
-  }
 }
 
 void get_local_features_correlations(const Party &party,
