@@ -252,3 +252,9 @@ void deserialize_encoded_number_matrix(EncodedNumber** number_matrix,
     }
   }
 }
+
+// todo: we should use template function to automatically detect the type and serialize it.
+template<typename T>
+std::string serialize_all(T data){
+
+}

@@ -165,7 +165,8 @@ set(SOURCE_FILES
         algorithm/vertical/preprocessing/pearson_correlation.cc
         include/message/feat_sel.pb.cc
         include/message/feat_sel.pb.h
-        )
+        algorithm/vertical/preprocessing/weighted_pearson_ps.cpp
+        ../../include/falcon/algorithm/vertical/preprocessing/weighted_pearson_ps.h)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
 set(FALCON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/")

@@ -23,6 +23,7 @@
 #include <Networking/ssl_sockets.h>
 #include <falcon/utils/math/math_ops.h>
 #include <openssl/ssl.h>
+#include "falcon/algorithm/vertical/preprocessing/weighted_pearson_ps.h"
 
 /**
  * Convert cipher into negative cipher
@@ -163,6 +164,54 @@ void spdz_lime_computation(int party_num,
                            const std::vector<double> &private_values,
                            falcon::SpdzLimeCompType lime_comp_type,
                            std::promise<std::vector<double>> *res);
+
+/**
+ * PS calculate [w], [w_sum], <r>, <q2>
+ * @param party
+ * @param train_data
+ * @param predictions
+ * @param sss_sample_weights_share
+ * @param party_local_tmp_wf
+ * @param sum_sss_weight_share
+ * @param local_encrypted_feature
+ * @param two_d_e_share_vec
+ * @param two_d_sss_weights_share
+ */
+void ps_get_wpcc_pre_info(const Party &party,
+                          const vector<std::vector<double>> &train_data,
+                          EncodedNumber *predictions,
+                          const vector<double> &sss_sample_weights_share,
+                          EncodedNumber **party_local_tmp_wf,
+                          std::vector<double> &sum_sss_weight_share,
+                          EncodedNumber **local_encrypted_feature,
+                          std::vector<vector<double>> &two_d_e_share_vec,
+                          std::vector<std::vector<double>> &two_d_sss_weights_share,
+                          std::vector<double> &q2_shares);
+
+/**
+ * Worker pair calculate WPCC for all those pair's local feature.
+ * @param party
+ * @param train_data
+ * @param party_local_tmp_wf
+ * @param sum_sss_weight_share
+ * @param local_encrypted_feature
+ * @param two_d_e_share_vec
+ * @param two_d_sss_weights_share
+ * @param wpcc_vec
+ * @param party_id_loop_ups
+ * @param party_feature_id_look_ups
+ */
+void worker_calculate_wpcc_per_feature(const Party &party,
+                                       const vector<std::vector<double>> &train_data,
+                                       EncodedNumber **party_local_tmp_wf,
+                                       const std::vector<double> &sum_sss_weight_share,
+                                       EncodedNumber **local_encrypted_feature,
+                                       const std::vector<vector<double>> &two_d_e_share_vec,
+                                       const std::vector<std::vector<double>> &two_d_sss_weights_share,
+                                       const std::vector<double> &q2_shares,
+                                       std::vector<double> &wpcc_vec,
+                                       std::vector<int> &party_id_loop_ups,
+                                       std::vector<int> &party_feature_id_look_ups);
 
 /**
 * get the correlation plaintext for verification

@@ -21,13 +21,13 @@ class LimeParameterServer : public ParameterServer {
   Party party;
  public:
   LimeParameterServer() = default;
-  LimeParameterServer(const Party& m_party,const std::string& ps_network_config_pb_str);
+  LimeParameterServer(const Party &m_party, const std::string &ps_network_config_pb_str);
 
   /**
    * copy constructor
    * @param LimeParameterServer
    */
-  LimeParameterServer(const LimeParameterServer& obj);
+  LimeParameterServer(const LimeParameterServer &obj);
 
   ~LimeParameterServer();
 
@@ -40,9 +40,8 @@ class LimeParameterServer : public ParameterServer {
    * @param predicted_labels: return value, array of labels
    */
   void distributed_predict(
-      const std::vector<int>& cur_test_data_indexes,
-      EncodedNumber* predicted_labels) override;
-
+      const std::vector<int> &cur_test_data_indexes,
+      EncodedNumber *predicted_labels) override;
 
   /**
  * abstract method of distributed_train
@@ -56,9 +55,9 @@ class LimeParameterServer : public ParameterServer {
    * @param report_save_path: the path to save evaluation matrix
    */
   void distributed_eval(falcon::DatasetType eval_type,
-                        const std::string& report_save_path) override;
+                        const std::string &report_save_path) override;
 
-  void save_model(const std::string& model_save_file) override;
+  void save_model(const std::string &model_save_file) override;
 
  public:
 
