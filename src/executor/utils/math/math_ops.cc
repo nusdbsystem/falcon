@@ -303,3 +303,29 @@ std::vector<int> index_of_top_k_in_vector(std::vector<double> vMetric, int K) {
 
   return first_k;
 }
+
+std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbers, int num_partition) {
+
+  int partition_size = static_cast<int>(std::floor(numbers.size() / num_partition ));
+
+  // Create a vector to hold the partitions
+  std::vector<std::vector<int>> partitions;
+
+  // Iterate over the vector, creating a new partition when the current
+  // partition is full
+  std::vector<int> partition;
+  for (int i : numbers) {
+    partition.push_back(i);
+    if (partition.size() == partition_size) {
+      partitions.push_back(partition);
+      partition.clear();
+    }
+  }
+
+  // Add the final partition if it is not empty
+  if (!partition.empty()) {
+    partitions.push_back(partition);
+  }
+
+  return partitions;
+}

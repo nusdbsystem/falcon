@@ -127,3 +127,13 @@ void deserialize_ps_network_configs(
     ps_ports.push_back(ps_network_config.ps(i).ps_port());
   }
 }
+
+int retrieve_worker_size_from_ps_network_configs(const std::string& input_message){
+  com::nus::dbsytem::falcon::v0::PSNetworkConfig ps_network_config;
+  if (!ps_network_config.ParseFromString(input_message)) {
+    log_error("Deserialize NetworkConfig message failed.");
+    exit(EXIT_FAILURE);
+  }
+  int workers_size = ps_network_config.workers_size();
+  return workers_size;
+}

@@ -174,4 +174,12 @@ bool MyComp(std::pair<double,int> a, std::pair<double,int> b);
  */
 std::vector<int> index_of_top_k_in_vector(std::vector<double> vec, int K);
 
+/**
+ * Partition numbers into multiple vector
+ * @param numbers
+ * @param partition_size how many ele in each partition .
+ * @return
+ */
+std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbers, int partition_size);
+
 #endif  // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

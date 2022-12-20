@@ -17,9 +17,9 @@
  * @param output_message: serialized message
  */
 void serialize_network_configs(std::vector<std::string> ips,
-                               const std::vector< std::vector<int> >& executor_executor_port_arrays,
-                               const std::vector<int>& executor_mpc_port_array,
-                               std::string& output_message);
+                               const std::vector<std::vector<int> > &executor_executor_port_arrays,
+                               const std::vector<int> &executor_mpc_port_array,
+                               std::string &output_message);
 
 /**
  * deserialize the network configs
@@ -29,10 +29,10 @@ void serialize_network_configs(std::vector<std::string> ips,
  * @param executor_mpc_port_array: deserialized ports for executors to mpc
  * @param input_message: serialized message
  */
-void deserialize_network_configs(std::vector<std::string>& ips,
-                                 std::vector< std::vector<int> >& executor_executor_port_arrays,
-                                 std::vector<int>& executor_mpc_port_array,
-                                 const std::string& input_message);
+void deserialize_network_configs(std::vector<std::string> &ips,
+                                 std::vector<std::vector<int> > &executor_executor_port_arrays,
+                                 std::vector<int> &executor_mpc_port_array,
+                                 const std::string &input_message);
 
 /**
  * serialize network configs between ps and workers
@@ -44,11 +44,11 @@ void deserialize_network_configs(std::vector<std::string>& ips,
  * @param output_message: serialized message
  */
 void serialize_ps_network_configs(
-    const std::vector<std::string>& worker_ips,
-    const std::vector< int >& worker_ports,
-    const std::vector<std::string>& ps_ips,
-    const std::vector<int>& ps_ports,
-    std::string& output_message);
+    const std::vector<std::string> &worker_ips,
+    const std::vector<int> &worker_ports,
+    const std::vector<std::string> &ps_ips,
+    const std::vector<int> &ps_ports,
+    std::string &output_message);
 
 /**
  * deserialize the network configs between ps and workers
@@ -60,10 +60,17 @@ void serialize_ps_network_configs(
  * @param input_message: serialized message
  */
 void deserialize_ps_network_configs(
-    std::vector<std::string>& worker_ips,
-    std::vector< int >& worker_ports,
-    std::vector<std::string>& ps_ips,
-    std::vector<int>& ps_ports,
-    const std::string& input_message);
+    std::vector<std::string> &worker_ips,
+    std::vector<int> &worker_ports,
+    std::vector<std::string> &ps_ips,
+    std::vector<int> &ps_ports,
+    const std::string &input_message);
+
+/**
+ * Get number of worker from ps
+ * @param input_message
+ * @return
+ */
+int retrieve_worker_size_from_ps_network_configs(const std::string &input_message);
 
 #endif //FALCON_INCLUDE_FALCON_UTILS_PB_CONVERTER_NETWORK_CONVERTER_H_
