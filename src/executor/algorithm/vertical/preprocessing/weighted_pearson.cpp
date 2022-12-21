@@ -136,7 +136,7 @@ std::vector<int> wpcc_feature_selection(Party party,
     log_info("[wpcc_feature_selection]: 2. Return selected feature index !");
   }
 
-  // distributed
+    // distributed
   else {
     std::vector<int> global_feature_index_vec;
     std::vector<int> global_partyid_look_up_vec;
@@ -249,9 +249,9 @@ std::vector<int> wpcc_feature_selection(Party party,
         for (int worker_local_f_id = 0; worker_local_f_id < worker_local_wpcc.size(); worker_local_f_id++) {
           int feature_index = partition_vec[wk_index][worker_local_f_id];
           log_info("[PS]: reading value from worker = "
-          + to_string(wk_index)
-          + " feature index = " + to_string(feature_index)
-          + " assiend_value = " + to_string(worker_local_wpcc[worker_local_f_id])
+                       + to_string(wk_index)
+                       + " feature index = " + to_string(feature_index)
+                       + " assiend_value = " + to_string(worker_local_wpcc[worker_local_f_id])
           );
 
           global_wpcc_vec[feature_index] = worker_local_wpcc[worker_local_f_id];
@@ -1388,6 +1388,12 @@ void worker_calculate_wpcc_per_feature(const Party &party,
 
     int party_id = global_partyid_look_up_vec[g_f_id];
     int feature_id = global_party_local_feature_id_look_up_vec[g_f_id];
+
+    log_info("[pearson_fl]: DEBUG. current worker calculate global_feature_id = "
+                 + std::to_string(g_f_id)
+                 + " party_id = " + std::to_string(party_id)
+                 + " feature_id = " + std::to_string(feature_id)
+    );
 
     // only the current party have this value. other parties have empty, 1*1
     auto *feature_multiply_w_cipher = new EncodedNumber[1];
