@@ -17,7 +17,7 @@ class WeightedPearsonPS : public ParameterServer {
   WeightedPearsonPS() = default;
   WeightedPearsonPS(const Party &m_party, const std::string &ps_network_config_pb_str);
   WeightedPearsonPS(const WeightedPearsonPS &obj);
-  ~WeightedPearsonPS();
+  ~WeightedPearsonPS() = default;
 
  public:
 

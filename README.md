@@ -16,6 +16,9 @@ serve for new requests.
 
 # Develop guide
 
+### Debug cmds
+lsof -i :80
+
 ### Build the platform
 
 Current development follows the current patterns:

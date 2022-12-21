@@ -8,6 +8,7 @@
 #include <falcon/utils/pb_converter/network_converter.h>
 #include <future>
 #include <cmath>
+#include <falcon/utils/io_util.h>
 
 void convert_cipher_to_negative(
     djcs_t_public_key *phe_pub_key,
@@ -94,7 +95,7 @@ std::vector<int> wpcc_feature_selection(Party party,
   bigint::init_thread();
 
   // begin to selected features
-
+  // centralized
   if (is_distributed == 0) {
     // 3.1 get the weights for each feature.
     std::vector<double> feature_wpcc_share_vec;
@@ -133,8 +134,10 @@ std::vector<int> wpcc_feature_selection(Party party,
                                    party_feature_id_look_ups,
                                    num_explained_features);
     log_info("[wpcc_feature_selection]: 2. Return selected feature index !");
-  } else {
+  }
 
+  // distributed
+  else {
     std::vector<int> global_feature_index_vec;
     std::vector<int> global_partyid_look_up_vec;
     std::vector<int> global_party_local_feature_id_look_up_vec;
@@ -160,12 +163,14 @@ std::vector<int> wpcc_feature_selection(Party party,
     }
 
     if (is_distributed == 1 && distributed_role == falcon::DistPS) {
+      log_info("[PS]: Init WPCC Parameter server");
       // 1. calculate [w], [w_sum], <r>, <q2>
       // 2. broadcast them and partition features.
       // 2. compare and select top K features with higher wpcc
       // 3. store the selected features and send to all workers
 
       // init results and compute them.
+      log_info("[PS]: begin to calculate <w_sum>, [F]list, <e>list, <w>list, <q2>lists ");
       auto **party_local_tmp_wf = new EncodedNumber *[party.getter_feature_num()];
       for (int i = 0; i < party.getter_feature_num(); i++) {
         party_local_tmp_wf[i] = new EncodedNumber[1];
@@ -190,6 +195,7 @@ std::vector<int> wpcc_feature_selection(Party party,
       auto ps = new WeightedPearsonPS(party, ps_network_str);
 
       // 2. broadcast them and partition features.
+      log_info("[PS]: begin to broadcast <w_sum>, [F]list, <e>list, <w>list, <q2>lists ");
       // 2.1
       std::string party_local_tmp_wf_str;
       serialize_encoded_number_matrix(party_local_tmp_wf,
@@ -227,20 +233,48 @@ std::vector<int> wpcc_feature_selection(Party party,
       // 2. receive all parties local wpcc and compare and select top K features with higher wpcc
 
       // Create a vector with an initial size of 10
-      std::vector<double> global_wpcc_vec;
+      std::vector<double> global_wpcc_vec(total_feature_num);
       global_wpcc_vec.reserve(total_feature_num);
+      log_info("[PS]: begin to receive global_wpcc_vec from all parties, reserve global_wpcc_vec size of ="
+                   + to_string(global_wpcc_vec.size()));
 
       for (int wk_index = 0; wk_index < ps->worker_channels.size(); wk_index++) {
+        log_info("[PS]: begin to receive wpcc from worker=" + std::to_string(wk_index));
         std::vector<double> worker_local_wpcc;
         std::string serialized_worker_wpcc_str;
         ps->recv_long_message_from_worker(wk_index, serialized_worker_wpcc_str);
         deserialize_double_array(worker_local_wpcc, serialized_worker_wpcc_str);
-        for (int worker_local_f_id = 0; worker_local_f_id < worker_local_wpcc.size(); worker_local_f_id++){
+        log_info("[PS]: receive wpcc from worker = " + vec_to_str<double>(worker_local_wpcc));
+
+        for (int worker_local_f_id = 0; worker_local_f_id < worker_local_wpcc.size(); worker_local_f_id++) {
           int feature_index = partition_vec[wk_index][worker_local_f_id];
+          log_info("[PS]: reading value from worker = "
+          + to_string(wk_index)
+          + " feature index = " + to_string(feature_index)
+          + " assiend_value = " + to_string(worker_local_wpcc[worker_local_f_id])
+          );
+
           global_wpcc_vec[feature_index] = worker_local_wpcc[worker_local_f_id];
         }
       }
 
+      log_info("[PS]: After receiving , size of global_wpcc_vec share = " + std::to_string(global_wpcc_vec.size()));
+
+      std::vector<double> wpcc_plain_double;
+      secret_shares_to_plain_double(party, wpcc_plain_double, global_wpcc_vec, total_feature_num,
+                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+
+      // for debug and check
+      for (int i : global_feature_index_vec) {
+        log_info("[PS]: verifying received WPCC: global_feature_id ="
+                     + std::to_string(i)
+                     + " wpcc = " + std::to_string(wpcc_plain_double[i])
+                     + " party_id = " + std::to_string(global_partyid_look_up_vec[i])
+                     + " party_local_id = " + std::to_string(global_party_local_feature_id_look_up_vec[i])
+        );
+      }
+
+      log_info("[PS]: After receiving from all parties, begin to calculate feature index with highest wpcc");
       selected_feat_idx =
           jointly_get_top_k_features(party,
                                      feature_num_array,
@@ -249,15 +283,34 @@ std::vector<int> wpcc_feature_selection(Party party,
                                      global_party_local_feature_id_look_up_vec,
                                      num_explained_features);
 
+      log_info("[PS]: Broadcast selected feature index to each party");
       // 3. store the selected features and send to all workers
       std::string selected_feat_idx_str;
       serialize_int_array(selected_feat_idx, selected_feat_idx_str);
       ps->broadcast_string_to_workers(selected_feat_idx_str);
+
+      // clear the memory
+      for (int i = 0; i < party.getter_feature_num(); i++) {
+        delete[] party_local_tmp_wf[i];
+      }
+      delete[] party_local_tmp_wf;
+
+      for (int i = 0; i < party.getter_feature_num(); i++) {
+        delete[] local_encrypted_feature[i];
+      }
+      delete[] local_encrypted_feature;
+      delete ps;
     }
 
     if (is_distributed == 1 && distributed_role == falcon::DistWorker) {
       auto worker = new Worker(ps_network_str, worker_id);
 
+      log_info("[Worker-" + std::to_string(worker_id - 1) + "]: responsible for global feature id = "
+                   + vec_to_str<int>(partition_vec[worker_id - 1]));
+
+      log_info(
+          "[Worker-" + std::to_string(worker_id)
+              + "]: begin to receive <w_sum>, [F]list, <e>list, <w>list, <q2>lists from PS");
       // 1. receive all infos
       auto **party_local_tmp_wf = new EncodedNumber *[party.getter_feature_num()];
       for (int i = 0; i < party.getter_feature_num(); i++) {
@@ -304,20 +357,34 @@ std::vector<int> wpcc_feature_selection(Party party,
 
       // 2. computes wpcc
       std::vector<double> wpcc_vec;
+      log_info("[Worker-" + std::to_string(worker_id - 1) + "]: begin to calculate wpcc_vec for vector = "
+                   + vec_to_str<int>(partition_vec[worker_id - 1]));
       worker_calculate_wpcc_per_feature(party, train_data, party_local_tmp_wf, sum_sss_weight_share,
                                         local_encrypted_feature, two_d_e_share_vec, two_d_sss_weights_share, q2_shares,
                                         wpcc_vec,
-                                        partition_vec[worker_id], global_partyid_look_up_vec,
+                                        partition_vec[worker_id - 1], global_partyid_look_up_vec,
                                         global_party_local_feature_id_look_up_vec);
       // 3. send to ps for top K selection
+      log_info("[Worker-" + std::to_string(worker_id - 1) + "]: begin to send wpcc_vec to PS");
       std::string wpcc_vec_str;
       serialize_double_array(wpcc_vec, wpcc_vec_str);
       worker->send_long_message_to_ps(wpcc_vec_str);
 
       // 4. receive final feature indexs and store locally.
+      log_info("[Worker-" + std::to_string(worker_id - 1) + "]: wait for PS to finish ");
       std::string recv_selected_feat_idx_str;
-      serialize_int_array(selected_feat_idx, recv_selected_feat_idx_str);
       worker->recv_long_message_from_ps(recv_selected_feat_idx_str);
+
+      // clear the memory
+      for (int i = 0; i < party.getter_feature_num(); i++) {
+        delete[] party_local_tmp_wf[i];
+      }
+      delete[] party_local_tmp_wf;
+      for (int i = 0; i < party.getter_feature_num(); i++) {
+        delete[] local_encrypted_feature[i];
+      }
+      delete[] local_encrypted_feature;
+      delete worker;
     }
   }
 
@@ -953,6 +1020,10 @@ void spdz_lime_computation(int party_num,
   log_info("begin connect to spdz parties");
   log_info("party_num = " + std::to_string(party_num));
   for (int i = 0; i < party_num; i++) {
+    log_info(
+        "[spdz_lime_computation]: falcon client is connecting with MPC server = " + std::to_string(i) + " at port = "
+            + std::to_string(mpc_port_bases[i] + i) + " ......");
+
     set_up_client_socket(plain_sockets[i], party_host_names[i].c_str(), mpc_port_bases[i] + i);
     send(plain_sockets[i], (octet *) &party_id, sizeof(int));
     mpc_sockets[i] = new ssl_socket(io_service, ctx, plain_sockets[i],

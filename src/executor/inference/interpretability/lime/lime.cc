@@ -471,7 +471,7 @@ void LimeExplainer::select_features(Party party,
       read_dataset(selected_samples_file, delimiter);
   std::vector<double> origin_data = selected_samples[0];
   int selected_sample_size = (int) selected_samples.size();
-  log_info("Read the generated samples finished");
+  log_info("[LimeExplainer::select_features]: Read the generated samples finished");
 
   // 2. read the computed_prediction file (note that
   //     we assume all parties have the same prediction file now)
@@ -488,7 +488,7 @@ void LimeExplainer::select_features(Party party,
   for (int i = 0; i < selected_sample_size; i++) {
     selected_pred_class_id[i] = selected_predictions[i][class_id];
   }
-  log_info("Read the computed predictions finished");
+  log_info("[LimeExplainer::select_features]: Read the computed predictions finished");
 
   // 3. read the sample weights file (optional at the moment)
   std::vector<double> sss_weights;
@@ -1639,7 +1639,7 @@ void lime_feat_sel(Party party, const std::string &params_str,
                    int is_distributed,
                    int distributed_role,
                    int worker_id) {
-  log_info("Begin to select features");
+  log_info("[lime_feat_sel]: Begin to select features");
   // deserialize the LimeFeatureParams
   LimeFeatSelParams feat_sel_params;
   log_info("[lime_feat_sel]: params_str = " + params_str);

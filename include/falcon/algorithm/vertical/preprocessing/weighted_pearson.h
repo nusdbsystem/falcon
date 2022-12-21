@@ -24,6 +24,8 @@
 #include <falcon/utils/math/math_ops.h>
 #include <openssl/ssl.h>
 #include "falcon/algorithm/vertical/preprocessing/weighted_pearson_ps.h"
+#include <falcon/distributed/worker.h>
+
 
 /**
  * Convert cipher into negative cipher

@@ -7,6 +7,9 @@
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <iterator>
 #include <falcon/utils/logger/logger.h>
+#include <iostream>
+#include <sstream>
+#include <vector>
 
 
 std::vector<std::vector<double> > read_dataset(const std::string& data_file,

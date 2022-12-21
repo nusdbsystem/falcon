@@ -152,4 +152,17 @@ std::ostream& falcon_print(std::ostream &os, const T &t, const Args&... rest){
   return falcon_print(os, rest...);
 }
 
+template <typename T>
+std::string vec_to_str(const std::vector<T>& v){
+
+  std::stringstream ss;
+  // Iterate over the elements in the vector and append them to the stringstream
+  for (T i : v) {
+    ss << i << ",";
+  }
+  // Convert the stringstream to a string
+  std::string s = ss.str();
+  return s;
+}
+
 #endif //FALCON_SRC_EXECUTOR_UTILS_IO_UTIL_H_
