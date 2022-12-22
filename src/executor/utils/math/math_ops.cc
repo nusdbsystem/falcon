@@ -306,7 +306,7 @@ std::vector<int> index_of_top_k_in_vector(std::vector<double> vMetric, int K) {
 
 std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbers, int num_partition) {
 
-  int partition_size = static_cast<int>(std::floor(numbers.size() / num_partition ));
+  int partition_size = static_cast<int>(std::ceil(numbers.size() / num_partition ));
 
   // Create a vector to hold the partitions
   std::vector<std::vector<int>> partitions;
