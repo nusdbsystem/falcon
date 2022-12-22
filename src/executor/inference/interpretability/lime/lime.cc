@@ -79,6 +79,17 @@ std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Pa
     }
     coalitions.push_back(data_row_coalition);
 
+    // calculate the mean value of each feature
+    std::vector<double> features_mean;
+    std::vector<std::vector<double>> party_local_data = party.getter_local_data();
+    for (int j = 0; j < dimension; j++) {
+      std::vector<double> feature_j_data;
+      for (int i = 0; i < party_local_data.size(); i++) {
+        feature_j_data.push_back(party_local_data[i][j]);
+      }
+      features_mean.push_back(average(feature_j_data));
+    }
+
     // generate random coalitions
     std::mt19937 mt(RANDOM_SEED);
     for (int i = 0; i < sample_instance_num; i++) {
@@ -87,9 +98,12 @@ std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Pa
       // randomly generate coalitions
       for (int j = 0; j < dimension; j++) {
         double c = 1.0 * (double) (mt() % 2);
-        double s = c * data_row[j];
         coalition.push_back(c);
-        sample.push_back(s);
+        if (c == 1.0) {
+          sample.push_back(data_row[j]);
+        } else {
+          sample.push_back(features_mean[j]);
+        }
       }
       coalitions.push_back(coalition);
       sampled_data.push_back(sample);
@@ -221,7 +235,7 @@ void LimeExplainer::compute_sample_weights(
     //      the distance metric, need to call spdz program
     //  3. compute the sample weights based on kernel and kernel_width
     //      also need to call spdz program
-    compute_dist_weights(party, sss_weights, generated_samples[0],
+    compute_dist_weights(party, sss_weights, generated_sample_file, generated_samples[0],
                          generated_samples, distance_metric, kernel, kernel_width);
     log_info("Compute dist and weights finished");
     //  4. write the sss sample weights to the sample_weights_file
@@ -279,7 +293,7 @@ void LimeExplainer::compute_sample_weights(
     // compute the sample weights
     int wk_sample_size = (int) recv_sample_indices.size();
     auto *worker_encrypted_weights = new EncodedNumber[wk_sample_size];
-    compute_dist_weights(party, sss_weights, generated_samples[0],
+    compute_dist_weights(party, sss_weights, generated_sample_file, generated_samples[0],
                          worker_samples, distance_metric, kernel, kernel_width);
     log_info("Worker " + std::to_string(worker_id) + " compute dist and weights finished");
     // return the weights back to ps
@@ -338,18 +352,19 @@ std::vector<int> LimeExplainer::random_select_sample_idx(
 
 void LimeExplainer::compute_dist_weights(const Party &party,
                                          std::vector<double> &sss_weights,
+                                         const std::string& generated_sample_file,
                                          const std::vector<double> &origin_data,
                                          const std::vector<std::vector<double>> &sampled_data,
                                          const std::string &distance_metric,
                                          const std::string &kernel,
                                          double kernel_width) {
-  // check distance metric and kernel method
-  if (distance_metric != "euclidean") {
-    log_error("The distance metric " + distance_metric + " is not supported.");
+  if (kernel != "exponential" && kernel != "kernelshap") {
+    log_error("The kernel function " + kernel + " is not supported.");
     exit(EXIT_FAILURE);
   }
-  if (kernel != "exponential") {
-    log_error("The kernel function " + kernel + " is not supported.");
+  // check distance metric and kernel method
+  if (kernel == "exponential" && distance_metric != "euclidean") {
+    log_error("The distance metric " + distance_metric + " is not supported.");
     exit(EXIT_FAILURE);
   }
 
@@ -361,52 +376,97 @@ void LimeExplainer::compute_dist_weights(const Party &party,
   int feature_size = (int) origin_data.size();
   std::vector<int> feature_sizes = sync_up_int_arr(party, feature_size);
   int total_feature_size = std::accumulate(feature_sizes.begin(), feature_sizes.end(), 0);
-
-  //  2. parties aggregate and convert to secret shares
-  log_info("[compute_dist_weights]: begin to compute square dist.");
   int sample_size = (int) sampled_data.size();
-  auto *squared_dist = new EncodedNumber[sample_size];
-  compute_squared_dist(party, origin_data, sampled_data, squared_dist);
-  log_info("[compute_dist_weights]: finish to compute square dist.");
-  std::vector<double> squared_dist_shares;
-  ciphers_to_secret_shares(party, squared_dist,
-                           squared_dist_shares,
-                           sample_size,
-                           ACTIVE_PARTY_ID,
-                           PHE_FIXED_POINT_PRECISION);
-  log_info("[compute_dist_weights]: compute encrypted distance finished");
 
-  //  3. parties compute kernel width (replace the input one by default now -- let spdz compute)
-  // kernel_width = std::sqrt(total_feature_size) * 0.75;
+  std::vector<double> res;
 
-  //  4. parties connect to spdz and compute weights (both sqrt and exponential kernel)
-  //    the spdz program compute sqrt(dist) and compute exponential kernel weights
-  std::vector<int> public_values;
-  public_values.push_back(sample_size);
-  public_values.push_back(total_feature_size);
+  if (kernel == "exponential") {
+    //  2. parties aggregate and convert to secret shares
+    log_info("[compute_dist_weights]: begin to compute square dist.");
+    auto *squared_dist = new EncodedNumber[sample_size];
+    compute_squared_dist(party, origin_data, sampled_data, squared_dist);
+    log_info("[compute_dist_weights]: finish to compute square dist.");
+    std::vector<double> squared_dist_shares;
+    ciphers_to_secret_shares(party, squared_dist,
+                             squared_dist_shares,
+                             sample_size,
+                             ACTIVE_PARTY_ID,
+                             PHE_FIXED_POINT_PRECISION);
+    log_info("[compute_dist_weights]: compute encrypted distance finished");
 
-  falcon::SpdzLimeCompType comp_type = falcon::DIST_WEIGHT;
-  std::promise<std::vector<double>> promise_values;
-  std::future<std::vector<double>> future_values = promise_values.get_future();
-  std::thread spdz_dist_weights(spdz_lime_computation,
-                                party.party_num,
-                                party.party_id,
-                                party.executor_mpc_ports,
-                                party.host_names,
-                                public_values.size(),
-                                public_values,
-                                squared_dist_shares.size(),
-                                squared_dist_shares,
-                                comp_type,
-                                &promise_values);
-  std::vector<double> res = future_values.get();
-  spdz_dist_weights.join();
-  log_info("[compute_dist_weights]: communicate with spdz finished");
-  log_info("[compute_dist_weights]: res.size = " + std::to_string(res.size()));
+    //  3. parties compute kernel width (replace the input one by default now -- let spdz compute)
+    // kernel_width = std::sqrt(total_feature_size) * 0.75;
+
+    //  4. parties connect to spdz and compute weights (both sqrt and exponential kernel)
+    //    the spdz program compute sqrt(dist) and compute exponential kernel weights
+    std::vector<int> public_values;
+    public_values.push_back(sample_size);
+    public_values.push_back(total_feature_size);
+
+    falcon::SpdzLimeCompType comp_type = falcon::DIST_WEIGHT;
+    std::promise<std::vector<double>> promise_values;
+    std::future<std::vector<double>> future_values = promise_values.get_future();
+    std::thread spdz_dist_weights(spdz_lime_computation,
+                                  party.party_num,
+                                  party.party_id,
+                                  party.executor_mpc_ports,
+                                  party.host_names,
+                                  public_values.size(),
+                                  public_values,
+                                  squared_dist_shares.size(),
+                                  squared_dist_shares,
+                                  comp_type,
+                                  &promise_values);
+    res = future_values.get();
+    spdz_dist_weights.join();
+    log_info("[compute_dist_weights]: communicate with spdz finished");
+    log_info("[compute_dist_weights]: res.size = " + std::to_string(res.size()));
+    delete[] squared_dist;
+  }
+
+  if (kernel == "kernelshap") {
+    // each party read the generated_data_file.tmp file
+    // count the number of local presented features and send it to mpc via sss
+    char delimiter = ',';
+    std::string coalition_file = generated_sample_file + ".tmp";
+    std::vector<std::vector<double>> coalitions =
+        read_dataset(coalition_file, delimiter);
+    log_info("[compute_dist_weights] read coalition file finished");
+
+    std::vector<double> local_presented_feature_nums;
+    for (int i = 0; i < sample_size; i++) {
+      double num = std::accumulate(sampled_data[i].begin(), sampled_data[i].end(), 0.0);
+      local_presented_feature_nums.push_back(num);
+    }
+
+    // the mpc parties compute <w> = (d-1) / (C_d^{[z]} * [z] * (d - [z]))
+    // where d = total_feature_size here
+    std::vector<int> public_values;
+    public_values.push_back(sample_size);
+    public_values.push_back(total_feature_size);
+
+    falcon::SpdzLimeCompType comp_type = falcon::KERNELSHAP_WEIGHT;
+    std::promise<std::vector<double>> promise_values;
+    std::future<std::vector<double>> future_values = promise_values.get_future();
+    std::thread spdz_dist_weights(spdz_lime_computation,
+                                  party.party_num,
+                                  party.party_id,
+                                  party.executor_mpc_ports,
+                                  party.host_names,
+                                  public_values.size(),
+                                  public_values,
+                                  local_presented_feature_nums.size(),
+                                  local_presented_feature_nums,
+                                  comp_type,
+                                  &promise_values);
+    res = future_values.get();
+    spdz_dist_weights.join();
+    log_info("[compute_dist_weights]: communicate with spdz finished");
+    log_info("[compute_dist_weights]: res.size = " + std::to_string(res.size()));
+  }
 
   sss_weights = res;
   log_info("[compute_dist_weights]: shares to ciphers finished");
-  delete[] squared_dist;
 }
 
 void LimeExplainer::compute_squared_dist(const Party &party,
@@ -1650,11 +1710,9 @@ void lime_comp_weight(Party party, const std::string &params_str,
       party,
       comp_weights_params.generated_sample_file,
       comp_weights_params.computed_prediction_file,
-
       comp_weights_params.is_precompute,
       comp_weights_params.num_samples,
       comp_weights_params.class_num,
-
       comp_weights_params.distance_metric,
       comp_weights_params.kernel,
       comp_weights_params.kernel_width,

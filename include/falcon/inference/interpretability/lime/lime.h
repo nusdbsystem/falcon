@@ -226,6 +226,7 @@ class LimeExplainer {
   void compute_dist_weights(
       const Party& party,
       std::vector<double>& sss_weights,
+      const std::string& generated_sample_file,
       const std::vector<double>& origin_data,
       const std::vector<std::vector<double>>& sampled_data,
       const std::string& distance_metric,

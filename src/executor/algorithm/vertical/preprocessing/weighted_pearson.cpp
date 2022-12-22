@@ -1151,6 +1151,13 @@ void spdz_lime_computation(int party_num,
       res->set_value(return_values);
       break;
     }
+    case falcon::KERNELSHAP_WEIGHT: {
+      log_info("falcon::KERNELSHAP_WEIGHT = " + std::to_string(falcon::KERNELSHAP_WEIGHT));
+      LOG(INFO) << "SPDZ compute kernelshap weights";
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+      res->set_value(return_values);
+      break;
+    }
     default:LOG(INFO) << "SPDZ lime computation type is not found.";
       exit(1);
   }

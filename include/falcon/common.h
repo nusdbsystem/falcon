@@ -70,7 +70,8 @@ enum SpdzLimeCompType {
   DIST_WEIGHT, // compute the sqrt distance and kernel weights
   PEARSON_Division, // compute the pearson coefficient, <a>/<b>
   PEARSON_Div_with_SquareRoot, // compute the pearson coefficient, <a>/<b>
-  PEARSON_TopK // compare and return top K element from a share vector.
+  PEARSON_TopK, // compare and return top K element from a share vector.
+  KERNELSHAP_WEIGHT // compute the kernelshap weights
 };
 
 /** for MLP */
