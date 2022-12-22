@@ -116,13 +116,15 @@ std::vector<int> wpcc_feature_selection(Party party,
 
     log_info("[wpcc_feature_selection]: 1. Get all features importance done ! Begin to jointly find top K");
 
-    // for debug and compare with baseline
-    jointly_get_top_k_features_plaintext(party,
-                                         feature_num_array,
-                                         feature_wpcc_share_vec,
-                                         party_id_loop_ups,
-                                         party_feature_id_look_ups,
-                                         num_explained_features);
+//    // for debug and compare with baseline
+//    jointly_get_top_k_features_plaintext(party,
+//                                         feature_num_array,
+//                                         feature_wpcc_share_vec,
+//                                         party_id_loop_ups,
+//                                         party_feature_id_look_ups,
+//                                         num_explained_features);
+
+    // TODO: if without sleep 5 seconds, an exception will exist on the MPC side, need further check
     sleep(5);
 
     // 3.2 find the top k over all parties.
@@ -1219,6 +1221,7 @@ void ps_get_wpcc_pre_info(const Party &party,
 
   // 5. calculate the (<w> * {[y] - [mean_y]}) ** 2
   std::vector<double> e_share_vec; // N vector
+  auto *e_cipher_vec = new EncodedNumber[num_instance];
   for (int index = 0; index < num_instance; index++) {
     // calculate [y_i] - [mean_y_cipher]
     EncodedNumber y_min_mean_y_cipher;
@@ -1250,15 +1253,8 @@ void ps_get_wpcc_pre_info(const Party &party,
 
     log_info("[pearson_fl]: 5.3 convert [y_i] - [mean_y_cipher] into two dim in form of 1*1 ");
 
-    // get es share
-    std::vector<double> es_share;
-    ciphers_to_secret_shares(party,
-                             sss_weight_mul_y_min_meany_cipher[0],
-                             es_share,
-                             1,
-                             ACTIVE_PARTY_ID,
-                             PHE_FIXED_POINT_PRECISION);
-    e_share_vec.push_back(es_share[0]);
+    // copy result to e_cipher_vec
+    e_cipher_vec[index] = sss_weight_mul_y_min_meany_cipher[0][0];
 
     // clear the memory
     delete[] two_d_mean_y_cipher_neg[0];
@@ -1267,6 +1263,15 @@ void ps_get_wpcc_pre_info(const Party &party,
     delete[] sss_weight_mul_y_min_meany_cipher;
   }
 
+  // decrypt and get es share
+  ciphers_to_secret_shares(party,
+                           e_cipher_vec,
+                           e_share_vec,
+                           num_instance,
+                           ACTIVE_PARTY_ID,
+                           PHE_FIXED_POINT_PRECISION);
+
+  delete [] e_cipher_vec;
   log_info("[WPCC_PS]: 5. all done ");
 
   // after getting e, calculate q2, y_vec_min_mean_vec in form of 1*1

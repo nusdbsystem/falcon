@@ -28,7 +28,7 @@
     },
     {
       "id": 2,
-      "addr": "127.0.0.1:30008",
+      "addr": "127.0.0.1:30007",
       "party_type": "passive",
       "path": {
         "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client2",
