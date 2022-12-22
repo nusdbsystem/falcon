@@ -180,7 +180,7 @@ void spdz_lime_computation(int party_num,
  * @param two_d_e_share_vec
  * @param two_d_sss_weights_share
  */
-void ps_get_wpcc_pre_info(const Party &party,
+void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
                           const vector<std::vector<double>> &train_data,
                           EncodedNumber *predictions,
                           const vector<double> &sss_sample_weights_share,

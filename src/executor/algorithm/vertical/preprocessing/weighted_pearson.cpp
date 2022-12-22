@@ -190,11 +190,13 @@ std::vector<int> wpcc_feature_selection(Party party,
       std::vector<std::vector<double>> two_d_sss_weights_share;
       // init <q2> lists
       std::vector<double> q2_shares;
-      ps_get_wpcc_pre_info(party, train_data, predictions, sss_sample_weights,
+
+      auto ps = new WeightedPearsonPS(party, ps_network_str);
+
+      ps_get_wpcc_pre_info(*ps, train_data, predictions, sss_sample_weights,
                            party_local_tmp_wf, sum_sss_weight_share, local_encrypted_feature,
                            two_d_e_share_vec, two_d_sss_weights_share, q2_shares);
 
-      auto ps = new WeightedPearsonPS(party, ps_network_str);
 
       // 2. broadcast them and partition features.
       log_info("[PS]: begin to broadcast <w_sum>, [F]list, <e>list, <w>list, <q2>lists ");
@@ -1127,7 +1129,7 @@ void spdz_lime_computation(int party_num,
 /***************** logic for PS ***************/
 /***********************************************************/
 
-void ps_get_wpcc_pre_info(const Party &party,
+void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
                           const vector<std::vector<double>> &train_data,
                           EncodedNumber *predictions,
                           const vector<double> &sss_sample_weights_share,
@@ -1140,7 +1142,7 @@ void ps_get_wpcc_pre_info(const Party &party,
 ) {
 
   djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
-  party.getter_phe_pub_key(phe_pub_key);
+  ps.party.getter_phe_pub_key(phe_pub_key);
 
   // 1. init
   // get batch_true_labels_precision
@@ -1162,7 +1164,7 @@ void ps_get_wpcc_pre_info(const Party &party,
 
   // 2. jointly convert <w> into ciphertext [w],
   auto *sss_weight_cipher = new EncodedNumber[num_instance];
-  secret_shares_to_ciphers(party,
+  secret_shares_to_ciphers(ps.party,
                            sss_weight_cipher,
                            sss_sample_weights_share,
                            num_instance,
@@ -1177,7 +1179,7 @@ void ps_get_wpcc_pre_info(const Party &party,
   int weight_cipher_exp = abs(sss_weight_cipher[0].getter_exponent());
   EncodedNumber sum_sss_weight_cipher_num;
   sum_sss_weight_cipher_num.set_double(phe_pub_key->n[0], 0, weight_cipher_exp);
-  djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sum_sss_weight_cipher_num, sum_sss_weight_cipher_num);
+  djcs_t_aux_encrypt(phe_pub_key, ps.party.phe_random, sum_sss_weight_cipher_num, sum_sss_weight_cipher_num);
 
   for (int i = 0; i < num_instance; i++) {
     log_info("[WPCC_PS]: Debug: exp of the weight number = " + std::to_string(i) + " is "
@@ -1189,7 +1191,7 @@ void ps_get_wpcc_pre_info(const Party &party,
   sum_sss_weight_cipher[0] = sum_sss_weight_cipher_num;
 
   // 4. active party convert it to secret shares, and each party hold one share
-  ciphers_to_secret_shares(party,
+  ciphers_to_secret_shares(ps.party,
                            sum_sss_weight_cipher,
                            sum_sss_weight_share,
                            1,
@@ -1201,7 +1203,7 @@ void ps_get_wpcc_pre_info(const Party &party,
   // init result two dimension cipher of 1*1
   auto **two_d_sss_weight_mul_pred_cipher = new EncodedNumber *[1];
   two_d_sss_weight_mul_pred_cipher[0] = new EncodedNumber[1];
-  cipher_shares_mat_mul(party,
+  cipher_shares_mat_mul(ps.party,
                         two_d_sss_weights_share,
                         two_d_prediction_cipher, 1, num_instance, num_instance, 1,
                         two_d_sss_weight_mul_pred_cipher);
@@ -1209,7 +1211,7 @@ void ps_get_wpcc_pre_info(const Party &party,
   log_info("[WPCC_PS]: 3. active party calculate <w>*[Prediction] and convert it to secret share");
 
   auto *mean_y_cipher = new EncodedNumber[1];
-  WeightedMean(party,
+  WeightedMean(ps.party,
                sum_sss_weight_share[0],
                two_d_sss_weight_mul_pred_cipher[0],
                mean_y_cipher,
@@ -1236,7 +1238,7 @@ void ps_get_wpcc_pre_info(const Party &party,
     two_d_mean_y_cipher_neg[0] = new EncodedNumber[1];
     two_d_mean_y_cipher_neg[0][0] = y_min_mean_y_cipher;
 
-    // init result 1*1 metris
+    // init result 1*1 metrics
     auto **sss_weight_mul_y_min_meany_cipher = new EncodedNumber *[1];
     sss_weight_mul_y_min_meany_cipher[0] = new EncodedNumber[1];
 
@@ -1246,7 +1248,7 @@ void ps_get_wpcc_pre_info(const Party &party,
     tmp_vec.push_back(sss_sample_weights_share[index]);
     two_d_sss_weights_share_element.push_back(tmp_vec);
 
-    cipher_shares_mat_mul(party,
+    cipher_shares_mat_mul(ps.party,
                           two_d_sss_weights_share_element,
                           two_d_mean_y_cipher_neg, 1, 1, 1, 1,
                           sss_weight_mul_y_min_meany_cipher);
@@ -1264,7 +1266,7 @@ void ps_get_wpcc_pre_info(const Party &party,
   }
 
   // decrypt and get es share
-  ciphers_to_secret_shares(party,
+  ciphers_to_secret_shares(ps.party,
                            e_cipher_vec,
                            e_share_vec,
                            num_instance,
@@ -1294,7 +1296,7 @@ void ps_get_wpcc_pre_info(const Party &party,
   // 6. calculate q2
   // make e_share to two dim,
   two_d_e_share_vec.push_back(e_share_vec);
-  cipher_shares_mat_mul(party,
+  cipher_shares_mat_mul(ps.party,
                         two_d_e_share_vec, // 1*N
                         y_vec_min_mean_y_cipher, // N * 1
                         1, num_instance, num_instance, 1,
@@ -1302,7 +1304,7 @@ void ps_get_wpcc_pre_info(const Party &party,
 
   // convert q2 into share
   // in form of 1*N
-  ciphers_to_secret_shares(party, y_vec_min_mean_vec[0],
+  ciphers_to_secret_shares(ps.party, y_vec_min_mean_vec[0],
                            q2_shares,
                            1,
                            ACTIVE_PARTY_ID,
@@ -1310,7 +1312,7 @@ void ps_get_wpcc_pre_info(const Party &party,
   log_info("[WPCC_PS]: 7. convert q2 cipher and convert it to share done");
 
   // party compute in parallel,
-  for (int feature_id = 0; feature_id < party.getter_feature_num(); feature_id++) {
+  for (int feature_id = 0; feature_id < ps.party.getter_feature_num(); feature_id++) {
     // 1. each party compute F*[W]
     auto **feature_vector_plains = new EncodedNumber *[1];
     feature_vector_plains[0] = new EncodedNumber[num_instance];
@@ -1323,7 +1325,7 @@ void ps_get_wpcc_pre_info(const Party &party,
     // calculate F*[W], 1*1
     auto *feature_multiply_w_cipher = new EncodedNumber[1];
     djcs_t_aux_vec_mat_ep_mult(phe_pub_key,
-                               party.phe_random,
+                               ps.party.phe_random,
                                feature_multiply_w_cipher,
                                sss_weight_cipher,
                                feature_vector_plains,
@@ -1340,7 +1342,7 @@ void ps_get_wpcc_pre_info(const Party &party,
                                                                 train_data[sample_id][feature_id],
                                                                 PHE_FIXED_POINT_PRECISION);
       djcs_t_aux_encrypt(phe_pub_key,
-                         party.phe_random,
+                         ps.party.phe_random,
                          local_encrypted_feature[feature_id][sample_id],
                          local_encrypted_feature[feature_id][sample_id]);
     }
