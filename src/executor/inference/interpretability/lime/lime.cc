@@ -32,7 +32,8 @@ std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Pa
                                                                         bool sample_around_instance,
                                                                         const std::vector<double> &data_row,
                                                                         int sample_instance_num,
-                                                                        const std::string &sampling_method) {
+                                                                        const std::string &sampling_method,
+                                                                        const std::string& sample_data_file) {
   // TODO: assume features are numerical, categorical features not implemented
   int feature_num = (int) data_row.size();
   std::vector<std::vector<double>> sampled_data;
@@ -50,28 +51,61 @@ std::vector<std::vector<double>> LimeExplainer::generate_random_samples(const Pa
       }
       sampled_data.push_back(sample);
     }
+    // scale the sampled data, note that the first row is origin_data, no need to scale
+    for (int i = 0; i < sample_instance_num; i++) {
+      for (int j = 0; j < feature_num; j++) {
+        if (sample_around_instance) {
+          sampled_data[i + 1][j] = (sampled_data[i + 1][j] * (scaler->scale[j]) + data_row[j]);
+        } else {
+          sampled_data[i + 1][j] = (sampled_data[i + 1][j] * (scaler->scale[j]) + scaler->mean[j]);
+        }
+        // truncate the sampled data to fall into [0, 1] range
+        if (sampled_data[i + 1][j] <= 0) {
+          sampled_data[i + 1][j] = SMOOTHER;
+        }
+        if (sampled_data[i + 1][j] > 1.0) {
+          sampled_data[i + 1][j] = 1.0;
+        }
+      }
+    }
+  } else if (sampling_method == "kernelshap") {
+    log_info("[generate_random_samples] kernelshap sampling.");
+    // record first data row as all 1
+    std::vector<std::vector<double>> coalitions;
+    int dimension = (int) data_row.size();
+    std::vector<double> data_row_coalition;
+    for (int i = 0; i < dimension; i++) {
+      data_row_coalition.push_back(1.0);
+    }
+    coalitions.push_back(data_row_coalition);
+
+    // generate random coalitions
+    std::mt19937 mt(RANDOM_SEED);
+    for (int i = 0; i < sample_instance_num; i++) {
+      std::vector<double> coalition;
+      std::vector<double> sample;
+      // randomly generate coalitions
+      for (int j = 0; j < dimension; j++) {
+        double c = 1.0 * (double) (mt() % 2);
+        double s = c * data_row[j];
+        coalition.push_back(c);
+        sample.push_back(s);
+      }
+      coalitions.push_back(coalition);
+      sampled_data.push_back(sample);
+    }
+
+    // write the coalitions into tmp file
+    std::string tmp_file = sample_data_file + ".tmp";
+    log_info("[generate_random_samples] the coalition file is: " + tmp_file);
+    // save the generated samples
+    char delimiter = ',';
+    write_dataset_to_file(coalitions, delimiter, tmp_file);
   } else {
-    log_error("Sampling method other than gaussian is not implemented");
+    log_error("Sampling method is not implemented");
     exit(EXIT_FAILURE);
   }
 
-  // scale the sampled data, note that the first row is origin_data, no need to scale
-  for (int i = 0; i < sample_instance_num; i++) {
-    for (int j = 0; j < feature_num; j++) {
-      if (sample_around_instance) {
-        sampled_data[i + 1][j] = (sampled_data[i + 1][j] * (scaler->scale[j]) + data_row[j]);
-      } else {
-        sampled_data[i + 1][j] = (sampled_data[i + 1][j] * (scaler->scale[j]) + scaler->mean[j]);
-      }
-      // truncate the sampled data to fall into [0, 1] range
-      if (sampled_data[i + 1][j] <= 0) {
-        sampled_data[i + 1][j] = SMOOTHER;
-      }
-      if (sampled_data[i + 1][j] > 1.0) {
-        sampled_data[i + 1][j] = 1.0;
-      }
-    }
-  }
   return sampled_data;
 }
 
@@ -1240,7 +1274,8 @@ void lime_sampling(Party party, const std::string &params_str, const std::string
       sampling_params.sample_around_instance,
       data_row,
       num_total_samples,
-      sampling_params.sampling_method
+      sampling_params.sampling_method,
+      sampling_params.generated_sample_file
   );
   log_info("[lime_comp_pred] Finish generating random samples");
 

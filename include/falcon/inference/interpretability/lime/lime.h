@@ -132,6 +132,7 @@ class LimeExplainer {
    * @param data_row: if above is true, give the predicting sample
    * @param sample_instance_num: the number of samples needed to generate
    * @param sampling_method: the sampling method for generating the samples
+   * @param sample_data_file: the file to store sampled data, here use it for tmp storage
    * @return
    */
   std::vector<std::vector<double>> generate_random_samples(
@@ -140,7 +141,8 @@ class LimeExplainer {
       bool sample_around_instance = false,
       const std::vector<double>& data_row = std::vector<double>(),
       int sample_instance_num = 5000,
-      const std::string& sampling_method = "gaussian");
+      const std::string& sampling_method = "gaussian",
+      const std::string& sample_data_file = std::string());
 
   /**
    * load the vertical federated learning model and predict
