@@ -172,6 +172,7 @@ void spdz_lime_computation(int party_num,
  * PS calculate [w], [w_sum], <r>, <q2>
  * @param party
  * @param train_data
+ * @param instance_partition_vec
  * @param predictions
  * @param sss_sample_weights_share
  * @param party_local_tmp_wf
@@ -182,6 +183,7 @@ void spdz_lime_computation(int party_num,
  */
 void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
                           const vector<std::vector<double>> &train_data,
+                          const std::vector<std::vector<int>> & instance_partition_vec,
                           EncodedNumber *predictions,
                           const vector<double> &sss_sample_weights_share,
                           EncodedNumber **party_local_tmp_wf,
@@ -190,6 +192,23 @@ void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
                           std::vector<vector<double>> &two_d_e_share_vec,
                           std::vector<std::vector<double>> &two_d_sss_weights_share,
                           std::vector<double> &q2_shares);
+
+/**
+ * worker calculate wpcc pre info distributedly
+ * @param party
+ * @param sum_sss_weight_share
+ * @param instance_partition_vec
+ * @param predictions
+ * @param mean_y_cipher
+ * @param partial_e_share_vec
+ */
+void worker_calculate_wpcc_batch_pre_info(const Party& party,
+                                          int wk_index,
+                                          const std::vector<double> &sum_sss_weight_share,
+                                          const std::vector<std::vector<int>>& instance_partition_vec,
+                                          EncodedNumber* predictions,
+                                          EncodedNumber* mean_y_cipher,
+                                          std::vector<double>& partial_e_share_vec);
 
 /**
  * Worker pair calculate WPCC for all those pair's local feature.

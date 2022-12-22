@@ -158,6 +158,22 @@ std::vector<int> wpcc_feature_selection(Party party,
     // either ps and worker partition features using same logic
     int workers_size = retrieve_worker_size_from_ps_network_configs(ps_network_str);
     std::vector<std::vector<int>> partition_vec = partition_vec_evenly(global_feature_index_vec, workers_size);
+    log_info("[wpcc_feature_selection] workers_size = " + std::to_string(workers_size));
+
+    // number of instances and its partition vector
+    std::vector<int> instance_index_vec;
+    for (int index = 0; index < num_instance; index++) {
+      instance_index_vec.push_back(index);
+    }
+    std::vector<std::vector<int>> instance_partition_vec = partition_vec_evenly(instance_index_vec, workers_size);
+    // debug info
+    for (int i = 0; i < instance_partition_vec.size(); i++) {
+      log_info("partition number = " + std::to_string(instance_partition_vec.size()));
+      for (int j = 0; j < instance_partition_vec[i].size(); j++) {
+        log_info("instance_partition_vec[" + std::to_string(i) + "][" +
+          std::to_string(j) + "] = " + std::to_string(instance_partition_vec[i][j]));
+      }
+    }
 
     int total_feature_num = 0;
     for (auto &ele: feature_num_array) {
@@ -193,7 +209,7 @@ std::vector<int> wpcc_feature_selection(Party party,
 
       auto ps = new WeightedPearsonPS(party, ps_network_str);
 
-      ps_get_wpcc_pre_info(*ps, train_data, predictions, sss_sample_weights,
+      ps_get_wpcc_pre_info(*ps, train_data, instance_partition_vec, predictions, sss_sample_weights,
                            party_local_tmp_wf, sum_sss_weight_share, local_encrypted_feature,
                            two_d_e_share_vec, two_d_sss_weights_share, q2_shares);
 
@@ -309,6 +325,30 @@ std::vector<int> wpcc_feature_selection(Party party,
     if (is_distributed == 1 && distributed_role == falcon::DistWorker) {
       auto worker = new Worker(ps_network_str, worker_id);
 
+      // 0. distributed ps wpcc pre info calculation
+//      std::vector<double> sss_sample_weights_share;
+//      std::string recv_sss_sample_weights_share_str;
+//      worker->recv_long_message_from_ps(recv_sss_sample_weights_share_str);
+//      deserialize_double_array(sss_sample_weights_share, recv_sss_sample_weights_share_str);
+//      log_info("[worker] sss_sample_weights_share.size = " + std::to_string(sss_sample_weights_share.size()));
+
+      auto* mean_y_cipher = new EncodedNumber[1];
+      std::string recv_mean_y_cipher_str;
+      worker->recv_long_message_from_ps(recv_mean_y_cipher_str);
+      deserialize_encoded_number_array(mean_y_cipher, 1, recv_mean_y_cipher_str);
+
+      std::vector<double> partial_e_share_vec;
+      worker_calculate_wpcc_batch_pre_info(party, worker_id-1, sss_sample_weights,
+                                           instance_partition_vec, predictions, mean_y_cipher,
+                                           partial_e_share_vec);
+
+      // send partial e_share_vec to ps
+      std::string partial_e_share_vec_str;
+      serialize_double_array(partial_e_share_vec, partial_e_share_vec_str);
+      worker->send_long_message_to_ps(partial_e_share_vec_str);
+      log_info("[Worker-" + std::to_string(worker_id - 1) + "]: send wpcc pre info partial_e_share_vec to ps");
+
+
       log_info("[Worker-" + std::to_string(worker_id - 1) + "]: responsible for global feature id = "
                    + vec_to_str<int>(partition_vec[worker_id - 1]));
 
@@ -388,6 +428,7 @@ std::vector<int> wpcc_feature_selection(Party party,
         delete[] local_encrypted_feature[i];
       }
       delete[] local_encrypted_feature;
+      delete [] mean_y_cipher;
       delete worker;
     }
   }
@@ -1131,6 +1172,7 @@ void spdz_lime_computation(int party_num,
 
 void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
                           const vector<std::vector<double>> &train_data,
+                          const std::vector<std::vector<int>> & instance_partition_vec,
                           EncodedNumber *predictions,
                           const vector<double> &sss_sample_weights_share,
                           EncodedNumber **party_local_tmp_wf,
@@ -1221,59 +1263,34 @@ void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
   convert_cipher_to_negative(phe_pub_key, mean_y_cipher[0], mean_y_cipher_neg);
   log_info("[WPCC_PS]: 4. each party compute -[mean_y]");
 
-  // 5. calculate the (<w> * {[y] - [mean_y]}) ** 2
+  // 5. calculate the (<w> * {[y] - [mean_y]}) ** 2 in parallel on workers
+  log_info("[PS]: begin to broadcast <w>, [mean_y_cipher]");
+  // 5.1 broadcast sss weights
+//  std::string sum_sss_weight_share_str;
+//  serialize_double_array(sum_sss_weight_share, sum_sss_weight_share_str);
+//  ps.broadcast_string_to_workers(sum_sss_weight_share_str);
+//  log_info("[PS] sum_sss_weight_share.size = " + std::to_string(sum_sss_weight_share.size()));
+
+
+  // 5.2 broadcast mean_y_cipher
+  std::string mean_y_cipher_str;
+  serialize_encoded_number_array(mean_y_cipher, 1, mean_y_cipher_str);
+  ps.broadcast_string_to_workers(mean_y_cipher_str);
+
+  log_info("[PS]: broadcast <w>, [mean_y_cipher] finished");
+
+  // receive all workers' partial_e_share_vec and aggregate
   std::vector<double> e_share_vec; // N vector
-  auto *e_cipher_vec = new EncodedNumber[num_instance];
-  for (int index = 0; index < num_instance; index++) {
-    // calculate [y_i] - [mean_y_cipher]
-    EncodedNumber y_min_mean_y_cipher;
-    djcs_t_aux_ee_add_ext(phe_pub_key, y_min_mean_y_cipher, mean_y_cipher_neg, predictions[index]);
-
-    int y_min_mean_y_cipher_pre = std::abs(y_min_mean_y_cipher.getter_exponent());
-    log_info("[pearson_fl]: 5.2 calculate the [y] - [mean_y], result's precision ="
-                 + std::to_string(y_min_mean_y_cipher_pre));
-
-    // convert [y_i] - [mean_y_cipher] into two dim in form of 1*1
-    auto **two_d_mean_y_cipher_neg = new EncodedNumber *[1];
-    two_d_mean_y_cipher_neg[0] = new EncodedNumber[1];
-    two_d_mean_y_cipher_neg[0][0] = y_min_mean_y_cipher;
-
-    // init result 1*1 metrics
-    auto **sss_weight_mul_y_min_meany_cipher = new EncodedNumber *[1];
-    sss_weight_mul_y_min_meany_cipher[0] = new EncodedNumber[1];
-
-    // pick one element from two_d_sss_weights_share each time and wrapper it as two-d vector
-    std::vector<std::vector<double>> two_d_sss_weights_share_element;
-    std::vector<double> tmp_vec;
-    tmp_vec.push_back(sss_sample_weights_share[index]);
-    two_d_sss_weights_share_element.push_back(tmp_vec);
-
-    cipher_shares_mat_mul(ps.party,
-                          two_d_sss_weights_share_element,
-                          two_d_mean_y_cipher_neg, 1, 1, 1, 1,
-                          sss_weight_mul_y_min_meany_cipher);
-
-    log_info("[pearson_fl]: 5.3 convert [y_i] - [mean_y_cipher] into two dim in form of 1*1 ");
-
-    // copy result to e_cipher_vec
-    e_cipher_vec[index] = sss_weight_mul_y_min_meany_cipher[0][0];
-
-    // clear the memory
-    delete[] two_d_mean_y_cipher_neg[0];
-    delete[] two_d_mean_y_cipher_neg;
-    delete[] sss_weight_mul_y_min_meany_cipher[0];
-    delete[] sss_weight_mul_y_min_meany_cipher;
+  for (int wk_index = 0; wk_index < ps.worker_channels.size(); wk_index++) {
+    std::string recv_partial_e_share_vec_str;
+    ps.recv_long_message_from_worker(wk_index, recv_partial_e_share_vec_str);
+    std::vector<double> partial_e_share_vec;
+    deserialize_double_array(partial_e_share_vec, recv_partial_e_share_vec_str);
+    for (double v : partial_e_share_vec) {
+      e_share_vec.push_back(v);
+    }
   }
 
-  // decrypt and get es share
-  ciphers_to_secret_shares(ps.party,
-                           e_cipher_vec,
-                           e_share_vec,
-                           num_instance,
-                           ACTIVE_PARTY_ID,
-                           PHE_FIXED_POINT_PRECISION);
-
-  delete [] e_cipher_vec;
   log_info("[WPCC_PS]: 5. all done ");
 
   // after getting e, calculate q2, y_vec_min_mean_vec in form of 1*1
@@ -1373,6 +1390,86 @@ void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
 /***********************************************************/
 /***************** logic for worker ***************/
 /***********************************************************/
+
+void worker_calculate_wpcc_batch_pre_info(const Party& party,
+                                          int wk_index,
+                                          const std::vector<double> &sss_sample_weights_share,
+                                          const std::vector<std::vector<int>>& instance_partition_vec,
+                                          EncodedNumber* predictions,
+                                          EncodedNumber* mean_y_cipher,
+                                          std::vector<double>& partial_e_share_vec) {
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
+  party.getter_phe_pub_key(phe_pub_key);
+
+  log_info("[worker] wk_index = " + std::to_string(wk_index));
+
+  // 1 calculate the (<w> * {[y] - [mean_y]}) ** 2
+  EncodedNumber mean_y_cipher_neg;
+  convert_cipher_to_negative(phe_pub_key, mean_y_cipher[0], mean_y_cipher_neg);
+  log_info("[worker]: each party compute -[mean_y]");
+
+  int worker_num_instance = (int) instance_partition_vec[wk_index].size();
+  log_info("[worker]: worker_num_instance = " + std::to_string(worker_num_instance));
+
+  std::vector<double> e_share_vec; // N vector
+  auto *e_cipher_vec = new EncodedNumber[worker_num_instance];
+  for (int index = 0; index < worker_num_instance; index++) {
+    // calculate [y_i] - [mean_y_cipher]
+    EncodedNumber y_min_mean_y_cipher;
+    djcs_t_aux_ee_add_ext(phe_pub_key, y_min_mean_y_cipher,
+                          mean_y_cipher_neg, predictions[instance_partition_vec[wk_index][index]]);
+
+    int y_min_mean_y_cipher_pre = std::abs(y_min_mean_y_cipher.getter_exponent());
+    log_info("[pearson_fl]: calculate the [y] - [mean_y], result's precision ="
+                 + std::to_string(y_min_mean_y_cipher_pre));
+
+    // convert [y_i] - [mean_y_cipher] into two dim in form of 1*1
+    auto **two_d_mean_y_cipher_neg = new EncodedNumber *[1];
+    two_d_mean_y_cipher_neg[0] = new EncodedNumber[1];
+    two_d_mean_y_cipher_neg[0][0] = y_min_mean_y_cipher;
+
+    // init result 1*1 metrics
+    auto **sss_weight_mul_y_min_meany_cipher = new EncodedNumber *[1];
+    sss_weight_mul_y_min_meany_cipher[0] = new EncodedNumber[1];
+
+    // pick one element from two_d_sss_weights_share each time and wrapper it as two-d vector
+    std::vector<std::vector<double>> two_d_sss_weights_share_element;
+    std::vector<double> tmp_vec;
+    log_info("[worker] sss_sample_weights_share.size = " + std::to_string(sss_sample_weights_share.size()));
+    log_info("[worker] instance_partition_vec[" + std::to_string(wk_index) + "]["
+      + std::to_string(index) + "] = " + std::to_string(instance_partition_vec[wk_index][index]));
+    tmp_vec.push_back(sss_sample_weights_share[instance_partition_vec[wk_index][index]]);
+    two_d_sss_weights_share_element.push_back(tmp_vec);
+
+    cipher_shares_mat_mul(party,
+                          two_d_sss_weights_share_element,
+                          two_d_mean_y_cipher_neg, 1, 1, 1, 1,
+                          sss_weight_mul_y_min_meany_cipher);
+
+    log_info("[pearson_fl]: 5.3 convert [y_i] - [mean_y_cipher] into two dim in form of 1*1 ");
+
+    // copy result to e_cipher_vec
+    e_cipher_vec[index] = sss_weight_mul_y_min_meany_cipher[0][0];
+
+    // clear the memory
+    delete[] two_d_mean_y_cipher_neg[0];
+    delete[] two_d_mean_y_cipher_neg;
+    delete[] sss_weight_mul_y_min_meany_cipher[0];
+    delete[] sss_weight_mul_y_min_meany_cipher;
+  }
+
+  // decrypt and get es share
+  ciphers_to_secret_shares(party,
+                           e_cipher_vec,
+                           e_share_vec,
+                           worker_num_instance,
+                           ACTIVE_PARTY_ID,
+                           PHE_FIXED_POINT_PRECISION);
+  partial_e_share_vec = e_share_vec;
+
+  delete [] e_cipher_vec;
+  djcs_t_free_public_key(phe_pub_key);
+}
 
 void worker_calculate_wpcc_per_feature(const Party &party,
                                        const vector<std::vector<double>> &train_data,
