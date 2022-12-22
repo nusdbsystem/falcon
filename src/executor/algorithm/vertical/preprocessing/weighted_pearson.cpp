@@ -108,11 +108,11 @@ std::vector<int> wpcc_feature_selection(Party party,
                                     party_id_loop_ups,
                                     party_feature_id_look_ups);
 
-    get_local_features_correlations_plaintext(party, feature_num_array, train_data, predictions,
-                                              sss_sample_weights,
-                                              feature_wpcc_share_vec,
-                                              party_id_loop_ups,
-                                              party_feature_id_look_ups);
+//    get_local_features_correlations_plaintext(party, feature_num_array, train_data, predictions,
+//                                              sss_sample_weights,
+//                                              feature_wpcc_share_vec,
+//                                              party_id_loop_ups,
+//                                              party_feature_id_look_ups);
 
     log_info("[wpcc_feature_selection]: 1. Get all features importance done ! Begin to jointly find top K");
 
@@ -487,8 +487,8 @@ void get_local_features_correlations(const Party &party,
   djcs_t_aux_encrypt(phe_pub_key, party.phe_random, sum_sss_weight_cipher_num, sum_sss_weight_cipher_num);
 
   for (int i = 0; i < num_instance; i++) {
-    log_info("Debug: exp of the weight number = " + std::to_string(i) + " is "
-                 + std::to_string(sss_weight_cipher[i].getter_exponent()));
+//    log_info("Debug: exp of the weight number = " + std::to_string(i) + " is "
+//                 + std::to_string(sss_weight_cipher[i].getter_exponent()));
     djcs_t_aux_ee_add(phe_pub_key, sum_sss_weight_cipher_num, sum_sss_weight_cipher_num, sss_weight_cipher[i]);
   }
   // convert to 1d array

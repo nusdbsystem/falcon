@@ -13,6 +13,7 @@
 #include <numeric>
 #include <falcon/utils/math/math_ops.h>
 #include <queue>
+#include <falcon/utils/logger/logger.h>
 
 inline void check_vectors(std::vector<double> a, std::vector<double> b,
                           const std::vector<double> &weights) {
@@ -306,7 +307,8 @@ std::vector<int> index_of_top_k_in_vector(std::vector<double> vMetric, int K) {
 
 std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbers, int num_partition) {
 
-  int partition_size = static_cast<int>(std::ceil(numbers.size() / num_partition ));
+  int partition_size = static_cast<int>(std::ceil((double) numbers.size() / (double) num_partition ));
+  log_info("[partition_vec_evenly] partition_size = " + std::to_string(partition_size));
 
   // Create a vector to hold the partitions
   std::vector<std::vector<int>> partitions;
