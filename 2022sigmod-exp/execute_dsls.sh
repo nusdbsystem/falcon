@@ -5,7 +5,7 @@
 set -e
 
 # go to falcon_platform dir
-# cd /opt/falcon/2022sigmod-exp
+# cd /opt/falcon/src/falcon_platform/
 # ./3party/DSLs
 
 # execute all dsls in this dir.
@@ -40,10 +40,9 @@ do
 
   sleep 3
   echo "Now, $jobID finished, rm it's services and begin to execute the next dsl ..... "
-#  bash docker_rm_job.sh $jobID
+  bash docker_rm_job.sh $jobID
   sleep 3
 
 done
 
 echo " All Job Done !"
-

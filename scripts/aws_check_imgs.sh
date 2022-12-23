@@ -2,15 +2,15 @@
 #!/bin/bash
 
 echo "----- p0w0 -----"
-echo "$(ssh -i "/home/wuyuncheng/sigmod23-aws/aws-ec2-ssh-falcon.pem" ubuntu@ec2-107-23-187-2.compute-1.amazonaws.com "docker images lemonwyc/falcon:latest")"
+echo "$(ssh -i "/home/wuyuncheng/sigmod23-aws/aws-ec2-ssh-falcon.pem" ubuntu@ec2-3-91-16-69.compute-1.amazonaws.com "docker images lemonwyc/falcon:latest")"
 echo " "
 
 echo "-----p1w0 -----"
-echo "$(ssh -i "/home/wuyuncheng/sigmod23-aws/aws-ec2-ssh-falcon.pem" ubuntu@ec2-3-80-22-114.compute-1.amazonaws.com "docker images lemonwyc/falcon:latest")"
+echo "$(ssh -i "/home/wuyuncheng/sigmod23-aws/aws-ec2-ssh-falcon.pem" ubuntu@ec2-54-164-50-149.compute-1.amazonaws.com "docker images lemonwyc/falcon:latest")"
 echo " "
 
 echo "----- p2w0 -----"
-echo "$(ssh -i "/home/wuyuncheng/sigmod23-aws/aws-ec2-ssh-falcon.pem" ubuntu@ec2-34-224-78-199.compute-1.amazonaws.com "docker images lemonwyc/falcon:latest")"
+echo "$(ssh -i "/home/wuyuncheng/sigmod23-aws/aws-ec2-ssh-falcon.pem" ubuntu@ec2-18-215-154-119.compute-1.amazonaws.com "docker images lemonwyc/falcon:latest")"
 echo " "
 
 echo "----- p0w1 -----"

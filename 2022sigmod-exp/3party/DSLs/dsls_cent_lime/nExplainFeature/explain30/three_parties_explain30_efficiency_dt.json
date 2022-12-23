@@ -18,7 +18,7 @@
     },
     {
       "id": 1,
-      "addr": "172.31.27.127:30006",
+      "addr": "172.31.16.239:30006",
       "party_type": "passive",
       "path": {
         "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party1/data/synthetic_lime/nClass/nclass2",
@@ -28,7 +28,7 @@
     },
     {
       "id": 2,
-      "addr": "172.31.28.225:30007",
+      "addr": "172.31.17.121:30007",
       "party_type": "passive",
       "path": {
         "data_input": "/mnt/efs/fs1/2022sigmod-exp/3party/party2/data/synthetic_lime/nClass/nclass2",
@@ -72,7 +72,7 @@
       }
     },
     "lime_feature": {
-      "mpc_algorithm_name": "linear_regression",
+      "mpc_algorithm_name": "lime",
       "algorithm_name": "lime_feature_selection",
       "input_configs": {
         "data_input": {
@@ -86,21 +86,7 @@
           "num_samples": 4000,
           "class_num": 2,
           "class_id": 0,
-          "feature_selection": "linear_regression",
-          "feature_selection_param": {
-            "batch_size": 128,
-            "max_iteration": 32,
-            "convergence_threshold": 0.0001,
-            "with_regularization": true,
-            "alpha": 0.1,
-            "learning_rate": 0.1,
-            "decay": 0.1,
-            "penalty": "l2",
-            "optimizer": "sgd",
-            "metric": "mse",
-            "differential_privacy_budget": 0.1,
-            "fit_bias": true
-          },
+          "feature_selection": "pearson_correlation",
           "num_explained_features": 30,
           "selected_features_file": "/selected_features_synthesis_nclass2_nfeaturepaty20_nparty3_nsample4000_party.csv"
         }
