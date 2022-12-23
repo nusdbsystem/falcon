@@ -383,16 +383,17 @@ void LimeExplainer::compute_dist_weights(const Party &party,
   if (kernel == "exponential") {
     //  2. parties aggregate and convert to secret shares
     log_info("[compute_dist_weights]: begin to compute square dist.");
-    auto *squared_dist = new EncodedNumber[sample_size];
-    compute_squared_dist(party, origin_data, sampled_data, squared_dist);
+//    auto *squared_dist = new EncodedNumber[sample_size];
+    std::vector<double> squared_dist_shares = compute_squared_dist(party, origin_data, sampled_data);
     log_info("[compute_dist_weights]: finish to compute square dist.");
-    std::vector<double> squared_dist_shares;
-    ciphers_to_secret_shares(party, squared_dist,
-                             squared_dist_shares,
-                             sample_size,
-                             ACTIVE_PARTY_ID,
-                             PHE_FIXED_POINT_PRECISION);
-    log_info("[compute_dist_weights]: compute encrypted distance finished");
+
+//    std::vector<double> squared_dist_shares;
+//    ciphers_to_secret_shares(party, squared_dist,
+//                             squared_dist_shares,
+//                             sample_size,
+//                             ACTIVE_PARTY_ID,
+//                             PHE_FIXED_POINT_PRECISION);
+//    log_info("[compute_dist_weights]: compute encrypted distance finished");
 
     //  3. parties compute kernel width (replace the input one by default now -- let spdz compute)
     // kernel_width = std::sqrt(total_feature_size) * 0.75;
@@ -421,7 +422,7 @@ void LimeExplainer::compute_dist_weights(const Party &party,
     spdz_dist_weights.join();
     log_info("[compute_dist_weights]: communicate with spdz finished");
     log_info("[compute_dist_weights]: res.size = " + std::to_string(res.size()));
-    delete[] squared_dist;
+//    delete[] squared_dist;
   }
 
   if (kernel == "kernelshap") {
@@ -469,10 +470,9 @@ void LimeExplainer::compute_dist_weights(const Party &party,
   log_info("[compute_dist_weights]: shares to ciphers finished");
 }
 
-void LimeExplainer::compute_squared_dist(const Party &party,
+std::vector<double> LimeExplainer::compute_squared_dist(const Party &party,
                                          const std::vector<double> &origin_data,
-                                         const std::vector<std::vector<double>> &sampled_data,
-                                         EncodedNumber *squared_dist) {
+                                         const std::vector<std::vector<double>> &sampled_data) {
   int sample_size = (int) sampled_data.size();
   log_info("[compute_squared_dist]: sample_size = " + std::to_string(sample_size));
   std::vector<double> local_squared_sum;
@@ -481,6 +481,9 @@ void LimeExplainer::compute_squared_dist(const Party &party,
     local_squared_sum.push_back(ss);
   }
 
+  return local_squared_sum;
+  // 20221223: no need to do the following, just return the local_squared_sum and provide to mpc
+  /*
   djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
@@ -529,6 +532,7 @@ void LimeExplainer::compute_squared_dist(const Party &party,
 
   delete[] local_squared_dist;
   djcs_t_free_public_key(phe_pub_key);
+  */
 }
 
 void LimeExplainer::select_features(Party party,

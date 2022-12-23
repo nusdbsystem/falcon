@@ -242,10 +242,9 @@ class LimeExplainer {
    * @param sampled_data: the sampled data
    * @param squared_dist: the returned squared distances
    */
-  void compute_squared_dist(const Party& party,
+  std::vector<double> compute_squared_dist(const Party& party,
                             const std::vector<double>& origin_data,
-                            const std::vector<std::vector<double>>& sampled_data,
-                            EncodedNumber* squared_dist);
+                            const std::vector<std::vector<double>>& sampled_data);
 
   /**
    * This function selects num_explained_features for training
