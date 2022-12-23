@@ -203,6 +203,9 @@ void MlpBuilder::backward_computation(
     bias_grads[l] = new EncodedNumber[l_num_outputs];
   }
 
+  struct timespec backward_last_layer_start;
+  clock_gettime(CLOCK_MONOTONIC, &backward_last_layer_start);
+
   // 1. compute the last layer's delta, dim = (n_samples, n_outputs)
   // if the activation function of the output layer matches the loss function
   // the deltas of the last layer is [activation_output - y] for each sample in the batch
@@ -224,8 +227,16 @@ void MlpBuilder::backward_computation(
                     weight_grads,
                     bias_grads);
 
+  struct timespec backward_last_layer_finish;
+  clock_gettime(CLOCK_MONOTONIC, &backward_last_layer_finish);
+  double last_layer_consumed_time = (double) (backward_last_layer_finish.tv_sec - backward_last_layer_start.tv_sec);
+  last_layer_consumed_time += (double) (backward_last_layer_finish.tv_nsec - backward_last_layer_start.tv_nsec) / 1000000000.0;
+  log_info("-------- The last layer backward consumed time = " + std::to_string(last_layer_consumed_time));
+
   // 3. back-propagate until reach the first hidden layer
   for (int l_idx = mlp_model.m_n_layers - 2; l_idx > 0; l_idx--) {
+    struct timespec backward_layer_start;
+    clock_gettime(CLOCK_MONOTONIC, &backward_layer_start);
     // while the rest of the hidden layers needs to multiply the derivative of activation shares
     // 3.1 update delta for (l - 1) layer
     log_info("[backward_computation] l_idx = " + std::to_string(l_idx));
@@ -247,6 +258,13 @@ void MlpBuilder::backward_computation(
                       weight_grads,
                       bias_grads);
     log_info("[backward_computation] compute_loss_grad finished");
+
+    struct timespec backward_layer_finish;
+    clock_gettime(CLOCK_MONOTONIC, &backward_layer_finish);
+    double layer_consumed_time = (double) (backward_layer_finish.tv_sec - backward_layer_start.tv_sec);
+    layer_consumed_time += (double) (backward_layer_finish.tv_nsec - backward_layer_start.tv_nsec) / 1000000000.0;
+    log_info("-------- The " + std::to_string(l_idx) + "-th "
+                                                       "layer backward consumed time = " + std::to_string(layer_consumed_time));
   }
 
   // 4. update the weights of each neuron in each layer
@@ -1103,6 +1121,13 @@ void MlpBuilder::train(Party party) {
     int encry_agg_precision = encry_weights_prec + plain_samples_prec;
     log_info("[train] encry_agg_precision is: " + std::to_string(encry_agg_precision));
     log_info("[train] mlp_model.m_n_layers = " + std::to_string(mlp_model.m_n_layers));
+
+    struct timespec iter_init;
+    clock_gettime(CLOCK_MONOTONIC, &iter_init);
+    double iter_init_consumed_time = (double) (iter_init.tv_sec - iter_start.tv_sec);
+    iter_init_consumed_time += (double) (iter_init.tv_nsec - iter_start.tv_nsec) / 1000000000.0;
+    log_info("-------- The " + std::to_string(iter) + "-th "
+                                                      "iteration init time = " + std::to_string(iter_init_consumed_time));
     mlp_model.forward_computation(
         party,
         cur_sample_size,
@@ -1115,6 +1140,13 @@ void MlpBuilder::train(Party party) {
       + ", forward computation success --------");
     log_info("[train] predicted_labels' precision is: "
       + std::to_string(abs(predicted_labels[0][0].getter_exponent())));
+
+    struct timespec iter_forward;
+    clock_gettime(CLOCK_MONOTONIC, &iter_forward);
+    double iter_forward_consumed_time = (double) (iter_forward.tv_sec - iter_init.tv_sec);
+    iter_forward_consumed_time += (double) (iter_forward.tv_nsec - iter_init.tv_nsec) / 1000000000.0;
+    log_info("-------- The " + std::to_string(iter) + "-th "
+                                                      "iteration forward consumed time = " + std::to_string(iter_forward_consumed_time));
 
     // step 2.5: backward propagation and update weights
     backward_computation(
@@ -1131,6 +1163,12 @@ void MlpBuilder::train(Party party) {
 
     struct timespec iter_finish;
     clock_gettime(CLOCK_MONOTONIC, &iter_finish);
+
+    double iter_backward_time = (double) (iter_finish.tv_sec - iter_forward.tv_sec);
+    iter_backward_time += (double) (iter_finish.tv_nsec - iter_forward.tv_nsec) / 1000000000.0;
+    log_info("-------- The " + std::to_string(iter) + "-th "
+                                                      "iteration backward time = " + std::to_string(iter_backward_time));
+
     double iter_consumed_time = (double) (iter_finish.tv_sec - iter_start.tv_sec);
     iter_consumed_time += (double) (iter_finish.tv_nsec - iter_start.tv_nsec) / 1000000000.0;
     log_info("-------- The " + std::to_string(iter) + "-th "

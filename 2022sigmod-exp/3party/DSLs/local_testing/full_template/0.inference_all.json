@@ -115,7 +115,7 @@
       }
     },
     "lime_feature": {
-      "mpc_algorithm_name": "linear_regression",
+      "mpc_algorithm_name": "lime",
       "algorithm_name": "lime_feature_selection",
       "input_configs": {
         "data_input": {
@@ -129,7 +129,7 @@
           "num_samples": 10,
           "class_num": 2,
           "class_id": 0,
-          "feature_selection": "linear_regression",
+          "feature_selection": "pearson_correlation",
           "num_explained_features": 10,
           "selected_features_file": "/log_reg/selected_feature_data.txt"
         }

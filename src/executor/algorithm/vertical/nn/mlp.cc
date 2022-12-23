@@ -255,6 +255,9 @@ void MlpModel::forward_computation(const Party &party,
   // format: (layer, idx_in_batch, neuron_idx)
   for (int l_idx = 0; l_idx < m_n_layers - 1; l_idx++) {
     log_info("---------- [forward_computation]: compute layer " + std::to_string(l_idx) + "-----------");
+    struct timespec forward_layer_start;
+    clock_gettime(CLOCK_MONOTONIC, &forward_layer_start);
+
 //    log_info("[forward_computation] display m_weight_mat");
 //    display_encrypted_matrix(party, m_layers[l_idx].m_num_inputs, m_layers[l_idx].m_num_outputs, m_layers[l_idx].m_weight_mat);
 //    log_info("[forward_computation] display m_bias");
@@ -345,6 +348,13 @@ void MlpModel::forward_computation(const Party &party,
 
 //    log_info("[forward_computation] display activation shares for layer " + std::to_string(l_idx));
 //    display_shares_matrix(party, layer_act_outputs_shares);
+
+    struct timespec forward_layer_finish;
+    clock_gettime(CLOCK_MONOTONIC, &forward_layer_finish);
+    double layer_consumed_time = (double) (forward_layer_finish.tv_sec - forward_layer_start.tv_sec);
+    layer_consumed_time += (double) (forward_layer_finish.tv_nsec - forward_layer_start.tv_nsec) / 1000000000.0;
+    log_info("-------- The " + std::to_string(l_idx) + "-th "
+                                                      "layer forward consumed time = " + std::to_string(layer_consumed_time));
 
     for (int i = 0; i < cur_batch_size; i++) {
       delete [] cur_layer_enc_outputs[i];
