@@ -9,6 +9,7 @@
 #include <future>
 #include <cmath>
 #include <falcon/utils/io_util.h>
+#include <omp.h>
 
 void convert_cipher_to_negative(
     djcs_t_public_key *phe_pub_key,
@@ -529,14 +530,15 @@ void get_local_features_correlations(const Party &party,
 
   // 5. calculate the (<w> * {[y] - [mean_y]}) ** 2
   std::vector<double> e_share_vec; // N vector
+  auto *e_cipher_vec = new EncodedNumber[num_instance];
   for (int index = 0; index < num_instance; index++) {
     // calculate [y_i] - [mean_y_cipher]
     EncodedNumber y_min_mean_y_cipher;
     djcs_t_aux_ee_add_ext(phe_pub_key, y_min_mean_y_cipher, mean_y_cipher_neg, predictions[index]);
 
     int y_min_mean_y_cipher_pre = std::abs(y_min_mean_y_cipher.getter_exponent());
-    log_info("[pearson_fl]: 5.2 calculate the [y] - [mean_y], result's precision ="
-                 + std::to_string(y_min_mean_y_cipher_pre));
+//    log_info("[pearson_fl]: 5.2 calculate the [y] - [mean_y], result's precision ="
+//                 + std::to_string(y_min_mean_y_cipher_pre));
 
     // convert [y_i] - [mean_y_cipher] into two dim in form of 1*1
     auto **two_d_mean_y_cipher_neg = new EncodedNumber *[1];
@@ -558,17 +560,20 @@ void get_local_features_correlations(const Party &party,
                           two_d_mean_y_cipher_neg, 1, 1, 1, 1,
                           sss_weight_mul_y_min_meany_cipher);
 
-    log_info("[pearson_fl]: 5.3 convert [y_i] - [mean_y_cipher] into two dim in form of 1*1 ");
+//    log_info("[pearson_fl]: 5.3 convert [y_i] - [mean_y_cipher] into two dim in form of 1*1 ");
 
-    // get es share
-    std::vector<double> es_share;
-    ciphers_to_secret_shares(party,
-                             sss_weight_mul_y_min_meany_cipher[0],
-                             es_share,
-                             1,
-                             ACTIVE_PARTY_ID,
-                             PHE_FIXED_POINT_PRECISION);
-    e_share_vec.push_back(es_share[0]);
+    // copy result to e_cipher_vec
+    e_cipher_vec[index] = sss_weight_mul_y_min_meany_cipher[0][0];
+
+//    // get es share
+//    std::vector<double> es_share;
+//    ciphers_to_secret_shares(party,
+//                             sss_weight_mul_y_min_meany_cipher[0],
+//                             es_share,
+//                             1,
+//                             ACTIVE_PARTY_ID,
+//                             PHE_FIXED_POINT_PRECISION);
+//    e_share_vec.push_back(es_share[0]);
 
     // clear the memory
     delete[] two_d_mean_y_cipher_neg[0];
@@ -576,6 +581,14 @@ void get_local_features_correlations(const Party &party,
     delete[] sss_weight_mul_y_min_meany_cipher[0];
     delete[] sss_weight_mul_y_min_meany_cipher;
   }
+
+  // decrypt and get es share
+  ciphers_to_secret_shares(party,
+                           e_cipher_vec,
+                           e_share_vec,
+                           num_instance,
+                           ACTIVE_PARTY_ID,
+                           PHE_FIXED_POINT_PRECISION);
 
   log_info("[pearson_fl]: 5. all done ");
 
@@ -629,29 +642,33 @@ void get_local_features_correlations(const Party &party,
   }
 
   // party compute in parallel,
+  int local_feature_num = party.getter_feature_num();
+  auto **feature_vector_plains = new EncodedNumber*[local_feature_num];
+  auto *feature_multiply_w_cipher = new EncodedNumber*[local_feature_num];
+  for (int feature_id = 0; feature_id < local_feature_num; feature_id++) {
+    feature_vector_plains[feature_id] = new EncodedNumber[num_instance];
+    feature_multiply_w_cipher[feature_id] = new EncodedNumber[1];
+  }
+
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
   for (int feature_id = 0; feature_id < party.getter_feature_num(); feature_id++) {
     // 1. each party compute F*[W]
-    auto **feature_vector_plains = new EncodedNumber *[1];
-    feature_vector_plains[0] = new EncodedNumber[num_instance];
     for (int sample_id = 0; sample_id < num_instance; sample_id++) {
       // assign value
-      feature_vector_plains[0][sample_id].set_double(phe_pub_key->n[0],
-                                                     train_data[sample_id][feature_id],
-                                                     PHE_FIXED_POINT_PRECISION);
+      feature_vector_plains[feature_id][sample_id].set_double(phe_pub_key->n[0],
+                                                              train_data[sample_id][feature_id],
+                                                              PHE_FIXED_POINT_PRECISION);
     }
     // calculate F*[W], 1*1
-    auto *feature_multiply_w_cipher = new EncodedNumber[1];
     djcs_t_aux_vec_mat_ep_mult(phe_pub_key,
                                party.phe_random,
-                               feature_multiply_w_cipher,
+                               feature_multiply_w_cipher[feature_id],
                                sss_weight_cipher,
                                feature_vector_plains,
                                1,
                                num_instance);
-    party_local_tmp_wf[feature_id][0] = feature_multiply_w_cipher[0];
-    delete[] feature_vector_plains[0];
-    delete[] feature_vector_plains;
-    delete[] feature_multiply_w_cipher;
+    party_local_tmp_wf[feature_id][0] = feature_multiply_w_cipher[feature_id][0];
 
     // each party also encrypt the feature vector first
     for (int sample_id = 0; sample_id < num_instance; sample_id++) {
@@ -663,14 +680,24 @@ void get_local_features_correlations(const Party &party,
                          local_encrypted_feature[feature_id][sample_id],
                          local_encrypted_feature[feature_id][sample_id]);
     }
-
   }
+
+
+  for (int feature_id = 0; feature_id < local_feature_num; feature_id++) {
+    delete [] feature_vector_plains[feature_id];
+    delete [] feature_multiply_w_cipher[feature_id];
+  }
+  delete[] feature_vector_plains;
+  delete[] feature_multiply_w_cipher;
+
   log_info("[pearson_fl]: 8. each party compute F*[W] in parallel done");
 
+#ifdef SAVE_BASELINE
   std::vector<double> debug_vec_p;
   std::vector<double> debug_vec_q1;
   std::vector<double> debug_vec_q2;
   std::vector<double> debug_vec_wpcc;
+#endif
 
   // 1. calculate local feature mean
   for (int party_id = 0; party_id < party.party_num; party_id++) {
@@ -798,6 +825,7 @@ void get_local_features_correlations(const Party &party,
       // all parties jointly calculate  WPCC share, wpcc = <p> / (<q1> * <q2>) for this features
       double one_wpcc_share = compute_wpcc(party, p_shares[0], q1_shares[0], q2_shares[0]);
 
+#ifdef SAVE_BASELINE
       // debug p, q1, q2
       std::vector<double> p_plain_double;
       secret_shares_to_plain_double(party, p_plain_double, p_shares, 1,
@@ -819,6 +847,7 @@ void get_local_features_correlations(const Party &party,
       debug_vec_q1.push_back(q1_plain_double[0]);
       debug_vec_q2.push_back(q2_plain_double[0]);
       debug_vec_wpcc.push_back(wpcc_plain_double[0]);
+#endif
 
       wpcc_vec.push_back(one_wpcc_share);
       party_id_loop_ups.push_back(party_id);
@@ -845,6 +874,7 @@ void get_local_features_correlations(const Party &party,
 
   djcs_t_free_public_key(phe_pub_key);
 
+#ifdef SAVE_BASELINE
   for (int feature_indx = 0; feature_indx < debug_vec_p.size(); feature_indx++) {
     log_info("[wpcc_plaintext]: Debug, system decryption. feature index = " + std::to_string(feature_indx)
                  + " wpcc = " + std::to_string(debug_vec_wpcc[feature_indx])
@@ -853,6 +883,7 @@ void get_local_features_correlations(const Party &party,
                  + " q2 = " + std::to_string(debug_vec_q2[feature_indx])
     );
   }
+#endif
 
   log_info("[pearson_fl]: 10. All done, begin to clear the memory");
 
@@ -1427,8 +1458,8 @@ void worker_calculate_wpcc_batch_pre_info(const Party& party,
                           mean_y_cipher_neg, predictions[instance_partition_vec[wk_index][index]]);
 
     int y_min_mean_y_cipher_pre = std::abs(y_min_mean_y_cipher.getter_exponent());
-    log_info("[pearson_fl]: calculate the [y] - [mean_y], result's precision ="
-                 + std::to_string(y_min_mean_y_cipher_pre));
+//    log_info("[pearson_fl]: calculate the [y] - [mean_y], result's precision ="
+//                 + std::to_string(y_min_mean_y_cipher_pre));
 
     // convert [y_i] - [mean_y_cipher] into two dim in form of 1*1
     auto **two_d_mean_y_cipher_neg = new EncodedNumber *[1];
@@ -1442,9 +1473,9 @@ void worker_calculate_wpcc_batch_pre_info(const Party& party,
     // pick one element from two_d_sss_weights_share each time and wrapper it as two-d vector
     std::vector<std::vector<double>> two_d_sss_weights_share_element;
     std::vector<double> tmp_vec;
-    log_info("[worker] sss_sample_weights_share.size = " + std::to_string(sss_sample_weights_share.size()));
-    log_info("[worker] instance_partition_vec[" + std::to_string(wk_index) + "]["
-      + std::to_string(index) + "] = " + std::to_string(instance_partition_vec[wk_index][index]));
+//    log_info("[worker] sss_sample_weights_share.size = " + std::to_string(sss_sample_weights_share.size()));
+//    log_info("[worker] instance_partition_vec[" + std::to_string(wk_index) + "]["
+//      + std::to_string(index) + "] = " + std::to_string(instance_partition_vec[wk_index][index]));
     tmp_vec.push_back(sss_sample_weights_share[instance_partition_vec[wk_index][index]]);
     two_d_sss_weights_share_element.push_back(tmp_vec);
 
@@ -1453,7 +1484,7 @@ void worker_calculate_wpcc_batch_pre_info(const Party& party,
                           two_d_mean_y_cipher_neg, 1, 1, 1, 1,
                           sss_weight_mul_y_min_meany_cipher);
 
-    log_info("[pearson_fl]: 5.3 convert [y_i] - [mean_y_cipher] into two dim in form of 1*1 ");
+//    log_info("[pearson_fl]: 5.3 convert [y_i] - [mean_y_cipher] into two dim in form of 1*1 ");
 
     // copy result to e_cipher_vec
     e_cipher_vec[index] = sss_weight_mul_y_min_meany_cipher[0][0];
@@ -1473,6 +1504,8 @@ void worker_calculate_wpcc_batch_pre_info(const Party& party,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
   partial_e_share_vec = e_share_vec;
+
+  log_info("[pearson_fl]: 6. decrypt finished.");
 
   delete [] e_cipher_vec;
   djcs_t_free_public_key(phe_pub_key);
