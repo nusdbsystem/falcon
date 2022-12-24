@@ -303,7 +303,10 @@ WORKDIR /opt/falcon/third_party/MP-SPDZ
 RUN Scripts/setup-online.sh 3 128 128 && \
     Scripts/setup-clients.sh 3 && \
     Scripts/setup-ssl.sh 3 128 128 && \
-    c_rehash Player-Data/
+    c_rehash Player-Data/ && \
+    git pull && \
+    git log --oneline -2 && \
+    ./compile.py Programs/Source/lime.mpc
 
 # # every-time the code (e,g. lime.mpc) have been changed, re-compiled it here.
 # WORKDIR /opt/falcon/third_party/MP-SPDZ

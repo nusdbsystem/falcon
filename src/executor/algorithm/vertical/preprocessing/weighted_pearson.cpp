@@ -817,31 +817,55 @@ void get_local_features_correlations(const Party &party,
   int start_global_idx = start_global_idx_vec[party.party_id];
   log_info("[pearson_fl]: start_global_idx = " + std::to_string(start_global_idx));
 
+
+  auto **squared_feature_value_cipher_mat = new EncodedNumber*[num_instance];
+  auto **middle_value_mat = new EncodedNumber*[num_instance];
+  auto **neg_2f_mat = new EncodedNumber*[num_instance];
+  auto **tmp_vec_ele_mat = new EncodedNumber*[num_instance];
+  for (int i = 0; i < num_instance; i++) {
+    squared_feature_value_cipher_mat[i] = new EncodedNumber[party.getter_feature_num()];
+    middle_value_mat[i] = new EncodedNumber[party.getter_feature_num()];
+    neg_2f_mat[i] = new EncodedNumber[party.getter_feature_num()];
+    tmp_vec_ele_mat[i] = new EncodedNumber[party.getter_feature_num()];
+  }
+
   omp_set_num_threads(NUM_OMP_THREADS);
 #pragma omp parallel for
   for (int feature_id = 0; feature_id < party.getter_feature_num(); feature_id++) {
     for (int i = 0; i < num_instance; i++) {
       // calculate [f**2]
-      EncodedNumber squared_feature_value_cipher;
-      squared_feature_value_cipher.set_double(phe_pub_key->n[0],
+      // EncodedNumber squared_feature_value_cipher;
+      squared_feature_value_cipher_mat[i][feature_id].set_double(phe_pub_key->n[0],
                                               train_data[i][feature_id] * train_data[i][feature_id],
                                               PHE_FIXED_POINT_PRECISION * PHE_FIXED_POINT_PRECISION);
-      djcs_t_aux_encrypt(phe_pub_key, party.phe_random, squared_feature_value_cipher, squared_feature_value_cipher);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random, squared_feature_value_cipher_mat[i][feature_id], squared_feature_value_cipher_mat[i][feature_id]);
 
       // calculate -2f*[mean_f]`
-      EncodedNumber middle_value;
-      EncodedNumber neg_2f;
-      neg_2f.set_double(phe_pub_key->n[0], -2 * train_data[i][feature_id],
+      // EncodedNumber middle_value;
+      // EncodedNumber neg_2f;
+      neg_2f_mat[i][feature_id].set_double(phe_pub_key->n[0], -2 * train_data[i][feature_id],
                         abs(mean_f_cipher_vec[start_global_idx+feature_id].getter_exponent()));
-      djcs_t_aux_ep_mul(phe_pub_key, middle_value, mean_f_cipher_vec[start_global_idx+feature_id], neg_2f);
+      djcs_t_aux_ep_mul(phe_pub_key, middle_value_mat[i][feature_id], mean_f_cipher_vec[start_global_idx+feature_id], neg_2f_mat[i][feature_id]);
 
       // calculate [f_j]**2 + -2f_j*[mean_F] + [mean_F]**2
-      EncodedNumber tmp_vec_ele;
-      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele, squared_feature_value_cipher, middle_value);
-      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele, tmp_vec_ele, squared_mean_f_cipher_vec[start_global_idx+feature_id]);
-      tmp_vec_cipher[i][start_global_idx+feature_id] = tmp_vec_ele;
+      // EncodedNumber tmp_vec_ele;
+      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele_mat[i][feature_id], squared_feature_value_cipher_mat[i][feature_id], middle_value_mat[i][feature_id]);
+      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele_mat[i][feature_id], tmp_vec_ele_mat[i][feature_id], squared_mean_f_cipher_vec[start_global_idx+feature_id]);
+      tmp_vec_cipher[i][start_global_idx+feature_id] = tmp_vec_ele_mat[i][feature_id];
     }
   }
+
+  for (int i = 0; i < num_instance; i++) {
+    delete [] squared_feature_value_cipher_mat[i];
+    delete [] middle_value_mat[i];
+    delete [] neg_2f_mat[i];
+    delete [] tmp_vec_ele_mat[i];
+  }
+  delete [] squared_feature_value_cipher_mat;
+  delete [] middle_value_mat;
+  delete [] neg_2f_mat;
+  delete [] tmp_vec_ele_mat;
+
   log_info("[pearson_fl]: 9.5. for each instance, calculate [f**2] + -2f*[mean_f] + [mean_f**2]");
 
   // the parties need to sync up the tmp_vec_cipher matrix to make sure they have the same matrix

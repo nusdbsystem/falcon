@@ -256,11 +256,13 @@ EncodedNumberType EncodedNumber::getter_type() const {
 long long fixed_pointed_integer_representation(double value, int precision) {
   auto ex = (long long) pow(PHE_FIXED_POINT_BASE, precision);
   std::stringstream ss;
+  // todo: setprecision truncate the double based on 10 hex, but PHE_FIXED_POINT_BASE is 2, why not set PHE_FIXED_POINT_BASE to 10 ?
   // keep precision decimal places.
   ss << std::fixed << std::setprecision(precision) << value;
   std::string s = ss.str();
-//  auto r = (long long) (::atof(s.c_str()) * ex);
+  //  auto r = (long long) (::atof(s.c_str()) * ex);
   // convert string back to long double and upgrade with ex**precision, ex is 2 by default
+  // todo: convert double to long long will lost the precision party.
   auto r = (long long) (std::stold(s) * ex);
   return r;
 }
