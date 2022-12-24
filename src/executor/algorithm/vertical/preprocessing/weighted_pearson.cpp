@@ -644,7 +644,7 @@ void get_local_features_correlations(const Party &party,
   // party compute in parallel,
   int local_feature_num = party.getter_feature_num();
   auto **feature_vector_plains = new EncodedNumber*[local_feature_num];
-  auto *feature_multiply_w_cipher = new EncodedNumber*[local_feature_num];
+  auto **feature_multiply_w_cipher = new EncodedNumber*[local_feature_num];
   for (int feature_id = 0; feature_id < local_feature_num; feature_id++) {
     feature_vector_plains[feature_id] = new EncodedNumber[num_instance];
     feature_multiply_w_cipher[feature_id] = new EncodedNumber[1];
@@ -661,6 +661,7 @@ void get_local_features_correlations(const Party &party,
                                                               PHE_FIXED_POINT_PRECISION);
     }
     // calculate F*[W], 1*1
+    log_info("[pearson_fl] 8.1 feature_id " + std::to_string(feature_id) + "mat mul start");
     djcs_t_aux_vec_mat_ep_mult(phe_pub_key,
                                party.phe_random,
                                feature_multiply_w_cipher[feature_id],
@@ -668,6 +669,8 @@ void get_local_features_correlations(const Party &party,
                                feature_vector_plains,
                                1,
                                num_instance);
+    log_info("[pearson_fl] 8.1 feature_id " + std::to_string(feature_id) + "mat mul finished");
+
     party_local_tmp_wf[feature_id][0] = feature_multiply_w_cipher[feature_id][0];
 
     // each party also encrypt the feature vector first
@@ -704,6 +707,7 @@ void get_local_features_correlations(const Party &party,
   // o2: for step 9.5, each party execute locally and use omp parallelism
   // o3: for the rest steps, the parties jointly compute and update
   int global_feature_num = std::accumulate(party_feature_nums.begin(), party_feature_nums.end(), 0);
+  log_info("[pearson_fl]: global_feature_num = " + std::to_string(global_feature_num));
   auto *mean_f_cipher_vec = new EncodedNumber[global_feature_num];
   auto *squared_mean_f_cipher_vec = new EncodedNumber[global_feature_num];
   std::vector<double> p_shares_vec; // size = global_feature_num
@@ -802,7 +806,7 @@ void get_local_features_correlations(const Party &party,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
   log_info("[pearson_fl]: 9.4. all parties jointly calculate p share <p>");
-
+  delete [] f_vec_min_mean_vec_share_vec;
 
   // calculate q1 = (f-mean_f) ** 2, tmp_vec_cipher: N*1
   // each party calculate in parallel
@@ -898,8 +902,11 @@ void get_local_features_correlations(const Party &party,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
 
+  std::vector<double> res_wpcc_shares = compute_wpcc(party, p_shares_vec, q1_shares_vec, q2_shares[0]);
+
   // the parties calculate wpcc shares
   // 1. calculate local feature mean
+  int idx = 0;
   for (int party_id = 0; party_id < party.party_num; party_id++) {
     int party_feature_num = party_feature_nums[party_id];
     start_global_idx = start_global_idx_vec[party_id];
@@ -907,8 +914,8 @@ void get_local_features_correlations(const Party &party,
                  + std::to_string(start_global_idx));
     for (int feature_id = 0; feature_id < party_feature_num; feature_id++) {
       // all parties jointly calculate  WPCC share, wpcc = <p> / (<q1> * <q2>) for this features
-      double one_wpcc_share = compute_wpcc(party, p_shares_vec[start_global_idx+feature_id],
-                                           q1_shares_vec[start_global_idx+feature_id], q2_shares[0]);
+//      double one_wpcc_share = compute_wpcc(party, p_shares_vec[start_global_idx+feature_id],
+//                                           q1_shares_vec[start_global_idx+feature_id], q2_shares[0]);
 
 #ifdef SAVE_BASELINE
       // debug p, q1, q2
@@ -933,14 +940,17 @@ void get_local_features_correlations(const Party &party,
       debug_vec_q2.push_back(q2_plain_double[0]);
       debug_vec_wpcc.push_back(wpcc_plain_double[0]);
 #endif
-      wpcc_vec.push_back(one_wpcc_share);
+      wpcc_vec.push_back(res_wpcc_shares[idx]);
+      idx++;
       party_id_loop_ups.push_back(party_id);
       party_feature_id_look_ups.push_back(feature_id);
       log_info("[pearson_fl]: 9.8. calculate WPCC for feature " + std::to_string(feature_id));
     }
   }
 
-  delete[] feature_multiply_w_cipher;
+  delete [] e_cipher_vec;
+  delete [] mean_f_cipher_vec;
+  delete [] squared_mean_f_cipher_vec;
   for (int i = 0; i < num_instance; i++) {
     delete [] tmp_vec_cipher[i];
   }
@@ -1117,18 +1127,24 @@ std::vector<double> WeightedMean(const Party &party,
   return weighted_mean_share_vec;
 }
 
-double compute_wpcc(
+std::vector<double> compute_wpcc(
     const Party &party,
-    double p_shares,
-    double q1_shares,
+    const std::vector<double>& p_shares_vec,
+    const std::vector<double>& q1_shares_vec,
     double q2_shares
 ) {
-
+  int vec_size = (int) p_shares_vec.size();
+  log_info("[compute_wpcc] vec_size = " + std::to_string(vec_size));
   std::vector<int> public_values;
+  public_values.push_back(vec_size);
 
   std::vector<double> private_values_wpcc;
-  private_values_wpcc.push_back(p_shares);
-  private_values_wpcc.push_back(q1_shares);
+  for (int i = 0; i < vec_size; i++) {
+    private_values_wpcc.push_back(p_shares_vec[i]);
+  }
+  for (int i = 0; i < vec_size; i++) {
+    private_values_wpcc.push_back(q1_shares_vec[i]);
+  }
   private_values_wpcc.push_back(q2_shares);
   falcon::SpdzLimeCompType comp_type_wpcc = falcon::PEARSON_Div_with_SquareRoot;
   std::promise<std::vector<double>> promise_values_wpcc;
@@ -1138,15 +1154,15 @@ double compute_wpcc(
                              party.party_id,
                              party.executor_mpc_ports,
                              party.host_names,
-                             0,
+                             public_values.size(), // 1
                              public_values, // no public value needed
-                             private_values_wpcc.size(), // 3
+                             private_values_wpcc.size(), // 2 * vec_size + 1
                              private_values_wpcc, // <mean_y>, <sum_w>
                              comp_type_wpcc,
                              &promise_values_wpcc);
   std::vector<double> wpcc_shares = future_values_wpcc.get();
   spdz_dist_wpcc.join();
-  return wpcc_shares[0];
+  return wpcc_shares;
 }
 
 void spdz_lime_computation(int party_num,
@@ -1223,8 +1239,7 @@ void spdz_lime_computation(int party_num,
   google::FlushLogFiles(google::INFO);
 
   // all the parties send private shares
-  std::cout << "private value size = " << private_value_size << std::endl;
-  LOG(INFO) << "private value size = " << private_value_size;
+  log_info("private value size = " + std::to_string(private_value_size));
   for (int i = 0; i < private_value_size; i++) {
     vector<double> x;
     x.push_back(private_values[i]);
@@ -1246,8 +1261,10 @@ void spdz_lime_computation(int party_num,
       break;
     }
     case falcon::PEARSON_Div_with_SquareRoot: {
-      LOG(INFO) << "SPDZ calculate mean value <p> /( <q1> * <q2>) ";
-      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+      log_info("SPDZ calculate mean value <p> /( <q1> * <q2>) ");
+      int vec_size = public_values[0];
+      log_info("[spdz_lime_computation] vec_size = " + std::to_string(vec_size));
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, vec_size);
       res->set_value(return_values);
       break;
     }
@@ -1764,7 +1781,9 @@ void worker_calculate_wpcc_per_feature(const Party &party,
                              PHE_FIXED_POINT_PRECISION);
 
     // all parties jointly calculate  WPCC share, wpcc = <p> / (<q1> * <q2>) for this features
-    double one_wpcc_share = compute_wpcc(party, p_shares[0], q1_shares[0], q2_shares[0]);
+//    double one_wpcc_share = compute_wpcc(party, p_shares[0], q1_shares[0], q2_shares[0]);
+// TODO: for debug centralized mode
+    double one_wpcc_share = 0.01;
 
     // debug p, q1, q2
     wpcc_vec.push_back(one_wpcc_share);

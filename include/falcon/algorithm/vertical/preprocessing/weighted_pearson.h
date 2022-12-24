@@ -134,10 +134,10 @@ std::vector<double> WeightedMean(const Party &party,
  * @param q2_shares: q2_shares
  * @return wpcc_shares: wpcc_shares
  */
-double compute_wpcc(
+std::vector<double> compute_wpcc(
     const Party &party,
-    double p_shares,
-    double q1_shares,
+    const std::vector<double>& p_shares_vec,
+    const std::vector<double>& q1_shares_vec,
     double q2_shares
 );
 
