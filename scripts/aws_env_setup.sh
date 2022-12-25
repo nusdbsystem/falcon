@@ -56,3 +56,7 @@ cp Player-Data/vary_party_num/6party/Input-P* Player-Data/
 cp Player-Data/vary_feature_num/partyfeature50/Input-P* Player-Data/
 
 /opt/falcon/third_party/MP-SPDZ/semi-party.x -F -N 3 -h 172.31.18.73 -p 0 spdz_mlp_partyfeature50
+
+# run background on aws
+
+nohup bash execute_dsls.sh 3party/DSLs/dsls_cent_lime/p1/ >> 20221214_run_batch1.out &

@@ -182,4 +182,13 @@ std::vector<int> index_of_top_k_in_vector(std::vector<double> vec, int K);
  */
 std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbers, int partition_size);
 
+/**
+ * partition numbers into multiple vector in a balanced manner
+ * so that each vector contains a specific proportion of each party
+ * @param numbers: size is party num, each value the number of elements in each party
+ * @param num_partition
+ * @return
+ */
+std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& numbers, int num_partition);
+
 #endif  // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

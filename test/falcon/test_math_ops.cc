@@ -315,3 +315,25 @@ TEST(Math_ops, Median) {
   double median_value = median(a);
   EXPECT_EQ(median_value, 2.5);
 }
+
+TEST(Math_ops, Partition_Vec_Balanced) {
+  std::vector<int> numbers;
+  numbers.push_back(11);
+  numbers.push_back(10);
+  numbers.push_back(9);
+  int num_partition = 2;
+  std::vector<std::vector<int>> partition_vectors = partition_vec_balanced(numbers, num_partition);
+  // expected output:
+  // partition1: 0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 15, 21, 22, 23, 24, 25
+  // partition2: 6, 7, 8, 9, 10, 16, 17, 18, 19, 20, 26, 27, 28, 29
+  std::vector<std::vector<int>> partitions = {
+      {0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 15, 21, 22, 23, 24, 25},
+      {6, 7, 8, 9, 10, 16, 17, 18, 19, 20, 26, 27, 28, 29}
+  };
+  for (int i = 0; i < num_partition; i++) {
+    std::cout << "partition " << i << " size = " << partition_vectors[i].size() << std::endl;
+    for (int j = 0; j < partition_vectors[i].size(); j++) {
+      EXPECT_EQ(partitions[i][j], partition_vectors[i][j]);
+    }
+  }
+}
