@@ -191,4 +191,12 @@ std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbe
  */
 std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& numbers, int num_partition);
 
+/**
+ * find the index of a value in a vector
+ * @param vec
+ * @param ele
+ * @return
+ */
+int find_idx_in_vec(const std::vector<int>& vec, int ele);
+
 #endif  // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

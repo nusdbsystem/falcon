@@ -378,3 +378,14 @@ std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& num
 
   return partition_vectors;
 }
+
+int find_idx_in_vec(const std::vector<int>& vec, int ele) {
+  int idx = -1;
+  for (int i = 0; i < vec.size(); i++) {
+    if (vec[i] == ele) {
+      idx = i;
+      break; // assume only one element match
+    }
+  }
+  return idx;
+}
