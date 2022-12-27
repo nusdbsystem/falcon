@@ -335,6 +335,10 @@ std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbe
 std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& numbers, int num_partition) {
   // get the number of parties
   int party_num = (int) numbers.size();
+  // debug info
+  for (int i = 0; i < party_num; i++) {
+    log_info("[partition_vec_balanced] numbers[" + std::to_string(i) + "] = " + std::to_string(numbers[i]));
+  }
   std::vector<std::vector<int>> partition_vectors;
   partition_vectors.reserve(num_partition);
   std::vector<int> partition;
@@ -361,6 +365,10 @@ std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& num
     int party_i_partition_size = static_cast<int>(std::ceil((double) numbers[i] / (double) num_partition));
     partition_sizes.push_back(party_i_partition_size);
   }
+  // debug info
+  for (int i = 0; i < party_num; i++) {
+    log_info("[partition_vec_balanced] partition_sizes[" + std::to_string(i) + "] = " + std::to_string(partition_sizes[i]));
+  }
 
   // put each party's global index into partition_vectors according to partition_size
   for (int i = 0; i < party_num; i++) {
@@ -371,6 +379,7 @@ std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& num
       partition_vectors[partition_id].push_back(global_numbers[i][j]);
       count++;
       if (count == partition_size) {
+        count = 0;
         partition_id += 1;
       }
     }

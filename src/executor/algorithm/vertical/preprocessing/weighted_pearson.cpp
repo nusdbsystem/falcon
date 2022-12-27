@@ -158,9 +158,17 @@ std::vector<int> wpcc_feature_selection(Party party,
 
     // either ps and worker partition features using same logic
     int workers_size = retrieve_worker_size_from_ps_network_configs(ps_network_str);
-    std::vector<std::vector<int>> partition_vec = partition_vec_balanced(feature_num_array ,workers_size);
+    std::vector<std::vector<int>> partition_vec = partition_vec_balanced(feature_num_array, workers_size);
     // std::vector<std::vector<int>> partition_vec = partition_vec_evenly(global_feature_index_vec, workers_size);
     log_info("[wpcc_feature_selection] workers_size = " + std::to_string(workers_size));
+
+    // debug info
+    for (int i = 0; i < partition_vec.size(); i++) {
+      log_info("[wpcc_feature_selection] partition i = " + std::to_string(i) + "'s result: ");
+      for (int j = 0; j < partition_vec[i].size(); j++) {
+        log_info("[wpcc_feature_selection] j = " + std::to_string(j) + ", partition_vec[i][j] = " + std::to_string(partition_vec[i][j]));
+      }
+    }
 
     // number of instances and its partition vector
     std::vector<int> instance_index_vec;
@@ -190,18 +198,10 @@ std::vector<int> wpcc_feature_selection(Party party,
       // 3. store the selected features and send to all workers
 
       // init results and compute them.
-      log_info("[PS]: begin to calculate <w_sum>, [F]list, <e>list, <w>list, <q2>lists ");
-      auto **party_local_tmp_wf = new EncodedNumber *[party.getter_feature_num()];
-      for (int i = 0; i < party.getter_feature_num(); i++) {
-        party_local_tmp_wf[i] = new EncodedNumber[1];
-      }
+      log_info("[PS]: begin to calculate <w_sum>, <e>list, <w>list, <q2>lists ");
       // init <w_sum>
       std::vector<double> sum_sss_weight_share;
-      // init [F] list
-      auto **local_encrypted_feature = new EncodedNumber *[party.getter_feature_num()];
-      for (int i = 0; i < party.getter_feature_num(); i++) {
-        local_encrypted_feature[i] = new EncodedNumber[num_instance];
-      }
+
       // init <e> list
       std::vector<vector<double>> two_d_e_share_vec;
       // init <w> list
@@ -212,31 +212,17 @@ std::vector<int> wpcc_feature_selection(Party party,
       auto ps = new WeightedPearsonPS(party, ps_network_str);
 
       ps_get_wpcc_pre_info(*ps, train_data, instance_partition_vec, predictions, sss_sample_weights,
-                           party_local_tmp_wf, sum_sss_weight_share, local_encrypted_feature,
+                           sum_sss_weight_share,
                            two_d_e_share_vec, two_d_sss_weights_share, q2_shares);
-
 
       // 2. broadcast them and partition features.
       log_info("[PS]: begin to broadcast <w_sum>, [F]list, <e>list, <w>list, <q2>lists ");
-      // 2.1
-      std::string party_local_tmp_wf_str;
-      serialize_encoded_number_matrix(party_local_tmp_wf,
-                                      party.getter_feature_num(), 1,
-                                      party_local_tmp_wf_str);
-      ps->broadcast_string_to_workers(party_local_tmp_wf_str);
-
       // 2.2
       std::string sum_sss_weight_share_str;
       serialize_double_array(sum_sss_weight_share, sum_sss_weight_share_str);
       ps->broadcast_string_to_workers(sum_sss_weight_share_str);
 
       // 2.3
-      std::string local_encrypted_feature_str;
-      serialize_encoded_number_matrix(local_encrypted_feature,
-                                      party.getter_feature_num(), num_instance,
-                                      local_encrypted_feature_str);
-      ps->broadcast_string_to_workers(local_encrypted_feature_str);
-
       // 2.4
       std::string two_d_e_share_vec_str;
       serialize_double_matrix(two_d_e_share_vec, two_d_e_share_vec_str);
@@ -312,15 +298,6 @@ std::vector<int> wpcc_feature_selection(Party party,
       ps->broadcast_string_to_workers(selected_feat_idx_str);
 
       // clear the memory
-      for (int i = 0; i < party.getter_feature_num(); i++) {
-        delete[] party_local_tmp_wf[i];
-      }
-      delete[] party_local_tmp_wf;
-
-      for (int i = 0; i < party.getter_feature_num(); i++) {
-        delete[] local_encrypted_feature[i];
-      }
-      delete[] local_encrypted_feature;
       delete ps;
     }
 
@@ -334,13 +311,13 @@ std::vector<int> wpcc_feature_selection(Party party,
 //      deserialize_double_array(sss_sample_weights_share, recv_sss_sample_weights_share_str);
 //      log_info("[worker] sss_sample_weights_share.size = " + std::to_string(sss_sample_weights_share.size()));
 
-      auto* mean_y_cipher = new EncodedNumber[1];
+      auto *mean_y_cipher = new EncodedNumber[1];
       std::string recv_mean_y_cipher_str;
       worker->recv_long_message_from_ps(recv_mean_y_cipher_str);
       deserialize_encoded_number_array(mean_y_cipher, 1, recv_mean_y_cipher_str);
 
       std::vector<double> partial_e_share_vec;
-      worker_calculate_wpcc_batch_pre_info(party, worker_id-1, sss_sample_weights,
+      worker_calculate_wpcc_batch_pre_info(party, worker_id - 1, sss_sample_weights,
                                            instance_partition_vec, predictions, mean_y_cipher,
                                            partial_e_share_vec);
 
@@ -350,7 +327,6 @@ std::vector<int> wpcc_feature_selection(Party party,
       worker->send_long_message_to_ps(partial_e_share_vec_str);
       log_info("[Worker-" + std::to_string(worker_id - 1) + "]: send wpcc pre info partial_e_share_vec to ps");
 
-
       log_info("[Worker-" + std::to_string(worker_id - 1) + "]: responsible for global feature id = "
                    + vec_to_str<int>(partition_vec[worker_id - 1]));
 
@@ -358,35 +334,16 @@ std::vector<int> wpcc_feature_selection(Party party,
           "[Worker-" + std::to_string(worker_id)
               + "]: begin to receive <w_sum>, [F]list, <e>list, <w>list, <q2>lists from PS");
       // 1. receive all infos
-      auto **party_local_tmp_wf = new EncodedNumber *[party.getter_feature_num()];
-      for (int i = 0; i < party.getter_feature_num(); i++) {
-        party_local_tmp_wf[i] = new EncodedNumber[1];
-      }
+
       std::vector<double> sum_sss_weight_share;
-      auto **local_encrypted_feature = new EncodedNumber *[party.getter_feature_num()];
-      for (int i = 0; i < party.getter_feature_num(); i++) {
-        local_encrypted_feature[i] = new EncodedNumber[num_instance];
-      }
       std::vector<vector<double>> two_d_e_share_vec;
       std::vector<std::vector<double>> two_d_sss_weights_share;
       std::vector<double> q2_shares;
 
-      // 2.1
-      std::string recv_party_local_tmp_wf_str;
-      worker->recv_long_message_from_ps(recv_party_local_tmp_wf_str);
-      deserialize_encoded_number_matrix(party_local_tmp_wf,
-                                        party.getter_feature_num(), 1,
-                                        recv_party_local_tmp_wf_str);
       // 2.2
       std::string recv_sum_sss_weight_share_str;
       worker->recv_long_message_from_ps(recv_sum_sss_weight_share_str);
       deserialize_double_array(sum_sss_weight_share, recv_sum_sss_weight_share_str);
-      // 2.3
-      std::string recv_local_encrypted_feature_str;
-      worker->recv_long_message_from_ps(recv_local_encrypted_feature_str);
-      deserialize_encoded_number_matrix(local_encrypted_feature,
-                                        party.getter_feature_num(), num_instance,
-                                        recv_local_encrypted_feature_str);
       // 2.4
       std::string recv_two_d_e_share_vec_str;
       worker->recv_long_message_from_ps(recv_two_d_e_share_vec_str);
@@ -395,7 +352,6 @@ std::vector<int> wpcc_feature_selection(Party party,
       std::string recv_two_d_sss_weights_share_str;
       worker->recv_long_message_from_ps(recv_two_d_sss_weights_share_str);
       deserialize_double_matrix(two_d_sss_weights_share, recv_two_d_sss_weights_share_str);
-
       // 2.6
       std::string recv_q2_shares_str;
       worker->recv_long_message_from_ps(recv_q2_shares_str);
@@ -405,8 +361,8 @@ std::vector<int> wpcc_feature_selection(Party party,
       std::vector<double> wpcc_vec;
       log_info("[Worker-" + std::to_string(worker_id - 1) + "]: begin to calculate wpcc_vec for vector = "
                    + vec_to_str<int>(partition_vec[worker_id - 1]));
-      worker_calculate_wpcc_per_feature(party, train_data, party_local_tmp_wf, sum_sss_weight_share,
-                                        local_encrypted_feature, two_d_e_share_vec, two_d_sss_weights_share, q2_shares,
+      worker_calculate_wpcc_per_feature(party, train_data, sss_sample_weights, sum_sss_weight_share,
+                                        two_d_e_share_vec, two_d_sss_weights_share, q2_shares,
                                         wpcc_vec,
                                         partition_vec[worker_id - 1], global_partyid_look_up_vec,
                                         global_party_local_feature_id_look_up_vec);
@@ -422,15 +378,7 @@ std::vector<int> wpcc_feature_selection(Party party,
       worker->recv_long_message_from_ps(recv_selected_feat_idx_str);
 
       // clear the memory
-      for (int i = 0; i < party.getter_feature_num(); i++) {
-        delete[] party_local_tmp_wf[i];
-      }
-      delete[] party_local_tmp_wf;
-      for (int i = 0; i < party.getter_feature_num(); i++) {
-        delete[] local_encrypted_feature[i];
-      }
-      delete[] local_encrypted_feature;
-      delete [] mean_y_cipher;
+      delete[] mean_y_cipher;
       delete worker;
     }
   }
@@ -644,11 +592,11 @@ void get_local_features_correlations(const Party &party,
 
   // party compute in parallel,
   int local_feature_num = party.getter_feature_num();
-  auto **feature_vector_plains = new EncodedNumber*[local_feature_num];
-  auto **feature_multiply_w_cipher = new EncodedNumber*[local_feature_num];
+  auto **feature_vector_plains = new EncodedNumber *[local_feature_num];
+  auto *feature_multiply_w_cipher = new EncodedNumber[local_feature_num];
   for (int feature_id = 0; feature_id < local_feature_num; feature_id++) {
     feature_vector_plains[feature_id] = new EncodedNumber[num_instance];
-    feature_multiply_w_cipher[feature_id] = new EncodedNumber[1];
+//    feature_multiply_w_cipher[feature_id] = new EncodedNumber[1];
   }
 
   omp_set_num_threads(NUM_OMP_THREADS);
@@ -663,16 +611,15 @@ void get_local_features_correlations(const Party &party,
     }
     // calculate F*[W], 1*1
     log_info("[pearson_fl] 8.1 feature_id " + std::to_string(feature_id) + "mat mul start");
-    djcs_t_aux_vec_mat_ep_mult(phe_pub_key,
-                               party.phe_random,
-                               feature_multiply_w_cipher[feature_id],
-                               sss_weight_cipher,
-                               feature_vector_plains,
-                               1,
-                               num_instance);
+    djcs_t_aux_inner_product(phe_pub_key,
+                             party.phe_random,
+                             feature_multiply_w_cipher[feature_id],
+                             sss_weight_cipher,
+                             feature_vector_plains[feature_id],
+                             num_instance);
     log_info("[pearson_fl] 8.1 feature_id " + std::to_string(feature_id) + "mat mul finished");
 
-    party_local_tmp_wf[feature_id][0] = feature_multiply_w_cipher[feature_id][0];
+    party_local_tmp_wf[feature_id][0] = feature_multiply_w_cipher[feature_id];
 
     // each party also encrypt the feature vector first
     for (int sample_id = 0; sample_id < num_instance; sample_id++) {
@@ -686,10 +633,9 @@ void get_local_features_correlations(const Party &party,
     }
   }
 
-
   for (int feature_id = 0; feature_id < local_feature_num; feature_id++) {
-    delete [] feature_vector_plains[feature_id];
-    delete [] feature_multiply_w_cipher[feature_id];
+    delete[] feature_vector_plains[feature_id];
+//    delete[] feature_multiply_w_cipher[feature_id];
   }
   delete[] feature_vector_plains;
   delete[] feature_multiply_w_cipher;
@@ -717,7 +663,7 @@ void get_local_features_correlations(const Party &party,
   start_global_idx_vec.push_back(0);
   int start_pos = 0;
   for (int party_id = 1; party_id < party.party_num; party_id++) {
-    start_pos += party_feature_nums[party_id-1];
+    start_pos += party_feature_nums[party_id - 1];
     start_global_idx_vec.push_back(start_pos);
   }
 
@@ -725,7 +671,8 @@ void get_local_features_correlations(const Party &party,
   for (int party_id = 0; party_id < party.party_num; party_id++) {
     int party_feature_num = party_feature_nums[party_id];
     int start_global_idx = start_global_idx_vec[party_id];
-    log_info("[pearson_fl]: party_id = " + std::to_string(party_id) + ", start_global_idx = " + std::to_string(start_global_idx));
+    log_info("[pearson_fl]: party_id = " + std::to_string(party_id) + ", start_global_idx = "
+                 + std::to_string(start_global_idx));
     for (int feature_id = 0; feature_id < party_feature_num; feature_id++) {
       // only the current party have this value. other parties have empty, 1*1
       auto *feature_multiply_w_cipher = new EncodedNumber[1];
@@ -755,7 +702,7 @@ void get_local_features_correlations(const Party &party,
 
       // only the current party calculate [F] - [mean_F], other don;t have value of f_vec_min_mean_f_cipher
       // N*1
-      auto **f_vec_min_mean_f_cipher = new EncodedNumber*[num_instance];
+      auto **f_vec_min_mean_f_cipher = new EncodedNumber *[num_instance];
       for (int sample_id = 0; sample_id < num_instance; sample_id++) {
         f_vec_min_mean_f_cipher[sample_id] = new EncodedNumber[1];
       }
@@ -777,7 +724,7 @@ void get_local_features_correlations(const Party &party,
       log_info("[pearson_fl]: 9.2. party id " + std::to_string(party_id) + " send [F]-[MeanF] to others");
 
       // all parties jointly calculate sum(<w_i> * ([f_i] - [mean_F])([y_i] - [mean_Y])), 1*1
-      auto **f_vec_min_mean_vec_share = new EncodedNumber*[1];
+      auto **f_vec_min_mean_vec_share = new EncodedNumber *[1];
       f_vec_min_mean_vec_share[0] = new EncodedNumber[1];
       cipher_shares_mat_mul(party,
                             two_d_e_share_vec, // 1*N
@@ -788,15 +735,15 @@ void get_local_features_correlations(const Party &party,
 
       f_vec_min_mean_vec_share_vec[start_global_idx + feature_id] = f_vec_min_mean_vec_share[0][0];
 
-      delete [] feature_multiply_w_cipher;
-      delete [] mean_f_cipher;
-      delete [] squared_mean_f_cipher;
+      delete[] feature_multiply_w_cipher;
+      delete[] mean_f_cipher;
+      delete[] squared_mean_f_cipher;
       for (int i = 0; i < num_instance; i++) {
         delete[] f_vec_min_mean_f_cipher[i];
       }
-      delete [] f_vec_min_mean_f_cipher;
-      delete [] f_vec_min_mean_vec_share[0];
-      delete [] f_vec_min_mean_vec_share;
+      delete[] f_vec_min_mean_f_cipher;
+      delete[] f_vec_min_mean_vec_share[0];
+      delete[] f_vec_min_mean_vec_share;
     }
   }
 
@@ -807,22 +754,21 @@ void get_local_features_correlations(const Party &party,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
   log_info("[pearson_fl]: 9.4. all parties jointly calculate p share <p>");
-  delete [] f_vec_min_mean_vec_share_vec;
+  delete[] f_vec_min_mean_vec_share_vec;
 
   // calculate q1 = (f-mean_f) ** 2, tmp_vec_cipher: N*1
   // each party calculate in parallel
-  auto **tmp_vec_cipher = new EncodedNumber*[num_instance];
+  auto **tmp_vec_cipher = new EncodedNumber *[num_instance];
   for (int i = 0; i < num_instance; i++) {
     tmp_vec_cipher[i] = new EncodedNumber[global_feature_num];
   }
   int start_global_idx = start_global_idx_vec[party.party_id];
   log_info("[pearson_fl]: start_global_idx = " + std::to_string(start_global_idx));
 
-
-  auto **squared_feature_value_cipher_mat = new EncodedNumber*[num_instance];
-  auto **middle_value_mat = new EncodedNumber*[num_instance];
-  auto **neg_2f_mat = new EncodedNumber*[num_instance];
-  auto **tmp_vec_ele_mat = new EncodedNumber*[num_instance];
+  auto **squared_feature_value_cipher_mat = new EncodedNumber *[num_instance];
+  auto **middle_value_mat = new EncodedNumber *[num_instance];
+  auto **neg_2f_mat = new EncodedNumber *[num_instance];
+  auto **tmp_vec_ele_mat = new EncodedNumber *[num_instance];
   for (int i = 0; i < num_instance; i++) {
     squared_feature_value_cipher_mat[i] = new EncodedNumber[party.getter_feature_num()];
     middle_value_mat[i] = new EncodedNumber[party.getter_feature_num()];
@@ -837,35 +783,47 @@ void get_local_features_correlations(const Party &party,
       // calculate [f**2]
       // EncodedNumber squared_feature_value_cipher;
       squared_feature_value_cipher_mat[i][feature_id].set_double(phe_pub_key->n[0],
-                                              train_data[i][feature_id] * train_data[i][feature_id],
-                                              PHE_FIXED_POINT_PRECISION * PHE_FIXED_POINT_PRECISION);
-      djcs_t_aux_encrypt(phe_pub_key, party.phe_random, squared_feature_value_cipher_mat[i][feature_id], squared_feature_value_cipher_mat[i][feature_id]);
+                                                                 train_data[i][feature_id] * train_data[i][feature_id],
+                                                                 PHE_FIXED_POINT_PRECISION * PHE_FIXED_POINT_PRECISION);
+      djcs_t_aux_encrypt(phe_pub_key,
+                         party.phe_random,
+                         squared_feature_value_cipher_mat[i][feature_id],
+                         squared_feature_value_cipher_mat[i][feature_id]);
 
       // calculate -2f*[mean_f]`
       // EncodedNumber middle_value;
       // EncodedNumber neg_2f;
       neg_2f_mat[i][feature_id].set_double(phe_pub_key->n[0], -2 * train_data[i][feature_id],
-                        abs(mean_f_cipher_vec[start_global_idx+feature_id].getter_exponent()));
-      djcs_t_aux_ep_mul(phe_pub_key, middle_value_mat[i][feature_id], mean_f_cipher_vec[start_global_idx+feature_id], neg_2f_mat[i][feature_id]);
+                                           abs(mean_f_cipher_vec[start_global_idx + feature_id].getter_exponent()));
+      djcs_t_aux_ep_mul(phe_pub_key,
+                        middle_value_mat[i][feature_id],
+                        mean_f_cipher_vec[start_global_idx + feature_id],
+                        neg_2f_mat[i][feature_id]);
 
       // calculate [f_j]**2 + -2f_j*[mean_F] + [mean_F]**2
       // EncodedNumber tmp_vec_ele;
-      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele_mat[i][feature_id], squared_feature_value_cipher_mat[i][feature_id], middle_value_mat[i][feature_id]);
-      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele_mat[i][feature_id], tmp_vec_ele_mat[i][feature_id], squared_mean_f_cipher_vec[start_global_idx+feature_id]);
-      tmp_vec_cipher[i][start_global_idx+feature_id] = tmp_vec_ele_mat[i][feature_id];
+      djcs_t_aux_ee_add_ext(phe_pub_key,
+                            tmp_vec_ele_mat[i][feature_id],
+                            squared_feature_value_cipher_mat[i][feature_id],
+                            middle_value_mat[i][feature_id]);
+      djcs_t_aux_ee_add_ext(phe_pub_key,
+                            tmp_vec_ele_mat[i][feature_id],
+                            tmp_vec_ele_mat[i][feature_id],
+                            squared_mean_f_cipher_vec[start_global_idx + feature_id]);
+      tmp_vec_cipher[i][start_global_idx + feature_id] = tmp_vec_ele_mat[i][feature_id];
     }
   }
 
   for (int i = 0; i < num_instance; i++) {
-    delete [] squared_feature_value_cipher_mat[i];
-    delete [] middle_value_mat[i];
-    delete [] neg_2f_mat[i];
-    delete [] tmp_vec_ele_mat[i];
+    delete[] squared_feature_value_cipher_mat[i];
+    delete[] middle_value_mat[i];
+    delete[] neg_2f_mat[i];
+    delete[] tmp_vec_ele_mat[i];
   }
-  delete [] squared_feature_value_cipher_mat;
-  delete [] middle_value_mat;
-  delete [] neg_2f_mat;
-  delete [] tmp_vec_ele_mat;
+  delete[] squared_feature_value_cipher_mat;
+  delete[] middle_value_mat;
+  delete[] neg_2f_mat;
+  delete[] tmp_vec_ele_mat;
 
   log_info("[pearson_fl]: 9.5. for each instance, calculate [f**2] + -2f*[mean_f] + [mean_f**2]");
 
@@ -876,27 +834,31 @@ void get_local_features_correlations(const Party &party,
       if (id != party.party_id) {
         std::string recv_tmp_vec_ciphers_str;
         party.recv_long_message(id, recv_tmp_vec_ciphers_str);
-        auto **recv_tmp_vec_ciphers = new EncodedNumber*[num_instance];
+        auto **recv_tmp_vec_ciphers = new EncodedNumber *[num_instance];
         for (int i = 0; i < num_instance; i++) {
           recv_tmp_vec_ciphers[i] = new EncodedNumber[global_feature_num];
         }
-        deserialize_encoded_number_matrix(recv_tmp_vec_ciphers, num_instance, global_feature_num, recv_tmp_vec_ciphers_str);
+        deserialize_encoded_number_matrix(recv_tmp_vec_ciphers,
+                                          num_instance,
+                                          global_feature_num,
+                                          recv_tmp_vec_ciphers_str);
         // copy party id's results to tmp_vec_ciphers
         int party_id_start_global_idx = start_global_idx_vec[id];
         int party_id_feature_num = party_feature_nums[id];
         log_info("[pearson_fl]: 9.5.1. party_id = " + std::to_string(id) +
-          ", party_id_start_global_idx = " + std::to_string(party_id_start_global_idx) +
-          ", party_id_feature_num = " + std::to_string(party_id_feature_num));
+            ", party_id_start_global_idx = " + std::to_string(party_id_start_global_idx) +
+            ", party_id_feature_num = " + std::to_string(party_id_feature_num));
         for (int i = 0; i < num_instance; i++) {
           for (int feature_id = 0; feature_id < party_id_feature_num; feature_id++) {
-            tmp_vec_cipher[i][party_id_start_global_idx+feature_id] = recv_tmp_vec_ciphers[i][party_id_start_global_idx+feature_id];
+            tmp_vec_cipher[i][party_id_start_global_idx + feature_id] =
+                recv_tmp_vec_ciphers[i][party_id_start_global_idx + feature_id];
           }
         }
 
         for (int i = 0; i < num_instance; i++) {
-          delete [] recv_tmp_vec_ciphers[i];
+          delete[] recv_tmp_vec_ciphers[i];
         }
-        delete [] recv_tmp_vec_ciphers;
+        delete[] recv_tmp_vec_ciphers;
       }
     }
   } else {
@@ -910,7 +872,7 @@ void get_local_features_correlations(const Party &party,
 
 
   // all parties jointly calculate q1 cipher and convert it to shares 1*1
-  auto **q1_cipher = new EncodedNumber*[1];
+  auto **q1_cipher = new EncodedNumber *[1];
   q1_cipher[0] = new EncodedNumber[global_feature_num];
   cipher_shares_mat_mul(party,
                         two_d_sss_weights_share, // 1*N
@@ -973,11 +935,11 @@ void get_local_features_correlations(const Party &party,
     }
   }
 
-  delete [] e_cipher_vec;
-  delete [] mean_f_cipher_vec;
-  delete [] squared_mean_f_cipher_vec;
+  delete[] e_cipher_vec;
+  delete[] mean_f_cipher_vec;
+  delete[] squared_mean_f_cipher_vec;
   for (int i = 0; i < num_instance; i++) {
-    delete [] tmp_vec_cipher[i];
+    delete[] tmp_vec_cipher[i];
   }
   delete[] tmp_vec_cipher;
   delete[] q1_cipher[0];
@@ -1154,8 +1116,8 @@ std::vector<double> WeightedMean(const Party &party,
 
 std::vector<double> compute_wpcc(
     const Party &party,
-    const std::vector<double>& p_shares_vec,
-    const std::vector<double>& q1_shares_vec,
+    const std::vector<double> &p_shares_vec,
+    const std::vector<double> &q1_shares_vec,
     double q2_shares
 ) {
   int vec_size = (int) p_shares_vec.size();
@@ -1303,7 +1265,7 @@ void spdz_lime_computation(int party_num,
     case falcon::KERNELSHAP_WEIGHT: {
       log_info("falcon::KERNELSHAP_WEIGHT = " + std::to_string(falcon::KERNELSHAP_WEIGHT));
       LOG(INFO) << "SPDZ compute kernelshap weights";
-      std::vector<double> return_values = receive_result(mpc_sockets, party_num, private_value_size);
+      std::vector<double> return_values = receive_result(mpc_sockets, party_num, public_values[0]);
       res->set_value(return_values);
       break;
     }
@@ -1328,7 +1290,7 @@ void spdz_lime_computation(int party_num,
 
 void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
                           const vector<std::vector<double>> &train_data,
-                          const std::vector<std::vector<int>> & instance_partition_vec,
+                          const std::vector<std::vector<int>> &instance_partition_vec,
                           EncodedNumber *predictions,
                           const vector<double> &sss_sample_weights_share,
                           std::vector<double> &sum_sss_weight_share,
@@ -1494,57 +1456,10 @@ void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
 //    local_encrypted_feature[i] = new EncodedNumber[num_instance];
 //  }
 
-  // party compute in parallel,
-  int local_feature_num = ps.party.getter_feature_num();
-  auto **feature_vector_plains = new EncodedNumber*[local_feature_num];
-  auto **feature_multiply_w_cipher = new EncodedNumber*[local_feature_num];
-  for (int feature_id = 0; feature_id < local_feature_num; feature_id++) {
-    feature_vector_plains[feature_id] = new EncodedNumber[num_instance];
-    feature_multiply_w_cipher[feature_id] = new EncodedNumber[1];
-  }
-
-  // party compute in parallel,
-  omp_set_num_threads(NUM_OMP_THREADS);
-#pragma omp parallel for
-  for (int feature_id = 0; feature_id < ps.party.getter_feature_num(); feature_id++) {
-    // 1. each party compute F*[W]
-    for (int sample_id = 0; sample_id < num_instance; sample_id++) {
-      // assign value
-      feature_vector_plains[feature_id][sample_id].set_double(phe_pub_key->n[0],
-                                                     train_data[sample_id][feature_id],
-                                                     PHE_FIXED_POINT_PRECISION);
-    }
-    // calculate F*[W], 1*1
-    djcs_t_aux_vec_mat_ep_mult(phe_pub_key,
-                               ps.party.phe_random,
-                               feature_multiply_w_cipher[feature_id],
-                               sss_weight_cipher,
-                               feature_vector_plains,
-                               1,
-                               num_instance);
-    party_local_tmp_wf[feature_id][0] = feature_multiply_w_cipher[feature_id][0];
-
-    // each party also encrypt the feature vector first
-    for (int sample_id = 0; sample_id < num_instance; sample_id++) {
-      local_encrypted_feature[feature_id][sample_id].set_double(phe_pub_key->n[0],
-                                                                train_data[sample_id][feature_id],
-                                                                PHE_FIXED_POINT_PRECISION);
-      djcs_t_aux_encrypt(phe_pub_key,
-                         ps.party.phe_random,
-                         local_encrypted_feature[feature_id][sample_id],
-                         local_encrypted_feature[feature_id][sample_id]);
-    }
-  }
   log_info("[WPCC_PS]: 8. each party compute F*[W] in parallel done");
-
   djcs_t_free_public_key(phe_pub_key);
 
   // clean the code
-  for (int feature_id = 0; feature_id < local_feature_num; feature_id++) {
-    delete [] feature_vector_plains[feature_id];
-    delete [] feature_multiply_w_cipher[feature_id];
-  }
-  delete[] feature_vector_plains;
   delete[] sum_sss_weight_cipher;
   for (int i = 0; i < num_instance; i++) {
     delete[] two_d_prediction_cipher[i];
@@ -1566,13 +1481,13 @@ void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
 /***************** logic for worker ***************/
 /***********************************************************/
 
-void worker_calculate_wpcc_batch_pre_info(const Party& party,
+void worker_calculate_wpcc_batch_pre_info(const Party &party,
                                           int wk_index,
                                           const std::vector<double> &sss_sample_weights_share,
-                                          const std::vector<std::vector<int>>& instance_partition_vec,
-                                          EncodedNumber* predictions,
-                                          EncodedNumber* mean_y_cipher,
-                                          std::vector<double>& partial_e_share_vec) {
+                                          const std::vector<std::vector<int>> &instance_partition_vec,
+                                          EncodedNumber *predictions,
+                                          EncodedNumber *mean_y_cipher,
+                                          std::vector<double> &partial_e_share_vec) {
   djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
@@ -1644,15 +1559,14 @@ void worker_calculate_wpcc_batch_pre_info(const Party& party,
 
   log_info("[pearson_fl]: 6. decrypt finished.");
 
-  delete [] e_cipher_vec;
+  delete[] e_cipher_vec;
   djcs_t_free_public_key(phe_pub_key);
 }
 
 void worker_calculate_wpcc_per_feature(const Party &party,
                                        const vector<std::vector<double>> &train_data,
-                                       EncodedNumber **party_local_tmp_wf,
+                                       const vector<double> &sss_sample_weight_share,
                                        const std::vector<double> &sum_sss_weight_share,
-                                       EncodedNumber **local_encrypted_feature,
                                        const std::vector<vector<double>> &two_d_e_share_vec,
                                        const std::vector<std::vector<double>> &two_d_sss_weights_share,
                                        const std::vector<double> &q2_shares,
@@ -1665,7 +1579,15 @@ void worker_calculate_wpcc_per_feature(const Party &party,
   party.getter_phe_pub_key(phe_pub_key);
   int num_instance = (int) train_data.size();
 
-  // each party gets local feature indexes and compute in parallel
+  // 2. jointly convert <w> into ciphertext [w],
+  auto *sss_weight_cipher = new EncodedNumber[num_instance];
+  secret_shares_to_ciphers(party,
+                           sss_weight_cipher,
+                           sss_sample_weight_share,
+                           num_instance,
+                           ACTIVE_PARTY_ID,
+                           PHE_FIXED_POINT_PRECISION);
+
   std::vector<std::vector<int>> worker_party_feature_ids;
   for (int pid = 0; pid < party.party_num; pid++) {
     std::vector<int> party_feature_ids;
@@ -1679,6 +1601,84 @@ void worker_calculate_wpcc_per_feature(const Party &party,
     worker_party_feature_ids.push_back(party_feature_ids);
   }
 
+  std::vector<int> worker_local_feature_ids = worker_party_feature_ids[party.party_id];
+  int worker_local_feature_num = (int) worker_local_feature_ids.size();
+  int global_feature_partition_num = (int) global_feature_partition_ids.size();
+
+  log_info("[pearson_fl]: inside worker, worker_local_feature_num = "
+               + std::to_string(worker_local_feature_num)
+               + ", local feature ids=  " + vec_to_str<int>(worker_local_feature_ids)
+               + " global_feature_partition_num = " + std::to_string(global_feature_partition_num));
+
+  // party calculate
+  auto **party_local_tmp_wf = new EncodedNumber *[party.getter_feature_num()];
+  for (int i = 0; i < party.getter_feature_num(); i++) {
+    party_local_tmp_wf[i] = new EncodedNumber[1];
+  }
+  // init [F] list
+  auto **local_encrypted_feature = new EncodedNumber *[party.getter_feature_num()];
+  for (int i = 0; i < party.getter_feature_num(); i++) {
+    local_encrypted_feature[i] = new EncodedNumber[num_instance];
+  }
+  // init
+  log_info("[pearson_fl]: Party begin to compute F*[W] and [F] in parallel");
+
+  auto **feature_vector_plains = new EncodedNumber *[worker_local_feature_num];
+  auto *feature_multiply_w_cipher = new EncodedNumber[worker_local_feature_num];
+
+  for (int i = 0; i < worker_local_feature_num; i++) {
+    feature_vector_plains[i] = new EncodedNumber[num_instance];
+//    feature_multiply_w_cipher[i] = new EncodedNumber[1];
+  }
+
+  // each worker parallel calculate it.
+  omp_set_num_threads(NUM_OMP_THREADS);
+#pragma omp parallel for
+  for (int worker_f_id = 0; worker_f_id < worker_local_feature_num; worker_f_id++) {
+    // local = 2
+    // global  =6
+    // feature_global_id = [8.9]  [18,19]  [28, 29]
+    int feature_global_id = worker_local_feature_ids[worker_f_id];
+    int feature_worker_id = find_idx_in_vec(global_feature_partition_ids, feature_global_id);
+    // each party has it 8,9
+    int feature_id = global_party_local_feature_id_look_up_vec[feature_global_id];
+    log_info("[pearson_fl] feature_global_id = " + std::to_string(feature_global_id));
+    log_info("[pearson_fl] feature_worker_id = " + std::to_string(feature_worker_id));
+    log_info("[pearson_fl] feature_id = " + std::to_string(feature_id));
+
+    // 1. each party compute F*[W]
+    log_info("[pearson_fl]: encode training dataset");
+    for (int sample_id = 0; sample_id < num_instance; sample_id++) {
+      // assign value
+      feature_vector_plains[worker_f_id][sample_id].set_double(phe_pub_key->n[0],
+                                                     train_data[sample_id][feature_id],
+                                                     PHE_FIXED_POINT_PRECISION);
+    }
+    // calculate F*[W], 1*1
+    log_info("[pearson_fl]: calculate F*[W], 1*1");
+    djcs_t_aux_inner_product(phe_pub_key,
+                             party.phe_random,
+                             feature_multiply_w_cipher[worker_f_id],
+                             sss_weight_cipher,
+                             feature_vector_plains[worker_f_id],
+                             num_instance);
+    party_local_tmp_wf[feature_id][0] = feature_multiply_w_cipher[worker_f_id];
+
+    log_info("[pearson_fl]: each party also encrypt the feature vector ");
+    // each party also encrypt the feature vector first
+    for (int sample_id = 0; sample_id < num_instance; sample_id++) {
+      local_encrypted_feature[feature_id][sample_id].set_double(phe_pub_key->n[0],
+                                                                train_data[sample_id][feature_id],
+                                                                PHE_FIXED_POINT_PRECISION);
+      djcs_t_aux_encrypt(phe_pub_key,
+                         party.phe_random,
+                         local_encrypted_feature[feature_id][sample_id],
+                         local_encrypted_feature[feature_id][sample_id]);
+    }
+
+  }
+
+
   // optimize the worker feature calculation
   // o1. identify the local features that need to calculate
   // o2. for the original step 9.5, each party execute locally and use omp parallelism
@@ -1690,7 +1690,6 @@ void worker_calculate_wpcc_per_feature(const Party &party,
   auto *mean_f_cipher_vec = new EncodedNumber[worker_global_feature_num];
   auto *squared_mean_f_cipher_vec = new EncodedNumber[worker_global_feature_num];
 
-  std::vector<double> p_shares_vec; // size = worker_global_feature_num
   auto *p_cipher_vec = new EncodedNumber[worker_global_feature_num];
   for (int g_f_id: global_feature_partition_ids) {
 
@@ -1770,17 +1769,18 @@ void worker_calculate_wpcc_per_feature(const Party &party,
 
     p_cipher_vec[feature_worker_id] = p_cipher[0][0];
 
-    delete [] feature_multiply_w_cipher;
-    delete [] mean_f_cipher;
-    delete [] squared_mean_f_cipher;
+    delete[] feature_multiply_w_cipher;
+    delete[] mean_f_cipher;
+    delete[] squared_mean_f_cipher;
     for (int i = 0; i < num_instance; i++) {
       delete[] f_vec_min_mean_f_cipher[i];
     }
-    delete [] f_vec_min_mean_f_cipher;
-    delete [] p_cipher[0];
-    delete [] p_cipher;
+    delete[] f_vec_min_mean_f_cipher;
+    delete[] p_cipher[0];
+    delete[] p_cipher;
   }
 
+  std::vector<double> p_shares_vec; // size = worker_global_feature_num
   //  all parties jointly compute p share, 1*1
   ciphers_to_secret_shares(party, p_cipher_vec,
                            p_shares_vec,
@@ -1788,21 +1788,18 @@ void worker_calculate_wpcc_per_feature(const Party &party,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
   log_info("[pearson_fl]: 9.4. all parties jointly calculate p share <p>");
-  delete [] p_cipher_vec;
+  delete[] p_cipher_vec;
 
-  // calculate q1 = (f-mean_f) ** 2, tmp_vec_cipher: N*1
+  // calculate q1 = (f-mean_f) ** 2, tmp_vec_cipher: N*M, where N is instance number and M is feature num
   auto **tmp_vec_cipher = new EncodedNumber *[num_instance];
   for (int i = 0; i < num_instance; i++) {
     tmp_vec_cipher[i] = new EncodedNumber[worker_global_feature_num];
   }
 
-  std::vector<int> worker_local_feature_ids = worker_party_feature_ids[party.party_id];
-  int worker_local_feature_num = (int) worker_local_feature_ids.size();
-
-  auto **squared_feature_value_cipher_mat = new EncodedNumber*[num_instance];
-  auto **middle_value_mat = new EncodedNumber*[num_instance];
-  auto **neg_2f_mat = new EncodedNumber*[num_instance];
-  auto **tmp_vec_ele_mat = new EncodedNumber*[num_instance];
+  auto **squared_feature_value_cipher_mat = new EncodedNumber *[num_instance];
+  auto **middle_value_mat = new EncodedNumber *[num_instance];
+  auto **neg_2f_mat = new EncodedNumber *[num_instance];
+  auto **tmp_vec_ele_mat = new EncodedNumber *[num_instance];
   for (int i = 0; i < num_instance; i++) {
     squared_feature_value_cipher_mat[i] = new EncodedNumber[worker_local_feature_num];
     middle_value_mat[i] = new EncodedNumber[worker_local_feature_num];
@@ -1820,36 +1817,50 @@ void worker_calculate_wpcc_per_feature(const Party &party,
       // calculate [f**2]
       // EncodedNumber squared_feature_value_cipher;
       squared_feature_value_cipher_mat[i][worker_f_id].set_double(phe_pub_key->n[0],
-                                                                 train_data[i][feature_id] * train_data[i][feature_id],
-                                                                 PHE_FIXED_POINT_PRECISION * PHE_FIXED_POINT_PRECISION);
-      djcs_t_aux_encrypt(phe_pub_key, party.phe_random, squared_feature_value_cipher_mat[i][worker_f_id], squared_feature_value_cipher_mat[i][worker_f_id]);
+                                                                  train_data[i][feature_id] * train_data[i][feature_id],
+                                                                  PHE_FIXED_POINT_PRECISION
+                                                                      * PHE_FIXED_POINT_PRECISION);
+      djcs_t_aux_encrypt(phe_pub_key,
+                         party.phe_random,
+                         squared_feature_value_cipher_mat[i][worker_f_id],
+                         squared_feature_value_cipher_mat[i][worker_f_id]);
 
       // calculate -2f*[mean_f]`
       // EncodedNumber middle_value;
       // EncodedNumber neg_2f;
       neg_2f_mat[i][worker_f_id].set_double(phe_pub_key->n[0], -2 * train_data[i][feature_id],
-                                           abs(mean_f_cipher_vec[feature_worker_id].getter_exponent()));
-      djcs_t_aux_ep_mul(phe_pub_key, middle_value_mat[i][worker_f_id], mean_f_cipher_vec[feature_worker_id], neg_2f_mat[i][worker_f_id]);
+                                            abs(mean_f_cipher_vec[feature_worker_id].getter_exponent()));
+      djcs_t_aux_ep_mul(phe_pub_key,
+                        middle_value_mat[i][worker_f_id],
+                        mean_f_cipher_vec[feature_worker_id],
+                        neg_2f_mat[i][worker_f_id]);
 
       // calculate [f_j]**2 + -2f_j*[mean_F] + [mean_F]**2
       // EncodedNumber tmp_vec_ele;
-      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele_mat[i][worker_f_id], squared_feature_value_cipher_mat[i][worker_f_id], middle_value_mat[i][worker_f_id]);
-      djcs_t_aux_ee_add_ext(phe_pub_key, tmp_vec_ele_mat[i][worker_f_id], tmp_vec_ele_mat[i][worker_f_id], squared_mean_f_cipher_vec[feature_worker_id]);
+      djcs_t_aux_ee_add_ext(phe_pub_key,
+                            tmp_vec_ele_mat[i][worker_f_id],
+                            squared_feature_value_cipher_mat[i][worker_f_id],
+                            middle_value_mat[i][worker_f_id]);
+      djcs_t_aux_ee_add_ext(phe_pub_key,
+                            tmp_vec_ele_mat[i][worker_f_id],
+                            tmp_vec_ele_mat[i][worker_f_id],
+                            squared_mean_f_cipher_vec[feature_worker_id]);
       tmp_vec_cipher[i][feature_worker_id] = tmp_vec_ele_mat[i][worker_f_id];
 
     }
   }
 
+  // clear the memory
   for (int i = 0; i < num_instance; i++) {
-    delete [] squared_feature_value_cipher_mat[i];
-    delete [] middle_value_mat[i];
-    delete [] neg_2f_mat[i];
-    delete [] tmp_vec_ele_mat[i];
+    delete[] squared_feature_value_cipher_mat[i];
+    delete[] middle_value_mat[i];
+    delete[] neg_2f_mat[i];
+    delete[] tmp_vec_ele_mat[i];
   }
-  delete [] squared_feature_value_cipher_mat;
-  delete [] middle_value_mat;
-  delete [] neg_2f_mat;
-  delete [] tmp_vec_ele_mat;
+  delete[] squared_feature_value_cipher_mat;
+  delete[] middle_value_mat;
+  delete[] neg_2f_mat;
+  delete[] tmp_vec_ele_mat;
 
   log_info("[pearson_fl]: 9.5. for each instance, calculate [f**2] + -2f*[mean_f] + [mean_f**2]");
 
@@ -1860,11 +1871,14 @@ void worker_calculate_wpcc_per_feature(const Party &party,
       if (id != party.party_id) {
         std::string recv_tmp_vec_ciphers_str;
         party.recv_long_message(id, recv_tmp_vec_ciphers_str);
-        auto **recv_tmp_vec_ciphers = new EncodedNumber*[num_instance];
+        auto **recv_tmp_vec_ciphers = new EncodedNumber *[num_instance];
         for (int i = 0; i < num_instance; i++) {
           recv_tmp_vec_ciphers[i] = new EncodedNumber[worker_global_feature_num];
         }
-        deserialize_encoded_number_matrix(recv_tmp_vec_ciphers, num_instance, worker_global_feature_num, recv_tmp_vec_ciphers_str);
+        deserialize_encoded_number_matrix(recv_tmp_vec_ciphers,
+                                          num_instance,
+                                          worker_global_feature_num,
+                                          recv_tmp_vec_ciphers_str);
         // copy party id's results to tmp_vec_ciphers (need to find the corresponding index of party id in worker_global_feature_num vector
         std::vector<int> party_feature_ids = worker_party_feature_ids[id];
         std::vector<int> feature_idx_in_worker_global;
@@ -1880,9 +1894,9 @@ void worker_calculate_wpcc_per_feature(const Party &party,
         }
 
         for (int i = 0; i < num_instance; i++) {
-          delete [] recv_tmp_vec_ciphers[i];
+          delete[] recv_tmp_vec_ciphers[i];
         }
-        delete [] recv_tmp_vec_ciphers;
+        delete[] recv_tmp_vec_ciphers;
       }
     }
   } else {
@@ -1900,7 +1914,7 @@ void worker_calculate_wpcc_per_feature(const Party &party,
   q1_cipher[0] = new EncodedNumber[worker_global_feature_num];
   cipher_shares_mat_mul(party,
                         two_d_sss_weights_share, // 1*N
-                        tmp_vec_cipher, // N*1
+                        tmp_vec_cipher, // N*M
                         1, num_instance, num_instance, worker_global_feature_num,
                         q1_cipher);
   log_info("[pearson_fl]: 9.7. calculate q1 ");
@@ -1920,14 +1934,31 @@ void worker_calculate_wpcc_per_feature(const Party &party,
     wpcc_vec.push_back(v);
   }
 
-  delete [] mean_f_cipher_vec;
-  delete [] squared_mean_f_cipher_vec;
+  delete[] mean_f_cipher_vec;
+  delete[] squared_mean_f_cipher_vec;
   for (int i = 0; i < num_instance; i++) {
     delete[] tmp_vec_cipher[i];
   }
   delete[] tmp_vec_cipher;
   delete[] q1_cipher[0];
   delete[] q1_cipher;
+
+  for (int i = 0; i < party.getter_feature_num(); i++) {
+    delete[] party_local_tmp_wf[i];
+  }
+  delete[] party_local_tmp_wf;
+  for (int i = 0; i < party.getter_feature_num(); i++) {
+    delete[] local_encrypted_feature[i];
+  }
+  delete[] local_encrypted_feature;
+  delete[] sss_weight_cipher;
+
+  for (int i = 0; i< worker_local_feature_num; i++){
+    delete[] feature_vector_plains[i];
+  }
+  delete[] feature_vector_plains;
+  delete[] feature_multiply_w_cipher;
+
 
   djcs_t_free_public_key(phe_pub_key);
 

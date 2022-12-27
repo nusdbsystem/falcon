@@ -5,11 +5,11 @@ PARTY_SERVER_NODE_PORT=30005
 # Only used when deployment method is docker,
 # When party server is a cluster with many servers, list all servers here,
 # PARTY_SERVER_IP is the first element in PARTY_SERVER_CLUSTER_IPS
-PARTY_SERVER_CLUSTER_IPS="172.31.18.73 172.31.24.46 172.31.21.117 172.31.29.190 172.31.19.215"
+PARTY_SERVER_CLUSTER_IPS="172.31.18.73"
 # 1. Label each node of cluster when launch the cluster,and list all node's label here, used to do schedule.
 # 2. Label node with:: docker node update --label-add name=host j5eb3zmanmfd6wlgrby4qq101
 # 3. Check label with:: docker node ls -q | xargs docker node inspect -f '{{ .ID }} [{{ .Description.Hostname }}]: {{ .Spec.Labels }}'
-PARTY_SERVER_CLUSTER_LABEL="p0w0 p0w1 p0w2 p0w3 p0w4"
+PARTY_SERVER_CLUSTER_LABEL="p0w0"
 # if PARTY_SERVER_BASEPATH must be supported, it should be the absolute path
 PARTY_SERVER_BASEPATH="/mnt/efs/fs1/logs/"
 # subprocess call paths
