@@ -1331,9 +1331,7 @@ void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
                           const std::vector<std::vector<int>> & instance_partition_vec,
                           EncodedNumber *predictions,
                           const vector<double> &sss_sample_weights_share,
-                          EncodedNumber **party_local_tmp_wf,
                           std::vector<double> &sum_sss_weight_share,
-                          EncodedNumber **local_encrypted_feature,
                           std::vector<vector<double>> &two_d_e_share_vec,
                           std::vector<std::vector<double>> &two_d_sss_weights_share,
                           std::vector<double> &q2_shares
@@ -1536,7 +1534,6 @@ void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
                          local_encrypted_feature[feature_id][sample_id],
                          local_encrypted_feature[feature_id][sample_id]);
     }
-
   }
   log_info("[WPCC_PS]: 8. each party compute F*[W] in parallel done");
 
@@ -1668,6 +1665,20 @@ void worker_calculate_wpcc_per_feature(const Party &party,
   party.getter_phe_pub_key(phe_pub_key);
   int num_instance = (int) train_data.size();
 
+  // each party gets local feature indexes and compute in parallel
+  std::vector<std::vector<int>> worker_party_feature_ids;
+  for (int pid = 0; pid < party.party_num; pid++) {
+    std::vector<int> party_feature_ids;
+    for (int g_f_id : global_feature_partition_ids) {
+      int party_id = global_partyid_look_up_vec[g_f_id];
+      if (party_id == pid) {
+        // is local feature, put into local_feature_ids
+        party_feature_ids.push_back(g_f_id);
+      }
+    }
+    worker_party_feature_ids.push_back(party_feature_ids);
+  }
+
   // optimize the worker feature calculation
   // o1. identify the local features that need to calculate
   // o2. for the original step 9.5, each party execute locally and use omp parallelism
@@ -1675,12 +1686,12 @@ void worker_calculate_wpcc_per_feature(const Party &party,
 
   int worker_global_feature_num = (int) global_feature_partition_ids.size();
   log_info("[pearson_fl]: worker_global_feature_num = " + std::to_string(worker_global_feature_num));
+
   auto *mean_f_cipher_vec = new EncodedNumber[worker_global_feature_num];
   auto *squared_mean_f_cipher_vec = new EncodedNumber[worker_global_feature_num];
+
   std::vector<double> p_shares_vec; // size = worker_global_feature_num
-  auto *f_vec_min_mean_vec_share_vec = new EncodedNumber[worker_global_feature_num];
-
-
+  auto *p_cipher_vec = new EncodedNumber[worker_global_feature_num];
   for (int g_f_id: global_feature_partition_ids) {
 
     int party_id = global_partyid_look_up_vec[g_f_id];
@@ -1748,16 +1759,16 @@ void worker_calculate_wpcc_per_feature(const Party &party,
         std::to_string(party_id) + " send [F]-[MeanF] to others");
 
     // all parties jointly calculate sum(<w_i> * ([f_i] - [mean_F])([y_i] - [mean_Y])), 1*1
-    auto **f_vec_min_mean_vec_share = new EncodedNumber *[1];
-    f_vec_min_mean_vec_share[0] = new EncodedNumber[1];
+    auto **p_cipher = new EncodedNumber *[1];
+    p_cipher[0] = new EncodedNumber[1];
     cipher_shares_mat_mul(party,
                           two_d_e_share_vec, // 1*N
                           f_vec_min_mean_f_cipher, // N*1
                           1, num_instance, num_instance, 1,
-                          f_vec_min_mean_vec_share);
+                          p_cipher);
     log_info("[pearson_fl]: 9.3. all parties jointly calculate sum(<w_i> * ([f_i] - [mean_F])([y_i] - [mean_Y])),");
 
-    f_vec_min_mean_vec_share_vec[feature_worker_id] = f_vec_min_mean_vec_share[0][0];
+    p_cipher_vec[feature_worker_id] = p_cipher[0][0];
 
     delete [] feature_multiply_w_cipher;
     delete [] mean_f_cipher;
@@ -1766,37 +1777,23 @@ void worker_calculate_wpcc_per_feature(const Party &party,
       delete[] f_vec_min_mean_f_cipher[i];
     }
     delete [] f_vec_min_mean_f_cipher;
-    delete [] f_vec_min_mean_vec_share[0];
-    delete [] f_vec_min_mean_vec_share;
+    delete [] p_cipher[0];
+    delete [] p_cipher;
   }
 
   //  all parties jointly compute p share, 1*1
-  ciphers_to_secret_shares(party, f_vec_min_mean_vec_share_vec,
+  ciphers_to_secret_shares(party, p_cipher_vec,
                            p_shares_vec,
                            worker_global_feature_num,
                            ACTIVE_PARTY_ID,
                            PHE_FIXED_POINT_PRECISION);
   log_info("[pearson_fl]: 9.4. all parties jointly calculate p share <p>");
-  delete [] f_vec_min_mean_vec_share_vec;
+  delete [] p_cipher_vec;
 
   // calculate q1 = (f-mean_f) ** 2, tmp_vec_cipher: N*1
   auto **tmp_vec_cipher = new EncodedNumber *[num_instance];
   for (int i = 0; i < num_instance; i++) {
     tmp_vec_cipher[i] = new EncodedNumber[worker_global_feature_num];
-  }
-
-  // each party gets local feature indexes and compute in parallel
-  std::vector<std::vector<int>> worker_party_feature_ids;
-  for (int pid = 0; pid < party.party_num; pid++) {
-    std::vector<int> party_feature_ids;
-    for (int g_f_id : global_feature_partition_ids) {
-      int party_id = global_partyid_look_up_vec[g_f_id];
-      if (party_id == pid) {
-        // is local feature, put into local_feature_ids
-        party_feature_ids.push_back(g_f_id);
-      }
-    }
-    worker_party_feature_ids.push_back(party_feature_ids);
   }
 
   std::vector<int> worker_local_feature_ids = worker_party_feature_ids[party.party_id];
