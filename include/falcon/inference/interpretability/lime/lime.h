@@ -234,6 +234,13 @@ class LimeExplainer {
       double kernel_width);
 
   /**
+   * precompute the kernelshap weights
+   * @param total_feature_size
+   * @return
+   */
+  static std::vector<double> precompute_kernelshap_weights(int total_feature_size);
+
+  /**
    * This function computes the squared distance between origin_data
    * and sampled_data across all the parties
    *

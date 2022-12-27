@@ -446,6 +446,32 @@ void LimeExplainer::compute_dist_weights(const Party &party,
     public_values.push_back(sample_size);
     public_values.push_back(total_feature_size);
 
+    std::vector<double> total_feature_index_vec;
+    std::vector<double> precompute_weight_values;
+    // TODO: optimize to send public values instead of private values to sss
+    if (party.party_id == ACTIVE_PARTY_ID) {
+      for (int i = 0; i < total_feature_size + 1; i++) {
+        total_feature_index_vec.push_back(i*1.0);
+      }
+      precompute_weight_values = precompute_kernelshap_weights(total_feature_size);
+    } else {
+      for (int i = 0; i < total_feature_size + 1; i++) {
+        total_feature_index_vec.push_back(0.0);
+        precompute_weight_values.push_back(0.0);
+      }
+    }
+
+    std::vector<double> private_values;
+    for (int i = 0; i < sample_size; i++) {
+      private_values.push_back(local_presented_feature_nums[i]);
+    }
+    for (int i = 0; i < total_feature_size + 1; i++) {
+      private_values.push_back(total_feature_index_vec[i]);
+    }
+    for (int i = 0; i < total_feature_size + 1; i++) {
+      private_values.push_back(precompute_weight_values[i]);
+    }
+
     falcon::SpdzLimeCompType comp_type = falcon::KERNELSHAP_WEIGHT;
     std::promise<std::vector<double>> promise_values;
     std::future<std::vector<double>> future_values = promise_values.get_future();
@@ -456,8 +482,8 @@ void LimeExplainer::compute_dist_weights(const Party &party,
                                   party.host_names,
                                   public_values.size(),
                                   public_values,
-                                  local_presented_feature_nums.size(),
-                                  local_presented_feature_nums,
+                                  private_values.size(),
+                                  private_values,
                                   comp_type,
                                   &promise_values);
     res = future_values.get();
@@ -468,6 +494,25 @@ void LimeExplainer::compute_dist_weights(const Party &party,
 
   sss_weights = res;
   log_info("[compute_dist_weights]: shares to ciphers finished");
+}
+
+std::vector<double> LimeExplainer::precompute_kernelshap_weights(int total_feature_size) {
+  // compute w = (d-1) / (C_d^{z} * z * (d - z))
+  std::vector<double> res;
+  for (int i = 0; i < total_feature_size + 1; i++) {
+    if (i == 0 || i == total_feature_size) {
+      res.push_back(ROUNDED_PRECISION_EXT);
+    }
+    long long x = combination(total_feature_size, i);
+    x = x * i * (total_feature_size - i);
+    double y = ((double) (total_feature_size - 1)) / (double) x;
+    // TODO: need to check how kernelshap handle extremely small weights, currently
+    if (y < ROUNDED_PRECISION_EXT) {
+      y = ROUNDED_PRECISION_EXT;
+    }
+    res.push_back(y);
+  }
+  return res;
 }
 
 std::vector<double> LimeExplainer::compute_squared_dist(const Party &party,

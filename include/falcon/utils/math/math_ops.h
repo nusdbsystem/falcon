@@ -199,4 +199,12 @@ std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& num
  */
 int find_idx_in_vec(const std::vector<int>& vec, int ele);
 
+/**
+ * compute the combination c_n^r
+ * @param n
+ * @param r
+ * @return
+ */
+long long combination(long long n, long long r);
+
 #endif  // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

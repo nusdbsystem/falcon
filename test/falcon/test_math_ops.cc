@@ -337,3 +337,15 @@ TEST(Math_ops, Partition_Vec_Balanced) {
     }
   }
 }
+
+TEST(Math_ops, Combination) {
+  long long a = 20;
+  long long b = 2;
+  long long comb = combination(a, b);
+  EXPECT_EQ(comb, 190);
+
+  a = 60;
+  b = 20;
+  comb = combination(a, b);
+  EXPECT_EQ(comb, 4191844505805495);
+}

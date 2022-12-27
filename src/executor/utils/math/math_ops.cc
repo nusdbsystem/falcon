@@ -389,3 +389,11 @@ int find_idx_in_vec(const std::vector<int>& vec, int ele) {
   }
   return idx;
 }
+
+long long combination(long long n, long long r)
+{
+  long long f = 1; // Optimize with regFunction
+  for(auto i = 0; i < r;i++)
+    f = (f * (n - i)) / (i + 1);
+  return f;
+}

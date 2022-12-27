@@ -28,6 +28,7 @@ namespace falcon {
 #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024
 #define MAXIMUM_RAND_VALUE 32767
 #define ROUNDED_PRECISION 1e-3
+#define ROUNDED_PRECISION_EXT 1e-6
 #define NETWORK_CONFIG_PROTO
 
 /** for linear models */
