@@ -43,32 +43,32 @@ def instance_weighting(x):
 
 def feature_selection(x):
     feature_selection = dict()
-    feature_selection[1] = 53.48
-    feature_selection[2] = 44.61
-    feature_selection[3] = 36.97
-    feature_selection[4] = 32.93
-    feature_selection[5] = 30.68
-    feature_selection[6] = 29.19
-    feature_selection[7] = 28.07
-    feature_selection[8] = 27.11
+    feature_selection[1] = 627.566
+    feature_selection[2] = 384.922
+    feature_selection[3] = 351.732
+    feature_selection[4] = 240.295
+    feature_selection[5] = 230.715
+    feature_selection[6] = 227.749
+    feature_selection[7] = 218.538
+    feature_selection[8] = 218.538
     # if x in feature_selection:
     #     return feature_selection[x]
-    return 24.929086085421833+ 30.762217008446868/x
+    return 149.0552092476221+ 481.11922641789533/x
 
 
 def VFL_training(x):
     VFL_training = dict()
-    VFL_training[1] = 71.69
-    VFL_training[2] = 63.01
-    VFL_training[3] = 54
-    VFL_training[4] = 51.35
-    VFL_training[5] = 49.46
-    VFL_training[6] = 47.87
-    VFL_training[7] = 46.71
-    VFL_training[8] = 45.87
+    VFL_training[1] = 283.4
+    VFL_training[2] = 231.34
+    VFL_training[3] = 190.51
+    VFL_training[4] = 170.13
+    VFL_training[5] = 159.36
+    VFL_training[6] = 157.23
+    VFL_training[7] = 152.81
+    VFL_training[8] = 147.55
     # if x in VFL_training:
     #     return VFL_training[x]
-    return 43.48788216642094+ 30.19177917524453/x
+    return 132.29009936540604+ 159.688012380408/x
 
 
 def beta(workerNum, stageName):
@@ -367,13 +367,14 @@ main(10, 0)
 
 
 
-# xxx = range(20, 38, 2)
+# # xxx = [20, 25, 30, 35, 40, 45, 50]
+# xxx = range(10, 40, 1)
 #
 # time_result = []
 # for defaultWorker in xxx:
 #     print("--------------", defaultWorker, "--------------")
 #     time_result.append(main(defaultWorker, 0))
-# print(time_result)
+# print("time_result", time_result)
 #
 # # average
 # averageList = []
@@ -382,17 +383,18 @@ main(10, 0)
 #     averageList.append(main(defaultWorker, 1))
 # print("average: ", averageList)
 #
+# diffs = [averageList[i] - time_result[i] for i in range(len(xxx))]
+# print(diffs)
+#
 # # plot
 # import matplotlib.pyplot as plt
-# plt.plot(xxx, time_result, 'r', )
-# plt.plot(xxx, averageList, 'r', )
-# # plt.plot(xxx, ybest, 'r', )
 #
-# plt.plot(xxx, time_result, '*', label='autoParallel')
-# plt.plot(xxx, averageList, '*', label='average')
+# plt.plot(xxx, time_result, '*-', label='autoParallel')
+# plt.plot(xxx, averageList, '*-', label='average')
+# # plt.plot(xxx, diffs, "o-", label='differs')
 # # plt.plot(xxx, ybest, '*', label='best')
 # plt.xlabel('worker number')
 # plt.ylabel('time usage')
-# plt.legend(loc=2)
+# plt.legend()
 # plt.title('polyfitting')
 # plt.show()
