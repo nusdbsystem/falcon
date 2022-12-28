@@ -10,6 +10,7 @@
 #include <falcon/algorithm/model_builder_helper.h>
 #include <falcon/inference/interpretability/lime/scaler.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/nn_converter.h>
 #include <falcon/utils/math/math_ops.h>
 #include <Networking/ssl_sockets.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
@@ -142,6 +143,28 @@ void LimeExplainer::load_predict_origin_model(const Party &party,
       saved_log_reg_model.predict_proba(party,
                                         generated_samples,
                                         predictions);
+      break;
+    }
+    case falcon::LINEAR_REG: {
+      LinearRegressionModel saved_linear_reg_model;
+      std::string saved_model_string;
+      load_pb_model_string(saved_model_string, origin_model_saved_file);
+      deserialize_lr_model(saved_linear_reg_model, saved_model_string);
+      auto* predictions_1d = new EncodedNumber[num_total_samples];
+      saved_linear_reg_model.predict(party, generated_samples, predictions_1d);
+      for (int i = 0; i < num_total_samples; i++) {
+        predictions[i][0] = predictions_1d[i];
+      }
+      delete [] predictions_1d;
+
+      break;
+    }
+    case falcon::MLP: {
+      MlpModel saved_mlp_model;
+      std::string saved_model_string;
+      load_pb_model_string(saved_model_string, origin_model_saved_file);
+      deserialize_mlp_model(saved_mlp_model, saved_model_string);
+      saved_mlp_model.predict_proba(party, generated_samples, predictions);
       break;
     }
     case falcon::RF: {
