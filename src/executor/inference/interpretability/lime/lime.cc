@@ -1406,6 +1406,7 @@ void lime_comp_pred(Party party, const std::string &params_str,
   log_info("Begin to compute the lime predictions");
   // 1. deserialize the LimePreComputeParams
   LimeCompPredictionParams comp_prediction_params;
+  log_info("[lime_comp_pred] LimeCompPredictionParams.original_model_name = " + comp_prediction_params.original_model_name);
   // set the values for local debug
   // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
   //  comp_prediction_params.original_model_name = "logistic_regression";
@@ -1423,6 +1424,9 @@ void lime_comp_pred(Party party, const std::string &params_str,
   comp_prediction_params.computed_prediction_file =
       output_path_prefix + comp_prediction_params.computed_prediction_file;
   log_info("Deserialize the lime comp_prediction params");
+  log_info("[lime_comp_pred] LimeCompPredictionParams.original_model_saved_file = " + comp_prediction_params.original_model_saved_file);
+  log_info("[lime_comp_pred] LimeCompPredictionParams.generated_sample_file = " + comp_prediction_params.generated_sample_file);
+  log_info("[lime_comp_pred] LimeCompPredictionParams.computed_prediction_file = " + comp_prediction_params.computed_prediction_file);
 
   // 2. read generated random samples
   LimeExplainer lime_explainer;

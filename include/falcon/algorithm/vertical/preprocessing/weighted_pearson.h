@@ -26,7 +26,6 @@
 #include "falcon/algorithm/vertical/preprocessing/weighted_pearson_ps.h"
 #include <falcon/distributed/worker.h>
 
-
 /**
  * Convert cipher into negative cipher
  * @param phe_pub_key: user public key
@@ -136,8 +135,8 @@ std::vector<double> WeightedMean(const Party &party,
  */
 std::vector<double> compute_wpcc(
     const Party &party,
-    const std::vector<double>& p_shares_vec,
-    const std::vector<double>& q1_shares_vec,
+    const std::vector<double> &p_shares_vec,
+    const std::vector<double> &q1_shares_vec,
     double q2_shares
 );
 
@@ -181,7 +180,7 @@ void spdz_lime_computation(int party_num,
  */
 void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
                           const vector<std::vector<double>> &train_data,
-                          const std::vector<std::vector<int>> & instance_partition_vec,
+                          const std::vector<std::vector<int>> &instance_partition_vec,
                           EncodedNumber *predictions,
                           const vector<double> &sss_sample_weights_share,
                           std::vector<double> &sum_sss_weight_share,
@@ -198,13 +197,13 @@ void ps_get_wpcc_pre_info(const WeightedPearsonPS &ps,
  * @param mean_y_cipher
  * @param partial_e_share_vec
  */
-void worker_calculate_wpcc_batch_pre_info(const Party& party,
+void worker_calculate_wpcc_batch_pre_info(const Party &party,
                                           int wk_index,
                                           const std::vector<double> &sum_sss_weight_share,
-                                          const std::vector<std::vector<int>>& instance_partition_vec,
-                                          EncodedNumber* predictions,
-                                          EncodedNumber* mean_y_cipher,
-                                          std::vector<double>& partial_e_share_vec);
+                                          const std::vector<std::vector<int>> &instance_partition_vec,
+                                          EncodedNumber *predictions,
+                                          EncodedNumber *mean_y_cipher,
+                                          std::vector<double> &partial_e_share_vec);
 
 /**
  * Worker pair calculate WPCC for all those pair's local feature.
@@ -240,14 +239,12 @@ void worker_calculate_wpcc_per_feature(const Party &party,
 * @param sss_sample_weights: the sss sample weights
 * @return correlation
 */
-void get_local_features_correlations_plaintext(const Party &party,
-                                               const std::vector<int> &party_feature_nums,
-                                               const vector<std::vector<double>> &train_data,
-                                               EncodedNumber *predictions,
-                                               const vector<double> &sss_sample_weights_share,
-                                               std::vector<double> &wpcc_vec,
-                                               std::vector<int> party_id_loop_ups,
-                                               std::vector<int> party_feature_id_look_ups);
+std::vector<double> get_local_features_correlations_plaintext(const Party &party,
+                                                              const std::vector<int> &party_feature_nums,
+                                                              const vector<std::vector<double>> &train_data,
+                                                              EncodedNumber *predictions,
+                                                              const vector<double> &sss_sample_weights_share,
+                                                              std::vector<double> &wpcc_vec);
 
 /**
  * get the top K features from MPC
@@ -257,11 +254,11 @@ void get_local_features_correlations_plaintext(const Party &party,
  * @param num_explained_features: the top K features
  * @return correlation
  */
-std::vector<int> jointly_get_top_k_features_plaintext(const Party &party,
-                                                      const std::vector<int> &party_feature_nums,
-                                                      const std::vector<double> &feature_cor_shares,
-                                                      const std::vector<int> &party_id_loop_ups,
-                                                      const std::vector<int> &party_feature_id_look_ups,
-                                                      int num_explained_features);
+std::vector<double> jointly_get_top_k_features_plaintext(const Party &party,
+                                                         const std::vector<int> &party_feature_nums,
+                                                         const std::vector<double> &feature_cor_shares,
+                                                         const std::vector<int> &party_id_loop_ups,
+                                                         const std::vector<int> &party_feature_id_look_ups,
+                                                         int num_explained_features);
 
 #endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_PREPROCESSING_WEIGHTED_PEARSON_H_
