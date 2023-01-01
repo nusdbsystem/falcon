@@ -15,7 +15,7 @@ serve for new requests, and calculate the interpretability.
 * install web server request handling library **[served](https://github.com/meltwater/served)**.
 
 
-## Run an example with Docker
+## Run an example with Docker at local
 
 ### Build the docker image
 
@@ -28,8 +28,22 @@ docker build --network=host -t falcon:latest -f ./ubuntu18.04-falcon.Dockerfile 
 It may take a long time to build this image as it needs to download a number of 
 dependencies and build the MP-SPDZ programs for running the test examples. 
 
+### Install Go and source environment
+
+Install go and source environment for running the coordinator and partyservers later.
+
+```shell
+wget -q https://golang.org/dl/go1.14.13.linux-amd64.tar.gz -O go114.tar.gz && tar xzf go114.tar.gz -C /home/ubuntu/
+export GOROOT=/home/ubuntu/go
+export GOPATH=/gopath
+export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+export PATH=/root/.local/bin:$PATH
+```
+
+### Start coordinator and partyservers
+
 After building the docker image, open four terminals (one is the coordinator, and the other three
-are the parties), and run the following commands under the project path in the terminals, respectively. 
+are the partyservers), and run the following commands under the project path in the terminals, respectively. 
 Make sure the path and image name in `examples/3party/coordinator/config_coord.properties` are correctly defined.
 
 ```shell
@@ -41,6 +55,8 @@ bash examples/3party/party0/debug_partyserver.sh --partyID 0
 bash examples/3party/party0/debug_partyserver.sh --partyID 1
 bash examples/3party/party0/debug_partyserver.sh --partyID 2
 ```
+
+### Submit and run the job
 
 Once the coordinator and three parties are started successfully, open another terminal for the user to submit 
 a DSL job request. For example, train a logistic regression model on the breast_cancer dataset. Need to make sure
@@ -59,7 +75,72 @@ view the containers. After the job finished, can clean the docker containers usi
 bash src/falcon_platform/scripts/docker_service_rm_all_container.sh
 ```
 
-## Develop guide
+## Run examples on a distributed cluster 
+
+### Setup Docker swarm service 
+
+Install docker on three cluster nodes for three parties (the coordinator can be run on the active party).
+And init a docker swarm service and add labels to the three nodes with `p0w0`, `p1w0`, `p2w0`, respectively.
+
+```shell
+sudo snap install docker
+sudo chmod 666 /var/run/docker.sock
+
+docker swarm init --advertise-addr xxx.xxx.xxx.xxx
+docker swarm join --token SWMTKN-1-47j1o757a9c55fegvbh2uj9ncyqhj7rzfis02hwxrwulpghc8j-bh5bbjhscpmx5qcchaxp0zroo 172.31.18.73:2377
+docker node promote xxx
+docker node demote xxx
+docker node update --label-add name=p0w0 xxx
+docker node ls -q | xargs docker node inspect -f '{{ .ID }} [{{ .Description.Hostname }}]: {{ .Spec.Labels }}'
+
+```
+
+Follow the steps above to build a docker image and upload to DockerHub, and pull the image on the three nodes,
+make sure each node has the corresponding image.
+
+### Install Go and source environment
+
+Follow the above steps to install go and source the environment.
+
+### Update the config files
+
+Go to the `examples/3party/` folder, update `config_coord.properties` file with the 
+coordinator IP address `COORD_SERVER_IP=xxx.xxx.xxx.xxx`. 
+
+Similarly, update the config file for  each partyserver under `examples/3party/party0/config_partyserver.properties`.
+
+```shell
+COORD_SERVER_IP=172.31.18.73
+COORD_SERVER_PORT=30004
+PARTY_SERVER_IP=172.31.18.73
+PARTY_SERVER_NODE_PORT=30005
+# Only used when deployment method is docker,
+# When party server is a cluster with many servers, list all servers here,
+# PARTY_SERVER_IP is the first element in PARTY_SERVER_CLUSTER_IPS
+PARTY_SERVER_CLUSTER_IPS="172.31.18.73"
+# 1. Label each node of cluster when launch the cluster,and list all node's label here, used to do schedule.
+# 2. Label node with:: docker node update --label-add name=host j5eb3zmanmfd6wlgrby4qq101
+# 3. Check label with:: docker node ls -q | xargs docker node inspect -f '{{ .ID }} [{{ .Description.Hostname }}]: {{ .Spec.Labels }}'
+PARTY_SERVER_CLUSTER_LABEL="p0w0"
+```
+
+The `COORD_SERVER_IP` is the previous coordinator's IP address, and the `PARTY_SERVER_IP` is the current
+node's IP address. Also, update the `PARTY_SERVER_CLUSTER_IPS` with all the available nodes for each party if 
+running in the distributed mode. If each party only has one node, here should be the same as `PARTY_SERVER_IP`.
+Besides, update the `PARTY_SERVER_CLUSTER_LABEL` with the label just created for the docker swarm node.
+
+### Start coordinator and partyservres
+
+Similarly, start one coordinator and three partyservers on the corresponding cluster node. Then, the 
+coordinator is ready for accepting new job requests.
+
+### Submit a job to run the test
+
+Follow the above steps to submit a job on any cluster node, make sure to set `--url 127.0.0.1:30004` to
+the coordinator IP address and port, for example `--url 172.31.18.73:30004`.
+
+
+## Develop guide (for developers)
 
 ### Build the platform
 
@@ -145,7 +226,7 @@ JOB_DATABASE=sqlite3
 COORD_SERVER_IP=10.0.0.20
 COORD_SERVER_PORT=30004
 # if COORD_SERVER_BASEPATH is not supplied, will default to LOG_PATH later in start_all script
-COORD_SERVER_BASEPATH="/users/yunchengwu/projects/falcon/src/falcon_platform"
+COORD_SERVER_BASEPATH="/opt/falcon/src/falcon_platform"
 # number of consumers for the coord http server
 N_CONSUMER=3
 ```
@@ -170,7 +251,7 @@ PARTY_SERVER_CLUSTER_IPS="10.0.0.24 10.0.0.32 10.0.0.33 10.0.0.34"
 # label each node of cluster when launch the cluster,and list all node's label here, used to do schedule.
 PARTY_SERVER_CLUSTER_LABEL="p2 p2w0 p2w1 p2w2"
 # if PARTY_SERVER_BASEPATH must be supported, it should be the absolute path
-PARTY_SERVER_BASEPATH="/users/yunchengwu/projects/falcon/src/falcon_platform"
+PARTY_SERVER_BASEPATH="/opt/falcon/src/falcon_platform"
 # subprocess call paths
 MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x"
 FL_ENGINE_PATH="/opt/falcon/build/src/executor/falcon
