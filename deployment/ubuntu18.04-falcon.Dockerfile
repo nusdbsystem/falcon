@@ -176,7 +176,7 @@ RUN echo "update repo for building new image"
 WORKDIR /opt
 RUN echo yes|git clone git@github.com:lemonviv/falcon.git && \
     cd falcon && \
-    git checkout experiment2022  && \
+    git checkout dev  && \
     cd third_party/ && \
     git submodule update --init --recursive
 
@@ -221,7 +221,7 @@ RUN cd /opt/falcon/src/executor/include/proto && \
 # build the falcon executor
 WORKDIR /opt/falcon
 RUN git branch
-RUN git pull origin mlp && git log
+RUN git pull origin dev && git log
 RUN export PATH="$PATH:$HOME/.local/bin" && \
     mkdir build && \
     cmake -Bbuild -H. && \
@@ -262,15 +262,15 @@ RUN apt-get update && apt-get upgrade -y && \
 #############################################################
 WORKDIR /opt/falcon/third_party/MP-SPDZ
 RUN git fetch origin && \
-    git checkout add_pearson && \
+    git checkout master && \
     git log --oneline -2 && \
     ./compile.py Programs/Source/lime.mpc
 
 # 1. pull latest code
 WORKDIR /opt/falcon
 RUN git fetch origin && \
-    git checkout add_pearson && \
-    git pull origin add_pearson
+    git checkout dev && \
+    git pull origin dev
 
 # 2. Set environment variables and pre-compile falcon_coordinator
 ENV GOROOT /usr/local/go
@@ -286,7 +286,7 @@ ARG CACHEBUST=1
 # 1. pull latest code
 WORKDIR /opt/falcon
 RUN git fetch origin && \
-    git pull origin add_pearson
+    git pull origin dev
 
 # 2. Set environment variables and pre-compile falcon_coordinator
 # ENV GOROOT /usr/local/go
@@ -307,12 +307,6 @@ RUN Scripts/setup-online.sh 3 128 128 && \
     git pull && \
     git log --oneline -2 && \
     ./compile.py Programs/Source/lime.mpc
-
-# # every-time the code (e,g. lime.mpc) have been changed, re-compiled it here.
-# WORKDIR /opt/falcon/third_party/MP-SPDZ
-# RUN git fetch origin && \
-#     git checkout add_pearson && \
-#     ./compile.py Programs/Source/lime.mpc
 
 # 4. pre-compile falcon
 WORKDIR /opt/falcon
