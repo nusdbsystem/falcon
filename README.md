@@ -1,8 +1,8 @@
 # Falcon
 
-Falcon is a federated learning system with privacy protection. It allows
-multiple parties to collaboratively train a machine learning model and
-serve for new requests.
+Falcon is a federated learning system with strong privacy protection. It allows
+multiple parties to collaboratively train a variety of machine learning models, 
+serve for new requests, and calculate the interpretability.
 
 ## Prerequisites
 
@@ -14,17 +14,59 @@ serve for new requests.
 
 * install web server request handling library **[served](https://github.com/meltwater/served)**.
 
-# Develop guide
 
-### Debug cmds
-lsof -i :80
+## Run an example with Docker
+
+### Build the docker image
+
+Go to the `deployment` folder, and run the following command to build the docker image:
+
+```bash
+docker build --network=host -t falcon:latest -f ./ubuntu18.04-falcon.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg CACHEBUST="$(date +%s)"
+```
+
+It may take a long time to build this image as it needs to download a number of 
+dependencies and build the MP-SPDZ programs for running the test examples. 
+
+After building the docker image, open four terminals (one is the coordinator, and the other three
+are the parties), and run the following commands under the project path in the terminals, respectively. 
+Make sure the path and image name in `examples/3party/coordinator/config_coord.properties` are correctly defined.
+
+```shell
+# start the coordinator
+bash examples/3party/coordinator/debug_coord.sh
+
+# start three parties
+bash examples/3party/party0/debug_partyserver.sh --partyID 0
+bash examples/3party/party0/debug_partyserver.sh --partyID 1
+bash examples/3party/party0/debug_partyserver.sh --partyID 2
+```
+
+Once the coordinator and three parties are started successfully, open another terminal for the user to submit 
+a DSL job request. For example, train a logistic regression model on the breast_cancer dataset. Need to make sure
+that the path in the example dsl `examples/3party/dsls/local_testing/full_template/8.train_logistic_reg.json` is correct.
+
+```shell
+cd examples/
+python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path /opt/falcon/examples/3party/dsls/local_testing/full_template/8.train_logistic_reg.json
+```
+
+If the job is successfully submitted, it will return a job ID. You can query the status of this job using 
+the `coordinator_client.py` script, go to the log folder to check the LOGs, or use `docker service ls` to 
+view the containers. After the job finished, can clean the docker containers using:
+
+```shell
+bash src/falcon_platform/scripts/docker_service_rm_all_container.sh
+```
+
+## Develop guide
 
 ### Build the platform
 
 Current development follows the current patterns:
 
 1. Edit falcon or `MPC`  locally and `git commit` to corresponding `github`
-2. Review the `dockerfile` in `/falcon/deployment/ubuntu18.04-falcon.Dockerfile`:
+2. Review the `dockerfile` in `/deployment/ubuntu18.04-falcon.Dockerfile`:
     1. If some`MPC` code is updated, change the docker file line 283-286
     2. Build locally with `cd deployment && docker build -t falcon-clean:latest -f ./ubuntu18.04-falcon.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg CACHEBUST="$(date +%s)"`
 3. Now the code is updated to the docker container.
@@ -33,12 +75,11 @@ Current development follows the current patterns:
 
 ### Run the platform
 
-1. Run coordinator with `bash 2022sigmod-exp/3party/coordinator/debug_coord.sh `
+1. Run coordinator with `bash examples/3party/coordinator/debug_coord.sh `
 
-2. Run party server N with  `bash 2022sigmod-exp/3party/party0/debug_partyserver.sh --partyID N`
+2. Run party server N with  `bash examples/3party/party0/debug_partyserver.sh --partyID N`
 
-   e,g.  server 0 with `bash 2022sigmod-exp/3party/party0/debug_partyserver.sh --partyID 0`
-
+   e,g.  server 0 with `bash examples/3party/party0/debug_partyserver.sh --partyID 0`
 
 
 ## Quick Setup
