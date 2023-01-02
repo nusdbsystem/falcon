@@ -87,7 +87,7 @@ sudo snap install docker
 sudo chmod 666 /var/run/docker.sock
 
 docker swarm init --advertise-addr xxx.xxx.xxx.xxx
-docker swarm join --token SWMTKN-1-47j1o757a9c55fegvbh2uj9ncyqhj7rzfis02hwxrwulpghc8j-bh5bbjhscpmx5qcchaxp0zroo 172.31.18.73:2377
+docker swarm join --token xxx 172.31.18.73:2377
 docker node promote xxx
 docker node demote xxx
 docker node update --label-add name=p0w0 xxx
