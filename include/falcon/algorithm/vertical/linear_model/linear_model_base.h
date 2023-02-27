@@ -5,23 +5,24 @@
 #ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BASE_H_
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BASE_H_
 
+#include "falcon/distributed/worker.h"
 #include <falcon/common.h>
 #include <falcon/party/party.h>
-#include "falcon/distributed/worker.h"
 
-#include <thread>
 #include <future>
+#include <thread>
 
 class LinearModel {
- public:
+public:
   // number of weights in the model
   int weight_size{};
-  // model weights vector, encrypted values during training, size equals to weight_size
+  // model weights vector, encrypted values during training, size equals to
+  // weight_size
   EncodedNumber *local_weights{};
   // parties' weight size vector
   std::vector<int> party_weight_sizes;
 
- public:
+public:
   LinearModel();
   explicit LinearModel(int m_weight_size);
   ~LinearModel();
@@ -40,19 +41,17 @@ class LinearModel {
   LinearModel &operator=(const LinearModel &linear_model);
 
   /**
- * compute phe aggregation for a batch of samples
- *
- * @param party: initialized party object
- * @param batch_indexes: selected batch indexes
- * @param dataset_type: denote the dataset type
- * @param precision: the fixed point precision of encoded plaintext samples
- * @param batch_aggregation: returned phe aggregation for the batch
- */
+   * compute phe aggregation for a batch of samples
+   *
+   * @param party: initialized party object
+   * @param batch_indexes: selected batch indexes
+   * @param dataset_type: denote the dataset type
+   * @param precision: the fixed point precision of encoded plaintext samples
+   * @param batch_aggregation: returned phe aggregation for the batch
+   */
   void compute_batch_phe_aggregation(
-      const Party &party,
-      int cur_batch_size,
-      EncodedNumber** encoded_batch_samples,
-      int precision,
+      const Party &party, int cur_batch_size,
+      EncodedNumber **encoded_batch_samples, int precision,
       EncodedNumber *encrypted_batch_aggregation) const;
 
   /**
@@ -60,7 +59,7 @@ class LinearModel {
    *
    * @param party: initialized party object
    */
-  void sync_up_weight_sizes(const Party& party);
+  void sync_up_weight_sizes(const Party &party);
 
   /**
    * This function truncates the parties' weights precision
@@ -68,14 +67,14 @@ class LinearModel {
    * @param party: initialized party object
    * @param dest_precision: the destination precision
    */
-  void truncate_weights_precision(const Party& party, int dest_precision);
+  void truncate_weights_precision(const Party &party, int dest_precision);
 
   /**
    * print weights during training to view changes
    *
    * @param party: initialized party object
    */
-  std::vector<double> display_weights(const Party& party);
+  std::vector<double> display_weights(const Party &party);
 };
 
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BASE_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_MODEL_BASE_H_

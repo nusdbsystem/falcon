@@ -3,19 +3,20 @@
 //
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <iomanip>
 
 using namespace std;
 
 #define smoother 0.001
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   // the argv[1] give the file path
-  // the argv[2] denote whether normalize labels, for classification, no, regression, yes
+  // the argv[2] denote whether normalize labels, for classification, no,
+  // regression, yes
   if (argc < 3) {
     cout << "Args: file_path" << endl;
     return 0;
@@ -26,7 +27,7 @@ int main(int argc, char* argv[]) {
   cout << "flag = " << flag << endl;
   ifstream ifs(file);
   string line;
-  vector< vector<float> > table;
+  vector<vector<float>> table;
   while (getline(ifs, line)) {
     stringstream ss(line);
     string data;
@@ -68,7 +69,8 @@ int main(int argc, char* argv[]) {
 
   for (int i = 0; i < n_samples; i++) {
     for (int j = 0; j < normalized_attribute; j++) {
-      table[i][j] = (table[i][j] - attributes_min[j] + smoother) / (attributes_max[j] - attributes_min[j] + smoother);
+      table[i][j] = (table[i][j] - attributes_min[j] + smoother) /
+                    (attributes_max[j] - attributes_min[j] + smoother);
     }
   }
 
@@ -89,6 +91,6 @@ int main(int argc, char* argv[]) {
     }
   }
   out1.flush();
-  cout << "write finished "<< endl;
+  cout << "write finished " << endl;
   return 0;
 }

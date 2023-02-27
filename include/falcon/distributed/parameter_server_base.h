@@ -11,13 +11,13 @@
 using namespace std;
 
 class ParameterServer {
- public:
+public:
   // boost i/o functionality
   boost::asio::io_service io_service;
   // communication channel between parameter server and follower
-  std::vector<shared_ptr<CommParty> > worker_channels;
+  std::vector<shared_ptr<CommParty>> worker_channels;
 
- public:
+public:
   ParameterServer() = default;
   explicit ParameterServer(const std::string &ps_network_config_pb_str);
   ~ParameterServer() = default;
@@ -60,9 +60,9 @@ class ParameterServer {
    * @param cur_test_data_indexes: vector of index
    * @param predicted_labels: return value, array of labels
    */
-  virtual void distributed_predict(
-      const std::vector<int> &cur_test_data_indexes,
-      EncodedNumber *predicted_labels) = 0;
+  virtual void
+  distributed_predict(const std::vector<int> &cur_test_data_indexes,
+                      EncodedNumber *predicted_labels) = 0;
 
   /**
    * abstract method of saving the trained model
@@ -70,7 +70,6 @@ class ParameterServer {
    * @param model_save_file: vector of index
    */
   virtual void save_model(const std::string &model_save_file) = 0;
-
 };
 
-#endif //FALCON_PARAMETER_SERVER_H
+#endif // FALCON_PARAMETER_SERVER_H

@@ -1,7 +1,30 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by wuyuncheng on 4/6/21.
 //
-
 
 #include <iostream>
 #include <memory>
@@ -10,19 +33,19 @@
 #include <served/served.hpp>
 
 #include <falcon/common.h>
-#include <falcon/operator/phe/fixed_point_encoder.h>
-#include <falcon/model/model_io.h>
 #include <falcon/inference/server/dt_inference_service.h>
+#include <falcon/model/model_io.h>
+#include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/utils/io_util.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/tree_converter.h>
-#include <falcon/utils/io_util.h>
 
-#include <glog/logging.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <glog/logging.h>
 
-void run_active_server_dt(const std::string& endpoint,
-                          const std::string& saved_model_file,
-                          const Party& party) {
+void run_active_server_dt(const std::string &endpoint,
+                          const std::string &saved_model_file,
+                          const Party &party) {
   // The actual processing. Add process logic here
   TreeModel saved_tree_model_;
   std::string saved_model_string;
@@ -32,14 +55,13 @@ void run_active_server_dt(const std::string& endpoint,
   served::multiplexer mux;
 
   mux.handle("/inference")
-      .get([&](served::response & res, const served::request & req) {
+      .get([&](served::response &res, const served::request &req) {
         std::cout << "Receive client's request" << std::endl;
         LOG(INFO) << "Receive client's request";
         int sample_num = 0;
         std::vector<int> batch_indexes;
         // iterate all query param, sparse the client request
-        for ( const auto & query_param : req.query )
-        {
+        for (const auto &query_param : req.query) {
           if (query_param.first == "sampleNum") {
             sample_num = std::stoi(query_param.second);
           }
@@ -62,27 +84,31 @@ void run_active_server_dt(const std::string& endpoint,
             party.send_long_message(i, batch_indexes_str);
           }
         }
-        std::cout << "Broadcast client's batch requests to other parties" << std::endl;
+        std::cout << "Broadcast client's batch requests to other parties"
+                  << std::endl;
         LOG(INFO) << "Broadcast client's batch requests to other parties";
 
         // retrieve batch samples and encode (notice to use cur_batch_size
         // instead of default batch size to avoid unexpected batch)
-        EncodedNumber* predicted_labels = new EncodedNumber[sample_num];
-        std::vector< std::vector<double> > batch_samples;
+        EncodedNumber *predicted_labels = new EncodedNumber[sample_num];
+        std::vector<std::vector<double>> batch_samples;
         for (int i = 0; i < sample_num; i++) {
           batch_samples.push_back(party.getter_local_data()[batch_indexes[i]]);
         }
-        saved_tree_model_.predict(const_cast<Party &>(party), batch_samples, sample_num, predicted_labels);
+        saved_tree_model_.predict(const_cast<Party &>(party), batch_samples,
+                                  sample_num, predicted_labels);
 
         // step 3: active party aggregates and call collaborative decryption
-        EncodedNumber* decrypted_labels = new EncodedNumber[sample_num];
-        collaborative_decrypt(party, predicted_labels, decrypted_labels, sample_num, ACTIVE_PARTY_ID);
+        EncodedNumber *decrypted_labels = new EncodedNumber[sample_num];
+        collaborative_decrypt(party, predicted_labels, decrypted_labels,
+                              sample_num, ACTIVE_PARTY_ID);
         std::cout << "Collaboratively decryption finished" << std::endl;
         LOG(INFO) << "Collaboratively decryption finished";
 
-        // step 4: active party computes the logistic function and compare the accuracy
+        // step 4: active party computes the logistic function and compare the
+        // accuracy
         std::vector<double> labels;
-        std::vector< std::vector<double> > probabilities;
+        std::vector<std::vector<double>> probabilities;
         int positive_class = 1;
         int negative_class = 0;
         for (int i = 0; i < sample_num; i++) {
@@ -107,15 +133,16 @@ void run_active_server_dt(const std::string& endpoint,
         }
         std::cout << "Compute prediction finished" << std::endl;
         LOG(INFO) << "Compute prediction finished";
-        delete [] predicted_labels;
-        delete [] decrypted_labels;
+        delete[] predicted_labels;
+        delete[] decrypted_labels;
         google::FlushLogFiles(google::INFO);
 
         // assemble response
         res << "The batch prediction results are as follows.\n";
         res << "Predicted sample num: " << NumberToString(sample_num) << "\n";
         for (int i = 0; i < sample_num; i++) {
-          res << "\t sample " << NumberToString(i) << "'s label: " << NumberToString(labels[i]) << ". ";
+          res << "\t sample " << NumberToString(i)
+              << "'s label: " << NumberToString(labels[i]) << ". ";
           res << "probabilities: [";
           for (int j = 0; j < probabilities[0].size(); j++) {
             if (j != probabilities[0].size() - 1) {
@@ -142,8 +169,8 @@ void run_active_server_dt(const std::string& endpoint,
   server.run(10); // Run with a pool of 10 threads.
 }
 
-void run_passive_server_dt(const std::string& saved_model_file,
-                           const Party& party) {
+void run_passive_server_dt(const std::string &saved_model_file,
+                           const Party &party) {
   TreeModel saved_tree_model;
   // load_dt_model(saved_model_file, saved_tree_model);
   std::string saved_model_string;
@@ -166,20 +193,22 @@ void run_passive_server_dt(const std::string& saved_model_file,
     // instead of default batch size to avoid unexpected batch)
     int cur_batch_size = batch_indexes.size();
     EncodedNumber *predicted_labels = new EncodedNumber[cur_batch_size];
-    std::vector< std::vector<double> > batch_samples;
+    std::vector<std::vector<double>> batch_samples;
     for (int i = 0; i < cur_batch_size; i++) {
       batch_samples.push_back(party.getter_local_data()[batch_indexes[i]]);
     }
-    saved_tree_model.predict(const_cast<Party &>(party), batch_samples, cur_batch_size, predicted_labels);
+    saved_tree_model.predict(const_cast<Party &>(party), batch_samples,
+                             cur_batch_size, predicted_labels);
 
     // step 3: active party aggregates and call collaborative decryption
-    EncodedNumber* decrypted_labels = new EncodedNumber[cur_batch_size];
-    collaborative_decrypt(party, predicted_labels, decrypted_labels, cur_batch_size, ACTIVE_PARTY_ID);
+    EncodedNumber *decrypted_labels = new EncodedNumber[cur_batch_size];
+    collaborative_decrypt(party, predicted_labels, decrypted_labels,
+                          cur_batch_size, ACTIVE_PARTY_ID);
     std::cout << "Collaboratively decryption finished" << std::endl;
     LOG(INFO) << "Collaboratively decryption finished";
 
-    delete [] predicted_labels;
-    delete [] decrypted_labels;
+    delete[] predicted_labels;
+    delete[] decrypted_labels;
 
     google::FlushLogFiles(google::INFO);
   }

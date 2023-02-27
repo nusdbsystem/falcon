@@ -1,3 +1,27 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by wuyuncheng on 15/11/20.
 //
@@ -5,10 +29,10 @@
 #include "../../include/message/common.pb.h"
 #include <falcon/utils/pb_converter/common_converter.h>
 
-#include <google/protobuf/io/coded_stream.h>
 #include <falcon/utils/logger/logger.h>
+#include <google/protobuf/io/coded_stream.h>
 
-void serialize_int_array(std::vector<int> vec, std::string& output_message) {
+void serialize_int_array(std::vector<int> vec, std::string &output_message) {
   com::nus::dbsytem::falcon::v0::IntArray int_array;
   for (int i = 0; i < vec.size(); i++) {
     int_array.add_int_item(vec[i]);
@@ -17,7 +41,8 @@ void serialize_int_array(std::vector<int> vec, std::string& output_message) {
   int_array.Clear();
 }
 
-void deserialize_int_array(std::vector<int>& vec, const std::string& input_message) {
+void deserialize_int_array(std::vector<int> &vec,
+                           const std::string &input_message) {
   com::nus::dbsytem::falcon::v0::IntArray deserialized_int_array;
   if (!deserialized_int_array.ParseFromString(input_message)) {
     log_error("Deserialize int array message failed.");
@@ -28,7 +53,8 @@ void deserialize_int_array(std::vector<int>& vec, const std::string& input_messa
   }
 }
 
-void serialize_double_array(std::vector<double> vec, std::string& output_message) {
+void serialize_double_array(std::vector<double> vec,
+                            std::string &output_message) {
   com::nus::dbsytem::falcon::v0::DoubleArray double_array;
   for (int i = 0; i < vec.size(); i++) {
     double_array.add_item(vec[i]);
@@ -36,7 +62,8 @@ void serialize_double_array(std::vector<double> vec, std::string& output_message
   double_array.SerializeToString(&output_message);
 }
 
-void deserialize_double_array(std::vector<double>& vec, const std::string& input_message) {
+void deserialize_double_array(std::vector<double> &vec,
+                              const std::string &input_message) {
   com::nus::dbsytem::falcon::v0::DoubleArray deserialized_double_array;
   if (!deserialized_double_array.ParseFromString(input_message)) {
     log_error("Deserialize double array message failed.");
@@ -47,12 +74,14 @@ void deserialize_double_array(std::vector<double>& vec, const std::string& input
   }
 }
 
-void serialize_double_matrix(std::vector< std::vector<double> > mat, std::string& output_message) {
+void serialize_double_matrix(std::vector<std::vector<double>> mat,
+                             std::string &output_message) {
   com::nus::dbsytem::falcon::v0::DoubleMatrix double_matrix;
-  int row_num = (int) mat.size();
-  int column_num = (int) mat[0].size();
+  int row_num = (int)mat.size();
+  int column_num = (int)mat[0].size();
   for (int i = 0; i < row_num; i++) {
-    com::nus::dbsytem::falcon::v0::DoubleArray *double_array = double_matrix.add_array();
+    com::nus::dbsytem::falcon::v0::DoubleArray *double_array =
+        double_matrix.add_array();
     for (int j = 0; j < column_num; j++) {
       double_array->add_item(mat[i][j]);
     }
@@ -60,7 +89,8 @@ void serialize_double_matrix(std::vector< std::vector<double> > mat, std::string
   double_matrix.SerializeToString(&output_message);
 }
 
-void deserialize_double_matrix(std::vector< std::vector<double> >& mat, const std::string& input_message) {
+void deserialize_double_matrix(std::vector<std::vector<double>> &mat,
+                               const std::string &input_message) {
   com::nus::dbsytem::falcon::v0::DoubleMatrix deserialized_double_matrix;
   if (!deserialized_double_matrix.ParseFromString(input_message)) {
     log_error("Deserialize double matrix message failed.");
@@ -68,7 +98,8 @@ void deserialize_double_matrix(std::vector< std::vector<double> >& mat, const st
   }
   for (int i = 0; i < deserialized_double_matrix.array_size(); i++) {
     std::vector<double> row;
-    const com::nus::dbsytem::falcon::v0::DoubleArray& double_array = deserialized_double_matrix.array(i);
+    const com::nus::dbsytem::falcon::v0::DoubleArray &double_array =
+        deserialized_double_matrix.array(i);
     for (int j = 0; j < double_array.item_size(); j++) {
       row.push_back(double_array.item(j));
     }
@@ -76,7 +107,8 @@ void deserialize_double_matrix(std::vector< std::vector<double> >& mat, const st
   }
 }
 
-void serialize_encoded_number(const EncodedNumber& number, std::string& output_message) {
+void serialize_encoded_number(const EncodedNumber &number,
+                              std::string &output_message) {
   com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber encoded_number;
   mpz_t g_n, g_value;
   mpz_init(g_n);
@@ -101,8 +133,10 @@ void serialize_encoded_number(const EncodedNumber& number, std::string& output_m
   encoded_number.Clear();
 }
 
-void deserialize_encoded_number(EncodedNumber& number, const std::string& input_message) {
-  com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber deserialized_encoded_number;
+void deserialize_encoded_number(EncodedNumber &number,
+                                const std::string &input_message) {
+  com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber
+      deserialized_encoded_number;
   if (!deserialized_encoded_number.ParseFromString(input_message)) {
     log_error("Deserialize fixed point encoded number message failed.");
     exit(EXIT_FAILURE);
@@ -111,21 +145,25 @@ void deserialize_encoded_number(EncodedNumber& number, const std::string& input_
   mpz_init(s_n);
   mpz_init(s_value);
   mpz_set_str(s_n, deserialized_encoded_number.n().c_str(), PHE_STR_BASE);
-  mpz_set_str(s_value, deserialized_encoded_number.value().c_str(), PHE_STR_BASE);
+  mpz_set_str(s_value, deserialized_encoded_number.value().c_str(),
+              PHE_STR_BASE);
 
   number.setter_n(s_n);
   number.setter_value(s_value);
   number.setter_exponent(deserialized_encoded_number.exponent());
-  number.setter_type(static_cast<EncodedNumberType>(deserialized_encoded_number.type()));
+  number.setter_type(
+      static_cast<EncodedNumberType>(deserialized_encoded_number.type()));
 
   mpz_clear(s_n);
   mpz_clear(s_value);
 }
 
-void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::string& output_message) {
+void serialize_encoded_number_array(EncodedNumber *number_array, int size,
+                                    std::string &output_message) {
   com::nus::dbsytem::falcon::v0::EncodedNumberArray encoded_number_array;
   for (int i = 0; i < size; i++) {
-    com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber *encoded_number = encoded_number_array.add_encoded_number();
+    com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber *encoded_number =
+        encoded_number_array.add_encoded_number();
     mpz_t g_n, g_value;
     mpz_init(g_n);
     mpz_init(g_value);
@@ -150,9 +188,12 @@ void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::
   encoded_number_array.Clear();
 }
 
-void deserialize_encoded_number_array(EncodedNumber* number_array, int size, const std::string& input_message) {
-  com::nus::dbsytem::falcon::v0::EncodedNumberArray deserialized_encoded_number_array;
-  google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_message.c_str(), input_message.length());
+void deserialize_encoded_number_array(EncodedNumber *number_array, int size,
+                                      const std::string &input_message) {
+  com::nus::dbsytem::falcon::v0::EncodedNumberArray
+      deserialized_encoded_number_array;
+  google::protobuf::io::CodedInputStream inputStream(
+      (unsigned char *)input_message.c_str(), input_message.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_encoded_number_array.ParseFromString(input_message)) {
     log_error("Deserialize encoded number array message failed.");
@@ -165,7 +206,8 @@ void deserialize_encoded_number_array(EncodedNumber* number_array, int size, con
   }
   // number_array = new EncodedNumber[size];
   for (int i = 0; i < size; i++) {
-    const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& encoded_number = deserialized_encoded_number_array.encoded_number(i);
+    const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber
+        &encoded_number = deserialized_encoded_number_array.encoded_number(i);
     mpz_t s_n, s_value;
     mpz_init(s_n);
     mpz_init(s_value);
@@ -175,20 +217,24 @@ void deserialize_encoded_number_array(EncodedNumber* number_array, int size, con
     number_array[i].setter_n(s_n);
     number_array[i].setter_value(s_value);
     number_array[i].setter_exponent(encoded_number.exponent());
-    number_array[i].setter_type(static_cast<EncodedNumberType>(encoded_number.type()));
+    number_array[i].setter_type(
+        static_cast<EncodedNumberType>(encoded_number.type()));
 
     mpz_clear(s_n);
     mpz_clear(s_value);
   }
 }
 
-void serialize_encoded_number_matrix(EncodedNumber** number_matrix,
-                                     int row_size, int column_size, std::string& output_message) {
+void serialize_encoded_number_matrix(EncodedNumber **number_matrix,
+                                     int row_size, int column_size,
+                                     std::string &output_message) {
   com::nus::dbsytem::falcon::v0::EncodedNumberMatrix encoded_number_matrix;
   for (int i = 0; i < row_size; i++) {
-    com::nus::dbsytem::falcon::v0::EncodedNumberArray *encoded_number_array = encoded_number_matrix.add_encoded_array();
+    com::nus::dbsytem::falcon::v0::EncodedNumberArray *encoded_number_array =
+        encoded_number_matrix.add_encoded_array();
     for (int j = 0; j < column_size; j++) {
-      com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber *encoded_number = encoded_number_array->add_encoded_number();
+      com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber *encoded_number =
+          encoded_number_array->add_encoded_number();
       mpz_t g_n, g_value;
       mpz_init(g_n);
       mpz_init(g_value);
@@ -215,11 +261,13 @@ void serialize_encoded_number_matrix(EncodedNumber** number_matrix,
   encoded_number_matrix.Clear();
 }
 
-
-void deserialize_encoded_number_matrix(EncodedNumber** number_matrix,
-                                       int row_size, int column_size, const std::string& input_message) {
-  com::nus::dbsytem::falcon::v0::EncodedNumberMatrix deserialized_encoded_number_matrix;
-  google::protobuf::io::CodedInputStream inputStream((unsigned char*)input_message.c_str(), input_message.length());
+void deserialize_encoded_number_matrix(EncodedNumber **number_matrix,
+                                       int row_size, int column_size,
+                                       const std::string &input_message) {
+  com::nus::dbsytem::falcon::v0::EncodedNumberMatrix
+      deserialized_encoded_number_matrix;
+  google::protobuf::io::CodedInputStream inputStream(
+      (unsigned char *)input_message.c_str(), input_message.length());
   inputStream.SetTotalBytesLimit(PROTOBUF_SIZE_LIMIT);
   if (!deserialized_encoded_number_matrix.ParseFromString(input_message)) {
     log_error("Deserialize encoded number matrix message failed.");
@@ -227,15 +275,19 @@ void deserialize_encoded_number_matrix(EncodedNumber** number_matrix,
   }
 
   if (row_size != deserialized_encoded_number_matrix.encoded_array_size() ||
-    column_size != deserialized_encoded_number_matrix.encoded_array(0).encoded_number_size()) {
+      column_size != deserialized_encoded_number_matrix.encoded_array(0)
+                         .encoded_number_size()) {
     log_error("Deserialized encoded number array size is not expected.");
     exit(EXIT_FAILURE);
   }
 
   for (int i = 0; i < row_size; i++) {
-    const com::nus::dbsytem::falcon::v0::EncodedNumberArray& encoded_number_array = deserialized_encoded_number_matrix.encoded_array(i);
+    const com::nus::dbsytem::falcon::v0::EncodedNumberArray
+        &encoded_number_array =
+            deserialized_encoded_number_matrix.encoded_array(i);
     for (int j = 0; j < column_size; j++) {
-      const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber& encoded_number = encoded_number_array.encoded_number(j);
+      const com::nus::dbsytem::falcon::v0::FixedPointEncodedNumber
+          &encoded_number = encoded_number_array.encoded_number(j);
       mpz_t s_n, s_value;
       mpz_init(s_n);
       mpz_init(s_value);
@@ -245,7 +297,8 @@ void deserialize_encoded_number_matrix(EncodedNumber** number_matrix,
       number_matrix[i][j].setter_n(s_n);
       number_matrix[i][j].setter_value(s_value);
       number_matrix[i][j].setter_exponent(encoded_number.exponent());
-      number_matrix[i][j].setter_type(static_cast<EncodedNumberType>(encoded_number.type()));
+      number_matrix[i][j].setter_type(
+          static_cast<EncodedNumberType>(encoded_number.type()));
 
       mpz_clear(s_n);
       mpz_clear(s_value);
@@ -253,8 +306,6 @@ void deserialize_encoded_number_matrix(EncodedNumber** number_matrix,
   }
 }
 
-// todo: we should use template function to automatically detect the type and serialize it.
-template<typename T>
-std::string serialize_all(T data){
-
-}
+// todo: we should use template function to automatically detect the type and
+// serialize it.
+template <typename T> std::string serialize_all(T data) {}

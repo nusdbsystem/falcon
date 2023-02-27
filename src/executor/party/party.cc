@@ -1,32 +1,56 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by wuyuncheng on 13/8/20.
 //
 
+#include "omp.h"
+#include <cstdlib>
+#include <ctime>
 #include <falcon/common.h>
+#include <falcon/network/ConfigFile.hpp>
 #include <falcon/operator/phe/djcs_t_aux.h>
 #include <falcon/party/party.h>
+#include <falcon/utils/base64.h>
 #include <falcon/utils/io_util.h>
+#include <falcon/utils/logger/logger.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/network_converter.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
-#include <falcon/utils/base64.h>
-#include <glog/logging.h>
-#include <falcon/utils/logger/logger.h>
-#include <cstdlib>
-#include <ctime>
-#include <falcon/network/ConfigFile.hpp>
 #include <fstream>
+#include <glog/logging.h>
 #include <iostream>
 #include <random>
 #include <sstream>
 #include <stack>
 #include <string>
-#include "omp.h"
 
 Party::Party() {}
 
 Party::Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
-             falcon::FLSetting m_fl_setting, const std::string& m_data_file) {
+             falcon::FLSetting m_fl_setting, const std::string &m_data_file) {
   // copy params
   party_id = m_party_id;
   party_num = m_party_num;
@@ -53,7 +77,7 @@ Party::Party(int m_party_id, int m_party_num, falcon::PartyType m_party_type,
   log_info("feature_num = " + std::to_string(feature_num));
 }
 
-Party::Party(const Party& party) {
+Party::Party(const Party &party) {
   // copy public variables
   party_id = party.party_id;
   party_num = party.party_num;
@@ -73,8 +97,8 @@ Party::Party(const Party& party) {
   phe_random = hcs_init_random();
   phe_pub_key = djcs_t_init_public_key();
   phe_auth_server = djcs_t_init_auth_server();
-  djcs_t_public_key* tmp_pub_key = djcs_t_init_public_key();
-  djcs_t_auth_server* tmp_auth_server = djcs_t_init_auth_server();
+  djcs_t_public_key *tmp_pub_key = djcs_t_init_public_key();
+  djcs_t_auth_server *tmp_auth_server = djcs_t_init_auth_server();
   party.getter_phe_pub_key(tmp_pub_key);
   party.getter_phe_auth_server(tmp_auth_server);
   djcs_t_public_key_copy(tmp_pub_key, phe_pub_key);
@@ -85,7 +109,7 @@ Party::Party(const Party& party) {
   djcs_t_free_auth_server(tmp_auth_server);
 }
 
-Party& Party::operator=(const Party& party) {
+Party &Party::operator=(const Party &party) {
   // copy public variables
   party_id = party.party_id;
   party_num = party.party_num;
@@ -105,8 +129,8 @@ Party& Party::operator=(const Party& party) {
   phe_random = hcs_init_random();
   phe_pub_key = djcs_t_init_public_key();
   phe_auth_server = djcs_t_init_auth_server();
-  djcs_t_public_key* tmp_pub_key = djcs_t_init_public_key();
-  djcs_t_auth_server* tmp_auth_server = djcs_t_init_auth_server();
+  djcs_t_public_key *tmp_pub_key = djcs_t_init_public_key();
+  djcs_t_auth_server *tmp_auth_server = djcs_t_init_auth_server();
   party.getter_phe_pub_key(tmp_pub_key);
   party.getter_phe_auth_server(tmp_auth_server);
   djcs_t_public_key_copy(tmp_pub_key, phe_pub_key);
@@ -120,7 +144,7 @@ Party& Party::operator=(const Party& party) {
 
 void Party::init_network_channels(const std::string &m_network_file) {
   std::vector<std::string> ips;
-  std::vector<std::vector<int> > port_arrays;
+  std::vector<std::vector<int>> port_arrays;
 
 #ifndef NETWORK_CONFIG_PROTO
   // read network config file
@@ -140,7 +164,7 @@ void Party::init_network_channels(const std::string &m_network_file) {
     if (i <= party_id) {
       tmp_ports.push_back(ports[party_id] + i);
       tmp_ports.push_back(ports[i] + party_id - 1);
-    } else if (i > party_id){
+    } else if (i > party_id) {
       tmp_ports.push_back(ports[party_id] + i - 1);
       tmp_ports.push_back(ports[i] + party_id);
     }
@@ -150,20 +174,25 @@ void Party::init_network_channels(const std::string &m_network_file) {
   // read network config proto from coordinator
   //    // decode the network base64 string to pb string
   //    vector<BYTE> network_file_byte = base64_decode(m_network_file);
-  //    std::string network_pb_string(network_file_byte.begin(), network_file_byte.end());
-  deserialize_network_configs(ips, port_arrays, executor_mpc_ports, m_network_file);
-  log_info("mpc_port_array_size = " + std::to_string(executor_mpc_ports.size()));
+  //    std::string network_pb_string(network_file_byte.begin(),
+  //    network_file_byte.end());
+  deserialize_network_configs(ips, port_arrays, executor_mpc_ports,
+                              m_network_file);
+  log_info("mpc_port_array_size = " +
+           std::to_string(executor_mpc_ports.size()));
   log_info("size of ip address = " + std::to_string(ips.size()));
 
   for (int i = 0; i < ips.size(); i++) {
     log_info("ips[" + std::to_string(i) + "] = " + ips[i]);
     for (int j = 0; j < port_arrays[i].size(); j++) {
-      log_info("port_array[" + std::to_string(i) + "][" + std::to_string(j) + "] = " + std::to_string(port_arrays[i][j]));
+      log_info("port_array[" + std::to_string(i) + "][" + std::to_string(j) +
+               "] = " + std::to_string(port_arrays[i][j]));
     }
   }
 
   for (int i = 0; i < executor_mpc_ports.size(); i++) {
-    log_info("executor_mpc_ports[" + std::to_string(i) + "] = " + std::to_string(executor_mpc_ports[i]));
+    log_info("executor_mpc_ports[" + std::to_string(i) +
+             "] = " + std::to_string(executor_mpc_ports[i]));
   }
 #endif
 
@@ -179,19 +208,22 @@ void Party::init_network_channels(const std::string &m_network_file) {
       other = SocketPartyData(boost_ip::address::from_string(ips[i]),
                               port_arrays[i][party_id]);
 #ifdef DEBUG
-      log_info("My party id is: " + std::to_string(party_id) + ", I am listening party "
-        + std::to_string(i) + " on port " + std::to_string(port_arrays[party_id][i]));
+      log_info("My party id is: " + std::to_string(party_id) +
+               ", I am listening party " + std::to_string(i) + " on port " +
+               std::to_string(port_arrays[party_id][i]));
 #endif
       shared_ptr<CommParty> channel =
           make_shared<CommPartyTCPSynced>(io_service, me, other);
 #ifdef DEBUG
-      log_info("The other party's port I will send data to is: " + std::to_string(port_arrays[i][party_id]));
+      log_info("The other party's port I will send data to is: " +
+               std::to_string(port_arrays[i][party_id]));
 #endif
       // connect to the other party and add channel
       channel->join(500, 5000);
 #ifdef DEBUG
-      log_info("Communication channel established with party " + std::to_string(i)
-        + ", port is " + std::to_string(port_arrays[party_id][i]));
+      log_info("Communication channel established with party " +
+               std::to_string(i) + ", port is " +
+               std::to_string(port_arrays[party_id][i]));
 #endif
       channels.push_back(std::move(channel));
     } else {
@@ -202,7 +234,8 @@ void Party::init_network_channels(const std::string &m_network_file) {
   }
 }
 
-void Party::init_phe_keys(bool m_use_existing_key, const std::string &m_key_file) {
+void Party::init_phe_keys(bool m_use_existing_key,
+                          const std::string &m_key_file) {
   log_info("Init threshold partially homomorphic encryption keys");
   // init phe keys: if use existing key, read key file
   // otherwise, generate keys and broadcast to others
@@ -229,17 +262,17 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size,
   if (party_type == falcon::ACTIVE_PARTY) {
     log_info("active party begins to generate phe keys...");
     // generate phe keys
-    hcs_random* random = hcs_init_random();
-    djcs_t_public_key* pub_key = djcs_t_init_public_key();
-    djcs_t_private_key* priv_key = djcs_t_init_private_key();
+    hcs_random *random = hcs_init_random();
+    djcs_t_public_key *pub_key = djcs_t_init_public_key();
+    djcs_t_private_key *priv_key = djcs_t_init_private_key();
 
-    djcs_t_auth_server** auth_server =
-        (djcs_t_auth_server**)malloc(party_num * sizeof(djcs_t_auth_server*));
-    mpz_t* si = (mpz_t*)malloc(party_num * sizeof(mpz_t));
+    djcs_t_auth_server **auth_server =
+        (djcs_t_auth_server **)malloc(party_num * sizeof(djcs_t_auth_server *));
+    mpz_t *si = (mpz_t *)malloc(party_num * sizeof(mpz_t));
     djcs_t_generate_key_pair(pub_key, priv_key, random, epsilon, phe_key_size,
                              party_num, required_party_num);
 
-    mpz_t* coeff = djcs_t_init_polynomial(priv_key, random);
+    mpz_t *coeff = djcs_t_init_polynomial(priv_key, random);
     for (int i = 0; i < party_num; i++) {
       mpz_init(si[i]);
       djcs_t_compute_polynomial(priv_key, coeff, si[i], i);
@@ -274,14 +307,15 @@ void Party::init_with_new_phe_keys(int epsilon, int phe_key_size,
     // for passive parties, receive the phe keys message from the active party
     // and set its own keys with the received message
     // TODO: now active party id is 0 by design, could abstract as a variable
-    log_info("receive serialized keys from the active party and deserializing...");
+    log_info(
+        "receive serialized keys from the active party and deserializing...");
     std::string recv_phe_keys_message;
     recv_long_message(0, recv_phe_keys_message);
     deserialize_phe_keys(phe_pub_key, phe_auth_server, recv_phe_keys_message);
   }
 }
 
-void Party::init_with_key_file(const std::string& key_file) {
+void Party::init_with_key_file(const std::string &key_file) {
   // read key file as string
   std::string phe_keys_str = read_key_file(key_file);
   deserialize_phe_keys(phe_pub_key, phe_auth_server, phe_keys_str);
@@ -301,38 +335,39 @@ void Party::load_phe_key_string(const std::string &phe_keys_str) {
 }
 
 void Party::send_message(int id, std::string message) const {
-  channels[id]->write((const byte*)message.c_str(), message.size());
+  channels[id]->write((const byte *)message.c_str(), message.size());
 }
 
 void Party::send_long_message(int id, string message) const {
   channels[id]->writeWithSize(message);
 }
 
-void Party::recv_message(int id, std::string message, byte* buffer,
+void Party::recv_message(int id, std::string message, byte *buffer,
                          int expected_size) const {
   channels[id]->read(buffer, expected_size);
   // the size of all strings is 2. Parse the message to get the original strings
-  auto s = string(reinterpret_cast<char const*>(buffer), expected_size);
+  auto s = string(reinterpret_cast<char const *>(buffer), expected_size);
   message = s;
 }
 
-void Party::recv_long_message(int id, std::string& message) const {
+void Party::recv_long_message(int id, std::string &message) const {
   vector<byte> recv_message;
   channels[id]->readWithSizeIntoVector(recv_message);
-  const byte* uc = &(recv_message[0]);
-  string recv_message_str(reinterpret_cast<char const*>(uc),
+  const byte *uc = &(recv_message[0]);
+  string recv_message_str(reinterpret_cast<char const *>(uc),
                           recv_message.size());
   message = recv_message_str;
 }
 
 void Party::split_train_test_data(
-    double split_percentage, std::vector<std::vector<double> >& training_data,
-    std::vector<std::vector<double> >& testing_data,
-    std::vector<double>& training_labels,
-    std::vector<double>& testing_labels) const {
-  int training_data_size = (int) (sample_num * split_percentage);
+    double split_percentage, std::vector<std::vector<double>> &training_data,
+    std::vector<std::vector<double>> &testing_data,
+    std::vector<double> &training_labels,
+    std::vector<double> &testing_labels) const {
+  int training_data_size = (int)(sample_num * split_percentage);
   log_info("Split local data and labels into training and testing dataset.");
-  log_info("Split percentage for train and test datasets = " + std::to_string(split_percentage));
+  log_info("Split percentage for train and test datasets = " +
+           std::to_string(split_percentage));
   log_info("Training_data_size = " + std::to_string(training_data_size));
 
   std::vector<int> data_indexes;
@@ -351,7 +386,8 @@ void Party::split_train_test_data(
 #ifdef DEBUG
     // print the shuffled data indexes for debug
     for (int i = 0; i < sample_num; i++) {
-      log_info("shuffled data indexes[" + std::to_string(i) + "] = " + std::to_string(data_indexes[i]));
+      log_info("shuffled data indexes[" + std::to_string(i) +
+               "] = " + std::to_string(data_indexes[i]));
     }
 #endif
     // select the former training data size as training data,
@@ -386,7 +422,8 @@ void Party::split_train_test_data(
     deserialize_int_array(data_indexes, recv_shuffled_indexes_str);
 
     if (data_indexes.size() != sample_num) {
-      log_error("Received size of shuffled indexes does not equal to sample num.");
+      log_error(
+          "Received size of shuffled indexes does not equal to sample num.");
       exit(EXIT_FAILURE);
     }
 

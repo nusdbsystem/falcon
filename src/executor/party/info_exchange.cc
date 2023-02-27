@@ -1,3 +1,27 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by root on 4/23/22.
 //
@@ -5,14 +29,14 @@
 #include <falcon/party/info_exchange.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 
-void send_int_array(const Party& party, const std::vector<int>& arr,
+void send_int_array(const Party &party, const std::vector<int> &arr,
                     int dest_party_id) {
   std::string arr_str;
   serialize_int_array(arr, arr_str);
   party.send_long_message(dest_party_id, arr_str);
 }
 
-std::vector<int> recv_int_array(const Party& party, int src_party_id) {
+std::vector<int> recv_int_array(const Party &party, int src_party_id) {
   std::string recv_str;
   party.recv_long_message(src_party_id, recv_str);
   std::vector<int> recv_arr;
@@ -20,14 +44,14 @@ std::vector<int> recv_int_array(const Party& party, int src_party_id) {
   return recv_arr;
 }
 
-void send_double_array(const Party& party, const std::vector<double>& arr,
+void send_double_array(const Party &party, const std::vector<double> &arr,
                        int dest_party_id) {
   std::string arr_str;
   serialize_double_array(arr, arr_str);
   party.send_long_message(dest_party_id, arr_str);
 }
 
-std::vector<double> recv_double_array(const Party& party, int src_party_id) {
+std::vector<double> recv_double_array(const Party &party, int src_party_id) {
   std::string recv_str;
   party.recv_long_message(src_party_id, recv_str);
   std::vector<double> recv_arr;
@@ -35,35 +59,38 @@ std::vector<double> recv_double_array(const Party& party, int src_party_id) {
   return recv_arr;
 }
 
-void send_encoded_number_array(const Party& party, EncodedNumber* arr,
-                               int size, int dest_party_id) {
+void send_encoded_number_array(const Party &party, EncodedNumber *arr, int size,
+                               int dest_party_id) {
   std::string arr_str;
   serialize_encoded_number_array(arr, size, arr_str);
   party.send_long_message(dest_party_id, arr_str);
 }
 
-void recv_encoded_number_array(const Party& party, EncodedNumber* arr,
-                               int size, int src_party_id) {
+void recv_encoded_number_array(const Party &party, EncodedNumber *arr, int size,
+                               int src_party_id) {
   std::string recv_str;
   party.recv_long_message(src_party_id, recv_str);
   deserialize_encoded_number_array(arr, size, recv_str);
 }
 
-void send_encoded_number_matrix(const Party& party, EncodedNumber** mat,
-                                int row_size, int column_size, int dest_party_id) {
+void send_encoded_number_matrix(const Party &party, EncodedNumber **mat,
+                                int row_size, int column_size,
+                                int dest_party_id) {
   std::string mat_str;
   serialize_encoded_number_matrix(mat, row_size, column_size, mat_str);
   party.send_long_message(dest_party_id, mat_str);
 }
 
-void recv_encoded_number_matrix(const Party& party, EncodedNumber** mat,
-                                int row_size, int column_size, int src_party_id) {
+void recv_encoded_number_matrix(const Party &party, EncodedNumber **mat,
+                                int row_size, int column_size,
+                                int src_party_id) {
   std::string recv_str;
   party.recv_long_message(src_party_id, recv_str);
   deserialize_encoded_number_matrix(mat, row_size, column_size, recv_str);
 }
 
-void broadcast_int_array(const Party& party, std::vector<int>& arr, int req_party_id) {
+void broadcast_int_array(const Party &party, std::vector<int> &arr,
+                         int req_party_id) {
   if (party.party_id == req_party_id) {
     // serialize the array to be broadcast
     std::string arr_str;
@@ -81,7 +108,8 @@ void broadcast_int_array(const Party& party, std::vector<int>& arr, int req_part
   }
 }
 
-void broadcast_double_array(const Party& party, std::vector<double>& arr, int req_party_id) {
+void broadcast_double_array(const Party &party, std::vector<double> &arr,
+                            int req_party_id) {
   if (party.party_id == req_party_id) {
     // serialize the array to be broadcast
     std::string arr_str;
@@ -99,7 +127,7 @@ void broadcast_double_array(const Party& party, std::vector<double>& arr, int re
   }
 }
 
-void broadcast_encoded_number_array(const Party& party, EncodedNumber *arr,
+void broadcast_encoded_number_array(const Party &party, EncodedNumber *arr,
                                     int size, int req_party_id) {
   if (party.party_id == req_party_id) {
     // serialize the encoded number vector and send to other parties
@@ -118,8 +146,9 @@ void broadcast_encoded_number_array(const Party& party, EncodedNumber *arr,
   }
 }
 
-void broadcast_encoded_number_matrix(const Party& party, EncodedNumber** mat,
-                                     int row_size, int column_size, int req_party_id) {
+void broadcast_encoded_number_matrix(const Party &party, EncodedNumber **mat,
+                                     int row_size, int column_size,
+                                     int req_party_id) {
   if (party.party_id == req_party_id) {
     // serialize the encoded number matrix and send to other parties
     std::string mat_str;
@@ -137,7 +166,7 @@ void broadcast_encoded_number_matrix(const Party& party, EncodedNumber** mat,
   }
 }
 
-std::vector<int> sync_up_int_arr(const Party& party, int v) {
+std::vector<int> sync_up_int_arr(const Party &party, int v) {
   std::vector<int> sync_arr;
   if (party.party_type == falcon::ACTIVE_PARTY) {
     // first set its own weight size and receive other parties' weight sizes
@@ -168,9 +197,10 @@ std::vector<int> sync_up_int_arr(const Party& party, int v) {
   return sync_arr;
 }
 
-std::vector<int> sync_up_int_arrs(const Party& party, const std::vector<int>& arr) {
+std::vector<int> sync_up_int_arrs(const Party &party,
+                                  const std::vector<int> &arr) {
   // first sync up each party's local arr size
-  std::vector<int> arr_size = sync_up_int_arr(party, (int) arr.size());
+  std::vector<int> arr_size = sync_up_int_arr(party, (int)arr.size());
   // then, sync up the int arr
   std::vector<int> flattened_arr;
   if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -203,9 +233,10 @@ std::vector<int> sync_up_int_arrs(const Party& party, const std::vector<int>& ar
   return flattened_arr;
 }
 
-std::vector<double> sync_up_double_arrs(const Party& party, const std::vector<double>& arr) {
+std::vector<double> sync_up_double_arrs(const Party &party,
+                                        const std::vector<double> &arr) {
   // first sync up each party's local arr size
-  std::vector<int> arr_size = sync_up_int_arr(party, (int) arr.size());
+  std::vector<int> arr_size = sync_up_int_arr(party, (int)arr.size());
   // then, sync up the double arr
   std::vector<double> flattened_arr;
   if (party.party_type == falcon::ACTIVE_PARTY) {

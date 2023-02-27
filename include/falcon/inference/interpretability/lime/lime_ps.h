@@ -6,22 +6,24 @@
 #define FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_LIME_PS_H_
 
 #include "falcon/distributed/parameter_server_base.h"
-#include <falcon/algorithm/vertical/linear_model/logistic_regression_model.h>
 #include <falcon/algorithm/vertical/linear_model/linear_model_base.h>
-#include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/algorithm/vertical/linear_model/logistic_regression_builder.h>
-#include <falcon/party/party.h>
-#include <falcon/utils/pb_converter/lr_converter.h>
-#include <falcon/model/model_io.h>
+#include <falcon/algorithm/vertical/linear_model/logistic_regression_model.h>
 #include <falcon/common.h>
+#include <falcon/model/model_io.h>
+#include <falcon/party/party.h>
+#include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/lr_converter.h>
 
 class LimeParameterServer : public ParameterServer {
- public:
+public:
   // party
   Party party;
- public:
+
+public:
   LimeParameterServer() = default;
-  LimeParameterServer(const Party &m_party, const std::string &ps_network_config_pb_str);
+  LimeParameterServer(const Party &m_party,
+                      const std::string &ps_network_config_pb_str);
 
   /**
    * copy constructor
@@ -31,21 +33,19 @@ class LimeParameterServer : public ParameterServer {
 
   ~LimeParameterServer();
 
- public:
-
+public:
   /**
    * distributed prediction, partition data, collect result, deserialize
    *
    * @param cur_test_data_indexes: vector of index
    * @param predicted_labels: return value, array of labels
    */
-  void distributed_predict(
-      const std::vector<int> &cur_test_data_indexes,
-      EncodedNumber *predicted_labels) override;
+  void distributed_predict(const std::vector<int> &cur_test_data_indexes,
+                           EncodedNumber *predicted_labels) override;
 
   /**
- * abstract method of distributed_train
- */
+   * abstract method of distributed_train
+   */
   void distributed_train() override;
 
   /**
@@ -59,8 +59,7 @@ class LimeParameterServer : public ParameterServer {
 
   void save_model(const std::string &model_save_file) override;
 
- public:
-
+public:
   /**
    * partition examples according to number of workers
    *
@@ -73,7 +72,6 @@ class LimeParameterServer : public ParameterServer {
    *
    */
   std::vector<string> wait_worker_complete();
-
 };
 
-#endif //FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_LIME_PS_H_
+#endif // FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_LIME_PS_H_

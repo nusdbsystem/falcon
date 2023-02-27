@@ -1,3 +1,27 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by naili on 21/6/22.
 //
@@ -5,26 +29,24 @@
 #include "falcon/algorithm/vertical/preprocessing/pre_feature_selection.h"
 #include "falcon/algorithm/vertical/preprocessing/pearson_correlation.h"
 
-#include <string>
-#include <glog/logging.h>
+#include <falcon/common.h>
+#include <falcon/utils/base64.h>
 #include <falcon/utils/io_util.h>
 #include <falcon/utils/logger/logger.h>
-#include <falcon/utils/base64.h>
-#include <falcon/utils/pb_converter/preprocessing_converter.h>
-#include <falcon/common.h>
 #include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/preprocessing_converter.h>
+#include <glog/logging.h>
+#include <string>
 
-void FeatSel::select_features(Party party,
-                              int num_samples,
+void FeatSel::select_features(Party party, int num_samples,
                               const std::string &feature_selection,
                               const std::string &selected_features_file,
                               const std::string &ps_network_str,
-                              int is_distributed,
-                              int distributed_role,
+                              int is_distributed, int distributed_role,
                               int worker_id) {
 
   // 1. read the selected sample file
-  std::vector<std::vector<double> > dataset = party.getter_local_data();
+  std::vector<std::vector<double>> dataset = party.getter_local_data();
 
   int selected_sample_size = dataset.size();
   log_info("Read the generated samples finished");
@@ -38,7 +60,8 @@ void FeatSel::select_features(Party party,
   djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
 
-  // 1. Active party sends local labels to other party, while passive party receive and save locally.
+  // 1. Active party sends local labels to other party, while passive party
+  // receive and save locally.
   auto *selected_sample_true_labels = new EncodedNumber[selected_sample_size];
 
   // 1.1 encrypt local label
@@ -47,10 +70,8 @@ void FeatSel::select_features(Party party,
     std::vector<double> labels = party.getter_labels();
 
     for (int i = 0; i < selected_sample_size; i++) {
-      selected_sample_true_labels[i].set_double(
-          phe_pub_key->n[0],
-          labels[i],
-          PHE_FIXED_POINT_PRECISION);
+      selected_sample_true_labels[i].set_double(phe_pub_key->n[0], labels[i],
+                                                PHE_FIXED_POINT_PRECISION);
 
       // encrypted label
       djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
@@ -59,7 +80,8 @@ void FeatSel::select_features(Party party,
     }
     // serialize encrypted label and send out
     std::string enc_label_str;
-    serialize_encoded_number_array(selected_sample_true_labels, selected_sample_size, enc_label_str);
+    serialize_encoded_number_array(selected_sample_true_labels,
+                                   selected_sample_size, enc_label_str);
     for (int j = 0; j < party.party_num; j++) {
       if (j != party.party_id) {
         party.send_long_message(j, enc_label_str);
@@ -71,7 +93,8 @@ void FeatSel::select_features(Party party,
   if (party.party_type == falcon::PASSIVE_PARTY) {
     std::string recv_enc_label_str;
     party.recv_long_message(ACTIVE_PARTY_ID, recv_enc_label_str);
-    deserialize_encoded_number_array(selected_sample_true_labels, selected_sample_size, recv_enc_label_str);
+    deserialize_encoded_number_array(selected_sample_true_labels,
+                                     selected_sample_size, recv_enc_label_str);
   }
 
   // 2. each party calculate the score
@@ -87,10 +110,9 @@ void FeatSel::select_features(Party party,
     }
 
     // calculate the score.
-    EncodedNumber score = pearson_cor.calculate_score(party,
-                                                      selected_feature_vec,
-                                                      selected_sample_true_labels,
-                                                      selected_feature_vec.size());
+    EncodedNumber score = pearson_cor.calculate_score(
+        party, selected_feature_vec, selected_sample_true_labels,
+        selected_feature_vec.size());
 
     local_score[fid] = score;
   }
@@ -119,13 +141,15 @@ void FeatSel::select_features(Party party,
         std::string recv_score_str;
         party.recv_long_message(id, recv_score_str);
         EncodedNumber *recv_score;
-        deserialize_encoded_number_array(recv_score, recv_score_size, recv_score_str);
+        deserialize_encoded_number_array(recv_score, recv_score_size,
+                                         recv_score_str);
         global_score.push_back(recv_score);
       }
     }
 
     // 1.3 find top-k score and match to each party's local index
-    std::vector<std::vector<int>> party_selected_feat_idx = find_party_feat_index(global_score, 10);
+    std::vector<std::vector<int>> party_selected_feat_idx =
+        find_party_feat_index(global_score, 10);
 
     // 1.4 send selected features index to other party.
     selected_feat_idx = party_selected_feat_idx[0];
@@ -146,7 +170,8 @@ void FeatSel::select_features(Party party,
 
     // 1.send to active party the score array
     std::string local_score_str;
-    serialize_encoded_number_array(local_score, dataset[0].size(), local_score_str);
+    serialize_encoded_number_array(local_score, dataset[0].size(),
+                                   local_score_str);
     party.send_long_message(ACTIVE_PARTY_ID, local_score_str);
 
     // receive selected_feat_idx from active party
@@ -171,16 +196,13 @@ void FeatSel::select_features(Party party,
   write_dataset_to_file(selected_feat_samples, ',', selected_features_file);
 
   delete[] selected_sample_true_labels;
-  delete[]local_score;
-
+  delete[] local_score;
 }
 
 void pre_feat_sel(const Party &party, const std::string &params_str,
                   const std::string &output_path_prefix,
-                  const std::string &ps_network_str,
-                  int is_distributed,
-                  int distributed_role,
-                  int worker_id) {
+                  const std::string &ps_network_str, int is_distributed,
+                  int distributed_role, int worker_id) {
 
   log_info("Begin to select features");
   // deserialize the Params
@@ -190,27 +212,26 @@ void pre_feat_sel(const Party &party, const std::string &params_str,
   std::string feat_sel_params_str = base64_decode_to_pb_string(params_str);
   deserialize_feat_sel_params(feat_sel_params, feat_sel_params_str);
   log_info("Deserialize the lime feature_selection params");
-  log_info("[lime_feat_sel] num_samples = " + std::to_string(feat_sel_params.num_samples));
-  log_info("[lime_feat_sel] feature_selection = " + feat_sel_params.feature_selection);
-  // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" + std::to_string(party.party_id);
-  feat_sel_params.selected_features_file = output_path_prefix + feat_sel_params.selected_features_file;
+  log_info("[lime_feat_sel] num_samples = " +
+           std::to_string(feat_sel_params.num_samples));
+  log_info("[lime_feat_sel] feature_selection = " +
+           feat_sel_params.feature_selection);
+  // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" +
+  // std::to_string(party.party_id);
+  feat_sel_params.selected_features_file =
+      output_path_prefix + feat_sel_params.selected_features_file;
 
   FeatSel feat_sel;
   feat_sel.select_features(
-      party,
-      feat_sel_params.num_samples,
-      feat_sel_params.feature_selection,
-      feat_sel_params.selected_features_file,
-      ps_network_str,
-      is_distributed,
-      distributed_role,
-      worker_id);
+      party, feat_sel_params.num_samples, feat_sel_params.feature_selection,
+      feat_sel_params.selected_features_file, ps_network_str, is_distributed,
+      distributed_role, worker_id);
 }
 
 // test
-std::vector<std::vector<int>> find_party_feat_index(
-    const std::vector<EncodedNumber *> &global_score,
-    int topK) {
+std::vector<std::vector<int>>
+find_party_feat_index(const std::vector<EncodedNumber *> &global_score,
+                      int topK) {
   std::vector<std::vector<int>> party_selected_feat_idx;
   return party_selected_feat_idx;
 }

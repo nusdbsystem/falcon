@@ -3,16 +3,16 @@
 //
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <iomanip>
 
 using namespace std;
 #define MAX_CLIENT 10
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   if (argc < 3) {
     cout << "Args: file_path" << endl;
     return 0;
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 
   for (auto entry : table) {
     for (int i = 0; i < n_attributes - 1; ++i) {
-      for (int client_id = 0; client_id < num_client; client_id ++) {
+      for (int client_id = 0; client_id < num_client; client_id++) {
         if (client_id == 0) {
           if (i < threshold_index[client_id]) {
             double d = std::stod(entry[i]);
@@ -81,7 +81,8 @@ int main(int argc, char* argv[]) {
             // do nothing
           }
         } else {
-          if (i < threshold_index[client_id] && i >= threshold_index[client_id - 1]) {
+          if (i < threshold_index[client_id] &&
+              i >= threshold_index[client_id - 1]) {
             double d = std::stod(entry[i]);
             outs[client_id] << fixed << d;
             if (i == threshold_index[client_id] - 1) {

@@ -1,10 +1,34 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by wuyuncheng on 14/11/20.
 //
 
 #include <falcon/common.h>
-#include <falcon/utils/io_util.h>
 #include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/utils/io_util.h>
 #include <falcon/utils/pb_converter/phe_keys_converter.h>
 #include <gtest/gtest.h>
 
@@ -13,7 +37,7 @@
 
 TEST(IO_Util, ReadWriteData) {
   // create dummy data
-  std::vector<std::vector<double> > write_data;
+  std::vector<std::vector<double>> write_data;
   char delimiter = ',';
   for (int i = 0; i < 2; i++) {
     std::vector<double> row;
@@ -27,7 +51,7 @@ TEST(IO_Util, ReadWriteData) {
   write_dataset_to_file(write_data, delimiter, file_name);
 
   // read data and compare
-  std::vector<std::vector<double> > read_data =
+  std::vector<std::vector<double>> read_data =
       read_dataset(file_name, delimiter);
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 3; j++) {
@@ -56,7 +80,7 @@ TEST(IO_Util, WriteShuffledDataIndexes) {
 
   // read data and compare
   char delimiter = ',';
-  std::vector<std::vector<double> > read_data =
+  std::vector<std::vector<double>> read_data =
       read_dataset(file_name, delimiter);
   // Seed = 42, data_indexes = {1,6,3...}
   EXPECT_EQ(1, read_data[0][0]);
@@ -66,15 +90,15 @@ TEST(IO_Util, WriteShuffledDataIndexes) {
 
 TEST(IO_Util, ReadWriteKeys) {
   // generate phe keys
-  hcs_random* phe_random = hcs_init_random();
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  djcs_t_private_key* phe_priv_key = djcs_t_init_private_key();
-  djcs_t_auth_server** phe_auth_server =
-      (djcs_t_auth_server**)malloc(3 * sizeof(djcs_t_auth_server*));
-  mpz_t* si = (mpz_t*)malloc(3 * sizeof(mpz_t));
+  hcs_random *phe_random = hcs_init_random();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
+  djcs_t_private_key *phe_priv_key = djcs_t_init_private_key();
+  djcs_t_auth_server **phe_auth_server =
+      (djcs_t_auth_server **)malloc(3 * sizeof(djcs_t_auth_server *));
+  mpz_t *si = (mpz_t *)malloc(3 * sizeof(mpz_t));
   djcs_t_generate_key_pair(phe_pub_key, phe_priv_key, phe_random, 1, 1024, 3,
                            3);
-  mpz_t* coeff = djcs_t_init_polynomial(phe_priv_key, phe_random);
+  mpz_t *coeff = djcs_t_init_polynomial(phe_priv_key, phe_random);
   for (int i = 0; i < 3; i++) {
     mpz_init(si[i]);
     djcs_t_compute_polynomial(phe_priv_key, coeff, si[i], i);
@@ -91,8 +115,8 @@ TEST(IO_Util, ReadWriteKeys) {
     write_key_to_file(write_message, key_file_name);
 
     std::string read_message = read_key_file(key_file_name);
-    djcs_t_public_key* deserialized_phe_pub_key = djcs_t_init_public_key();
-    djcs_t_auth_server* deserialized_phe_auth_server =
+    djcs_t_public_key *deserialized_phe_pub_key = djcs_t_init_public_key();
+    djcs_t_auth_server *deserialized_phe_auth_server =
         djcs_t_init_auth_server();
     deserialize_phe_keys(deserialized_phe_pub_key, deserialized_phe_auth_server,
                          read_message);
@@ -128,7 +152,7 @@ TEST(IO_Util, ReadWriteKeys) {
 
 TEST(IO_Util, ReadWriteEncodedMatrix) {
   int row_num = 3, column_num = 2;
-  auto** encoded_data_matrix = new EncodedNumber*[row_num];
+  auto **encoded_data_matrix = new EncodedNumber *[row_num];
   for (int i = 0; i < row_num; i++) {
     encoded_data_matrix[i] = new EncodedNumber[column_num];
   }
@@ -151,19 +175,15 @@ TEST(IO_Util, ReadWriteEncodedMatrix) {
   }
 
   std::string encoded_matrix_file = "encoded_matrix_test_file.txt";
-  write_encoded_number_matrix_to_file(encoded_data_matrix,
-                                      row_num,
-                                      column_num,
+  write_encoded_number_matrix_to_file(encoded_data_matrix, row_num, column_num,
                                       encoded_matrix_file);
 
-  auto** read_encoded_data_matrix = new EncodedNumber*[row_num];
+  auto **read_encoded_data_matrix = new EncodedNumber *[row_num];
   for (int i = 0; i < row_num; i++) {
     read_encoded_data_matrix[i] = new EncodedNumber[column_num];
   }
 
-  read_encoded_number_matrix_file(read_encoded_data_matrix,
-                                  row_num,
-                                  column_num,
+  read_encoded_number_matrix_file(read_encoded_data_matrix, row_num, column_num,
                                   encoded_matrix_file);
 
   // compare and check
@@ -188,16 +208,16 @@ TEST(IO_Util, ReadWriteEncodedMatrix) {
   mpz_clear(v_n);
   mpz_clear(v_value);
   for (int i = 0; i < row_num; i++) {
-    delete [] encoded_data_matrix[i];
-    delete [] read_encoded_data_matrix[i];
+    delete[] encoded_data_matrix[i];
+    delete[] read_encoded_data_matrix[i];
   }
-  delete [] encoded_data_matrix;
-  delete [] read_encoded_data_matrix;
+  delete[] encoded_data_matrix;
+  delete[] read_encoded_data_matrix;
 }
 
 TEST(IO_Util, ReadWriteEncodedArray) {
   int row_num = 3;
-  auto* encoded_data_arr = new EncodedNumber[row_num];
+  auto *encoded_data_arr = new EncodedNumber[row_num];
 
   mpz_t v_n;
   mpz_t v_value;
@@ -215,10 +235,12 @@ TEST(IO_Util, ReadWriteEncodedArray) {
   }
 
   std::string encoded_arr_file = "encoded_array_test_file.txt";
-  write_encoded_number_array_to_file(encoded_data_arr, row_num, encoded_arr_file);
+  write_encoded_number_array_to_file(encoded_data_arr, row_num,
+                                     encoded_arr_file);
 
-  auto* read_encoded_data_arr = new EncodedNumber[row_num];
-  read_encoded_number_array_file(read_encoded_data_arr, row_num, encoded_arr_file);
+  auto *read_encoded_data_arr = new EncodedNumber[row_num];
+  read_encoded_number_array_file(read_encoded_data_arr, row_num,
+                                 encoded_arr_file);
 
   // compare and check
   for (int i = 0; i < row_num; i++) {
@@ -239,6 +261,6 @@ TEST(IO_Util, ReadWriteEncodedArray) {
 
   mpz_clear(v_n);
   mpz_clear(v_value);
-  delete [] encoded_data_arr;
-  delete [] read_encoded_data_arr;
+  delete[] encoded_data_arr;
+  delete[] read_encoded_data_arr;
 }

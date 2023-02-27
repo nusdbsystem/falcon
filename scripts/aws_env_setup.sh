@@ -17,7 +17,6 @@ git checkout -b experiment2022 origin/experiment2022
 
 # 2. join swarm cluster
 docker swarm init --advertise-addr xxx.xxx.xxx.xxx
-docker swarm join --token xxx 172.31.18.73:2377
 docker node promote xxx
 docker node demote xxx
 docker node update --label-add name=p0w0 xxx

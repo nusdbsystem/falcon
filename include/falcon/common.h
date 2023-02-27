@@ -10,7 +10,7 @@ namespace falcon {
 // turn DEBUG off in the real application
 //  #define DEBUG
 // #define SAVE_BASELINE
-#define PRINT_EVERY 20  // if debug, display info at this frequency
+#define PRINT_EVERY 20 // if debug, display info at this frequency
 
 // Precision for transforming a floating-point value
 // encode a floating-point value into a big integer
@@ -24,7 +24,7 @@ namespace falcon {
 #define PHE_KEY_SIZE 2048
 #define PHE_STR_BASE 10
 #define SPDZ_FIXED_POINT_PRECISION 16
-#define SPDZ_PLAYER_PATH "Player-Data/"  // deprecated
+#define SPDZ_PLAYER_PATH "Player-Data/" // deprecated
 #define PROTOBUF_SIZE_LIMIT 1024 * 1024 * 1024
 #define MAXIMUM_RAND_VALUE 32767
 #define ROUNDED_PRECISION 1e-3
@@ -51,13 +51,13 @@ enum TreeNodeType { INTERNAL, LEAF };
 enum TreeFeatureType { CONTINUOUS, CATEGORICAL };
 enum TreeType { CLASSIFICATION, REGRESSION };
 enum SpdzTreeCompType {
-  PRUNING_CHECK, // check if the node satisfies pruning conditions
-  COMPUTE_LABEL, // when a leaf node reaches, compute its label
-  FIND_BEST_SPLIT, // find the best split for a decision tree node
+  PRUNING_CHECK,     // check if the node satisfies pruning conditions
+  COMPUTE_LABEL,     // when a leaf node reaches, compute its label
+  FIND_BEST_SPLIT,   // find the best split for a decision tree node
   GBDT_SQUARE_LABEL, // compute the square label for gbdt models
-  GBDT_SOFTMAX, // compute the softmax predictions for each estimator
-  RF_LABEL_MODE, // compute the mode of the predicted labels of the trees
-  GBDT_EXPIT,  // compute the negative gradient for binomial deviance loss
+  GBDT_SOFTMAX,      // compute the softmax predictions for each estimator
+  RF_LABEL_MODE,     // compute the mode of the predicted labels of the trees
+  GBDT_EXPIT,        // compute the negative gradient for binomial deviance loss
   GBDT_UPDATE_TERMINAL_REGION // compute the terminal region labels
 };
 #define REGRESSION_TREE_CLASS_NUM 2
@@ -68,33 +68,22 @@ enum SpdzTreeCompType {
 
 /** for LIME **/
 enum SpdzLimeCompType {
-  DIST_WEIGHT, // compute the sqrt distance and kernel weights
-  PEARSON_Division, // compute the pearson coefficient, <a>/<b>
+  DIST_WEIGHT,                 // compute the sqrt distance and kernel weights
+  PEARSON_Division,            // compute the pearson coefficient, <a>/<b>
   PEARSON_Div_with_SquareRoot, // compute the pearson coefficient, <a>/<b>
-  PEARSON_TopK, // compare and return top K element from a share vector.
+  PEARSON_TopK,     // compare and return top K element from a share vector.
   KERNELSHAP_WEIGHT // compute the kernelshap weights
 };
 
 /** for MLP */
-enum SpdzMlpCompType {
-  ACTIVATION,
-  ACTIVATION_FAST
-};
+enum SpdzMlpCompType { ACTIVATION, ACTIVATION_FAST };
 
-enum SpdzMlpActivationFunc {
-  LOGISTIC,
-  RELU,
-  IDENTITY,
-  SOFTMAX
-};
+enum SpdzMlpActivationFunc { LOGISTIC, RELU, IDENTITY, SOFTMAX };
 
-enum SpdzLogRegCompType {
-  LOG_FUNC,
-  L1_REGULARIZATION
-};
+enum SpdzLogRegCompType { LOG_FUNC, L1_REGULARIZATION };
 
 // for inference service
-# define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
+#define DEFAULT_INFERENCE_ENDPOINT "localhost:8123"
 
 #define CERTAIN_PROBABILITY 1.0
 #define ZERO_PROBABILITY 0.0
@@ -126,6 +115,6 @@ enum DatasetType { TRAIN, TEST, VALIDATE };
 
 #define NUM_OMP_THREADS 6
 #define PARALLELISM_ENABLED true
-}  // namespace falcon
+} // namespace falcon
 
 #endif // FALCON_INCLUDE_COMMON_H_

@@ -12,12 +12,12 @@
 class ClassificationMetrics {
   // inspired by scikit-learn's:
   // https://scikit-learn.org/stable/modules/model_evaluation.html
- public:
+public:
   // four cells of the confusion matrix
-  double FN;  // False negative (FN)
-  double FP;  // False positive (FP)
-  double TP;  // True positive (TP)
-  double TN;  // True negative (TN)
+  double FN; // False negative (FN)
+  double FP; // False positive (FP)
+  double TP; // True positive (TP)
+  double TN; // True negative (TN)
 
   // regular accuracy = fraction of correct predictions over all samples
   double regular_accuracy;
@@ -42,7 +42,7 @@ class ClassificationMetrics {
   // Precision or Positive Predictive Value (PPV)
   // Positive Predictive Value (Precision) = TP / (TP + FP)
   double precision;
-  double NPV;  // Negative Predictive Value = TN / (TN + FN)
+  double NPV; // Negative Predictive Value = TN / (TN + FN)
 
   // F1 score
   // The F1 score can be interpreted as a weighted average of the precision and
@@ -61,10 +61,10 @@ class ClassificationMetrics {
                        std::vector<double> labels);
 
   // pretty print confusion matrix
-  void pretty_print_cm(std::ofstream& outfile);
+  void pretty_print_cm(std::ofstream &outfile);
 
   // print the classifier performance report
-  void classification_report(std::ofstream& outfile);
+  void classification_report(std::ofstream &outfile);
 };
 
-#endif  // FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_
+#endif // FALCON_SRC_EXECUTOR_UTILS_METRIC_CLASSIFICATION_H_

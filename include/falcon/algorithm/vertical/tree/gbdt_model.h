@@ -5,15 +5,15 @@
 #ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_MODEL_H_
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_MODEL_H_
 
+#include <falcon/algorithm/vertical/tree/tree_model.h>
 #include <falcon/common.h>
 #include <falcon/party/party.h>
-#include <falcon/algorithm/vertical/tree/tree_model.h>
 
-#include <thread>
 #include <future>
+#include <thread>
 
 class GbdtModel {
- public:
+public:
   // number of trees in the model
   int tree_size{};
   // type of the tree, 'classification' or 'regression'
@@ -31,7 +31,7 @@ class GbdtModel {
   // vector of tree models
   std::vector<TreeModel> gbdt_trees;
 
- public:
+public:
   /**
    * default constructor
    */
@@ -45,11 +45,8 @@ class GbdtModel {
    * @param m_class_num
    * @param m_learning_rate
    */
-  GbdtModel(int m_tree_size,
-      const std::string& m_tree_type,
-      int m_n_estimator,
-      int m_class_num,
-      double m_learning_rate);
+  GbdtModel(int m_tree_size, const std::string &m_tree_type, int m_n_estimator,
+            int m_class_num, double m_learning_rate);
 
   /**
    * default destructor
@@ -70,44 +67,41 @@ class GbdtModel {
   GbdtModel &operator=(const GbdtModel &gbdt_model);
 
   /**
- * given the gbdt model, predict on samples
- * @param party
- * @param predicted_samples
- * @param predicted_sample_size
- * @param predicted_labels
- * @return predicted labels (encrypted)
- */
-  void predict(Party& party,
-               const std::vector< std::vector<double> >& predicted_samples,
-               int predicted_sample_size,
-               EncodedNumber* predicted_labels);
+   * given the gbdt model, predict on samples
+   * @param party
+   * @param predicted_samples
+   * @param predicted_sample_size
+   * @param predicted_labels
+   * @return predicted labels (encrypted)
+   */
+  void predict(Party &party,
+               const std::vector<std::vector<double>> &predicted_samples,
+               int predicted_sample_size, EncodedNumber *predicted_labels);
 
   /**
-    * given the gbdt model, predict on samples
-    * if regression or binary classification
-    * @param party
-    * @param predicted_samples
-    * @param predicted_sample_size
-    * @param predicted_labels
-    * @return predicted labels (encrypted)
-    */
-  void predict_single_estimator(Party& party,
-                                const std::vector< std::vector<double> >& predicted_samples,
-                                int predicted_sample_size,
-                                EncodedNumber* predicted_labels);
+   * given the gbdt model, predict on samples
+   * if regression or binary classification
+   * @param party
+   * @param predicted_samples
+   * @param predicted_sample_size
+   * @param predicted_labels
+   * @return predicted labels (encrypted)
+   */
+  void predict_single_estimator(
+      Party &party, const std::vector<std::vector<double>> &predicted_samples,
+      int predicted_sample_size, EncodedNumber *predicted_labels);
 
   /**
-  * given the gbdt model, predict on samples
-  * @param party
-  * @param predicted_samples
-  * @param predicted_sample_size
-  * @param predicted_labels
-  * @return predicted labels (encrypted)
-  */
-  void predict_multi_estimator(Party& party,
-                              const std::vector< std::vector<double> >& predicted_samples,
-                              int predicted_sample_size,
-                              EncodedNumber* predicted_labels);
+   * given the gbdt model, predict on samples
+   * @param party
+   * @param predicted_samples
+   * @param predicted_sample_size
+   * @param predicted_labels
+   * @return predicted labels (encrypted)
+   */
+  void predict_multi_estimator(
+      Party &party, const std::vector<std::vector<double>> &predicted_samples,
+      int predicted_sample_size, EncodedNumber *predicted_labels);
 };
 
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_MODEL_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_MODEL_H_

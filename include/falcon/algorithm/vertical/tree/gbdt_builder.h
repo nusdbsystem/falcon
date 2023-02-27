@@ -5,13 +5,12 @@
 #ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_BUILDER_H_
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_BUILDER_H_
 
-#include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/gbdt_model.h>
+#include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/common.h>
 
 // number of estimators (note that the number of total trees in the model
 // does not necessarily equal to the number of estimators for classification)
-
 
 struct GbdtParams {
   // number of estimators (note that the number of total trees in the model
@@ -29,7 +28,7 @@ struct GbdtParams {
 };
 
 class GbdtBuilder : public ModelBuilder {
- public:
+public:
   // number of estimators (note that the number of total trees in the model
   // does not necessarily equal to the number of estimators for classification)
   int n_estimator;
@@ -43,7 +42,7 @@ class GbdtBuilder : public ModelBuilder {
   // decision tree builder params
   DecisionTreeParams dt_param;
 
- public:
+public:
   // local feature num in the training dataset
   int local_feature_num;
   // tree builders of each tree in the gbdt builder
@@ -51,7 +50,7 @@ class GbdtBuilder : public ModelBuilder {
   // gbdt model
   GbdtModel gbdt_model;
 
- public:
+public:
   /** default constructor */
   GbdtBuilder();
 
@@ -59,26 +58,26 @@ class GbdtBuilder : public ModelBuilder {
   ~GbdtBuilder();
 
   /** constructor */
-  GbdtBuilder(const GbdtParams& gbdt_params,
-              std::vector< std::vector<double> > m_training_data,
-              std::vector< std::vector<double> > m_testing_data,
+  GbdtBuilder(const GbdtParams &gbdt_params,
+              std::vector<std::vector<double>> m_training_data,
+              std::vector<std::vector<double>> m_testing_data,
               std::vector<double> m_training_labels,
               std::vector<double> m_testing_labels,
               double m_training_accuracy = 0.0,
               double m_testing_accuracy = 0.0);
 
   /**
- * build each tree of gbdt model
- *
- * @param party
- */
+   * build each tree of gbdt model
+   *
+   * @param party
+   */
   void train(Party party) override;
 
   /**
    * build the decision tree model
    * @param party
-  */
-  void distributed_train(const Party& party, const Worker& worker) override;
+   */
+  void distributed_train(const Party &party, const Worker &worker) override;
 
   /**
    * train gbdt regression task
@@ -103,10 +102,8 @@ class GbdtBuilder : public ModelBuilder {
    * @param size: the size of the residual vector
    * @param phe_precision: the precision of each element in encrypted residual
    */
-  void square_encrypted_residual(Party party,
-                                 EncodedNumber *residuals,
-                                 EncodedNumber *squared_residuals,
-                                 int size,
+  void square_encrypted_residual(Party party, EncodedNumber *residuals,
+                                 EncodedNumber *squared_residuals, int size,
                                  int phe_precision);
 
   /**
@@ -114,9 +111,9 @@ class GbdtBuilder : public ModelBuilder {
    * @param party
    * @param eval_type
    * @param report_save_path
-*/
+   */
   void eval(Party party, falcon::DatasetType eval_type,
-            const std::string& report_save_path = std::string()) override;
+            const std::string &report_save_path = std::string()) override;
 };
 
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_BUILDER_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_GBDT_BUILDER_H_

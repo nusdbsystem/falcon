@@ -1,12 +1,36 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by wuyuncheng on 13/9/20.
 //
 
-#include <string>
 #include <iostream>
+#include <string>
 
-#include <gtest/gtest.h>
 #include "falcon/operator/phe/fixed_point_encoder.h"
+#include <gtest/gtest.h>
 
 using namespace std;
 
@@ -53,7 +77,7 @@ TEST(FixedPoint, SetterGetter) {
   mpz_clear(g_value);
 }
 
-TEST(FixedPoint, IntegerEncodeDecode){
+TEST(FixedPoint, IntegerEncodeDecode) {
   // positive integer
   mpz_t v_n;
   mpz_t v_value;
@@ -83,7 +107,7 @@ TEST(FixedPoint, IntegerEncodeDecode){
   long decoded_positive;
   positive_number.decode(decoded_positive);
   // printf("decoded_positive = %ld\n", decoded_positive);
-  EXPECT_EQ((long) positive, decoded_positive);
+  EXPECT_EQ((long)positive, decoded_positive);
 
   // negative integer
   int negative = -8000;
@@ -111,7 +135,7 @@ TEST(FixedPoint, IntegerEncodeDecode){
   long decoded_negative;
   negative_number.decode(decoded_negative);
   // printf("decoded_negative = %ld\n", decoded_negative);
-  EXPECT_EQ((long) negative, decoded_negative);
+  EXPECT_EQ((long)negative, decoded_negative);
 
   mpz_clear(v_n);
   mpz_clear(v_value);
@@ -119,7 +143,7 @@ TEST(FixedPoint, IntegerEncodeDecode){
   mpz_clear(g_value);
 }
 
-TEST(FixedPoint, FloatEncodeDecode){
+TEST(FixedPoint, FloatEncodeDecode) {
   // positive float
   mpz_t v_n;
   mpz_t v_value;
@@ -186,7 +210,7 @@ TEST(FixedPoint, FloatEncodeDecode){
   mpz_clear(g_value);
 }
 
-TEST(FixedPoint, EncodedState){
+TEST(FixedPoint, EncodedState) {
   mpz_t v_n;
   mpz_t v_value_invalid, v_value_positive, v_value_negative, v_value_overflow;
   mpz_init(v_n);
@@ -244,14 +268,14 @@ TEST(FixedPoint, EncodedState){
   mpz_clear(neg_int);
 }
 
-TEST(FixedPoint, ExponentChange){
+TEST(FixedPoint, ExponentChange) {
   mpz_t v_n;
   mpz_t v_value;
   mpz_init(v_n);
   mpz_init(v_value);
   mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
   mpz_set_str(v_value, "100", PHE_STR_BASE);
-  //int v_exponent = 0 - PHE_FIXED_POINT_PRECISION;
+  // int v_exponent = 0 - PHE_FIXED_POINT_PRECISION;
   int v_exponent = -8;
   EncodedNumberType v_type = Plaintext;
 
@@ -291,7 +315,7 @@ TEST(FixedPoint, ExponentChange){
   mpz_clear(g_value);
 }
 
-TEST(FixedPoint, DecodeTruncationCase1){
+TEST(FixedPoint, DecodeTruncationCase1) {
   mpz_t v_n;
   mpz_init(v_n);
   mpz_set_str(v_n, "100000000000000", PHE_STR_BASE);
@@ -301,23 +325,28 @@ TEST(FixedPoint, DecodeTruncationCase1){
   number.decode(x_decoded);
   number.decode_with_truncation(x_decoded_truncation, -16);
   EXPECT_NEAR(x_decoded, x_decoded_truncation, 1e-3);
-//  std::cout << "x_decoded = " << x_decoded << std::endl;
-//  std::cout << "x_decoded_truncation = " << x_decoded_truncation << std::endl;
+  //  std::cout << "x_decoded = " << x_decoded << std::endl;
+  //  std::cout << "x_decoded_truncation = " << x_decoded_truncation <<
+  //  std::endl;
   mpz_clear(v_n);
 }
 
 TEST(FixedPoint, DecodeTruncationCase2) {
   mpz_t v_n;
   mpz_init(v_n);
-  mpz_set_str(v_n, "100000000000000000000000000000000"
-                   "000000000000000000000000000000000", PHE_STR_BASE);
+  mpz_set_str(v_n,
+              "100000000000000000000000000000000"
+              "000000000000000000000000000000000",
+              PHE_STR_BASE);
   EncodedNumber number;
   number.set_double(v_n, 0.985, 64);
   double x_decoded, x_decoded_truncation;
   number.decode(x_decoded);
-  number.decode_with_truncation(x_decoded_truncation, 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
-//  std::cout << "x_decoded = " << x_decoded << std::endl;
-//  std::cout << "x_decoded_truncation = " << x_decoded_truncation << std::endl;
+  number.decode_with_truncation(x_decoded_truncation,
+                                0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
+  //  std::cout << "x_decoded = " << x_decoded << std::endl;
+  //  std::cout << "x_decoded_truncation = " << x_decoded_truncation <<
+  //  std::endl;
   EXPECT_NEAR(x_decoded, x_decoded_truncation, 1e-3);
   mpz_clear(v_n);
 }
@@ -325,15 +354,19 @@ TEST(FixedPoint, DecodeTruncationCase2) {
 TEST(FixedPoint, DecodeTruncationCase3) {
   mpz_t v_n;
   mpz_init(v_n);
-  mpz_set_str(v_n, "100000000000000000000000000000000"
-                   "000000000000000000000000000000000", PHE_STR_BASE);
+  mpz_set_str(v_n,
+              "100000000000000000000000000000000"
+              "000000000000000000000000000000000",
+              PHE_STR_BASE);
   EncodedNumber number;
   number.set_double(v_n, 0.985, 36);
   double x_decoded, x_decoded_truncation;
   number.decode(x_decoded);
-  number.decode_with_truncation(x_decoded_truncation, 0 - 2 * PHE_MAXIMUM_FIXED_POINT_PRECISION);
-//  std::cout << "x_decoded = " << x_decoded << std::endl;
-//  std::cout << "x_decoded_truncation = " << x_decoded_truncation << std::endl;
+  number.decode_with_truncation(x_decoded_truncation,
+                                0 - 2 * PHE_MAXIMUM_FIXED_POINT_PRECISION);
+  //  std::cout << "x_decoded = " << x_decoded << std::endl;
+  //  std::cout << "x_decoded_truncation = " << x_decoded_truncation <<
+  //  std::endl;
   EXPECT_NEAR(x_decoded, x_decoded_truncation, 1e-3);
   mpz_clear(v_n);
 }
@@ -341,15 +374,19 @@ TEST(FixedPoint, DecodeTruncationCase3) {
 TEST(FixedPoint, DecodeTruncationCase4) {
   mpz_t v_n;
   mpz_init(v_n);
-  mpz_set_str(v_n, "100000000000000000000000000000000"
-                   "000000000000000000000000000000000", PHE_STR_BASE);
+  mpz_set_str(v_n,
+              "100000000000000000000000000000000"
+              "000000000000000000000000000000000",
+              PHE_STR_BASE);
   EncodedNumber number;
   number.set_double(v_n, 0.985, 16);
   double x_decoded, x_decoded_truncation;
   number.decode(x_decoded);
-  number.decode_with_truncation(x_decoded_truncation, 0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
-//  std::cout << "x_decoded = " << x_decoded << std::endl;
-//  std::cout << "x_decoded_truncation = " << x_decoded_truncation << std::endl;
+  number.decode_with_truncation(x_decoded_truncation,
+                                0 - PHE_MAXIMUM_FIXED_POINT_PRECISION);
+  //  std::cout << "x_decoded = " << x_decoded << std::endl;
+  //  std::cout << "x_decoded_truncation = " << x_decoded_truncation <<
+  //  std::endl;
   EXPECT_NEAR(x_decoded, x_decoded_truncation, 1e-3);
   mpz_clear(v_n);
 }

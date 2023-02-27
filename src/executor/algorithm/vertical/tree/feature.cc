@@ -1,12 +1,36 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by wuyuncheng on 12/5/21.
 //
 
+#include <algorithm> // std::sort
 #include <falcon/algorithm/vertical/tree/feature.h>
-#include <numeric>      // std::iota
-#include <algorithm>    // std::sort
-#include <glog/logging.h>
 #include <falcon/utils/logger/logger.h>
+#include <glog/logging.h>
+#include <numeric> // std::iota
 
 FeatureHelper::FeatureHelper() = default;
 
@@ -27,7 +51,7 @@ FeatureHelper::FeatureHelper(const FeatureHelper &feature_helper) {
   split_ivs_right = feature_helper.split_ivs_right;
 }
 
-FeatureHelper& FeatureHelper::operator=(FeatureHelper *feature_helper) {
+FeatureHelper &FeatureHelper::operator=(FeatureHelper *feature_helper) {
   id = feature_helper->id;
   num_splits = feature_helper->num_splits;
   max_bins = feature_helper->max_bins;
@@ -60,8 +84,9 @@ void FeatureHelper::set_feature_data(std::vector<double> values, int size) {
 }
 
 std::vector<double> FeatureHelper::compute_distinct_values() {
-  // now the feature values are sorted, the sorted indexes are stored in sorted_indexes
-  int sample_num = (int) origin_feature_values.size();
+  // now the feature values are sorted, the sorted indexes are stored in
+  // sorted_indexes
+  int sample_num = (int)origin_feature_values.size();
   int distinct_value_num = 0;
   std::vector<double> distinct_values;
   for (int i = 0; i < sample_num; i++) {
@@ -71,7 +96,8 @@ std::vector<double> FeatureHelper::compute_distinct_values() {
       distinct_value_num++;
     } else {
       // if this value has been already added, skip
-      if (distinct_values[distinct_value_num-1] == origin_feature_values[sorted_indexes[i]]) {
+      if (distinct_values[distinct_value_num - 1] ==
+          origin_feature_values[sorted_indexes[i]]) {
         continue;
       } else {
         // if his value is not seen , add directly
@@ -91,7 +117,7 @@ void FeatureHelper::sort_feature() {
   // sort indexes based on comparing values in v
   // sort 100000 running time 30ms, sort 10000 running time 3ms
   sort(idx.begin(), idx.end(),
-       [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
+       [&v](size_t i1, size_t i2) { return v[i1] < v[i2]; });
   sorted_indexes = idx;
 }
 
@@ -102,16 +128,17 @@ void FeatureHelper::find_splits() {
   /// basically, after sorting the feature values, we compute the size of
   /// each bin, n is the sample number
   /// i.e., n_sample_per_bin = n/(k+1), and samples[0:n_sample_per_bin]
-  /// is the first bin, while (value[n_sample_per_bin] + value[n_sample_per_bin+1])/2
-  /// is the first split value, etc.
+  /// is the first bin, while (value[n_sample_per_bin] +
+  /// value[n_sample_per_bin+1])/2 is the first split value, etc.
 
-  /// note: currently assume that the feature values is sorted, treat categorical
-  /// feature as label encoder sortable values
+  /// note: currently assume that the feature values is sorted, treat
+  /// categorical feature as label encoder sortable values
 
-  int n_samples = (int) origin_feature_values.size();
+  int n_samples = (int)origin_feature_values.size();
   std::vector<double> distinct_values = compute_distinct_values();
 
-  log_info("The number of distinct values of this feature is " + std::to_string(distinct_values.size()));
+  log_info("The number of distinct values of this feature is " +
+           std::to_string(distinct_values.size()));
 
   // if distinct values is larger than max_bins + 1, treat as continuous feature
   // otherwise, treat as categorical feature
@@ -120,22 +147,24 @@ void FeatureHelper::find_splits() {
     // (might not accurate when the values are imbalanced)
     int n_sample_per_bin = n_samples / (num_splits + 1);
     for (int i = 0; i < num_splits; i++) {
-      double split_value_i = (origin_feature_values[sorted_indexes[(i + 1) * n_sample_per_bin]]
-          + origin_feature_values[sorted_indexes[(i + 1) * n_sample_per_bin + 1]])/2;
+      double split_value_i =
+          (origin_feature_values[sorted_indexes[(i + 1) * n_sample_per_bin]] +
+           origin_feature_values[sorted_indexes[(i + 1) * n_sample_per_bin +
+                                                1]]) /
+          2;
       split_values.push_back(split_value_i);
     }
-  }
-  else if (distinct_values.size() > 1) {
+  } else if (distinct_values.size() > 1) {
     // the split values are same as the distinct values
-    num_splits = (int) distinct_values.size() - 1;
+    num_splits = (int)distinct_values.size() - 1;
     for (int i = 0; i < num_splits; i++) {
       split_values.push_back(distinct_values[i]);
     }
-  }
-  else {
-    // the distinct values is equal to 1, which is suspicious for the input dataset
+  } else {
+    // the distinct values is equal to 1, which is suspicious for the input
+    // dataset
     log_info("This feature has only one distinct value, please check it again");
-    num_splits = (int) distinct_values.size();
+    num_splits = (int)distinct_values.size();
     split_values.push_back(distinct_values[0]);
   }
 }
@@ -146,7 +175,7 @@ void FeatureHelper::compute_split_ivs() {
   for (int i = 0; i < num_splits; i++) {
     // read split value i
     double split_value_i = split_values[i];
-    int n_samples = (int) origin_feature_values.size();
+    int n_samples = (int)origin_feature_values.size();
     std::vector<int> indicator_vec_left;
     indicator_vec_left.reserve(n_samples);
     std::vector<int> indicator_vec_right;
