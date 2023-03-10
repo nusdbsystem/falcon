@@ -18,7 +18,7 @@ namespace falcon {
 // NOTE: cannot be too high (encoded <= long long)
 #define PHE_FIXED_POINT_PRECISION 16
 #define PHE_MAXIMUM_FIXED_POINT_PRECISION 32
-#define PHE_MAXIMUM_PRECISION 448
+#define PHE_MAXIMUM_PRECISION 400
 #define PHE_FIXED_POINT_BASE 2
 #define PHE_EPSILON 1
 // #define PHE_KEY_SIZE 2048 // for efficiency testing to make it secure
