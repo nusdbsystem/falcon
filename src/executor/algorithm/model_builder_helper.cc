@@ -74,8 +74,7 @@ std::vector<int> sync_batch_idx(const Party &party, int batch_size,
   return batch_indexes;
 }
 
-std::vector<std::vector<int>>
-precompute_iter_batch_idx(int batch_size, int max_iter,
+std::vector<std::vector<int>> precompute_iter_batch_idx(int batch_size, int max_iter,
                           std::vector<int> data_indexes) {
   std::vector<std::vector<int>> batch_iter_indexes;
   batch_iter_indexes.reserve(max_iter);
