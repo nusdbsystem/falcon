@@ -1,0 +1,16 @@
+******** Evaluation Report on testing dataset ********
+=== Regression Report ===
+MSE Loss = 0.83095
+RMSE Loss = 0.911565
+MSLE Loss = 0.775064
+RMSLE Loss = 0.880377
+MAE Loss = 0.862671
+MAXE Loss = 1.62012
+******** Evaluation Report on testing dataset ********
+=== Regression Report ===
+MSE Loss = 0.0867423
+RMSE Loss = 0.29452
+MSLE Loss = 0.0404234
+RMSLE Loss = 0.201056
+MAE Loss = 0.250892
+MAXE Loss = 0.593747

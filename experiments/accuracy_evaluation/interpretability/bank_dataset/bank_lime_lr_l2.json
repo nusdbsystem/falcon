@@ -1,0 +1,138 @@
+{
+  "job_name": "bank dataset lime explanation",
+  "job_info": "include weight, feature selection, and interpret stages",
+  "job_fl_type": "vertical",
+  "existing_key": 1,
+  "party_nums": 3,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "127.0.0.1:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/opt/falcon/examples/3party/party0/data/bank",
+        "data_output": "/opt/falcon/examples/3party/party0/data/bank",
+        "model_path": "/opt/falcon/examples/3party/party0/data/bank"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "127.0.0.1:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/opt/falcon/examples/3party/party1/data/bank",
+        "data_output": "/opt/falcon/examples/3party/party1/data/bank",
+        "model_path": "/opt/falcon/examples/3party/party1/data/bank"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "127.0.0.1:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/opt/falcon/examples/3party/party2/data/bank",
+        "data_output": "/opt/falcon/examples/3party/party2/data/bank",
+        "model_path": "/opt/falcon/examples/3party/party2/data/bank"
+      }
+    }
+  ],
+  "distributed_task": {
+    "enable": 0,
+    "worker_number": 1,
+    "average": 0
+  },
+  "tasks": {
+    "lime_weight": {
+      "mpc_algorithm_name": "lime",
+      "algorithm_name": "lime_compute_weights",
+      "input_configs": {
+        "data_input": {
+          "data": "bank_sampled_data.csv",
+          "key": "acc_bank_lime_phe_keys"
+        },
+        "algorithm_config": {
+          "explain_instance_idx": 0,
+          "generated_sample_file": "/bank_sampled_data.csv",
+          "computed_prediction_file": "/bank_sampled_data_predictions.csv.ciphertext",
+          "is_precompute": false,
+          "num_samples": 1001,
+          "class_num": 2,
+          "distance_metric": "euclidean",
+          "kernel": "exponential",
+          "kernel_width": 0.0,
+          "sample_weights_file": "/bank_sample_weights.txt.ciphertext",
+          "selected_samples_file": "/bank_sampled_data.csv",
+          "selected_predictions_file": "/bank_sampled_data_predictions.csv.ciphertext"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "acc_bank_lime_l2_all_report_20230314.txt"
+      }
+    },
+    "lime_feature": {
+      "mpc_algorithm_name": "lime",
+      "algorithm_name": "lime_feature_selection",
+      "input_configs": {
+        "data_input": {
+          "data": "bank_sampled_data.csv",
+          "key": "acc_bank_lime_phe_keys"
+        },
+        "algorithm_config": {
+          "selected_samples_file": "/bank_sampled_data.csv",
+          "selected_predictions_file": "/bank_sampled_data_predictions.csv.ciphertext",
+          "sample_weights_file": "/bank_sample_weights.txt.ciphertext",
+          "num_samples": 1001,
+          "class_num": 2,
+          "class_id": 0,
+          "feature_selection": "pearson_correlation",
+          "num_explained_features": 16,
+          "selected_features_file": "/bank_sampled_data_selected_features.csv"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "acc_bank_lime_l2_all_report_20230314.txt"
+      }
+    },
+    "lime_interpret": {
+      "mpc_algorithm_name": "linear_regression",
+      "algorithm_name": "lime_interpret",
+      "input_configs": {
+        "data_input": {
+          "data": "bank_sampled_data.csv",
+          "key": "acc_bank_lime_phe_keys"
+        },
+        "algorithm_config": {
+          "selected_data_file": "/bank_sampled_data_selected_features.csv",
+          "selected_predictions_file": "/bank_sampled_data_predictions.csv.ciphertext",
+          "sample_weights_file": "/bank_sample_weights.txt.ciphertext",
+          "num_samples": 1001,
+          "class_num": 2,
+          "class_id": 0,
+          "interpret_model_name": "linear_regression",
+          "interpret_model_param": {
+            "batch_size": 128,
+            "max_iteration": 200,
+            "convergence_threshold": 0.0001,
+            "with_regularization": true,
+            "alpha": 0.1,
+            "learning_rate": 0.1,
+            "decay": 0.1,
+            "penalty": "l2",
+            "optimizer": "sgd",
+            "metric": "mse",
+            "differential_privacy_budget": 0.1,
+            "fit_bias": true
+          },
+          "explanation_report": "/20230314_exp_report_bank_lime_lr_l2_.txt"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "acc_bank_lime_l2_all_report_20230314.txt"
+      }
+    }
+  }
+}
