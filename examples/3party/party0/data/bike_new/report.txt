@@ -1,0 +1,40 @@
+******** Evaluation Report on testing dataset ********
+=== Regression Report ===
+MSE Loss = 0.0471458
+RMSE Loss = 0.217131
+MSLE Loss = 0.0303443
+RMSLE Loss = 0.174196
+MAE Loss = 0.140871
+MAXE Loss = 0.717853
+******** Evaluation Report on testing dataset ********
+=== Regression Report ===
+MSE Loss = 0.0228414
+RMSE Loss = 0.151134
+MSLE Loss = 0.0129474
+RMSLE Loss = 0.113786
+MAE Loss = 0.0760017
+MAXE Loss = 0.697218
+******** Evaluation Report on testing dataset ********
+=== Regression Report ===
+MSE Loss = 0.0228418
+RMSE Loss = 0.151135
+MSLE Loss = 0.0129476
+RMSLE Loss = 0.113788
+MAE Loss = 0.0760011
+MAXE Loss = 0.697222
+******** Evaluation Report on testing dataset ********
+=== Regression Report ===
+MSE Loss = 0.0221978
+RMSE Loss = 0.148989
+MSLE Loss = 0.0132101
+RMSLE Loss = 0.114935
+MAE Loss = 0.087012
+MAXE Loss = 0.627514
+******** Evaluation Report on testing dataset ********
+=== Regression Report ===
+MSE Loss = 0.0154184
+RMSE Loss = 0.124171
+MSLE Loss = 0.00890608
+RMSLE Loss = 0.0943721
+MAE Loss = 0.0651877
+MAXE Loss = 0.581354
