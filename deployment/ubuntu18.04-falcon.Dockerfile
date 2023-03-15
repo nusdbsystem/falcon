@@ -306,7 +306,8 @@ RUN Scripts/setup-online.sh 3 128 128 && \
     c_rehash Player-Data/ && \
     git pull && \
     git log --oneline -2 && \
-    ./compile.py Programs/Source/lime.mpc
+    ./compile.py Programs/Source/lime.mpc && \
+    ./compile.py Programs/Source/mlp.mpc
 
 # 4. pre-compile falcon
 WORKDIR /opt/falcon

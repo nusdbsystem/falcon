@@ -48,27 +48,27 @@
       "algorithm_name": "lime_compute_weights",
       "input_configs": {
         "data_input": {
-          "data": "credit_sampled_data.csv",
-          "key": "acc_credit_lime_phe_keys"
+          "data": "lime/credit_sampled_data.csv",
+          "key": "lime/acc_credit_lime_phe_keys"
         },
         "algorithm_config": {
           "explain_instance_idx": 0,
-          "generated_sample_file": "/credit_sampled_data.csv",
-          "computed_prediction_file": "/credit_sampled_data_predictions.csv.ciphertext",
+          "generated_sample_file": "/lime/credit_sampled_data.csv",
+          "computed_prediction_file": "/lime/credit_sampled_data_predictions.csv.ciphertext",
           "is_precompute": false,
           "num_samples": 1001,
           "class_num": 2,
           "distance_metric": "euclidean",
           "kernel": "exponential",
           "kernel_width": 0.0,
-          "sample_weights_file": "/credit_sample_weights.txt.ciphertext",
-          "selected_samples_file": "/credit_sampled_data.csv",
-          "selected_predictions_file": "/credit_sampled_data_predictions.csv.ciphertext"
+          "sample_weights_file": "/lime/credit_sample_weights.txt.ciphertext",
+          "selected_samples_file": "/lime/credit_sampled_data.csv",
+          "selected_predictions_file": "/lime/credit_sampled_data_predictions.csv.ciphertext"
         }
       },
       "output_configs": {
-        "trained_model": "saved_model.pb",
-        "evaluation_report": "acc_credit_lime_l2_all_report_20230314.txt"
+        "trained_model": "lime/saved_model.pb",
+        "evaluation_report": "lime/acc_credit_lime_l2_all_report_20230314.txt"
       }
     },
     "lime_feature": {
@@ -76,24 +76,24 @@
       "algorithm_name": "lime_feature_selection",
       "input_configs": {
         "data_input": {
-          "data": "credit_sampled_data.csv",
-          "key": "acc_credit_lime_phe_keys"
+          "data": "lime/credit_sampled_data.csv",
+          "key": "lime/acc_credit_lime_phe_keys"
         },
         "algorithm_config": {
-          "selected_samples_file": "/credit_sampled_data.csv",
-          "selected_predictions_file": "/credit_sampled_data_predictions.csv.ciphertext",
-          "sample_weights_file": "/credit_sample_weights.txt.ciphertext",
+          "selected_samples_file": "/lime/credit_sampled_data.csv",
+          "selected_predictions_file": "/lime/credit_sampled_data_predictions.csv.ciphertext",
+          "sample_weights_file": "/lime/credit_sample_weights.txt.ciphertext",
           "num_samples": 1001,
           "class_num": 2,
           "class_id": 0,
           "feature_selection": "pearson_correlation",
           "num_explained_features": 16,
-          "selected_features_file": "/credit_sampled_data_selected_features.csv"
+          "selected_features_file": "/lime/credit_sampled_data_selected_features.csv"
         }
       },
       "output_configs": {
-        "trained_model": "saved_model.pb",
-        "evaluation_report": "acc_credit_lime_l2_all_report_20230314.txt"
+        "trained_model": "lime/saved_model.pb",
+        "evaluation_report": "lime/acc_credit_lime_l2_all_report_20230314.txt"
       }
     },
     "lime_interpret": {
@@ -101,13 +101,13 @@
       "algorithm_name": "lime_interpret",
       "input_configs": {
         "data_input": {
-          "data": "credit_sampled_data.csv",
-          "key": "acc_credit_lime_phe_keys"
+          "data": "lime/credit_sampled_data.csv",
+          "key": "lime/acc_credit_lime_phe_keys"
         },
         "algorithm_config": {
-          "selected_data_file": "/credit_sampled_data_selected_features.csv",
-          "selected_predictions_file": "/credit_sampled_data_predictions.csv.ciphertext",
-          "sample_weights_file": "/credit_sample_weights.txt.ciphertext",
+          "selected_data_file": "/lime/credit_sampled_data_selected_features.csv",
+          "selected_predictions_file": "/lime/credit_sampled_data_predictions.csv.ciphertext",
+          "sample_weights_file": "/lime/credit_sample_weights.txt.ciphertext",
           "num_samples": 1001,
           "class_num": 2,
           "class_id": 0,
@@ -126,12 +126,12 @@
             "differential_privacy_budget": 0.1,
             "fit_bias": true
           },
-          "explanation_report": "/20230314_exp_report_credit_lime_lr_l2_.txt"
+          "explanation_report": "/lime/20230314_exp_report_credit_lime_lr_l2_.txt"
         }
       },
       "output_configs": {
-        "trained_model": "saved_model.pb",
-        "evaluation_report": "acc_credit_lime_l2_all_report_20230314.txt"
+        "trained_model": "lime/saved_model.pb",
+        "evaluation_report": "lime/acc_credit_lime_l2_all_report_20230314.txt"
       }
     }
   }

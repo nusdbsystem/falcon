@@ -1,5 +1,5 @@
 {
-  "job_name": "bank dataset lime explanation",
+  "job_name": "news dataset lime explanation",
   "job_info": "include weight, feature selection, and interpret stages",
   "job_fl_type": "vertical",
   "existing_key": 0,
@@ -11,9 +11,9 @@
       "addr": "127.0.0.1:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/opt/falcon/examples/3party/party0/data/bank",
-        "data_output": "/opt/falcon/examples/3party/party0/data/bank",
-        "model_path": "/opt/falcon/examples/3party/party0/data/bank"
+        "data_input": "/opt/falcon/examples/3party/party0/data/news",
+        "data_output": "/opt/falcon/examples/3party/party0/data/news",
+        "model_path": "/opt/falcon/examples/3party/party0/data/news"
       }
     },
     {
@@ -21,9 +21,9 @@
       "addr": "127.0.0.1:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/examples/3party/party1/data/bank",
-        "data_output": "/opt/falcon/examples/3party/party1/data/bank",
-        "model_path": "/opt/falcon/examples/3party/party1/data/bank"
+        "data_input": "/opt/falcon/examples/3party/party1/data/news",
+        "data_output": "/opt/falcon/examples/3party/party1/data/news",
+        "model_path": "/opt/falcon/examples/3party/party1/data/news"
       }
     },
     {
@@ -31,9 +31,9 @@
       "addr": "127.0.0.1:30007",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/examples/3party/party2/data/bank",
-        "data_output": "/opt/falcon/examples/3party/party2/data/bank",
-        "model_path": "/opt/falcon/examples/3party/party2/data/bank"
+        "data_input": "/opt/falcon/examples/3party/party2/data/news",
+        "data_output": "/opt/falcon/examples/3party/party2/data/news",
+        "model_path": "/opt/falcon/examples/3party/party2/data/news"
       }
     }
   ],
@@ -49,19 +49,19 @@
       "input_configs": {
         "data_input": {
           "data": "client.txt",
-          "key": "lime/acc_bank_lime_phe_keys"
+          "key": "lime/acc_news_lime_phe_keys"
         },
         "algorithm_config": {
           "explain_instance_idx": 0,
           "sample_around_instance": true,
           "num_total_samples": 1000,
           "sampling_method": "gaussian",
-          "generated_sample_file": "/lime/bank_sampled_data.csv"
+          "generated_sample_file": "/lime/news_sampled_data.csv"
         }
       },
       "output_configs": {
         "trained_model": "saved_model.pb",
-        "evaluation_report": "acc_bank_lime_l1_all_report_20230314.txt"
+        "evaluation_report": "acc_news_lime_l1_all_report_20230314.txt"
       }
     }
   }
