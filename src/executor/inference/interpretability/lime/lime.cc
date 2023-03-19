@@ -283,15 +283,6 @@ void LimeExplainer::compute_sample_weights(
     write_data.push_back(sss_weights);
     write_dataset_to_file(write_data, delimiter, sample_weights_file);
     log_info("Write encrypted sample weights finished");
-
-#ifdef SAVE_BASELINE
-    // the parties jointly reveal sss_weights and record it into sample_weights_file.plaintext
-    std::string sample_weights_file_plain = sample_weights_file + ".plain";
-    std::vector<double> sss_weights_plain = display_shares_vector(party, sss_weights);
-    std::vector<std::vector<double>> write_data_plain;
-    write_data_plain.push_back(sss_weights_plain);
-    write_dataset_to_file(write_data_plain, delimiter, sample_weights_file_plain);
-#endif
   }
 
   // parameter server logic with distributed

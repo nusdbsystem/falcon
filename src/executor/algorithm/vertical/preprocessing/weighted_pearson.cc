@@ -182,16 +182,18 @@ std::vector<int> wpcc_feature_selection(Party party,
     }
 
 #ifdef SAVE_BASELINE
-    std::vector<std::vector<double>> write_data_plain;
-    write_data_plain.push_back(wpcc_decrypted_vec);
+    std::vector<std::vector<double>> write_data_plain1, write_data_plain2;
+    write_data_plain1.push_back(wpcc_decrypted_vec);
     std::vector<double> selected_feat_idx_double;
     for (int i : selected_feat_idx) {
       selected_feat_idx_double.push_back((double) i);
     }
-    write_data_plain.push_back(selected_feat_idx_double);
+    write_data_plain2.push_back(selected_feat_idx_double);
     std::string wpcc_file_plain = output_path_prefix + ".wpcc.plain";
+    log_info("wpcc_file_plain = " + wpcc_file_plain);
     char delimiter = ',';
-    write_dataset_to_file(write_data_plain, delimiter, wpcc_file_plain);
+    write_dataset_to_file(write_data_plain1, delimiter, wpcc_file_plain);
+    write_dataset_to_file(write_data_plain2, delimiter, wpcc_file_plain);
 #endif
   }
 
