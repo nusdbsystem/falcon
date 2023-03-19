@@ -9,7 +9,7 @@ namespace falcon {
 // for DEBUG to display intermediate information
 // turn DEBUG off in the real application
 //  #define DEBUG
-// #define SAVE_BASELINE
+#define SAVE_BASELINE
 #define PRINT_EVERY 20 // if debug, display info at this frequency
 
 // Precision for transforming a floating-point value

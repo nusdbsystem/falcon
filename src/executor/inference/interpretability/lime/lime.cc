@@ -283,6 +283,15 @@ void LimeExplainer::compute_sample_weights(
     write_data.push_back(sss_weights);
     write_dataset_to_file(write_data, delimiter, sample_weights_file);
     log_info("Write encrypted sample weights finished");
+
+#ifdef SAVE_BASELINE
+    // the parties jointly reveal sss_weights and record it into sample_weights_file.plaintext
+    std::string sample_weights_file_plain = sample_weights_file + ".plain";
+    std::vector<double> sss_weights_plain = display_shares_vector(party, sss_weights);
+    std::vector<std::vector<double>> write_data_plain;
+    write_data_plain.push_back(sss_weights_plain);
+    write_dataset_to_file(write_data_plain, delimiter, sample_weights_file_plain);
+#endif
   }
 
   // parameter server logic with distributed
@@ -700,7 +709,7 @@ void LimeExplainer::select_features(
     log_info("[explain_one_label]: begin run pearson feature selection");
     // pearson doesn't require parameters
     selected_feat_idx = wpcc_feature_selection(
-        party, num_explained_features, selected_samples, selected_pred_class_id,
+        party, num_explained_features, output_path_prefix, selected_samples, selected_pred_class_id,
         sss_weights, ps_network_str, is_distributed, distributed_role,
         worker_id);
   } else if (feature_selection == LR_FEATURE_SELECTION_NAME) {

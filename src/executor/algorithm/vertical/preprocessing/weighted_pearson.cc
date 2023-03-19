@@ -94,6 +94,7 @@ std::vector<int> sync_global_feature_number(const Party &party) {
 
 std::vector<int> wpcc_feature_selection(Party party,
                                         int num_explained_features,
+                                        const std::string& output_path_prefix,
                                         const vector<std::vector<double>> &train_data,
                                         EncodedNumber *predictions,
                                         const vector<double> &sss_sample_weights,
@@ -179,6 +180,19 @@ std::vector<int> wpcc_feature_selection(Party party,
       std::cout << mean_squared_error_double << std::endl;
       LOG(INFO) << mean_squared_error_double;
     }
+
+#ifdef SAVE_BASELINE
+    std::vector<std::vector<double>> write_data_plain;
+    write_data_plain.push_back(wpcc_decrypted_vec);
+    std::vector<double> selected_feat_idx_double;
+    for (int i : selected_feat_idx) {
+      selected_feat_idx_double.push_back((double) i);
+    }
+    write_data_plain.push_back(selected_feat_idx_double);
+    std::string wpcc_file_plain = output_path_prefix + ".wpcc.plain";
+    char delimiter = ',';
+    write_dataset_to_file(write_data_plain, delimiter, wpcc_file_plain);
+#endif
   }
 
     // distributed
@@ -947,29 +961,29 @@ void get_local_features_correlations(const Party &party,
 //      double one_wpcc_share = compute_wpcc(party, p_shares_vec[start_global_idx+feature_id],
 //                                           q1_shares_vec[start_global_idx+feature_id], q2_shares[0]);
 
-#ifdef SAVE_BASELINE
-      // debug p, q1, q2
-      std::vector<double> p_plain_double;
-      secret_shares_to_plain_double(party, p_plain_double, p_shares, 1,
-                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-      std::vector<double> q1_plain_double;
-      secret_shares_to_plain_double(party, q1_plain_double, q1_shares, 1,
-                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-      std::vector<double> q2_plain_double;
-      secret_shares_to_plain_double(party, q2_plain_double, q2_shares, 1,
-                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-
-      std::vector<double> wpcc_plain_double;
-      std::vector<double> share_vec_wpcc;
-      share_vec_wpcc.push_back(one_wpcc_share);
-      secret_shares_to_plain_double(party, wpcc_plain_double, share_vec_wpcc, 1,
-                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
-
-      debug_vec_p.push_back(p_plain_double[0]);
-      debug_vec_q1.push_back(q1_plain_double[0]);
-      debug_vec_q2.push_back(q2_plain_double[0]);
-      debug_vec_wpcc.push_back(wpcc_plain_double[0]);
-#endif
+//#ifdef SAVE_BASELINE
+//      // debug p, q1, q2
+//      std::vector<double> p_plain_double;
+//      secret_shares_to_plain_double(party, p_plain_double, p_shares, 1,
+//                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+//      std::vector<double> q1_plain_double;
+//      secret_shares_to_plain_double(party, q1_plain_double, q1_shares, 1,
+//                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+//      std::vector<double> q2_plain_double;
+//      secret_shares_to_plain_double(party, q2_plain_double, q2_shares, 1,
+//                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+//
+//      std::vector<double> wpcc_plain_double;
+//      std::vector<double> share_vec_wpcc;
+//      share_vec_wpcc.push_back(one_wpcc_share);
+//      secret_shares_to_plain_double(party, wpcc_plain_double, share_vec_wpcc, 1,
+//                                    ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
+//
+//      debug_vec_p.push_back(p_plain_double[0]);
+//      debug_vec_q1.push_back(q1_plain_double[0]);
+//      debug_vec_q2.push_back(q2_plain_double[0]);
+//      debug_vec_wpcc.push_back(wpcc_plain_double[0]);
+//#endif
       wpcc_vec.push_back(res_wpcc_shares[idx]);
       idx++;
       party_id_loop_ups.push_back(party_id);

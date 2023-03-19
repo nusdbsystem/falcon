@@ -59,6 +59,7 @@ std::vector<int> sync_global_feature_number(const Party &party);
  */
 std::vector<int> wpcc_feature_selection(
     Party party, int num_explained_features,
+    const std::string& output_path_prefix,
     const std::vector<std::vector<double>> &train_data,
     EncodedNumber *predictions, const std::vector<double> &sss_sample_weights,
     const std::string &ps_network_str = std::string(), int is_distributed = 0,
