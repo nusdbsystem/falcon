@@ -1,0 +1,69 @@
+{
+  "job_name": "bank dataset lime explanation",
+  "job_info": "include weight, feature selection, and interpret stages",
+  "job_fl_type": "vertical",
+  "existing_key": 0,
+  "party_nums": 3,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "127.0.0.1:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/opt/falcon/examples/3party/party0/data/bank",
+        "data_output": "/opt/falcon/examples/3party/party0/data/bank",
+        "model_path": "/opt/falcon/examples/3party/party0/data/bank"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "127.0.0.1:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/opt/falcon/examples/3party/party1/data/bank",
+        "data_output": "/opt/falcon/examples/3party/party1/data/bank",
+        "model_path": "/opt/falcon/examples/3party/party1/data/bank"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "127.0.0.1:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/opt/falcon/examples/3party/party2/data/bank",
+        "data_output": "/opt/falcon/examples/3party/party2/data/bank",
+        "model_path": "/opt/falcon/examples/3party/party2/data/bank"
+      }
+    }
+  ],
+  "distributed_task": {
+    "enable": 0,
+    "worker_number": 1,
+    "average": 0
+  },
+  "tasks": {
+    "lime_pred": {
+      "mpc_algorithm_name": "logistic_regression",
+      "algorithm_name": "lime_compute_prediction",
+      "input_configs": {
+        "data_input": {
+          "data": "lime/bank_sampled_data.csv",
+          "key": "lime/acc_bank_lime_phe_keys"
+        },
+        "algorithm_config": {
+          "original_model_name": "logistic_regression",
+          "original_model_saved_file": "/log_reg/saved_model.pb",
+          "generated_sample_file": "/lime/bank_sampled_data.csv",
+          "model_type": "classification",
+          "class_num": 2,
+          "computed_prediction_file": "/lime/bank_sampled_data_predictions.csv"
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "acc_bank_lime_l1_all_report_20230314.txt"
+      }
+    }
+  }
+}

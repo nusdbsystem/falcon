@@ -1583,7 +1583,7 @@ void lime_conv_pred_plain2cipher(Party party, const std::string &params_str,
                                  const std::string &output_path_prefix) {
   log_info("Begin to convert plaintext predictions to ciphertext");
   // deserialize the LimeCompWeightsParams
-  LimeCompWeightsParams comp_weights_params;
+  LimeCompPredictionParams comp_pred_params;
   // set the values for local debug
   // std::string path_prefix = "/opt/falcon/exps/breast_cancer/client" +
   // std::to_string(party.party_id);
@@ -1603,19 +1603,19 @@ void lime_conv_pred_plain2cipher(Party party, const std::string &params_str,
   //  comp_weights_params.selected_predictions_file = path_prefix +
   //  "/log_reg/selected_predictions.txt";
 
-  std::string comp_weight_params_str = base64_decode_to_pb_string(params_str);
-  deserialize_lime_comp_weights_params(comp_weights_params,
-                                       comp_weight_params_str);
-  comp_weights_params.computed_prediction_file =
-      output_path_prefix + comp_weights_params.computed_prediction_file;
+  std::string comp_pred_params_str = base64_decode_to_pb_string(params_str);
+  deserialize_lime_comp_pred_params(comp_pred_params,
+                                    comp_pred_params_str);
+  comp_pred_params.computed_prediction_file =
+      output_path_prefix + comp_pred_params.computed_prediction_file;
   std::string converted_prediction_file =
-      comp_weights_params.computed_prediction_file + ".ciphertext";
+      comp_pred_params.computed_prediction_file + ".ciphertext";
   log_info("Deserialize the lime params");
 
   // read prediction dataset
   char delimiter = ',';
   std::vector<std::vector<double>> plain_predictions =
-      read_dataset(comp_weights_params.computed_prediction_file, delimiter);
+      read_dataset(comp_pred_params.computed_prediction_file, delimiter);
 
   // active party encrypt the plain predictions with 2 * PHE_PRECISION and
   // broadcast
