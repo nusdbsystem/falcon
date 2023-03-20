@@ -16,7 +16,7 @@ namespace falcon {
 // encode a floating-point value into a big integer
 // the higher the precision, the more accurate
 // NOTE: cannot be too high (encoded <= long long)
-#define PHE_FIXED_POINT_PRECISION 28
+#define PHE_FIXED_POINT_PRECISION 24
 #define PHE_MAXIMUM_FIXED_POINT_PRECISION 32
 // #define PHE_MAXIMUM_PRECISION 368 // for PHE_KEY_SIZE 512
 // #define PHE_MAXIMUM_PRECISION 864 // for PHE_KEY_SIZE 1024
