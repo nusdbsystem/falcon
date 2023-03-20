@@ -315,4 +315,5 @@ RUN bash make.sh
 
 # 5. define the entry
 WORKDIR /opt/falcon
+RUN cat deployment/docker_cmd.sh
 CMD ["bash", "deployment/docker_cmd.sh"]
