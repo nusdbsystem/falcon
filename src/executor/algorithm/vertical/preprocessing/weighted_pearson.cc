@@ -189,7 +189,7 @@ std::vector<int> wpcc_feature_selection(Party party,
       selected_feat_idx_double.push_back((double) i);
     }
     write_data_plain2.push_back(selected_feat_idx_double);
-    std::string wpcc_file_plain = output_path_prefix + ".wpcc.plain";
+    std::string wpcc_file_plain = output_path_prefix + "/wpcc.plain";
     log_info("wpcc_file_plain = " + wpcc_file_plain);
     char delimiter = ',';
     write_dataset_to_file(write_data_plain1, delimiter, wpcc_file_plain);
