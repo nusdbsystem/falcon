@@ -700,7 +700,7 @@ void LimeExplainer::select_features(
     log_info("[explain_one_label]: begin run pearson feature selection");
     // pearson doesn't require parameters
     selected_feat_idx = wpcc_feature_selection(
-        party, num_explained_features, output_path_prefix, selected_samples, selected_pred_class_id,
+        party, num_explained_features, selected_features_file, selected_samples, selected_pred_class_id,
         sss_weights, ps_network_str, is_distributed, distributed_role,
         worker_id);
   } else if (feature_selection == LR_FEATURE_SELECTION_NAME) {

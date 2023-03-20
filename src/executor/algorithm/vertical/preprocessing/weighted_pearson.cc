@@ -94,7 +94,7 @@ std::vector<int> sync_global_feature_number(const Party &party) {
 
 std::vector<int> wpcc_feature_selection(Party party,
                                         int num_explained_features,
-                                        const std::string& output_path_prefix,
+                                        const std::string& selected_features_file,
                                         const vector<std::vector<double>> &train_data,
                                         EncodedNumber *predictions,
                                         const vector<double> &sss_sample_weights,
@@ -157,7 +157,8 @@ std::vector<int> wpcc_feature_selection(Party party,
                                                                                   feature_wpcc_share_vec,
                                                                                   party_id_loop_ups,
                                                                                   party_feature_id_look_ups,
-                                                                                  num_explained_features);
+                                                                                  num_explained_features,
+                                                                                  selected_features_file);
     std::vector<double> wpcc_plain_vec = get_local_features_correlations_plaintext(party, feature_num_array,
                                                                                    train_data, predictions,
                                                                                    sss_sample_weights,
@@ -182,18 +183,12 @@ std::vector<int> wpcc_feature_selection(Party party,
     }
 
 #ifdef SAVE_BASELINE
-    std::vector<std::vector<double>> write_data_plain1, write_data_plain2;
+    std::vector<std::vector<double>> write_data_plain1;
     write_data_plain1.push_back(wpcc_decrypted_vec);
-    std::vector<double> selected_feat_idx_double;
-    for (int i : selected_feat_idx) {
-      selected_feat_idx_double.push_back((double) i);
-    }
-    write_data_plain2.push_back(selected_feat_idx_double);
-    std::string wpcc_file_plain = output_path_prefix + "/wpcc.plain";
+    std::string wpcc_file_plain = selected_features_file + ".wpcc.plain";
     log_info("wpcc_file_plain = " + wpcc_file_plain);
     char delimiter = ',';
     write_dataset_to_file(write_data_plain1, delimiter, wpcc_file_plain);
-    write_dataset_to_file(write_data_plain2, delimiter, wpcc_file_plain);
 #endif
   }
 
@@ -2193,7 +2188,8 @@ std::vector<double> jointly_get_top_k_features_plaintext(const Party &party,
                                                          const std::vector<double> &feature_cor_shares,
                                                          const std::vector<int> &party_id_loop_ups,
                                                          const std::vector<int> &party_feature_id_look_ups,
-                                                         int num_explained_features) {
+                                                         int num_explained_features,
+                                                         const std::string& selected_features_file) {
   int total_feature_num = 0;
   for (auto &ele: party_feature_nums) {
     total_feature_num += ele;
@@ -2219,6 +2215,18 @@ std::vector<double> jointly_get_top_k_features_plaintext(const Party &party,
   }
 
   std::vector<int> global_indexs = index_of_top_k_in_vector(feature_corr_plain_double, num_explained_features);
+
+#ifdef SAVE_BASELINE
+  std::vector<double> global_indexs_double;
+  for (int i : global_indexs) {
+    global_indexs_double.push_back((double) i);
+  }
+  std::vector<std::vector<double>> write_data_plain2;
+  write_data_plain2.push_back(global_indexs_double);
+  std::string wpcc_idx_file_plain = selected_features_file + ".wpcc.idx.plain";
+  char delimiter = ',';
+  write_dataset_to_file(write_data_plain2, delimiter, wpcc_idx_file_plain);
+#endif
 
   // Print the indices of the largest k elements
   for (auto g_index: global_indexs) {

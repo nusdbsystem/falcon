@@ -59,7 +59,7 @@ std::vector<int> sync_global_feature_number(const Party &party);
  */
 std::vector<int> wpcc_feature_selection(
     Party party, int num_explained_features,
-    const std::string& output_path_prefix,
+    const std::string& selected_features_file,
     const std::vector<std::vector<double>> &train_data,
     EncodedNumber *predictions, const std::vector<double> &sss_sample_weights,
     const std::string &ps_network_str = std::string(), int is_distributed = 0,
@@ -242,6 +242,7 @@ std::vector<double> jointly_get_top_k_features_plaintext(
     const std::vector<double> &feature_cor_shares,
     const std::vector<int> &party_id_loop_ups,
     const std::vector<int> &party_feature_id_look_ups,
-    int num_explained_features);
+    int num_explained_features,
+    const std::string& selected_features_file);
 
 #endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_PREPROCESSING_WEIGHTED_PEARSON_H_
