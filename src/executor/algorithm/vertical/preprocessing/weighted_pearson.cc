@@ -1051,6 +1051,17 @@ std::vector<int> jointly_get_top_k_features(const Party &party,
 
   log_info("[weighted_pearson] jointly_get_top_k_features start");
 
+  // add global feature number equal check
+  std::vector<int> selected_feat_idx;
+  int global_feature_num = std::accumulate(party_feature_nums.begin(), party_feature_nums.end(), 0);
+  if (global_feature_num == num_explained_features) {
+    for (int i = 0; i < party_feature_nums[party.party_id]; i++) {
+      selected_feat_idx.push_back(i);
+    }
+    log_info("[jointly_get_top_k_features] global_feature_num == num_explained_features");
+    return selected_feat_idx;
+  }
+
   int total_feature_num = 0;
   for (auto &ele: party_feature_nums) {
     total_feature_num += ele;
@@ -1092,7 +1103,6 @@ std::vector<int> jointly_get_top_k_features(const Party &party,
                                 feature_index_share, num_explained_features,
                                 ACTIVE_PARTY_ID, PHE_FIXED_POINT_PRECISION);
   // each party only get the local feature index
-  std::vector<int> selected_feat_idx;
   for (int i = 0; i < num_explained_features; i++) {
     // decode the plaintext into int, which is the globally selected feature id
     int decoded_feature_global_index_int = static_cast<int>(std::round(feature_global_index_double[i]));
