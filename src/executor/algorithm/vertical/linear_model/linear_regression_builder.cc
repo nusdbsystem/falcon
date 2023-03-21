@@ -316,20 +316,19 @@ void LinearRegressionBuilder::lime_backward_computation(
                              predicted_labels, encrypted_batch_losses);
   log_info("[lime_backward_computation]: finish compute encrypted residual");
 
-  //  // for debug
-  //  auto* decrypted_batch_losses = new EncodedNumber[cur_batch_size];
-  //  party.collaborative_decrypt(encrypted_batch_losses,
-  //  decrypted_batch_losses,
-  //                              cur_batch_size, ACTIVE_PARTY_ID);
-  //  if (party.party_type == falcon::ACTIVE_PARTY) {
-  //    for (int i = 0; i < cur_batch_size; i++) {
-  //      double loss_i;
-  //      decrypted_batch_losses[i].decode(loss_i);
-  //      log_info("loss_[" + std::to_string(i) +"] = " +
-  //      std::to_string(loss_i));
-  //    }
-  //  }
-  //  delete [] decrypted_batch_losses;
+    // for debug
+    auto* decrypted_batch_losses = new EncodedNumber[cur_batch_size];
+    collaborative_decrypt(party, encrypted_batch_losses, decrypted_batch_losses,
+                                cur_batch_size, ACTIVE_PARTY_ID);
+    if (party.party_type == falcon::ACTIVE_PARTY) {
+      for (int i = 0; i < cur_batch_size; i++) {
+        double loss_i;
+        decrypted_batch_losses[i].decode(loss_i);
+        log_info("loss_[" + std::to_string(i) +"] = " +
+        std::to_string(loss_i));
+      }
+    }
+    delete [] decrypted_batch_losses;
 
   // notice that the update formulas are different for different settings
   // (1) without regularization:
@@ -470,6 +469,9 @@ void LinearRegressionBuilder::lime_backward_computation(
     // we use spdz to check the sign of [local_weights]
     if (penalty == "l1") {
       compute_l1_regularized_grad(party, regularized_gradients);
+      log_info("[debug] display regularized_gradients");
+      display_encrypted_vector(party, linear_reg_model.weight_size, regularized_gradients);
+
       // then, add the second item to the common_gradients
       int common_gradients_precision =
           abs(common_gradients[0].getter_exponent());
@@ -490,6 +492,9 @@ void LinearRegressionBuilder::lime_backward_computation(
         djcs_t_aux_ee_add_ext(phe_pub_key, encrypted_gradients[j],
                               common_gradients[j], regularized_gradients[j]);
       }
+
+      log_info("[debug] display encrypted_gradients");
+      display_encrypted_vector(party, linear_reg_model.weight_size, encrypted_gradients);
     }
     delete[] regularized_gradients;
   }

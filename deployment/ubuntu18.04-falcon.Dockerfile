@@ -283,6 +283,19 @@ RUN bash make_platform.sh
 # ARG CACHEBUST=1 is to force re-execute the following CMDs at each updates.
 ARG CACHEBUST=1
 
+# 3. update mpc data and code
+# Client-side handshake with P0 failed. Make sure we have the necessary certificate (Player-Data/P0.pem in the default configuration), and run `c_rehash <directory>` on its location.
+# The certificates should be the same on every host. Also make sure that it's still valid. Certificates generated with `Scripts/setup-ssl.sh` expire after a month.
+WORKDIR /opt/falcon/third_party/MP-SPDZ
+RUN Scripts/setup-online.sh 3 128 128 && \
+    Scripts/setup-clients.sh 3 && \
+    Scripts/setup-ssl.sh 3 128 128 && \
+    c_rehash Player-Data/ && \
+    git pull && \
+    git log --oneline -2 && \
+    ./compile.py Programs/Source/lime.mpc && \
+    ./compile.py Programs/Source/mlp.mpc \
+
 # 1. pull latest code
 WORKDIR /opt/falcon
 RUN git fetch origin && \
@@ -296,19 +309,6 @@ RUN git fetch origin && \
 # ENV PATH /root/.local/bin:$PATH
 # WORKDIR /opt/falcon/src/falcon_platform
 # RUN bash make_platform.sh
-
-# 3. update mpc data and code
-# Client-side handshake with P0 failed. Make sure we have the necessary certificate (Player-Data/P0.pem in the default configuration), and run `c_rehash <directory>` on its location.
-# The certificates should be the same on every host. Also make sure that it's still valid. Certificates generated with `Scripts/setup-ssl.sh` expire after a month.
-WORKDIR /opt/falcon/third_party/MP-SPDZ
-RUN Scripts/setup-online.sh 3 128 128 && \
-    Scripts/setup-clients.sh 3 && \
-    Scripts/setup-ssl.sh 3 128 128 && \
-    c_rehash Player-Data/ && \
-    git pull && \
-    git log --oneline -2 && \
-    ./compile.py Programs/Source/lime.mpc && \
-    ./compile.py Programs/Source/mlp.mpc
 
 # 4. pre-compile falcon
 WORKDIR /opt/falcon
