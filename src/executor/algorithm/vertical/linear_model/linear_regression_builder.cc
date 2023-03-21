@@ -477,7 +477,9 @@ void LinearRegressionBuilder::lime_backward_computation(
           abs(regularized_gradients[0].getter_exponent());
       int plaintext_precision =
           common_gradients_precision - regularized_gradients_precision;
-      double constant = learning_rate;
+      log_info("[backward_computation] learning_rate = " +
+          std::to_string(learning_rate) + ", alpha = " + std::to_string(alpha));
+      double constant = learning_rate * alpha;
       EncodedNumber encoded_constant;
       encoded_constant.set_double(phe_pub_key->n[0], constant,
                                   PHE_FIXED_POINT_PRECISION);
