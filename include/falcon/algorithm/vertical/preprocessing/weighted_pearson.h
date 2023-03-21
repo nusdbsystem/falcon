@@ -50,6 +50,7 @@ std::vector<int> sync_global_feature_number(const Party &party);
  * @param train_data: the plaintext train data
  * @param predictions: the encrypted model predictions
  * @param sss_sample_weights: the sss sample weights
+ * @param tmp_res_file: record for comparison
  * @param ps_network_str: the parameters of ps network string,
  * @param is_distributed: whether use distributed interpretable model training
  * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
@@ -62,6 +63,7 @@ std::vector<int> wpcc_feature_selection(
     const std::string& selected_features_file,
     const std::vector<std::vector<double>> &train_data,
     EncodedNumber *predictions, const std::vector<double> &sss_sample_weights,
+    const std::string& tmp_res_file,
     const std::string &ps_network_str = std::string(), int is_distributed = 0,
     int distributed_role = 0, int worker_id = 0);
 
@@ -243,6 +245,7 @@ std::vector<double> jointly_get_top_k_features_plaintext(
     const std::vector<int> &party_id_loop_ups,
     const std::vector<int> &party_feature_id_look_ups,
     int num_explained_features,
-    const std::string& selected_features_file);
+    const std::string& selected_features_file,
+    const std::string& tmp_res_file);
 
 #endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_PREPROCESSING_WEIGHTED_PEARSON_H_

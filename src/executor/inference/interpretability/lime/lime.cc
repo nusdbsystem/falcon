@@ -248,6 +248,7 @@ void LimeExplainer::compute_sample_weights(
     const std::string &sample_weights_file,
     const std::string &selected_sample_file,
     const std::string &selected_prediction_file,
+    const std::string &tmp_res_file,
     const std::string &ps_network_str, int is_distributed, int distributed_role,
     int worker_id) {
   // the parties do the following steps for computing sample weights
@@ -358,6 +359,7 @@ void LimeExplainer::compute_sample_weights(
     std::vector<std::vector<double>> format_weights;
     format_weights.push_back(plaintext_weights);
     write_dataset_to_file(format_weights, delimiter, plaintext_weights_file);
+    write_dataset_to_file_without_ow(format_weights, delimiter, tmp_res_file);
   }
 #endif
 }
@@ -638,6 +640,7 @@ void LimeExplainer::select_features(
     const std::string &output_path_prefix, int num_samples, int class_num,
     int class_id, const std::string &feature_selection,
     int num_explained_features, const std::string &selected_features_file,
+    const std::string& tmp_res_file,
     const std::string &ps_network_str, int is_distributed, int distributed_role,
     int worker_id) {
 
@@ -701,7 +704,7 @@ void LimeExplainer::select_features(
     // pearson doesn't require parameters
     selected_feat_idx = wpcc_feature_selection(
         party, num_explained_features, selected_features_file, selected_samples, selected_pred_class_id,
-        sss_weights, ps_network_str, is_distributed, distributed_role,
+        sss_weights, tmp_res_file, ps_network_str, is_distributed, distributed_role,
         worker_id);
   } else if (feature_selection == LR_FEATURE_SELECTION_NAME) {
     LinearRegressionParams linear_reg_params;
@@ -874,7 +877,9 @@ std::vector<double> LimeExplainer::interpret(
     const std::string &sample_weights_file, int num_samples, int class_num,
     int class_id, const std::string &interpret_model_name,
     const std::string &interpret_model_param,
-    const std::string &explanation_report, const std::string &ps_network_str,
+    const std::string &explanation_report,
+    const std::string &tmp_res_file,
+    const std::string &ps_network_str,
     int is_distributed, int distributed_role, int worker_id) {
   // for interpret model training, do the following steps:
   //  1. read the selected_features_file to get the training data (the first row
@@ -934,7 +939,6 @@ std::vector<double> LimeExplainer::interpret(
 #ifdef SAVE_BASELINE
   //  6. active party collect explanations from passive parties
   if (party.party_type == falcon::ACTIVE_PARTY) {
-    std::string explanation_report_overall = explanation_report + ".overall";
     std::vector<double> explanations_overall = explanations;
     for (int i = 0; i < party.party_num; i++) {
       if (i != party.party_id) {
@@ -949,8 +953,7 @@ std::vector<double> LimeExplainer::interpret(
     }
     std::vector<std::vector<double>> wrap_explanations_overall;
     wrap_explanations_overall.push_back(explanations_overall);
-    write_dataset_to_file(wrap_explanations_overall, delimiter,
-                          explanation_report_overall);
+    write_dataset_to_file_without_ow(wrap_explanations_overall, delimiter, tmp_res_file);
   } else {
     std::string explanation_i_str;
     serialize_double_array(explanations, explanation_i_str);
@@ -1752,6 +1755,7 @@ void save_data_pred4baseline(
 
 void lime_comp_weight(Party party, const std::string &params_str,
                       const std::string &output_path_prefix,
+                      const std::string &tmp_res_file,
                       const std::string &ps_network_str, int is_distributed,
                       int distributed_role, int worker_id) {
   log_info("Begin to compute sample weights");
@@ -1801,13 +1805,15 @@ void lime_comp_weight(Party party, const std::string &params_str,
       comp_weights_params.kernel, comp_weights_params.kernel_width,
       comp_weights_params.sample_weights_file,
       comp_weights_params.selected_samples_file,
-      comp_weights_params.selected_predictions_file, ps_network_str,
+      comp_weights_params.selected_predictions_file,
+      tmp_res_file, ps_network_str,
       is_distributed, distributed_role, worker_id);
   log_info("Finish computing sample weights");
 }
 
 void lime_feat_sel(Party party, const std::string &params_str,
                    const std::string &output_path_prefix,
+                   const std::string &tmp_res_file,
                    const std::string &ps_network_str, int is_distributed,
                    int distributed_role, int worker_id) {
   log_info("[lime_feat_sel]: Begin to select features");
@@ -1841,13 +1847,15 @@ void lime_feat_sel(Party party, const std::string &params_str,
       feat_sel_params.num_samples, feat_sel_params.class_num,
       feat_sel_params.class_id, feat_sel_params.feature_selection,
       feat_sel_params.num_explained_features,
-      feat_sel_params.selected_features_file, ps_network_str, is_distributed,
+      feat_sel_params.selected_features_file,
+      tmp_res_file, ps_network_str, is_distributed,
       distributed_role, worker_id);
   log_info("Finish feature selection");
 }
 
 void lime_interpret(Party party, const std::string &params_str,
                     const std::string &output_path_prefix,
+                    const std::string &tmp_res_file,
                     const std::string &ps_network_str, int is_distributed,
                     int distributed_role, int worker_id) {
   log_info("Begin to interpret using lime");
@@ -1894,7 +1902,8 @@ void lime_interpret(Party party, const std::string &params_str,
       interpret_params.class_num, interpret_params.class_id,
       interpret_params.interpret_model_name,
       interpret_params.interpret_model_param,
-      interpret_params.explanation_report, ps_network_str, is_distributed,
+      interpret_params.explanation_report,
+      tmp_res_file, ps_network_str, is_distributed,
       distributed_role, worker_id);
 
   // 3. print the explanation

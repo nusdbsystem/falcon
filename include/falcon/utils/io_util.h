@@ -35,6 +35,16 @@ std::vector<std::vector<double>> read_dataset(const std::string &data_file,
 void write_dataset_to_file(std::vector<std::vector<double>> data,
                            char delimiter, const std::string &data_file);
 
+/**
+ * write dataset to file without overwritten existing file
+ *
+ * @param data: data to write
+ * @param delimiter
+ * @param data_file: file to write
+ */
+void write_dataset_to_file_without_ow(std::vector<std::vector<double>> data,
+                                      char delimiter, const std::string& data_file);
+
 // for Party::split_train_test_data
 // save a copy of shuffled data_indexes vector<int> to file for local debugging
 void write_shuffled_data_indexes_to_file(std::vector<int> data_indexes,

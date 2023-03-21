@@ -132,6 +132,10 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  // define temporary result file for comparison
+  std::string tmp_res_file = data_input_file + ".phe" + std::to_string(PHE_KEY_SIZE)
+      + ".prec" + std::to_string(PHE_FIXED_POINT_PRECISION);
+
   // execute the main logic
   std::exception_ptr eptr;
   try {
@@ -213,13 +217,13 @@ int main(int argc, char *argv[]) {
         case falcon::LIME_COMP_WEIGHT:
           // lime_conv_pred_plain2cipher(party, algorithm_params,
           // data_output_file); // only for preparing data
-          lime_comp_weight(party, algorithm_params, data_output_file);
+          lime_comp_weight(party, algorithm_params, data_output_file, tmp_res_file);
           break;
         case falcon::LIME_FEAT_SEL:
-          lime_feat_sel(party, algorithm_params, data_output_file);
+          lime_feat_sel(party, algorithm_params, data_output_file, tmp_res_file);
           break;
         case falcon::LIME_INTERPRET:
-          lime_interpret(party, algorithm_params, data_output_file);
+          lime_interpret(party, algorithm_params, data_output_file, tmp_res_file);
           break;
         default:
           train_logistic_regression(&party, algorithm_params_pb_str,
@@ -287,19 +291,19 @@ int main(int argc, char *argv[]) {
                          distributed_role);
           break;
         case falcon::LIME_COMP_WEIGHT:
-          lime_comp_weight(party, algorithm_params, data_output_file,
+          lime_comp_weight(party, algorithm_params, data_output_file, tmp_res_file,
                            ps_network_config_pb_str, is_distributed,
                            distributed_role);
           break;
         case falcon::LIME_FEAT_SEL:
           lime_feat_sel(party, algorithm_params, data_output_file,
-                        ps_network_config_pb_str, is_distributed,
-                        distributed_role);
+                        tmp_res_file, ps_network_config_pb_str,
+                        is_distributed, distributed_role);
           break;
         case falcon::LIME_INTERPRET:
           lime_interpret(party, algorithm_params, data_output_file,
-                         ps_network_config_pb_str, is_distributed,
-                         distributed_role);
+                         tmp_res_file, ps_network_config_pb_str,
+                         is_distributed, distributed_role);
           break;
         default:
           launch_log_reg_parameter_server(&party, algorithm_params_pb_str,
@@ -404,22 +408,22 @@ int main(int argc, char *argv[]) {
           case falcon::LIME_COMP_WEIGHT: {
             party.init_phe_keys(use_existing_key, key_file);
             lime_comp_weight(party, algorithm_params, data_output_file,
-                             ps_network_config_pb_str, is_distributed,
-                             distributed_role, worker_id);
+                             tmp_res_file, ps_network_config_pb_str,
+                             is_distributed, distributed_role, worker_id);
             break;
           }
           case falcon::LIME_FEAT_SEL: {
             party.init_phe_keys(use_existing_key, key_file);
             lime_feat_sel(party, algorithm_params, data_output_file,
-                          ps_network_config_pb_str, is_distributed,
-                          distributed_role, worker_id);
+                          tmp_res_file, ps_network_config_pb_str,
+                          is_distributed, distributed_role, worker_id);
             break;
           }
           case falcon::LIME_INTERPRET: {
             party.init_phe_keys(use_existing_key, key_file);
             lime_interpret(party, algorithm_params, data_output_file,
-                           ps_network_config_pb_str, is_distributed,
-                           distributed_role, worker_id);
+                           tmp_res_file, ps_network_config_pb_str,
+                           is_distributed, distributed_role, worker_id);
             break;
           }
           default: {

@@ -98,6 +98,7 @@ std::vector<int> wpcc_feature_selection(Party party,
                                         const vector<std::vector<double>> &train_data,
                                         EncodedNumber *predictions,
                                         const vector<double> &sss_sample_weights,
+                                        const std::string& tmp_res_file,
                                         const string &ps_network_str,
                                         int is_distributed,
                                         int distributed_role,
@@ -158,7 +159,8 @@ std::vector<int> wpcc_feature_selection(Party party,
                                                                                   party_id_loop_ups,
                                                                                   party_feature_id_look_ups,
                                                                                   num_explained_features,
-                                                                                  selected_features_file);
+                                                                                  selected_features_file,
+                                                                                  tmp_res_file);
     std::vector<double> wpcc_plain_vec = get_local_features_correlations_plaintext(party, feature_num_array,
                                                                                    train_data, predictions,
                                                                                    sss_sample_weights,
@@ -181,15 +183,6 @@ std::vector<int> wpcc_feature_selection(Party party,
       std::cout << mean_squared_error_double << std::endl;
       LOG(INFO) << mean_squared_error_double;
     }
-
-#ifdef SAVE_BASELINE
-    std::vector<std::vector<double>> write_data_plain1;
-    write_data_plain1.push_back(wpcc_decrypted_vec);
-    std::string wpcc_file_plain = selected_features_file + ".wpcc.plain";
-    log_info("wpcc_file_plain = " + wpcc_file_plain);
-    char delimiter = ',';
-    write_dataset_to_file(write_data_plain1, delimiter, wpcc_file_plain);
-#endif
   }
 
     // distributed
@@ -2199,7 +2192,8 @@ std::vector<double> jointly_get_top_k_features_plaintext(const Party &party,
                                                          const std::vector<int> &party_id_loop_ups,
                                                          const std::vector<int> &party_feature_id_look_ups,
                                                          int num_explained_features,
-                                                         const std::string& selected_features_file) {
+                                                         const std::string& selected_features_file,
+                                                         const std::string& tmp_res_file) {
   int total_feature_num = 0;
   for (auto &ele: party_feature_nums) {
     total_feature_num += ele;
@@ -2226,16 +2220,21 @@ std::vector<double> jointly_get_top_k_features_plaintext(const Party &party,
 
   std::vector<int> global_indexs = index_of_top_k_in_vector(feature_corr_plain_double, num_explained_features);
 
+
 #ifdef SAVE_BASELINE
+  std::vector<std::vector<double>> write_data_plain1;
+  write_data_plain1.push_back(feature_corr_plain_double);
+  log_info("tmp_res_file = " + tmp_res_file);
+  char delimiter = ',';
+  write_dataset_to_file_without_ow(write_data_plain1, delimiter, tmp_res_file);
+
   std::vector<double> global_indexs_double;
   for (int i : global_indexs) {
     global_indexs_double.push_back((double) i);
   }
   std::vector<std::vector<double>> write_data_plain2;
   write_data_plain2.push_back(global_indexs_double);
-  std::string wpcc_idx_file_plain = selected_features_file + ".wpcc.idx.plain";
-  char delimiter = ',';
-  write_dataset_to_file(write_data_plain2, delimiter, wpcc_idx_file_plain);
+  write_dataset_to_file_without_ow(write_data_plain2, delimiter, tmp_res_file);
 #endif
 
   // Print the indices of the largest k elements

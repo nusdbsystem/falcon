@@ -190,6 +190,7 @@ public:
                               const std::string &sample_weights_file,
                               const std::string &selected_sample_file,
                               const std::string &selected_prediction_file,
+                              const std::string &tmp_res_file,
                               const std::string &ps_network_str = std::string(),
                               int is_distributed = 0, int distributed_role = 0,
                               int worker_id = 0);
@@ -281,6 +282,7 @@ public:
                        const std::string &feature_selection,
                        int num_explained_features,
                        const std::string &selected_features_file,
+                       const std::string &tmp_res_file,
                        const std::string &ps_network_str = std::string(),
                        int is_distributed = 0, int distributed_role = 0,
                        int worker_id = 0);
@@ -328,6 +330,7 @@ public:
       int class_id, const std::string &interpret_model_name,
       const std::string &interpret_model_param,
       const std::string &explanation_report,
+      const std::string &tmp_res_file,
       const std::string &ps_network_str = std::string(), int is_distributed = 0,
       int distributed_role = 0, int worker_id = 0);
 
@@ -459,9 +462,11 @@ void save_data_pred4baseline(
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeCompWeightsParams
  * @param output_path_prefix: the path of the output files
+ * @param tmp_res_file: is for recording temporary results for comparison
  */
 void lime_comp_weight(Party party, const std::string &params_str,
                       const std::string &output_path_prefix,
+                      const std::string &tmp_res_file,
                       const std::string &ps_network_str = std::string(),
                       int is_distributed = 0, int distributed_role = 0,
                       int worker_id = 0);
@@ -472,6 +477,7 @@ void lime_comp_weight(Party party, const std::string &params_str,
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeFeatureSelectionParams
  * @param output_path_prefix: the path of the output files
+ * @param tmp_res_file: is for recording temporary results for comparison
  * @param ps_network_str: the parameters of ps network string,
  * @param is_distributed: whether use distributed interpretable model training
  * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
@@ -480,6 +486,7 @@ void lime_comp_weight(Party party, const std::string &params_str,
  */
 void lime_feat_sel(Party party, const std::string &params_str,
                    const std::string &output_path_prefix,
+                   const std::string &tmp_res_file,
                    const std::string &ps_network_str = std::string(),
                    int is_distributed = 0, int distributed_role = 0,
                    int worker_id = 0);
@@ -490,6 +497,7 @@ void lime_feat_sel(Party party, const std::string &params_str,
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeInterpretParams
  * @param output_path_prefix: the path of the output files
+ * @param tmp_res_file: is for recording temporary results for comparison
  * @param ps_network_str: the parameters of ps network string,
  * @param is_distributed: whether use distributed interpretable model training
  * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
@@ -498,6 +506,7 @@ void lime_feat_sel(Party party, const std::string &params_str,
  */
 void lime_interpret(Party party, const std::string &params_str,
                     const std::string &output_path_prefix,
+                    const std::string &tmp_res_file,
                     const std::string &ps_network_str = std::string(),
                     int is_distributed = 0, int distributed_role = 0,
                     int worker_id = 0);

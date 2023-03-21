@@ -86,6 +86,33 @@ void write_dataset_to_file(std::vector<std::vector<double>> data,
   write_outfile.close();
 }
 
+void write_dataset_to_file_without_ow(std::vector<std::vector<double>> data,
+                                      char delimiter, const std::string& data_file) {
+  std::ofstream write_outfile;
+  write_outfile.open(data_file, std::ios_base::app);
+  if (!write_outfile) {
+    LOG(INFO) << "Open " << data_file.c_str() << " file error.";
+    exit(EXIT_FAILURE);
+  }
+  int row_num = data.size();
+  int column_num = data[0].size();
+  for (int i = 0; i < row_num; i++) {
+    std::string line;
+    for (int j = 0; j < column_num; j++) {
+      // std::to_string defaults to 6 decimal places
+      // when given an input value of type float or double
+      line = line + std::to_string(data[i][j]);
+      if (j != column_num - 1) {
+        line += delimiter;
+      } else {
+        line += "\n";
+      }
+    }
+    write_outfile << line;
+  }
+  write_outfile.close();
+}
+
 // for Party::split_train_test_data
 // save a copy of shuffled data_indexes vector<int> to file
 // for local debugging
