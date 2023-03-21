@@ -239,7 +239,7 @@ void LinearRegressionBuilder::backward_computation(
           abs(regularized_gradients[0].getter_exponent());
       int plaintext_precision =
           common_gradients_precision - regularized_gradients_precision;
-      double constant = learning_rate;
+      double constant = learning_rate * alpha;
       EncodedNumber encoded_constant;
       encoded_constant.set_double(phe_pub_key->n[0], constant,
                                   PHE_FIXED_POINT_PRECISION);

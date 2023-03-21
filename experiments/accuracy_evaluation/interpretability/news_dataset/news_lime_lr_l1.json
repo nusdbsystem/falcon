@@ -87,7 +87,7 @@
           "class_num": 5,
           "class_id": 0,
           "feature_selection": "pearson_correlation",
-          "num_explained_features": 16,
+          "num_explained_features": 59,
           "selected_features_file": "/lime/news_sampled_data_selected_features.csv"
         }
       },

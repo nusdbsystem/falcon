@@ -44,6 +44,7 @@ weight_mse = mean_squared_error(falcon_res[0], plaintext_res[0])
 
 # calculate the pearson_mse
 for i in range(args.num_classes):
+    print(i)
     list1 = falcon_res[i*2+1]
     list2 = plaintext_res[i*2+1]
     pearson_mse = pearson_mse + mean_squared_error(list1, list2)

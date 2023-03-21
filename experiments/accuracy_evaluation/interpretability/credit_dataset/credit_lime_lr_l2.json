@@ -87,7 +87,7 @@
           "class_num": 2,
           "class_id": 0,
           "feature_selection": "pearson_correlation",
-          "num_explained_features": 16,
+          "num_explained_features": 23,
           "selected_features_file": "/lime/credit_sampled_data_selected_features.csv"
         }
       },
