@@ -469,6 +469,8 @@ void LinearRegressionBuilder::lime_backward_computation(
     // we use spdz to check the sign of [local_weights]
     if (penalty == "l1") {
       compute_l1_regularized_grad(party, regularized_gradients);
+
+      /***** debug info start ******/
       log_info("[debug] display regularized_gradients");
       // step 2
       int global_weight_size =
@@ -510,6 +512,8 @@ void LinearRegressionBuilder::lime_backward_computation(
                                      ACTIVE_PARTY_ID);
       display_encrypted_vector(party, global_weight_size, global_regularized_gradients);
       delete [] global_regularized_gradients;
+      /***** debug info end ******/
+
 
       // then, add the second item to the common_gradients
       int common_gradients_precision =
@@ -532,6 +536,7 @@ void LinearRegressionBuilder::lime_backward_computation(
                               common_gradients[j], regularized_gradients[j]);
       }
 
+      /***** debug info start ******/
       log_info("[debug] display encrypted_gradients");
       auto *global_encrypted_gradients = new EncodedNumber[global_weight_size];
       if (party.party_type == falcon::ACTIVE_PARTY) {
@@ -569,6 +574,7 @@ void LinearRegressionBuilder::lime_backward_computation(
                                      ACTIVE_PARTY_ID);
       display_encrypted_vector(party, global_weight_size, global_encrypted_gradients);
       delete [] global_encrypted_gradients;
+      /***** debug info end ******/
     }
     delete[] regularized_gradients;
   }
@@ -665,6 +671,8 @@ void LinearRegressionBuilder::compute_l1_regularized_grad(
 
   log_info("[compute_l1_regularized_grad]: finish connect to spdz parties and "
            "receive result shares");
+
+  display_shares_vector(party, global_regularized_sign_shares);
 
   // step 5
   auto *global_regularized_grad = new EncodedNumber[global_weight_size];
