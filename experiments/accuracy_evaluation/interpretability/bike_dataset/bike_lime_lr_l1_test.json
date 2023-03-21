@@ -52,7 +52,7 @@
           "key": "lime/acc_bike_lime_phe_keys"
         },
         "algorithm_config": {
-          "selected_data_file": "/lime/bike_sampled_data_selected_features.csv",
+          "selected_data_file": "/lime/bike_sampled_data_selected_features0.txt",
           "selected_predictions_file": "/lime/bike_sampled_data_predictions.csv.ciphertext",
           "sample_weights_file": "/lime/bike_sample_weights.txt.ciphertext",
           "num_samples": 1001,

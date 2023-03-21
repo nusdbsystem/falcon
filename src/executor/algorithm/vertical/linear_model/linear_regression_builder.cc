@@ -508,7 +508,7 @@ void LinearRegressionBuilder::lime_backward_computation(
       // active party broadcast the global weights vector
       broadcast_encoded_number_array(party, global_regularized_gradients, global_weight_size,
                                      ACTIVE_PARTY_ID);
-      display_encrypted_vector(party, linear_reg_model.weight_size, global_regularized_gradients);
+      display_encrypted_vector(party, global_weight_size, global_regularized_gradients);
       delete [] global_regularized_gradients;
 
       // then, add the second item to the common_gradients
@@ -567,7 +567,7 @@ void LinearRegressionBuilder::lime_backward_computation(
       // active party broadcast the global weights vector
       broadcast_encoded_number_array(party, global_encrypted_gradients, global_weight_size,
                                      ACTIVE_PARTY_ID);
-      display_encrypted_vector(party, linear_reg_model.weight_size, global_encrypted_gradients);
+      display_encrypted_vector(party, global_weight_size, global_encrypted_gradients);
       delete [] global_encrypted_gradients;
     }
     delete[] regularized_gradients;
