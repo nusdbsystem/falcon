@@ -286,7 +286,8 @@ ARG CACHEBUST=1
 # 1. pull latest code
 WORKDIR /opt/falcon
 RUN git fetch origin && \
-    git pull origin dev
+    git pull origin dev && \
+    git log -4
 
 # 2. Set environment variables and pre-compile falcon_coordinator
 # ENV GOROOT /usr/local/go
