@@ -470,7 +470,46 @@ void LinearRegressionBuilder::lime_backward_computation(
     if (penalty == "l1") {
       compute_l1_regularized_grad(party, regularized_gradients);
       log_info("[debug] display regularized_gradients");
-      display_encrypted_vector(party, linear_reg_model.weight_size, regularized_gradients);
+      // step 2
+      int global_weight_size =
+          std::accumulate(linear_reg_model.party_weight_sizes.begin(),
+                          linear_reg_model.party_weight_sizes.end(), 0);
+      auto *global_regularized_gradients = new EncodedNumber[global_weight_size];
+      if (party.party_type == falcon::ACTIVE_PARTY) {
+        // first append its own local weights
+        int global_idx = 0;
+        for (int j = 0; j < linear_reg_model.weight_size; j++) {
+          global_regularized_gradients[global_idx] = regularized_gradients[j];
+          global_idx++;
+        }
+        for (int i = 0; i < party.party_num; i++) {
+          if (i != party.party_id) {
+            int recv_weight_size = linear_reg_model.party_weight_sizes[i];
+            auto *recv_regularized_gradients = new EncodedNumber[recv_weight_size];
+            std::string recv_local_weights_str;
+            party.recv_long_message(i, recv_local_weights_str);
+            deserialize_encoded_number_array(recv_regularized_gradients, recv_weight_size,
+                                             recv_local_weights_str);
+            for (int k = 0; k < recv_weight_size; k++) {
+              global_regularized_gradients[global_idx] = recv_regularized_gradients[k];
+              global_idx++;
+            }
+            delete[] recv_regularized_gradients;
+          }
+        }
+      } else {
+        // serialize local weights and send to active party
+        std::string local_regularized_gradients;
+        serialize_encoded_number_array(regularized_gradients,
+                                       linear_reg_model.weight_size,
+                                       local_regularized_gradients);
+        party.send_long_message(ACTIVE_PARTY_ID, local_regularized_gradients);
+      }
+      // active party broadcast the global weights vector
+      broadcast_encoded_number_array(party, global_regularized_gradients, global_weight_size,
+                                     ACTIVE_PARTY_ID);
+      display_encrypted_vector(party, linear_reg_model.weight_size, global_regularized_gradients);
+      delete [] global_regularized_gradients;
 
       // then, add the second item to the common_gradients
       int common_gradients_precision =
@@ -494,7 +533,42 @@ void LinearRegressionBuilder::lime_backward_computation(
       }
 
       log_info("[debug] display encrypted_gradients");
-      display_encrypted_vector(party, linear_reg_model.weight_size, encrypted_gradients);
+      auto *global_encrypted_gradients = new EncodedNumber[global_weight_size];
+      if (party.party_type == falcon::ACTIVE_PARTY) {
+        // first append its own local weights
+        int global_idx = 0;
+        for (int j = 0; j < linear_reg_model.weight_size; j++) {
+          global_encrypted_gradients[global_idx] = encrypted_gradients[j];
+          global_idx++;
+        }
+        for (int i = 0; i < party.party_num; i++) {
+          if (i != party.party_id) {
+            int recv_weight_size = linear_reg_model.party_weight_sizes[i];
+            auto *recv_encrypted_gradients = new EncodedNumber[recv_weight_size];
+            std::string recv_local_weights_str;
+            party.recv_long_message(i, recv_local_weights_str);
+            deserialize_encoded_number_array(recv_encrypted_gradients, recv_weight_size,
+                                             recv_local_weights_str);
+            for (int k = 0; k < recv_weight_size; k++) {
+              global_encrypted_gradients[global_idx] = recv_encrypted_gradients[k];
+              global_idx++;
+            }
+            delete[] recv_encrypted_gradients;
+          }
+        }
+      } else {
+        // serialize local weights and send to active party
+        std::string local_encrypted_gradients;
+        serialize_encoded_number_array(encrypted_gradients,
+                                       linear_reg_model.weight_size,
+                                       local_encrypted_gradients);
+        party.send_long_message(ACTIVE_PARTY_ID, local_encrypted_gradients);
+      }
+      // active party broadcast the global weights vector
+      broadcast_encoded_number_array(party, global_encrypted_gradients, global_weight_size,
+                                     ACTIVE_PARTY_ID);
+      display_encrypted_vector(party, linear_reg_model.weight_size, global_encrypted_gradients);
+      delete [] global_encrypted_gradients;
     }
     delete[] regularized_gradients;
   }

@@ -280,8 +280,6 @@ ENV PATH /root/.local/bin:$PATH
 WORKDIR /opt/falcon/src/falcon_platform
 RUN bash make_platform.sh
 
-# ARG CACHEBUST=1 is to force re-execute the following CMDs at each updates.
-ARG CACHEBUST=1
 
 # 3. update mpc data and code
 # Client-side handshake with P0 failed. Make sure we have the necessary certificate (Player-Data/P0.pem in the default configuration), and run `c_rehash <directory>` on its location.
@@ -294,7 +292,10 @@ RUN Scripts/setup-online.sh 3 128 128 && \
     git pull && \
     git log --oneline -2 && \
     ./compile.py Programs/Source/lime.mpc && \
-    ./compile.py Programs/Source/mlp.mpc \
+    ./compile.py Programs/Source/mlp.mpc
+
+# ARG CACHEBUST=1 is to force re-execute the following CMDs at each updates.
+ARG CACHEBUST=1
 
 # 1. pull latest code
 WORKDIR /opt/falcon
