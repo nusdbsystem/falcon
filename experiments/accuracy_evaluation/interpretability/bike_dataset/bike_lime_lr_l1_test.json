@@ -64,7 +64,7 @@
             "max_iteration": 10,
             "convergence_threshold": 0.0001,
             "with_regularization": true,
-            "alpha": 0.1,
+            "alpha": 0.01,
             "learning_rate": 0.1,
             "decay": 0.1,
             "penalty": "l1",
