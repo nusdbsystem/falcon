@@ -31,7 +31,7 @@ because they are already installed in the docker image.
 Go to the `tools/deployment` folder, and run the following command to build the docker image:
 
 ```bash
-docker build --network=host -t falcon:latest -f ./ubuntu18.04-falcon.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg CACHEBUST="$(date +%s)"
+docker build --network=host -t falcon:latest -f ./tools/deployment/ubuntu18.04-falcon.Dockerfile . --build-arg CACHEBUST="$(date +%s)"
 ```
 
 It may take more than 1 hour to build this image as it needs to download a number of 

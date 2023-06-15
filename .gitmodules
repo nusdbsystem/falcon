@@ -1,12 +1,12 @@
 [submodule "third_party/libhcs"]
 	path = third_party/libhcs
-	url = git@github.com:lemonviv/libhcs.git
+	url = https://github.com/lemonviv/libhcs.git
 	ignore = dirty
 [submodule "third_party/MP-SPDZ"]
 	path = third_party/MP-SPDZ
-	url = git@github.com:lemonviv/MP-SPDZ.git
+	url = https://github.com/lemonviv/MP-SPDZ.git
 	ignore = dirty
 [submodule "third_party/served"]
 	path = third_party/served
-	url = git@github.com:meltwater/served.git
+	url = https://github.com/meltwater/served.git
     ignore = dirty
