@@ -1,24 +1,48 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by root on 11/14/21.
 //
 
-#include <falcon/utils/metric/regression.h>
 #include <falcon/utils/logger/logger.h>
 #include <falcon/utils/math/math_ops.h>
+#include <falcon/utils/metric/regression.h>
 
 #include <fstream>
-#include <iomanip>   // std::setprecision
-#include <iostream>  // std::cout
+#include <iomanip>  // std::setprecision
+#include <iostream> // std::cout
 #include <valarray>
 
 RegressionMetrics::RegressionMetrics() = default;
 
-void RegressionMetrics::compute_metrics(const std::vector<double>& predictions,
-                                        const std::vector<double>& labels,
-                                        const std::vector<double>& sample_weights) {
-  if ((predictions.size() != labels.size()) || (
-      !sample_weights.empty() && (predictions.size() != sample_weights.size())
-      )) {
+void RegressionMetrics::compute_metrics(
+    const std::vector<double> &predictions, const std::vector<double> &labels,
+    const std::vector<double> &sample_weights) {
+  if ((predictions.size() != labels.size()) ||
+      (!sample_weights.empty() &&
+       (predictions.size() != sample_weights.size()))) {
     log_error("The prediction size, label size, and sample_weights size"
               "are not equal");
   }

@@ -5,12 +5,12 @@
 #ifndef FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_TREE_NODE_H_
 #define FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_TREE_NODE_H_
 
-#include <vector>
-#include <falcon/operator/phe/fixed_point_encoder.h>
 #include <falcon/common.h>
+#include <falcon/operator/phe/fixed_point_encoder.h>
+#include <vector>
 
 class Node {
- public:
+public:
   // node type, default is internal node
   falcon::TreeNodeType node_type;
   // the depth of the current node, root node is 0, -1: not decided
@@ -38,7 +38,7 @@ class Node {
   // right branch id of the current node, if not a leaf node, -1: not decided
   int right_child;
 
- public:
+public:
   Node();
   ~Node();
 
@@ -63,4 +63,4 @@ class Node {
   void print_node();
 };
 
-#endif //FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_TREE_NODE_H_
+#endif // FALCON_SRC_EXECUTOR_ALGORITHM_VERTICAL_TREE_NODE_H_

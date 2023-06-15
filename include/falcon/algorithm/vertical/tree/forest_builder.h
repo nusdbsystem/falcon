@@ -5,8 +5,8 @@
 #ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_BUILDER_H_
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_BUILDER_H_
 
-#include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/algorithm/vertical/tree/forest_model.h>
+#include <falcon/algorithm/vertical/tree/tree_builder.h>
 
 struct RandomForestParams {
   // number of trees in the forest
@@ -18,7 +18,7 @@ struct RandomForestParams {
 };
 
 class RandomForestBuilder : public ModelBuilder {
- public:
+public:
   // number of trees in the forest
   int n_estimator;
   // sample rate for each tree in the forest
@@ -26,7 +26,7 @@ class RandomForestBuilder : public ModelBuilder {
   // decision tree builder params
   DecisionTreeParams dt_param;
 
- public:
+public:
   // local feature num in the training dataset
   int local_feature_num;
   // tree builders of each tree in the forest
@@ -34,7 +34,7 @@ class RandomForestBuilder : public ModelBuilder {
   // forest tree model
   ForestModel forest_model;
 
- public:
+public:
   /** default constructor */
   RandomForestBuilder();
 
@@ -43,31 +43,33 @@ class RandomForestBuilder : public ModelBuilder {
 
   /** constructor */
   RandomForestBuilder(RandomForestParams params,
-    std::vector< std::vector<double> > m_training_data,
-    std::vector< std::vector<double> > m_testing_data,
-    std::vector<double> m_training_labels,
-    std::vector<double> m_testing_labels,
-    double m_training_accuracy = 0.0,
-    double m_testing_accuracy = 0.0);
+                      std::vector<std::vector<double>> m_training_data,
+                      std::vector<std::vector<double>> m_testing_data,
+                      std::vector<double> m_training_labels,
+                      std::vector<double> m_testing_labels,
+                      double m_training_accuracy = 0.0,
+                      double m_testing_accuracy = 0.0);
 
   /**
    * init the tree builders for the forest
    * @param party
    */
-  void init_forest_builder(Party& party);
+  void init_forest_builder(Party &party);
 
   /**
-     * shuffle and assign training data to a decision tree of random forest
-     *
-     * @param party
-     * @param tree_id
-     * @param sampled_training_data: shuffle and select sample_rate * training_data_size samples
-     * @param sampled_training_labels: the labels of the above sampled trainig data
-     */
-  void shuffle_and_assign_training_data(Party& party,
-      int tree_id,
-      std::vector< std::vector<double> >& sampled_training_data,
-      std::vector<double>& sampled_training_labels);
+   * shuffle and assign training data to a decision tree of random forest
+   *
+   * @param party
+   * @param tree_id
+   * @param sampled_training_data: shuffle and select sample_rate *
+   * training_data_size samples
+   * @param sampled_training_labels: the labels of the above sampled trainig
+   * data
+   */
+  void shuffle_and_assign_training_data(
+      Party &party, int tree_id,
+      std::vector<std::vector<double>> &sampled_training_data,
+      std::vector<double> &sampled_training_labels);
 
   /**
    * build each tree of random forest
@@ -82,18 +84,16 @@ class RandomForestBuilder : public ModelBuilder {
    * @param party
    * @param sample_rate
    */
-  void distributed_train(const Party& party, const Worker& worker) override;
+  void distributed_train(const Party &party, const Worker &worker) override;
 
   /**
    * evaluate the accuracy on the dataset
    * @param party
    * @param eval_type
    * @param report_save_path
-*/
+   */
   void eval(Party party, falcon::DatasetType eval_type,
-      const std::string& report_save_path = std::string()) override;
+            const std::string &report_save_path = std::string()) override;
 };
 
-
-
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_BUILDER_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_BUILDER_H_

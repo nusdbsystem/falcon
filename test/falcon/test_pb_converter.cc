@@ -1,35 +1,56 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by wuyuncheng on 13/8/20.
 //
 
-#include <string>
 #include <iostream>
+#include <string>
 
-#include <gtest/gtest.h>
-#include <falcon/utils/pb_converter/model_converter.h>
-#include <falcon/utils/pb_converter/phe_keys_converter.h>
-#include <falcon/utils/pb_converter/common_converter.h>
-#include <falcon/utils/pb_converter/alg_params_converter.h>
-#include <falcon/utils/pb_converter/network_converter.h>
-#include <falcon/utils/pb_converter/tree_converter.h>
-#include <falcon/utils/pb_converter/lr_converter.h>
-#include <falcon/utils/pb_converter/nn_converter.h>
-#include <falcon/utils/pb_converter/interpretability_converter.h>
 #include <falcon/utils/base64.h>
+#include <falcon/utils/pb_converter/alg_params_converter.h>
+#include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/interpretability_converter.h>
+#include <falcon/utils/pb_converter/lr_converter.h>
+#include <falcon/utils/pb_converter/model_converter.h>
+#include <falcon/utils/pb_converter/network_converter.h>
+#include <falcon/utils/pb_converter/nn_converter.h>
+#include <falcon/utils/pb_converter/phe_keys_converter.h>
+#include <falcon/utils/pb_converter/tree_converter.h>
+#include <gtest/gtest.h>
 
 TEST(PB_Converter, ModelPublishRequest) {
   int model_id = 1;
   int initiator_party_id = 1001;
   std::string output_message;
-  serialize_model_publish_request(model_id,
-      initiator_party_id,
-      output_message);
+  serialize_model_publish_request(model_id, initiator_party_id, output_message);
 
   int deserialized_model_id;
   int deserialized_initiator_party_id;
-  deserialize_model_publish_request(deserialized_model_id,
-      deserialized_initiator_party_id,
-      output_message);
+  deserialize_model_publish_request(
+      deserialized_model_id, deserialized_initiator_party_id, output_message);
 
   EXPECT_EQ(1, deserialized_model_id);
   EXPECT_EQ(1001, deserialized_initiator_party_id);
@@ -42,23 +63,17 @@ TEST(PB_Converter, ModelPublishResponse) {
   int error_code = 2001;
   std::string error_msg = "Model id does not exist.";
   std::string output_message;
-  serialize_model_publish_response(model_id,
-      initiator_party_id,
-      is_success,
-      error_code,
-      error_msg,
-      output_message);
+  serialize_model_publish_response(model_id, initiator_party_id, is_success,
+                                   error_code, error_msg, output_message);
 
   int deserialized_model_id;
   int deserialized_initiator_party_id;
   int deserialized_is_success;
   int deserialized_error_code;
   std::string deserialized_error_msg;
-  deserialize_model_publish_response(deserialized_model_id,
-      deserialized_initiator_party_id,
-      deserialized_is_success,
-      deserialized_error_code,
-      deserialized_error_msg,
+  deserialize_model_publish_response(
+      deserialized_model_id, deserialized_initiator_party_id,
+      deserialized_is_success, deserialized_error_code, deserialized_error_msg,
       output_message);
 
   EXPECT_EQ(1, deserialized_model_id);
@@ -70,13 +85,15 @@ TEST(PB_Converter, ModelPublishResponse) {
 
 TEST(PB_Converter, PHEKeys) {
   // generate phe keys
-  hcs_random* phe_random = hcs_init_random();
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
-  djcs_t_private_key* phe_priv_key = djcs_t_init_private_key();
-  djcs_t_auth_server** phe_auth_server = (djcs_t_auth_server **) malloc (3 * sizeof(djcs_t_auth_server *));
-  mpz_t* si = (mpz_t *) malloc (3 * sizeof(mpz_t));
-  djcs_t_generate_key_pair(phe_pub_key, phe_priv_key, phe_random, 1, 1024, 3, 3);
-  mpz_t* coeff = djcs_t_init_polynomial(phe_priv_key, phe_random);
+  hcs_random *phe_random = hcs_init_random();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
+  djcs_t_private_key *phe_priv_key = djcs_t_init_private_key();
+  djcs_t_auth_server **phe_auth_server =
+      (djcs_t_auth_server **)malloc(3 * sizeof(djcs_t_auth_server *));
+  mpz_t *si = (mpz_t *)malloc(3 * sizeof(mpz_t));
+  djcs_t_generate_key_pair(phe_pub_key, phe_priv_key, phe_random, 1, 1024, 3,
+                           3);
+  mpz_t *coeff = djcs_t_init_polynomial(phe_priv_key, phe_random);
   for (int i = 0; i < 3; i++) {
     mpz_init(si[i]);
     djcs_t_compute_polynomial(phe_priv_key, coeff, si[i], i);
@@ -85,12 +102,14 @@ TEST(PB_Converter, PHEKeys) {
   }
 
   // test serialization and deserialization
-  for(int i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     std::string output_message;
     serialize_phe_keys(phe_pub_key, phe_auth_server[i], output_message);
-    djcs_t_public_key* deserialized_phe_pub_key = djcs_t_init_public_key();
-    djcs_t_auth_server* deserialized_phe_auth_server = djcs_t_init_auth_server();
-    deserialize_phe_keys(deserialized_phe_pub_key, deserialized_phe_auth_server, output_message);
+    djcs_t_public_key *deserialized_phe_pub_key = djcs_t_init_public_key();
+    djcs_t_auth_server *deserialized_phe_auth_server =
+        djcs_t_init_auth_server();
+    deserialize_phe_keys(deserialized_phe_pub_key, deserialized_phe_auth_server,
+                         output_message);
 
     EXPECT_EQ(phe_pub_key->s, deserialized_phe_pub_key->s);
     EXPECT_EQ(phe_pub_key->l, deserialized_phe_pub_key->l);
@@ -100,7 +119,8 @@ TEST(PB_Converter, PHEKeys) {
     for (int j = 0; j < phe_pub_key->s + 1; j++) {
       EXPECT_EQ(0, mpz_cmp(phe_pub_key->n[j], deserialized_phe_pub_key->n[j]));
     }
-    EXPECT_EQ(0, mpz_cmp(phe_auth_server[i]->si, deserialized_phe_auth_server->si));
+    EXPECT_EQ(
+        0, mpz_cmp(phe_auth_server[i]->si, deserialized_phe_auth_server->si));
     EXPECT_EQ(phe_auth_server[i]->i, deserialized_phe_auth_server->i);
 
     djcs_t_free_public_key(deserialized_phe_pub_key);
@@ -162,7 +182,7 @@ TEST(PB_Converter, DoubleArray) {
 
 TEST(PB_Converter, DoubleMatrix) {
   // generate double matrix
-  std::vector< std::vector<double> > mat;
+  std::vector<std::vector<double>> mat;
   for (int i = 0; i < 3; i++) {
     std::vector<double> vec;
     vec.push_back(3.0);
@@ -175,7 +195,7 @@ TEST(PB_Converter, DoubleMatrix) {
   std::string output_message;
   serialize_double_matrix(mat, output_message);
 
-  std::vector< std::vector<double> > deserialized_mat;
+  std::vector<std::vector<double>> deserialized_mat;
   deserialize_double_matrix(deserialized_mat, output_message);
 
   // check equality
@@ -227,7 +247,7 @@ TEST(PB_Converter, FixedPointEncodedNumber) {
 }
 
 TEST(PB_Converter, EncodedNumberArray) {
-  auto* encoded_number_array = new EncodedNumber[3];
+  auto *encoded_number_array = new EncodedNumber[3];
   mpz_t v_n;
   mpz_t v_value;
   mpz_init(v_n);
@@ -245,7 +265,7 @@ TEST(PB_Converter, EncodedNumberArray) {
 
   std::string out_message;
   serialize_encoded_number_array(encoded_number_array, 3, out_message);
-  auto* deserialized_number_array = new EncodedNumber[3];
+  auto *deserialized_number_array = new EncodedNumber[3];
   deserialize_encoded_number_array(deserialized_number_array, 3, out_message);
 
   for (int i = 0; i < 3; i++) {
@@ -265,12 +285,12 @@ TEST(PB_Converter, EncodedNumberArray) {
   }
   mpz_clear(v_n);
   mpz_clear(v_value);
-  delete [] encoded_number_array;
-  delete [] deserialized_number_array;
+  delete[] encoded_number_array;
+  delete[] deserialized_number_array;
 }
 
 TEST(PB_Converter, EncodedNumberMatrix) {
-  auto** encoded_number_matrix = new EncodedNumber*[3];
+  auto **encoded_number_matrix = new EncodedNumber *[3];
   for (int i = 0; i < 3; i++) {
     encoded_number_matrix[i] = new EncodedNumber[2];
   }
@@ -293,11 +313,12 @@ TEST(PB_Converter, EncodedNumberMatrix) {
 
   std::string out_message;
   serialize_encoded_number_matrix(encoded_number_matrix, 3, 2, out_message);
-  auto** deserialized_number_matrix = new EncodedNumber*[3];
+  auto **deserialized_number_matrix = new EncodedNumber *[3];
   for (int i = 0; i < 3; i++) {
     deserialized_number_matrix[i] = new EncodedNumber[2];
   }
-  deserialize_encoded_number_matrix(deserialized_number_matrix, 3, 2, out_message);
+  deserialize_encoded_number_matrix(deserialized_number_matrix, 3, 2,
+                                    out_message);
 
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 2; j++) {
@@ -320,11 +341,11 @@ TEST(PB_Converter, EncodedNumberMatrix) {
   mpz_clear(v_value);
 
   for (int i = 0; i < 3; i++) {
-    delete [] encoded_number_matrix[i];
-    delete [] deserialized_number_matrix[i];
+    delete[] encoded_number_matrix[i];
+    delete[] deserialized_number_matrix[i];
   }
-  delete [] encoded_number_matrix;
-  delete [] deserialized_number_matrix;
+  delete[] encoded_number_matrix;
+  delete[] deserialized_number_matrix;
 }
 
 TEST(PB_Converter, LogisticRegressionParams) {
@@ -349,15 +370,19 @@ TEST(PB_Converter, LogisticRegressionParams) {
   deserialize_lr_params(deserialized_lr_params, output_message);
   EXPECT_EQ(lr_params.batch_size, deserialized_lr_params.batch_size);
   EXPECT_EQ(lr_params.max_iteration, deserialized_lr_params.max_iteration);
-  EXPECT_EQ(lr_params.converge_threshold, deserialized_lr_params.converge_threshold);
-  EXPECT_EQ(lr_params.with_regularization, deserialized_lr_params.with_regularization);
-  // std::cout << "deserialized_lr_params.with_regularization = " << deserialized_lr_params.with_regularization << std::endl;
+  EXPECT_EQ(lr_params.converge_threshold,
+            deserialized_lr_params.converge_threshold);
+  EXPECT_EQ(lr_params.with_regularization,
+            deserialized_lr_params.with_regularization);
+  // std::cout << "deserialized_lr_params.with_regularization = " <<
+  // deserialized_lr_params.with_regularization << std::endl;
   EXPECT_EQ(lr_params.alpha, deserialized_lr_params.alpha);
   EXPECT_EQ(lr_params.learning_rate, deserialized_lr_params.learning_rate);
   EXPECT_EQ(lr_params.decay, deserialized_lr_params.decay);
   EXPECT_EQ(lr_params.dp_budget, deserialized_lr_params.dp_budget);
   EXPECT_EQ(lr_params.fit_bias, deserialized_lr_params.fit_bias);
-  // std::cout << "deserialized_lr_params.fit_bias = " << deserialized_lr_params.fit_bias << std::endl;
+  // std::cout << "deserialized_lr_params.fit_bias = " <<
+  // deserialized_lr_params.fit_bias << std::endl;
   EXPECT_TRUE(lr_params.penalty == deserialized_lr_params.penalty);
   EXPECT_TRUE(lr_params.optimizer == deserialized_lr_params.optimizer);
   EXPECT_TRUE(lr_params.multi_class == deserialized_lr_params.multi_class);
@@ -399,7 +424,8 @@ TEST(PB_Converter, LogisticRegressionModel) {
     int value_cmp = mpz_cmp(v_value, deserialized_value);
     EXPECT_EQ(0, n_cmp);
     EXPECT_EQ(0, value_cmp);
-    EXPECT_EQ(v_exponent, deserialized_lr_model.local_weights[i].getter_exponent());
+    EXPECT_EQ(v_exponent,
+              deserialized_lr_model.local_weights[i].getter_exponent());
     EXPECT_EQ(v_type, deserialized_lr_model.local_weights[i].getter_type());
     mpz_clear(deserialized_n);
     mpz_clear(deserialized_value);
@@ -429,15 +455,19 @@ TEST(PB_Converter, LinearRegressionParams) {
   deserialize_lir_params(deserialized_lir_params, output_message);
   EXPECT_EQ(lir_params.batch_size, deserialized_lir_params.batch_size);
   EXPECT_EQ(lir_params.max_iteration, deserialized_lir_params.max_iteration);
-  EXPECT_EQ(lir_params.converge_threshold, deserialized_lir_params.converge_threshold);
-  EXPECT_EQ(lir_params.with_regularization, deserialized_lir_params.with_regularization);
-  // std::cout << "deserialized_lr_params.with_regularization = " << deserialized_lr_params.with_regularization << std::endl;
+  EXPECT_EQ(lir_params.converge_threshold,
+            deserialized_lir_params.converge_threshold);
+  EXPECT_EQ(lir_params.with_regularization,
+            deserialized_lir_params.with_regularization);
+  // std::cout << "deserialized_lr_params.with_regularization = " <<
+  // deserialized_lr_params.with_regularization << std::endl;
   EXPECT_EQ(lir_params.alpha, deserialized_lir_params.alpha);
   EXPECT_EQ(lir_params.learning_rate, deserialized_lir_params.learning_rate);
   EXPECT_EQ(lir_params.decay, deserialized_lir_params.decay);
   EXPECT_EQ(lir_params.dp_budget, deserialized_lir_params.dp_budget);
   EXPECT_EQ(lir_params.fit_bias, deserialized_lir_params.fit_bias);
-  // std::cout << "deserialized_lr_params.fit_bias = " << deserialized_lr_params.fit_bias << std::endl;
+  // std::cout << "deserialized_lr_params.fit_bias = " <<
+  // deserialized_lr_params.fit_bias << std::endl;
   EXPECT_TRUE(lir_params.penalty == deserialized_lir_params.penalty);
   EXPECT_TRUE(lir_params.optimizer == deserialized_lir_params.optimizer);
   EXPECT_TRUE(lir_params.metric == deserialized_lir_params.metric);
@@ -465,15 +495,20 @@ TEST(PB_Converter, DecisionTreeParams) {
   EXPECT_EQ(dt_params.class_num, deserialized_dt_params.class_num);
   EXPECT_EQ(dt_params.max_depth, deserialized_dt_params.max_depth);
   EXPECT_EQ(dt_params.max_bins, deserialized_dt_params.max_bins);
-  EXPECT_EQ(dt_params.min_samples_split, deserialized_dt_params.min_samples_split);
-  EXPECT_EQ(dt_params.min_samples_leaf, deserialized_dt_params.min_samples_leaf);
+  EXPECT_EQ(dt_params.min_samples_split,
+            deserialized_dt_params.min_samples_split);
+  EXPECT_EQ(dt_params.min_samples_leaf,
+            deserialized_dt_params.min_samples_leaf);
   EXPECT_EQ(dt_params.max_leaf_nodes, deserialized_dt_params.max_leaf_nodes);
-  EXPECT_EQ(dt_params.min_impurity_decrease, deserialized_dt_params.min_impurity_decrease);
-  EXPECT_EQ(dt_params.min_impurity_split, deserialized_dt_params.min_impurity_split);
+  EXPECT_EQ(dt_params.min_impurity_decrease,
+            deserialized_dt_params.min_impurity_decrease);
+  EXPECT_EQ(dt_params.min_impurity_split,
+            deserialized_dt_params.min_impurity_split);
   EXPECT_EQ(dt_params.dp_budget, deserialized_dt_params.dp_budget);
   EXPECT_TRUE(dt_params.tree_type == deserialized_dt_params.tree_type);
   EXPECT_TRUE(dt_params.criterion == deserialized_dt_params.criterion);
-  EXPECT_TRUE(dt_params.split_strategy == deserialized_dt_params.split_strategy);
+  EXPECT_TRUE(dt_params.split_strategy ==
+              deserialized_dt_params.split_strategy);
 }
 
 TEST(PB_Converter, RandomForestParams) {
@@ -499,18 +534,30 @@ TEST(PB_Converter, RandomForestParams) {
   deserialize_rf_params(deserialized_rf_params, output_message);
   EXPECT_EQ(rf_params.n_estimator, deserialized_rf_params.n_estimator);
   EXPECT_EQ(rf_params.sample_rate, deserialized_rf_params.sample_rate);
-  EXPECT_EQ(rf_params.dt_param.class_num, deserialized_rf_params.dt_param.class_num);
-  EXPECT_EQ(rf_params.dt_param.max_depth, deserialized_rf_params.dt_param.max_depth);
-  EXPECT_EQ(rf_params.dt_param.max_bins, deserialized_rf_params.dt_param.max_bins);
-  EXPECT_EQ(rf_params.dt_param.min_samples_split, deserialized_rf_params.dt_param.min_samples_split);
-  EXPECT_EQ(rf_params.dt_param.min_samples_leaf, deserialized_rf_params.dt_param.min_samples_leaf);
-  EXPECT_EQ(rf_params.dt_param.max_leaf_nodes, deserialized_rf_params.dt_param.max_leaf_nodes);
-  EXPECT_EQ(rf_params.dt_param.min_impurity_decrease, deserialized_rf_params.dt_param.min_impurity_decrease);
-  EXPECT_EQ(rf_params.dt_param.min_impurity_split, deserialized_rf_params.dt_param.min_impurity_split);
-  EXPECT_EQ(rf_params.dt_param.dp_budget, deserialized_rf_params.dt_param.dp_budget);
-  EXPECT_TRUE(rf_params.dt_param.tree_type == deserialized_rf_params.dt_param.tree_type);
-  EXPECT_TRUE(rf_params.dt_param.criterion == deserialized_rf_params.dt_param.criterion);
-  EXPECT_TRUE(rf_params.dt_param.split_strategy == deserialized_rf_params.dt_param.split_strategy);
+  EXPECT_EQ(rf_params.dt_param.class_num,
+            deserialized_rf_params.dt_param.class_num);
+  EXPECT_EQ(rf_params.dt_param.max_depth,
+            deserialized_rf_params.dt_param.max_depth);
+  EXPECT_EQ(rf_params.dt_param.max_bins,
+            deserialized_rf_params.dt_param.max_bins);
+  EXPECT_EQ(rf_params.dt_param.min_samples_split,
+            deserialized_rf_params.dt_param.min_samples_split);
+  EXPECT_EQ(rf_params.dt_param.min_samples_leaf,
+            deserialized_rf_params.dt_param.min_samples_leaf);
+  EXPECT_EQ(rf_params.dt_param.max_leaf_nodes,
+            deserialized_rf_params.dt_param.max_leaf_nodes);
+  EXPECT_EQ(rf_params.dt_param.min_impurity_decrease,
+            deserialized_rf_params.dt_param.min_impurity_decrease);
+  EXPECT_EQ(rf_params.dt_param.min_impurity_split,
+            deserialized_rf_params.dt_param.min_impurity_split);
+  EXPECT_EQ(rf_params.dt_param.dp_budget,
+            deserialized_rf_params.dt_param.dp_budget);
+  EXPECT_TRUE(rf_params.dt_param.tree_type ==
+              deserialized_rf_params.dt_param.tree_type);
+  EXPECT_TRUE(rf_params.dt_param.criterion ==
+              deserialized_rf_params.dt_param.criterion);
+  EXPECT_TRUE(rf_params.dt_param.split_strategy ==
+              deserialized_rf_params.dt_param.split_strategy);
 }
 
 TEST(PB_Converter, GbdtParams) {
@@ -540,18 +587,30 @@ TEST(PB_Converter, GbdtParams) {
   EXPECT_TRUE(gbdt_params.loss == deserialized_gbdt_params.loss);
   EXPECT_EQ(gbdt_params.learning_rate, deserialized_gbdt_params.learning_rate);
   EXPECT_EQ(gbdt_params.subsample, deserialized_gbdt_params.subsample);
-  EXPECT_EQ(gbdt_params.dt_param.class_num, deserialized_gbdt_params.dt_param.class_num);
-  EXPECT_EQ(gbdt_params.dt_param.max_depth, deserialized_gbdt_params.dt_param.max_depth);
-  EXPECT_EQ(gbdt_params.dt_param.max_bins, deserialized_gbdt_params.dt_param.max_bins);
-  EXPECT_EQ(gbdt_params.dt_param.min_samples_split, deserialized_gbdt_params.dt_param.min_samples_split);
-  EXPECT_EQ(gbdt_params.dt_param.min_samples_leaf, deserialized_gbdt_params.dt_param.min_samples_leaf);
-  EXPECT_EQ(gbdt_params.dt_param.max_leaf_nodes, deserialized_gbdt_params.dt_param.max_leaf_nodes);
-  EXPECT_EQ(gbdt_params.dt_param.min_impurity_decrease, deserialized_gbdt_params.dt_param.min_impurity_decrease);
-  EXPECT_EQ(gbdt_params.dt_param.min_impurity_split, deserialized_gbdt_params.dt_param.min_impurity_split);
-  EXPECT_EQ(gbdt_params.dt_param.dp_budget, deserialized_gbdt_params.dt_param.dp_budget);
-  EXPECT_TRUE(gbdt_params.dt_param.tree_type == deserialized_gbdt_params.dt_param.tree_type);
-  EXPECT_TRUE(gbdt_params.dt_param.criterion == deserialized_gbdt_params.dt_param.criterion);
-  EXPECT_TRUE(gbdt_params.dt_param.split_strategy == deserialized_gbdt_params.dt_param.split_strategy);
+  EXPECT_EQ(gbdt_params.dt_param.class_num,
+            deserialized_gbdt_params.dt_param.class_num);
+  EXPECT_EQ(gbdt_params.dt_param.max_depth,
+            deserialized_gbdt_params.dt_param.max_depth);
+  EXPECT_EQ(gbdt_params.dt_param.max_bins,
+            deserialized_gbdt_params.dt_param.max_bins);
+  EXPECT_EQ(gbdt_params.dt_param.min_samples_split,
+            deserialized_gbdt_params.dt_param.min_samples_split);
+  EXPECT_EQ(gbdt_params.dt_param.min_samples_leaf,
+            deserialized_gbdt_params.dt_param.min_samples_leaf);
+  EXPECT_EQ(gbdt_params.dt_param.max_leaf_nodes,
+            deserialized_gbdt_params.dt_param.max_leaf_nodes);
+  EXPECT_EQ(gbdt_params.dt_param.min_impurity_decrease,
+            deserialized_gbdt_params.dt_param.min_impurity_decrease);
+  EXPECT_EQ(gbdt_params.dt_param.min_impurity_split,
+            deserialized_gbdt_params.dt_param.min_impurity_split);
+  EXPECT_EQ(gbdt_params.dt_param.dp_budget,
+            deserialized_gbdt_params.dt_param.dp_budget);
+  EXPECT_TRUE(gbdt_params.dt_param.tree_type ==
+              deserialized_gbdt_params.dt_param.tree_type);
+  EXPECT_TRUE(gbdt_params.dt_param.criterion ==
+              deserialized_gbdt_params.dt_param.criterion);
+  EXPECT_TRUE(gbdt_params.dt_param.split_strategy ==
+              deserialized_gbdt_params.dt_param.split_strategy);
 }
 
 TEST(PB_Converter, MlpParams) {
@@ -581,11 +640,14 @@ TEST(PB_Converter, MlpParams) {
 
   MlpParams deserialized_mlp_params;
   deserialize_mlp_params(deserialized_mlp_params, output_message);
-  EXPECT_EQ(mlp_params.is_classification, deserialized_mlp_params.is_classification);
+  EXPECT_EQ(mlp_params.is_classification,
+            deserialized_mlp_params.is_classification);
   EXPECT_EQ(mlp_params.batch_size, deserialized_mlp_params.batch_size);
   EXPECT_EQ(mlp_params.max_iteration, deserialized_mlp_params.max_iteration);
-  EXPECT_EQ(mlp_params.converge_threshold, deserialized_mlp_params.converge_threshold);
-  EXPECT_EQ(mlp_params.with_regularization, deserialized_mlp_params.with_regularization);
+  EXPECT_EQ(mlp_params.converge_threshold,
+            deserialized_mlp_params.converge_threshold);
+  EXPECT_EQ(mlp_params.with_regularization,
+            deserialized_mlp_params.with_regularization);
   EXPECT_EQ(mlp_params.alpha, deserialized_mlp_params.alpha);
   EXPECT_EQ(mlp_params.learning_rate, deserialized_mlp_params.learning_rate);
   EXPECT_EQ(mlp_params.decay, deserialized_mlp_params.decay);
@@ -594,13 +656,15 @@ TEST(PB_Converter, MlpParams) {
   EXPECT_TRUE(mlp_params.penalty == deserialized_mlp_params.penalty);
   EXPECT_TRUE(mlp_params.optimizer == deserialized_mlp_params.optimizer);
   EXPECT_TRUE(mlp_params.metric == deserialized_mlp_params.metric);
-  int layer_size = (int) mlp_params.num_layers_outputs.size();
-  int hidden_layer_size = (int) mlp_params.layers_activation_funcs.size();
+  int layer_size = (int)mlp_params.num_layers_outputs.size();
+  int hidden_layer_size = (int)mlp_params.layers_activation_funcs.size();
   for (int i = 0; i < layer_size; i++) {
-    EXPECT_EQ(mlp_params.num_layers_outputs[i], deserialized_mlp_params.num_layers_outputs[i]);
+    EXPECT_EQ(mlp_params.num_layers_outputs[i],
+              deserialized_mlp_params.num_layers_outputs[i]);
   }
   for (int i = 0; i < hidden_layer_size; i++) {
-    EXPECT_TRUE(mlp_params.layers_activation_funcs[i] == deserialized_mlp_params.layers_activation_funcs[i]);
+    EXPECT_TRUE(mlp_params.layers_activation_funcs[i] ==
+                deserialized_mlp_params.layers_activation_funcs[i]);
   }
 }
 
@@ -611,9 +675,9 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
   int classes_num = 2;
   auto *left_sample_nums = new EncodedNumber[3];
   auto *right_sample_nums = new EncodedNumber[3];
-  auto ** encrypted_statistics = new EncodedNumber*[3];
+  auto **encrypted_statistics = new EncodedNumber *[3];
   for (int i = 0; i < 3; i++) {
-    encrypted_statistics[i] = new EncodedNumber[2*2];
+    encrypted_statistics[i] = new EncodedNumber[2 * 2];
   }
   mpz_t v_n;
   mpz_t v_value;
@@ -634,7 +698,7 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
     right_sample_nums[i].setter_type(v_type);
   }
   for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 2*2; j++) {
+    for (int j = 0; j < 2 * 2; j++) {
       encrypted_statistics[i][j].setter_n(v_n);
       encrypted_statistics[i][j].setter_value(v_value);
       encrypted_statistics[i][j].setter_exponent(v_exponent);
@@ -643,10 +707,9 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
   }
 
   std::string output_message;
-  serialize_encrypted_statistics(client_id, node_index,
-      split_num, classes_num,
-      left_sample_nums, right_sample_nums,
-      encrypted_statistics, output_message);
+  serialize_encrypted_statistics(client_id, node_index, split_num, classes_num,
+                                 left_sample_nums, right_sample_nums,
+                                 encrypted_statistics, output_message);
 
   int deserialized_client_id = 0;
   int deserialized_node_index = 1;
@@ -654,15 +717,16 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
   int deserialized_classes_num = 2;
   auto *deserialized_left_sample_nums = new EncodedNumber[3];
   auto *deserialized_right_sample_nums = new EncodedNumber[3];
-  auto ** deserialized_encrypted_statistics = new EncodedNumber*[3];
+  auto **deserialized_encrypted_statistics = new EncodedNumber *[3];
   for (int i = 0; i < 3; i++) {
-    deserialized_encrypted_statistics[i] = new EncodedNumber[2*2];
+    deserialized_encrypted_statistics[i] = new EncodedNumber[2 * 2];
   }
 
-  deserialize_encrypted_statistics(deserialized_client_id, deserialized_node_index,
-      deserialized_split_num, deserialized_classes_num,
-      deserialized_left_sample_nums, deserialized_right_sample_nums,
-      deserialized_encrypted_statistics, output_message);
+  deserialize_encrypted_statistics(
+      deserialized_client_id, deserialized_node_index, deserialized_split_num,
+      deserialized_classes_num, deserialized_left_sample_nums,
+      deserialized_right_sample_nums, deserialized_encrypted_statistics,
+      output_message);
 
   for (int i = 0; i < 3; i++) {
     mpz_t deserialized_n, deserialized_value;
@@ -697,7 +761,7 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
   }
 
   for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 2*2; j++) {
+    for (int j = 0; j < 2 * 2; j++) {
       mpz_t deserialized_n, deserialized_value;
       mpz_init(deserialized_n);
       mpz_init(deserialized_value);
@@ -707,7 +771,8 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
       int value_cmp = mpz_cmp(v_value, deserialized_value);
       EXPECT_EQ(0, n_cmp);
       EXPECT_EQ(0, value_cmp);
-      EXPECT_EQ(v_exponent, deserialized_encrypted_statistics[i][j].getter_exponent());
+      EXPECT_EQ(v_exponent,
+                deserialized_encrypted_statistics[i][j].getter_exponent());
       EXPECT_EQ(v_type, deserialized_encrypted_statistics[i][j].getter_type());
       mpz_clear(deserialized_n);
       mpz_clear(deserialized_value);
@@ -716,16 +781,16 @@ TEST(PB_Converter, TreeEncryptedStatistics) {
 
   mpz_clear(v_n);
   mpz_clear(v_value);
-  delete [] left_sample_nums;
-  delete [] right_sample_nums;
-  delete [] deserialized_left_sample_nums;
-  delete [] deserialized_right_sample_nums;
+  delete[] left_sample_nums;
+  delete[] right_sample_nums;
+  delete[] deserialized_left_sample_nums;
+  delete[] deserialized_right_sample_nums;
   for (int i = 0; i < 3; i++) {
-    delete [] encrypted_statistics[i];
-    delete [] deserialized_encrypted_statistics[i];
+    delete[] encrypted_statistics[i];
+    delete[] deserialized_encrypted_statistics[i];
   }
-  delete [] encrypted_statistics;
-  delete [] deserialized_encrypted_statistics;
+  delete[] encrypted_statistics;
+  delete[] deserialized_encrypted_statistics;
 }
 
 TEST(PB_Converter, TreeUpdateInfo) {
@@ -764,19 +829,19 @@ TEST(PB_Converter, TreeUpdateInfo) {
   }
 
   std::string out_message;
-  serialize_update_info(source_party_id, best_party_id,
-      best_feature_id, best_split_id, left_impurity, right_impurity,
-      left_sample_iv, right_sample_iv, 3, out_message);
+  serialize_update_info(source_party_id, best_party_id, best_feature_id,
+                        best_split_id, left_impurity, right_impurity,
+                        left_sample_iv, right_sample_iv, 3, out_message);
   int deserialized_source_party_id, deserialized_best_party_id;
   int deserialized_best_feature_id, deserialized_best_split_id;
   EncodedNumber deserialized_left_impurity, deserialized_right_impurity;
-  auto* deserialized_left_sample_iv = new EncodedNumber[3];
-  auto* deserialized_right_sample_iv = new EncodedNumber[3];
-  deserialize_update_info(deserialized_source_party_id,
-      deserialized_best_party_id, deserialized_best_feature_id,
-      deserialized_best_split_id, deserialized_left_impurity,
-      deserialized_right_impurity, deserialized_left_sample_iv,
-      deserialized_right_sample_iv, out_message);
+  auto *deserialized_left_sample_iv = new EncodedNumber[3];
+  auto *deserialized_right_sample_iv = new EncodedNumber[3];
+  deserialize_update_info(
+      deserialized_source_party_id, deserialized_best_party_id,
+      deserialized_best_feature_id, deserialized_best_split_id,
+      deserialized_left_impurity, deserialized_right_impurity,
+      deserialized_left_sample_iv, deserialized_right_sample_iv, out_message);
 
   EXPECT_EQ(source_party_id, deserialized_source_party_id);
   EXPECT_EQ(best_party_id, deserialized_best_party_id);
@@ -846,10 +911,10 @@ TEST(PB_Converter, TreeUpdateInfo) {
   mpz_clear(deserialized_left_value);
   mpz_clear(deserialized_right_n);
   mpz_clear(deserialized_right_value);
-  delete [] left_sample_iv;
-  delete [] right_sample_iv;
-  delete [] deserialized_left_sample_iv;
-  delete [] deserialized_right_sample_iv;
+  delete[] left_sample_iv;
+  delete[] right_sample_iv;
+  delete[] deserialized_left_sample_iv;
+  delete[] deserialized_right_sample_iv;
 }
 
 TEST(PB_Converter, TreeSplitInfo) {
@@ -864,7 +929,8 @@ TEST(PB_Converter, TreeSplitInfo) {
 
   int deserialized_global_split_num;
   std::vector<int> deserialized_client_split_nums;
-  deserialize_split_info(deserialized_global_split_num, deserialized_client_split_nums, output_message);
+  deserialize_split_info(deserialized_global_split_num,
+                         deserialized_client_split_nums, output_message);
 
   EXPECT_EQ(global_split_num, deserialized_global_split_num);
   for (int i = 0; i < 3; i++) {
@@ -935,16 +1001,24 @@ TEST(PB_Converter, TreeModel) {
   for (int i = 0; i < tree.capacity; i++) {
     EXPECT_EQ(deserialized_tree.nodes[i].node_type, tree.nodes[i].node_type);
     EXPECT_EQ(deserialized_tree.nodes[i].depth, tree.nodes[i].depth);
-    EXPECT_EQ(deserialized_tree.nodes[i].is_self_feature, tree.nodes[i].is_self_feature);
-    EXPECT_EQ(deserialized_tree.nodes[i].best_party_id, tree.nodes[i].best_party_id);
-    EXPECT_EQ(deserialized_tree.nodes[i].best_feature_id, tree.nodes[i].best_feature_id);
-    EXPECT_EQ(deserialized_tree.nodes[i].best_split_id, tree.nodes[i].best_split_id);
-    EXPECT_EQ(deserialized_tree.nodes[i].split_threshold, tree.nodes[i].split_threshold);
-    EXPECT_EQ(deserialized_tree.nodes[i].node_sample_num, tree.nodes[i].node_sample_num);
+    EXPECT_EQ(deserialized_tree.nodes[i].is_self_feature,
+              tree.nodes[i].is_self_feature);
+    EXPECT_EQ(deserialized_tree.nodes[i].best_party_id,
+              tree.nodes[i].best_party_id);
+    EXPECT_EQ(deserialized_tree.nodes[i].best_feature_id,
+              tree.nodes[i].best_feature_id);
+    EXPECT_EQ(deserialized_tree.nodes[i].best_split_id,
+              tree.nodes[i].best_split_id);
+    EXPECT_EQ(deserialized_tree.nodes[i].split_threshold,
+              tree.nodes[i].split_threshold);
+    EXPECT_EQ(deserialized_tree.nodes[i].node_sample_num,
+              tree.nodes[i].node_sample_num);
     EXPECT_EQ(deserialized_tree.nodes[i].left_child, tree.nodes[i].left_child);
-    EXPECT_EQ(deserialized_tree.nodes[i].right_child, tree.nodes[i].right_child);
+    EXPECT_EQ(deserialized_tree.nodes[i].right_child,
+              tree.nodes[i].right_child);
     for (int j = 0; j < tree.nodes[i].node_sample_distribution.size(); j++) {
-      EXPECT_EQ(deserialized_tree.nodes[i].node_sample_distribution[j], tree.nodes[i].node_sample_distribution[j]);
+      EXPECT_EQ(deserialized_tree.nodes[i].node_sample_distribution[j],
+                tree.nodes[i].node_sample_distribution[j]);
     }
 
     EncodedNumber deserialized_impurity = deserialized_tree.nodes[i].impurity;
@@ -1047,46 +1121,55 @@ TEST(PB_Converter, RandomForestModel) {
   EXPECT_EQ(forest_model.tree_size, deserialized_forest_model.tree_size);
   EXPECT_EQ(forest_model.tree_type, deserialized_forest_model.tree_type);
   for (int t = 0; t < deserialized_forest_model.tree_size; t++) {
-    EXPECT_EQ(deserialized_forest_model.forest_trees[t].type,
-        tree.type);
+    EXPECT_EQ(deserialized_forest_model.forest_trees[t].type, tree.type);
     EXPECT_EQ(deserialized_forest_model.forest_trees[t].class_num,
-        tree.class_num);
+              tree.class_num);
     EXPECT_EQ(deserialized_forest_model.forest_trees[t].max_depth,
-        tree.max_depth);
+              tree.max_depth);
     EXPECT_EQ(deserialized_forest_model.forest_trees[t].internal_node_num,
-        tree.internal_node_num);
+              tree.internal_node_num);
     EXPECT_EQ(deserialized_forest_model.forest_trees[t].total_node_num,
-        tree.total_node_num);
+              tree.total_node_num);
     EXPECT_EQ(deserialized_forest_model.forest_trees[t].capacity,
-        tree.capacity);
+              tree.capacity);
     for (int i = 0; i < tree.capacity; i++) {
       EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].node_type,
-          tree.nodes[i].node_type);
+                tree.nodes[i].node_type);
       EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].depth,
-          tree.nodes[i].depth);
-      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].is_self_feature,
+                tree.nodes[i].depth);
+      EXPECT_EQ(
+          deserialized_forest_model.forest_trees[t].nodes[i].is_self_feature,
           tree.nodes[i].is_self_feature);
-      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].best_party_id,
+      EXPECT_EQ(
+          deserialized_forest_model.forest_trees[t].nodes[i].best_party_id,
           tree.nodes[i].best_party_id);
-      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].best_feature_id,
+      EXPECT_EQ(
+          deserialized_forest_model.forest_trees[t].nodes[i].best_feature_id,
           tree.nodes[i].best_feature_id);
-      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].best_split_id,
+      EXPECT_EQ(
+          deserialized_forest_model.forest_trees[t].nodes[i].best_split_id,
           tree.nodes[i].best_split_id);
-      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].split_threshold,
+      EXPECT_EQ(
+          deserialized_forest_model.forest_trees[t].nodes[i].split_threshold,
           tree.nodes[i].split_threshold);
-      EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].node_sample_num,
+      EXPECT_EQ(
+          deserialized_forest_model.forest_trees[t].nodes[i].node_sample_num,
           tree.nodes[i].node_sample_num);
       EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].left_child,
-          tree.nodes[i].left_child);
+                tree.nodes[i].left_child);
       EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].right_child,
-          tree.nodes[i].right_child);
+                tree.nodes[i].right_child);
       for (int j = 0; j < tree.nodes[i].node_sample_distribution.size(); j++) {
-        EXPECT_EQ(deserialized_forest_model.forest_trees[t].nodes[i].node_sample_distribution[j],
-            tree.nodes[i].node_sample_distribution[j]);
+        EXPECT_EQ(deserialized_forest_model.forest_trees[t]
+                      .nodes[i]
+                      .node_sample_distribution[j],
+                  tree.nodes[i].node_sample_distribution[j]);
       }
 
-      EncodedNumber deserialized_impurity = deserialized_forest_model.forest_trees[t].nodes[i].impurity;
-      EncodedNumber deserialized_label = deserialized_forest_model.forest_trees[t].nodes[i].label;
+      EncodedNumber deserialized_impurity =
+          deserialized_forest_model.forest_trees[t].nodes[i].impurity;
+      EncodedNumber deserialized_label =
+          deserialized_forest_model.forest_trees[t].nodes[i].label;
       mpz_t deserialized_impurity_n, deserialized_impurity_value;
       mpz_t deserialized_label_n, deserialized_label_value;
       mpz_init(deserialized_impurity_n);
@@ -1196,18 +1279,14 @@ TEST(PB_Converter, GbdtModel) {
               deserialized_gbdt_model.dummy_predictors[i]);
   }
   for (int t = 0; t < deserialized_gbdt_model.tree_size; t++) {
-    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].type,
-              tree.type);
-    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].class_num,
-              tree.class_num);
-    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].max_depth,
-              tree.max_depth);
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].type, tree.type);
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].class_num, tree.class_num);
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].max_depth, tree.max_depth);
     EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].internal_node_num,
               tree.internal_node_num);
     EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].total_node_num,
               tree.total_node_num);
-    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].capacity,
-              tree.capacity);
+    EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].capacity, tree.capacity);
     for (int i = 0; i < tree.capacity; i++) {
       EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].node_type,
                 tree.nodes[i].node_type);
@@ -1230,12 +1309,16 @@ TEST(PB_Converter, GbdtModel) {
       EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].right_child,
                 tree.nodes[i].right_child);
       for (int j = 0; j < tree.nodes[i].node_sample_distribution.size(); j++) {
-        EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t].nodes[i].node_sample_distribution[j],
+        EXPECT_EQ(deserialized_gbdt_model.gbdt_trees[t]
+                      .nodes[i]
+                      .node_sample_distribution[j],
                   tree.nodes[i].node_sample_distribution[j]);
       }
 
-      EncodedNumber deserialized_impurity = deserialized_gbdt_model.gbdt_trees[t].nodes[i].impurity;
-      EncodedNumber deserialized_label = deserialized_gbdt_model.gbdt_trees[t].nodes[i].label;
+      EncodedNumber deserialized_impurity =
+          deserialized_gbdt_model.gbdt_trees[t].nodes[i].impurity;
+      EncodedNumber deserialized_label =
+          deserialized_gbdt_model.gbdt_trees[t].nodes[i].label;
       mpz_t deserialized_impurity_n, deserialized_impurity_value;
       mpz_t deserialized_label_n, deserialized_label_value;
       mpz_init(deserialized_impurity_n);
@@ -1280,11 +1363,11 @@ TEST(PB_Converter, MlpModel) {
   activation_func_str.emplace_back("sigmoid");
   activation_func_str.emplace_back("sigmoid");
   MlpModel mlp_model(true, true, num_layers_neurons, activation_func_str);
-//  mlp_model.m_num_inputs = 3;
-//  mlp_model.m_num_outputs = 2;
-//  mlp_model.m_num_hidden_layers = 2;
-//  mlp_model.m_num_layers_neurons.push_back(3);
-//  mlp_model.m_num_layers_neurons.push_back(3);
+  //  mlp_model.m_num_inputs = 3;
+  //  mlp_model.m_num_outputs = 2;
+  //  mlp_model.m_num_hidden_layers = 2;
+  //  mlp_model.m_num_layers_neurons.push_back(3);
+  //  mlp_model.m_num_layers_neurons.push_back(3);
   mpz_t v_n;
   mpz_t v_value;
   mpz_init(v_n);
@@ -1294,7 +1377,7 @@ TEST(PB_Converter, MlpModel) {
   int v_exponent = -8;
   EncodedNumberType v_type = Ciphertext;
   for (int i = 0; i < 2; i++) {
-//    Layer layer(3, 3, true, "sigmoid");
+    //    Layer layer(3, 3, true, "sigmoid");
     for (int j = 0; j < 3; j++) {
       for (int k = 0; k < 3; k++) {
         mlp_model.m_layers[i].m_weight_mat[j][k].setter_n(v_n);
@@ -1321,26 +1404,34 @@ TEST(PB_Converter, MlpModel) {
   EXPECT_EQ(mlp_model.m_num_inputs, des_mlp_model.m_num_inputs);
   EXPECT_EQ(mlp_model.m_num_outputs, des_mlp_model.m_num_outputs);
   EXPECT_EQ(mlp_model.m_num_hidden_layers, des_mlp_model.m_num_hidden_layers);
-  EXPECT_EQ(mlp_model.m_layers_num_outputs.size(), des_mlp_model.m_layers_num_outputs.size());
+  EXPECT_EQ(mlp_model.m_layers_num_outputs.size(),
+            des_mlp_model.m_layers_num_outputs.size());
   EXPECT_EQ(mlp_model.m_layers.size(), des_mlp_model.m_layers.size());
   for (int i = 0; i < mlp_model.m_layers.size(); i++) {
-    EXPECT_EQ(mlp_model.m_layers[i].m_num_inputs, des_mlp_model.m_layers[i].m_num_inputs);
-    EXPECT_EQ(mlp_model.m_layers[i].m_num_outputs, des_mlp_model.m_layers[i].m_num_outputs);
-    EXPECT_EQ(mlp_model.m_layers[i].m_fit_bias, des_mlp_model.m_layers[i].m_fit_bias);
-    EXPECT_TRUE(mlp_model.m_layers[i].m_activation_func_str == des_mlp_model.m_layers[i].m_activation_func_str);
+    EXPECT_EQ(mlp_model.m_layers[i].m_num_inputs,
+              des_mlp_model.m_layers[i].m_num_inputs);
+    EXPECT_EQ(mlp_model.m_layers[i].m_num_outputs,
+              des_mlp_model.m_layers[i].m_num_outputs);
+    EXPECT_EQ(mlp_model.m_layers[i].m_fit_bias,
+              des_mlp_model.m_layers[i].m_fit_bias);
+    EXPECT_TRUE(mlp_model.m_layers[i].m_activation_func_str ==
+                des_mlp_model.m_layers[i].m_activation_func_str);
     for (int j = 0; j < mlp_model.m_layers[i].m_num_inputs; j++) {
       for (int k = 0; k < mlp_model.m_layers[i].m_num_outputs; k++) {
         mpz_t deserialized_n, deserialized_value;
         mpz_init(deserialized_n);
         mpz_init(deserialized_value);
         mlp_model.m_layers[i].m_weight_mat[j][k].getter_n(deserialized_n);
-        mlp_model.m_layers[i].m_weight_mat[j][k].getter_value(deserialized_value);
+        mlp_model.m_layers[i].m_weight_mat[j][k].getter_value(
+            deserialized_value);
         int n_cmp = mpz_cmp(v_n, deserialized_n);
         int value_cmp = mpz_cmp(v_value, deserialized_value);
         EXPECT_EQ(0, n_cmp);
         EXPECT_EQ(0, value_cmp);
-        EXPECT_EQ(v_exponent, mlp_model.m_layers[i].m_weight_mat[j][k].getter_exponent());
-        EXPECT_EQ(v_type, mlp_model.m_layers[i].m_weight_mat[j][k].getter_type());
+        EXPECT_EQ(v_exponent,
+                  mlp_model.m_layers[i].m_weight_mat[j][k].getter_exponent());
+        EXPECT_EQ(v_type,
+                  mlp_model.m_layers[i].m_weight_mat[j][k].getter_type());
         mpz_clear(deserialized_n);
         mpz_clear(deserialized_value);
       }
@@ -1372,7 +1463,8 @@ TEST(PB_Converter, MlpModel) {
 TEST(PB_Converter, NetworkConfig) {
   // serialization
   std::vector<std::string> ip_addresses, deserialized_ip_addresses;
-  std::vector< std::vector<int> > executors_executors_port_nums, deserialized_executors_executors_port_nums;
+  std::vector<std::vector<int>> executors_executors_port_nums,
+      deserialized_executors_executors_port_nums;
   std::vector<int> executor_mpc_port_nums, deserialized_executor_mpc_port_nums;
   for (int i = 0; i < 3; i++) {
     ip_addresses.emplace_back("127.0.0.1");
@@ -1384,22 +1476,21 @@ TEST(PB_Converter, NetworkConfig) {
     executor_mpc_port_nums.push_back(10000 + i * 50);
   }
   std::string output_message;
-  serialize_network_configs(ip_addresses,
-                            executors_executors_port_nums,
-                            executor_mpc_port_nums,
-                            output_message);
+  serialize_network_configs(ip_addresses, executors_executors_port_nums,
+                            executor_mpc_port_nums, output_message);
 
   // deserialzation
-  deserialize_network_configs(deserialized_ip_addresses,
-                              deserialized_executors_executors_port_nums,
-                              deserialized_executor_mpc_port_nums,
-                              output_message);
+  deserialize_network_configs(
+      deserialized_ip_addresses, deserialized_executors_executors_port_nums,
+      deserialized_executor_mpc_port_nums, output_message);
   for (int i = 0; i < 3; i++) {
     EXPECT_TRUE(ip_addresses[i] == deserialized_ip_addresses[i]);
     for (int j = 0; j < 3; j++) {
-      EXPECT_EQ(executors_executors_port_nums[i][j], deserialized_executors_executors_port_nums[i][j]);
+      EXPECT_EQ(executors_executors_port_nums[i][j],
+                deserialized_executors_executors_port_nums[i][j]);
     }
-    EXPECT_EQ(executor_mpc_port_nums[i], deserialized_executor_mpc_port_nums[i]);
+    EXPECT_EQ(executor_mpc_port_nums[i],
+              deserialized_executor_mpc_port_nums[i]);
   }
 }
 
@@ -1416,13 +1507,13 @@ TEST(PB_Converter, PSNetworkConfig) {
     ps_ports.emplace_back(8000 + i * 20);
   }
   std::string output_message;
-  serialize_ps_network_configs(worker_ips, worker_ports,
-                               ps_ips, ps_ports, output_message);
+  serialize_ps_network_configs(worker_ips, worker_ports, ps_ips, ps_ports,
+                               output_message);
 
   // deserialzation
-  deserialize_ps_network_configs(deserialized_worker_ips, deserialized_worker_ports,
-                                 deserialized_ps_ips, deserialized_ps_ports,
-                                 output_message);
+  deserialize_ps_network_configs(deserialized_worker_ips,
+                                 deserialized_worker_ports, deserialized_ps_ips,
+                                 deserialized_ps_ports, output_message);
   for (int i = 0; i < 3; i++) {
     EXPECT_TRUE(worker_ips[i] == deserialized_worker_ips[i]);
     EXPECT_TRUE(ps_ips[i] == deserialized_ps_ips[i]);
@@ -1444,11 +1535,16 @@ TEST(PB_Converter, LimeSamplingParams) {
   LimeSamplingParams output_lime_sampling_params;
   deserialize_lime_sampling_params(output_lime_sampling_params, output_message);
 
-  EXPECT_EQ(lime_sampling_params.explain_instance_idx, output_lime_sampling_params.explain_instance_idx);
-  EXPECT_EQ(lime_sampling_params.sample_around_instance, output_lime_sampling_params.sample_around_instance);
-  EXPECT_EQ(lime_sampling_params.num_total_samples, output_lime_sampling_params.num_total_samples);
-  EXPECT_TRUE(lime_sampling_params.sampling_method == output_lime_sampling_params.sampling_method);
-  EXPECT_TRUE(lime_sampling_params.generated_sample_file == output_lime_sampling_params.generated_sample_file);
+  EXPECT_EQ(lime_sampling_params.explain_instance_idx,
+            output_lime_sampling_params.explain_instance_idx);
+  EXPECT_EQ(lime_sampling_params.sample_around_instance,
+            output_lime_sampling_params.sample_around_instance);
+  EXPECT_EQ(lime_sampling_params.num_total_samples,
+            output_lime_sampling_params.num_total_samples);
+  EXPECT_TRUE(lime_sampling_params.sampling_method ==
+              output_lime_sampling_params.sampling_method);
+  EXPECT_TRUE(lime_sampling_params.generated_sample_file ==
+              output_lime_sampling_params.generated_sample_file);
 }
 
 TEST(PB_Converter, LimeCompPredParams) {
@@ -1458,25 +1554,34 @@ TEST(PB_Converter, LimeCompPredParams) {
   lime_comp_pred_params.generated_sample_file = "gen_sample_file.txt";
   lime_comp_pred_params.model_type = "classification";
   lime_comp_pred_params.class_num = 2;
-  lime_comp_pred_params.computed_prediction_file = "computed_prediction_file.txt";
+  lime_comp_pred_params.computed_prediction_file =
+      "computed_prediction_file.txt";
 
   std::string output_message;
   serialize_lime_comp_pred_params(lime_comp_pred_params, output_message);
   LimeCompPredictionParams output_lime_comp_pred_params;
-  deserialize_lime_comp_pred_params(output_lime_comp_pred_params, output_message);
-  EXPECT_TRUE(lime_comp_pred_params.original_model_name == output_lime_comp_pred_params.original_model_name);
-  EXPECT_TRUE(lime_comp_pred_params.original_model_saved_file == output_lime_comp_pred_params.original_model_saved_file);
-  EXPECT_TRUE(lime_comp_pred_params.generated_sample_file == output_lime_comp_pred_params.generated_sample_file);
-  EXPECT_TRUE(lime_comp_pred_params.model_type == output_lime_comp_pred_params.model_type);
-  EXPECT_EQ(lime_comp_pred_params.class_num, output_lime_comp_pred_params.class_num);
-  EXPECT_TRUE(lime_comp_pred_params.computed_prediction_file == output_lime_comp_pred_params.computed_prediction_file);
+  deserialize_lime_comp_pred_params(output_lime_comp_pred_params,
+                                    output_message);
+  EXPECT_TRUE(lime_comp_pred_params.original_model_name ==
+              output_lime_comp_pred_params.original_model_name);
+  EXPECT_TRUE(lime_comp_pred_params.original_model_saved_file ==
+              output_lime_comp_pred_params.original_model_saved_file);
+  EXPECT_TRUE(lime_comp_pred_params.generated_sample_file ==
+              output_lime_comp_pred_params.generated_sample_file);
+  EXPECT_TRUE(lime_comp_pred_params.model_type ==
+              output_lime_comp_pred_params.model_type);
+  EXPECT_EQ(lime_comp_pred_params.class_num,
+            output_lime_comp_pred_params.class_num);
+  EXPECT_TRUE(lime_comp_pred_params.computed_prediction_file ==
+              output_lime_comp_pred_params.computed_prediction_file);
 }
 
 TEST(PB_Converter, LimeCompWeiParams) {
   LimeCompWeightsParams lime_comp_weights_params;
   lime_comp_weights_params.explain_instance_idx = 5;
   lime_comp_weights_params.generated_sample_file = "gen_sample_file.txt";
-  lime_comp_weights_params.computed_prediction_file = "computed_prediction_file.txt";
+  lime_comp_weights_params.computed_prediction_file =
+      "computed_prediction_file.txt";
   lime_comp_weights_params.is_precompute = false;
   lime_comp_weights_params.num_samples = 5000;
   lime_comp_weights_params.class_num = 2;
@@ -1485,31 +1590,46 @@ TEST(PB_Converter, LimeCompWeiParams) {
   lime_comp_weights_params.kernel_width = 0.75;
   lime_comp_weights_params.sample_weights_file = "sample_weights_file.txt";
   lime_comp_weights_params.selected_samples_file = "selected_samples_file.txt";
-  lime_comp_weights_params.selected_predictions_file = "selected_predictions_file.txt";
+  lime_comp_weights_params.selected_predictions_file =
+      "selected_predictions_file.txt";
 
   std::string output_message;
   serialize_lime_comp_weights_params(lime_comp_weights_params, output_message);
   LimeCompWeightsParams output_lime_comp_weights_params;
-  deserialize_lime_comp_weights_params(output_lime_comp_weights_params, output_message);
+  deserialize_lime_comp_weights_params(output_lime_comp_weights_params,
+                                       output_message);
 
-  EXPECT_EQ(lime_comp_weights_params.explain_instance_idx, output_lime_comp_weights_params.explain_instance_idx);
-  EXPECT_TRUE(lime_comp_weights_params.generated_sample_file == output_lime_comp_weights_params.generated_sample_file);
-  EXPECT_TRUE(lime_comp_weights_params.computed_prediction_file == output_lime_comp_weights_params.computed_prediction_file);
-  EXPECT_EQ(lime_comp_weights_params.is_precompute, output_lime_comp_weights_params.is_precompute);
-  EXPECT_EQ(lime_comp_weights_params.num_samples, output_lime_comp_weights_params.num_samples);
-  EXPECT_EQ(lime_comp_weights_params.class_num, output_lime_comp_weights_params.class_num);
-  EXPECT_TRUE(lime_comp_weights_params.distance_metric == output_lime_comp_weights_params.distance_metric);
-  EXPECT_TRUE(lime_comp_weights_params.kernel == output_lime_comp_weights_params.kernel);
-  EXPECT_EQ(lime_comp_weights_params.kernel_width, output_lime_comp_weights_params.kernel_width);
-  EXPECT_TRUE(lime_comp_weights_params.sample_weights_file == output_lime_comp_weights_params.sample_weights_file);
-  EXPECT_TRUE(lime_comp_weights_params.selected_samples_file == output_lime_comp_weights_params.selected_samples_file);
-  EXPECT_TRUE(lime_comp_weights_params.selected_predictions_file == output_lime_comp_weights_params.selected_predictions_file);
+  EXPECT_EQ(lime_comp_weights_params.explain_instance_idx,
+            output_lime_comp_weights_params.explain_instance_idx);
+  EXPECT_TRUE(lime_comp_weights_params.generated_sample_file ==
+              output_lime_comp_weights_params.generated_sample_file);
+  EXPECT_TRUE(lime_comp_weights_params.computed_prediction_file ==
+              output_lime_comp_weights_params.computed_prediction_file);
+  EXPECT_EQ(lime_comp_weights_params.is_precompute,
+            output_lime_comp_weights_params.is_precompute);
+  EXPECT_EQ(lime_comp_weights_params.num_samples,
+            output_lime_comp_weights_params.num_samples);
+  EXPECT_EQ(lime_comp_weights_params.class_num,
+            output_lime_comp_weights_params.class_num);
+  EXPECT_TRUE(lime_comp_weights_params.distance_metric ==
+              output_lime_comp_weights_params.distance_metric);
+  EXPECT_TRUE(lime_comp_weights_params.kernel ==
+              output_lime_comp_weights_params.kernel);
+  EXPECT_EQ(lime_comp_weights_params.kernel_width,
+            output_lime_comp_weights_params.kernel_width);
+  EXPECT_TRUE(lime_comp_weights_params.sample_weights_file ==
+              output_lime_comp_weights_params.sample_weights_file);
+  EXPECT_TRUE(lime_comp_weights_params.selected_samples_file ==
+              output_lime_comp_weights_params.selected_samples_file);
+  EXPECT_TRUE(lime_comp_weights_params.selected_predictions_file ==
+              output_lime_comp_weights_params.selected_predictions_file);
 }
 
 TEST(PB_Converter, LimeFeatureSelectParams) {
   LimeFeatSelParams lime_feat_sel_params;
   lime_feat_sel_params.selected_samples_file = "selected_samples_file.txt";
-  lime_feat_sel_params.selected_predictions_file = "selected_predictions_file.txt";
+  lime_feat_sel_params.selected_predictions_file =
+      "selected_predictions_file.txt";
   lime_feat_sel_params.sample_weights_file = "sample_weights_file.txt";
   lime_feat_sel_params.num_samples = 5000;
   lime_feat_sel_params.class_num = 2;
@@ -1523,21 +1643,31 @@ TEST(PB_Converter, LimeFeatureSelectParams) {
   LimeFeatSelParams output_lime_feat_sel_params;
   deserialize_lime_feat_sel_params(output_lime_feat_sel_params, output_message);
 
-  EXPECT_TRUE(lime_feat_sel_params.selected_samples_file == output_lime_feat_sel_params.selected_samples_file);
-  EXPECT_TRUE(lime_feat_sel_params.selected_predictions_file == output_lime_feat_sel_params.selected_predictions_file);
-  EXPECT_TRUE(lime_feat_sel_params.sample_weights_file == output_lime_feat_sel_params.sample_weights_file);
-  EXPECT_EQ(lime_feat_sel_params.num_samples, output_lime_feat_sel_params.num_samples);
-  EXPECT_EQ(lime_feat_sel_params.class_num, output_lime_feat_sel_params.class_num);
-  EXPECT_EQ(lime_feat_sel_params.class_id, output_lime_feat_sel_params.class_id);
-  EXPECT_TRUE(lime_feat_sel_params.feature_selection == output_lime_feat_sel_params.feature_selection);
-  EXPECT_EQ(lime_feat_sel_params.num_explained_features, output_lime_feat_sel_params.num_explained_features);
-  EXPECT_TRUE(lime_feat_sel_params.selected_features_file == output_lime_feat_sel_params.selected_features_file);
+  EXPECT_TRUE(lime_feat_sel_params.selected_samples_file ==
+              output_lime_feat_sel_params.selected_samples_file);
+  EXPECT_TRUE(lime_feat_sel_params.selected_predictions_file ==
+              output_lime_feat_sel_params.selected_predictions_file);
+  EXPECT_TRUE(lime_feat_sel_params.sample_weights_file ==
+              output_lime_feat_sel_params.sample_weights_file);
+  EXPECT_EQ(lime_feat_sel_params.num_samples,
+            output_lime_feat_sel_params.num_samples);
+  EXPECT_EQ(lime_feat_sel_params.class_num,
+            output_lime_feat_sel_params.class_num);
+  EXPECT_EQ(lime_feat_sel_params.class_id,
+            output_lime_feat_sel_params.class_id);
+  EXPECT_TRUE(lime_feat_sel_params.feature_selection ==
+              output_lime_feat_sel_params.feature_selection);
+  EXPECT_EQ(lime_feat_sel_params.num_explained_features,
+            output_lime_feat_sel_params.num_explained_features);
+  EXPECT_TRUE(lime_feat_sel_params.selected_features_file ==
+              output_lime_feat_sel_params.selected_features_file);
 }
 
 TEST(PB_Converter, LimeInterpretParams) {
   LimeInterpretParams lime_interpret_params;
   lime_interpret_params.selected_data_file = "selected_data_file.txt";
-  lime_interpret_params.selected_predictions_file = "selected_prediction_file.txt";
+  lime_interpret_params.selected_predictions_file =
+      "selected_prediction_file.txt";
   lime_interpret_params.sample_weights_file = "sample_weights_file.txt";
   lime_interpret_params.num_samples = 5000;
   lime_interpret_params.class_num = 2;
@@ -1549,15 +1679,25 @@ TEST(PB_Converter, LimeInterpretParams) {
   std::string output_message;
   serialize_lime_interpret_params(lime_interpret_params, output_message);
   LimeInterpretParams output_lime_interpret_params;
-  deserialize_lime_interpret_params(output_lime_interpret_params, output_message);
+  deserialize_lime_interpret_params(output_lime_interpret_params,
+                                    output_message);
 
-  EXPECT_TRUE(lime_interpret_params.selected_data_file == output_lime_interpret_params.selected_data_file);
-  EXPECT_TRUE(lime_interpret_params.selected_predictions_file == output_lime_interpret_params.selected_predictions_file);
-  EXPECT_TRUE(lime_interpret_params.sample_weights_file == output_lime_interpret_params.sample_weights_file);
-  EXPECT_EQ(lime_interpret_params.num_samples, output_lime_interpret_params.num_samples);
-  EXPECT_EQ(lime_interpret_params.class_num, output_lime_interpret_params.class_num);
-  EXPECT_EQ(lime_interpret_params.class_id, output_lime_interpret_params.class_id);
-  EXPECT_TRUE(lime_interpret_params.interpret_model_name == output_lime_interpret_params.interpret_model_name);
-  EXPECT_TRUE(lime_interpret_params.interpret_model_param == output_lime_interpret_params.interpret_model_param);
-  EXPECT_TRUE(lime_interpret_params.explanation_report == output_lime_interpret_params.explanation_report);
+  EXPECT_TRUE(lime_interpret_params.selected_data_file ==
+              output_lime_interpret_params.selected_data_file);
+  EXPECT_TRUE(lime_interpret_params.selected_predictions_file ==
+              output_lime_interpret_params.selected_predictions_file);
+  EXPECT_TRUE(lime_interpret_params.sample_weights_file ==
+              output_lime_interpret_params.sample_weights_file);
+  EXPECT_EQ(lime_interpret_params.num_samples,
+            output_lime_interpret_params.num_samples);
+  EXPECT_EQ(lime_interpret_params.class_num,
+            output_lime_interpret_params.class_num);
+  EXPECT_EQ(lime_interpret_params.class_id,
+            output_lime_interpret_params.class_id);
+  EXPECT_TRUE(lime_interpret_params.interpret_model_name ==
+              output_lime_interpret_params.interpret_model_name);
+  EXPECT_TRUE(lime_interpret_params.interpret_model_param ==
+              output_lime_interpret_params.interpret_model_param);
+  EXPECT_TRUE(lime_interpret_params.explanation_report ==
+              output_lime_interpret_params.explanation_report);
 }

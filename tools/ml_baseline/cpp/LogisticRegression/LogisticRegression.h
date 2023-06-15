@@ -12,41 +12,25 @@ using namespace std;
 // 2. Propagate
 // 3. Optimize
 // 4. Predict
-class LogisticRegression
-{
+class LogisticRegression {
 public:
-    LogisticRegression()
-    {}
+  LogisticRegression() {}
 
-    // Sigmoid
-    Eigen::MatrixXd Sigmoid(Eigen::MatrixXd Z);
+  // Sigmoid
+  Eigen::MatrixXd Sigmoid(Eigen::MatrixXd Z);
 
-    // propagate (calculate the cost)
-    tuple<Eigen::MatrixXd, double, double> Propagate(
-        Eigen::MatrixXd Weights,
-        double bias,
-        Eigen::MatrixXd X,
-        Eigen::MatrixXd y,
-        double lambda
-    );
+  // propagate (calculate the cost)
+  tuple<Eigen::MatrixXd, double, double>
+  Propagate(Eigen::MatrixXd Weights, double bias, Eigen::MatrixXd X,
+            Eigen::MatrixXd y, double lambda);
 
+  // optimize with SGD
+  tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, list<double>>
+  Optimize(Eigen::MatrixXd W, double b, Eigen::MatrixXd X, Eigen::MatrixXd y,
+           int num_iter, double learning_rate, double lambda, bool print_cost);
 
-    // optimize with SGD
-    tuple<Eigen::MatrixXd, double, Eigen::MatrixXd, double, list<double>> Optimize(
-            Eigen::MatrixXd W,
-            double b, Eigen::MatrixXd X,
-            Eigen::MatrixXd y,
-            int num_iter,
-            double learning_rate,
-            double lambda, bool
-            print_cost
-            );
-
-
-    // predict the labels
-    Eigen::MatrixXd Predict(Eigen::MatrixXd W, double b, Eigen::MatrixXd X);
-
+  // predict the labels
+  Eigen::MatrixXd Predict(Eigen::MatrixXd W, double b, Eigen::MatrixXd X);
 };
-
 
 #endif

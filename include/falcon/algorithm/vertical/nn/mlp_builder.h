@@ -5,12 +5,12 @@
 #ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_NN_MLP_BUILDER_H_
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_NN_MLP_BUILDER_H_
 
-#include <falcon/operator/phe/fixed_point_encoder.h>
 #include <falcon/algorithm/model_builder.h>
 #include <falcon/algorithm/model_builder_helper.h>
-#include <falcon/party/party.h>
-#include <falcon/algorithm/vertical/nn/mlp_builder.h>
 #include <falcon/algorithm/vertical/nn/mlp.h>
+#include <falcon/algorithm/vertical/nn/mlp_builder.h>
+#include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/party/party.h>
 
 struct MlpParams {
   // whether classification or regression
@@ -47,7 +47,7 @@ struct MlpParams {
 };
 
 class MlpBuilder : public ModelBuilder {
- public:
+public:
   // whether classification or regression
   bool is_classification;
   // size of mini-batch in each iteration
@@ -85,11 +85,11 @@ class MlpBuilder : public ModelBuilder {
   // the vector of layers activation functions
   std::vector<std::string> layers_activation_funcs;
 
- public:
+public:
   // the mlp model
   MlpModel mlp_model;
 
- public:
+public:
   /** default constructor */
   MlpBuilder();
 
@@ -104,15 +104,14 @@ class MlpBuilder : public ModelBuilder {
    * @param m_training_accuracy: training accuracy
    * @param m_testing_accuracy: testing accuracy
    */
-  MlpBuilder(const MlpParams& mlp_params,
-             std::vector< std::vector<double> > m_training_data,
-             std::vector< std::vector<double> > m_testing_data,
+  MlpBuilder(const MlpParams &mlp_params,
+             std::vector<std::vector<double>> m_training_data,
+             std::vector<std::vector<double>> m_testing_data,
              std::vector<double> m_training_labels,
              std::vector<double> m_testing_labels,
-             double m_training_accuracy = 0.0,
-             double m_testing_accuracy = 0.0);
+             double m_training_accuracy = 0.0, double m_testing_accuracy = 0.0);
 
-  MlpBuilder(const MlpBuilder& mlp_builder);
+  MlpBuilder(const MlpBuilder &mlp_builder);
 
   MlpBuilder &operator=(const MlpBuilder &mlp_builder);
 
@@ -125,7 +124,7 @@ class MlpBuilder : public ModelBuilder {
    * @param party: initialized party object
    * @param precision: precision for big integer representation EncodedNumber
    */
-  void init_encrypted_weights(const Party& party,
+  void init_encrypted_weights(const Party &party,
                               int precision = PHE_FIXED_POINT_PRECISION);
 
   /**
@@ -138,17 +137,15 @@ class MlpBuilder : public ModelBuilder {
    * @param local_weight_sizes: the local weight sizes of parties
    * @param precision: the precision for the batch samples
    * @param activation_shares: layers' activation shares of batch samples
-   * @param deriv_activation_shares: layers' derivative activation shares of batch samples
+   * @param deriv_activation_shares: layers' derivative activation shares of
+   * batch samples
    */
   void backward_computation(
-      const Party& party,
-      const std::vector<std::vector<double>>& batch_samples,
-      EncodedNumber** predicted_labels,
-      const std::vector<int>& batch_indexes,
-      const std::vector<int>& local_weight_sizes,
-      int precision,
-      const TripleDVec& activation_shares,
-      const TripleDVec& deriv_activation_shares);
+      const Party &party, const std::vector<std::vector<double>> &batch_samples,
+      EncodedNumber **predicted_labels, const std::vector<int> &batch_indexes,
+      const std::vector<int> &local_weight_sizes, int precision,
+      const TripleDVec &activation_shares,
+      const TripleDVec &deriv_activation_shares);
 
   /**
    * compute the delta of the last layer (i.e., output layer)
@@ -159,12 +156,10 @@ class MlpBuilder : public ModelBuilder {
    * @param deltas: the deviations
    * @param batch_indexes: the last layer activation shares
    */
-  void compute_last_layer_delta(
-      const Party& party,
-      int layer_idx,
-      EncodedNumber** predicted_labels,
-      EncodedNumber*** deltas,
-      const std::vector<int> &batch_indexes);
+  void compute_last_layer_delta(const Party &party, int layer_idx,
+                                EncodedNumber **predicted_labels,
+                                EncodedNumber ***deltas,
+                                const std::vector<int> &batch_indexes);
 
   /**
    * compute the gradients of a layer
@@ -179,17 +174,13 @@ class MlpBuilder : public ModelBuilder {
    * @param weight_grads: the weight gradients of the layers
    * @param bias_grads: the bias gradients of the layers
    */
-  void compute_loss_grad(
-      const Party& party,
-      int layer_idx,
-      int sample_size,
-      const std::vector<int>& local_weight_sizes,
-      const std::vector<std::vector<double>>& batch_samples,
-      const TripleDVec& activation_shares,
-      const TripleDVec& deriv_activation_shares,
-      EncodedNumber*** deltas,
-      EncodedNumber*** weight_grads,
-      EncodedNumber** bias_grads);
+  void compute_loss_grad(const Party &party, int layer_idx, int sample_size,
+                         const std::vector<int> &local_weight_sizes,
+                         const std::vector<std::vector<double>> &batch_samples,
+                         const TripleDVec &activation_shares,
+                         const TripleDVec &deriv_activation_shares,
+                         EncodedNumber ***deltas, EncodedNumber ***weight_grads,
+                         EncodedNumber **bias_grads);
 
   /**
    * given a layer index, compute the regularization gradients
@@ -197,17 +188,15 @@ class MlpBuilder : public ModelBuilder {
    * @param party: initialized party object
    * @param layer_idx: the index of the layer
    * @param sample_size: number of samples in a batch
-   * @param row_size: number of rows in the reg_grad, should be equal to previous layer #neurons
-   * @param column_size: number of columns in the reg_grad, should be equal to current layer #neurons
+   * @param row_size: number of rows in the reg_grad, should be equal to
+   * previous layer #neurons
+   * @param column_size: number of columns in the reg_grad, should be equal to
+   * current layer #neurons
    * @param reg_grad: the returned gradients
    */
-  void compute_reg_grad(
-      const Party& party,
-      int layer_idx,
-      int sample_size,
-      int row_size,
-      int column_size,
-      EncodedNumber** reg_grad);
+  void compute_reg_grad(const Party &party, int layer_idx, int sample_size,
+                        int row_size, int column_size,
+                        EncodedNumber **reg_grad);
 
   /**
    * update the delta of a layer
@@ -219,13 +208,10 @@ class MlpBuilder : public ModelBuilder {
    * @param deriv_activation_shares: the derivative activation shares
    * @param deltas: the deviations
    */
-  void update_layer_delta(
-      const Party& party,
-      int layer_idx,
-      int sample_size,
-      const TripleDVec& activation_shares,
-      const TripleDVec& deriv_activation_shares,
-      EncodedNumber*** deltas);
+  void update_layer_delta(const Party &party, int layer_idx, int sample_size,
+                          const TripleDVec &activation_shares,
+                          const TripleDVec &deriv_activation_shares,
+                          EncodedNumber ***deltas);
 
   /**
    * update the delta given activation shares and derivative shares
@@ -238,14 +224,12 @@ class MlpBuilder : public ModelBuilder {
    * @param delta_col_size: the number of cols in delta
    * @param phe_precision: the precision to encode shares
    */
-  void inplace_derivatives(
-      const Party& party,
-      const std::vector<std::vector<double>>& act_shares,
-      const std::vector<std::vector<double>>& deriv_shares,
-      EncodedNumber** delta,
-      int delta_row_size,
-      int delta_col_size,
-      int phe_precision = PHE_FIXED_POINT_PRECISION);
+  void inplace_derivatives(const Party &party,
+                           const std::vector<std::vector<double>> &act_shares,
+                           const std::vector<std::vector<double>> &deriv_shares,
+                           EncodedNumber **delta, int delta_row_size,
+                           int delta_col_size,
+                           int phe_precision = PHE_FIXED_POINT_PRECISION);
 
   /**
    * layer-by-layer update weights
@@ -254,9 +238,9 @@ class MlpBuilder : public ModelBuilder {
    * @param weight_grads: the gradients of weights each neuron of each layer
    * @param bias_grads: the gradients of intercept in each neuron of each layer
    */
-  void update_encrypted_weights(const Party& party,
-                                EncodedNumber*** weight_grads,
-                                EncodedNumber** bias_grads);
+  void update_encrypted_weights(const Party &party,
+                                EncodedNumber ***weight_grads,
+                                EncodedNumber **bias_grads);
 
   /**
    * display gradients
@@ -265,9 +249,8 @@ class MlpBuilder : public ModelBuilder {
    * @param weight_grads: the gradients of weights each neuron of each layer
    * @param bias_grads: the gradients of intercept in each neuron of each layer
    */
-  void display_gradients(const Party& party,
-                         EncodedNumber*** weight_grads,
-                         EncodedNumber** bias_grads);
+  void display_gradients(const Party &party, EncodedNumber ***weight_grads,
+                         EncodedNumber **bias_grads);
 
   /**
    * post-processing the weights to make sure that all the layers have the
@@ -275,7 +258,7 @@ class MlpBuilder : public ModelBuilder {
    *
    * @param party: initialized party object
    */
-  void post_proc_model_weights(const Party& party);
+  void post_proc_model_weights(const Party &party);
 
   /**
    * train an mlp model
@@ -290,7 +273,7 @@ class MlpBuilder : public ModelBuilder {
    * @param party: initialized party object
    * @param worker: worker instance for distributed training
    */
-  void distributed_train(const Party& party, const Worker& worker) override;
+  void distributed_train(const Party &party, const Worker &worker) override;
 
   /**
    * evaluate an mlp model
@@ -301,9 +284,8 @@ class MlpBuilder : public ModelBuilder {
    *   as well as a classification metrics report
    * @param report_save_path: save the report into path
    */
-  void eval(Party party,
-            falcon::DatasetType eval_type,
-            const std::string& report_save_path = std::string()) override;
+  void eval(Party party, falcon::DatasetType eval_type,
+            const std::string &report_save_path = std::string()) override;
 
   /**
    * mlp model eval
@@ -314,10 +296,8 @@ class MlpBuilder : public ModelBuilder {
    *   as well as a classification metrics report
    * @param report_save_path: save the report into path
    */
-  void distributed_eval(
-      const Party &party,
-      const Worker &worker,
-      falcon::DatasetType eval_type);
+  void distributed_eval(const Party &party, const Worker &worker,
+                        falcon::DatasetType eval_type);
 };
 
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_NN_MLP_BUILDER_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_NN_MLP_BUILDER_H_

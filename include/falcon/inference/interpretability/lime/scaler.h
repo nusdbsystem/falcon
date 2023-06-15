@@ -8,7 +8,7 @@
 #include <vector>
 
 class StandardScaler {
- public:
+public:
   // input parameters
   // whether given mean
   bool with_mean;
@@ -24,7 +24,7 @@ class StandardScaler {
   // variance of features, equal to None when with_std = False
   std::vector<double> variance;
 
- public:
+public:
   explicit StandardScaler(bool m_with_mean = true, bool m_with_std = true);
   ~StandardScaler();
 
@@ -32,4 +32,4 @@ class StandardScaler {
            std::vector<double> train_labels = std::vector<double>());
 };
 
-#endif //FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_SCALER_H_
+#endif // FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_SCALER_H_

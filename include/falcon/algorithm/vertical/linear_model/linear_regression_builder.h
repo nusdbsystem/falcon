@@ -5,12 +5,12 @@
 #ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_REGRESSION_BUILDER_H_
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_REGRESSION_BUILDER_H_
 
-#include <falcon/operator/phe/fixed_point_encoder.h>
 #include <falcon/algorithm/model_builder.h>
 #include <falcon/algorithm/model_builder_helper.h>
 #include <falcon/algorithm/vertical/linear_model/linear_regression_model.h>
-#include <falcon/party/party.h>
 #include <falcon/common.h>
+#include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/party/party.h>
 
 #include <future>
 #include <string>
@@ -46,7 +46,7 @@ struct LinearRegressionParams {
 };
 
 class LinearRegressionBuilder : public ModelBuilder {
- public:
+public:
   // size of mini-batch in each iteration
   int batch_size{};
   // maximum number of iterations for training
@@ -73,11 +73,11 @@ class LinearRegressionBuilder : public ModelBuilder {
   // whether to fit the bias term
   bool fit_bias{};
 
- public:
+public:
   // linear regression model
   LinearRegressionModel linear_reg_model;
 
- public:
+public:
   /** default constructor */
   LinearRegressionBuilder();
 
@@ -93,10 +93,10 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param m_training_accuracy: training accuracy
    * @param m_testing_accuracy: testing accuracy
    */
-  LinearRegressionBuilder(const LinearRegressionParams& linear_reg_params,
+  LinearRegressionBuilder(const LinearRegressionParams &linear_reg_params,
                           int m_weight_size,
-                          std::vector< std::vector<double> > m_training_data,
-                          std::vector< std::vector<double> > m_testing_data,
+                          std::vector<std::vector<double>> m_training_data,
+                          std::vector<std::vector<double>> m_testing_data,
                           std::vector<double> m_training_labels,
                           std::vector<double> m_testing_labels,
                           double m_training_accuracy = 0.0,
@@ -115,12 +115,9 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param precision: precision for the batch samples and shares
    */
   void backward_computation(
-      const Party& party,
-      const std::vector<std::vector<double> >& batch_samples,
-      EncodedNumber* predicted_labels,
-      const std::vector<int>& batch_indexes,
-      int precision,
-      EncodedNumber* encrypted_gradients);
+      const Party &party, const std::vector<std::vector<double>> &batch_samples,
+      EncodedNumber *predicted_labels, const std::vector<int> &batch_indexes,
+      int precision, EncodedNumber *encrypted_gradients);
 
   /**
    * after receiving batch loss shares and truncated weight shares
@@ -135,15 +132,11 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param sss_sample_weights: (encrypted) sample weights
    */
   void lime_backward_computation(
-      const Party& party,
-      const std::vector<std::vector<double> >& batch_samples,
-      EncodedNumber* predicted_labels,
-      const std::vector<int>& batch_indexes,
-      int precision,
-      EncodedNumber *ground_truth_labels,
-      bool use_sample_weights,
-      const std::vector<double> &sss_sample_weights,
-      EncodedNumber* encrypted_gradients);
+      const Party &party, const std::vector<std::vector<double>> &batch_samples,
+      EncodedNumber *predicted_labels, const std::vector<int> &batch_indexes,
+      int precision, EncodedNumber *ground_truth_labels,
+      bool use_sample_weights, const std::vector<double> &sss_sample_weights,
+      EncodedNumber *encrypted_gradients);
 
   /**
    * this function computes the regularized gradients of l1
@@ -154,8 +147,8 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param party
    * @param regularized_gradients
    */
-  void compute_l1_regularized_grad(const Party& party,
-                                   EncodedNumber* regularized_gradients);
+  void compute_l1_regularized_grad(const Party &party,
+                                   EncodedNumber *regularized_gradients);
 
   /**
    * after receiving batch loss shares and truncated weight shares
@@ -163,8 +156,9 @@ class LinearRegressionBuilder : public ModelBuilder {
    *
    * @param party: initialized party object
    * @param encrypted_gradients: encrypted gradients
-  */
-  void update_encrypted_weights(Party& party, EncodedNumber* encrypted_gradients);
+   */
+  void update_encrypted_weights(Party &party,
+                                EncodedNumber *encrypted_gradients);
 
   /**
    * train a logistic regression model
@@ -182,10 +176,8 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param use_sample_weights: whether use encrypted sample weights
    * @param sss_sample_weights: encrypted sample weights
    */
-  void lime_train(Party party,
-                  bool use_encrypted_labels,
-                  EncodedNumber* encrypted_true_labels,
-                  bool use_sample_weights,
+  void lime_train(Party party, bool use_encrypted_labels,
+                  EncodedNumber *encrypted_true_labels, bool use_sample_weights,
                   const std::vector<double> &sss_sample_weights);
 
   /**
@@ -194,7 +186,7 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param party: initialized party object
    * @param worker: worker instance for distributed training
    */
-  void distributed_train(const Party& party, const Worker& worker) override;
+  void distributed_train(const Party &party, const Worker &worker) override;
 
   /**
    * specific train function for lime
@@ -206,10 +198,9 @@ class LinearRegressionBuilder : public ModelBuilder {
    * @param use_sample_weights: whether use encrypted sample weights
    * @param sss_sample_weights: encrypted sample weights
    */
-  void distributed_lime_train(const Party& party,
-                              const Worker& worker,
+  void distributed_lime_train(const Party &party, const Worker &worker,
                               bool use_encrypted_labels,
-                              EncodedNumber* encrypted_true_labels,
+                              EncodedNumber *encrypted_true_labels,
                               bool use_sample_weights,
                               const std::vector<double> &sss_sample_weights);
 
@@ -222,9 +213,8 @@ class LinearRegressionBuilder : public ModelBuilder {
    *   as well as a classification metrics report
    * @param report_save_path: save the report into path
    */
-  void eval(Party party,
-            falcon::DatasetType eval_type,
-            const std::string& report_save_path = std::string()) override;
+  void eval(Party party, falcon::DatasetType eval_type,
+            const std::string &report_save_path = std::string()) override;
 
   /**
    * compute the loss of the dataset in each iteration
@@ -234,7 +224,7 @@ class LinearRegressionBuilder : public ModelBuilder {
    *   TRAIN for training data and TEST for testing data
    * @param loss: returned loss
    */
-  double loss_computation(const Party& party, falcon::DatasetType dataset_type);
+  double loss_computation(const Party &party, falcon::DatasetType dataset_type);
 
   /**
    * linear regression model eval
@@ -245,10 +235,8 @@ class LinearRegressionBuilder : public ModelBuilder {
    *   as well as a classification metrics report
    * @param report_save_path: save the report into path
    */
-  void distributed_eval(
-      const Party &party,
-      const Worker &worker,
-      falcon::DatasetType eval_type);
+  void distributed_eval(const Party &party, const Worker &worker,
+                        falcon::DatasetType eval_type);
 
   /**
    * evaluate a linear regression model performance
@@ -259,11 +247,10 @@ class LinearRegressionBuilder : public ModelBuilder {
    *   as well as a classification metrics report
    * @param report_save_path: save the report into path
    */
-  void eval_predictions_and_save(
-      EncodedNumber* decrypted_labels,
-      int sample_number,
-      falcon::DatasetType eval_type,
-      const std::string& report_save_path);
+  void eval_predictions_and_save(EncodedNumber *decrypted_labels,
+                                 int sample_number,
+                                 falcon::DatasetType eval_type,
+                                 const std::string &report_save_path);
 };
 
 /**
@@ -279,14 +266,11 @@ class LinearRegressionBuilder : public ModelBuilder {
  * @param cur_batch_size: size of current batch
  * @param batch_loss_shares: promise structure of the loss shares
  */
-void spdz_linear_regression_computation(int party_num,
-                                        int party_id,
-                                        std::vector<int> mpc_port_bases,
-                                        const std::string& mpc_player_path,
-                                        std::vector<std::string> party_host_names,
-                                        const std::vector<double>& global_weights_shares,
-                                        int global_weight_size,
-                                        std::promise<std::vector<double>> *regularized_grad_shares);
+void spdz_linear_regression_computation(
+    int party_num, int party_id, std::vector<int> mpc_port_bases,
+    const std::string &mpc_player_path,
+    std::vector<std::string> party_host_names,
+    const std::vector<double> &global_weights_shares, int global_weight_size,
+    std::promise<std::vector<double>> *regularized_grad_shares);
 
-
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_REGRESSION_BUILDER_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_LINEAR_MODEL_LINEAR_REGRESSION_BUILDER_H_

@@ -5,15 +5,15 @@
 #ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_MODEL_H_
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_MODEL_H_
 
+#include <falcon/algorithm/vertical/tree/tree_model.h>
 #include <falcon/common.h>
 #include <falcon/party/party.h>
-#include <falcon/algorithm/vertical/tree/tree_model.h>
 
-#include <thread>
 #include <future>
+#include <thread>
 
 class ForestModel {
- public:
+public:
   // number of trees in the model
   int tree_size;
   // type of the tree, 'classification' or 'regression'
@@ -21,9 +21,9 @@ class ForestModel {
   // vector of tree models
   std::vector<TreeModel> forest_trees;
 
- public:
+public:
   ForestModel();
-  ForestModel(int m_tree_size, const std::string& m_tree_type);
+  ForestModel(int m_tree_size, const std::string &m_tree_type);
   ~ForestModel();
 
   /**
@@ -40,30 +40,29 @@ class ForestModel {
   ForestModel &operator=(const ForestModel &forest_model);
 
   /**
- * given the forest model, predict on samples
- * @param party
- * @param predicted_samples
- * @param predicted_sample_size
- * @param predicted_labels
- * @return predicted labels (encrypted)
- */
-  void predict(Party& party,
-               const std::vector< std::vector<double> >& predicted_samples,
-               int predicted_sample_size,
-               EncodedNumber* predicted_labels);
+   * given the forest model, predict on samples
+   * @param party
+   * @param predicted_samples
+   * @param predicted_sample_size
+   * @param predicted_labels
+   * @return predicted labels (encrypted)
+   */
+  void predict(Party &party,
+               const std::vector<std::vector<double>> &predicted_samples,
+               int predicted_sample_size, EncodedNumber *predicted_labels);
 
   /**
-  * given the forest tree model, predict on samples with probabilities
-  * @param party
-  * @param predicted_samples
-  * @param predicted_sample_size
-  * @param predicted_labels
-  * @return predicted labels (encrypted)
-  */
+   * given the forest tree model, predict on samples with probabilities
+   * @param party
+   * @param predicted_samples
+   * @param predicted_sample_size
+   * @param predicted_labels
+   * @return predicted labels (encrypted)
+   */
   void predict_proba(Party &party,
-                     const std::vector<std::vector<double> >& predicted_samples,
+                     const std::vector<std::vector<double>> &predicted_samples,
                      int predicted_sample_size,
                      EncodedNumber **predicted_labels);
 };
 
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_MODEL_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FOREST_MODEL_H_

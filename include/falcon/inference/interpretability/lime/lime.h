@@ -5,19 +5,18 @@
 #ifndef FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_H_
 #define FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_H_
 
-
+#include "scaler.h"
+#include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
+#include <falcon/algorithm/vertical/preprocessing/weighted_pearson.h>
+#include <falcon/algorithm/vertical/tree/tree_builder.h>
 #include <falcon/common.h>
-#include <falcon/party/party.h>
 #include <falcon/distributed/worker.h>
 #include <falcon/operator/phe/fixed_point_encoder.h>
-#include <falcon/algorithm/vertical/linear_model/linear_regression_builder.h>
-#include <falcon/algorithm/vertical/tree/tree_builder.h>
-#include <falcon/algorithm/vertical/preprocessing/weighted_pearson.h>
-#include "scaler.h"
-#include <string>
-#include <vector>
-#include <thread>
+#include <falcon/party/party.h>
 #include <future>
+#include <string>
+#include <thread>
+#include <vector>
 
 struct LimeSamplingParams {
   // the instance index for explain
@@ -63,7 +62,8 @@ struct LimeCompWeightsParams {
   // the metric for computing the distance, only "euclidean"
   string distance_metric;
   // kernel, similarity kernel that takes euclidean distances and kernel width
-  // as input and outputs weights in (0,1). If not specified, default is exponential kernel
+  // as input and outputs weights in (0,1). If not specified, default is
+  // exponential kernel
   string kernel;
   // width for the kernel
   double kernel_width;
@@ -90,7 +90,8 @@ struct LimeFeatSelParams {
   int class_id;
   // feature selection method, current options are 'pearson', 'lasso_path',
   string feature_selection;
-  // feature selection model params, should be serialized LinearRegressionParams or null for pearson
+  // feature selection model params, should be serialized LinearRegressionParams
+  // or null for pearson
   string feature_selection_param;
   // number of features to be explained in the interpret model
   int num_explained_features;
@@ -113,14 +114,15 @@ struct LimeInterpretParams {
   int class_id;
   // interpretable model name, linear_regression or decision_tree
   string interpret_model_name;
-  // interpretable model params, should be serialized LinearRegressionParams or DecisionTreeParams
+  // interpretable model params, should be serialized LinearRegressionParams or
+  // DecisionTreeParams
   string interpret_model_param;
   // explanation report
   string explanation_report;
 };
 
 class LimeExplainer {
- public:
+public:
   LimeExplainer() = default;
   ~LimeExplainer() = default;
 
@@ -132,17 +134,17 @@ class LimeExplainer {
    * @param data_row: if above is true, give the predicting sample
    * @param sample_instance_num: the number of samples needed to generate
    * @param sampling_method: the sampling method for generating the samples
-   * @param sample_data_file: the file to store sampled data, here use it for tmp storage
+   * @param sample_data_file: the file to store sampled data, here use it for
+   * tmp storage
    * @return
    */
   std::vector<std::vector<double>> generate_random_samples(
-      const Party& party,
-      StandardScaler* scaler,
+      const Party &party, StandardScaler *scaler,
       bool sample_around_instance = false,
-      const std::vector<double>& data_row = std::vector<double>(),
+      const std::vector<double> &data_row = std::vector<double>(),
       int sample_instance_num = 5000,
-      const std::string& sampling_method = "gaussian",
-      const std::string& sample_data_file = std::string());
+      const std::string &sampling_method = "gaussian",
+      const std::string &sample_data_file = std::string());
 
   /**
    * load the vertical federated learning model and predict
@@ -156,20 +158,18 @@ class LimeExplainer {
    * @param predictions: the returned ciphertext predictions
    */
   void load_predict_origin_model(
-      const Party& party,
-      const std::string& origin_model_name,
-      const std::string& origin_model_saved_file,
+      const Party &party, const std::string &origin_model_name,
+      const std::string &origin_model_saved_file,
       std::vector<std::vector<double>> generated_samples,
-      std::string model_type,
-      int class_num,
-      EncodedNumber** predictions);
+      std::string model_type, int class_num, EncodedNumber **predictions);
 
   /**
    * This function computes the encrypted sample weights and save
    *
    * @param party: the participating party
    * @param generated_sample_file: the generated sample file in the first step
-   * @param computed_prediction_file: the computed prediction file in the first step
+   * @param computed_prediction_file: the computed prediction file in the first
+   * step
    * @param is_precompute: whether precompute is enabled
    * @param num_samples: the number of samples for training the interpret model
    * @param class_num: classification: equal to class_num; regression: 1
@@ -181,22 +181,19 @@ class LimeExplainer {
    * @param selected_sample_file: the selected sample file to be saved
    * @param selected_prediction_file: the selected prediction file to be saved
    */
-  void compute_sample_weights(const Party& party,
-                               const std::string& generated_sample_file,
-                               const std::string& computed_prediction_file,
-                               bool is_precompute,
-                               int num_samples,
-                               int class_num,
-                               const std::string& distance_metric,
-                               const std::string& kernel,
-                               double kernel_width,
-                               const std::string& sample_weights_file,
-                               const std::string& selected_sample_file,
-                               const std::string& selected_prediction_file,
-                               const std::string& ps_network_str = std::string(),
-                               int is_distributed = 0,
-                               int distributed_role = 0,
-                               int worker_id = 0);
+  void compute_sample_weights(const Party &party,
+                              const std::string &generated_sample_file,
+                              const std::string &computed_prediction_file,
+                              bool is_precompute, int num_samples,
+                              int class_num, const std::string &distance_metric,
+                              const std::string &kernel, double kernel_width,
+                              const std::string &sample_weights_file,
+                              const std::string &selected_sample_file,
+                              const std::string &selected_prediction_file,
+                              const std::string &tmp_res_file,
+                              const std::string &ps_network_str = std::string(),
+                              int is_distributed = 0, int distributed_role = 0,
+                              int worker_id = 0);
 
   /**
    * randomly select a set of sample indexes
@@ -206,9 +203,9 @@ class LimeExplainer {
    * @param num_samples: the number of selected samples
    * @return
    */
-  static std::vector<int> random_select_sample_idx(const Party& party,
-                                            int generated_samples_size,
-                                            int num_samples);
+  static std::vector<int> random_select_sample_idx(const Party &party,
+                                                   int generated_samples_size,
+                                                   int num_samples);
 
   /**
    * This function computes the distance between origin data
@@ -218,27 +215,27 @@ class LimeExplainer {
    * @param weights: the returned asss weights
    * @param origin_data: the data to be explained
    * @param sampled_data: the sampled data
-   * @param distance_metric: the distance metric between data samples, "euclidean"
+   * @param distance_metric: the distance metric between data samples,
+   * "euclidean"
    * @param kernel: the kernel function of the distance, "exponential"
    * @param kernel_width: the kernel width for the kernel function
    * @return
    */
-  void compute_dist_weights(
-      const Party& party,
-      std::vector<double>& sss_weights,
-      const std::string& generated_sample_file,
-      const std::vector<double>& origin_data,
-      const std::vector<std::vector<double>>& sampled_data,
-      const std::string& distance_metric,
-      const std::string& kernel,
-      double kernel_width);
+  void
+  compute_dist_weights(const Party &party, std::vector<double> &sss_weights,
+                       const std::string &generated_sample_file,
+                       const std::vector<double> &origin_data,
+                       const std::vector<std::vector<double>> &sampled_data,
+                       const std::string &distance_metric,
+                       const std::string &kernel, double kernel_width);
 
   /**
    * precompute the kernelshap weights
    * @param total_feature_size
    * @return
    */
-  static std::vector<double> precompute_kernelshap_weights(int total_feature_size);
+  static std::vector<double>
+  precompute_kernelshap_weights(int total_feature_size);
 
   /**
    * This function computes the squared distance between origin_data
@@ -249,9 +246,10 @@ class LimeExplainer {
    * @param sampled_data: the sampled data
    * @param squared_dist: the returned squared distances
    */
-  std::vector<double> compute_squared_dist(const Party& party,
-                            const std::vector<double>& origin_data,
-                            const std::vector<std::vector<double>>& sampled_data);
+  std::vector<double>
+  compute_squared_dist(const Party &party,
+                       const std::vector<double> &origin_data,
+                       const std::vector<std::vector<double>> &sampled_data);
 
   /**
    * This function selects num_explained_features for training
@@ -271,24 +269,22 @@ class LimeExplainer {
    * @param selected_features_file: the selected features file to be saved
    * @param ps_network_str: the parameters of ps network string,
    * @param is_distributed: whether use distributed interpretable model training
-   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
+   * worker
    * @param worker_id: if is_distributed = 1 and distributed_role = 1
    */
-  void select_features(Party party,
-                       const std::string& feature_selection_param,
-                       const std::string& selected_samples_file,
-                       const std::string& selected_predictions_file,
+  void select_features(Party party, const std::string &feature_selection_param,
+                       const std::string &selected_samples_file,
+                       const std::string &selected_predictions_file,
                        const std::string &sample_weights_file,
-                       const std::string& output_path_prefix,
-                       int num_samples,
-                       int class_num,
-                       int class_id,
-                       const std::string& feature_selection,
+                       const std::string &output_path_prefix, int num_samples,
+                       int class_num, int class_id,
+                       const std::string &feature_selection,
                        int num_explained_features,
-                       const std::string& selected_features_file,
-                       const std::string& ps_network_str = std::string(),
-                       int is_distributed = 0,
-                       int distributed_role = 0,
+                       const std::string &selected_features_file,
+                       const std::string &tmp_res_file,
+                       const std::string &ps_network_str = std::string(),
+                       int is_distributed = 0, int distributed_role = 0,
                        int worker_id = 0);
 
   /**
@@ -300,12 +296,11 @@ class LimeExplainer {
    * @param selected_feature_idx_file this is only for debug
    * @return
    */
-  std::vector<std::vector<int>> find_party_feat_idx(
-      const std::vector<int>& party_weight_sizes,
-      const std::vector<double>& global_model_weights,
-      int num_explained_features,
-      const std::string& selected_feature_idx_file
-      );
+  std::vector<std::vector<int>>
+  find_party_feat_idx(const std::vector<int> &party_weight_sizes,
+                      const std::vector<double> &global_model_weights,
+                      int num_explained_features,
+                      const std::string &selected_feature_idx_file);
 
   /**
    * This function explains a origin_data's model prediction
@@ -323,25 +318,21 @@ class LimeExplainer {
    * @param explanation_report: the report for save the explanations
    * @param ps_network_str: the parameters of ps network string,
    * @param is_distributed: whether use distributed interpretable model training
-   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
+   * worker
    * @param worker: if is_distributed = 1 and distributed_role = 1
    * @return
    */
   std::vector<double> interpret(
-      const Party& party,
-      const std::string& selected_data_file,
-      const std::string& selected_predictions_file,
-      const std::string& sample_weights_file,
-      int num_samples,
-      int class_num,
-      int class_id,
-      const std::string& interpret_model_name,
-      const std::string& interpret_model_param,
-      const std::string& explanation_report,
-      const std::string& ps_network_str = std::string(),
-      int is_distributed = 0,
-      int distributed_role = 0,
-      int worker_id = 0);
+      const Party &party, const std::string &selected_data_file,
+      const std::string &selected_predictions_file,
+      const std::string &sample_weights_file, int num_samples, int class_num,
+      int class_id, const std::string &interpret_model_name,
+      const std::string &interpret_model_param,
+      const std::string &explanation_report,
+      const std::string &tmp_res_file,
+      const std::string &ps_network_str = std::string(), int is_distributed = 0,
+      int distributed_role = 0, int worker_id = 0);
 
   /**
    * This function explain a specific label by training a model
@@ -355,22 +346,18 @@ class LimeExplainer {
    * @param interpret_model_param: the model params to be used for training
    * @param ps_network_str: the parameters of ps network string,
    * @param is_distributed: whether use distributed interpretable model training
-   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
+   * worker
    * @param worker: if is_distributed = 1 and distributed_role = 1
    * @return
    */
   std::vector<double> explain_one_label(
-      const Party &party,
-      const std::vector<std::vector<double>>& train_data,
-      EncodedNumber* predictions,
-      const std::vector<double> &sss_sample_weights,
-      int num_samples,
-      const std::string &interpret_model_name,
+      const Party &party, const std::vector<std::vector<double>> &train_data,
+      EncodedNumber *predictions, const std::vector<double> &sss_sample_weights,
+      int num_samples, const std::string &interpret_model_name,
       const std::string &interpret_model_param,
-      const std::string& ps_network_str = std::string(),
-      int is_distributed = 0,
-      int distributed_role = 0,
-      int worker_id = 0);
+      const std::string &ps_network_str = std::string(), int is_distributed = 0,
+      int distributed_role = 0, int worker_id = 0);
 
   /**
    * This function trains linear regression model with encrypted predictions,
@@ -383,20 +370,17 @@ class LimeExplainer {
    * @param sss_sample_weights: the sss sample weights
    * @param ps_network_str: the parameters of ps network string,
    * @param is_distributed: whether use distributed interpretable model training
-   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
+   * worker
    * @param worker_id: if is_distributed = 1 and distributed_role = 1
    * @return
    */
   std::vector<double> lime_linear_reg_train(
-      Party party,
-      const LinearRegressionParams & linear_reg_params,
-      const std::vector<std::vector<double>>& train_data,
-      EncodedNumber* predictions,
-      const std::vector<double> &sss_sample_weights,
-      const std::string& ps_network_str = std::string(),
-      int is_distributed = 0,
-      int distributed_role = 0,
-      int worker_id = 0);
+      Party party, const LinearRegressionParams &linear_reg_params,
+      const std::vector<std::vector<double>> &train_data,
+      EncodedNumber *predictions, const std::vector<double> &sss_sample_weights,
+      const std::string &ps_network_str = std::string(), int is_distributed = 0,
+      int distributed_role = 0, int worker_id = 0);
 
   /**
    * This function trains decision tree model with encrypted predictions,
@@ -409,20 +393,17 @@ class LimeExplainer {
    * @param sample_weights: the encrypted sample weights
    * @param ps_network_str: the parameters of ps network string,
    * @param is_distributed: whether use distributed interpretable model training
-   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+   * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
+   * worker
    * @param worker: if is_distributed = 1 and distributed_role = 1
    * @return
    */
   std::vector<double> lime_decision_tree_train(
-      Party party,
-      const DecisionTreeParams & dt_params,
-      const std::vector<std::vector<double>>& train_data,
-      EncodedNumber* predictions,
-      const std::vector<double> &sss_sample_weights,
-      const std::string& ps_network_str = std::string(),
-      int is_distributed = 0,
-      int distributed_role = 0,
-      int worker_id = 0);
+      Party party, const DecisionTreeParams &dt_params,
+      const std::vector<std::vector<double>> &train_data,
+      EncodedNumber *predictions, const std::vector<double> &sss_sample_weights,
+      const std::string &ps_network_str = std::string(), int is_distributed = 0,
+      int distributed_role = 0, int worker_id = 0);
 };
 
 /**
@@ -432,7 +413,8 @@ class LimeExplainer {
  * @param params_str: the algorithm params, aka. LimeSamplingParams
  * @param output_path_prefix: the path of the output files
  */
-void lime_sampling(Party party, const std::string& params_str, const std::string& output_path_prefix);
+void lime_sampling(Party party, const std::string &params_str,
+                   const std::string &output_path_prefix);
 
 /**
  * pre-generate the samples and compute the model predictions
@@ -441,11 +423,10 @@ void lime_sampling(Party party, const std::string& params_str, const std::string
  * @param params_str: the algorithm params, aka. LimeCompPredictionParams
  * @param output_path_prefix: the path of the output files
  */
-void lime_comp_pred(Party party, const std::string& params_str,
-                    const std::string& output_path_prefix,
-                    const std::string& ps_network_str = std::string(),
-                    int is_distributed = 0,
-                    int distributed_role = 0,
+void lime_comp_pred(Party party, const std::string &params_str,
+                    const std::string &output_path_prefix,
+                    const std::string &ps_network_str = std::string(),
+                    int is_distributed = 0, int distributed_role = 0,
                     int worker_id = 0);
 
 /**
@@ -455,7 +436,8 @@ void lime_comp_pred(Party party, const std::string& params_str,
  * @param params_str
  * @param output_path_prefix
  */
-void lime_conv_pred_plain2cipher(Party party, const std::string& params_str, const std::string& output_path_prefix);
+void lime_conv_pred_plain2cipher(Party party, const std::string &params_str,
+                                 const std::string &output_path_prefix);
 
 /**
  * save the aggregated generated data and encrypted predictions into files
@@ -468,10 +450,11 @@ void lime_conv_pred_plain2cipher(Party party, const std::string& params_str, con
  * @param generated_sample_file: the original saved generated sample file
  * @param computed_prediction_file: the original saved prediction file
  */
-void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>& generated_samples,
-                             EncodedNumber** predictions, int cur_sample_size, int class_num,
-                             const std::string& generated_sample_file,
-                             const std::string& computed_prediction_file);
+void save_data_pred4baseline(
+    Party party, const std::vector<std::vector<double>> &generated_samples,
+    EncodedNumber **predictions, int cur_sample_size, int class_num,
+    const std::string &generated_sample_file,
+    const std::string &computed_prediction_file);
 
 /**
  * compute the sample weights
@@ -479,12 +462,13 @@ void save_data_pred4baseline(Party party, const std::vector<std::vector<double>>
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeCompWeightsParams
  * @param output_path_prefix: the path of the output files
+ * @param tmp_res_file: is for recording temporary results for comparison
  */
-void lime_comp_weight(Party party, const std::string& params_str,
-                      const std::string& output_path_prefix,
-                      const std::string& ps_network_str = std::string(),
-                      int is_distributed = 0,
-                      int distributed_role = 0,
+void lime_comp_weight(Party party, const std::string &params_str,
+                      const std::string &output_path_prefix,
+                      const std::string &tmp_res_file,
+                      const std::string &ps_network_str = std::string(),
+                      int is_distributed = 0, int distributed_role = 0,
                       int worker_id = 0);
 
 /**
@@ -493,16 +477,18 @@ void lime_comp_weight(Party party, const std::string& params_str,
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeFeatureSelectionParams
  * @param output_path_prefix: the path of the output files
+ * @param tmp_res_file: is for recording temporary results for comparison
  * @param ps_network_str: the parameters of ps network string,
  * @param is_distributed: whether use distributed interpretable model training
- * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+ * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
+ * worker
  * @param worker_id: if is_distributed = 1 and distributed_role = 1
  */
-void lime_feat_sel(Party party, const std::string& params_str,
-                   const std::string& output_path_prefix,
-                   const std::string& ps_network_str = std::string(),
-                   int is_distributed = 0,
-                   int distributed_role = 0,
+void lime_feat_sel(Party party, const std::string &params_str,
+                   const std::string &output_path_prefix,
+                   const std::string &tmp_res_file,
+                   const std::string &ps_network_str = std::string(),
+                   int is_distributed = 0, int distributed_role = 0,
                    int worker_id = 0);
 
 /**
@@ -511,17 +497,18 @@ void lime_feat_sel(Party party, const std::string& params_str,
  * @param party: the participating party
  * @param params_str: the algorithm params, aka. LimeInterpretParams
  * @param output_path_prefix: the path of the output files
+ * @param tmp_res_file: is for recording temporary results for comparison
  * @param ps_network_str: the parameters of ps network string,
  * @param is_distributed: whether use distributed interpretable model training
- * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else: worker
+ * @param distributed_role: if is_distributed = 1, meaningful; if 0, ps, else:
+ * worker
  * @param worker_id: if is_distributed = 1 and distributed_role = 1
  */
-void lime_interpret(Party party, const std::string& params_str,
-                    const std::string& output_path_prefix,
-                    const std::string& ps_network_str = std::string(),
-                    int is_distributed = 0,
-                    int distributed_role = 0,
+void lime_interpret(Party party, const std::string &params_str,
+                    const std::string &output_path_prefix,
+                    const std::string &tmp_res_file,
+                    const std::string &ps_network_str = std::string(),
+                    int is_distributed = 0, int distributed_role = 0,
                     int worker_id = 0);
 
-
-#endif //FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_H_
+#endif // FALCON_INCLUDE_FALCON_INFERENCE_INTERPRETABILITY_LIME_H_

@@ -5,15 +5,15 @@
 #ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FEATURE_H_
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FEATURE_H_
 
-#include <vector>
-#include <iostream>
 #include <falcon/common.h>
+#include <iostream>
+#include <vector>
 
 /**
  * This class is constructed to help build decision tree model
  */
 class FeatureHelper {
- public:
+public:
   // index of party's local feature
   int id{};
   // the number of splits of the current feature, should <= max_bins - 1
@@ -35,11 +35,11 @@ class FeatureHelper {
   // the values of this feature are sorted, the re-sorted indexes are recorded
   std::vector<int> sorted_indexes;
   // pre-compute 0 1 ivs for each split in the left branch, before re-sorting
-  std::vector< std::vector<int> > split_ivs_left;
+  std::vector<std::vector<int>> split_ivs_left;
   // pre-compute 0 1 ivs for each split in the right branch, before re-sorting
-  std::vector< std::vector<int> > split_ivs_right;
+  std::vector<std::vector<int>> split_ivs_right;
 
- public:
+public:
   /**
    * default constructor
    */
@@ -54,14 +54,14 @@ class FeatureHelper {
    * copy constructor
    * @param feature
    */
-  FeatureHelper(const FeatureHelper & feature);
+  FeatureHelper(const FeatureHelper &feature);
 
   /**
    * copy assignment constructor
    * @param feature
    * @return
    */
-  FeatureHelper &operator = (FeatureHelper *feature);
+  FeatureHelper &operator=(FeatureHelper *feature);
 
   /**
    * set the feature data given a column in the training dataset
@@ -99,4 +99,4 @@ class FeatureHelper {
   void compute_split_ivs();
 };
 
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FEATURE_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_FEATURE_H_

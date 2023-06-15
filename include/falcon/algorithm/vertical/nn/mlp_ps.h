@@ -7,21 +7,21 @@
 
 #include "falcon/distributed/parameter_server_base.h"
 #include <falcon/algorithm/vertical/nn/mlp.h>
-#include <falcon/utils/pb_converter/common_converter.h>
-#include <falcon/party/party.h>
-#include <falcon/utils/pb_converter/lr_converter.h>
-#include <falcon/model/model_io.h>
-#include <falcon/common.h>
 #include <falcon/algorithm/vertical/nn/mlp_builder.h>
+#include <falcon/common.h>
+#include <falcon/model/model_io.h>
+#include <falcon/party/party.h>
+#include <falcon/utils/pb_converter/common_converter.h>
+#include <falcon/utils/pb_converter/lr_converter.h>
 
 class MlpParameterServer : public ParameterServer {
- public:
+public:
   // party
   Party party;
   // mlp model builder
   MlpBuilder mlp_builder;
 
- public:
+public:
   /**
    * default constructor
    */
@@ -34,9 +34,8 @@ class MlpParameterServer : public ParameterServer {
    * @param m_party: the participating party
    * @param ps_network_config_pb_str: the network config between ps and workers
    */
-  MlpParameterServer(const MlpBuilder& m_mlp_builder,
-                     const Party& m_party,
-                     const std::string& ps_network_config_pb_str);
+  MlpParameterServer(const MlpBuilder &m_mlp_builder, const Party &m_party,
+                     const std::string &ps_network_config_pb_str);
 
   /**
    * constructor
@@ -44,44 +43,46 @@ class MlpParameterServer : public ParameterServer {
    * @param m_party: the party object
    * @param ps_network_config_pb_str: the network config between ps and worker
    */
-  MlpParameterServer(const Party& m_party,const std::string& ps_network_config_pb_str);
+  MlpParameterServer(const Party &m_party,
+                     const std::string &ps_network_config_pb_str);
 
   /**
    * copy constructor
    *
    * @param MlpParameterServer
    */
-  MlpParameterServer(const MlpParameterServer& obj);
+  MlpParameterServer(const MlpParameterServer &obj);
 
   /**
-    * destructor
-    */
+   * destructor
+   */
   ~MlpParameterServer() = default;
 
- public:
+public:
   /**
-  * send the split training data and testing data to workers
-  *
-  * @param training_data: split training dataset
-  * @param testing_data: split testing dataset
-  * @param training_labels: split training labels
-  * @param testing_labels: split testing labels
-  */
-  void broadcast_train_test_data(const std::vector< std::vector<double> >& training_data,
-                                 const std::vector< std::vector<double> >& testing_data,
-                                 const std::vector<double>& training_labels,
-                                 const std::vector<double>& testing_labels);
+   * send the split training data and testing data to workers
+   *
+   * @param training_data: split training dataset
+   * @param testing_data: split testing dataset
+   * @param training_labels: split training labels
+   * @param testing_labels: split testing labels
+   */
+  void broadcast_train_test_data(
+      const std::vector<std::vector<double>> &training_data,
+      const std::vector<std::vector<double>> &testing_data,
+      const std::vector<double> &training_labels,
+      const std::vector<double> &testing_labels);
 
   /**
    * send the phe keys to workers
    */
   void broadcast_phe_keys();
 
- public:
+public:
   /**
    * send encrypted weights to workers
    */
-  void broadcast_encrypted_weights(const MlpModel& mlp_model);
+  void broadcast_encrypted_weights(const MlpModel &mlp_model);
 
   /**
    * partition examples according to number of workers
@@ -99,13 +100,15 @@ class MlpParameterServer : public ParameterServer {
   /**
    * update weight
    *
-   * @param encoded_messages: messages received from worker, this is loss in distributed training
+   * @param encoded_messages: messages received from worker, this is loss in
+   * distributed training
    * @param agg_mlp_model: returned updated mlp_model
    */
-  void update_encrypted_weights(const std::vector< string >& encoded_messages);
+  void update_encrypted_weights(const std::vector<string> &encoded_messages);
 
   /**
-   * distributed training process, partition data, collect result, update weights
+   * distributed training process, partition data, collect result, update
+   * weights
    */
   void distributed_train() override;
 
@@ -115,25 +118,25 @@ class MlpParameterServer : public ParameterServer {
    * @param cur_test_data_indexes: vector of index
    * @param predicted_labels: return value, array of labels
    */
-  void distributed_predict(
-      const std::vector<int>& cur_test_data_indexes,
-      EncodedNumber* predicted_labels) override;
+  void distributed_predict(const std::vector<int> &cur_test_data_indexes,
+                           EncodedNumber *predicted_labels) override;
 
   /**
-   * distributed evaluation, partition data, collect result, compute evaluation matrix
+   * distributed evaluation, partition data, collect result, compute evaluation
+   * matrix
    *
    * @param eval_type: train data or test data
    * @param report_save_path: the path to save evaluation matrix
    */
   void distributed_eval(falcon::DatasetType eval_type,
-                        const std::string& report_save_path) override;
+                        const std::string &report_save_path) override;
 
   /**
    * save the trained model
    *
    * @param model_save_file: vector of index
    */
-  void save_model(const std::string& model_save_file) override;
+  void save_model(const std::string &model_save_file) override;
 };
 
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_NN_MLP_PS_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_NN_MLP_PS_H_
