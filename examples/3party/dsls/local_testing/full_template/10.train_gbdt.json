@@ -51,17 +51,17 @@
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "n_estimator": 8,
+          "n_estimator": 2,
           "sample_rate": 0.8,
           "tree_type": "regression",
           "criterion": "gini",
           "split_strategy": "best",
           "class_num": 2,
           "max_depth": 3,
-          "max_bins": 8,
-          "min_samples_split": 5,
-          "min_samples_leaf": 5,
-          "max_leaf_nodes": 16,
+          "max_bins": 4,
+          "min_samples_split": 3,
+          "min_samples_leaf": 3,
+          "max_leaf_nodes": 4,
           "min_impurity_decrease": 0.1,
           "min_impurity_split": 0.001,
           "dp_budget": 0.1

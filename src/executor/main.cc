@@ -211,8 +211,8 @@ int main(int argc, char *argv[]) {
           lime_sampling(party, algorithm_params, data_output_file);
           break;
         case falcon::LIME_COMP_PRED:
-          lime_conv_pred_plain2cipher(party, algorithm_params, data_output_file); // only for preparing data
-          // lime_comp_pred(party, algorithm_params, data_output_file);
+          // lime_conv_pred_plain2cipher(party, algorithm_params, data_output_file); // only for preparing data
+          lime_comp_pred(party, algorithm_params, data_output_file);
           break;
         case falcon::LIME_COMP_WEIGHT:
           // lime_conv_pred_plain2cipher(party, algorithm_params,
