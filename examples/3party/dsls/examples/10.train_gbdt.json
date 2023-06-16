@@ -1,0 +1,76 @@
+{
+  "job_name": "energy prediction",
+  "job_info": "this is the job_decs",
+  "job_fl_type": "vertical",
+  "existing_key": 0,
+  "party_nums": 3,
+  "task_num": 1,
+  "party_info": [
+    {
+      "id": 0,
+      "addr": "127.0.0.1:30005",
+      "party_type": "active",
+      "path": {
+        "data_input": "/opt/falcon/data/dataset/energy_prediction_data/client0",
+        "data_output": "/opt/falcon/data/dataset/energy_prediction_data/client0",
+        "model_path": "/opt/falcon/data/dataset/energy_prediction_data/client0"
+      }
+    },
+    {
+      "id": 1,
+      "addr": "127.0.0.1:30006",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/opt/falcon/data/dataset/energy_prediction_data/client1",
+        "data_output": "/opt/falcon/data/dataset/energy_prediction_data/client1",
+        "model_path": "/opt/falcon/data/dataset/energy_prediction_data/client1"
+      }
+    },
+    {
+      "id": 2,
+      "addr": "127.0.0.1:30007",
+      "party_type": "passive",
+      "path": {
+        "data_input": "/opt/falcon/data/dataset/energy_prediction_data/client2",
+        "data_output": "/opt/falcon/data/dataset/energy_prediction_data/client2",
+        "model_path": "/opt/falcon/data/dataset/energy_prediction_data/client2"
+      }
+    }
+  ],
+  "distributed_task": {
+    "enable": 0,
+    "worker_number": 1
+  },
+  "tasks": {
+    "model_training": {
+      "mpc_algorithm_name": "vfl_decision_tree",
+      "algorithm_name": "gbdt",
+      "input_configs": {
+        "data_input": {
+          "data": "client.txt",
+          "key": "phe_keys"
+        },
+        "algorithm_config": {
+          "n_estimator": 2,
+          "sample_rate": 0.8,
+          "tree_type": "regression",
+          "criterion": "gini",
+          "split_strategy": "best",
+          "class_num": 2,
+          "max_depth": 3,
+          "max_bins": 4,
+          "min_samples_split": 3,
+          "min_samples_leaf": 3,
+          "max_leaf_nodes": 4,
+          "min_impurity_decrease": 0.1,
+          "min_impurity_split": 0.001,
+          "dp_budget": 0.1
+        }
+      },
+      "output_configs": {
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
+      }
+    }
+  }
+}
