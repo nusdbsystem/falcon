@@ -398,6 +398,6 @@ func main() {
 		}
 	}
 
-	time.Sleep(time.Minute * 60)
+// 	time.Sleep(time.Minute * 60)
 	os.Exit(0)
 }

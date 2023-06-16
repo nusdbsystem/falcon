@@ -43,9 +43,9 @@
     "average": 0
   },
   "tasks": {
-    "lime_weight": {
-      "mpc_algorithm_name": "lime",
-      "algorithm_name": "lime_compute_weights",
+    "lime_sampling": {
+      "mpc_algorithm_name": "logistic_regression",
+      "algorithm_name": "lime_sampling",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
@@ -53,17 +53,10 @@
         },
         "algorithm_config": {
           "explain_instance_idx": 0,
-          "generated_sample_file": "/log_reg/sampled_data.txt",
-          "computed_prediction_file": "/log_reg/predictions.txt",
-          "is_precompute": false,
-          "num_samples": 10,
-          "class_num": 2,
-          "distance_metric": "euclidean",
-          "kernel": "exponential",
-          "kernel_width": 0.0,
-          "sample_weights_file": "/log_reg/sample_weights.txt",
-          "selected_samples_file": "/log_reg/selected_sampled_data.txt",
-          "selected_predictions_file": "/log_reg/selected_predictions.txt"
+          "sample_around_instance": true,
+          "num_total_samples": 10,
+          "sampling_method": "gaussian",
+          "generated_sample_file": "/sampled_data.txt"
         }
       },
       "output_configs": {

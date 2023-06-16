@@ -1,5 +1,5 @@
 {
-  "job_name": "breast_cancer_lime",
+  "job_name": "credit_card_training",
   "job_info": "this is the job_decs",
   "job_fl_type": "vertical",
   "existing_key": 1,
@@ -38,30 +38,36 @@
     }
   ],
   "distributed_task": {
-    "enable": 0,
-    "worker_number": 1,
-    "average": 0
+    "enable": 1,
+    "worker_number": 3
   },
   "tasks": {
-    "lime_sampling": {
-      "mpc_algorithm_name": "logistic_regression",
-      "algorithm_name": "lime_sampling",
+    "model_training": {
+      "mpc_algorithm_name": "vfl_decision_tree",
+      "algorithm_name": "decision_tree",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "explain_instance_idx": 0,
-          "sample_around_instance": true,
-          "num_total_samples": 10,
-          "sampling_method": "gaussian",
-          "generated_sample_file": "/log_reg/sampled_data.txt"
+          "tree_type": "classification",
+          "criterion": "gini",
+          "split_strategy": "best",
+          "class_num": 2,
+          "max_depth": 2,
+          "max_bins": 8,
+          "min_samples_split": 5,
+          "min_samples_leaf": 5,
+          "max_leaf_nodes": 16,
+          "min_impurity_decrease": 0.1,
+          "min_impurity_split": 0.001,
+          "dp_budget": 0.1
         }
       },
       "output_configs": {
-        "trained_model": "saved_model.pb",
-        "evaluation_report": "report.txt"
+        "trained_model": "vfl_decision_tree.pb",
+        "evaluation_report": "vfl_decision_tree.txt"
       }
     }
   }

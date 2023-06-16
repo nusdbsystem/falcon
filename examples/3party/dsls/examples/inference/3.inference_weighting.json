@@ -1,5 +1,5 @@
 {
-  "job_name": "credit_card_training",
+  "job_name": "breast_cancer_lime",
   "job_info": "this is the job_decs",
   "job_fl_type": "vertical",
   "existing_key": 1,
@@ -39,32 +39,31 @@
   ],
   "distributed_task": {
     "enable": 0,
-    "worker_number": 1
+    "worker_number": 1,
+    "average": 0
   },
   "tasks": {
-    "model_training": {
-      "mpc_algorithm_name": "vfl_decision_tree",
-      "algorithm_name": "random_forest",
+    "lime_weight": {
+      "mpc_algorithm_name": "lime",
+      "algorithm_name": "lime_compute_weights",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "n_estimator": 8,
-          "sample_rate": 0.8,
-          "tree_type": "classification",
-          "criterion": "gini",
-          "split_strategy": "best",
+          "explain_instance_idx": 0,
+          "generated_sample_file": "/sampled_data.txt",
+          "computed_prediction_file": "/predictions.txt",
+          "is_precompute": false,
+          "num_samples": 10,
           "class_num": 2,
-          "max_depth": 3,
-          "max_bins": 8,
-          "min_samples_split": 5,
-          "min_samples_leaf": 5,
-          "max_leaf_nodes": 16,
-          "min_impurity_decrease": 0.1,
-          "min_impurity_split": 0.001,
-          "dp_budget": 0.1
+          "distance_metric": "euclidean",
+          "kernel": "exponential",
+          "kernel_width": 0.0,
+          "sample_weights_file": "/sample_weights.txt",
+          "selected_samples_file": "/selected_sampled_data.txt",
+          "selected_predictions_file": "/selected_predictions.txt"
         }
       },
       "output_configs": {

@@ -1,8 +1,8 @@
 {
-  "job_name": "credit_card_training",
-  "job_info": "this is the job_info",
+  "job_name": "energy prediction",
+  "job_info": "this is the job_decs",
   "job_fl_type": "vertical",
-  "existing_key": 1,
+  "existing_key": 0,
   "party_nums": 3,
   "task_num": 1,
   "party_info": [
@@ -43,34 +43,33 @@
   },
   "tasks": {
     "model_training": {
-      "mpc_algorithm_name": "mlp",
-      "algorithm_name": "mlp",
+      "mpc_algorithm_name": "vfl_decision_tree",
+      "algorithm_name": "gbdt",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "is_classification": false,
-          "batch_size": 8,
-          "max_iteration": 5000,
-          "converge_threshold": 0.0001,
-          "with_regularization": true,
-          "alpha": 0.1,
-          "learning_rate": 0.1,
-          "decay": 0.1,
-          "penalty": "l2",
-          "optimizer": "sgd",
-          "metric": "mse",
-          "dp_budget": 0.1,
-          "fit_bias": true,
-          "num_layers_outputs": [26, 2, 1],
-          "layers_activation_funcs": ["logistic", "identity"]
+          "n_estimator": 2,
+          "sample_rate": 0.8,
+          "tree_type": "regression",
+          "criterion": "gini",
+          "split_strategy": "best",
+          "class_num": 2,
+          "max_depth": 3,
+          "max_bins": 4,
+          "min_samples_split": 3,
+          "min_samples_leaf": 3,
+          "max_leaf_nodes": 4,
+          "min_impurity_decrease": 0.1,
+          "min_impurity_split": 0.001,
+          "dp_budget": 0.1
         }
       },
       "output_configs": {
-        "trained_model": "20220621-MLP-model.pb",
-        "evaluation_report": "20220621-MLP-report.txt"
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
       }
     }
   }

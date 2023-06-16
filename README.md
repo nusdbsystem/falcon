@@ -31,7 +31,7 @@ because they are already installed in the docker image.
 Go to the `tools/deployment` folder, and run the following command to build the docker image:
 
 ```bash
-docker build --network=host -t falcon:latest -f ./ubuntu18.04-falcon.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg CACHEBUST="$(date +%s)"
+docker build --network=host -t lemonwyc/falcon-pub:latest -f ./tools/deployment/ubuntu18.04-falcon.Dockerfile . --build-arg CACHEBUST="$(date +%s)"
 ```
 
 It may take more than 1 hour to build this image as it needs to download a number of 
@@ -175,10 +175,7 @@ Current development follows the current patterns:
 1. Run coordinator with `bash examples/3party/coordinator/debug_coord.sh `
 
 2. Run party server N with  `bash examples/3party/party0/debug_partyserver.sh --partyID N`
-
    e,g.  server 0 with `bash examples/3party/party0/debug_partyserver.sh --partyID 0`
-
-
 
 ## Citation
 

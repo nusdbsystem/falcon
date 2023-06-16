@@ -1,6 +1,6 @@
 {
   "job_name": "credit_card_training",
-  "job_info": "this is the job_info",
+  "job_info": "this is the job_decs",
   "job_fl_type": "vertical",
   "existing_key": 1,
   "party_nums": 3,
@@ -38,39 +38,38 @@
     }
   ],
   "distributed_task": {
-    "enable": 1,
-    "worker_number": 3
+    "enable": 0,
+    "worker_number": 1
   },
   "tasks": {
     "model_training": {
-      "mpc_algorithm_name": "mlp",
-      "algorithm_name": "mlp",
+      "mpc_algorithm_name": "vfl_decision_tree",
+      "algorithm_name": "random_forest",
       "input_configs": {
         "data_input": {
           "data": "client.txt",
           "key": "phe_keys"
         },
         "algorithm_config": {
-          "is_classification": true,
-          "batch_size": 8,
-          "max_iteration": 5,
-          "converge_threshold": 0.0001,
-          "with_regularization": true,
-          "alpha": 0.1,
-          "learning_rate": 0.1,
-          "decay": 0.1,
-          "penalty": "l2",
-          "optimizer": "sgd",
-          "metric": "acc",
-          "dp_budget": 0.1,
-          "fit_bias": true,
-          "num_layers_outputs": [30, 2, 1],
-          "layers_activation_funcs": ["relu", "logistic"]
+          "n_estimator": 2,
+          "sample_rate": 0.8,
+          "tree_type": "classification",
+          "criterion": "gini",
+          "split_strategy": "best",
+          "class_num": 2,
+          "max_depth": 3,
+          "max_bins": 8,
+          "min_samples_split": 5,
+          "min_samples_leaf": 5,
+          "max_leaf_nodes": 8,
+          "min_impurity_decrease": 0.1,
+          "min_impurity_split": 0.001,
+          "dp_budget": 0.1
         }
       },
       "output_configs": {
-        "trained_model": "20220611-MLP-model.pb",
-        "evaluation_report": "20220611-MLP-report.txt"
+        "trained_model": "saved_model.pb",
+        "evaluation_report": "report.txt"
       }
     }
   }

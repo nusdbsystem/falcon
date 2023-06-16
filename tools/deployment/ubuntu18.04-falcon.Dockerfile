@@ -143,38 +143,10 @@ RUN apt-get update && apt-get upgrade -y && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/*
 
-#Accept input argument
-ARG SSH_PRIVATE_KEY
-
-#Pass the content of the private key into the container
-RUN mkdir /root/.ssh/
-RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
-
-#Github requires a private key with strict permission settings
-RUN chmod 600 /root/.ssh/id_rsa
-
-#Add Github to known hosts
-RUN touch /root/.ssh/config
-RUN echo Host github.com > /root/.ssh/config
-RUN echo  Hostname ssh.github.com >> /root/.ssh/config
-RUN echo  Port 443 >> /root/.ssh/config
-RUN echo  StrictHostKeyChecking no >> /root/.ssh/config
-
-RUN touch /root/.ssh/known_hosts
-RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
-RUN git config --global http.sslVerify false
-
-#RUN touch /root/.ssh/config
-#RUN echo Host github.com > /root/.ssh/config
-#RUN echo  Hostname ssh.github.com >> /root/.ssh/config
-#RUN echo  Port 443 >> /root/.ssh/config
-
-RUN cat /root/.ssh/config
-
 # Clone Falcon and init submodules
 RUN echo "update repo for building new image"
 WORKDIR /opt
-RUN echo yes|git clone git@github.com:lemonviv/falcon.git && \
+RUN echo yes|git clone https://github.com/lemonviv/falcon.git && \
     cd falcon && \
     git checkout dev  && \
     cd third_party/ && \
@@ -237,7 +209,6 @@ COPY --from=build /opt/falcon /opt/falcon
 COPY --from=build /usr/local /usr/local
 COPY --from=build /usr/bin /usr/bin
 COPY --from=build /usr/lib /usr/lib
-COPY --from=build /root/.ssh /root/.ssh
 
 RUN apt-get update && apt-get upgrade -y && \
         apt-get install -y --no-install-recommends \
@@ -299,9 +270,11 @@ ARG CACHEBUST=1
 
 # 1. pull latest code
 WORKDIR /opt/falcon
-RUN git fetch origin && \
-    git pull origin dev && \
-    git log -4
+RUN git config --global user.email "lemonwyc@gmail.com" &&\
+      git config --global user.name "lemonwyc" &&\
+     git fetch origin && \
+     git checkout dev && \
+     git pull origin dev --force
 
 # 2. Set environment variables and pre-compile falcon_coordinator
 # ENV GOROOT /usr/local/go
