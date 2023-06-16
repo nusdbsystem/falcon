@@ -6,12 +6,12 @@
 #define FALCON_INCLUDE_FALCON_UTILS_ALG_DEBUG_UTIL_H_
 
 #include <falcon/common.h>
-#include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/operator/conversion/op_conv.h>
 #include <falcon/operator/phe/djcs_t_aux.h>
+#include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/party/info_exchange.h>
 #include <falcon/party/party.h>
 #include <falcon/utils/logger/logger.h>
-#include <falcon/operator/conversion/op_conv.h>
-#include <falcon/party/info_exchange.h>
 
 /**
  * This function implements debug of cipher array for check
@@ -22,13 +22,15 @@
  * @param size: the size of cipher_array
  * @param req_party_id: the request party id
  * @param print_flag: whether print the debug information inside the function
- * @param print_size: the size for printing the debug information, should <= size
+ * @param print_size: the size for printing the debug information, should <=
+ * size
  * @return
  */
 template <typename T>
-std::vector<T> debug_cipher_array(const Party& party, EncodedNumber* cipher_array,
-                                  int size, int req_party_id,
-                                  bool print_flag = false, int print_size = 0) {
+std::vector<T> debug_cipher_array(const Party &party,
+                                  EncodedNumber *cipher_array, int size,
+                                  int req_party_id, bool print_flag = false,
+                                  int print_size = 0) {
   // request party broadcast the cipher array
   broadcast_encoded_number_array(party, cipher_array, size, req_party_id);
   // call collaborative decrypt function
@@ -46,11 +48,11 @@ std::vector<T> debug_cipher_array(const Party& party, EncodedNumber* cipher_arra
   // print the debug information
   if (print_flag) {
     for (int i = 0; i < print_size; i++) {
-      log_info("[debug_cipher_array] decoded_array[" + std::to_string(i)
-                   + "] = " + std::to_string(decoded_array[i]));
+      log_info("[debug_cipher_array] decoded_array[" + std::to_string(i) +
+               "] = " + std::to_string(decoded_array[i]));
     }
   }
-  delete [] plain_array;
+  delete[] plain_array;
   return decoded_array;
 }
 
@@ -65,29 +67,33 @@ std::vector<T> debug_cipher_array(const Party& party, EncodedNumber* cipher_arra
  * @param req_party_id: the request party id
  * @param print_flag: whether print the debug information inside the function
  * @param print_row: the size for printing the debug information, should <= row
- * @param print_column: the size for printing the debug information, should <= column
+ * @param print_column: the size for printing the debug information, should <=
+ * column
  * @return
  */
 template <typename T>
-std::vector<std::vector<T>> debug_cipher_matrix(const Party& party, EncodedNumber** cipher_matrix,
-                                                int row, int column, int req_party_id,
-                                                bool print_flag = false, int print_row = 0, int print_column = 0)  {
+std::vector<std::vector<T>>
+debug_cipher_matrix(const Party &party, EncodedNumber **cipher_matrix, int row,
+                    int column, int req_party_id, bool print_flag = false,
+                    int print_row = 0, int print_column = 0) {
   // iteratively debug cipher array
   std::vector<std::vector<T>> decoded_matrix;
   for (int i = 0; i < row; i++) {
-    std::vector<T> decoded_array = debug_cipher_array<T>(party, cipher_matrix[i], column, req_party_id);
+    std::vector<T> decoded_array =
+        debug_cipher_array<T>(party, cipher_matrix[i], column, req_party_id);
     decoded_matrix.push_back(decoded_array);
   }
   // print the debug information
   if (print_flag) {
     for (int i = 0; i < print_row; i++) {
       for (int j = 0; j < print_column; j++) {
-        log_info("[debug_cipher_matrix] debug_cipher_matrix[" + std::to_string(i)
-                     + "][" + std::to_string(j) + "] = " + std::to_string(decoded_matrix[i][j]));
+        log_info("[debug_cipher_matrix] debug_cipher_matrix[" +
+                 std::to_string(i) + "][" + std::to_string(j) +
+                 "] = " + std::to_string(decoded_matrix[i][j]));
       }
     }
   }
   return decoded_matrix;
 }
 
-#endif //FALCON_INCLUDE_FALCON_UTILS_ALG_DEBUG_UTIL_H_
+#endif // FALCON_INCLUDE_FALCON_UTILS_ALG_DEBUG_UTIL_H_

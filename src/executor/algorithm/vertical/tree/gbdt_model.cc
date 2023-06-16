@@ -1,16 +1,41 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by wuyuncheng on 31/7/21.
 //
 
-#include <falcon/algorithm/vertical/tree/gbdt_model.h>
 #include <falcon/algorithm/vertical/tree/gbdt_loss.h>
+#include <falcon/algorithm/vertical/tree/gbdt_model.h>
 #include <falcon/party/info_exchange.h>
 
-#include <glog/logging.h>
 #include <falcon/utils/logger/logger.h>
+#include <glog/logging.h>
 
-GbdtModel::GbdtModel(int m_tree_size, const std::string& m_tree_type,
-    int m_n_estimator, int m_class_num, double m_learning_rate) {
+GbdtModel::GbdtModel(int m_tree_size, const std::string &m_tree_type,
+                     int m_n_estimator, int m_class_num,
+                     double m_learning_rate) {
   tree_size = m_tree_size;
   // copy builder parameters
   if (m_tree_type == "classification") {
@@ -39,7 +64,7 @@ GbdtModel::GbdtModel(const GbdtModel &gbdt_model) {
   gbdt_trees = gbdt_model.gbdt_trees;
 }
 
-GbdtModel& GbdtModel::operator=(const GbdtModel &gbdt_model) {
+GbdtModel &GbdtModel::operator=(const GbdtModel &gbdt_model) {
   tree_size = gbdt_model.tree_size;
   tree_type = gbdt_model.tree_type;
   n_estimator = gbdt_model.n_estimator;
@@ -49,24 +74,23 @@ GbdtModel& GbdtModel::operator=(const GbdtModel &gbdt_model) {
   gbdt_trees = gbdt_model.gbdt_trees;
 }
 
-void GbdtModel::predict(Party &party,
-                        const std::vector<std::vector<double>>& predicted_samples,
-                        int predicted_sample_size,
-                        EncodedNumber *predicted_labels) {
+void GbdtModel::predict(
+    Party &party, const std::vector<std::vector<double>> &predicted_samples,
+    int predicted_sample_size, EncodedNumber *predicted_labels) {
   // the prediction method for regression and classification are different
-  if ((tree_type == falcon::REGRESSION) || (tree_type == falcon::CLASSIFICATION && class_num == 2)) {
-    predict_single_estimator(party,predicted_samples,
-                             predicted_sample_size, predicted_labels);
+  if ((tree_type == falcon::REGRESSION) ||
+      (tree_type == falcon::CLASSIFICATION && class_num == 2)) {
+    predict_single_estimator(party, predicted_samples, predicted_sample_size,
+                             predicted_labels);
   } else {
-    predict_multi_estimator(party,predicted_samples,
-                            predicted_sample_size, predicted_labels);
+    predict_multi_estimator(party, predicted_samples, predicted_sample_size,
+                            predicted_labels);
   }
 }
 
-void GbdtModel::predict_single_estimator(Party &party,
-                                         const std::vector<std::vector<double>>& predicted_samples,
-                                         int predicted_sample_size,
-                                         EncodedNumber *predicted_labels) {
+void GbdtModel::predict_single_estimator(
+    Party &party, const std::vector<std::vector<double>> &predicted_samples,
+    int predicted_sample_size, EncodedNumber *predicted_labels) {
   /// the predict method works as follows:
   /// 1. init the dummy predictor and add to predicted_labels
   /// 2. for each tree in gbdt_trees, predict, multiply learning
@@ -74,28 +98,30 @@ void GbdtModel::predict_single_estimator(Party &party,
   /// 3. return the predicted labels
 
   // retrieve phe pub key and phe random
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
-  log_info("[GbdtModel.predict_single_estimator] predicted_sample_size = " + std::to_string(predicted_sample_size));
+  log_info("[GbdtModel.predict_single_estimator] predicted_sample_size = " +
+           std::to_string(predicted_sample_size));
   // if active party, compute the encrypted dummy predictor and broadcast
   // init the encrypted predicted_labels with dummy prediction by 2 * precision
-  auto* raw_predictions = new EncodedNumber[predicted_sample_size];
+  auto *raw_predictions = new EncodedNumber[predicted_sample_size];
   if (party.party_type == falcon::ACTIVE_PARTY) {
     log_info("dummy predictor = " + std::to_string(dummy_predictors[0]));
     for (int i = 0; i < predicted_sample_size; i++) {
       raw_predictions[i].set_double(phe_pub_key->n[0], dummy_predictors[0],
-                                     2 * PHE_FIXED_POINT_PRECISION);
-      djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
-                         raw_predictions[i], raw_predictions[i]);
+                                    2 * PHE_FIXED_POINT_PRECISION);
+      djcs_t_aux_encrypt(phe_pub_key, party.phe_random, raw_predictions[i],
+                         raw_predictions[i]);
     }
   }
-  broadcast_encoded_number_array(party, raw_predictions, predicted_sample_size, ACTIVE_PARTY_ID);
+  broadcast_encoded_number_array(party, raw_predictions, predicted_sample_size,
+                                 ACTIVE_PARTY_ID);
   // iterate for each tree in gbdt_trees and predict
   for (int t = 0; t < tree_size; t++) {
     // predict for tree t, obtain the predicted labels, should be precision
     auto *predicted_labels_tree_t = new EncodedNumber[predicted_sample_size];
-    gbdt_trees[t].predict(party, predicted_samples,
-                          predicted_sample_size, predicted_labels_tree_t);
+    gbdt_trees[t].predict(party, predicted_samples, predicted_sample_size,
+                          predicted_labels_tree_t);
     // add the current predicted labels
     EncodedNumber encoded_learning_rate;
     encoded_learning_rate.set_double(phe_pub_key->n[0], learning_rate);
@@ -103,10 +129,10 @@ void GbdtModel::predict_single_estimator(Party &party,
     for (int i = 0; i < predicted_sample_size; i++) {
       djcs_t_aux_ep_mul(phe_pub_key, predicted_labels_tree_t[i],
                         predicted_labels_tree_t[i], encoded_learning_rate);
-      djcs_t_aux_ee_add(phe_pub_key, raw_predictions[i],
-                        raw_predictions[i], predicted_labels_tree_t[i]);
+      djcs_t_aux_ee_add(phe_pub_key, raw_predictions[i], raw_predictions[i],
+                        predicted_labels_tree_t[i]);
     }
-    delete [] predicted_labels_tree_t;
+    delete[] predicted_labels_tree_t;
   }
   if (tree_type == falcon::REGRESSION) {
     for (int i = 0; i < predicted_sample_size; i++) {
@@ -115,39 +141,40 @@ void GbdtModel::predict_single_estimator(Party &party,
   } else {
     // call expit function to compute probabilities based on the raw_predictions
     int binary_classification_class_num = 1;
-    compute_raw_predictions_expit(party, raw_predictions,
-                                  predicted_labels, predicted_sample_size,
-                                  binary_classification_class_num,
-                                  2 * PHE_FIXED_POINT_PRECISION);
+    compute_raw_predictions_expit(
+        party, raw_predictions, predicted_labels, predicted_sample_size,
+        binary_classification_class_num, 2 * PHE_FIXED_POINT_PRECISION);
   }
   // free memory
   djcs_t_free_public_key(phe_pub_key);
-  delete [] raw_predictions;
+  delete[] raw_predictions;
 }
 
-void GbdtModel::predict_multi_estimator(Party &party,
-                                        const std::vector<std::vector<double>>& predicted_samples,
-                                        int predicted_sample_size,
-                                        EncodedNumber *predicted_labels) {
+void GbdtModel::predict_multi_estimator(
+    Party &party, const std::vector<std::vector<double>> &predicted_samples,
+    int predicted_sample_size, EncodedNumber *predicted_labels) {
   /// the predict method works as follows:
   /// 1. init the dummy predictor for each estimator and add to predicted_labels
-  /// 2. for each tree of each estimator in gbdt_trees, predict, multiply learning
+  /// 2. for each tree of each estimator in gbdt_trees, predict, multiply
+  /// learning
   ///    rate and add to predicted_labels
   /// 3. compute the softmax of the predictions and return the predicted labels
 
   // retrieve phe pub key and phe random
-  djcs_t_public_key* phe_pub_key = djcs_t_init_public_key();
+  djcs_t_public_key *phe_pub_key = djcs_t_init_public_key();
   party.getter_phe_pub_key(phe_pub_key);
   // if active party, compute the encrypted dummy predictors and broadcast
   // init the encrypted predicted_labels with dummy prediction by 2 * precision
-  auto* raw_predictions = new EncodedNumber[predicted_sample_size * class_num];
+  auto *raw_predictions = new EncodedNumber[predicted_sample_size * class_num];
   if (party.party_type == falcon::ACTIVE_PARTY) {
     for (int c = 0; c < class_num; c++) {
-      log_info("dummy predictor " + std::to_string(c) + " = " + std::to_string(dummy_predictors[c]));
+      log_info("dummy predictor " + std::to_string(c) + " = " +
+               std::to_string(dummy_predictors[c]));
       for (int i = 0; i < predicted_sample_size; i++) {
         int real_id = c * predicted_sample_size + i;
-        raw_predictions[real_id].set_double(phe_pub_key->n[0], dummy_predictors[0],
-                                      2 * PHE_FIXED_POINT_PRECISION);
+        raw_predictions[real_id].set_double(phe_pub_key->n[0],
+                                            dummy_predictors[0],
+                                            2 * PHE_FIXED_POINT_PRECISION);
         djcs_t_aux_encrypt(phe_pub_key, party.phe_random,
                            raw_predictions[real_id], raw_predictions[real_id]);
       }
@@ -164,7 +191,8 @@ void GbdtModel::predict_multi_estimator(Party &party,
       // predict for tree t, obtain the predicted labels, should be precision
       auto *predicted_labels_tree_t = new EncodedNumber[predicted_sample_size];
       gbdt_trees[read_tree_id].predict(party, predicted_samples,
-                            predicted_sample_size, predicted_labels_tree_t);
+                                       predicted_sample_size,
+                                       predicted_labels_tree_t);
       // add the current predicted labels
       EncodedNumber encoded_learning_rate;
       encoded_learning_rate.set_double(phe_pub_key->n[0], learning_rate);
@@ -176,15 +204,14 @@ void GbdtModel::predict_multi_estimator(Party &party,
         djcs_t_aux_ee_add(phe_pub_key, raw_predictions[real_id],
                           raw_predictions[real_id], predicted_labels_tree_t[i]);
       }
-      delete [] predicted_labels_tree_t;
+      delete[] predicted_labels_tree_t;
     }
   }
   // call expit function to compute probabilities based on the raw_predictions
-  compute_raw_predictions_softmax(party, raw_predictions,
-                                  predicted_labels, predicted_sample_size,
-                                  class_num,
+  compute_raw_predictions_softmax(party, raw_predictions, predicted_labels,
+                                  predicted_sample_size, class_num,
                                   2 * PHE_FIXED_POINT_PRECISION);
   // free memory
   djcs_t_free_public_key(phe_pub_key);
-  delete [] raw_predictions;
+  delete[] raw_predictions;
 }

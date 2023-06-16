@@ -13,8 +13,9 @@
  * @param weights: if weights vector is given, compute weighted mse
  * @return
  */
-double mean_squared_error(std::vector<double> a, std::vector<double> b,
-                          const std::vector<double>& weights = std::vector<double>());
+double
+mean_squared_error(std::vector<double> a, std::vector<double> b,
+                   const std::vector<double> &weights = std::vector<double>());
 
 /**
  * given two vectors, compute the mean squared log error
@@ -26,8 +27,9 @@ double mean_squared_error(std::vector<double> a, std::vector<double> b,
  * @param weights: if weights vector is given, compute weighted mse
  * @return
  */
-double mean_squared_log_error(std::vector<double> a, std::vector<double> b,
-                              const std::vector<double>& weights = std::vector<double>());
+double mean_squared_log_error(
+    std::vector<double> a, std::vector<double> b,
+    const std::vector<double> &weights = std::vector<double>());
 
 /**
  * given two vectors, compute the median absolute error
@@ -103,7 +105,7 @@ double logistic_regression_loss(std::vector<double> pred_probs,
  * @param inputs
  * @return
  */
-double mode(const std::vector<double>& inputs);
+double mode(const std::vector<double> &inputs);
 
 /**
  * find the median value of a vector.
@@ -115,7 +117,7 @@ double mode(const std::vector<double>& inputs);
  * @param vec
  * @return
  */
-double median(std::vector<double>& inputs);
+double median(std::vector<double> &inputs);
 
 /**
  * compute the average value of a vector
@@ -141,7 +143,7 @@ double square_sum(std::vector<double> a, std::vector<double> b);
  * @param k find top k from a
  * @return
  */
-std::vector<int> find_top_k_indexes(const std::vector<double>& a, int k);
+std::vector<int> find_top_k_indexes(const std::vector<double> &a, int k);
 
 /**
  * revert the global index given a 2-dimensional index (id, j)
@@ -151,7 +153,7 @@ std::vector<int> find_top_k_indexes(const std::vector<double>& a, int k);
  * @param idx: the index in local vector
  * @return
  */
-int global_idx(const std::vector<int>& a, int id, int idx);
+int global_idx(const std::vector<int> &a, int id, int idx);
 
 /**
  * Compare which one is bigger
@@ -159,14 +161,15 @@ int global_idx(const std::vector<int>& a, int id, int idx);
  * @param b
  * @return
  */
-bool MyComp(std::pair<double,int> a, std::pair<double,int> b);
+bool MyComp(std::pair<double, int> a, std::pair<double, int> b);
 
 /**
  *  Return the top K value's index in a list
  *  Create a pair of vectors, one for the values and one for the indices.
- *  Iterate through the original vector and for each element, add the value and its index to the pair of vectors.
- *  Sort the pair of vectors in descending order based on the values.
- *  Take the first K elements from the sorted pair of vectors. These will be the K largest values and their indices.
+ *  Iterate through the original vector and for each element, add the value and
+ * its index to the pair of vectors. Sort the pair of vectors in descending
+ * order based on the values. Take the first K elements from the sorted pair of
+ * vectors. These will be the K largest values and their indices.
  * @param a: the number of elements in each id vector
  * @param id: the id of local vector
  * @param idx: the index in local vector
@@ -180,16 +183,19 @@ std::vector<int> index_of_top_k_in_vector(std::vector<double> vec, int K);
  * @param partition_size how many ele in each partition .
  * @return
  */
-std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbers, int partition_size);
+std::vector<std::vector<int>>
+partition_vec_evenly(const std::vector<int> &numbers, int partition_size);
 
 /**
  * partition numbers into multiple vector in a balanced manner
  * so that each vector contains a specific proportion of each party
- * @param numbers: size is party num, each value the number of elements in each party
+ * @param numbers: size is party num, each value the number of elements in each
+ * party
  * @param num_partition
  * @return
  */
-std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& numbers, int num_partition);
+std::vector<std::vector<int>>
+partition_vec_balanced(const std::vector<int> &numbers, int num_partition);
 
 /**
  * find the index of a value in a vector
@@ -197,7 +203,7 @@ std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& num
  * @param ele
  * @return
  */
-int find_idx_in_vec(const std::vector<int>& vec, int ele);
+int find_idx_in_vec(const std::vector<int> &vec, int ele);
 
 /**
  * compute the combination c_n^r
@@ -207,4 +213,4 @@ int find_idx_in_vec(const std::vector<int>& vec, int ele);
  */
 long long combination(long long n, long long r);
 
-#endif  // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_
+#endif // FALCON_SRC_EXECUTOR_UTILS_MATH_MATH_OPS_H_

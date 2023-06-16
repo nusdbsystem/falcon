@@ -13,7 +13,8 @@
  * @param mat: the matrix to be converted
  * @return the converted 1d vector
  */
-std::vector<double> flatten_2d_vector(const std::vector<std::vector<double>>& mat);
+std::vector<double>
+flatten_2d_vector(const std::vector<std::vector<double>> &mat);
 
 /**
  * expend a 1d vector into a 2d vector (matrix)
@@ -23,9 +24,8 @@ std::vector<double> flatten_2d_vector(const std::vector<std::vector<double>>& ma
  * @param column_size: the column size of the matrix to be expended
  * @return
  */
-std::vector<std::vector<double>> expend_1d_vector(
-    const std::vector<double>& vec,
-    int row_size, int column_size);
+std::vector<std::vector<double>>
+expend_1d_vector(const std::vector<double> &vec, int row_size, int column_size);
 
 /**
  * transpose a matrix
@@ -33,6 +33,7 @@ std::vector<std::vector<double>> expend_1d_vector(
  * @param mat: the matrix to be transposed, i.e., 2d vector
  * @return
  */
-std::vector<std::vector<double>> trans_mat(const std::vector<std::vector<double>>& mat);
+std::vector<std::vector<double>>
+trans_mat(const std::vector<std::vector<double>> &mat);
 
-#endif //FALCON_INCLUDE_FALCON_UTILS_ALG_VEC_UTIL_H_
+#endif // FALCON_INCLUDE_FALCON_UTILS_ALG_VEC_UTIL_H_

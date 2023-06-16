@@ -5,9 +5,9 @@
 #ifndef FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_COMMON_CONVERTER_H_
 #define FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_COMMON_CONVERTER_H_
 
-#include <vector>
-#include <string>
 #include <falcon/operator/phe/fixed_point_encoder.h>
+#include <string>
+#include <vector>
 
 /**
  * serialize int array proto message
@@ -15,7 +15,7 @@
  * @param vec: input int vector
  * @param output_message: serialized string
  */
-void serialize_int_array(std::vector<int> vec, std::string& output_message);
+void serialize_int_array(std::vector<int> vec, std::string &output_message);
 
 /**
  * deserialize int array proto message
@@ -23,7 +23,8 @@ void serialize_int_array(std::vector<int> vec, std::string& output_message);
  * @param vec: deserialized int vector
  * @param input_message: serialized string
  */
-void deserialize_int_array(std::vector<int>& vec, const std::string& input_message);
+void deserialize_int_array(std::vector<int> &vec,
+                           const std::string &input_message);
 
 /**
  * serialize double array proto message
@@ -31,7 +32,8 @@ void deserialize_int_array(std::vector<int>& vec, const std::string& input_messa
  * @param vec: input double vector
  * @param output_message: serialized string
  */
-void serialize_double_array(std::vector<double> vec, std::string& output_message);
+void serialize_double_array(std::vector<double> vec,
+                            std::string &output_message);
 
 /**
  * deserialize double array proto message
@@ -39,7 +41,8 @@ void serialize_double_array(std::vector<double> vec, std::string& output_message
  * @param vec: deserialized double vector
  * @param input_message: serialized string
  */
-void deserialize_double_array(std::vector<double>& vec, const std::string& input_message);
+void deserialize_double_array(std::vector<double> &vec,
+                              const std::string &input_message);
 
 /**
  * serialize double matrix proto message
@@ -47,7 +50,8 @@ void deserialize_double_array(std::vector<double>& vec, const std::string& input
  * @param mat: input double matrix
  * @param output_message: serialized string
  */
-void serialize_double_matrix(std::vector< std::vector<double> > mat, std::string& output_message);
+void serialize_double_matrix(std::vector<std::vector<double>> mat,
+                             std::string &output_message);
 
 /**
  * deserialize double matrix proto message
@@ -55,7 +59,8 @@ void serialize_double_matrix(std::vector< std::vector<double> > mat, std::string
  * @param mat: deserialized double matrix
  * @param input_message: serialized string
  */
-void deserialize_double_matrix(std::vector< std::vector<double> >& mat, const std::string& input_message);
+void deserialize_double_matrix(std::vector<std::vector<double>> &mat,
+                               const std::string &input_message);
 
 /**
  * serialize encoded number
@@ -63,7 +68,8 @@ void deserialize_double_matrix(std::vector< std::vector<double> >& mat, const st
  * @param number: an EncodedNumber
  * @param output_message: serialized string
  */
-void serialize_encoded_number(const EncodedNumber& number, std::string& output_message);
+void serialize_encoded_number(const EncodedNumber &number,
+                              std::string &output_message);
 
 /**
  * deserialize encoded number
@@ -71,7 +77,8 @@ void serialize_encoded_number(const EncodedNumber& number, std::string& output_m
  * @param number: an EncodedNumber
  * @param input_message: serialized string
  */
-void deserialize_encoded_number(EncodedNumber& number, const std::string& input_message);
+void deserialize_encoded_number(EncodedNumber &number,
+                                const std::string &input_message);
 
 /**
  * serialize encoded number array
@@ -80,7 +87,8 @@ void deserialize_encoded_number(EncodedNumber& number, const std::string& input_
  * @param size: size of array
  * @param output_message: serialized string
  */
-void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::string& output_message);
+void serialize_encoded_number_array(EncodedNumber *number_array, int size,
+                                    std::string &output_message);
 
 /**
  * deserialize encoded number array
@@ -89,7 +97,8 @@ void serialize_encoded_number_array(EncodedNumber* number_array, int size, std::
  * @param size: size of array (need to specify before deserialization)
  * @param input_message: serialized string
  */
-void deserialize_encoded_number_array(EncodedNumber* number_array, int size, const std::string& input_message);
+void deserialize_encoded_number_array(EncodedNumber *number_array, int size,
+                                      const std::string &input_message);
 
 /**
  * serialize encoded number matrix
@@ -99,7 +108,9 @@ void deserialize_encoded_number_array(EncodedNumber* number_array, int size, con
  * @param column_size: column number
  * @param output_message: serialized string
  */
-void serialize_encoded_number_matrix(EncodedNumber** number_matrix, int row_size, int column_size, std::string& output_message);
+void serialize_encoded_number_matrix(EncodedNumber **number_matrix,
+                                     int row_size, int column_size,
+                                     std::string &output_message);
 
 /**
  * deserialize encoded number array
@@ -108,6 +119,8 @@ void serialize_encoded_number_matrix(EncodedNumber** number_matrix, int row_size
  * @param size: size of array (need to specify before deserialization)
  * @param input_message: serialized string
  */
-void deserialize_encoded_number_matrix(EncodedNumber** number_matrix, int row_size, int column_size, const std::string& input_message);
+void deserialize_encoded_number_matrix(EncodedNumber **number_matrix,
+                                       int row_size, int column_size,
+                                       const std::string &input_message);
 
-#endif //FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_COMMON_CONVERTER_H_
+#endif // FALCON_SRC_EXECUTOR_UTILS_PB_CONVERTER_COMMON_CONVERTER_H_

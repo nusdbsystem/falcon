@@ -1,12 +1,17 @@
 # Falcon
 
-Falcon is a federated learning system with strong privacy protection. It allows
-multiple parties to collaboratively train a variety of machine learning models, 
-serve for new requests, and calculate the interpretability.
+Falcon is a privacy-preserving and interpretable vertical federated learning system. It allows 
+multiple parties to collaboratively train a variety of machine learning models, such as linear 
+regression, logistic regression, decision tree, random forest, gradient boosting decision tree, 
+and multi-layer perceptron models. The protection is achieved by a hybrid strategy of threshold 
+partially homomorphic encryption (PHE) and additive secret sharing scheme (SSS), ensuring no 
+intermediate information disclosure. Also, it supports prediction interpretability, which gives 
+the parties an explanation on how the prediction is interpreted. Besides, it supports efficient data 
+parallelism of the tasks to reduce the execution time.
 
 ## Prerequisites
 
-* Ubuntu 18.04
+* Ubuntu 18.04 
 
 * install partially homomorphic encryption library **libhcs**.
 
@@ -14,19 +19,30 @@ serve for new requests, and calculate the interpretability.
 
 * install web server request handling library **[served](https://github.com/meltwater/served)**.
 
+Note: if you are using docker image to run the examples, it is not needed to install these dependencies,
+because they are already installed in the docker image. 
+
+* install docker on the host machine.
 
 ## Run an example with Docker at local
 
 ### Build the docker image
 
-Go to the `deployment` folder, and run the following command to build the docker image:
+Go to the `tools/deployment` folder, and run the following command to build the docker image:
 
 ```bash
 docker build --network=host -t falcon:latest -f ./ubuntu18.04-falcon.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg CACHEBUST="$(date +%s)"
 ```
 
-It may take a long time to build this image as it needs to download a number of 
+It may take more than 1 hour to build this image as it needs to download a number of 
 dependencies and build the MP-SPDZ programs for running the test examples. 
+
+Alternatively, you can pull the built image and tag it with the name in each party's config `config_partyserver`:
+
+```bash
+docker pull lemonwyc/falcon-pub:latest
+docker tag lemonwyc/falcon-pub:latest falcon:latest
+```
 
 ### Install Go and source environment
 
@@ -52,8 +68,8 @@ bash examples/3party/coordinator/debug_coord.sh
 
 # start three parties
 bash examples/3party/party0/debug_partyserver.sh --partyID 0
-bash examples/3party/party0/debug_partyserver.sh --partyID 1
-bash examples/3party/party0/debug_partyserver.sh --partyID 2
+bash examples/3party/party1/debug_partyserver.sh --partyID 1
+bash examples/3party/party2/debug_partyserver.sh --partyID 2
 ```
 
 ### Submit and run the job
@@ -69,7 +85,7 @@ python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path /opt/fa
 
 If the job is successfully submitted, it will return a job ID. You can query the status of this job using 
 the `coordinator_client.py` script, go to the log folder to check the LOGs, or use `docker service ls` to 
-view the containers. After the job finished, can clean the docker containers using:
+view the containers. After the job is finished, can clean the docker containers using:
 
 ```shell
 bash src/falcon_platform/scripts/docker_service_rm_all_container.sh
@@ -87,7 +103,7 @@ sudo snap install docker
 sudo chmod 666 /var/run/docker.sock
 
 docker swarm init --advertise-addr xxx.xxx.xxx.xxx
-docker swarm join --token xxx 172.31.18.73:2377
+docker swarm 
 docker node promote xxx
 docker node demote xxx
 docker node update --label-add name=p0w0 xxx
@@ -147,9 +163,9 @@ the coordinator IP address and port, for example `--url 172.31.18.73:30004`.
 Current development follows the current patterns:
 
 1. Edit falcon or `MPC`  locally and `git commit` to corresponding `github`
-2. Review the `dockerfile` in `/deployment/ubuntu18.04-falcon.Dockerfile`:
+2. Review the `dockerfile` in `/tools/deployment/ubuntu18.04-falcon.Dockerfile`:
     1. If some`MPC` code is updated, change the docker file line 283-286
-    2. Build locally with `cd deployment && docker build -t falcon-clean:latest -f ./ubuntu18.04-falcon.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg CACHEBUST="$(date +%s)"`
+    2. Build locally with `cd tools/deployment && docker build -t falcon:latest -f ./ubuntu18.04-falcon.Dockerfile . --build-arg SSH_PRIVATE_KEY="$(cat ~/.ssh/id_rsa)" --build-arg CACHEBUST="$(date +%s)"`
 3. Now the code is updated to the docker container.
 4. Start the platform and submit the job according the following tutorials
 5. If the `MPC` program is stable, then move the line 283-386 before the `ARG CACHEBUST=1` to avoid repeatly compile `MPC`
@@ -163,121 +179,13 @@ Current development follows the current patterns:
    e,g.  server 0 with `bash examples/3party/party0/debug_partyserver.sh --partyID 0`
 
 
-## Quick Setup
 
-* build the falcon_platform
+## Citation
 
-```shell script
-# launch the coordinator and partyserver 0~2
-bash src/falcon_platform/scripts/dev_start_all.sh --partyCount 3
+If you use our code in your research, please kindly cite:
+```
+TBD.
 ```
 
-* build the executor
-
-```shell script
-# start the 3 semi-party.x simulating 3 parties
-bash src/falcon_platform/scripts/start_semi-party012.sh
-
-# build falcon executor
-bash tools/scripts/build_executor.sh
-```
-
-* prepare data and json file for training or inference (default dataset
-  is under data/dataset/bank_marketing_data/ and default job is under
-  src/falcon_platform/train_jobs/three_parties_train_job.json)
-
-* submit train job to coordinator
-
-```shell script
-cd src/falcon_platform
-# UCI tele-marketing bank dataset
-python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_banktele.json
-# UCI breast cancer dataset
-python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path ./train_jobs/three_parties_train_job_breastcancer.json
-```
-
-* after training, find the saved model and report under
-  data/dataset/bank_marketing_data/client0/
-
-* terminate coordinator and partyserver
-
-```shell script
-bash src/falcon_platform/scripts/dev_terminate_all.sh --partyCount 3
-```
-
-## Run debug mode on the cluster
-
-* create docker swarm service on the cluster
-
-* source the go environment on the coordinator and each party server
-
-```shell
-export PATH=$PATH:${YOUR_GO_BIN_PATH}/go/bin
-export GOROOT=${YOUR_GO_ROOT}/go
-export GOPATH=${YOUR_GO_PATH}/gopath
-export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-export PATH=/root/.local/bin:$PATH
-```
-
-* configure the `COORD_SERVER_IP` and `COORD_SERVER_PORT` in `src/falcon_platform/config_coord.properties`, for example
-
-```shell
-JOB_DATABASE=sqlite3
-COORD_SERVER_IP=10.0.0.20
-COORD_SERVER_PORT=30004
-# if COORD_SERVER_BASEPATH is not supplied, will default to LOG_PATH later in start_all script
-COORD_SERVER_BASEPATH="/opt/falcon/src/falcon_platform"
-# number of consumers for the coord http server
-N_CONSUMER=3
-```
-
-* start the coordinator by
-
-```shell
-cd src/falcon_platform
-bash scripts/debug_coord.sh
-```
-
-* configure the docker swarm cluster for each party server, for example
-
-```shell
-COORD_SERVER_IP=10.0.0.20
-COORD_SERVER_PORT=30004
-PARTY_SERVER_IP=10.0.0.24
-# Only used when deployment method is docker,
-# When party server is a cluster with many servers, list all servers here,
-# PARTY_SERVER_IP is the first element in PARTY_SERVER_CLUSTER_IPS
-PARTY_SERVER_CLUSTER_IPS="10.0.0.24 10.0.0.32 10.0.0.33 10.0.0.34"
-# label each node of cluster when launch the cluster,and list all node's label here, used to do schedule.
-PARTY_SERVER_CLUSTER_LABEL="p2 p2w0 p2w1 p2w2"
-# if PARTY_SERVER_BASEPATH must be supported, it should be the absolute path
-PARTY_SERVER_BASEPATH="/opt/falcon/src/falcon_platform"
-# subprocess call paths
-MPC_EXE_PATH="/opt/falcon/third_party/MP-SPDZ/semi-party.x"
-FL_ENGINE_PATH="/opt/falcon/build/src/executor/falcon
-```
-
-* label the swarm nodes, for example
-
-```shell
-docker node update --label-add name=p0 [node-name]
-```
-
-* start each party server on the corresponding machine by
-
-```shell
-bash scripts/debug_partyserver.sh --partyID 0
-```
-
-* configure the parameters in the job json file, such as data path, if distributed, etc. submit the job by
-
-```shell
-python3 coordinator_client.py --url 10.0.0.20:30004 -method submit -path ./examples/train_job_dsls/three_parties_train_job_bank_distributed.json
-```
-
-* after submitting the job, can check the docker service is running correctly by
-
-```shell
-docker service ls 
-bash scripts/docker_swarm_check.sh
-```
+## Contact
+To ask questions or report issues, please drop us an [email](mailto:lemonwyc@gmail.com).

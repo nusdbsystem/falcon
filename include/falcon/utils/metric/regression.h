@@ -12,7 +12,7 @@
 class RegressionMetrics {
   // inspired by scikit-learn's:
   // https://scikit-learn.org/stable/modules/model_evaluation.html
- public:
+public:
   // mean squared error = average of (Y-\hat{Y})^2
   double mse{};
 
@@ -41,12 +41,12 @@ class RegressionMetrics {
    * @param labels: the original labels
    * @param sample_weights: the weights of samples
    */
-  void compute_metrics(const std::vector<double>& predictions,
-                       const std::vector<double>& labels,
-                       const std::vector<double>& sample_weights = std::vector<double>());
+  void compute_metrics(
+      const std::vector<double> &predictions, const std::vector<double> &labels,
+      const std::vector<double> &sample_weights = std::vector<double>());
 
   // print the classifier performance report
-  void regression_report(std::ofstream& outfile);
+  void regression_report(std::ofstream &outfile);
 };
 
-#endif //FALCON_INCLUDE_FALCON_UTILS_METRIC_REGRESSION_H_
+#endif // FALCON_INCLUDE_FALCON_UTILS_METRIC_REGRESSION_H_

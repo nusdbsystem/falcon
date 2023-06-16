@@ -1,19 +1,43 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 // math operations
 
+#include <algorithm>
+#include <cmath>
 #include <falcon/common.h>
+#include <falcon/utils/logger/logger.h>
+#include <falcon/utils/math/math_ops.h>
 #include <glog/logging.h>
 #include <google/protobuf/io/coded_stream.h>
+#include <iomanip> // std::setprecision
 #include <iostream>
-#include<vector>
-#include<algorithm>
-#include <cmath>
-#include <iomanip>   // std::setprecision
-#include <iostream>  // std::cout
+#include <iostream> // std::cout
 #include <map>
 #include <numeric>
-#include <falcon/utils/math/math_ops.h>
 #include <queue>
-#include <falcon/utils/logger/logger.h>
+#include <vector>
 
 inline void check_vectors(std::vector<double> a, std::vector<double> b,
                           const std::vector<double> &weights) {
@@ -33,7 +57,8 @@ double mean_squared_error(std::vector<double> a, std::vector<double> b,
   double squared_error = 0.0, mean_squared_error = 0.0;
   for (int i = 0; i < num; i++) {
     if (!weights.empty()) {
-      squared_error = squared_error + weights[i] * (a[i] - b[i]) * (a[i] - b[i]);
+      squared_error =
+          squared_error + weights[i] * (a[i] - b[i]) * (a[i] - b[i]);
     } else {
       squared_error = squared_error + (a[i] - b[i]) * (a[i] - b[i]);
     }
@@ -41,7 +66,8 @@ double mean_squared_error(std::vector<double> a, std::vector<double> b,
 
   if (!weights.empty()) {
     double weights_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
-    // mean_squared_error = squared_error / (num * weights_sum); // do not use num here
+    // mean_squared_error = squared_error / (num * weights_sum); // do not use
+    // num here
     mean_squared_error = squared_error / weights_sum;
   } else {
     mean_squared_error = squared_error / num;
@@ -59,22 +85,24 @@ double mean_squared_log_error(std::vector<double> a, std::vector<double> b,
     b[i] = log1p(b[i]);
   }
   return mean_squared_error(a, b, weights);
-//  for (int i = 0; i < num; i++) {
-//    // need to make sure value is less than negative 1
-//    double log_error_i = log1p(a[i]) - log1p(b[i]);
-//    if (!weights.empty()) {
-//      squared_log_error = squared_log_error + weights[i] * log_error_i * log_error_i;
-//    } else {
-//      squared_log_error = squared_log_error + log_error_i * log_error_i;
-//    }
-//  }
-//
-//  if (!weights.empty()) {
-//    double weights_sum = std::accumulate(weights.begin(), weights.end(),0.0);
-//    mean_squared_log_error = squared_log_error / (num * weights_sum);
-//  } else {
-//    mean_squared_log_error = squared_log_error / num;
-//  }
+  //  for (int i = 0; i < num; i++) {
+  //    // need to make sure value is less than negative 1
+  //    double log_error_i = log1p(a[i]) - log1p(b[i]);
+  //    if (!weights.empty()) {
+  //      squared_log_error = squared_log_error + weights[i] * log_error_i *
+  //      log_error_i;
+  //    } else {
+  //      squared_log_error = squared_log_error + log_error_i * log_error_i;
+  //    }
+  //  }
+  //
+  //  if (!weights.empty()) {
+  //    double weights_sum = std::accumulate(weights.begin(),
+  //    weights.end(),0.0); mean_squared_log_error = squared_log_error / (num *
+  //    weights_sum);
+  //  } else {
+  //    mean_squared_log_error = squared_log_error / num;
+  //  }
   return mean_squared_log_error;
 }
 
@@ -134,7 +162,7 @@ double logistic_function(double logit) {
   // Input logit to the logistic function
   // logistic function is a sigmoid function (S-shaped)
   // logistic function outputs an estimated probability between 0 and 1
-  double est_prob;  // estimated probability
+  double est_prob; // estimated probability
   est_prob = 1.0 / (1 + exp(0 - logit));
   return est_prob;
 }
@@ -168,8 +196,8 @@ double logistic_regression_loss(std::vector<double> pred_probs,
     }
     // std::cout << "est_prob = " << std::setprecision(17) << est_prob << "\n";
 
-    loss_i += (double) (labels[i] * log(est_prob));
-    loss_i += (double) ((1.0 - labels[i]) * log(1.0 - est_prob));
+    loss_i += (double)(labels[i] * log(est_prob));
+    loss_i += (double)((1.0 - labels[i]) * log(1.0 - est_prob));
     loss_sum += loss_i;
     // if (i < 5) {
     //   std::cout << "predicted probability = " << std::setprecision(17) <<
@@ -206,7 +234,7 @@ double mode(const std::vector<double> &inputs) {
 }
 
 double median(std::vector<double> &inputs) {
-  int vec_size = (int) inputs.size();
+  int vec_size = (int)inputs.size();
   double median_value = 0.0;
   int n = vec_size / 2;
   nth_element(inputs.begin(), inputs.begin() + n, inputs.end());
@@ -235,7 +263,7 @@ double square_sum(std::vector<double> a, std::vector<double> b) {
                   "vectors not same";
     exit(EXIT_FAILURE);
   }
-  for (int i = 0; i < (int) a.size(); i++) {
+  for (int i = 0; i < (int)a.size(); i++) {
     double diff = a[i] - b[i];
     ss += (diff * diff);
   }
@@ -243,11 +271,13 @@ double square_sum(std::vector<double> a, std::vector<double> b) {
 }
 
 std::vector<int> find_top_k_indexes(const std::vector<double> &a, int k) {
-  // from: https://stackoverflow.com/questions/14902876/indices-of-the-k-largest-elements-in-an-unsorted-length-n-array/23486017
+  // from:
+  // https://stackoverflow.com/questions/14902876/indices-of-the-k-largest-elements-in-an-unsorted-length-n-array/23486017
   std::vector<int> indexes;
   std::priority_queue<std::pair<double, int>,
-                      std::vector<std::pair<double, int> >,
-                      std::greater<std::pair<double, int> > > q;
+                      std::vector<std::pair<double, int>>,
+                      std::greater<std::pair<double, int>>>
+      q;
   for (int i = 0; i < a.size(); ++i) {
     if (q.size() < k)
       q.push(std::pair<double, int>(a[i], i));
@@ -262,15 +292,15 @@ std::vector<int> find_top_k_indexes(const std::vector<double> &a, int k) {
     res[k - i - 1] = q.top().second;
     q.pop();
   }
-//  for (int i = 0; i < k; ++i) {
-//    std::cout<< res[i] <<std::endl;
-//  }
+  //  for (int i = 0; i < k; ++i) {
+  //    std::cout<< res[i] <<std::endl;
+  //  }
   return res;
 }
 
 int global_idx(const std::vector<int> &a, int id, int idx) {
   int count = 0;
-  int size = (int) a.size();
+  int size = (int)a.size();
   if (id >= size || idx >= a[id]) {
     LOG(ERROR) << "The input id and idx are invalid";
     exit(EXIT_FAILURE);
@@ -283,7 +313,8 @@ int global_idx(const std::vector<int> &a, int id, int idx) {
 }
 
 bool MyComp(std::pair<double, int> a, std::pair<double, int> b) {
-  if (a.first >= b.first) return true;
+  if (a.first >= b.first)
+    return true;
   return false;
 }
 
@@ -291,10 +322,11 @@ std::vector<int> index_of_top_k_in_vector(std::vector<double> vMetric, int K) {
   // vec is the original vector
   std::vector<std::pair<double, int>> vMetricWithIndex;
   vMetricWithIndex.reserve(vMetric.size());
-  for (int i = 0; i < vMetric.size(); ++i) vMetricWithIndex.emplace_back(vMetric[i], i);
+  for (int i = 0; i < vMetric.size(); ++i)
+    vMetricWithIndex.emplace_back(vMetric[i], i);
   sort(vMetricWithIndex.begin(), vMetricWithIndex.end(), MyComp);
   std::vector<int> result;
-  for (auto i:vMetricWithIndex) {
+  for (auto i : vMetricWithIndex) {
     std::cout << "Element :" << i.first << " | Index:" << i.second << std::endl;
     result.push_back(i.second);
   }
@@ -305,10 +337,13 @@ std::vector<int> index_of_top_k_in_vector(std::vector<double> vMetric, int K) {
   return first_k;
 }
 
-std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbers, int num_partition) {
+std::vector<std::vector<int>>
+partition_vec_evenly(const std::vector<int> &numbers, int num_partition) {
 
-  int partition_size = static_cast<int>(std::ceil((double) numbers.size() / (double) num_partition ));
-  log_info("[partition_vec_evenly] partition_size = " + std::to_string(partition_size));
+  int partition_size = static_cast<int>(
+      std::ceil((double)numbers.size() / (double)num_partition));
+  log_info("[partition_vec_evenly] partition_size = " +
+           std::to_string(partition_size));
 
   // Create a vector to hold the partitions
   std::vector<std::vector<int>> partitions;
@@ -332,12 +367,14 @@ std::vector<std::vector<int>> partition_vec_evenly(const std::vector<int> &numbe
   return partitions;
 }
 
-std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& numbers, int num_partition) {
+std::vector<std::vector<int>>
+partition_vec_balanced(const std::vector<int> &numbers, int num_partition) {
   // get the number of parties
-  int party_num = (int) numbers.size();
+  int party_num = (int)numbers.size();
   // debug info
   for (int i = 0; i < party_num; i++) {
-    log_info("[partition_vec_balanced] numbers[" + std::to_string(i) + "] = " + std::to_string(numbers[i]));
+    log_info("[partition_vec_balanced] numbers[" + std::to_string(i) +
+             "] = " + std::to_string(numbers[i]));
   }
   std::vector<std::vector<int>> partition_vectors;
   partition_vectors.reserve(num_partition);
@@ -362,15 +399,18 @@ std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& num
   // get the partition size for each party
   std::vector<int> partition_sizes;
   for (int i = 0; i < party_num; i++) {
-    int party_i_partition_size = static_cast<int>(std::ceil((double) numbers[i] / (double) num_partition));
+    int party_i_partition_size =
+        static_cast<int>(std::ceil((double)numbers[i] / (double)num_partition));
     partition_sizes.push_back(party_i_partition_size);
   }
   // debug info
   for (int i = 0; i < party_num; i++) {
-    log_info("[partition_vec_balanced] partition_sizes[" + std::to_string(i) + "] = " + std::to_string(partition_sizes[i]));
+    log_info("[partition_vec_balanced] partition_sizes[" + std::to_string(i) +
+             "] = " + std::to_string(partition_sizes[i]));
   }
 
-  // put each party's global index into partition_vectors according to partition_size
+  // put each party's global index into partition_vectors according to
+  // partition_size
   for (int i = 0; i < party_num; i++) {
     int partition_size = partition_sizes[i];
     int partition_id = 0;
@@ -388,7 +428,7 @@ std::vector<std::vector<int>> partition_vec_balanced(const std::vector<int>& num
   return partition_vectors;
 }
 
-int find_idx_in_vec(const std::vector<int>& vec, int ele) {
+int find_idx_in_vec(const std::vector<int> &vec, int ele) {
   int idx = -1;
   for (int i = 0; i < vec.size(); i++) {
     if (vec[i] == ele) {
@@ -399,10 +439,9 @@ int find_idx_in_vec(const std::vector<int>& vec, int ele) {
   return idx;
 }
 
-long long combination(long long n, long long r)
-{
+long long combination(long long n, long long r) {
   long long f = 1; // Optimize with regFunction
-  for(auto i = 0; i < r;i++)
+  for (auto i = 0; i < r; i++)
     f = (f * (n - i)) / (i + 1);
   return f;
 }

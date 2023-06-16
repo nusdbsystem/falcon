@@ -5,50 +5,48 @@
 #ifndef FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_DT_PS_H_
 #define FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_DT_PS_H_
 
-
 #include "falcon/distributed/parameter_server_base.h"
-#include <falcon/algorithm/vertical/tree//tree_builder.h>
+#include <falcon/algorithm/vertical/tree/tree_builder.h>
 
 #include <utility>
 
-
-class DTParameterServer: public ParameterServer{
- private:
+class DTParameterServer : public ParameterServer {
+private:
   // tree model builder
   DecisionTreeBuilder alg_builder;
   // party
   Party party;
 
- public:
+public:
   /**
-  * constructor
-  * @param m_alg_builder: the module builder
-  * @param m_alg_builder: the module builder
-  * @param m_alg_builder: the module builder
-  */
-  DTParameterServer(const DecisionTreeBuilder& m_alg_builder,
-                    const Party& m_party,
-                    const std::string& ps_network_config_pb_str):
-                    ParameterServer(ps_network_config_pb_str),
-                    alg_builder(m_alg_builder),party(m_party){};
+   * constructor
+   * @param m_alg_builder: the module builder
+   * @param m_alg_builder: the module builder
+   * @param m_alg_builder: the module builder
+   */
+  DTParameterServer(const DecisionTreeBuilder &m_alg_builder,
+                    const Party &m_party,
+                    const std::string &ps_network_config_pb_str)
+      : ParameterServer(ps_network_config_pb_str), alg_builder(m_alg_builder),
+        party(m_party){};
 
   /**
-  * copy constructor
-  * @param obj
-  */
-  DTParameterServer(const DTParameterServer& obj);
+   * copy constructor
+   * @param obj
+   */
+  DTParameterServer(const DTParameterServer &obj);
 
   ~DTParameterServer();
 
- public:
+public:
   /**
-  * partition data by features, and send partitioned data to workers
-  *
-  * @param training_data: split training dataset
-  * @param testing_data: split testing dataset
-  * @param training_labels: split training labels
-  * @param testing_labels: split testing labels
-  */
+   * partition data by features, and send partitioned data to workers
+   *
+   * @param training_data: split training dataset
+   * @param testing_data: split testing dataset
+   * @param training_labels: split training labels
+   * @param testing_labels: split testing labels
+   */
 
   void broadcast_train_test_data(
       const std::vector<std::vector<double>> &training_data,
@@ -56,14 +54,14 @@ class DTParameterServer: public ParameterServer{
       const std::vector<double> &training_labels,
       const std::vector<double> &testing_labels);
 
-
   /**
    * send the phe keys to workers
    */
   void broadcast_phe_keys();
 
   /**
-   * distributed training process, partition data, collect result, update weights
+   * distributed training process, partition data, collect result, update
+   * weights
    */
   void distributed_train() override;
 
@@ -73,14 +71,14 @@ class DTParameterServer: public ParameterServer{
   void build_tree();
 
   /**
-   * distributed evaluation, partition data, collect result, compute evaluation matrix
+   * distributed evaluation, partition data, collect result, compute evaluation
+   * matrix
    *
    * @param eval_type: train data or test data
    * @param report_save_path: the path to save evaluation matrix
    */
-  void distributed_eval(
-      falcon::DatasetType eval_type,
-      const std::string& report_save_path) override;
+  void distributed_eval(falcon::DatasetType eval_type,
+                        const std::string &report_save_path) override;
 
   /**
    * distributed prediction, partition data, collect result, deserialize
@@ -88,24 +86,24 @@ class DTParameterServer: public ParameterServer{
    * @param cur_test_data_indexes: vector of index
    * @param predicted_labels: return value, array of labels
    */
-  void distributed_predict(
-      const std::vector<int>& cur_test_data_indexes,
-      EncodedNumber* predicted_labels) override;
+  void distributed_predict(const std::vector<int> &cur_test_data_indexes,
+                           EncodedNumber *predicted_labels) override;
 
   /**
    * save the trained model
    *
    * @param model_save_file: vector of index
    */
-  void save_model(const std::string& model_save_file) override;
+  void save_model(const std::string &model_save_file) override;
 
- private:
+private:
   /**
    * partition examples according to number of workers
    *
    * @param encoded_msg: encoded message received from worker
    */
-  std::vector<double> retrieve_global_best_split(const std::vector<string>& encoded_msg);
+  std::vector<double>
+  retrieve_global_best_split(const std::vector<string> &encoded_msg);
 
   /**
    * wait until receive all messages returned from worker
@@ -114,10 +112,10 @@ class DTParameterServer: public ParameterServer{
   std::vector<string> wait_worker_complete();
 
   /**
- * partition examples according to number of workers
- *
- * @param batch_indexes: batch's sample index
- */
+   * partition examples according to number of workers
+   *
+   * @param batch_indexes: batch's sample index
+   */
   std::vector<int> partition_examples(std::vector<int> batch_indexes);
 };
 
@@ -127,6 +125,7 @@ class DTParameterServer: public ParameterServer{
  * @param local_best_split_vec: each worker's local best split vector
  * @return
  */
-std::vector<double> find_global_best(const std::vector<std::vector<double>>& local_best_split_vec);
+std::vector<double>
+find_global_best(const std::vector<std::vector<double>> &local_best_split_vec);
 
-#endif //FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_DT_PS_H_
+#endif // FALCON_INCLUDE_FALCON_ALGORITHM_VERTICAL_TREE_DT_PS_H_

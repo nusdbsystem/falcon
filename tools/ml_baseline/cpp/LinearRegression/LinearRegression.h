@@ -4,31 +4,20 @@
 #include <Eigen/Dense>
 #include <vector>
 
-
 using namespace std;
 
-class LinearRegression
-{
+class LinearRegression {
 public:
-    // default constructor，empty function
-    LinearRegression(){}
+  // default constructor，empty function
+  LinearRegression() {}
 
-    // Ordinary Least Square Cost function
-    float OLS_Cost(
-        Eigen::MatrixXd X,
-        Eigen::MatrixXd y,
-        Eigen::MatrixXd theta
-    );
+  // Ordinary Least Square Cost function
+  float OLS_Cost(Eigen::MatrixXd X, Eigen::MatrixXd y, Eigen::MatrixXd theta);
 
-    // gradient descent for cost function OLS
-    tuple<Eigen::VectorXd, vector<float>> GradientDescent(
-        Eigen::MatrixXd X,
-        Eigen::MatrixXd y,
-        Eigen::MatrixXd theta,
-        float learning_rate,
-        int iters
-    );
-
+  // gradient descent for cost function OLS
+  tuple<Eigen::VectorXd, vector<float>>
+  GradientDescent(Eigen::MatrixXd X, Eigen::MatrixXd y, Eigen::MatrixXd theta,
+                  float learning_rate, int iters);
 };
 
 #endif

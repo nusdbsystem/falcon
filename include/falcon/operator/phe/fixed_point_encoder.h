@@ -5,9 +5,9 @@
 #ifndef FALCON_SRC_EXECUTOR_OPERATOR_PHE_FIXED_POINT_ENCODER_H_
 #define FALCON_SRC_EXECUTOR_OPERATOR_PHE_FIXED_POINT_ENCODER_H_
 
-#include "libhcs.h"
-#include "gmp.h"
 #include "falcon/common.h"
+#include "gmp.h"
+#include "libhcs.h"
 #include <vector>
 
 /**
@@ -30,7 +30,7 @@ enum EncodedNumberType { Plaintext, Ciphertext };
 
 // fixed pointed integer representation
 class EncodedNumber {
- private:
+private:
   // max value in public key for encoding
   mpz_t n;
   // the value in mpz_t form
@@ -40,7 +40,7 @@ class EncodedNumber {
   // the encoded number type
   EncodedNumberType type;
 
- public:
+public:
   /**
    * default constructor
    */
@@ -77,21 +77,22 @@ class EncodedNumber {
    * @param v
    * @param precision
    */
-  void set_double(mpz_t pn, double v, int precision = PHE_FIXED_POINT_PRECISION);
+  void set_double(mpz_t pn, double v,
+                  int precision = PHE_FIXED_POINT_PRECISION);
 
   /**
-     * make two EncodedNumber exponent the same for computation
-     * on the same level, only reasonable when two are plaintexts
-     * @param new_exponent
-     */
+   * make two EncodedNumber exponent the same for computation
+   * on the same level, only reasonable when two are plaintexts
+   * @param new_exponent
+   */
   void decrease_exponent(int new_exponent);
 
   /**
-     * given a mpz_t value, increase its exponent for control
-     * NOTE: this function only work for plaintext and will lose some precision
-     * should be used carefully
-     * @param new_exponent
-     */
+   * given a mpz_t value, increase its exponent for control
+   * NOTE: this function only work for plaintext and will lose some precision
+   * should be used carefully
+   * @param new_exponent
+   */
   void increase_exponent(int new_exponent);
 
   /**
@@ -125,9 +126,9 @@ class EncodedNumber {
    * else (max_int < value < n - max_int) then return overflow
    *
    * NOTE: this function only works for the plaintext after decryption,
-   * if an encoded number is not encrypted and decrypted, it should always return
-   * a positive state because we assume the plaintext will never
-   * surpass the max_int of the djcs_t cryptosystem?
+   * if an encoded number is not encrypted and decrypted, it should always
+   * return a positive state because we assume the plaintext will never surpass
+   * the max_int of the djcs_t cryptosystem?
    *
    * @return
    */
@@ -191,7 +192,8 @@ void fixed_pointed_encode(long value, mpz_t res, int &exponent);
  * @param res
  * @param exponent
  */
-void fixed_pointed_encode(double value, int precision, mpz_t res, int &exponent);
+void fixed_pointed_encode(double value, int precision, mpz_t res,
+                          int &exponent);
 
 /**
  * decode a mpz_t to a long value when exponent is 0
@@ -209,25 +211,27 @@ void fixed_pointed_decode(long &value, mpz_t res);
 void fixed_pointed_decode(double &value, mpz_t res, int exponent);
 
 /**
- * decode a mpz_t to a double value when exponent is not 0 with precision truncation
- * NOTE: the truncation can only be applied on plaintexts
+ * decode a mpz_t to a double value when exponent is not 0 with precision
+ * truncation NOTE: the truncation can only be applied on plaintexts
  * @param value
  * @param res
  * @param exponent
- * @param truncated_exponent : truncate the res to desired precision to avoid overflow
+ * @param truncated_exponent : truncate the res to desired precision to avoid
+ * overflow
  */
-void fixed_pointed_decode_truncated(double &value, mpz_t res, int exponent, int truncated_exponent);
+void fixed_pointed_decode_truncated(double &value, mpz_t res, int exponent,
+                                    int truncated_exponent);
 
 /**
  * Convert a two dimension vector into two-d encoded number array
  * @param two_d_vec input two dimension array to be converted
  * @param pn: public key of a party
  * @param exponent: precision in converting a value into encode number
- * @return two dimension encoded number with each value encoding using pn and exponent
+ * @return two dimension encoded number with each value encoding using pn and
+ * exponent
  */
 void metrics_to_encoded_num(EncodedNumber **result,
                             const std::vector<std::vector<double>> &two_d_vec,
-                            mpz_t pn,
-                            int exponent);
+                            mpz_t pn, int exponent);
 
-#endif //FALCON_SRC_EXECUTOR_OPERATOR_PHE_FIXED_POINT_ENCODER_H_
+#endif // FALCON_SRC_EXECUTOR_OPERATOR_PHE_FIXED_POINT_ENCODER_H_

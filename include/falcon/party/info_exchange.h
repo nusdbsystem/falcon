@@ -5,8 +5,8 @@
 #ifndef FALCON_INCLUDE_FALCON_PARTY_INFO_EXCHANGE_H_
 #define FALCON_INCLUDE_FALCON_PARTY_INFO_EXCHANGE_H_
 
-#include <falcon/party/party.h>
 #include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/party/party.h>
 
 /**
  * send a int array to dest_party_id
@@ -15,7 +15,8 @@
  * @param arr: array to be sent
  * @param dest_party_id: the party id to be sent
  */
-void send_int_array(const Party& party, const std::vector<int>& arr, int dest_party_id);
+void send_int_array(const Party &party, const std::vector<int> &arr,
+                    int dest_party_id);
 
 /**
  * recv a int array from src_party_id
@@ -24,7 +25,7 @@ void send_int_array(const Party& party, const std::vector<int>& arr, int dest_pa
  * @param src_party_id: the party that sends the array
  * @return
  */
-std::vector<int> recv_int_array(const Party& party, int src_party_id);
+std::vector<int> recv_int_array(const Party &party, int src_party_id);
 
 /**
  * send a double array to dest_party_id
@@ -33,7 +34,8 @@ std::vector<int> recv_int_array(const Party& party, int src_party_id);
  * @param arr: array to be sent
  * @param dest_party_id: the party id to be sent
  */
-void send_double_array(const Party& party, const std::vector<double>& arr, int dest_party_id);
+void send_double_array(const Party &party, const std::vector<double> &arr,
+                       int dest_party_id);
 
 /**
  * recv a double array from src_party_id
@@ -42,7 +44,7 @@ void send_double_array(const Party& party, const std::vector<double>& arr, int d
  * @param src_party_id: the party that sends the array
  * @return
  */
-std::vector<double> recv_double_array(const Party& party, int src_party_id);
+std::vector<double> recv_double_array(const Party &party, int src_party_id);
 
 /**
  * send an encoded number array to dest_party_id
@@ -52,7 +54,8 @@ std::vector<double> recv_double_array(const Party& party, int src_party_id);
  * @param size: the size of the array
  * @param dest_party_id: the party id to be sent
  */
-void send_encoded_number_array(const Party& party, EncodedNumber* arr, int size, int dest_party_id);
+void send_encoded_number_array(const Party &party, EncodedNumber *arr, int size,
+                               int dest_party_id);
 
 /**
  * recv an encoded number array from src_party_id
@@ -63,7 +66,8 @@ void send_encoded_number_array(const Party& party, EncodedNumber* arr, int size,
  * @param src_party_id: the party that sends the array
  * @return
  */
-void recv_encoded_number_array(const Party& party, EncodedNumber* arr, int size, int src_party_id);
+void recv_encoded_number_array(const Party &party, EncodedNumber *arr, int size,
+                               int src_party_id);
 
 /**
  * send an encoded number matrix to dest_party_id
@@ -74,8 +78,9 @@ void recv_encoded_number_array(const Party& party, EncodedNumber* arr, int size,
  * @param column_size: the number of columns
  * @param dest_party_id: the party id to be sent
  */
-void send_encoded_number_matrix(const Party& party, EncodedNumber** mat,
-                                int row_size, int column_size, int dest_party_id);
+void send_encoded_number_matrix(const Party &party, EncodedNumber **mat,
+                                int row_size, int column_size,
+                                int dest_party_id);
 
 /**
  * recv an encoded number matrix from src_party_id
@@ -86,8 +91,9 @@ void send_encoded_number_matrix(const Party& party, EncodedNumber** mat,
  * @param column_size: the number of columns
  * @param src_party_id: the party that sends the matrix
  */
-void recv_encoded_number_matrix(const Party& party, EncodedNumber** mat,
-                                int row_size, int column_size, int src_party_id);
+void recv_encoded_number_matrix(const Party &party, EncodedNumber **mat,
+                                int row_size, int column_size,
+                                int src_party_id);
 /**
  * broadcast an int array to other parties
  *
@@ -95,7 +101,8 @@ void recv_encoded_number_matrix(const Party& party, EncodedNumber** mat,
  * @param arr: the int array to be broadcast
  * @param req_party_id: the party who has the vector to be broadcast
  */
-void broadcast_int_array(const Party& party, std::vector<int>& arr, int req_party_id);
+void broadcast_int_array(const Party &party, std::vector<int> &arr,
+                         int req_party_id);
 
 /**
  * broadcast an double array to other parties
@@ -104,7 +111,8 @@ void broadcast_int_array(const Party& party, std::vector<int>& arr, int req_part
  * @param arr: the double array to be broadcast
  * @param req_party_id: the party who has the vector to be broadcast
  */
-void broadcast_double_array(const Party& party, std::vector<double>& arr, int req_party_id);
+void broadcast_double_array(const Party &party, std::vector<double> &arr,
+                            int req_party_id);
 
 /**
  * broadcast an encoded vector to other parties
@@ -114,7 +122,7 @@ void broadcast_double_array(const Party& party, std::vector<double>& arr, int re
  * @param size: the size of the vector
  * @param req_party_id: the party who has the vector to be broadcast
  */
-void broadcast_encoded_number_array(const Party& party, EncodedNumber *arr,
+void broadcast_encoded_number_array(const Party &party, EncodedNumber *arr,
                                     int size, int req_party_id);
 
 /**
@@ -126,8 +134,9 @@ void broadcast_encoded_number_array(const Party& party, EncodedNumber *arr,
  * @param column_size: the number of columns
  * @param req_party_id: the party who has the vector to be broadcast
  */
-void broadcast_encoded_number_matrix(const Party& party, EncodedNumber** mat,
-                                     int row_size, int column_size, int req_party_id);
+void broadcast_encoded_number_matrix(const Party &party, EncodedNumber **mat,
+                                     int row_size, int column_size,
+                                     int req_party_id);
 
 /**
  * each party has a int value, sync up to obtain a int array
@@ -137,7 +146,7 @@ void broadcast_encoded_number_matrix(const Party& party, EncodedNumber** mat,
  * @param v: the value to be sync up
  * @return
  */
-std::vector<int> sync_up_int_arr(const Party& party, int v);
+std::vector<int> sync_up_int_arr(const Party &party, int v);
 
 /**
  * each party has a int array, sync up to obtain a flatten int array
@@ -146,7 +155,8 @@ std::vector<int> sync_up_int_arr(const Party& party, int v);
  * @param arr: the int array to be sync up
  * @return
  */
-std::vector<int> sync_up_int_arrs(const Party& party, const std::vector<int>& arr);
+std::vector<int> sync_up_int_arrs(const Party &party,
+                                  const std::vector<int> &arr);
 
 /**
  * each party has a double array, sync up to obtain a flatten double array
@@ -155,6 +165,7 @@ std::vector<int> sync_up_int_arrs(const Party& party, const std::vector<int>& ar
  * @param arr: the double array to be sync up
  * @return
  */
-std::vector<double> sync_up_double_arrs(const Party& party, const std::vector<double>& arr);
+std::vector<double> sync_up_double_arrs(const Party &party,
+                                        const std::vector<double> &arr);
 
-#endif //FALCON_INCLUDE_FALCON_PARTY_INFO_EXCHANGE_H_
+#endif // FALCON_INCLUDE_FALCON_PARTY_INFO_EXCHANGE_H_

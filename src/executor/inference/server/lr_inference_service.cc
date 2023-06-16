@@ -1,3 +1,27 @@
+/**
+MIT License
+
+Copyright (c) 2020 lemonviv
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 //
 // Created by wuyuncheng on 4/6/21.
 //
@@ -10,26 +34,26 @@
 #include <served/served.hpp>
 
 #include <falcon/common.h>
-#include <falcon/operator/phe/fixed_point_encoder.h>
-#include <falcon/model/model_io.h>
 #include <falcon/inference/server/lr_inference_service.h>
+#include <falcon/model/model_io.h>
+#include <falcon/operator/phe/fixed_point_encoder.h>
+#include <falcon/utils/io_util.h>
 #include <falcon/utils/pb_converter/common_converter.h>
 #include <falcon/utils/pb_converter/lr_converter.h>
-#include <falcon/utils/io_util.h>
 
-#include <glog/logging.h>
 #include <falcon/operator/conversion/op_conv.h>
+#include <glog/logging.h>
 
 static int IS_MODEL_LOADED = 0;
 static LogisticRegressionModel saved_lr_model;
 
-void run_active_server_lr(const Party& party,
-    const std::string& saved_model_file,
-    const std::vector<int> & batch_indexes,
-    EncodedNumber* decrypted_labels) {
+void run_active_server_lr(const Party &party,
+                          const std::string &saved_model_file,
+                          const std::vector<int> &batch_indexes,
+                          EncodedNumber *decrypted_labels) {
 
   // step 1. load trained model if not loaded
-  if (IS_MODEL_LOADED == 0){
+  if (IS_MODEL_LOADED == 0) {
     std::string saved_model_string;
     load_pb_model_string(saved_model_string, saved_model_file);
     deserialize_lr_model(saved_lr_model, saved_model_string);
@@ -45,19 +69,20 @@ void run_active_server_lr(const Party& party,
     }
   }
 
-  // step 3: active party computes the logistic function and compare the accuracy
+  // step 3: active party computes the logistic function and compare the
+  // accuracy
   int sample_num = batch_indexes.size();
   lr_inference_logic(batch_indexes, party, decrypted_labels);
 
-  delete [] decrypted_labels;
-  std::cout << "Broadcast client's batch requests to other parties" << std::endl;
+  delete[] decrypted_labels;
+  std::cout << "Broadcast client's batch requests to other parties"
+            << std::endl;
   LOG(INFO) << "Broadcast client's batch requests to other parties";
   google::FlushLogFiles(google::INFO);
-
 }
 
-void run_passive_server_lr(const std::string& saved_model_file,
-                           const Party& party) {
+void run_passive_server_lr(const std::string &saved_model_file,
+                           const Party &party) {
 
   std::string saved_model_string;
   load_pb_model_string(saved_model_string, saved_model_file);
@@ -77,35 +102,34 @@ void run_passive_server_lr(const std::string& saved_model_file,
     LOG(INFO) << "Received active party's batch indexes";
 
     // step 2: passive party computes the logistic function
-    auto* decrypted_labels = new EncodedNumber[batch_indexes.size()];
+    auto *decrypted_labels = new EncodedNumber[batch_indexes.size()];
     lr_inference_logic(batch_indexes, party, decrypted_labels);
-    delete [] decrypted_labels;
+    delete[] decrypted_labels;
 
     google::FlushLogFiles(google::INFO);
   }
 }
 
-
-void lr_inference_logic(
-    const std::vector<int> & batch_indexes,
-    const Party& party,
-    EncodedNumber* decrypted_labels){
+void lr_inference_logic(const std::vector<int> &batch_indexes,
+                        const Party &party, EncodedNumber *decrypted_labels) {
 
   int sample_num = batch_indexes.size();
   // retrieve batch samples and encode (notice to use cur_batch_size
   // instead of default batch size to avoid unexpected batch)
-  auto* predicted_labels = new EncodedNumber[sample_num];
-  std::vector< std::vector<double> > batch_samples;
+  auto *predicted_labels = new EncodedNumber[sample_num];
+  std::vector<std::vector<double>> batch_samples;
   for (int i = 0; i < sample_num; i++) {
     batch_samples.push_back(party.getter_local_data()[batch_indexes[i]]);
   }
-  saved_lr_model.predict(const_cast<Party &>(party), batch_samples, predicted_labels);
+  saved_lr_model.predict(const_cast<Party &>(party), batch_samples,
+                         predicted_labels);
 
   // step 3: active party aggregates and call collaborative decryption
-  collaborative_decrypt(party, predicted_labels, decrypted_labels, sample_num, ACTIVE_PARTY_ID);
+  collaborative_decrypt(party, predicted_labels, decrypted_labels, sample_num,
+                        ACTIVE_PARTY_ID);
 
   std::cout << "Collaboratively decryption finished" << std::endl;
   LOG(INFO) << "Collaboratively decryption finished";
 
-  delete [] predicted_labels;
+  delete[] predicted_labels;
 }

@@ -158,14 +158,14 @@ set(SOURCE_FILES
         ../../include/falcon/algorithm/vertical/nn/mlp_ps.h algorithm/vertical/nn/mlp_ps.cc
         ../../include/falcon/utils/alg/vec_util.h utils/alg/vec_util.cc
         ../../include/falcon/algorithm/vertical/preprocessing/weighted_pearson.h
-        algorithm/vertical/preprocessing/weighted_pearson.cpp
+        algorithm/vertical/preprocessing/weighted_pearson.cc
         ../../include/falcon/algorithm/vertical/preprocessing/pre_feature_selection.h
         algorithm/vertical/preprocessing/pre_feature_selection.cc
         ../../include/falcon/algorithm/vertical/preprocessing/pearson_correlation.h
         algorithm/vertical/preprocessing/pearson_correlation.cc
         include/message/feat_sel.pb.cc
         include/message/feat_sel.pb.h
-        algorithm/vertical/preprocessing/weighted_pearson_ps.cpp
+        algorithm/vertical/preprocessing/weighted_pearson_ps.cc
         ../../include/falcon/algorithm/vertical/preprocessing/weighted_pearson_ps.h)
 
 set(SPDZ_HOME "/opt/falcon/third_party/MP-SPDZ/")
