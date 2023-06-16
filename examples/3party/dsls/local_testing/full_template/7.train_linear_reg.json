@@ -11,9 +11,9 @@
       "addr": "127.0.0.1:30005",
       "party_type": "active",
       "path": {
-        "data_input": "/opt/falcon/data/dataset/energy_prediction_data/client0",
-        "data_output": "/opt/falcon/data/dataset/energy_prediction_data/client0",
-        "model_path": "/opt/falcon/data/dataset/energy_prediction_data/client0"
+        "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client0",
+        "data_output": "/opt/falcon/data/dataset/breast_cancer_data/client0",
+        "model_path": "/opt/falcon/data/dataset/breast_cancer_data/client0"
       }
     },
     {
@@ -21,9 +21,9 @@
       "addr": "127.0.0.1:30006",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/data/dataset/energy_prediction_data/client1",
-        "data_output": "/opt/falcon/data/dataset/energy_prediction_data/client1",
-        "model_path": "/opt/falcon/data/dataset/energy_prediction_data/client1"
+        "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client1",
+        "data_output": "/opt/falcon/data/dataset/breast_cancer_data/client1",
+        "model_path": "/opt/falcon/data/dataset/breast_cancer_data/client1"
       }
     },
     {
@@ -31,9 +31,9 @@
       "addr": "127.0.0.1:30007",
       "party_type": "passive",
       "path": {
-        "data_input": "/opt/falcon/data/dataset/energy_prediction_data/client2",
-        "data_output": "/opt/falcon/data/dataset/energy_prediction_data/client2",
-        "model_path": "/opt/falcon/data/dataset/energy_prediction_data/client2"
+        "data_input": "/opt/falcon/data/dataset/breast_cancer_data/client2",
+        "data_output": "/opt/falcon/data/dataset/breast_cancer_data/client2",
+        "model_path": "/opt/falcon/data/dataset/breast_cancer_data/client2"
       }
     }
   ],
