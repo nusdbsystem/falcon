@@ -175,10 +175,7 @@ Current development follows the current patterns:
 1. Run coordinator with `bash examples/3party/coordinator/debug_coord.sh `
 
 2. Run party server N with  `bash examples/3party/party0/debug_partyserver.sh --partyID N`
-
    e,g.  server 0 with `bash examples/3party/party0/debug_partyserver.sh --partyID 0`
-
-
 
 ## Citation
 
