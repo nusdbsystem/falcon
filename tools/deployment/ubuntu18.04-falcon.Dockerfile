@@ -270,9 +270,11 @@ ARG CACHEBUST=1
 
 # 1. pull latest code
 WORKDIR /opt/falcon
-RUN git fetch origin && \
-    git pull origin dev && \
-    git log -4
+RUN git config --global user.email "lemonwyc@gmail.com" &&\
+      git config --global user.name "lemonwyc" &&\
+     git fetch origin && \
+     git checkout dev && \
+     git pull origin dev --force
 
 # 2. Set environment variables and pre-compile falcon_coordinator
 # ENV GOROOT /usr/local/go
