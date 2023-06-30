@@ -181,7 +181,22 @@ Current development follows the current patterns:
 
 If you use our code in your research, please kindly cite:
 ```
-TBD.
+@article{DBLP:journals/pvldb/WuXCDLOXZ23,
+  author    = {Yuncheng Wu and
+               Naili Xing and
+               Gang Chen and
+               Tien Tuan Anh Dinh and
+               Zhaojing Luo and
+               Beng Chin OOi and
+               Xiaokui Xiao and
+               Meihui Zhang},
+  title     = {Falcon: A Privacy-Preserving and Interpretable Vertical Federated Learning System},
+  journal   = {Proc. {VLDB} Endow.},
+  volume    = {16},
+  number    = {10},
+  pages     = {2471--2484},
+  year      = {2023}
+}
 ```
 
 ## Contact
