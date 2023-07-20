@@ -1,0 +1,14 @@
+Release Notes - FALCON - Version falcon-1.0.0
+
+Falcon is a privacy-preserving and interpretable vertical federated learning system.
+The features in falcon-1.0.0 include the following machine learning training algorithms with DSL in the vertical federated learning setting.
+
+* Logistic regression.
+* Decision tree.
+* Random forest.
+* Gradient boosting decision tree.
+* Multi-layer perceptron.
+
+It also supports calculating the explanations for a prediction request based on the LIME algorithm.
+In terms of deployment, it supports docker-based scheduling for both centralized and distributed modes.
+
