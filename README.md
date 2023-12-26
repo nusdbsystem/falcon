@@ -40,8 +40,8 @@ dependencies and build the MP-SPDZ programs for running the test examples.
 Alternatively, you can pull the built image and tag it with the name in each party's config `config_partyserver`:
 
 ```bash
-docker pull lemonwyc/falcon-pub:latest
-docker tag lemonwyc/falcon-pub:latest falcon:latest
+docker pull lemonwyc/falcon-pub:Dec2023
+docker tag lemonwyc/falcon-pub:Dec2023 falcon:latest
 ```
 
 ### Install Go and source environment
@@ -72,15 +72,26 @@ bash examples/3party/party1/debug_partyserver.sh --partyID 1
 bash examples/3party/party2/debug_partyserver.sh --partyID 2
 ```
 
+### Configure the docker swarm node label
+
+Note that the label of the partyserver node is `PARTY_SERVER_CLUSTER_LABEL="host"` in the `examples/3party/coordinator/config_coord.properties`.
+So, need to configure the corresponding label of `[NodeID]` in docker swarm, using the following commands.
+
+```shell
+docker node ls
+docker node ls -q | xargs docker node inspect -f '{{ .ID }} [{{ .Description.Hostname }}]: {{ .Spec.Labels }}'
+docker node update --label-add name=host [NodeID]
+```
+
 ### Submit and run the job
 
 Once the coordinator and three parties are started successfully, open another terminal for the user to submit 
 a DSL job request. For example, train a logistic regression model on the breast_cancer dataset. Need to make sure
-that the path in the example dsl `examples/3party/dsls/local_testing/full_template/8.train_logistic_reg.json` is correct.
+that the path in the example dsl `examples/3party/dsls/examples/train/8.train_logistic_reg.json` is correct.
 
 ```shell
 cd examples/
-python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path /opt/falcon/examples/3party/dsls/local_testing/full_template/8.train_logistic_reg.json
+python3 coordinator_client.py --url 127.0.0.1:30004 -method submit -path /opt/falcon/examples/3party/dsls/examples/train/8.train_logistic_reg.json
 ```
 
 If the job is successfully submitted, it will return a job ID. You can query the status of this job using 
@@ -90,6 +101,25 @@ view the containers. After the job is finished, can clean the docker containers 
 ```shell
 bash src/falcon_platform/scripts/docker_service_rm_all_container.sh
 ```
+
+In case that the certificates for the MP-SPDZ library are expired, can enter the image container and re-generate 
+the corresponding certificates as follows:
+
+```shell
+docker run --entrypoint /bin/bash -it falcon:latest
+cd third_party/MP-SPDZ/
+bash Scripts/setup-online.sh 3 128 128 && Scripts/setup-clients.sh 3 && Scripts/setup-ssl.sh 3 128 128 && c_rehash Player-Data/
+cd /opt/falcon
+bash make.sh
+```
+
+After that, open another terminal to commit the changes in the container to `falcon:latest` image by:
+```shell
+docker ps
+docker commit --change='ENTRYPOINT ["bash", "deployment/docker_cmd.sh"]' [CONTAINER_ID] falcon:latest
+```
+
+Then, the rest of the steps are the same as the above.
 
 ## Run examples on a distributed cluster 
 
