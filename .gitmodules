@@ -10,3 +10,7 @@
 	path = third_party/served
 	url = https://github.com/meltwater/served.git
     ignore = dirty
+[submodule "third_party/risefl"]
+	path = third_party/risefl
+	url = https://github.com/nusdbsystem/risefl.git
+    ignore = dirty
